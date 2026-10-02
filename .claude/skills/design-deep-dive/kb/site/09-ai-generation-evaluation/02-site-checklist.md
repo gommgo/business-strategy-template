@@ -27,9 +27,9 @@
    незаконны без него. → SITE-PRF-01 `[консенсус]`
 7. **Шаблон генератора ловится по порядку секций, а не по одной секции**: старый «hero → фичи → отзывы → тарифы → CTA»
    (1 из 30 живых страниц) и новый «ряд чисел ↔ фичи» (переход stats → benefits 5 раз на 6 ИИ-страницах). → SITE-STR-01
-   `[проверено: C/01]`
+   `[проверено]`
 8. **Первый экран проверяй с баннером cookie на 390×844**: у 15 из 27 живых страниц его перекрывает баннер или окно, у 3
-   баннер прячет призыв. → SITE-MOB-04 `[проверено: C/02]`
+   баннер прячет призыв. → SITE-MOB-04 `[проверено]`
 9. **Форма без `<form>` и `type=submit` — блокер**, даже если «выглядит»: не работает отправка без JS и цель Метрики.
    → SITE-FRM-01 `[практика]`
 10. **Согласие на ПД в РФ — отдельный пустой чекбокс** (152-ФЗ в ред. 156-ФЗ, с 01.09.2025); у 9 из 17 русских
@@ -46,7 +46,7 @@
     сессией. → SITE-OUT-06 `[практика: kimi 08/02]`
 16. **Ноль находок — неудачная проверка, а не чистая страница**. → SITE-OUT-09 `[мнение: Нильсен]` + `[исследование]`
 17. **Автопроверку структуры ставь только на роли с уверенностью ≥ 0,5**: классификатор M верен в 62 % ролей и 36 %
-    блоков, при уверенности ≥ 0,5 — в 87–92 %. → §6 `[проверено: M/04]`
+    блоков, при уверенности ≥ 0,5 — в 87–92 %. → §6 `[проверено]`
 18. **Дефект чини на шаге, где он рождается**: каталог DEF связывает каждый дефект с шагом процедуры J и пунктами,
     которые его ловят. → §4 `[практика]`
 19. **UX-чек-лист на сайте — только через профиль**: из 434 пунктов часть действует как есть, часть меняется, часть
@@ -163,7 +163,7 @@ COPY-C-*), визуал и движение — creative (`../../creative/01-cre
 
 | ID | Проверка | Сер. | Способ | Источник |
 |---|---|---|---|---|
-| SITE-STR-01 | Порядок секций выведен из типа страницы, осведомлённости и трафика; нет шаблона генератора («hero → фичи → отзывы → тарифы → CTA» или чередования «ряд чисел ↔ фичи») без вопроса посетителя у секций | S | JDG, HUM | `../03-page-structure/01-narratives-and-section-order.md` §3.1, §3.4 `[проверено: C/01]`; AIL-01, AIL-02; DEF-02 |
+| SITE-STR-01 | Порядок секций выведен из типа страницы, осведомлённости и трафика; нет шаблона генератора («hero → фичи → отзывы → тарифы → CTA» или чередования «ряд чисел ↔ фичи») без вопроса посетителя у секций | S | JDG, HUM | `../03-page-structure/01-narratives-and-section-order.md` §3.1, §3.4 `[проверено]`; AIL-01, AIL-02; DEF-02 |
 | SITE-STR-02 | Хвост (последние 3–4 секции) выведен из возражений страницы; форма страницы не повторяет прошлую страницу проекта того же типа | S | JDG | `../03-page-structure/01-narratives-and-section-order.md` §3.4; AIL-03; DEF-03 |
 | SITE-STR-03 | Каждая секция служит цели страницы: в таблице конгруэнтности нет секций с 0 баллов (`03-expert-review-and-judge.md` §2.4) | S | JDG | `03-expert-review-and-judge.md` §2.4; [V:w87hTii1Dao 36:07] |
 | SITE-STR-04 | Число секций — в диапазоне типа (лидогенерация 8–12, рынок РФ — 11–16, SaaS 7–11, продукт 6–10, кампания 5–9, курс 10–16, главная 8–12, лид-магнит 3–5) или отклонение объяснено | D | DOM, LNT | `../03-page-structure/02-length-goal-message-match.md` §1.3; DEF-11 |
@@ -175,7 +175,7 @@ COPY-C-*), визуал и движение — creative (`../../creative/01-cre
 | SITE-STR-10 | Первый экран продолжает обещание источника трафика: предмет, цена или условие, география, действие (message match); акция из объявления есть на странице | S | JDG, HUM | `../03-page-structure/02-length-goal-message-match.md` §3.1; `../05-conversion-funnels/03-multi-page-funnels.md` §2.1; DEF-09 |
 | SITE-STR-11 | Реклама ведёт на посадочную с предложением кампании, а не на главную | S | HUM | `../03-page-structure/02-length-goal-message-match.md` §3.1 `[консенсус]` |
 | SITE-STR-12 | Блокирующее возражение закрыто до финального призыва — у кнопки, цены или формы; блок FAQ — для остатка | S | JDG | `../03-page-structure/01-narratives-and-section-order.md` §3.2; `../01-foundations/01-how-visitors-decide.md` §4; AIL-39; DEF-12 |
-| SITE-STR-13 | У лидогенерации цена или состав услуги — не ниже 4-й секции или есть причина | S | DOM | `../03-page-structure/01-narratives-and-section-order.md` §3.2 `[проверено: C/01]` |
+| SITE-STR-13 | У лидогенерации цена или состав услуги — не ниже 4-й секции или есть причина | S | DOM | `../03-page-structure/01-narratives-and-section-order.md` §3.2 `[проверено]` |
 | SITE-STR-14 | SEO-текст, перелинковка и смежные продажи стоят после главного призыва, не между оффером и формой | S | DOM | `../03-page-structure/01-narratives-and-section-order.md` §3.2 |
 | SITE-STR-15 | Макроструктура подходит задаче: плакатные формы (poster, Letter, Manifesto, Marquee) — не для страницы, которую нужно понять за секунды; Stat-Led и Quote-Led — только с реальными фактами | S | JDG | `../03-page-structure/01-narratives-and-section-order.md` §4.2 |
 | SITE-STR-16 | Конвенции взаимодействия сохранены: логотип слева ведёт на главную, навигация сверху, формы и ссылки предсказуемы | S | DOM, SCR | контракт v2 §6 п.11; CRV-AL-11; `../04-blocks/blocks.yaml` `conventions.logo-home` |
@@ -233,7 +233,7 @@ COPY-C-*), визуал и движение — creative (`../../creative/01-cre
 | SITE-FRM-06 | Проверка ввода на сервере и в браузере; введённое сохраняется при ошибке; сообщение связано с полем | S | SCR | `../05-conversion-funnels/lead-forms.yaml` `defaults.validation`; `../../ux/04-components-patterns/05-forms-and-validation.md` |
 | SITE-FRM-07 | Антиспам без трения: honeypot, временная ловушка, лимиты; видимой капчи нет; reCAPTCHA на сайте для РФ по умолчанию нет | S | DOM | `../05-conversion-funnels/01-cta-and-lead-capture.md` §8; `lead-forms.yaml` `defaults.antispam`; DEF-20 |
 | SITE-FRM-08 | Скрытые поля источника (`utm_*`, `yclid`, `ym_client_id`, `landing_url`, `page_url`, `form_id`, `variant`) есть и доходят до CRM | S | DOM, HUM | `../05-conversion-funnels/01-cta-and-lead-capture.md` §9.4; `../05-conversion-funnels/03-multi-page-funnels.md` §6.1; DEF-18 |
-| SITE-FRM-09 | Квиз: 3–7 вопросов, вариант «не знаю», честный прогресс, «Назад», итог показан или честно обещан в начале, контакт — последним | S | SCR, JDG | `../05-conversion-funnels/01-cta-and-lead-capture.md` §5.3 `[проверено: F/01]` |
+| SITE-FRM-09 | Квиз: 3–7 вопросов, вариант «не знаю», честный прогресс, «Назад», итог показан или честно обещан в начале, контакт — последним | S | SCR, JDG | `../05-conversion-funnels/01-cta-and-lead-capture.md` §5.3 `[проверено]` |
 | SITE-FRM-10 | В квизе и у формы нет катящихся сроков («акция до завтра» скриптом) и скидки «для всех» как стимула | B | SCR | `../05-conversion-funnels/lead-forms.yaml` `rolling-deadline`; `../99-raw/experiments/F/01-quiz-forms-ru/deep_check.py` `[проверено: 2 из 5 квизов]`; AIL-13; DEF-21 |
 | SITE-FRM-11 | «Спасибо»: статус первым, что дальше, кто и когда свяжется (срок — факт), канал, номер обращения, один следующий шаг; без рекламы сразу | S | DOM, JDG | `../05-conversion-funnels/01-cta-and-lead-capture.md` §10; `lead-forms.yaml` `defaults.success`; [V:w87hTii1Dao 44:20]; AIL-34; DEF-16 |
 | SITE-FRM-12 | Персональные данные не попадают в адрес «спасибо» и перехода в продукт; «спасибо» — `noindex` и вне sitemap | B | SCR, DOM | `../05-conversion-funnels/03-multi-page-funnels.md` §4.2; `../04-blocks/blocks.yaml` `errors` блока `thank-you`; DEF-49 |
@@ -317,7 +317,7 @@ SITE-NAV-01…19 — чек-лист G (`../06-multipage-ia/02-navigation-linkin
 | SITE-SEO-11 | Страницы «услуга × город» — с локальными фактами; нет клонов с заменой топонима и списков городов в подвале | S | JDG, HUM | `../07-seo-geo-performance-analytics/01-seo-google-yandex.md` ошибка 11; `../03-page-structure/02-length-goal-message-match.md` §3.4 |
 | SITE-SEO-12 | Нет текста только для роботов; аккордеоны и вкладки — с содержимым в HTML; анимация появления заканчивается видимым состоянием | B | DOM | `head-kit.yaml` `hk-access-hidden-text` |
 | SITE-SEO-13 | Сертификат TLS проверяется общепризнанными корнями (сертификат НУЦ Минцифры — только вторым) | B | SCR | `head-kit.yaml` `hk-access-tls` `[проверено: H/01, M]` |
-| SITE-SEO-14 | Антибот, CDN и WAF не отдают YandexBot и Googlebot заглушку | B | SCR | `head-kit.yaml` `hk-access-waf` `[проверено: H/01]` |
+| SITE-SEO-14 | Антибот, CDN и WAF не отдают YandexBot и Googlebot заглушку | B | SCR | `head-kit.yaml` `hk-access-waf` `[проверено]` |
 | SITE-SEO-15 | Для Яндекса: адрес и телефон текстом; профиль Яндекс Бизнеса связан с сайтом; регион задан в Вебмастере | D | HUM | `../07-seo-geo-performance-analytics/01-seo-google-yandex.md` «Чек-лист» |
 | SITE-SEO-16 | После публикации страница проверена в Search Console («Проверка URL») и Вебмастере («Проверка ответа сервера») | D | HUM | `../07-seo-geo-performance-analytics/01-seo-google-yandex.md` «Чек-лист» |
 | SITE-SEO-17 | Код ответа и директивы robots одинаковы в 10–20 повторах запроса (нет «плавающего» `noindex` за CDN) | B | SCR | `../07-seo-geo-performance-analytics/crawlers.yaml` `rt-cdn-directives-stable`; SG-SEO-02 |
@@ -349,7 +349,7 @@ SG-WEIGHT — `page-gates.yaml`; автопроверка — `page_gates.py`. �
 |---|---|---|---|---|
 | SITE-PERF-01 | LCP телефона в лаборатории (CPU×4, 1,6 Мбит/с, RTT 150 мс, медиана 3 прогонов) не хуже цели профиля; хуже «плохо» (4 000 мс) — блокер | B | SCR | SG-PERF-01; `../07-seo-geo-performance-analytics/03-performance-budgets-gates.md` §2.1 `[документация: web.dev]` |
 | SITE-PERF-02 | LCP десктопа не хуже цели профиля; хуже 4 000 мс — блокер | S | SCR | SG-PERF-02 |
-| SITE-PERF-03 | CLS загрузки и прокрутки всей страницы ≤ 0,1; > 0,25 — блокер; мерить прокруткой до конца (web-vitals, окно сессии), а не только после загрузки: закрепление `pin` ScrollTrigger через `position: fixed` даёт 1,6–2,0 при прокрутке, `position: sticky` и `pinType: 'transform'` — 0 | S | SCR | SG-PERF-03; `../../creative-research/99-raw/experiments/E/02-scroll-scene/README.md` `[проверено: creative E/02]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.2; `../99-raw/experiments/K/03-gates-v1/README.md` `[проверено: K/03 — сумма сдвигов 0,42 против 0,15 окна сессии]` |
+| SITE-PERF-03 | CLS загрузки и прокрутки всей страницы ≤ 0,1; > 0,25 — блокер; мерить прокруткой до конца (web-vitals, окно сессии), а не только после загрузки: закрепление `pin` ScrollTrigger через `position: fixed` даёт 1,6–2,0 при прокрутке, `position: sticky` и `pinType: 'transform'` — 0 | S | SCR | SG-PERF-03; `../../creative-research/99-raw/experiments/E/02-scroll-scene/README.md` `[проверено]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.2; `../99-raw/experiments/K/03-gates-v1/README.md` `[проверено: K/03 — сумма сдвигов 0,42 против 0,15 окна сессии]` |
 | SITE-PERF-04 | INP по сценарию (меню, CTA, аккордеон, поле и нажатие во время загрузки) ≤ 200 мс; TBT телефона — в профиле | S | SCR | SG-PERF-04, SG-PERF-05 `[проверено: M — TBT телефона медиана 272 мс]` |
 | SITE-PERF-05 | LCP-элемент есть и не canvas: H1 или картинка/постер из исходного HTML, без `loading=lazy`, с `fetchpriority=high`; H1 первого экрана появляется без `opacity: 0`, маски строк и скрытия скриптом (в Chromium такой H1 выпадает из LCP и кандидатом становится лид — S), `opacity` ≥ 0,01 и `clip-path` показывают LCP раньше текста (D); честно — только `transform` | B | SCR, DOM | SG-PERF-06; `../04-blocks/blocks.yaml` `conventions.lcp-eager`; CRV-AL-09; DEF-31; `../../creative-research/99-raw/experiments/E/01-lcp-reveal/README.md` `[проверено: creative E/01, Chromium 153]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.1 |
 | SITE-PERF-06 | Тяжёлые виджеты (чат, карты, запись, видео, отзывы-виджеты) — фасадом, по видимости или нажатию | S | SCR | SG-PERF-09; DEF-32 |
@@ -558,7 +558,7 @@ SITE-LEGAL-06, SITE-A11Y-14` — обязательный баннер cookie з
 и «действие дважды» (UX-LAY-02, UX-LAY-16 — 21 из 23 норма сайта), «шапка страницы с H1» (UX-LAY-03 — 16 из 16), баннер cookie
 как «оверлей без действия» (UX-OVL-02 — 14 из 14), капс и Title Case (AC-TXT-13 → text COPY-C-14 — 14 из 14). Потеряно
 одно верное: «Trusted by» шаблона Framer — словарь правдоподобный вымысел не видит, его ловит связка слота `data` с `fact:`
-(SITE-PRF-01). `[проверено: K/02]`
+(SITE-PRF-01). `[проверено]`
 
 ### 5.3. Как пользоваться
 
@@ -610,7 +610,7 @@ SITE-LEGAL-06, SITE-A11Y-14` — обязательный баннер cookie з
 ### 6.4. Когда автопроверке верить
 
 - **Структура — только при уверенности ≥ 0,5**: роль секции `page_anatomy.py` верна в 62 %, при уверенности ≥ 0,5 — в
-  87–92 % (M/04); ниже порога — «не проверено», проверка по плану или кадру. `[проверено: M/04]`
+  87–92 % (M/04); ниже порога — «не проверено», проверка по плану или кадру. `[проверено]`
 - **B из DOM и SCR подтверждать кадром или сырым HTML**: замеры ошибаются — `scrollWidth` без учёта `overflow-x: hidden`,
   склейка `innerText` на скрытых `<br>`, `href="./"` не узнан как ссылка на главную (K/02, K/03).
 - **Контраст — по адресам узлов**: B только у H1, лида первого экрана, призыва, согласия и баннера cookie; без адресов —
@@ -624,7 +624,7 @@ SITE-LEGAL-06, SITE-A11Y-14` — обязательный баннер cookie з
 без потери верных: 32 → 25 → 23 строки B; 6 `blocked`, 2 `accepted_with_notes`; право — 14 из 23 верных строк. **Все три демо
 генераторов не проходят** (Durable — `Disallow: /`, Lovable — трекинг до выбора и CLS 0,46, Framer — кнопки без имени);
 вымышленный бренд шаблона и происхождение фото автоматика не видит. Подробно — `../99-raw/experiments/K/03-gates-v1/README.md`.
-`[проверено: K/03]`
+`[проверено]`
 
 ## 7. Быстрый набор: первый проход
 
@@ -757,6 +757,6 @@ SITE-OUT-07) **плюс 22 пункта**, которые чаще всего л
 - [S11] `../../kimi-research/08-director-loop-qa/02-checks-k3.md`, `07-brief-handoff/templates/ACCEPTANCE.md` (kimi) — проверки K3, приёмка A–H.
 - [S12] `../../blender/11-evaluation-qa/05-master-checklist.md` §9, §11 (blender) — WEB-*, таблица нормализации.
 - [S13] `../02-site-types/pages.csv`, опыты M/03 и M/04 (M, M2) — выборка страниц, точность классификатора `[проверено: M]`.
-- [S14] `../99-raw/experiments/I/02-axe/` (I; axe-core 4.13) — нарушения axe на 10 страницах `[проверено: I/02]`.
+- [S14] `../99-raw/experiments/I/02-axe/` (I; axe-core 4.13) — нарушения axe на 10 страницах `[проверено]`.
 - [S15] `../99-raw/experiments/K/01-export/`, `K/02-ux-profile/`, `K/03-gates-v1/` (K, K2, K3, K4) — экспорт, профиль UX и ложные срабатывания, ворота на 8 страницах `[проверено]`.
 - [S16] `01-generators-and-ai-landing-markers.md`, `ai-landing-markers.yaml`, `03-expert-review-and-judge.md`, `site-rubric.json` (эта папка) — маркеры, экспертиза, рубрика.

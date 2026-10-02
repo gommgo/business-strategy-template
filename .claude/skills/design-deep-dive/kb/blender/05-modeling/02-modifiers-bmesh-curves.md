@@ -9,23 +9,23 @@
 ## Выжимка для агента
 
 1. **Модификаторы задавай через `bpyx.add_modifier(ob, TYPE, **props)`**: он проверяет имена свойств по RNA 5.2 (старые `use_x`, `use_only_vertices` → ошибка с подсказкой). → §1 [проверено: B, D1/00]
-2. **Умолчания 5.2.2 не для веба**: Bevel `width=0.1` м и `segments=1`; Boolean `solver='EXACT'`; Subdivision `levels=1`/`render_levels=2`; Weighted Normal `keep_sharp=False`. Задавай все ключевые значения явно. → §1 [проверено: D1/00]
+2. **Умолчания 5.2.2 не для веба**: Bevel `width=0.1` м и `segments=1`; Boolean `solver='EXACT'`; Subdivision `levels=1`/`render_levels=2`; Weighted Normal `keep_sharp=False`. Задавай все ключевые значения явно. → §1 [проверено]
 3. **Стек hard-surface**: Mirror → Boolean → Weld → Bevel (angle, harden) → Weighted Normal (keep_sharp) последним; SubD — только с опорами. → §2 [проверено: D1/01, D1/03; документация]
-4. **Для веба модификаторы доходят только применёнными** (`export_apply=True` берёт уровень вьюпорта `levels`); с shape keys — применить до морфов. → §2.3 [проверено: E/07; D1/01]
+4. **Для веба модификаторы доходят только применёнными** (`export_apply=True` берёт уровень вьюпорта `levels`); с shape keys — применить до морфов. → §2.3 [проверено]
 5. **«Smooth by Angle» без окна** — ассет из `geometry_nodes_essentials.blend` через `bpy.data.libraries.load` + модификатор NODES (`d1lib.smooth_by_angle_modifier`); проще и дешевле — данные `set_sharp_from_angle`. → §1.3 [проверено: D1/_lib t08, D1/01]
 6. **Edge Split не использовать** («kept mostly for historical/compatibility reasons») — рвёт меш. → §1 [документация 5.2]
 7. **В 5.2 два Array**: классический `ARRAY` (legacy) и ассет «Array» на geometry nodes (выдаёт инстансы, Realize — опция). Из кода — классический или свой GN (файл 03). → §1 [документация 5.2]
 8. **У `bmesh.ops.bevel` другие умолчания, чем у модификатора**: `affect='VERTICES'`, `segments=0`, `profile=0.0`, `clamp_overlap=False` — задавай `affect='EDGES'`, сегменты, `profile=0.5`, `clamp_overlap=True` явно. → §3.1 [проверено: D1/00 докстринг]
 9. **Корпуса и «таблетки» — кольцами контура по профилю кромки** (`d1lib.rounded_slab`): квады на боковине, точные размеры, 0,02 с. → §3.2 [проверено: D1/02–04]
-10. **Разрез тела на части — `bisect_plane` + `edgeloop_fill`**: две замкнутые детали из одной формы (крышка/база). → §3.3 [проверено: D1/03]
-11. **Тела вращения — свой `lathe` по профилю (r, z)** на bmesh: точки на оси → полюса, UV по длине профиля; профиль — гладкая кривая. → §4.1 [проверено: D1/04, D1/06]
-12. **Трубки и ленты — протяжка с параллельным переносом рамок** (`d1lib.sweep`), не кривая с `bevel_depth`, когда нужны закрут, сужение и UV. → §4.2 [проверено: D1/04, D1/06]
-13. **Плоский контур с отверстиями — кривая POLY с `fill_mode='BOTH'`** + extrude/bevel, `offset = −bevel` (фаска не раздувает контур), затем **сварка вершин**: без неё 3 280 неманифолдных рёбер на решётке 7×7. → §5.1 [проверено: D1/03]
-14. **`resolution_u` кривой — на сегмент Безье**, а не на всю кривую: 2 больших сегмента × 6 = гранёный 12-угольник; крупные дуги — 12–16. → §5.2 [проверено: D1/05]
-15. **3D-текст: `resolution_u` 3–6, `bevel_resolution` 1–2**: «Nova» 12/4 — 6 880 треуг., 6/2 — 2 472, 3/1 — 1 060; 3/1 гранит «o» в крупном плане. → §6.1 [проверено: D1/05; E/09]
+10. **Разрез тела на части — `bisect_plane` + `edgeloop_fill`**: две замкнутые детали из одной формы (крышка/база). → §3.3 [проверено]
+11. **Тела вращения — свой `lathe` по профилю (r, z)** на bmesh: точки на оси → полюса, UV по длине профиля; профиль — гладкая кривая. → §4.1 [проверено]
+12. **Трубки и ленты — протяжка с параллельным переносом рамок** (`d1lib.sweep`), не кривая с `bevel_depth`, когда нужны закрут, сужение и UV. → §4.2 [проверено]
+13. **Плоский контур с отверстиями — кривая POLY с `fill_mode='BOTH'`** + extrude/bevel, `offset = −bevel` (фаска не раздувает контур), затем **сварка вершин**: без неё 3 280 неманифолдных рёбер на решётке 7×7. → §5.1 [проверено]
+14. **`resolution_u` кривой — на сегмент Безье**, а не на всю кривую: 2 больших сегмента × 6 = гранёный 12-угольник; крупные дуги — 12–16. → §5.2 [проверено]
+15. **3D-текст: `resolution_u` 3–6, `bevel_resolution` 1–2**: «Nova» 12/4 — 6 880 треуг., 6/2 — 2 472, 3/1 — 1 060; 3/1 гранит «o» в крупном плане. → §6.1 [проверено]
 16. **Текст ставь вертикально лицом к −Y и низом на z = 0** (иначе лежит плашмя, M2.12); шрифт — встроенный или файл проекта (M1.13). → §6.1 [проверено: D1/05; C1]
-17. **SVG → `bpy.ops.import_curve.svg(filepath=…)`** (5.2.2, работает в фоне); `wm.svg_import` не существует; `wm.grease_pencil_import_svg` импортирует в Grease Pencil. Кривые приходят крошечными (px → м) — масштабировать. → §6.2 [проверено: D1/00, D1/05]
-18. **Меш из кривой, текста, SVG — сварить** (`d1lib.weld_mesh`): `new_from_object` оставляет швы заливки и фаски несваренными. → §5.1 [проверено: D1/03, D1/05]
+17. **SVG → `bpy.ops.import_curve.svg(filepath=…)`** (5.2.2, работает в фоне); `wm.svg_import` не существует; `wm.grease_pencil_import_svg` импортирует в Grease Pencil. Кривые приходят крошечными (px → м) — масштабировать. → §6.2 [проверено]
+18. **Меш из кривой, текста, SVG — сварить** (`d1lib.weld_mesh`): `new_from_object` оставляет швы заливки и фаски несваренными. → §5.1 [проверено]
 19. **Масштаб объекта = 1, размеры в вершинах**: толщина Solidify, ширина Bevel и шаг Array считаются в локальных координатах. → §2.2 [документация 5.2; C1 M2.10]
 20. **Модификатор «правь поверх», bmesh «пересобери»**: в `build(P)` геометрию строит bmesh из параметров, модификаторы — только неразрушающая отделка (Bevel, WN, Mirror, Array), которая применяется при экспорте. → §2 [мнение D1 по экспериментам 01–07]
 
@@ -104,7 +104,7 @@ ignore the stack order» (руководство 5.2 — через заметк
 - Морф-ассет: модификаторы применить до создания shape keys (E `01 §4.6`, H).
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] стек hard-surface с явными значениями и порядком
+# Blender 5.2.2 — [проверено] стек hard-surface с явными значениями и порядком
 import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -151,7 +151,7 @@ print(rep, D.gltf_vertex_estimate(ob))
 `ensure_lookup_table()` (B `../03-bpy-api/01 §6.2`, B6.1–B6.4).
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] bmesh.bevel с явными аргументами (умолчания — вершины!)
+# Blender 5.2.2 — [проверено] bmesh.bevel с явными аргументами (умолчания — вершины!)
 import math, bpy, bmesh
 bpy.ops.wm.read_factory_settings(use_empty=True)
 bm = bmesh.new()
@@ -178,7 +178,7 @@ assert len(res["faces"]) > 0 and len(me.polygons) > 6 * 5      # скошены 
 ### 3.3. Разрез тела на части
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] база и крышка из одного тела: разрез с зазором 0,3 мм
+# Blender 5.2.2 — [проверено] база и крышка из одного тела: разрез с зазором 0,3 мм
 import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -221,7 +221,7 @@ print(bpyx.object_stats(base)["tris"], bpyx.object_stats(lid)["tris"], tuple(rou
 управляемой UV (B `../03-bpy-api/01 §8`).
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] сосуд по профилю и лента по узлу с закрутом
+# Blender 5.2.2 — [проверено] сосуд по профилю и лента по узлу с закрутом
 import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -246,10 +246,10 @@ print(bpyx.object_stats(cup)["tris"], bpyx.object_stats(ribbon)["tris"])
 POLY; `extrude = depth/2 − bevel`, `bevel_depth = bevel`, `offset = −bevel` (фаска не раздувает контур); `new_from_object`
 → меш → `weld_mesh` → острые рёбра 30°. Отверстия и вогнутости заливаются без ручной триангуляции, n-гонов 0. Решётка
 60 × 60 × 4 мм с 49 отверстиями — 10 032 треуг., 8 653 вершины glTF, 0,2–0,6 с; без сварки — 3 280 неманифолдных рёбер
-[проверено: D1/03]. Кольцо Ø 100/40 мм — 1 280 треуг., звезда из 10 точек — 36 треуг. [проверено: D1/_lib t05].
+[проверено]. Кольцо Ø 100/40 мм — 1 280 треуг., звезда из 10 точек — 36 треуг. [проверено: D1/_lib t05].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] контур с отверстиями через заливку кривой + сварка
+# Blender 5.2.2 — [проверено] контур с отверстиями через заливку кривой + сварка
 import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -272,7 +272,7 @@ assert nonman == 0 and ngons == 0 and abs((mx - mn).x - 0.06) < 1e-4
 
 `resolution_u` — число шагов на каждый сегмент Безье (между соседними контрольными точками), а не на всю кривую. Лист
 логотипа из 2 больших сегментов при 6 шагах — 12-угольный гранёный контур (956 треуг.), при 16 — гладкий (2 556 треуг., 74 КБ);
-отверстие из 4 сегментов при 6 шагах (24 точки) уже гладкое [проверено: D1/05]. Правило: число точек на полный оборот
+отверстие из 4 сегментов при 6 шагах (24 точки) уже гладкое [проверено]. Правило: число точек на полный оборот
 окружности ≥ 24–32 для hero-размера; крупная дуга из одного сегмента — 12–16 шагов; или уплотнить путь контрольными точками.
 
 ## 6. Текст и SVG
@@ -281,7 +281,7 @@ assert nonman == 0 and ngons == 0 and abs((mx - mn).x - 0.06) < 1e-4
 
 `d1lib.text_mesh(name, body, size, extrude, bevel, bevel_res, resolution_u)`: кривая FONT → `new_from_object` → сварка →
 поворот 90° по X (лицом к −Y) → низ базовой линии на z = 0 → острые рёбра 30°; `offset = −bevel` — буквы не толстеют от фаски.
-«Nova» size 0,1 м, extrude 12 мм, bevel 2,5 мм: [проверено: D1/05]
+«Nova» size 0,1 м, extrude 12 мм, bevel 2,5 мм: [проверено]
 
 | `resolution_u` / `bevel_resolution` | Треуг. | Вершин glTF (оценка) | Вид в кадре 384 px |
 |---|---|---|---|
@@ -297,14 +297,14 @@ E/09: «Hello 3D» 12/4 → 9 968 треуг., 3/1 → 1 520 (E `../08-export-gl
 
 Оператор 5.2.2 — `bpy.ops.import_curve.svg(filepath=abs_path)` (встроенный аддон io_curve_svg включён и при
 `--factory-startup`, `poll` в фоне — True); `wm.svg_import` нет; `wm.grease_pencil_import_svg` создаёт Grease Pencil (для
-2D-штрихов, не для 3D-логотипа) [проверено: D1/00]. Импорт даёт коллекцию кривых в метрах по viewBox (120 px → 0,12 м…
+2D-штрихов, не для 3D-логотипа) [проверено]. Импорт даёт коллекцию кривых в метрах по viewBox (120 px → 0,12 м…
 в долях) — `d1lib.svg_mesh` объединяет кривые, центрирует, масштабирует к ширине `size`, задаёт `fill_mode='BOTH'`, extrude,
 bevel с `offset`, конвертирует, сваривает и ставит вертикально. Путь с отверстием (`fill-rule="evenodd"`) — отверстие
-вырезано; логотип 120 × 102 × 12 мм: неманифолда 0, n-гонов 0 [проверено: D1/05]. Перед импортом из SVG убрать
+вырезано; логотип 120 × 102 × 12 мм: неманифолда 0, n-гонов 0 [проверено]. Перед импортом из SVG убрать
 перекрывающиеся фигуры и 2D-блики, иконку сразу масштабировать [V:zthvZvw-yJE 00:36, 01:03].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] SVG → меш заданной ширины и 3D-текст с бюджетом
+# Blender 5.2.2 — [проверено] SVG → меш заданной ширины и 3D-текст с бюджетом
 import sys, os, tempfile; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -322,16 +322,16 @@ print(bpyx.object_stats(logo)["tris"], bpyx.object_stats(txt)["tris"])
 
 ## Частые ошибки
 
-1. **`bmesh.ops.bevel(bm, geom=edges, offset=…)` без `affect`** — скошены вершины, а не рёбра; `segments=0` [проверено: D1/00].
+1. **`bmesh.ops.bevel(bm, geom=edges, offset=…)` без `affect`** — скошены вершины, а не рёбра; `segments=0` [проверено].
 2. **Модификатор Bevel со значениями по умолчанию** — фаска 10 см на 10-см детали [проверено: D1/00 умолчание `width=0.1`].
 3. **Нода `Mesh Bevel` с одним входом `Offset`** — в режиме Edges ширина из 4 входов Start/End Left/Right Offset (0,1 м) —
    модель разрушена (файл 03 §5) [проверено: D1/01 E0].
 4. **`solver='FAST'`** у Boolean — TypeError в 5.x (стало FLOAT) [B].
 5. **Edge Split вместо острых рёбер данными** — разрыв меша, лишние вершины [документация 5.2].
-6. **Меш из кривой/текста/SVG без сварки** — неманифолд по швам заливки и фаски [проверено: D1/03].
-7. **`resolution_u` «на кривую»** — крупные дуги гранёные [проверено: D1/05].
+6. **Меш из кривой/текста/SVG без сварки** — неманифолд по швам заливки и фаски [проверено].
+7. **`resolution_u` «на кривую»** — крупные дуги гранёные [проверено].
 8. **Текст плашмя и шрифт по пути ОС** (M2.12, M1.13) [C1].
-9. **Импорт SVG «по памяти»** через несуществующий `wm.svg_import` или старый путь `bpy.ops.import_curve.svg` без абсолютного пути [проверено: D1/00].
+9. **Импорт SVG «по памяти»** через несуществующий `wm.svg_import` или старый путь `bpy.ops.import_curve.svg` без абсолютного пути [проверено].
 10. **Модификаторы не применены при экспорте** — в вебе голый меш (M5.5) [E/07].
 
 ## Чек-лист

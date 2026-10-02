@@ -1,8 +1,8 @@
 # Машиночитаемая версия 09-ai-generation-evaluation/02-site-checklist.md (сводный чек-лист сайта, агент K).
 # Сгенерировано scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.
 version: "1.0"
-generated_at: "2026-09-29 14:36"
-checked: "2026-09-29"
+generated_at: "2026-10-02 11:15"
+checked: "2026-10-02"
 source_md: "09-ai-generation-evaluation/02-site-checklist.md"
 source_md_meta: "Свод правил базы в форме «да / нет» для проверки плана, собранной страницы и сайта: **248 пунктов в 15 блоках** плюс каталог"
 items_count: 248
@@ -422,7 +422,7 @@ items:
     auto_gate: false
     source_file: ["03-page-structure/01-narratives-and-section-order.md"]
     source_section: "§3.1, §3.4 ; AIL-01, AIL-02; DEF-02"
-    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.1, §3.4 `[проверено: C/01]`; AIL-01, AIL-02; DEF-02"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.1, §3.4 `[проверено]`; AIL-01, AIL-02; DEF-02"
     evidence_level: ["проверено"]
     related_ids: [AIL-01, AIL-02, DEF-02]
   - id: SITE-STR-02
@@ -600,7 +600,7 @@ items:
     auto_gate: true
     source_file: ["03-page-structure/01-narratives-and-section-order.md"]
     source_section: "§3.2"
-    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.2 `[проверено: C/01]`"
+    source_raw: "`../03-page-structure/01-narratives-and-section-order.md` §3.2 `[проверено]`"
     evidence_level: ["проверено"]
   - id: SITE-STR-14
     block: STR
@@ -1227,7 +1227,7 @@ items:
     auto_gate: true
     source_file: ["05-conversion-funnels/01-cta-and-lead-capture.md"]
     source_section: "§5.3"
-    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §5.3 `[проверено: F/01]`"
+    source_raw: "`../05-conversion-funnels/01-cta-and-lead-capture.md` §5.3 `[проверено]`"
     evidence_level: ["проверено"]
   - id: SITE-FRM-10
     block: FRM
@@ -2185,7 +2185,7 @@ items:
     auto_gate: true
     source_file: ["07-seo-geo-performance-analytics/head-kit.yaml"]
     source_section: ""
-    source_raw: "`head-kit.yaml` `hk-access-waf` `[проверено: H/01]`"
+    source_raw: "`head-kit.yaml` `hk-access-waf` `[проверено]`"
     evidence_level: ["проверено"]
   - id: SITE-SEO-15
     block: SEO
@@ -2449,7 +2449,7 @@ items:
     auto_gate: true
     source_file: ["../creative-research/99-raw/experiments/E/02-scroll-scene/README.md?", "99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md?", "99-raw/experiments/K/03-gates-v1/README.md"]
     source_section: "SG-PERF-03; ; п.2"
-    source_raw: "SG-PERF-03; `../../creative-research/99-raw/experiments/E/02-scroll-scene/README.md` `[проверено: creative E/02]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.2; `../99-raw/experiments/K/03-gates-v1/README.md` `[проверено: K/03 — сумма сдвигов 0,42 против 0,15 окна сессии]`"
+    source_raw: "SG-PERF-03; `../../creative-research/99-raw/experiments/E/02-scroll-scene/README.md` `[проверено]`; `../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md` п.2; `../99-raw/experiments/K/03-gates-v1/README.md` `[проверено: K/03 — сумма сдвигов 0,42 против 0,15 окна сессии]`"
     evidence_level: ["проверено"]
     related_ids: [SG-PERF-03]
   - id: SITE-PERF-04

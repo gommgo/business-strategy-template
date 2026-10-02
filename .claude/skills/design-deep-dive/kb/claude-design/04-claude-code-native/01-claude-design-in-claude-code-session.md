@@ -332,7 +332,7 @@ Anthropic: ниже пересказ, не копия; в наши скиллы 
 ### 6.2. Команды
 
 ```bash
-# kit · агент D · 2026-09-25 · [проверено: 99-raw/experiments/D/01-kit-smoke/]
+# kit · агент D · 2026-09-25 · [проверено]
 K=04-claude-code-native/kit; P=design; L=/home/mm/Документы/app-design/.locks/browser.lock
 flock $L python3 $K/shot.py $P review/iter-01 --tiles --iteration iter-01 --min-free-gb 2          # кадры, холст, marks.json
 flock $L python3 $K/shot.py $P review/iter-02 --tiles --prev review/iter-01/marks.json --min-free-gb 2

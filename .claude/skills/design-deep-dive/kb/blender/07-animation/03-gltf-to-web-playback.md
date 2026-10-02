@@ -14,28 +14,28 @@
    NLA_TRACKS — клип на дорожку (запекается целиком, активные действия не уходят); SCENE — вся сцена одним клипом; BROADCAST —
    все действия всем объектам. → §1.2 [проверено: E/15, H/12; BROADCAST — исходник]
 3. **Клип начинается с 0 с только при сэмплировании**: с `export_force_sampling=False` сдвиг к нулю не применяется (клип длиннее на
-   кадр). → §1.4 [проверено: H/10]
+   кадр). → §1.4 [проверено]
 4. **Анимация материалов, света, камеры-объектива (`KHR_animation_pointer`) в three r186 не играется** — клип 0 с без треков;
-   делай такой эффект JS-треком на `mesh.material.color` в том же `AnimationMixer`. → §1.6, §3.5 [проверено: E/15, H/30]
+   делай такой эффект JS-треком на `mesh.material.color` в том же `AnimationMixer`. → §1.6, §3.5 [проверено]
 5. **Вес анимации мал**: клип трансформаций 1–5 КБ; `gltf-transform optimize` (resample внутри) убирает 60–80 % ключей; камера
-   244 → 82 ключа с `gltfpack -af 10`. Тяжелы морфы, не клипы. → §2 [проверено: H/22, H/13]
-6. **`gltf-transform resample` после Meshopt снимает сжатие** (26 → 66 КБ); resample — до сжатия, а `optimize` делает его сам. → §2.2 [проверено: H/16]
+   244 → 82 ключа с `gltfpack -af 10`. Тяжелы морфы, не клипы. → §2 [проверено]
+6. **`gltf-transform resample` после Meshopt снимает сжатие** (26 → 66 КБ); resample — до сжатия, а `optimize` делает его сам. → §2.2 [проверено]
 7. **Постобработка по умолчанию клипы не ломает**: имена анимированных узлов сохраняются (узлы-цели ≤ 0,14 мм, ≤ 0,5°); ломается
-   поиск МЕША по имени (`hero_1`, `mesh_N`) — искать через `traverse` от узла. → §2.3 [проверено: H/22]
+   поиск МЕША по имени (`hero_1`, `mesh_N`) — искать через `traverse` от узла. → §2.3 [проверено]
 8. **Клип по имени — `THREE.AnimationClip.findByName(gltf.animations, "Reveal")`**; `mixer.clipAction("Reveal")` на `gltf.scene`
-   вернёт `null` (GLTFLoader не заполняет `gltf.scene.animations`). → §3.1 [проверено: H/20]
+   вернёт `null` (GLTFLoader не заполняет `gltf.scene.animations`). → §3.1 [проверено]
 9. **Один проигрыш: `setLoop(THREE.LoopOnce)` + `clampWhenFinished = true`**, повтор — `action.reset().play()` (`play()` время не
-   сбрасывает); конец — событие `finished` на миксере. → §3.2 [проверено: H/30]
+   сбрасывает); конец — событие `finished` на миксере. → §3.2 [проверено]
 10. **Скраб прокруткой: `action.play()` один раз, затем `action.time = p·clip.duration; mixer.update(0)`**. Рецепт
-    `paused = true` + `mixer.setTime()` в r186 даёт позу кадра 0; `mixer.setTime(duration)` в LoopRepeat заворачивает в начало. → §3.3 [проверено: H/20, H/21]
+    `paused = true` + `mixer.setTime()` в r186 даёт позу кадра 0; `mixer.setTime(duration)` в LoopRepeat заворачивает в начало. → §3.3 [проверено]
 11. **Сглаживание прокрутки — `THREE.MathUtils.damp(current, target, λ, dt)`** (λ = 10: 99 % пути за 0,46 с, порог 1e-4 — за 0,85 с), не `lerp` без dt;
     рендер только пока `|current − target| > 1e-4`. → §3.4 [проверено: H/21; V:LSNQuFEDOyQ по отчёту V]
 12. **Время — `THREE.Timer` + `timer.connect(document)`** (r183+, `Clock` устарел и пишет предупреждение); dt ограничивать 0,1 с. → §3.4 [исходник r186; проверено: H/21]
-13. **Кроссфейд клипов: `from.crossFadeTo(to, 0.3, false)`**; через половину перехода веса ≈ 0,5/0,5. → §3.2 [проверено: H/30]
+13. **Кроссфейд клипов: `from.crossFadeTo(to, 0.3, false)`**; через половину перехода веса ≈ 0,5/0,5. → §3.2 [проверено]
 14. **Морфы из клипа и из кода на одном меше не смешивать**: трек пишет весь `morphTargetInfluences`, но только когда его значение
-    меняется — «последний пишущий» побеждает непредсказуемо. → §3.5 [проверено: H/30]
+    меняется — «последний пишущий» побеждает непредсказуемо. → §3.5 [проверено]
 15. **Reduced motion для скраба**: без инерции и промежуточных поз — сразу 0 или 1; для самозапускающихся петель — статичный кадр
-    и стоп цикла. → §3.6 [проверено: H/21]
+    и стоп цикла. → §3.6 [проверено]
 16. **model-viewer играет один клип (`animation-name`, по умолчанию первый) + `appendAnimation` для наложения; Scene Viewer (AR
     Android) — максимум 1 анимация, морфы запрещены, ≤ 254 кости** → отдельный AR-GLB. → §4 [документация model-viewer 4, Google]
 17. **Стык с F2**: H отдаёт GLB с клипами, имена, длительности и рецепт времени; F2 — страницу, прокрутку, интерактив. → §5
@@ -65,7 +65,7 @@
 `TypeError: … keyword "…" unrecognized` — проверять по RNA до вызова (как ниже).
 
 ```python
-# Blender 5.2.2 / glTF-IO 5.2.40 — [проверено: 99-raw/experiments/H/30-doc-snippets] экспорт клипов для веба и разбор GLB
+# Blender 5.2.2 / glTF-IO 5.2.40 — [проверено] экспорт клипов для веба и разбор GLB
 import os, tempfile, json, struct
 import bpy
 ANIM_WEB = dict(export_format="GLB", export_yup=True, export_apply=True, export_extras=True,
@@ -131,13 +131,13 @@ print(r)
 
 [проверено: 99-raw/experiments/H/10-turntable, 11-float-pulse, 13-morph; исходник 5.2.40 `fcurves/channels.py`, `sampled/*/sampler.py`].
 Гипотеза E «кривые + gltf-transform resample = минимальный вес без потерь» не подтверждена: кривые теряют точность и сдвиг к нулю,
-а сэмплы после `optimize` (resample) весят 0,3–1,3 КБ на клип — выигрыш кривых меньше 1 КБ [проверено: H/22].
+а сэмплы после `optimize` (resample) весят 0,3–1,3 КБ на клип — выигрыш кривых меньше 1 КБ [проверено].
 
 ### 1.5 Поза покоя, скрытые объекты, констрейнты
 
 Поза покоя в GLB = кадр 0 (`export_current_frame=False`) [проверено: E/15 a13]; констрейнты и драйверы без запекания не
 экспортируются — `02-… §3` [проверено: E/15 a11–a12]; скрытые объекты уходят в файл, если не `use_visible`/`use_renderable`
-[проверено: E/10]. Анимацию видимости (hide) glTF не описывает — анимировать масштаб 0 → 1 или прозрачность в JS [практика].
+[проверено]. Анимацию видимости (hide) glTF не описывает — анимировать масштаб 0 → 1 или прозрачность в JS [практика].
 
 ### 1.6 Анимация материалов, света, камеры → JS
 
@@ -145,7 +145,7 @@ print(r)
 (`/materials/0/pbrMetallicRoughness/baseColorFactor`, `/extensions/KHR_lights_punctual/lights/0/intensity`), но GLTFLoader r186
 пропускает каналы без `node` (`if (target.node === undefined) continue;`) — клип 0 с без треков [проверено: E/15 a15b; исходник
 GLTFLoader r186]. Плагин `needle-tools/three-animation-pointer` указан в шапке GLTFLoader как отдельный — не проверялся. Рабочий
-путь — трек three на свойство материала (`ColorKeyframeTrack('cta_dot.material.color', …)`) в том же миксере, §3.5 [проверено: H/30].
+путь — трек three на свойство материала (`ColorKeyframeTrack('cta_dot.material.color', …)`) в том же миксере, §3.5 [проверено].
 
 ## 2. Вес и постобработка
 
@@ -165,10 +165,10 @@ ANIMATIONS]. Для сравнения: геометрия и текстуры �
 ### 2.2 Порядок постобработки
 
 - `gltf-transform optimize` по умолчанию делает `--resample true` («losslessly deduplicating keyframes») [проверено: `optimize --help`,
-  4.5.0]; отдельный `resample` ПОСЛЕ Meshopt снимает `EXT_meshopt_compression`: 26,2 → 66,2 КБ [проверено: H/16].
+  4.5.0]; отдельный `resample` ПОСЛЕ Meshopt снимает `EXT_meshopt_compression`: 26,2 → 66,2 КБ [проверено].
 - gltfpack 1.2: `-af N` — пересэмплировать анимацию в N Гц (умолчание 30, 0 — выключить), `-at/-ar/-as` — биты квантования
   переноса/поворота/масштаба (16/12/16), `-ac` — сохранить постоянные треки [проверено: `gltfpack -h`]; постоянный scale камеры
-  выброшен без `-ac` [проверено: H/22].
+  выброшен без `-ac` [проверено].
 - Для анимированных файлов E советует `--flatten false --join false` (адресуемые части); на клипы это не влияет — анимированные узлы
   gltf-transform не сливает [проверено: H/22 — с умолчаниями клипы целы].
 
@@ -179,7 +179,7 @@ ANIMATIONS]. Для сравнения: геометрия и текстуры �
 | `gltf-transform optimize` (квантование) | имя остаётся у узла-родителя, треки находят его | ребёнок `case_lid_1` |
 | gltfpack `-cc` | имена анимированных узлов остаются | `mesh_N`, дубли → `mesh_0_instance_*` |
 
-[проверено: H/22]. В three имена ещё санитизируются (`PropertyBinding.sanitizeNodeName`: пробел → «_», удаляются `[ ] . : /`), дубли
+[проверено]. В three имена ещё санитизируются (`PropertyBinding.sanitizeNodeName`: пробел → «_», удаляются `[ ] . : /`), дубли
 получают `_1`, `_2`; трек ищет узел по имени обходом в глубину — первое совпадение [исходник r186, заметки H-sub/B].
 
 ## 3. Воспроизведение в three r186
@@ -187,7 +187,7 @@ ANIMATIONS]. Для сравнения: геометрия и текстуры �
 ### 3.1 Загрузка и клип по имени
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/H/30-doc-snippets] клип по имени, один проигрыш с фиксацией, событие finished, повтор
+// three r186 — [проверено] клип по имени, один проигрыш с фиксацией, событие finished, повтор
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
@@ -212,7 +212,7 @@ console.log(`Reveal ${clip.duration.toFixed(3)} с, крышка ${deg.toFixed(1
 ### 3.2 Кроссфейд и веса
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/H/30-doc-snippets] кроссфейд Idle → Reveal за 0,4 с: веса на середине ≈ 0,5
+// three r186 — [проверено] кроссфейд Idle → Reveal за 0,4 с: веса на середине ≈ 0,5
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
@@ -248,11 +248,11 @@ H-sub/B]. Аддитивные клипы — `THREE.AnimationUtils.makeClipAddi
 | LoopOnce + clamp + `setTime` | после конца обратный скраб застревает |
 | LoopOnce без clamp | после конца `enabled = false`, исходная поза |
 
-[проверено: 99-raw/experiments/H/20-scrub-api]. Цена `action.time = …; mixer.update(0)` — 1,1 мкс на вызов (клип из 1 трека).
+[проверено]. Цена `action.time = …; mixer.update(0)` — 1,1 мкс на вызов (клип из 1 трека).
 Рецепт каталога A (`../01-web-3d-landscape/01-… §4.5`, выжимка п. 12) с `paused` + `setTime` в r186 не работает — передано в отчёт.
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/H/30-doc-snippets] скраб: прогресс → время клипа, сглаживание damp, без заворота в конце
+// three r186 — [проверено] скраб: прогресс → время клипа, сглаживание damp, без заворота в конце
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
@@ -283,7 +283,7 @@ console.log(`p=1 → ${lidDeg().toFixed(1)}°, догнал p=0.5 за ${frames}
 ```
 
 Полная страница (секция 400vh, `THREE.Timer`, рендер по требованию, reduced motion) — `99-raw/experiments/H/21-scroll-page/index.html`:
-60 fps, 7 вызовов отрисовки, 0 ошибок консоли [проверено: H/21]. Прокрутку, закрепление секций (GSAP ScrollTrigger, Lenis) и
+60 fps, 7 вызовов отрисовки, 0 ошибок консоли [проверено]. Прокрутку, закрепление секций (GSAP ScrollTrigger, Lenis) и
 интерактив пишет F2 — `../09-web-runtime/`.
 
 ### 3.4 Время и плавность
@@ -298,7 +298,7 @@ console.log(`p=1 → ${lidDeg().toFixed(1)}°, догнал p=0.5 за ${frames}
 ### 3.5 Свойства материалов и морфы из кода
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/H/30-doc-snippets] анимация цвета и свечения материала JS-треками (вместо KHR_animation_pointer)
+// three r186 — [проверено] анимация цвета и свечения материала JS-треками (вместо KHR_animation_pointer)
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 
@@ -323,7 +323,7 @@ console.log('на 0,75 с: цвет #' + c.getHexString() + ', emissiveIntensity
 для частых изменений нескольких материалов дешевле uniform своего шейдера (цена не мерялась).
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/H/30-doc-snippets] вес морфа по имени из кода; клип и код на одном меше конфликтуют
+// three r186 — [проверено] вес морфа по имени из кода; клип и код на одном меше конфликтуют
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';
@@ -350,19 +350,19 @@ console.log(`из клипа ${fromClip.toFixed(3)}, после правки к�
 
 ### 3.6 Reduced motion и экономия
 
-- Скраб: при `prefers-reduced-motion: reduce` — без damp и промежуточных поз (0 или 1 по порогу 0,5) [проверено: H/21].
+- Скраб: при `prefers-reduced-motion: reduce` — без damp и промежуточных поз (0 или 1 по порогу 0,5) [проверено].
 - Самозапускающиеся петли (турнтейбл, парение, пульс) — статичный кадр и остановка цикла; вне экрана — `IntersectionObserver`,
   скрытая вкладка — `document.hidden` [практика: `../01-web-3d-landscape/01-… §1.4`]; WCAG 2.2.2: автоматическое движение дольше 5 с
   параллельно с контентом — нужен механизм паузы; появление в области видимости = автозапуск [стандарт: `../../ui-research/08-motion/03-… §2.2`].
-- Рендер по требованию: цикл rAF только пока идёт анимация или догоняет damp [проверено: H/21].
+- Рендер по требованию: цикл rAF только пока идёт анимация или догоняет damp [проверено].
 
 ### 3.7 Цена воспроизведения
 
 | что | замер | статус |
 |---|---|---|
-| скраб `action.time + update(0)` | 1,1 мкс на вызов | [проверено: H/20] |
-| страница: кейс 7 мешей, клип 5 треков, damp | 60 fps, p95 16,7 мс, 7 вызовов | [проверено: H/21] |
-| морф 2 737 вершин × 2 цели | без влияния на 60 fps (стенд) | [проверено: H/13, H/30] |
+| скраб `action.time + update(0)` | 1,1 мкс на вызов | [проверено] |
+| страница: кейс 7 мешей, клип 5 треков, damp | 60 fps, p95 16,7 мс, 7 вызовов | [проверено] |
+| морф 2 737 вершин × 2 цели | без влияния на 60 fps (стенд) | [проверено] |
 | скиннинг 4 кости, 514 вершин | GLB 36,6 КБ; кадр не мерялся | [проверено: H/30 — только экспорт] |
 | много морфов/костей на телефоне | не мерялось | [не проверено] |
 

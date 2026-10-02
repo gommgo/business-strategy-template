@@ -1,18 +1,18 @@
 # 02 · Серия 3D-иконок по паспорту: предрендер AVIF/WebP с альфой (+ GLB по запросу)
 
 Волна 3 · агент K · 23.09.2026 · Blender 5.2.2 LTS (Cycles CPU + OIDN), Pillow 11.3, three r186 · сквозной прогон:
-[проверено: 99-raw/experiments/K/01-run-recipes] · пример: `examples/02-icon-series/`
+[проверено] · пример: `examples/02-icon-series/`
 
 ## Выжимка рецепта
 
 1. Набор 3D-иконок на сайте — **предрендер** (AVIF q60 с альфой — единицы КБ), не GLB: 0 JS, 0 вызовов, работает везде
    [проверено: D1/04, D2/05, этот прогон].
 2. Серию держит **паспорт в коде** (доли радиусов, палитра hex, наклон, камера, свет, вид) — не «на глаз» в каждой иконке;
-   паспорт D2 выравнивает тень (разброс 0,9 L* против 6,4) и бренд (C* 84–93 против 38–44 у «наивной» серии) [проверено: D2/04].
+   паспорт D2 выравнивает тень (разброс 0,9 L* против 6,4) и бренд (C* 84–93 против 38–44 у «наивной» серии) [проверено].
 3. Форма «мягкой глины»: пухлая кромка (радиус ≈ 0,35–0,4 толщины, `power` 2,4), суперэллипс, мелкие детали врастают на
-   30–40 %, 2–3 цвета одной палитры, профили тел вращения — гладкой кривой [проверено: D1/04].
+   30–40 %, 2–3 цвета одной палитры, профили тел вращения — гладкой кривой [проверено].
 4. Нормировка: радиус описанной сферы 0,5 м, одна камера 85 мм (az 35°, el 25°, поле 1,35), E_key 2, Khronos PBR Neutral,
-   прозрачный фон + ловец теней (только Cycles) [проверено: D2/04].
+   прозрачный фон + ловец теней (только Cycles) [проверено].
 5. Выход: рендер 2× CSS-размера → AVIF q60 + WebP q80 для 1× и 2×, `<picture>` с `width/height` [проверено: D2 `06/04 §1.3`].
 
 ## 1. Бриф-пример и границы
@@ -33,7 +33,7 @@
 ## 3. Код: иконки → паспорт → рендер с альфой → GLB
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 02: серия из 3 иконок (формы D1/04, паспорт D2/04)
+# Blender 5.2.2 — [проверено] рецепт 02: серия из 3 иконок (формы D1/04, паспорт D2/04)
 import sys, math, bpy
 from mathutils import Matrix, Vector
 sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
@@ -162,7 +162,7 @@ rk.save(SLUG, passport=PASSPORT, series=S)
 ```
 
 ```python
-# run: system — Python 3 + Pillow — [проверено: 99-raw/experiments/K/01-run-recipes] PNG 512² → AVIF/WebP 1×/2× + страница-сетка
+# run: system — Python 3 + Pillow — [проверено] PNG 512² → AVIF/WebP 1×/2× + страница-сетка
 import os
 from PIL import Image
 EX = "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series"
@@ -212,7 +212,7 @@ print(total)
 | файлы | 2 384 | 202 КБ | 2,6 / 4,0 КБ | 9,9 / 25,9 КБ | 57,8 → 17,0 КБ |
 
 Страница-сетка (`examples/02-icon-series/index.html`, `web_view.py --page`): 4 запроса, **9,4 КБ всего**, LCP 48 мс, 0 вызовов
-отрисовки, 0 ошибок консоли [проверено: 99-raw/experiments/K/03-icons-page]. Три GLB — валидатор 0 ошибок, three r186 грузит без
+отрисовки, 0 ошибок консоли [проверено]. Три GLB — валидатор 0 ошибок, three r186 грузит без
 ошибок (`examples/02-icon-series/web/icon_*/web_sheet.png`). Предрендер в 8–13 раз легче GLB той же иконки и не тянет three
 (≈ 174 КБ br JS, рецепт 01).
 
@@ -226,7 +226,7 @@ print(total)
 без `lazy`, `fetchpriority="high"`), `alt` — если иконка несёт смысл, иначе `alt=""` при подписи рядом (D2 `06/04 §1.3`).
 
 ```html
-<!-- HTML — [проверено: 99-raw/experiments/K/03-icons-page] разметка одной карточки (генерирует блок 2) -->
+<!-- HTML — [проверено] разметка одной карточки (генерирует блок 2) -->
 <picture><source type="image/avif" srcset="web/icon-chat-3d@1x.avif 1x, web/icon-chat-3d@2x.avif 2x">
   <source type="image/webp" srcset="web/icon-chat-3d@1x.webp 1x, web/icon-chat-3d@2x.webp 2x">
   <img src="web/icon-chat-3d@1x.webp" width="256" height="256" alt="" loading="lazy" decoding="async"></picture>

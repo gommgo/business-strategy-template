@@ -39,7 +39,7 @@
     `bria-rmbg` = RMBG-2.0 (CC BY-NC 4.0, ≈1,02 ГБ скачивания) → §3.2 [проверено: код venv-p10]
 13. **Локально для удаления фона — `u2netp` (0,10 с, 0,72 ГБ) или `isnet-general-use` (0,55 с, 1,48 ГБ)** на CPU;
     **BiRefNet-lite ONNX — 10 с и 6,5 ГБ RSS** на картинку → только по одной при ≥ 8 ГБ свободной памяти или хостинг
-    fal `fal-ai/birefnet/v2` → §3.4, §10 [проверено: P/10]
+    fal `fal-ai/birefnet/v2` → §3.4, §10 [проверено]
 14. **RMBG-1.4 и RMBG-2.0 — некоммерческие** (1.4 «source-available model for non-commercial use», 2.0 CC BY-NC 4.0);
     коммерчески — API Bria / fal / Replicate $0,018 (≈1,51 ₽) → §3.1 [документация]
 15. **Матирование видео**: MatAnyone и MatAnyone 2 — S-Lab License (некоммерческая), RVM — GPL-3.0 и только люди;
@@ -49,15 +49,15 @@
 17. **Глубина коммерчески — только Apache-модели**: Depth Anything V2 Small, DA3-Small, DA3-Base, DA3Mono-Large,
     DA3Metric-Large; V2 Base/Large/Giant и DA3 Large/Giant/Nested — CC BY-NC 4.0; Depth Pro по HF — research-only → §5 [документация]
 18. **Глубина локально**: Depth Anything V2 Small ONNX fp32 — 0,25 с на 518², 0,41 ГБ, карта правдоподобна → годится для
-    цепочки «2.5D-параллакс» (граф ассетов №5) → §5, §10 [проверено: P/10]
+    цепочки «2.5D-параллакс» (граф ассетов №5) → §5, §10 [проверено]
 19. **Апскейл локально — `realesrgan-ncnn-vulkan -n realesrgan-x4plus` на Iris Xe**: ≈5 с на 1 Мп выхода, 0,7–1,3 ГБ
-    памяти iGPU; всегда задавай `-n` (дефолт бинарника — `realesr-animevideov3`, README пишет x4plus) → §6.1 [проверено: P/10]
+    памяти iGPU; всегда задавай `-n` (дефолт бинарника — `realesr-animevideov3`, README пишет x4plus) → §6.1 [проверено]
 20. **x4plus съедает мелкий регулярный узор** (штриховка 6 px: ≈22 линии → ≈17) — бесшовные текстуры с тонким
     паттерном апскейлить только с проверкой глазами → §6.1 [проверено: 1 синтетический образец]
 21. **SUPIR — только некоммерческий** («processing images that are intended for sale» — коммерция); **SeedVR2 — Apache 2.0**
     (картинки и видео, в обёртке ComfyUI сохраняет альфу) → §6.2 [документация]
 22. **Интерполяция локально — `rife-ncnn-vulkan -m rife-v4.6`**: ≈0,17 с на кадр 720p в пакетном режиме на Iris Xe
-    (CPU ≈0,75 с); для одиночных крошечных кадров `-g -1` быстрее → §6.3 [проверено: P/10]
+    (CPU ≈0,75 с); для одиночных крошечных кадров `-g -1` быстрее → §6.3 [проверено]
 23. **В сборке rife-ncnn-vulkan 20221029 модели только до v4.6**; автор RIFE советует 4.25 и «4.24+» для видео из
     диффузионных моделей → для 4.2x нужен PyTorch или хостинг (fal `fal-ai/rife/video` $0,0013/с GPU) → §6.3 [документация]
 24. **StarVector — только иконки, логотипы, диаграммы** («will not work for natural images or illustrations»); OmniSVG 1.1
@@ -71,7 +71,7 @@
 29. **Публикуя выход Hunyuan, LTX, MiniMax — помечай на странице «сгенерировано ИИ»**: это прямые требования AUP (плюс
     EU AI Act ст. 50 — вопрос к L) → §9 [документация]
 30. **Перед тяжёлым локальным шагом — `free -g`**: iGPU берёт ту же ОЗУ (x4plus 256² → 1,28 ГБ GPU-буферов), машина общая
-    (во время P/10 свободно было 4,2–6,2 ГБ) → §10 [проверено: P/10]
+    (во время P/10 свободно было 4,2–6,2 ГБ) → §10 [проверено]
 
 ## 1. Генерация картинок
 
@@ -191,7 +191,7 @@ img = pipe(prompt="…", height=1024, width=1024, guidance_scale=1.0, num_infere
   512²…2048² [S11]. **Z-Image-Omni-Base и Z-Image-Edit — «To be released»** (README на 23.09.2026) [S11].
 - Для сайтов: самый дешёвый перебор направлений (граф ассетов №16) и **бесшовные текстуры** — fal
   `fal-ai/z-image/turbo/tiling` ($0,02/Мп, `tiling_mode` both/horizontal/vertical); настоящий тайлинг подтверждён на
-  публичном образце [проверено: `99-raw/experiments/P/06-tiling-seam-check`].
+  публичном образце [проверено].
 - Локально: stable-diffusion.cpp с Z-Image «on machines with as little as 4GB of VRAM» [S11][S41] — на Iris Xe не
   проверено; кандидат для отдельного опыта H/E (GGUF Q4, 512², 8 шагов) [не проверено].
 
@@ -332,7 +332,7 @@ weights are for only non-commercial use» [S20].
 
 - **Модель по умолчанию — `bria-rmbg`** (веса `bria-rmbg-2.0.onnx`, ≈1,02 ГБ, CC BY-NC): `session_factory.py:
   model_name: str = "bria-rmbg"`, `bg.py: new_session("bria-rmbg")`, во всех CLI-командах `default="bria-rmbg"`
-  [проверено: `99-raw/tools/venv-p10/lib/python3.13/site-packages/rembg/`]; README: «bria-rmbg… **The default**… requires a
+  [проверено]; README: «bria-rmbg… **The default**… requires a
   paid agreement for commercial use. Model weights carry their own licenses, independent of rembg's MIT license» [S23].
   Вызов `remove(img)` без сессии = некоммерческая модель + скачивание 1 ГБ.
 - **`withoutbg` — облачный API**, не локальная модель: «Images are sent to withoutBG's servers; max upload size is 20 MB» [S23].
@@ -344,7 +344,7 @@ weights are for only non-commercial use» [S20].
   потоки ORT; `MODEL_CHECKSUM_DISABLED=1` — свои ONNX без перекачки [S23].
 
 ```python
-# rembg 2.0.85 + onnxruntime 1.30 (CPU) · venv 99-raw/tools/venv-p10 · [проверено: 99-raw/experiments/P/10-local-runtime-check]
+# rembg 2.0.85 + onnxruntime 1.30 (CPU) · venv 99-raw/tools/venv-p10 · [проверено]
 import os
 os.environ.setdefault("REMBG_HOME", "/путь/к/моделям")      # не засорять ~/.rembg
 from rembg import new_session, remove
@@ -421,14 +421,14 @@ u2netp — 0,10–0,12 с инференса, 0,72 ГБ RSS; isnet-general-use �
 
 - Код Real-ESRGAN — BSD-3-Clause (★36 880, последний push 06.08.2024); ncnn-сборка `xinntao/Real-ESRGAN-ncnn-vulkan` — MIT
   (★2 239, push 10.05.2024); «Portable… executable files for Intel/AMD/Nvidia GPU… No CUDA or PyTorch environment is
-  needed» [S30]. Репозитория `nihui/realesrgan-ncnn-vulkan` не существует (404) — брать релиз xinntao [проверено: P/09].
+  needed» [S30]. Репозитория `nihui/realesrgan-ncnn-vulkan` не существует (404) — брать релиз xinntao [проверено].
 - Модели сборки 20220424: `realesrgan-x4plus` (фото, 33,4 МБ), `realesrnet-x4plus`, `realesrgan-x4plus-anime` (6B),
   `realesr-animevideov3` ×2/×3/×4 (1,2 МБ, для кадров видео) [S30]. **Дефолт**: README — «realesrgan-x4plus (default)», а
-  `-h` бинарника — «default=realesr-animevideov3» → всегда `-n` [проверено: P/10].
+  `-h` бинарника — «default=realesr-animevideov3» → всегда `-n` [проверено].
 - Ключи [S30]: `-s` 2/3/4, `-t` тайл (0 = авто; меньше — меньше памяти), `-j load:proc:save` («4:4:4» для множества
   маленьких, «2:2:2» для больших), `-g` GPU, `-x` TTA, `-f` jpg/png/webp. Python-версия: тайлы, альфа-канал, 16 бит,
   `--outscale` (досжатие LANCZOS4), GFPGAN для лиц.
-- Измерено здесь (Iris Xe, Vulkan, 23.09.2026) [проверено: P/10]:
+- Измерено здесь (Iris Xe, Vulkan, 23.09.2026) [проверено]:
 
 | Модель | Вход → выход | Время процесса | GPU-буферы (= ОЗУ) | Замечание |
 |---|---|---|---|---|
@@ -444,7 +444,7 @@ u2netp — 0,10–0,12 с инференса, 0,72 ГБ RSS; isnet-general-use �
   «seamless» [проверено: 1 образец; SeedVR2 — не проверено].
 
 ```bash
-# realesrgan-ncnn-vulkan 20220424 · Iris Xe (Mesa ANV) · [проверено: 99-raw/experiments/P/10-local-runtime-check]
+# realesrgan-ncnn-vulkan 20220424 · Iris Xe (Mesa ANV) · [проверено]
 cd 99-raw/tools/bin/realesrgan-ncnn-vulkan
 ./realesrgan-ncnn-vulkan -i in.png -o out.png -n realesrgan-x4plus -s 4 -m models -g 0        # фото/иллюстрация
 mkdir -p frames_x2   # каталог вывода создать заранее (пакетный запуск P/10 шёл в существующий каталог)
@@ -475,7 +475,7 @@ mkdir -p frames_x2   # каталог вывода создать заранее
   модели rife, rife-HD/UHD/anime, v2…v4, **v4.6 — последняя** в сборке [проверено: список архива]; ключи: `-0/-1` пара или
   `-i каталог`, `-n` число кадров (по умолчанию N×2), `-s` доля времени, `-m` путь к модели (по умолчанию `rife-v2.3`!),
   `-g -1` — CPU, `-x/-z` TTA, `-u` UHD [S31].
-- Измерено здесь (rife-v4.6) [проверено: P/10]:
+- Измерено здесь (rife-v4.6) [проверено]:
 
 | Режим | Устройство | Время | Память |
 |---|---|---|---|
@@ -494,7 +494,7 @@ mkdir -p frames_x2   # каталог вывода создать заранее
   (закрытый) — у P в файле 04.
 
 ```bash
-# rife-ncnn-vulkan 20221029, модель v4.6 · [проверено: 99-raw/experiments/P/10-local-runtime-check]
+# rife-ncnn-vulkan 20221029, модель v4.6 · [проверено]
 cd 99-raw/tools/bin/rife-ncnn-vulkan
 mkdir -p frames_2x   # без существующего каталога: «invalid outputpath extension type» [проверено]
 ./rife-ncnn-vulkan -i frames/ -o frames_2x/ -m "$PWD/rife-v4.6" -g 0      # удвоение fps каталога кадров (%08d.png)
@@ -655,7 +655,7 @@ vtracer scan.jpg  output.svg --clustering bw --adaptive                         
 Машина: i9-13900H (14 ядер / 20 потоков), 15,7 ГБ ОЗУ (свободно 4,2–6,2 ГБ во время опыта), Intel Iris Xe (RPL-P),
 Vulkan 1.4.348, Mesa 26.1.2 (ANV), fp16/int8 — да, bf16 — нет, матричных ядер нет; второй Vulkan-«GPU» — llvmpipe (CPU).
 Intel OpenCL-ICD и Level Zero **не установлены** → OpenVINO-GPU, PyTorch-XPU и ORT на iGPU без sudo недоступны; GNU `time`
-отсутствует → замер своим `timev.py` (VmHWM + drm fdinfo) [проверено: `99-raw/experiments/P/10-local-runtime-check`].
+отсутствует → замер своим `timev.py` (VmHWM + drm fdinfo) [проверено].
 
 ### 10.1 Итоговая таблица (23.09.2026, по одному прогону на шаг)
 

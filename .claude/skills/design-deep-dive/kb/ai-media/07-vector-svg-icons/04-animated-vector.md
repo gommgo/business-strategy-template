@@ -8,14 +8,14 @@ reduce × тема; веса плееров lottie-web 5.13.0 и dotlottie-web 0
 ## Выжимка для агента
 
 1. **Иконки и лоадеры — inline SVG + CSS `@keyframes`**: 0 байт плеера, файл 0,3–0,5 КБ; блок
-   `@media (prefers-reduced-motion: reduce){animation:none}` останавливает анимацию. → §2 [проверено: G/05]
+   `@media (prefers-reduced-motion: reduce){animation:none}` останавливает анимацию. → §2 [проверено]
 2. **SMIL (`<animate>`, `<animateTransform>`) настройку reduce не слушает** — крутится при `reduce`; если SMIL
-   нужен — `svg.pauseAnimations()` по `matchMedia`. → §2, §3 [проверено: G/05]
+   нужен — `svg.pauseAnimations()` по `matchMedia`. → §2, §3 [проверено]
 3. **Анимированный SVG через `<img>` крутится (и CSS, и SMIL), но `prefers-reduced-motion` внутри не срабатывает**
    (а `prefers-color-scheme` в `<img>` срабатывает) → статичный запасной файл через `<picture>`. → §2, §3 [проверено: G/05, Chromium]
 4. **Lottie — только для сложного движения** (персонаж, морфинг, десятки слоёв): плеер lottie-web light 168 КБ
    (46 КБ gzip), полный 306 КБ (76 КБ gzip); dotLottie — 165 КБ JS + 1,24 МБ WASM (33 + 496 КБ gzip). → §1 [проверено: G/05, npm 23.09.2026]
-5. **lottie-web reduce не слушает** — `matchMedia('(prefers-reduced-motion: reduce)')` → `anim.goToAndStop(кадр, true)`. → §3 [проверено: G/05]
+5. **lottie-web reduce не слушает** — `matchMedia('(prefers-reduced-motion: reduce)')` → `anim.goToAndStop(кадр, true)`. → §3 [проверено]
 6. **Анимировать иконку — только когда меняется смысл**: гамбургер → крестик 200 мс, шеврон 150–200 мс, галочка
    150 мс, спиннер 1 с линейно; не «подпрыгивание» и не покачивание. → §4 [система, ui 07/01 §6.4]
 7. **LLM пишет простой Lottie вручную**: спиннер 809 байт (дуга с trim 0–75 %, штрих 2, поворот 360° за 30 кадров)

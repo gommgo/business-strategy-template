@@ -266,7 +266,7 @@ print("shoulder: бумага 1,0 → %.3f линейно → sRGB %d (заме�
 ## 7. Поведение страницы
 
 ```js
-// [проверено: 99-raw/experiments/SD/pagebuild/src/fonarik.js] — отрывок: данные без преобразований цвета, кадры только по вводу
+// [проверено] — отрывок: данные без преобразований цвета, кадры только по вводу
 async function bitmap(url) {
   const r = await fetch(url); const b = await r.blob();
   return createImageBitmap(b, { colorSpaceConversion: 'none', premultiplyAlpha: 'none' });

@@ -11,19 +11,19 @@ Blender 5.2.2 (glTF-IO 5.2.40), gltfpack 1.2, Chromium 153 headless (Iris Xe).
 
 1. **Демо-эталон — `examples/camera-path-scroll`**: кривая из Blender (JSON 2,7 КБ) → `CatmullRomCurve3`, клип сборки из Blender →
    `mixer.setTime`, hover по именам узлов, GSAP ScrollTrigger + Lenis; 0 вызовов отрисовки в покое, 60 fps и 7–12 вызовов при
-   прокрутке, LCP 92 мс (текст), TBT 323 мс → §2, §5, §6. [проверено: 99-raw/experiments/F2/03-camera-path]
+   прокрутке, LCP 92 мс (текст), TBT 323 мс → §2, §5, §6. [проверено]
 2. **Прокрутка — только источник прогресса**: ScrollTrigger (`onUpdate: st => ref.target = st.progress`) пишет число в ref/uniform;
    движение считает цикл кадра с `damp`; никакого React-состояния и твинов на каждый кадр → §2. [проверено: F2/03; практика Shopify]
 3. **Связка Lenis + ScrollTrigger**: `lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add(t => lenis.raf(t * 1000));
    gsap.ticker.lagSmoothing(0)`; Lenis 1.3.26 сам уважает reduce (`respectReducedMotion: true`), пакет — `lenis`, не
    `@studio-freight/lenis` → §2.1. [проверено: F2/03; исходник Lenis]
 4. **Рендер по требованию на прокрутке**: рисуй кадр, только если изменились прогресс, курсор или размер (`|t − tPrev| > 1e-5`) —
-   в покое 0 вызовов, при reduce кадры только на смене «станции» → §2.2. [проверено: F2/03]
+   в покое 0 вызовов, при reduce кадры только на смене «станции» → §2.2. [проверено]
 5. **Плавность — `THREE.MathUtils.damp(x, target, λ, dt)`**, не `lerp(x, target, k)` на кадр: `lerp 0.1` на 144 Гц через 0,25 с —
-   97,7 % пути, `damp` — 79,4 % на любой частоте; перевод `λ = −ln(1 − k)·60`, 95 % пути за `3/λ` с → §4. [проверено: F2/06]
+   97,7 % пути, `damp` — 79,4 % на любой частоте; перевод `λ = −ln(1 − k)·60`, 95 % пути за `3/λ` с → §4. [проверено]
 6. **Путь камеры — кривая Безье в Blender → точки вычисленной кривой → JSON `[x, z, −y]`** (объект по имени, `resolution_u` задаёт
    плотность, 97 точек = 2,7 КБ) → `new CatmullRomCurve3(points, false, 'catmullrom', 0.5)`, `getPointAt(u)` (равномерно по длине) и
-   взгляд на точку `u + 0,04` → §5. [проверено: F2/03]
+   взгляд на точку `u + 0,04` → §5. [проверено]
 7. **Скраббинг клипа: `action.play()` один раз, затем `mixer.setTime(clamp(p) · (duration − 1e-4))`**; `action.paused = true` + `setTime`
    клип НЕ двигает (x = 0 вместо 5), `LoopOnce + clampWhenFinished` после конца сам ставит паузу, `LoopRepeat` на `setTime(duration)`
    заворачивается в 0 → §6. [проверено: F2/06 по исходнику r186]
@@ -31,12 +31,12 @@ Blender 5.2.2 (glTF-IO 5.2.40), gltfpack 1.2, Chromium 153 headless (Iris Xe).
    поза покоя GLB = кадр 0 (разлёт) — управляй `setTime` с первого кадра → §6. [проверено: F2/03; E `08-export-gltf/01` §9]
 9. **Имена узлов из Blender управляют JS**: `ring_N` — кликабельные, `hotspot_N` с Custom Property `label` → `userData.label`
    (`export_extras=True`), сжатие только `gltfpack -cc -kn -ke` (421 → 33 КБ, имена и extras целы); после квантования меш — ребёнок
-   узла: при рейкасте поднимайся по `parent` до имени → §7. [проверено: F2/03]
+   узла: при рейкасте поднимайся по `parent` до имени → §7. [проверено]
 10. **CSS scroll-driven animations хватает для DOM-эффектов** (полоса прогресса, появление/наклон карточки, параллакс слоёв):
     `animation-timeline: scroll()` / `view()`, 0 JS; Chrome 115+, Safari 26+, Firefox — только preview → запас: элемент в конечном
     состоянии → §3. [проверено: F2/08; документация MDN BCD]
 11. **`ScrollTimeline` из JS отдаёт прогресс в процентах** (`currentTime = {value: 50, unit: 'percent'}`) — можно кормить uniform без
-    обработчика `scroll` (опрос в цикле кадра), но только в Chrome/Safari 26 → §3.2. [проверено: F2/08]
+    обработчика `scroll` (опрос в цикле кадра), но только в Chrome/Safari 26 → §3.2. [проверено]
 12. **Лицензия GSAP (Webflow, «Standard No Charge»)**: разрешено на любых сайтах, включая коммерческие; запрещено — инструменты
     визуального создания анимаций без кода, конкурирующие с Webflow; код GSAP, написанный ИИ, прямо разрешён → система,
     генерирующая сайты с GSAP, — разрешено; сама система как визуальный конструктор анимаций на GSAP — юридическая проверка → §2.3.
@@ -44,11 +44,11 @@ Blender 5.2.2 (glTF-IO 5.2.40), gltfpack 1.2, Chromium 153 headless (Iris Xe).
 13. **drei `ScrollControls`** — свой контейнер прокрутки внутри canvas; для лендинга с HTML-контентом — нативная прокрутка + ScrollTrigger
     (+ Lenis) → §1. [документация drei]
 14. **Курсор**: нормированные координаты → цель, `damp(λ = 3…8)` → смещение камеры 0,15–0,25 м или uniform; на тач-экранах
-    (`pointerType === 'touch'`) параллакс и hover выключать → §7. [проверено: F2/03, F2/05]
+    (`pointerType === 'touch'`) параллакс и hover выключать → §7. [проверено]
 15. **Рейкаст только по кликабельному**, не по всей сцене: массив узлов `ring_N` (или невидимые увеличенные hit-области, сферы у
     Bruno Simon), пересчёт только при движении курсора или камеры → §7. [проверено: F2/03; V:5uTwZVGgDpA 26:10; V:EhZwt9P4GP4 15:01]
 16. **Reduce для каждого приёма** (§8): полёт камеры → 5 «станций» без инерции; клип → конечная поза; параллакс, `Float`, автоповорот →
-    выкл.; Lenis → сам без сглаживания; CSS scroll-driven — только внутри `@media (prefers-reduced-motion: no-preference)`. [проверено: F2/03, F2/08]
+    выкл.; Lenis → сам без сглаживания; CSS scroll-driven — только внутри `@media (prefers-reduced-motion: no-preference)`. [проверено]
 17. **Сюжет на прокрутке режь на сегменты по экранам**: жёстко привязанный к скроллу таймлайн оставляет пользователя «в нелепой
     промежуточной позе» при остановке; сегмент = экран, внутри — короткая анимация [V:5uTwZVGgDpA 09:44–13:03]. [практика]
 18. **Физика — только когда она и есть эффект** (россыпь, толкание): Rapier wasm 0,5–2,4 МБ, `@react-three/rapier` 2.2.0; cannon-es
@@ -100,13 +100,13 @@ window.__scrollTick = tick;                                  // в демо: gsa
 - `scrub: true` у ScrollTrigger без сглаживания: сглаживание делает `damp` в цикле (не зависит от герцовки); `scrub: 1` — то же силами
   GSAP (твин догоняет за 1 с) [практика].
 - Замер (Iris Xe, 1440×900): прокрутка 60 fps, 7 (медиана) / 12 (макс.) вызовов, p95 кадра 16,8 мс; Pixel 7 + CPU×4 — 59 fps
-  (первый прогон 26 fps — нагрузка общей машины, повтор чистый); без Lenis (`?nolenis`) — те же 59 fps [проверено: F2/03].
+  (первый прогон 26 fps — нагрузка общей машины, повтор чистый); без Lenis (`?nolenis`) — те же 59 fps [проверено].
 - `pin: true` для закреплённых секций — не проверялось здесь; Shopify Editions держит смонтированными только активную и соседние сцены
   (A `01` §4.3) [практика].
 
 ### 2.2. Рендер по требованию и стоп вне экрана
 Цикл выше рисует только при изменении: в покое 0 вызовов (идёт только опрос `gsap.ticker`), движение 0 % пикселей; стоп при
-`IntersectionObserver` (canvas вне вида) и `document.hidden`; `resize` ставит `dirty` [проверено: F2/03]. Шаблон цикла для
+`IntersectionObserver` (canvas вне вида) и `document.hidden`; `resize` ставит `dirty` [проверено]. Шаблон цикла для
 статичных сцен — F1 `05-performance-a11y-fallbacks.md` §3.
 
 ### 2.3. Лицензия GSAP — дословно
@@ -124,7 +124,7 @@ code? Absolutely! AI-generated code is not a "Prohibited Use".» Webflow впр�
 
 ### 3.1. Где их хватает
 ```css
-/* Chrome 115+, Safari 26+ — [проверено: 99-raw/experiments/F2/08-css-scroll] 0 JS, reduce — через @media */
+/* Chrome 115+, Safari 26+ — [проверено] 0 JS, reduce — через @media */
 .bar { position: fixed; top: 0; left: 0; height: 6px; width: 100%; transform-origin: 0 50%; transform: scaleX(0); }
 @media (prefers-reduced-motion: no-preference) {
   .bar { animation: grow linear both; animation-timeline: scroll(root block); }
@@ -134,7 +134,7 @@ code? Absolutely! AI-generated code is not a "Prohibited Use".» Webflow впр�
 @keyframes tilt { from { transform: perspective(800px) rotateX(35deg) translateY(80px); opacity: 0; } to { transform: none; opacity: 1; } }
 ```
 Результат: на 50 % прокрутки полоса `scaleX(0.5)`, карточка видна полностью; при reduce анимация не применяется, элементы в
-конечном состоянии [проверено: F2/08]. Поддержка: `animation-timeline` и `ScrollTimeline` — Chrome/Edge 115+, Safari/iOS 26+, Firefox —
+конечном состоянии [проверено]. Поддержка: `animation-timeline` и `ScrollTimeline` — Chrome/Edge 115+, Safari/iOS 26+, Firefox —
 только preview (MDN BCD, 23.09.2026) [документация]. Без поддержки свойство игнорируется: `.card` без анимации видна сразу —
 безопасный запас; `.bar` остаётся `scaleX(0)` — невидимой.
 Ограничения: только DOM и CSS-свойства (canvas не получит прогресс); «появление при прокрутке» — автозапуск по WCAG 2.2.2 и
@@ -142,7 +142,7 @@ code? Absolutely! AI-generated code is not a "Prohibited Use".» Webflow впр�
 
 ### 3.2. Прогресс для WebGL без обработчика scroll
 ```js
-// Chrome 115+/Safari 26+ — [проверено: 99-raw/experiments/F2/08-css-scroll] currentTime = {value: 0…100, unit: 'percent'}
+// Chrome 115+/Safari 26+ — [проверено] currentTime = {value: 0…100, unit: 'percent'}
 const timeline = window.ScrollTimeline ? new ScrollTimeline({ source: document.documentElement, axis: 'block' }) : null;
 function scrollProgress() {                                   // вызывать в цикле кадра
   if (timeline && timeline.currentTime) return timeline.currentTime.value / 100;
@@ -202,7 +202,7 @@ out = export_curve_json("demo_path", os.path.join(tempfile.gettempdir(), "demo_p
 assert out["count"] == 49 and out["points"][0] == [0.0, 1.0, -4.0], out["points"][0]
 print("export_curve_json ok", out["count"])
 ```
-- Z-up → Y-up: `(x, y, z)_Blender → (x, z, −y)_three` — без этого путь «лежит на боку» [проверено: F2/03]. Альтернатива —
+- Z-up → Y-up: `(x, y, z)_Blender → (x, z, −y)_three` — без этого путь «лежит на боку» [проверено]. Альтернатива —
   анимированная камера (Follow Path, `export_bake_animation=True`) → клип камеры; JSON-кривая проще: 2,7 КБ, взгляд и скорость
   задаются в JS, путь не зависит от fps клипа [мнение F2].
 - Сплайн, построенный в JS по 5 опорным точкам, годится для абстрактной сцены; если путь должен проходить сквозь объекты сцены
@@ -259,7 +259,7 @@ export function makeScrubber(root, clip) {
   готовая страница (60 fps, reduce, рендер по требованию) — `../07-animation/03` §3, `99-raw/experiments/H/21-scroll-page/` [проверено H].
 - Blender: все части — отдельные объекты с origin в центре детали; ключи кадров 1 (разлёт) и 60 (сборка) @30 fps;
   `export_animation_mode="ACTIVE_ACTIONS"` → один клип «Animation» 1,967 с на 9 треков; у детали без поворота трек вращения
-  выброшен оптимизацией экспортёра [проверено: F2/03]. Много клипов и NLA — H `../07-animation/`, E `08-export-gltf/01` §9.
+  выброшен оптимизацией экспортёра [проверено]. Много клипов и NLA — H `../07-animation/`, E `08-export-gltf/01` §9.
 - Анимацию материалов и света (`KHR_animation_pointer`) three r186 не играет — такие свойства анимировать в JS (E §9.3).
 - Секвенция кадров на прокрутке — загрузчик с окном памяти у F1 (`06-…`); индекс кадра = `round(p · (N − 1))`, рисовать только при
   смене индекса [практика].

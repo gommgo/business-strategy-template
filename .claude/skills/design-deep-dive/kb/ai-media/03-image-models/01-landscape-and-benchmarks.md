@@ -130,7 +130,7 @@
 - Цена в таблице — «cost to generate 1,000 images on the model creator's API at 1024x1024 with the model's default settings»;
   время — медиана за 3 дня (us-central1), водяные знаки и safety выключены, где можно.
 - Снимок: 23.09.2026, 160 моделей в t2i и 76 в правке; категории — отдельные наборы промтов (20–140 моделей в срезе)
-  [проверено: `99-raw/experiments/C1/03-aa-category-leaderboards/`].
+  [проверено].
 
 ### 2.2 Общий рейтинг (23.09.2026)
 
@@ -205,7 +205,7 @@
 - t2i: 6 258 152 голоса, 79 моделей, снимок 21.09.2026; 8 категорий (Overall; Product, Branding & Commercial Design; 3D
   Imaging & Modeling; Cartoon, Anime & Fantasy; Photorealistic & Cinematic Imagery; Art; Portraits; Text Rendering).
 - Правка: 29 902 508 голосов, 56 моделей; надёжно снято 5 срезов (Overall, Cartoon, Photorealistic, Portraits, Text
-  Rendering) — Product, 3D, Art, Multi Image Edit при съёмке не обновились [проверено: C1/04].
+  Rendering) — Product, 3D, Art, Multi Image Edit при съёмке не обновились [проверено].
 - Модели участвуют в конкретных режимах: `gpt-image-2 (medium)`, `grok-imagine-image-2.0 (low)`, `gemini-3-pro-image-2k`,
   `gemini-3.1-flash-image [web-search]`; методика промтов не опубликована так подробно, как у AA.
 
@@ -524,7 +524,7 @@ Midjourney — без кириллицы [S48].
 
 Нумерация [S#] общая для `03-image-models/` (реестр — `99-raw/experiments/C1/06-model-cards-build/sources.py`).
 
-- [S1] polza.ai. Каталог моделей API (type=image, с провайдерами). снят 2026-09-23 08:45. https://polza.ai/api/v1/models?type=image&include_providers=true — первичные данные: id, провайдеры, параметры с описаниями, цены ₽; бесплатный эндпоинт [проверено: 99-raw/experiments/C1/01-polza-image-catalog-providers].
+- [S1] polza.ai. Каталог моделей API (type=image, с провайдерами). снят 2026-09-23 08:45. https://polza.ai/api/v1/models?type=image&include_providers=true — первичные данные: id, провайдеры, параметры с описаниями, цены ₽; бесплатный эндпоинт [проверено].
 - [S4] OpenAI. Страницы моделей gpt-image-2.5-sunburst, -flare, gpt-image-2, gpt-image-1.5. 2026-09-23. https://developers.openai.com/api/docs/models/gpt-image-2.5-sunburst — снимки, цены токенов, статус Deprecated у 1.5.
 - [S6] OpenAI. Image prompting guide (вкладки 2.5 / 2 / 1.5 / 1). 2026-09-23. https://developers.openai.com/api/docs/guides/image-prompting — канонический гайд по промтам GPT Image; заменил cookbook-гайд.
 - [S7] OpenAI. API changelog. 2026-09-23. https://developers.openai.com/api/docs/changelog — даты: 21.04.2026 GPT Image 2, 20.08.2026 прозрачность, 08.09.2026 GPT Image 2.5.
@@ -550,11 +550,11 @@ Midjourney — без кириллицы [S48].
 - [S33] Meta Superintelligence Labs. Introducing Muse Image and Muse Video. 2026-07-07. https://ai.meta.com/blog/introducing-muse-image-muse-video-msl/ — прочитано через WebFetch (прямой fetch — 400); Content Seal.
 - [S34] Midjourney. Version (V8.2, V8.1) + Enterprise API Survey. 2026-09-23 (через r.jina.ai; прямой — 403). https://docs.midjourney.com/hc/en-us/articles/32199405667853-Version — параметры V8.x; официального API нет.
 - [S35] Tencent Hunyuan. HunyuanImage-3.0 README + LICENSE (3271★, push 2026-06-23). 2026-09-23. https://github.com/Tencent-Hunyuan/HunyuanImage-3.0 — 80B MoE, VRAM, территориальные ограничения лицензии.
-- [S36] Artificial Analysis. Image Arena: text-to-image (20 срезов). снято 2026-09-23 08:59. https://artificialanalysis.ai/image/leaderboard/text-to-image — слепые пары, Elo; английские промты [проверено: C1/03].
-- [S37] Artificial Analysis. Image Arena: editing (18 срезов). снято 2026-09-23 09:01. https://artificialanalysis.ai/image/leaderboard/editing — [проверено: C1/03].
+- [S36] Artificial Analysis. Image Arena: text-to-image (20 срезов). снято 2026-09-23 08:59. https://artificialanalysis.ai/image/leaderboard/text-to-image — слепые пары, Elo; английские промты [проверено].
+- [S37] Artificial Analysis. Image Arena: editing (18 срезов). снято 2026-09-23 09:01. https://artificialanalysis.ai/image/leaderboard/editing — [проверено].
 - [S38] Artificial Analysis. Image methodology. 2026-09-23. https://artificialanalysis.ai/image/methodology — дефолты вендора, 1:1, seed 42, английские промты, цена за 1000.
-- [S39] LMArena. Text-to-Image leaderboard (8 категорий). снимок 2026-09-21. https://lmarena.ai/leaderboard/text-to-image — 6,26 млн голосов, 79 моделей [проверено: C1/04].
-- [S40] LMArena. Image Edit leaderboard. снимок 2026-09-21. https://lmarena.ai/leaderboard/image-edit — 29,9 млн голосов, 56 моделей; 4 категории устарели при съёмке [проверено: C1/04].
+- [S39] LMArena. Text-to-Image leaderboard (8 категорий). снимок 2026-09-21. https://lmarena.ai/leaderboard/text-to-image — 6,26 млн голосов, 79 моделей [проверено].
+- [S40] LMArena. Image Edit leaderboard. снимок 2026-09-21. https://lmarena.ai/leaderboard/image-edit — 29,9 млн голосов, 56 моделей; 4 категории устарели при съёмке [проверено].
 - [S41] Cheng et al. (HIT). MultiTextEdit: многоязычная правка текста в картинках, 12 языков. 2026-05 (v2). https://arxiv.org/abs/2605.08163 — правка текста, 12 языков вкл. русский; из закрытых — только GPT-image-1.5 и NB2.
 - [S42] Tencent Weixin, UESTC, DLUT. WeGenBench. 2026-06. https://arxiv.org/abs/2606.20100 — 4000 промтов zh/en; текст: Char F1, precision; судья Qwen3.5-397B.
 - [S43] —. UniGenBench++. 2025-10. https://arxiv.org/abs/2510.18701 — многоязычность = zh/en; прочитано частично.

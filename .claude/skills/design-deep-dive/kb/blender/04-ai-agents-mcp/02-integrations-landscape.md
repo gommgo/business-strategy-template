@@ -16,7 +16,7 @@ MCP SDK Python <2 (официальный сервер). Детальный ра
 2. **Официальный путь — MCP-сервер Blender Lab** (v1.0.3, 11.09.2026, GPL-3.0-or-later, Blender ≥5.1): он же коннектор
    Blender в каталоге Claude с 28.04.2026. → §2.2 `[документация]`
 3. **Официальный сервер работает без окна**: `blender -b file.blend --command blender_mcp` (нужен `--online-mode`); в 5.2.2
-   исполняет код, рендерит EEVEE, отдаёт 2 МБ. → §2.3 `[проверено: 99-raw/experiments/C2/02-blender-lab-mcp-headless]`
+   исполняет код, рендерит EEVEE, отдаёт 2 МБ. → §2.3 `[проверено]`
 4. **Контракт официального `execute_blender_code`**: данные — в `dict` по имени `result`; `print` → `stdout`; ошибка → полный
    traceback; переменные Python между вызовами не живут, данные `bpy` — живут. → §2.3 `[проверено]`
 5. **Справка API 5.2 встроена в официальный сервер** (`search_api_docs`, `get_python_api_docs`, `search_manual_docs`) —
@@ -157,7 +157,7 @@ MCP SDK Python <2 (официальный сервер). Детальный ра
 **Проверка на этой машине** [S2]: аддон v1.0.3 (исходники, без установки в настройки пользователя) в
 `blender -b --factory-startup --online-mode` на **Blender 5.2.2**: регистрация и CLI-команда работают; 9 проверок
 пройдены (создание меша, traceback, блок выхода, `result` не dict, `stdout`, рендер EEVEE 256² за 2.89 с, ответ 2 МБ);
-без `--online-mode` — отказ. `[проверено: 99-raw/experiments/C2/02-blender-lab-mcp-headless]`
+без `--online-mode` — отказ. `[проверено]`
 
 ### 2.4. Официальный сервер против mcp-for-blender (ahujasid)
 

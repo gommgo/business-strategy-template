@@ -11,28 +11,28 @@
 
 1. **Свой английский `facts.yaml` с теми же id**, а не `translations.en` в русском файле: сверка сравнивает объект счёта
    (`values[].what`), условие «рядом» и цитаты на языке факта; русский `what` даёт `COPY-F-NUM-MISMATCH` на верном английском
-   тексте (I/04, E/03). `[проверено: J/08, E/03, I/04]` все → §2
+   тексте (I/04, E/03). `[проверено]` все → §2
 2. **`source.quote` не переводится**: основание факта — русские слова заказчика; английский `verbatim` — адаптация с
    заметкой в `notes`. `[практика: B2]` все → §2
 3. **Ограничение сверки B2 (не норма языка): число без запятой тысяч с пометкой** — до разбора разделителя по `lang`
    «₽9,800» сверка и `lint-facts` читают как 9,8 (`COPY-F-INFERRED` — «слова факта не подтверждены выдержкой»); «₽9800»
    проходит. У «Окошка» E «2,490 ₽» проходит, потому что и выдержка источника английская с той же запятой. Норма EN —
-   «9,800» (H `../08-russian-legal-typography/02-typography-for-marketing.md` §7). `[проверено: J/08]` все → §2
+   «9,800» (H `../08-russian-legal-typography/02-typography-for-marketing.md` §7). `[проверено]` все → §2
 4. **id страниц, секций и слотов — как в исходнике**: пути `copy:<page>/<section>/<slot>` общие для языков; лишнее для
    аудитории снимается, новое не выдумывается. `[практика: J]` все → §1
 5. **Реалию объясняет одна вставка**: «Sormovo, a district of Nizhny Novgorod», «9:00 to 21:00 Moscow time». `[практика: I 02 §6]` все → §3
 6. **Цены российской компании — в рублях** и на английской странице (38-ФЗ ст. 5 ч. 7.1, H). `[стандарт]` {landing, site-page} → §3
 7. **Перевод цитаты помечен рядом**: «Anna K., Nizhny Novgorod (translated from Russian)» (B2 §5.1); цена пометки —
-   подпись длиннее границы E (warning, provisional). `[проверено: J/08]` {landing, site-page} → §3
+   подпись длиннее границы E (warning, provisional). `[проверено]` {landing, site-page} → §3
 8. **Число — формой факта и на английском**: «The contract set 50 working days; we handed the flat over in 47» →
-   `COPY-F-NUM-MISMATCH`; «It took 47 working days against the 50 set in the contract» проходит. `[проверено: J/08]` все → §4
-9. **Объект счёта — словами факта**: «For a team of up to 5» → `NUM-MISMATCH` («объект счёта другой»); «For up to 5 stylists» проходит. `[проверено: J/08]` все → §4
+   `COPY-F-NUM-MISMATCH`; «It took 47 working days against the 50 set in the contract» проходит. `[проверено]` все → §4
+9. **Объект счёта — словами факта**: «For a team of up to 5» → `NUM-MISMATCH` («объект счёта другой»); «For up to 5 stylists» проходит. `[проверено]` все → §4
 10. **Длина — по английским колонкам E** (основная единица — слова; грубая граница знаков тоже срабатывает): строка у
-    цены 13 слов / 85 знаков → `COPY-D-LEN`; «Labour only, materials not included.» — в границах. `[проверено: J/08]` {landing} → §4
+    цены 13 слов / 85 знаков → `COPY-D-LEN`; «Labour only, materials not included.» — в границах. `[проверено]` {landing} → §4
 11. **Строка «Voice:» на языке страницы**: у профилей F проекция `tone_of_voice` только русская — без
     `adaptation.voice_line` выгрузка даёт warning `COPY-D-LANG` (новое поле v1.1). `[проверено: J/08, selftest]` все → §5
 12. **Never claim в `facts.md` — по-английски**: строки проекта — из английского `facts.yaml`, умолчания B2 — английская
-    адаптация J (`NEVER_EN`); строки «Typography is final…» для EN нет. `[проверено: J/08]` {landing} → §5
+    адаптация J (`NEVER_EN`); строки «Typography is final…» для EN нет. `[проверено]` {landing} → §5
 
 ## 1. Набор
 

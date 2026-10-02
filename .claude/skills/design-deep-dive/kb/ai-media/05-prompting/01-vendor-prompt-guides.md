@@ -18,9 +18,9 @@
    produce a better… image than a simple list», Google). Исключение — Midjourney: коротко. → §2.1, §11.5
    `[документация]`
 5. **Лимит длины промта бери из каталога polza, а не из документации polza**: они расходятся (Veo 2 000 против 60 000,
-   GPT-5 Image 32 000 против 4 000). → §1.2 `[проверено: 99-raw/experiments/D/01-catalog-prompt-limits]`
+   GPT-5 Image 32 000 против 4 000). → §1.2 `[проверено]`
 6. **Поле негатива в polza есть только у `wan/2.5`** (`negative_prompt` ≤ 500 символов). У остальных 43 медиа-моделей
-   его нет — не отправляй `negative_prompt` вслепую. → §12.1 `[проверено: 99-raw/experiments/D/01-catalog-prompt-limits]`
+   его нет — не отправляй `negative_prompt` вслепую. → §12.1 `[проверено]`
 7. **«no X» в прозе у FLUX.2, Runway, Midjourney, Ideogram не пиши — заменяй описанием того, что там есть** («empty
    street», «clean unmarked surfaces», «Locked camera. The camera remains still.»). У моделей с LLM-фронтом служебные
    запреты «No text. No watermark. No subtitles. No dialogue.» допустимы — так пишут сами Google, OpenAI, ByteDance,
@@ -118,7 +118,7 @@ LLM до стиля подписей [S60]. Отсюда четыре класс
 
 ### 1.2 Модели polza: промт-ограничения по каталогу
 
-Данные — каталог polza 2026-09-23, извлечены скриптом `[проверено: 99-raw/experiments/D/01-catalog-prompt-limits]`
+Данные — каталог polza 2026-09-23, извлечены скриптом `[проверено]`
 (машиночитаемо: `prompt_limits.json`). Класс — по §1.1; «?» — данных нет.
 
 | id в polza | Модель | Класс | Промт ≤ симв. | Негатив | Референсы | Усилитель в polza (default) | Как модель читает промт | Раздел |

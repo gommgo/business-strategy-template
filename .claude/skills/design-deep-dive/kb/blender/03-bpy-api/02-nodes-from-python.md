@@ -2,7 +2,7 @@
 
 Волна 1 · агент B · 2026-09-23 · источников прочитано 47 (40 целиком; в этом файле цитируются 21) · экспериментов по теме 9
 (00, 01, 02, 03, 11, 12, 13, 19, 40) · Blender 5.2.2 LTS. Все блоки `python` с меткой
-`[проверено: 99-raw/experiments/B/42-doc-snippets]` выполнены автоматически в чистой сцене 5.2.2.
+`[проверено]` выполнены автоматически в чистой сцене 5.2.2.
 
 ## Выжимка для агента
 
@@ -84,7 +84,7 @@
 То же руками внутри Blender:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] сокеты ноды в нужном режиме — «probe» в своём коде
+# Blender 5.2.2 — [проверено] сокеты ноды в нужном режиме — «probe» в своём коде
 import bpy
 tree = bpy.data.node_groups.new("__probe__", "ShaderNodeTree")
 n = tree.nodes.new("ShaderNodeMix")
@@ -109,7 +109,7 @@ bpy.data.node_groups.remove(tree)
 - Если нужно несколько однотипных нод — задать им свои имена/метки при создании и искать по ним.
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] найти ноды материала без опоры на имена
+# Blender 5.2.2 — [проверено] найти ноды материала без опоры на имена
 import bpy
 mat = bpy.data.materials.new("Paint")                       # 5.x: дерево по умолчанию уже есть
 nt = mat.node_tree
@@ -141,7 +141,7 @@ assert [s.name for s in out.inputs] == ["Surface", "Volume", "Displacement", "Th
 `inputs[2]` = «Value_002» (третий недоступен при POWER) [проверено: 01, 12].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] правильный порядок: режим → сокет → связь → проверка
+# Blender 5.2.2 — [проверено] правильный порядок: режим → сокет → связь → проверка
 import bpy
 tree = bpy.data.node_groups.new("T", "ShaderNodeTree")
 rgb = tree.nodes.new("ShaderNodeRGB")
@@ -174,7 +174,7 @@ Transform, Corner Pin, Map UV, Scale, Rotate, Displace «Interpolation», «Exte
 затронуты. Значения меню — отображаемые имена (`"Count"`, `"Bloom"`), а не константы:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] входы-меню: значения и присвоение
+# Blender 5.2.2 — [проверено] входы-меню: значения и присвоение
 import bpy
 g = bpy.data.node_groups.new("G", "GeometryNodeTree")
 rs = g.nodes.new("GeometryNodeResampleCurve")
@@ -266,7 +266,7 @@ removed in Blender 6.0»), `scene.use_nodes` и `light.use_nodes` — тоже [
 ### 3.3 Материал с картинками
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] PBR-материал из текстур: цвет sRGB, данные Non-Color
+# Blender 5.2.2 — [проверено] PBR-материал из текстур: цвет sRGB, данные Non-Color
 import bpy
 def img(name, color, non_color):
     im = bpy.data.images.new(name, 16, 16, alpha=False)
@@ -304,7 +304,7 @@ assert rough.image.colorspace_settings.name == "Non-Color"
 ### 3.4 Процедурный материал
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] шум → ColorRamp → цвет, Voronoi → шероховатость, бамп
+# Blender 5.2.2 — [проверено] шум → ColorRamp → цвет, Voronoi → шероховатость, бамп
 import bpy
 mat = bpy.data.materials.new("Proc"); nt = mat.node_tree; N, L = nt.nodes, nt.links
 p = next(n for n in N if n.type == "BSDF_PRINCIPLED")
@@ -357,7 +357,7 @@ Weight, Fresnel) теряются молча — их запекают в тек
 ### 3.6 Мир и свет
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] мир: небо Sky Texture и сила фона без опоры на имена
+# Blender 5.2.2 — [проверено] мир: небо Sky Texture и сила фона без опоры на имена
 import math
 import bpy
 scene = bpy.context.scene
@@ -385,7 +385,7 @@ bpy.data.images.load(path)`, `projection='EQUIRECTANGULAR'`). Свет в сам
 относительным к рамке; абсолютные координаты — `node.location_absolute` (5.x, можно присваивать) [проверено: 11].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] раскладка по глубине от выхода, рамка
+# Blender 5.2.2 — [проверено] раскладка по глубине от выхода, рамка
 import bpy
 mat = bpy.data.materials.new("L"); nt = mat.node_tree
 p = next(n for n in nt.nodes if n.type == "BSDF_PRINCIPLED")
@@ -424,7 +424,7 @@ NodeSocketImage, NodeSocketMaterial, NodeSocketFont, NodeSocketSound, NodeSocket
 found` [проверено: 03].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] шейдерная группа с панелью и её использование
+# Blender 5.2.2 — [проверено] шейдерная группа с панелью и её использование
 import bpy
 g = bpy.data.node_groups.new("TintGroup", "ShaderNodeTree")
 iface = g.interface
@@ -460,7 +460,7 @@ parameter "to_position" not specified` [проверено: 42-doc-snippets; S21
 ### 5.1 Дерево и модификатор
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] дерево GN с интерфейсом, модификатор, входы по имени
+# Blender 5.2.2 — [проверено] дерево GN с интерфейсом, модификатор, входы по имени
 import bpy
 tree = bpy.data.node_groups.new("Line", "GeometryNodeTree")
 assert tree.is_modifier is False                         # кодом назначить можно, в выпадающем списке UI не видно
@@ -511,7 +511,7 @@ assert len(ob.evaluated_get(dg).data.vertices) == 25
 "Count", 25)` [проверено: 40-bpyx-tests; ветка < 5.2 — не проверено].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] вход из атрибута, выходной атрибут, объект и материал
+# Blender 5.2.2 — [проверено] вход из атрибута, выходной атрибут, объект и материал
 import bpy
 t = bpy.data.node_groups.new("Attr", "GeometryNodeTree")
 iface = t.interface
@@ -558,7 +558,7 @@ Realize — 1924 вершины, 3202 треугольника) [провере�
 и применены в меш [проверено: 12-geonodes]. Ниже — компактная версия с общей функцией входов.
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] разброс инстансов по поверхности со случайным масштабом
+# Blender 5.2.2 — [проверено] разброс инстансов по поверхности со случайным масштабом
 import bpy, bmesh
 def gn(name, ins=(), geo_in=True):
     t = bpy.data.node_groups.new(name, "GeometryNodeTree")
@@ -594,7 +594,7 @@ assert len(ob.evaluated_get(dg).data.vertices) == 1924     # 160 икосфер 
 ```
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] сетка со смещением по шуму (рельеф)
+# Blender 5.2.2 — [проверено] сетка со смещением по шуму (рельеф)
 import bpy
 t = bpy.data.node_groups.new("NoiseGrid", "GeometryNodeTree")
 for nm, st, dv in (("Size", "NodeSocketFloat", 2.0), ("Resolution", "NodeSocketInt", 80),
@@ -624,7 +624,7 @@ assert len(me.vertices) == 6400 and sum(len(p.vertices) - 2 for p in me.polygons
 ```
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] кривая → трубка и кубы вдоль кривой (входы-меню)
+# Blender 5.2.2 — [проверено] кривая → трубка и кубы вдоль кривой (входы-меню)
 import bpy
 def tree(name):
     t = bpy.data.node_groups.new(name, "GeometryNodeTree")
@@ -661,7 +661,7 @@ assert counts[1] == 16 * 8, counts                        # 16 кубов по 8
 ### 5.6 Применение для экспорта
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] применить GN (все модификаторы) в меш без оператора
+# Blender 5.2.2 — [проверено] применить GN (все модификаторы) в меш без оператора
 import bpy
 t = bpy.data.node_groups.new("Ico", "GeometryNodeTree")
 t.interface.new_socket(name="Geometry", in_out="OUTPUT", socket_type="NodeSocketGeometry")
@@ -693,7 +693,7 @@ assert len(ob.data.vertices) == 162 and not ob.modifiers      # Subdivisions 1 �
 ## 6. Композитор (5.x)
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] дерево композитора с Bloom для рендера в фоне
+# Blender 5.2.2 — [проверено] дерево композитора с Bloom для рендера в фоне
 import bpy
 scene = bpy.context.scene
 tree = bpy.data.node_groups.new("Comp", "CompositorNodeTree")        # 5.0+: отдельный ID, можно переиспользовать

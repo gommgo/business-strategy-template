@@ -7,41 +7,41 @@ glTF-IO 5.2.40, three r186 (0.186.0). Блоки `python` выполнены в 
 ## Выжимка для агента
 
 1. **Кривые живут в слоте**: Action → `slots` → `layers[0]` → `strips[0]` (`ActionKeyframeStrip`) → `channelbag(slot)` → `fcurves`.
-   `action.fcurves` в 5.x нет (AttributeError) — брать `anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)`. → §1 [проверено: H/01]
+   `action.fcurves` в 5.x нет (AttributeError) — брать `anim_utils.action_get_channelbag_for_slot(ad.action, ad.action_slot)`. → §1 [проверено]
 2. **`keyframe_insert(data_path, index=…, frame=…)` — всё после пути только именами**; позиционный вызов из руководства 4.4
-   даёт TypeError. → §2 [проверено: H/01, B/03]
+   даёт TypeError. → §2 [проверено]
 3. **Действие без слота не анимирует**: после `ad.action = act` на чужом объекте `ad.action_slot is None`; ставить
-   `ad.action_slot = act.slots.new(id_type="OBJECT", name=ob.name)` или `ad.action_suitable_slots[0]`. → §1.3 [проверено: H/01]
+   `ad.action_slot = act.slots.new(id_type="OBJECT", name=ob.name)` или `ad.action_suitable_slots[0]`. → §1.3 [проверено]
 4. **Ключ на shape key объекта с уже существующим действием кладётся в ТО ЖЕ действие** (слот `KEKey`, тип KEY);
-   ключ на вход материала — в отдельное действие у `material.node_tree`. → §1.2 [проверено: H/01]
+   ключ на вход материала — в отдельное действие у `material.node_tree`. → §1.2 [проверено]
 5. **Ключи, созданные `keyframe_points.add()`, имеют back = amplitude = period = 0** — BACK и ELASTIC «плоские»; задавать
-   явно (у `keyframe_insert` умолчания 1,70158 / 0,8 / 4,1). → §2.2 [проверено: 99-raw/experiments/H/01-api-basics]
+   явно (у `keyframe_insert` умолчания 1,70158 / 0,8 / 4,1). → §2.2 [проверено]
 6. **Умолчания новых ключей — BEZIER + AUTO_CLAMPED, `fcurve.auto_smoothing = 'CONT_ACCEL'`**: без правок любое движение с
-   разгоном и торможением. Турнтейбл и бегущая лента — `LINEAR`. → §3 [проверено: H/00, H/10]
+   разгоном и торможением. Турнтейбл и бегущая лента — `LINEAR`. → §3 [проверено]
 7. **glTF знает только LINEAR, STEP, CUBICSPLINE**: SINE/QUAD/…/BACK/BOUNCE/ELASTIC и смешанные интерполяции экспортёр
-   всегда сэмплирует (warning «Baking animation because of an unsupported interpolation method»). → §3.2 [проверено: H/11, H/12]
+   всегда сэмплирует (warning «Baking animation because of an unsupported interpolation method»). → §3.2 [проверено]
 8. **Экспортируй с сэмплированием (умолчание `export_force_sampling=True`)**: ключ на каждый кадр, совпадение с Blender до
    1e-5 м; CUBICSPLINE легче в 3–8 раз, но даёт ошибку (0,26° и 1,5 мм у парения, 0,07 веса у морфа) и теряет
-   `export_anim_slide_to_zero`. → §3.3, `03-… §1.4` [проверено: H/11, H/13]
+   `export_anim_slide_to_zero`. → §3.3, `03-… §1.4` [проверено]
 9. **Поворот ≥ 180° между ключами без сэмплирования ломается**: 2 ключа 0→360° → объект стоит; ключи 0/180/360° → крутится
-   НАЗАД. С сэмплами или ключами через ≤ 90° — верно. → §4.2 [проверено: H/10]
+   НАЗАД. С сэмплами или ключами через ≤ 90° — верно. → §4.2 [проверено]
 10. **Длина клипа = ручной диапазон действия**: `action.use_frame_range = True; frame_start/frame_end` — экспортёр берёт
     `int(action.frame_range)`. Петля: первый и последний ключ равны, диапазон = ровно период. → §4.1 [проверено: H/10, исходник 5.2.40]
 11. **Модификатор Cycles нужен только для просмотра в Blender**: в glTF уходит сэмплированный диапазон, петлю в three даёт
-    `LoopRepeat`. → §4.1 [проверено: H/10, H/11]
+    `LoopRepeat`. → §4.1 [проверено]
 12. **Для видео и секвенций рендерить 1…N−1**: кадр N петли = кадр 1, иначе «двойной кадр» на стыке. В glTF дубля нет:
     t = duration заворачивается в 0. → §4.1 [проверено: H/10; документация: руководство NLA]
 13. **Несколько частей в одном клипе — одно действие со слотом на каждую часть** (`act.slots.new` + `ad.action_slot`); экспортёр
-    сливает пообъектные анимации по имени действия. → §5.1 [проверено: H/12]
+    сливает пообъектные анимации по имени действия. → §5.1 [проверено]
 14. **Отдельные действия на части = отдельные клипы, КАЖДЫЙ сдвинут к 0**: стаггер между частями пропадает. Если действия уже
-    раздельные — NLA-дорожки с одним именем + `export_merge_animation="NLA_TRACK"`. → §5.2 [проверено: H/12]
+    раздельные — NLA-дорожки с одним именем + `export_merge_animation="NLA_TRACK"`. → §5.2 [проверено]
 15. **Второй и следующие клипы — NLA-дорожка ровно с одной полосой** (`stash`): дорожку с 2+ полосами экспортёр в режиме
-    ACTIONS пропускает (warning), нужна одна полоса или режим NLA_TRACKS. → §5.3 [проверено: H/12]
+    ACTIONS пропускает (warning), нужна одна полоса или режим NLA_TRACKS. → §5.3 [проверено]
 16. **Смешивание NLA (influence, blend, repeat, scale) в режиме ACTIONS не экспортируется**: экспортёр выключает `use_nla` и
     сэмплирует каждое действие отдельно. → §5.3 [исходник 5.2.40 action.py]
-17. **Поза покоя в GLB = кадр 0** — ставь ключи так, чтобы кадр 0 был осмысленной позой (или `export_current_frame`). → §4.3 [проверено: E/15]
+17. **Поза покоя в GLB = кадр 0** — ставь ключи так, чтобы кадр 0 был осмысленной позой (или `export_current_frame`). → §4.3 [проверено]
 18. **Pivot = origin объекта**: двигающаяся часть — отдельный объект с origin на оси (петля, центр колеса). → §6.3 [проверено: H/12; V:OVbIOHAI3iY 07:52 по дайджесту W4]
-19. **Имена действий = имена клипов в three** (латиница, без точек): `AnimationClip.findByName(gltf.animations, "Reveal")`. → §5.4 [проверено: H/12, H/20]
+19. **Имена действий = имена клипов в three** (латиница, без точек): `AnimationClip.findByName(gltf.animations, "Reveal")`. → §5.4 [проверено]
 20. **Период «парения» 3–4 с, амплитуда 2–6 % высоты, наклон ≤ 5°**; экстремумы — AUTO_CLAMPED (нулевой наклон), фаза наклона
     сдвинута на четверть. → §6.2 [проверено: H/11; мнение: числа — практика, не исследование]
 
@@ -59,12 +59,12 @@ glTF-IO 5.2.40, three r186 (0.186.0). Блоки `python` выполнены в 
 | кривая | `FCurve` | `data_path`, `array_index`, `keyframe_points`, `modifiers`, `extrapolation` (CONSTANT/LINEAR), `auto_smoothing`, `evaluate(frame)`, `bake(start, end, step, remove)` |
 | привязка | `AnimData` | `action`, `action_slot`, `action_suitable_slots`, `last_slot_identifier`, `nla_tracks`, `use_nla`, `drivers` |
 
-[проверено: 99-raw/experiments/H/00-api-probe/probe.json] Слои и полосы есть только в Python API, в интерфейсе 5.2 их нет
+[проверено] Слои и полосы есть только в Python API, в интерфейсе 5.2 их нет
 (руководство, раздел Actions) [документация: Blender Manual 5.2 Actions]. Удалённые в 5.0 `action.fcurves`, `action.groups`,
 `action.id_root` дают AttributeError [проверено: B/03 строки 68–70].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/H/30-doc-snippets] цепочка Action → слот → слой → полоса → channelbag → F-кривые
+# Blender 5.2.2 — [проверено] цепочка Action → слот → слой → полоса → channelbag → F-кривые
 import bpy
 from bpy_extras import anim_utils
 ob = bpy.data.objects.new("hero", None); bpy.context.scene.collection.objects.link(ob)
@@ -83,17 +83,17 @@ print(act.name, slot.identifier, [fc.evaluate(16) for fc in cb.fcurves])      # 
 ### 1.2 Что попадает в одно действие
 
 - Объект и его shape keys: ключ на `key_blocks["X"].value` у объекта, у которого уже есть действие, добавляет в ЭТО действие
-  слот `KE<имя Key>` (тип KEY) [проверено: H/01]; руководство называет это эвристикой «closely related» (объект + данные,
+  слот `KE<имя Key>` (тип KEY) [проверено]; руководство называет это эвристикой «closely related» (объект + данные,
   материал + дерево нод) и даёт оператор Separate Slots для разделения [документация: Blender Manual 5.2 Actions, по заметкам H-sub/A].
 - Вход материала (`p.inputs["Base Color"].keyframe_insert("default_value", …)`) — действие «<Материал>Action» у
-  `material.node_tree` со слотом `NTShader Nodetree` [проверено: H/01]; в glTF такая анимация уходит только как
+  `material.node_tree` со слотом `NTShader Nodetree` [проверено]; в glTF такая анимация уходит только как
   `KHR_animation_pointer`, который three r186 не играет — `03-… §1.6`.
 - Экспортёр складывает слоты одного действия в одну glTF-анимацию (TRS объекта + веса морфов) [исходник 5.2.40 `action.py`, ActionsData].
 
 ### 1.3 Назначение действия и слота
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/H/30-doc-snippets] одно действие на два объекта: у каждого свой слот
+# Blender 5.2.2 — [проверено] одно действие на два объекта: у каждого свой слот
 import bpy
 a = bpy.data.objects.new("part_a", None); b = bpy.data.objects.new("part_b", None)
 for o in (a, b):
@@ -110,7 +110,7 @@ assert len(act.layers[0].strips[0].channelbags) == 2
 ```
 
 `Action.fcurve_ensure_for_datablock(ob, "rotation_euler", index=2)` до присвоения действия объекту → `RuntimeError: Assign action
-"…" to "…" before calling this function`; после присвоения создаёт слот сам [проверено: H/01].
+"…" to "…" before calling this function`; после присвоения создаёт слот сам [проверено].
 
 ## 2. Ключи из Python
 
@@ -120,12 +120,12 @@ assert len(act.layers[0].strips[0].channelbags) == 2
 [документация: API 5.2 bpy_struct; проверено: B/03 №72, H/01]. `options`: `INSERTKEY_NEEDED` (не ставить, если значение не
 изменилось — предупреждение «Due to the setting 'Only Insert Needed'»), `INSERTKEY_VISUAL` (итог с констрейнтами), …;
 `INSERTKEY_XYZ_TO_RGB` удалён в 5.0 (ValueError) [проверено: B/03 №73, H/01]. Опечатка в пути → `TypeError: … property
-"locaton" not found` [проверено: H/01]. Возвращает True/False — проверяй.
+"locaton" not found` [проверено]. Возвращает True/False — проверяй.
 
 ### 2.2 Кривые напрямую (без операторов и без смены значений объекта)
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/H/30-doc-snippets] F-кривая «вручную»: слот, channelbag, ключи, изинг BACK
+# Blender 5.2.2 — [проверено] F-кривая «вручную»: слот, channelbag, ключи, изинг BACK
 import bpy
 from bpy_extras import anim_utils
 ob = bpy.data.objects.new("lid", None); bpy.context.scene.collection.objects.link(ob)
@@ -172,8 +172,8 @@ AUTO_CLAMPED не даёт перелётов и обнуляет наклон �
   {BEZIER → CUBICSPLINE, LINEAR, CONSTANT → STEP}, у всех ключей она одинакова, у x/y/z одинаковые кадры ключей, ключей > 1,
   у кости нет констрейнтов. Иначе это свойство сэмплируется [исходник 5.2.40 `fcurves/channels.py`, `needs_baking`].
 - Изинги SINE…ELASTIC и «смешанные» кривые всегда уходят сэмплами: Pulse с QUAD/SINE — 46 ключей LINEAR и при
-  `force_sampling=False` [проверено: H/11]; BACK у крышки — warning «Baking animation because of an unsupported interpolation
-  method: BACK» [проверено: H/12].
+  `force_sampling=False` [проверено]; BACK у крышки — warning «Baking animation because of an unsupported interpolation
+  method: BACK» [проверено].
 - Модификаторы F-кривых (Noise, Cycles, Stepped) в кривую не переносятся; при сэмплировании их эффект запекается
   (depsgraph вычисляет кадр целиком) [исходник 5.2.40: `fcurves/keyframes.py` берёт только `evaluate()` в кадрах ключей].
 
@@ -189,7 +189,7 @@ AUTO_CLAMPED не даёт перелётов и обнуляет наклон �
 Безье приближением «через t + 1» (комментарий в исходнике: «only works for locally linear transformation»), а
 `export_anim_slide_to_zero` применяет только в сэмплированном пути (`sampled/*/sampler.py`) → клип кривых начинается с 1/fps
 [исходник 5.2.40; проверено: H/10 — длительность 4,0333 вместо 4,0]. Вес сэмплов — единицы КБ на клип и режется
-`gltf-transform optimize` (resample) в 3–5 раз без видимой разницы — `03-… §2` [проверено: H/22]. Вывод: сэмплы по умолчанию.
+`gltf-transform optimize` (resample) в 3–5 раз без видимой разницы — `03-… §2` [проверено]. Вывод: сэмплы по умолчанию.
 
 ### 3.4 Изинги Blender в JS (если движение делаешь кодом, а тайминг — в Blender)
 
@@ -210,10 +210,10 @@ BACK ease-out: `u' = u − 1; y = u'²·((s + 1)·u' + s) + 1`, `s = keyframe.ba
    [проверено: H/11: 9 контрольных кадров совпали до 1e-5].
 3. `use_cyclic` — только пометка намерения, сам ничего не зацикливает [документация: руководство 5.2 Actions].
 4. В three петля — `LoopRepeat` (умолчание AnimationAction); t = duration заворачивается в 0, поэтому ключ «N = 1» не даёт
-   двойного кадра [проверено: H/20]. В видео/секвенции рендерить кадры 1…N−1.
+   двойного кадра [проверено]. В видео/секвенции рендерить кадры 1…N−1.
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/H/30-doc-snippets] петли: турнтейбл (LINEAR) и «парение» (AUTO_CLAMPED + Cycles)
+# Blender 5.2.2 — [проверено] петли: турнтейбл (LINEAR) и «парение» (AUTO_CLAMPED + Cycles)
 import math
 import bpy
 from bpy_extras import anim_utils
@@ -255,7 +255,7 @@ sc.frame_set(181); assert abs(hero.location.z - 0.60) < 1e-4                    
 | ключи через 90° без сэмплов | 42 / 132 / 222 / 312° (сдвиг на кадр) |
 | 2 ключа BEZIER, сэмплы | 15,5 / 113,9 / 246,1 / 344,5° — разгон и торможение, запинка на стыке |
 
-[проверено: 99-raw/experiments/H/10-turntable]. Ось вращения — пустышка, продукт — ребёнок, интерполяция Linear
+[проверено]. Ось вращения — пустышка, продукт — ребёнок, интерполяция Linear
 [V:5UCc3Z_-ibs 20:48–22:08 по дайджесту W3] [практика]. Эйлеровы кривые с резкими скачками перед экспортом прогоняй через
 Euler Filter (Graph Editor → Channel → Discontinuity (Euler) Filter) [документация: руководство 5.2, по заметкам H-sub/A].
 
@@ -263,7 +263,7 @@ Euler Filter (Graph Editor → Channel → Discontinuity (Euler) Filter) [док
 
 Экспортёр ставит `frame_set(0)` перед сбором (поза покоя = кадр 0, если не `export_current_frame=True`) [проверено: E/15 a13].
 До первого ключа кривая держит первое значение (CONSTANT), поэтому кадр 0 = первый ключ — нормальная поза. Клип с кадра 1
-при `export_anim_slide_to_zero=True` начинается с 0 с; без него — с 1/fps (клип «длиннее» на кадр) [проверено: E/15, H/10].
+при `export_anim_slide_to_zero=True` начинается с 0 с; без него — с 1/fps (клип «длиннее» на кадр) [проверено].
 
 ## 5. Несколько действий, слоты, NLA → несколько клипов
 
@@ -272,7 +272,7 @@ Euler Filter (Graph Editor → Channel → Discontinuity (Euler) Filter) [док
 Режим экспорта ACTIONS (умолчание): для каждого объекта берутся активное действие+слот и каждая NLA-дорожка с одной полосой;
 пообъектные анимации затем сливаются по `export_merge_animation`: `ACTION` (умолчание) — по имени действия, `NLA_TRACK` —
 по имени дорожки (кроме «NlaTrack…» и «[Action Stash]»), `NONE` — не сливать [исходник 5.2.40 `action.py`]. Итог на кейсе
-наушников (крышка + 2 наушника + корень) [проверено: 99-raw/experiments/H/12-reveal-parts]:
+наушников (крышка + 2 наушника + корень) [проверено]:
 
 | как устроены действия | клипы в GLB |
 |---|---|
@@ -284,7 +284,7 @@ Euler Filter (Graph Editor → Channel → Discontinuity (Euler) Filter) [док
 ### 5.2 Код: раскрытие по частям одним действием + второй клип в NLA
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/H/30-doc-snippets] клип «Reveal» на 3 части (одно действие, 3 слота) + «Idle» в NLA
+# Blender 5.2.2 — [проверено] клип «Reveal» на 3 части (одно действие, 3 слота) + «Idle» в NLA
 import math, os, tempfile, json, struct
 import bpy
 sc = bpy.context.scene; sc.render.fps = 30
@@ -324,7 +324,7 @@ assert clips == {"Idle": ["case_root"], "Reveal": ["bud_l", "bud_r", "case_lid"]
 
 - Дорожка с 2+ незаглушёнными полосами в ACTIONS пропускается: «NLA track 'LidTwice' has 2 strips, but only single-strip
   tracks are supported in 'actions' mode» — анимация крышки пропала целиком; в режиме NLA_TRACKS та же дорожка запечена в
-  клип «LidTwice» 2,067 с, но активные действия в NLA_TRACKS не уходят [проверено: H/12].
+  клип «LidTwice» 2,067 с, но активные действия в NLA_TRACKS не уходят [проверено].
 - Полоса без `action_slot` пропускается с предупреждением; фильтр — `strip.mute`, а не `track.mute` [исходник 5.2.40 `action.py`].
 - Push Down / Stash оставляют объект без активного действия; Stash кладёт действие в заглушённую дорожку «[Action Stash]»
   [документация: руководство 5.2 NLA, по заметкам H-sub/A].
@@ -338,7 +338,7 @@ assert clips == {"Idle": ["case_root"], "Reveal": ["bud_l", "bud_r", "case_lid"]
 
 Имя клипа = имя действия; при слиянии NONE или повторе на том же объекте — «Действие-ИмяСлота» [исходник 5.2.40]. В three
 клип ищется `THREE.AnimationClip.findByName(gltf.animations, "Reveal")`; `mixer.clipAction("Reveal")` на `gltf.scene` вернёт
-`null` [проверено: H/20]. Имена узлов санитизируются (`Cube.001` → `Cube001`) — называй объекты латиницей через «_» [проверено: E/11].
+`null` [проверено]. Имена узлов санитизируются (`Cube.001` → `Cube001`) — называй объекты латиницей через «_» [проверено].
 
 ## 6. Паттерны движения для сайта
 
@@ -361,7 +361,7 @@ assert clips == {"Idle": ["case_root"], "Reveal": ["bud_l", "bud_r", "case_lid"]
 ### 6.2 Библиотека паттернов (одно действие на паттерн)
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/H/30-doc-snippets] паттерны: пульсация, взрыв-схема (слоты), облёт камеры
+# Blender 5.2.2 — [проверено] паттерны: пульсация, взрыв-схема (слоты), облёт камеры
 import math
 import bpy
 from mathutils import Vector
@@ -422,12 +422,12 @@ assert abs(math.degrees(pv.rotation_euler.z) - 90) < 1e-3 and len(a2.slots) == 4
 
 - Двигающаяся часть — отдельный объект с origin на оси движения; перенос origin без оператора: `local = ob.matrix_world.inverted()
   @ p; ob.data.transform(Matrix.Translation(-local)); ob.matrix_world = ob.matrix_world @ Matrix.Translation(local)`
-  [проверено: H/12 `set_pivot`]; в three pivot = origin узла [проверено: E/10].
+  [проверено: H/12 `set_pivot`]; в three pivot = origin узла [проверено].
 - Ориентации и точки вращения задавать заранее, до ключей [V:OVbIOHAI3iY 07:52 по дайджесту W4] [практика].
 - Механизм из отдельных частей, каждая целиком на своём родителе/кости, дешевле скиннинга [V:H1oNuKChsdU 27:30 по дайджесту W4] —
   `02-… §2`.
 - Вложенные детали не должны иметь совпадающих граней: в H/12 пластина на уровне крышки корпуса дала z-конфликт — Blender и three
-  «выбрали» разные грани (ΔE 5 → 2,4 после подъёма на 3,5 мм) [проверено: H/12].
+  «выбрали» разные грани (ΔE 5 → 2,4 после подъёма на 3,5 мм) [проверено].
 
 ## 7. Как писали в 3.x → как в 5.2
 
@@ -448,7 +448,7 @@ assert abs(math.degrees(pv.rotation_euler.z) - 90) < 1e-3 and len(a2.slots) == 4
 | 13 | Follow Path после `view_layer.update()` | «работает сам» | тихо: объект не движется | `curve.use_path = True; path.update_tag()` | H/14, `02-… §3` |
 | 14 | скраб в three | `action.paused = true; mixer.setTime(p·d)` | поза кадра 0 | `action.time = p·d; mixer.update(0)` | H/20, `03-… §3.3` |
 
-Официальный пример «Slotted Actions: Upgrading to 4.4» с позиционным индексом в 5.2 не работает (№5) [проверено: B/19];
+Официальный пример «Slotted Actions: Upgrading to 4.4» с позиционным индексом в 5.2 не работает (№5) [проверено];
 снимок сцены mcp-for-blender 2.0.3 читает `action.fcurves` и теряет анимацию — проверять анимацию не инструментами
 наблюдения MCP, а экспортом и `anim_summary` [проверено: C1 `../04-ai-agents-mcp/01 §3.2`].
 

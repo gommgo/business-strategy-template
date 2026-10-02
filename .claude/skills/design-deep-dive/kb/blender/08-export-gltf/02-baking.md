@@ -11,32 +11,32 @@ release notes 5.0, спецификации glTF, исходник GLTFLoader, �
 
 ## Выжимка для агента
 
-1. **Запекать всё, что экспортёр теряет**: процедуры, Color Ramp, Mix, Bump, Mix Shader, Subsurface, Coat Tint. Незапечённый процедурный материал в three — белый гладкий объект (ΔE 23.5), запечённый — ΔE 5.5 → §4 [проверено: 99-raw/experiments/E/19-bake-procedural]
-2. **Движок — Cycles** (`scene.render.engine = "CYCLES"`, `cycles.device = "CPU"`): EEVEE не запекает → §3.1 [проверено: 99-raw/experiments/E/19-bake-procedural]
-3. **Цель запекания — активная нода Image Texture** в каждом материале объекта; материал без активной ноды с картинкой пропускается молча → §3.2 [проверено: 99-raw/experiments/E/19-bake-procedural] [документация: S1]
-4. **Картинку создавать до bake** с нужным пространством: цвет — sRGB, всё остальное (нормали, шероховатость, AO, металличность, свет) — Non-Color → §3.5 [проверено: 99-raw/experiments/E/19-bake-procedural, E/21-bake-lighting]
-5. **UV в фоне работают без temp_override**: `object.mode_set(mode="EDIT")` → `mesh.select_all` → `uv.smart_project` / `uv.lightmap_pack` / `uv.average_islands_scale` / `uv.pack_islands` → обратно в OBJECT → §2.1 [проверено: 99-raw/experiments/E/19, E/21, E/27]
-6. **Отступ (margin) 16 px** на 1–2k; тип по умолчанию ADJACENT_FACES; UV-острова с `island_margin` 0.01–0.02 → §2.3 [проверено: 99-raw/experiments/E/19-bake-procedural] [документация: S2]
-7. **Плотность текселей** считать функцией `texel_density()` (px/м); после смены масштаба — `view_layer.update()`, иначе `matrix_world` старая → §2.3 [проверено: 99-raw/experiments/E/27-bake-extra]
-8. **«Данные» материала — 1 сэмпл**: DIFFUSE с `pass_filter={"COLOR"}`, ROUGHNESS, NORMAL (без high-poly), EMIT не трассируют свет: 1024² за 0.15–0.25 с, 2048² за 0.75–1.27 с → §3.4 [проверено: 99-raw/experiments/E/19-bake-procedural, E/27-bake-extra]
-9. **DIFFUSE без `pass_filter={"COLOR"}`** запекает цвет вместе со светом сцены — для PBR-экспорта нужен только COLOR → §3.3 [проверено: 99-raw/experiments/E/19-bake-procedural]
-10. **Metallic**: типа bake METALLIC в 5.2 нет — источник Metallic временно подаётся в Emission и печётся EMIT (0.28 с на 1024²) → §8 [проверено: 99-raw/experiments/E/27-bake-extra]
-11. **ORM упаковывать в одну картинку** (R = AO, G = roughness, B = metallic) и подключать через Separate Color + группу «glTF Material Output» → в glTF одна текстура на occlusion и metallicRoughness → §8 [проверено: 99-raw/experiments/E/27-bake-extra]
-12. **AO — в текстуру, 1024², 16–64 spp (0.9–3.6 с)**; подключать только через «glTF Material Output».Occlusion; в Blender этот вход не рендерится → §5 [проверено: 99-raw/experiments/E/20-bake-ao]
-13. **aoMap в three затемняет только непрямой свет** (окружение, Hemisphere/Ambient); при одном DirectionalLight без окружения AO не виден → §5.3 [проверено: 99-raw/experiments/E/20-bake-ao]
-14. **AO в цвет вершин** — 0.05 с и без UV, но нужна плотная сетка; на редкой — угловатые пятна → §5.2 [проверено: 99-raw/experiments/E/20-bake-ao]
-15. **Запечённый свет «как у Bruno Simon»**: DIFFUSE с `{"DIRECT","INDIRECT","COLOR"}` → картинка прямо в Surface (unlit) → `MeshBasicMaterial`; ΔE 0.73 к Cycles — лучшее совпадение Blender↔веб во всех опытах → §6.1 [проверено: 99-raw/experiments/E/21-bake-lighting]
-16. **LightMap вместо unlit** (PBR сохраняется): свет без COLOR во второй UV → `material.lightMap`, `texture.channel = 1`, `flipY = false`, **`lightMapIntensity = Math.PI`** (при 1 — в π раз темнее, ΔE 22) → §6.2 [проверено: 99-raw/experiments/E/21-bake-lighting]
-17. **Свет > 1 в 8-битной PNG обрезается** (11 % пикселей упёрлись в 254): хранить .hdr/.exr или масштабировать ×k и ставить интенсивность π/k → §6.3 [проверено: 99-raw/experiments/E/21-bake-lighting]
-18. **Ловушка 5.2.2**: `Image.save()` float-картинки с пространством «Linear Rec.709» пишет sRGB-кодированные значения даже в .hdr/.exr (0.5 → 0.735); ставить Non-Color или сохранять `image.save_render(path, scene=…)` → §3.5 [проверено: 99-raw/experiments/E/21-bake-lighting]
-19. **Денойз** запечённой карты — нода Denoise композитора в фоне (0.54 с на 1024²); в 5.x дерево — `scene.compositing_node_group`, выход — Group Output, `scene.node_tree` удалён → §6.4 [проверено: 99-raw/experiments/E/21-bake-lighting] [документация: S3]
-20. **Нормали high→low**: high и low выделены, low активный, `use_selected_to_active=True`, **`cage_extrusion` ≈ 2 % размера** (0.02 на объекте 2 м): ΔE 3.66 к high; с 0 — артефакты хуже, чем без карты (ΔE 7.31) → §7 [проверено: 99-raw/experiments/E/27-bake-extra]
-21. **Время high→low** (63k → 4k треуг.): 1024² 4 spp — 0.36 с, 2048² — 1.17 с → §7 [проверено: 99-raw/experiments/E/27-bake-extra]
-22. **COMBINED и свет — 16–64 spp**: 1024² 64 spp 4.2–4.5 с на простой диораме, COMBINED 16 spp 5.4 с; время ∝ пиксели × сэмплы × сложность света → §3.4 [проверено: 99-raw/experiments/E/21, E/27]
-23. **Эмиссия**: EMIT пишет цвет × силу; в 8-бит всё > 1 обрезается — печь цвет при Strength 1, силу ставить в материал (`KHR_materials_emissive_strength`) → §3.3 [проверено: 99-raw/experiments/E/27-bake-extra]
-24. **После запекания — новый простой материал** (Image → Principled), старый процедурный не экспортировать; запечённые картинки без файла экспортёр пишет PNG → §4.2 [проверено: 99-raw/experiments/E/19-bake-procedural]
-25. **Вес запечённого**: 1024² PNG шумной карты ≈ 0.8–1 МБ, 3 карты 2k — 6.2 МБ GLB; в GPU 1024² = 5.3 МБ, 2048² = 21.3 МБ (RGBA8 + мипмапы) → сжимать (WebP/KTX2, `03` §3) → §10 [проверено: 99-raw/experiments/E/19, E/18]
-26. **GN → меш**: `bpy.ops.object.modifier_apply(modifier=…)` в фоне работает (активный объект, OBJECT mode), либо `export_apply=True` при экспорте → §9 [проверено: 99-raw/experiments/E/27-bake-extra, E/08]
+1. **Запекать всё, что экспортёр теряет**: процедуры, Color Ramp, Mix, Bump, Mix Shader, Subsurface, Coat Tint. Незапечённый процедурный материал в three — белый гладкий объект (ΔE 23.5), запечённый — ΔE 5.5 → §4 [проверено]
+2. **Движок — Cycles** (`scene.render.engine = "CYCLES"`, `cycles.device = "CPU"`): EEVEE не запекает → §3.1 [проверено]
+3. **Цель запекания — активная нода Image Texture** в каждом материале объекта; материал без активной ноды с картинкой пропускается молча → §3.2 [проверено] [документация: S1]
+4. **Картинку создавать до bake** с нужным пространством: цвет — sRGB, всё остальное (нормали, шероховатость, AO, металличность, свет) — Non-Color → §3.5 [проверено]
+5. **UV в фоне работают без temp_override**: `object.mode_set(mode="EDIT")` → `mesh.select_all` → `uv.smart_project` / `uv.lightmap_pack` / `uv.average_islands_scale` / `uv.pack_islands` → обратно в OBJECT → §2.1 [проверено]
+6. **Отступ (margin) 16 px** на 1–2k; тип по умолчанию ADJACENT_FACES; UV-острова с `island_margin` 0.01–0.02 → §2.3 [проверено] [документация: S2]
+7. **Плотность текселей** считать функцией `texel_density()` (px/м); после смены масштаба — `view_layer.update()`, иначе `matrix_world` старая → §2.3 [проверено]
+8. **«Данные» материала — 1 сэмпл**: DIFFUSE с `pass_filter={"COLOR"}`, ROUGHNESS, NORMAL (без high-poly), EMIT не трассируют свет: 1024² за 0.15–0.25 с, 2048² за 0.75–1.27 с → §3.4 [проверено]
+9. **DIFFUSE без `pass_filter={"COLOR"}`** запекает цвет вместе со светом сцены — для PBR-экспорта нужен только COLOR → §3.3 [проверено]
+10. **Metallic**: типа bake METALLIC в 5.2 нет — источник Metallic временно подаётся в Emission и печётся EMIT (0.28 с на 1024²) → §8 [проверено]
+11. **ORM упаковывать в одну картинку** (R = AO, G = roughness, B = metallic) и подключать через Separate Color + группу «glTF Material Output» → в glTF одна текстура на occlusion и metallicRoughness → §8 [проверено]
+12. **AO — в текстуру, 1024², 16–64 spp (0.9–3.6 с)**; подключать только через «glTF Material Output».Occlusion; в Blender этот вход не рендерится → §5 [проверено]
+13. **aoMap в three затемняет только непрямой свет** (окружение, Hemisphere/Ambient); при одном DirectionalLight без окружения AO не виден → §5.3 [проверено]
+14. **AO в цвет вершин** — 0.05 с и без UV, но нужна плотная сетка; на редкой — угловатые пятна → §5.2 [проверено]
+15. **Запечённый свет «как у Bruno Simon»**: DIFFUSE с `{"DIRECT","INDIRECT","COLOR"}` → картинка прямо в Surface (unlit) → `MeshBasicMaterial`; ΔE 0.73 к Cycles — лучшее совпадение Blender↔веб во всех опытах → §6.1 [проверено]
+16. **LightMap вместо unlit** (PBR сохраняется): свет без COLOR во второй UV → `material.lightMap`, `texture.channel = 1`, `flipY = false`, **`lightMapIntensity = Math.PI`** (при 1 — в π раз темнее, ΔE 22) → §6.2 [проверено]
+17. **Свет > 1 в 8-битной PNG обрезается** (11 % пикселей упёрлись в 254): хранить .hdr/.exr или масштабировать ×k и ставить интенсивность π/k → §6.3 [проверено]
+18. **Ловушка 5.2.2**: `Image.save()` float-картинки с пространством «Linear Rec.709» пишет sRGB-кодированные значения даже в .hdr/.exr (0.5 → 0.735); ставить Non-Color или сохранять `image.save_render(path, scene=…)` → §3.5 [проверено]
+19. **Денойз** запечённой карты — нода Denoise композитора в фоне (0.54 с на 1024²); в 5.x дерево — `scene.compositing_node_group`, выход — Group Output, `scene.node_tree` удалён → §6.4 [проверено] [документация: S3]
+20. **Нормали high→low**: high и low выделены, low активный, `use_selected_to_active=True`, **`cage_extrusion` ≈ 2 % размера** (0.02 на объекте 2 м): ΔE 3.66 к high; с 0 — артефакты хуже, чем без карты (ΔE 7.31) → §7 [проверено]
+21. **Время high→low** (63k → 4k треуг.): 1024² 4 spp — 0.36 с, 2048² — 1.17 с → §7 [проверено]
+22. **COMBINED и свет — 16–64 spp**: 1024² 64 spp 4.2–4.5 с на простой диораме, COMBINED 16 spp 5.4 с; время ∝ пиксели × сэмплы × сложность света → §3.4 [проверено]
+23. **Эмиссия**: EMIT пишет цвет × силу; в 8-бит всё > 1 обрезается — печь цвет при Strength 1, силу ставить в материал (`KHR_materials_emissive_strength`) → §3.3 [проверено]
+24. **После запекания — новый простой материал** (Image → Principled), старый процедурный не экспортировать; запечённые картинки без файла экспортёр пишет PNG → §4.2 [проверено]
+25. **Вес запечённого**: 1024² PNG шумной карты ≈ 0.8–1 МБ, 3 карты 2k — 6.2 МБ GLB; в GPU 1024² = 5.3 МБ, 2048² = 21.3 МБ (RGBA8 + мипмапы) → сжимать (WebP/KTX2, `03` §3) → §10 [проверено]
+26. **GN → меш**: `bpy.ops.object.modifier_apply(modifier=…)` в фоне работает (активный объект, OBJECT mode), либо `export_apply=True` при экспорте → §9 [проверено]
 
 ## 1. Что запекать и куда это попадает
 
@@ -65,7 +65,7 @@ release notes 5.0, спецификации glTF, исходник GLTFLoader, �
 ### 2.1. Операторы UV в фоне (без окна)
 
 Проверено в фоновом Blender 5.2.2 без `temp_override`: активный объект, режим EDIT, всё выделено
-[проверено: 99-raw/experiments/E/19-bake-procedural, E/21-bake-lighting, E/27-bake-extra].
+[проверено].
 
 | оператор | где проверен | время |
 |---|---|---|
@@ -76,12 +76,12 @@ release notes 5.0, спецификации glTF, исходник GLTFLoader, �
 | `bpy.ops.object.modifier_apply(modifier="GN")` (OBJECT mode) | GN 100 икосфер + Realize | 0.004 с |
 
 Smart UV заполнил 59 % квадрата на гальке (E/19) и 50 % на Suzanne (E/27); Lightmap Pack — все грани в отдельных
-прямоугольниках, удобен для второго UV под свет [проверено: 99-raw/experiments/E/19-bake-procedural, E/21-bake-lighting, E/27-bake-extra].
+прямоугольниках, удобен для второго UV под свет [проверено].
 
 ### 2.2. Код: развёртка в фоне
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/27-bake-extra/make.py]
+# Blender 5.2.2 — [проверено]
 import bpy, math
 
 def smart_uv(ob, angle_deg=66.0, margin=0.02, uv_name="UVMap"):
@@ -102,7 +102,7 @@ def smart_uv(ob, angle_deg=66.0, margin=0.02, uv_name="UVMap"):
 Второй UV-слой под свет (становится `TEXCOORD_1` → `uv1` в three):
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/21-bake-lighting/make.py]
+# Blender 5.2.2 — [проверено]
 def lightmap_uv(ob, name="LightUV"):
     uv = ob.data.uv_layers.new(name=name); ob.data.uv_layers.active = uv
     bpy.context.view_layer.objects.active = ob; ob.select_set(True)
@@ -114,9 +114,9 @@ def lightmap_uv(ob, name="LightUV"):
 
 - `uv_layers.new()` делает новый слой активным для редактирования, но экспорт текстур берёт слой по ноде UV Map или по
   `active_render` (`01` §4.3). Порядок слоёв = номер `TEXCOORD_n`: UV0 — материалы, UV1 — свет/AO
-  [проверено: 99-raw/experiments/E/04-uv-layers, E/21-bake-lighting].
+  [проверено].
 - Запекание пишет в **активный** UV-слой (`uv_layers.active`), если в материале нет ноды UV Map перед целевой Image Texture
-  [проверено: 99-raw/experiments/E/21-bake-lighting].
+  [проверено].
 - Острова, наложенные друг на друга (зеркальные половины, повторяющиеся детали), при запекании перетирают друг друга —
   для запекания развёртка без наложений (Smart UV, Lightmap Pack) [документация: S1].
 
@@ -124,14 +124,14 @@ def lightmap_uv(ob, name="LightUV"):
 
 - `margin` (px) продлевает края островов после запекания, чтобы мипмапы и фильтрация не подтягивали фон на швах; по
   умолчанию 16, тип `ADJACENT_FACES` [S2]. В опытах: 16 px для 1–2k карт материала, 4–8 px для карт света 1024²
-  [проверено: 99-raw/experiments/E/19, E/20, E/21]. Для 512² и меньше — 4–8 px; 16 px на 256² съедают острова [практика].
+  [проверено]. Для 512² и меньше — 4–8 px; 16 px на 256² съедают острова [практика].
 - `island_margin` UV-операторов — доля квадрата (0.02 = 2 %); вместе с `margin` bake задаёт зазор между островами.
 - Плотность текселей (texel density) — пикселей текстуры на метр поверхности. Одинаковая плотность у соседних объектов
   делает резкость ровной; ориентиры для веба — 256–512 px/м для крупных поверхностей и 512–1024 px/м для hero-объекта
   на первом экране [практика; числа — ориентир, не замер восприятия].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/27-bake-extra/texel_check.py] (плоскость 2×2 м, 1024² → 512 px/м; scale ×2 → 256)
+# Blender 5.2.2 — [проверено] (плоскость 2×2 м, 1024² → 512 px/м; scale ×2 → 256)
 import bpy, math
 
 def texel_density(ob, size, uv_name=None):
@@ -152,29 +152,29 @@ def texel_density(ob, size, uv_name=None):
 ```
 
 Замеры: Suzanne (≈ 2 м) с Smart UV, 1024² → 445 px/м при 50 % занятой площади UV; шар r = 0.6 м → 348 px/м
-[проверено: 99-raw/experiments/E/27-bake-extra]. Без `view_layer.update()` после `ob.scale = …` функция вернула бы старое значение
-(512 вместо 256) — классическая ловушка фонового скрипта [проверено: 99-raw/experiments/E/27-bake-extra].
+[проверено]. Без `view_layer.update()` после `ob.scale = …` функция вернула бы старое значение
+(512 вместо 256) — классическая ловушка фонового скрипта [проверено].
 
 ## 3. Механика bake в Blender 5.2 из Python
 
 ### 3.1. Что должно быть готово перед `bpy.ops.object.bake`
 
 1. `scene.render.engine = "CYCLES"`, `scene.cycles.device = "CPU"` (GPU на этой машине не используется), `scene.cycles.samples`
-   по типу прохода (§3.4) [проверено: 99-raw/experiments/E/19-bake-procedural].
+   по типу прохода (§3.4) [проверено].
 2. Объект активен и выделен; для high→low — оба выделены, low активный (§7).
 3. У меша есть UV без наложений; нужный слой активен (или нода UV Map перед целевой картинкой).
 4. **В каждом материале** объекта — нода Image Texture с картинкой, выбранная и активная (`nt.nodes.active = node`);
    материал без неё пропускается («If a material does not contain an active and selected image texture node, nothing will be
    baked for this material») [S1] [проверено: 99-raw/experiments/E/21-bake-lighting — у диорамы 3 материала, нода добавлена в каждый].
 5. Для запекания в цвета вершин — `scene.render.bake.target = "VERTEX_COLORS"` и активный цветовой атрибут
-   (`me.color_attributes.active_color`) [проверено: 99-raw/experiments/E/20-bake-ao].
+   (`me.color_attributes.active_color`) [проверено].
 6. После bake — вернуть `target = "IMAGE_TEXTURES"`, удалить временные ноды, сохранить картинки (они живут только в памяти:
-   «Baking map saved to internal image, save it externally or pack it») [проверено: 99-raw/experiments/E/27-bake-extra].
+   «Baking map saved to internal image, save it externally or pack it») [проверено].
 
 ### 3.2. Код: картинка и цель запекания
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/27-bake-extra/make.py]
+# Blender 5.2.2 — [проверено]
 import bpy
 
 def new_bake_image(name, size, colorspace="Non-Color", float_buffer=False):
@@ -207,7 +207,7 @@ def set_bake_target(mat, img, uv_name=None):
 ### 3.3. Типы запекания в 5.2.2
 
 `bpy.ops.object.bake(type=…)` принимает 12 значений: COMBINED, AO, SHADOW, POSITION, NORMAL, UV, ROUGHNESS, EMIT,
-ENVIRONMENT, DIFFUSE, GLOSSY, TRANSMISSION; типа METALLIC нет [проверено: 99-raw/experiments/E/25-api-drift] [S1].
+ENVIRONMENT, DIFFUSE, GLOSSY, TRANSMISSION; типа METALLIC нет [проверено] [S1].
 
 | тип | `pass_filter` / параметры | что получается | для веба |
 |---|---|---|---|
@@ -224,11 +224,11 @@ ENVIRONMENT, DIFFUSE, GLOSSY, TRANSMISSION; типа METALLIC нет [прове
 
 - «Если выбран только Color — получится цвет прохода, не зависящий от сэмплов; без Color — прямой/непрямой свет в оттенках
   серого; Color + Direct/Indirect — окрашенный свет» [S1]. Проверено на DIFFUSE: `{"COLOR"}` для PBR-экспорта, иначе в
-  base color попадает свет сцены [проверено: 99-raw/experiments/E/19-bake-procedural].
+  base color попадает свет сцены [проверено].
 - EMIT при Emission Color (1, 0.3, 0.05) × Strength 2: в 8-битной sRGB-картинке R обрезан до 1.0 (линейное 2.0), G = 0.796
-  (= sRGB от 0.6), B = 0.349 (= sRGB от 0.1) — значения > 1 теряются [проверено: 99-raw/experiments/E/27-bake-extra].
+  (= sRGB от 0.6), B = 0.349 (= sRGB от 0.1) — значения > 1 теряются [проверено].
 - `bpy.ops.object.bake_image` в 5.2 тоже существует («Bake image textures of selected objects»), но это запекание Multires,
-  а не Cycles; модель по памяти путает их [проверено: 99-raw/experiments/E/25-api-drift] [S1].
+  а не Cycles; модель по памяти путает их [проверено] [S1].
 
 ### 3.4. Время на этом CPU (Cycles CPU, 20 потоков)
 
@@ -247,7 +247,7 @@ ENVIRONMENT, DIFFUSE, GLOSSY, TRANSMISSION; типа METALLIC нет [прове
 | COMBINED | 5.4 с | — | 16 | шар + пол + солнце | E/27 |
 | денойз (композитор) | 0.54 с | — | — | карта света 1024² | E/21 |
 
-[проверено: 99-raw/experiments/E/19-bake-procedural, E/20-bake-ao, E/21-bake-lighting, E/27-bake-extra]. Правило: проходы «данных»
+[проверено]. Правило: проходы «данных»
 (COLOR, ROUGHNESS, NORMAL без high-poly, EMIT, METALLIC) — 1 сэмпл, 16 дают только сглаживание внутри текселя ценой ×5 времени;
 свет, AO, COMBINED — 16–64 сэмпла + денойз. Время растёт примерно как пиксели × сэмплы: 2048² при тех же сэмплах в 4–8 раз
 дольше 1024².
@@ -255,15 +255,15 @@ ENVIRONMENT, DIFFUSE, GLOSSY, TRANSMISSION; типа METALLIC нет [прове
 ### 3.5. Сохранение картинок и цветовые пространства
 
 - Байтовая картинка (`float_buffer=False`) с sRGB — для цвета; с Non-Color — для данных; PNG, `image.filepath_raw = path;
-  image.file_format = "PNG"; image.save()` [проверено: 99-raw/experiments/E/19-bake-procedural].
+  image.file_format = "PNG"; image.save()` [проверено].
 - Float-картинка (`float_buffer=True`) нужна для света > 1 и AO без полос. **Ловушка Blender 5.2.2**: `Image.save()` для float-картинки
   с пространством «Linear Rec.709» пишет sRGB-кодированные значения в .hdr, .exr и .png (линейные 0.5 → 0.735 в файле). С
   «Non-Color» или через `image.save_render(filepath, scene=bpy.context.scene)` значения линейные
-  [проверено: 99-raw/experiments/E/21-bake-lighting]. Практики тоже пекут в 32-bit float EXR и потом переводят в PNG композитором [S9].
+  [проверено]. Практики тоже пекут в 32-bit float EXR и потом переводят в PNG композитором [S9].
 - Цветовое пространство картинки в glTF не пишется (`01` §5.4): карта нормалей, записанная в sRGB-картинку, в Blender
   выглядит неправильно, а в three — правильно (или наоборот) — ставить пространство до запекания.
 - Картинка без файла (только в памяти) при экспорте уходит PNG; картинка, сохранённая в файл, — теми же байтами
-  [проверено: 99-raw/experiments/E/16-image-formats, E/19-bake-procedural].
+  [проверено].
 
 ## 4. Процедурный материал → текстуры → простой Principled
 
@@ -271,7 +271,7 @@ ENVIRONMENT, DIFFUSE, GLOSSY, TRANSMISSION; типа METALLIC нет [прове
 
 Галька (икосфера 4, 2562 вершины, сплюснута) с материалом: Noise → Color Ramp → Base Color; Voronoi → Map Range → Roughness;
 Noise → Bump → Normal. Экспорт «как есть» даёт в three белый гладкий шар (ΔE 23.5 к рендеру Blender); после запекания трёх
-карт 1024² — ΔE 5.5, IoU 0.997 (остаток — блики на рельефе) [проверено: 99-raw/experiments/E/19-bake-procedural].
+карт 1024² — ΔE 5.5, IoU 0.997 (остаток — блики на рельефе) [проверено].
 
 | разрешение, сэмплы | DIFFUSE color | ROUGHNESS | NORMAL | экспорт | GLB (PNG) |
 |---|---|---|---|---|---|
@@ -329,7 +329,7 @@ def baked_material(name, maps):
 
 ### 5.1. В текстуру (occlusionTexture)
 
-Диорама (плита 3×3 м, три ящика, цилиндр; 2976 вершин, 5932 треуг.), материал Clay [проверено: 99-raw/experiments/E/20-bake-ao]:
+Диорама (плита 3×3 м, три ящика, цилиндр; 2976 вершин, 5932 треуг.), материал Clay [проверено]:
 
 | вариант | время | GLB | three (HDRI studio_small_09, без тонмаппинга) |
 |---|---|---|---|
@@ -339,7 +339,7 @@ def baked_material(name, maps):
 | AO → цвета вершин (64 spp) → `COLOR_0` | **0.05 с** | 214 КБ | те же тени, но угловатые пятна по треугольникам |
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/26-doc-snippets/run_md.py, E/20-bake-ao]; gltf_output_node() — 01 §5.2, set_bake_target — §3.2
+# Blender 5.2.2 — [проверено]; gltf_output_node() — 01 §5.2, set_bake_target — §3.2
 def bake_ao_to_occlusion(ob, mat, out_path, size=1024, samples=64):
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"; sc.cycles.device = "CPU"; sc.cycles.samples = samples
@@ -359,7 +359,7 @@ def bake_ao_to_occlusion(ob, mat, out_path, size=1024, samples=64):
 ### 5.2. В цвета вершин
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/26-doc-snippets/run_md.py, E/20-bake-ao] (0.05 с на 2976 вершин; экспорт с export_all_vertex_colors=False)
+# Blender 5.2.2 — [проверено] (0.05 с на 2976 вершин; экспорт с export_all_vertex_colors=False)
 def bake_ao_to_vertices(ob, mat, base_rgb=(0.8, 0.78, 0.74), samples=64):
     sc = bpy.context.scene
     sc.render.engine = "CYCLES"; sc.cycles.samples = samples
@@ -379,32 +379,32 @@ def bake_ao_to_vertices(ob, mat, base_rgb=(0.8, 0.78, 0.74), samples=64):
 ```
 
 Сокеты ноды Mix искать по `identifier` перебором: `inputs["A_Color"]` по identifier не работает (KeyError), имена «A»/«B»
-повторяются для разных типов данных [проверено: 99-raw/experiments/E/20-bake-ao] [S8].
+повторяются для разных типов данных [проверено] [S8].
 
 ### 5.3. Как AO работает в three r186
 
 - `occlusionTexture` → `aoMap` (R-канал, `aoMapIntensity = strength`) на том же UV, что указан в `texCoord` [S5].
 - aoMap гасит только **непрямой** свет: окружение (`scene.environment`), HemisphereLight, AmbientLight. От DirectionalLight и
-  PointLight тени AO не появляются — при сцене «одно солнце без окружения» AO не виден [проверено: 99-raw/experiments/E/20-bake-ao].
+  PointLight тени AO не появляются — при сцене «одно солнце без окружения» AO не виден [проверено].
 - AO в цветах вершин — это множитель базового цвета: действует на весь свет, включая прямой (физически неверно, но для
   стилизованного low-poly выглядит естественно).
-- Blender не рендерит вход Occlusion группы: сравнивать AO только в three [проверено: 99-raw/experiments/E/12-materials-core, E/20-bake-ao].
+- Blender не рендерит вход Occlusion группы: сравнивать AO только в three [проверено].
 
 ## 6. Запечённый свет
 
 Сцена E/21: диорама (плита 3×3 м, 3 ящика, цилиндр; 96 вершин), 3 матовых материала (Roughness 1, Specular IOR Level 0),
 солнце 3 Вт/м² (угол 3°) + мир (0.25, 0.35, 0.55) × 0.6. Второй UV «LightUV» — Lightmap Pack (§2.2). Эталон — Cycles 64 spp
-[проверено: 99-raw/experiments/E/21-bake-lighting].
+[проверено].
 
 ### 6.1. Путь A: свет целиком → unlit (стиль «запечённого мира»)
 
 DIFFUSE с `{"DIRECT","INDIRECT","COLOR"}` (1024², 64 spp: 4.24 с) → одна картинка на всю диораму → Image Texture (UV Map
 «LightUV») прямо в Surface → `KHR_materials_unlit` → в three `MeshBasicMaterial` с `map` на `channel 1`.
 Результат: **ΔE2000 0.73 к Cycles, SSIM 0.95** — лучшее совпадение Blender↔веб во всех экспериментах E; GLB 950 КБ (PNG 1024²),
-после денойза 795 КБ [проверено: 99-raw/experiments/E/21-bake-lighting].
+после денойза 795 КБ [проверено].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/26-doc-snippets/run_md.py, E/21-bake-lighting] (bake_to — запекание во все материалы объекта)
+# Blender 5.2.2 — [проверено] (bake_to — запекание во все материалы объекта)
 import bpy
 
 def bake_to(ob, mats, image, pass_filter, uvname):
@@ -454,11 +454,11 @@ DIFFUSE с `{"DIRECT","INDIRECT"}` (без COLOR) → отдельный фай�
 | Radiance .hdr (`HDRLoader`, `LinearSRGBColorSpace`, `flipY=false`) | **π** | **0.74** | 76.0 / 76.1 |
 | .hdr с `flipY=true` | π | 23.2 | карта перевёрнута |
 
-[проверено: 99-raw/experiments/E/21-bake-lighting]. Почему π: шейдер three r155+ делит освещённость на π в BRDF Ламберта, а
+[проверено]. Почему π: шейдер three r155+ делит освещённость на π в BRDF Ламберта, а
 DIFFUSE-проход Blender хранит освещённость без этого деления.
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/E/21-bake-lighting/lightmap_view.py]
+// three r186 — [проверено]
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {HDRLoader} from 'three/addons/loaders/HDRLoader.js';
@@ -488,13 +488,13 @@ gltf.scene.traverse(o => {
 ### 6.3. Формат карты света
 
 - 8-битная PNG обрезает всё > 1: у диорамы 11 % пикселей упёрлись в потолок (линейный максимум 1.34)
-  [проверено: 99-raw/experiments/E/21-bake-lighting].
+  [проверено].
 - Варианты без обрезки: Radiance .hdr (float, HDRLoader; 1024² — несколько МБ) или масштаб ×k в 8-бит (×0.25 → интенсивность
-  4π, ΔE 0.77) — второе в разы легче и сжимается WebP/KTX2 [проверено: 99-raw/experiments/E/21-bake-lighting].
+  4π, ΔE 0.77) — второе в разы легче и сжимается WebP/KTX2 [проверено].
 - Запекать в float-картинку с **Non-Color** — ловушка §3.5; код из опыта:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/21-bake-lighting/make_hdr_lightmap.py]
+# Blender 5.2.2 — [проверено]
 import numpy as np
 img = bpy.data.images.new("light_float", 1024, 1024, float_buffer=True)
 img.colorspace_settings.name = "Non-Color"      # иначе Image.save() пишет sRGB-кодированные значения даже в .hdr/.exr (5.2.2)
@@ -511,12 +511,12 @@ out.pixels.foreach_set(s.ravel()); out.filepath_raw = "/abs/tex/light_1024_x0.25
 ### 6.4. Денойз запечённой карты в фоне
 
 Запечённый свет с 64 spp шумит; нода Denoise (OIDN) композитора убирает шум за 0.54 с на 1024² (PNG 1032 → 868 КБ, шум хуже
-жмётся; ΔE к Cycles 0.68 вместо 0.73) [проверено: 99-raw/experiments/E/21-bake-lighting]. В 5.0 композитор перешёл на
+жмётся; ΔE к Cycles 0.68 вместо 0.73) [проверено]. В 5.0 композитор перешёл на
 node groups: `scene.node_tree` удалён (`AttributeError`), нода Composite удалена (`RuntimeError: Node type
-CompositorNodeComposite undefined`) — выход дерева — Group Output [S3] [проверено: 99-raw/experiments/E/25-api-drift].
+CompositorNodeComposite undefined`) — выход дерева — Group Output [S3] [проверено].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/21-bake-lighting/make.py] (0.54 с на 1024²)
+# Blender 5.2.2 — [проверено] (0.54 с на 1024²)
 import bpy
 
 def denoise(image, out_path):
@@ -559,7 +559,7 @@ def denoise(image, out_path):
 | вес | растёт с площадью сцены: диорама 950 КБ (PNG 1024²) | 14 КБ GLB + карта отдельно |
 | движущиеся объекты | тени «прилипают» — только статика | то же для карты; динамика — отдельным светом |
 
-[проверено: 99-raw/experiments/E/21-bake-lighting]. Практики:
+[проверено]. Практики:
 - Andrew Woan (Codrops, 2025): вся сцена запечена COMBINED в 4096² EXR 32-bit float с денойзом композитором, второй UV
   «SimpleBake», Smart UV + UVPackmaster, затем PNG → KTX2 ETC1S (`gltf-transform etc1s --quality 255`); в коде все материалы
   заменены на `MeshBasicMaterial`; загрузка ≈ 6 с оценена как приемлемая цена [S9].
@@ -572,7 +572,7 @@ def denoise(image, out_path):
 ## 7. Нормали high-poly → low-poly
 
 High: Suzanne + Subdivision 3 + Displace (Clouds, 0.03) = 62 976 треуг.; low: Suzanne + Subdivision 1 = 3936 треуг., Smart UV.
-Сравнение: Blender рендерит high, three — low из GLB [проверено: 99-raw/experiments/E/27-bake-extra].
+Сравнение: Blender рендерит high, three — low из GLB [проверено].
 
 | вариант low-poly | время bake | IoU | ΔE2000 | SSIM L* | вид |
 |---|---|---|---|---|---|
@@ -582,7 +582,7 @@ High: Suzanne + Subdivision 3 + Displace (Clouds, 0.03) = 62 976 треуг.; lo
 | NORMAL, `cage_extrusion=0` | 0.37 с | 0.982 | 7.31 | 0.424 | пятна-артефакты: хуже, чем без карты |
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/27-bake-extra/make.py]; new_bake_image/set_bake_target — §3.2
+# Blender 5.2.2 — [проверено]; new_bake_image/set_bake_target — §3.2
 import bpy, time
 
 def bake_normal_high_to_low(high, low, img, extrusion=0.02, max_ray=0.0, samples=4):
@@ -604,24 +604,24 @@ def bake_normal_high_to_low(high, low, img, extrusion=0.02, max_ray=0.0, samples
 - Лучи идут от low-poly внутрь к high-poly; `cage_extrusion` «раздувает» low на заданное расстояние перед пуском лучей,
   `max_ray_distance` ограничивает длину (0 — без ограничения) [S1] [S2]. Без раздувания (0) лучи из точек, где low лежит
   снаружи high, промахиваются — артефакты. Начальное значение — 1–2 % размера объекта, затем проверить картинку
-  [проверено: 99-raw/experiments/E/27-bake-extra].
+  [проверено].
 - Руководство описывает Extrusion как параметр режима Cage, а Max Ray Distance — как режим без Cage [S1]; в 5.2.2
   `cage_extrusion` действует и без `use_cage` (0 → артефакты, 0.02 → норма), что совпадает с описанием свойства в API
-  («Inflate the active object by the specified distance for baking») [S2] [проверено: 99-raw/experiments/E/27-bake-extra].
+  («Inflate the active object by the specified distance for baking») [S2] [проверено].
 - Для сложных форм — объект-клетка (`cage_object`) с той же топологией, что low [S1] (не проверено).
 - Low-poly для такого запекания — гладкий (без острых рёбер или с ними по швам UV): жёсткие рёбра без шва дают полосы
   [S1: «Hard splits … should be avoided»].
 - GLB low без карты — 115 КБ, с картой нормалей 1024² PNG — 986 КБ: шумная нормаль тяжелее геометрии; сжимать (UASTC для
-  нормалей — `03` §3) [проверено: 99-raw/experiments/E/27-bake-extra].
+  нормалей — `03` §3) [проверено].
 
 ## 8. Металличность через EMIT и упаковка ORM
 
-В 5.2 нет прохода METALLIC; источник металличности временно подаётся в Emission и запекается EMIT [проверено: 99-raw/experiments/E/27-bake-extra].
+В 5.2 нет прохода METALLIC; источник металличности временно подаётся в Emission и запекается EMIT [проверено].
 Затем AO (R), roughness (G) и metallic (B) складываются в одну картинку — экспортёр запишет одну текстуру для
 `occlusionTexture` и `metallicRoughnessTexture` (в опыте оба индекса 0, одна картинка).
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/27-bake-extra/make.py] (металл 0/1 на 31 % площади; ORM → одна текстура в glTF)
+# Blender 5.2.2 — [проверено] (металл 0/1 на 31 % площади; ORM → одна текстура в glTF)
 import bpy, numpy as np
 
 def bake_metallic_via_emit(ob, mat, img):
@@ -665,11 +665,11 @@ def pack_orm(ao, rough, metal, name, path):
 
 «Запекание» GN для glTF — это применение модификатора: экспорт с `export_apply=True` или явное применение. В фоне
 `bpy.ops.object.modifier_apply(modifier=name)` работает для активного объекта в OBJECT mode: GN с Realize Instances
-(100 икосфер) → меш 8000 треуг. за 0.004 с, модификаторов не остаётся [проверено: 99-raw/experiments/E/27-bake-extra].
+(100 икосфер) → меш 8000 треуг. за 0.004 с, модификаторов не остаётся [проверено].
 Повторяющиеся объекты лучше не реализовывать, а экспортировать инстансами (`01` §4.7: 11.8 КБ против 625 КБ).
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/27-bake-extra/make.py]
+# Blender 5.2.2 — [проверено]
 bpy.context.view_layer.objects.active = ob
 ob.select_set(True)
 for md in list(ob.modifiers):
@@ -689,45 +689,45 @@ for md in list(ob.modifiers):
 | запечённый свет диорамы 1024² PNG (unlit) | GLB 950 КБ (795 КБ после денойза) | 5.3 МБ | E/21 |
 | та же карта в KTX2 | — | 1.3 МБ (BC7/ASTC, 1 байт/пиксель + мипмапы) | расчёт по E/18 |
 
-[проверено: 99-raw/experiments/E/18-compression-textures, E/19, E/20, E/21, E/27]. Выводы:
+[проверено]. Выводы:
 - Запечённые PNG — самые тяжёлые картинки в ассете (шум плохо жмётся); после запекания обязательна постобработка:
   WebP/AVIF для цвета, KTX2 (ETC1S цвет, UASTC нормали) для памяти GPU, ресайз 2048 → 1024 (вес ×2.3, память ×4) — `03` §3.
 - Для веба пекут 1024² на объект первого экрана и 512² на второстепенные; 2048² — только hero крупным планом [практика; сверено с
   бюджетами `03` §6].
 - Один атлас на много объектов = меньше вызовов отрисовки при слиянии мешей, но больше пикселей впустую (Smart UV занимает
-  50–60 % квадрата) [проверено: 99-raw/experiments/E/19, E/27].
+  50–60 % квадрата) [проверено].
 
 ## Частые ошибки
 
 1. Запекание при `scene.render.engine = "BLENDER_EEVEE"` → `RuntimeError: Current render engine does not support baking`
-   [проверено: 99-raw/experiments/E/25-api-drift].
+   [проверено].
 2. Старый API: `scene.render.bake_type = "AO"` → `AttributeError` (в 5.2 — `bpy.ops.object.bake(type="AO")`, а
    `scene.render.bake.type` относится к Multires); `bpy.ops.object.bake_image()` — это Multires-запекание, не Cycles
-   [проверено: 99-raw/experiments/E/25-api-drift].
+   [проверено].
 3. Нет активной ноды Image Texture в материале → `{'CANCELLED'}` без исключения; если цель есть не во всех материалах —
-   `{'FINISHED'}`, но грани остальных материалов не запечены [проверено: 99-raw/experiments/E/25-api-drift].
+   `{'FINISHED'}`, но грани остальных материалов не запечены [проверено].
 4. DIFFUSE с фильтрами по умолчанию для PBR-карты → свет и тени сцены попадают в base color (двойное освещение в three)
-   [проверено: 99-raw/experiments/E/19-bake-procedural].
+   [проверено].
 5. Картинка для нормалей/шероховатости создана с пространством sRGB по умолчанию → неверные значения в Blender и
-   расхождение с three [проверено: 99-raw/experiments/E/12-materials-core].
+   расхождение с three [проверено].
 6. Float-картинка с «Linear Rec.709» сохранена `Image.save()` → в .hdr/.exr/.png записаны sRGB-значения (0.5 → 0.735)
-   [проверено: 99-raw/experiments/E/21-bake-lighting].
-7. Карта света в 8-битной PNG без масштаба → блики и солнечные пятна обрезаны [проверено: 99-raw/experiments/E/21-bake-lighting].
-8. `lightMapIntensity` оставлен 1 → всё в π раз темнее (ΔE 22) [проверено: 99-raw/experiments/E/21-bake-lighting].
+   [проверено].
+7. Карта света в 8-битной PNG без масштаба → блики и солнечные пятна обрезаны [проверено].
+8. `lightMapIntensity` оставлен 1 → всё в π раз темнее (ΔE 22) [проверено].
 9. Карта света загружена `TextureLoader` без `flipY = false` → карта перевёрнута (ΔE 23); без `channel = 1` читается UV0
-   [проверено: 99-raw/experiments/E/21-bake-lighting].
-10. High→low с `cage_extrusion = 0` → пятна хуже, чем без карты [проверено: 99-raw/experiments/E/27-bake-extra].
+   [проверено].
+10. High→low с `cage_extrusion = 0` → пятна хуже, чем без карты [проверено].
 11. Развёртка с наложением островов (зеркальные половины) → запекание перетирает острова [документация: S1].
 12. UV-операторы вызываются в OBJECT mode или через `temp_override` с несуществующей областью окна — в фоне достаточно EDIT
-    mode и выделения [проверено: 99-raw/experiments/E/19, E/21, E/27].
-13. После `ob.scale = …` в скрипте читается `matrix_world` без `view_layer.update()` → старые значения [проверено: 99-raw/experiments/E/27-bake-extra].
+    mode и выделения [проверено].
+13. После `ob.scale = …` в скрипте читается `matrix_world` без `view_layer.update()` → старые значения [проверено].
 14. Композитор по памяти: `scene.use_nodes = True; scene.node_tree.nodes[...]`, нода Composite → `AttributeError`/`RuntimeError`
-    в 5.x [проверено: 99-raw/experiments/E/25-api-drift] [S3].
-15. Денойз без `view_transform = "Standard"` → AgX второй раз применяется к готовой карте [проверено: 99-raw/experiments/E/21-bake-lighting].
+    в 5.x [проверено] [S3].
+15. Денойз без `view_transform = "Standard"` → AgX второй раз применяется к готовой карте [проверено].
 16. AO умножен в base color и одновременно подан в Occlusion → двойное затемнение; выбрать одно.
 17. Запечённый свет + лампы и environment на странице → свет считается дважды.
 18. Процедурный материал оставлен на объекте после запекания → экспортёр возьмёт его, а не запечённый (белый объект в вебе).
-19. Emission Strength > 1 запечена в 8-бит → обрезка; печь цвет при силе 1 [проверено: 99-raw/experiments/E/27-bake-extra].
+19. Emission Strength > 1 запечена в 8-бит → обрезка; печь цвет при силе 1 [проверено].
 
 ## Чек-лист
 
@@ -750,7 +750,7 @@ for md in list(ob.modifiers):
 ## Открытые вопросы и противоречия
 
 1. **Руководство против API** по `cage_extrusion` без Cage: руководство относит Extrusion к режиму Cage [S1], описание свойства и
-   эксперимент показывают, что раздувание действует и без клетки [S2] [проверено: 99-raw/experiments/E/27-bake-extra].
+   эксперимент показывают, что раздувание действует и без клетки [S2] [проверено].
 2. **Двойной свет с lightMap**: как сочетать lightMap (прямой + непрямой свет) с `scene.environment` для бликов без пересвета —
    не проверено; вероятно, нужен запечённый только непрямой свет + реальные лампы на странице.
 3. **KTX2 для карт света**: ETC1S мылит градиенты (на нормалях SSIM 0.91, `03` §3); как ведёт себя UASTC/ETC1S на плавных

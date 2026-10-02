@@ -57,7 +57,7 @@ API и клиент polza — `01-polza-api.md`, параметры и цены 
 16. **Без VPN и иностранной карты** доступны только российские агрегаторы: polza, Gen-API, ProxyAPI, AITUNNEL, RouterAI,
     VseGPT, BotHub, GPTunnel; KIE, fal, Replicate и вендоры — зарубежная оплата и санкционные оговорки → §6.
 17. **Сеть из среды заказчика — не барьер**: зарубежные API отвечают через VPN с раздельной маршрутизацией (видят LT),
-    российские — напрямую; барьер — оплата и условия → §6 [проверено: 99-raw/experiments/P/08-access-probe].
+    российские — напрямую; барьер — оплата и условия → §6 [проверено].
 18. **Держи второй канал на ключевые модели** с другим поставщиком внизу цепочки: polza (KIE) + RouterAI/AITUNNEL
     (цепочка OpenRouter) или Gen-API (цепочка fal) → §7 [мнение P].
 19. **Не отправляй фото клиентов в BFL API и Luma без согласия**: их условия разрешают обучение на входах; Ideogram и
@@ -469,7 +469,7 @@ Replicate/ProxyAPI/VseGPT и каналами — `99-raw/experiments/P/05-price
 - fal: очередь, автоповторы до 10 раз, фолбэк на эквивалентный эндпоинт, резервные домены; в пробе P/08 таймаутили то
   основной, то резервный домен → клиент должен переключать домен сам [документация; проверено P/08].
 - Инциденты за 90 дней (Statuspage): Runway 6 (1 critical), BFL 9 (2 major, сбой кластера EU 19.08.2026), Ideogram 4
-  (3 critical: v3 04.09, Reframe v3 29.08, 3.1 27.07) [проверено: `99-raw/experiments/P/12-status-pages`]. fal, Replicate,
+  (3 critical: v3 04.09, Reframe v3 29.08, 3.1 27.07) [проверено]. fal, Replicate,
   Recraft, Luma — не Statuspage, OpenRouter/OpenAI — таймаут; счёт несопоставим между провайдерами.
 - WaveSpeed: доступность API 99,96 % за 90 дней (~81 мин простоя, Better Stack); Runware: 24 инцидента за 90 дней, 2 major
   (Statuspage с 01.07.2026) [документация, P/11].
@@ -493,7 +493,7 @@ Replicate/ProxyAPI/VseGPT и каналами — `99-raw/experiments/P/05-price
 Модели на открытых весах в каналах (Qwen Image 2.1, Z-Image, Wan 2.2, FLUX.2 [dev]) несут лицензию весов: у Qwen Image 2.1
 и FLUX.2 [dev] она некоммерческая; бейдж `commercial` в каталоге fal — условия fal, а не лицензия весов (файл 05 §9, §11).
 Recraft SVG несёт подпись происхождения `<recraft-signature>` (Ed25519) в `<metadata>` — svgo по умолчанию её удалит
-[проверено: `99-raw/experiments/P/07-recraft-svg-structure`]. BFL оставляет за собой право встраивать Content Credentials.
+[проверено]. BFL оставляет за собой право встраивать Content Credentials.
 
 ## 9. Коммерческие условия
 

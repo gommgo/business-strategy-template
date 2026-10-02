@@ -334,7 +334,7 @@ Nano Banana 2 (№1 MultiTextEdit по правке; перефразирует)
 - **Фаза 5:** тест 10 — исходник 16:9 из теста 3 → 21:9 на NB2 и Flare (8,8 ₽); критерий — три условия вместе
   (`edit_check.py outpaint`): SSIM центра ≥ 0,9 **и** ΔE00 медиана ≤ 3 **и** `edge_sharpness` ≥ 0,85, иначе REGENERATED; нет
   повторов объектов. Один SSIM перерисовку не ловит (0,993 у перерисованного центра) — `../08-image-post-processing/02-upscale-outpaint-edit.md`
-  §4.3 [проверено: H/03] [поправка X 24.09.2026: было «центр… SSIM ≥ 0,9»].
+  §4.3 [проверено] [поправка X 24.09.2026: было «центр… SSIM ≥ 0,9»].
 
 ## 14. IMG-MOCKUP — мокап устройства с настоящим скриншотом
 
@@ -376,7 +376,7 @@ Nano Banana 2 (№1 MultiTextEdit по правке; перефразирует)
 | `google/gemini-3.1-flash-lite-image` | 2,9 ₽ | AA #13 1092 (Marketing #9); LMArena #13; 3,1 с | только 1K; слабая правка | [исследование] |
 | `bytedance/seedream-4` | 3 ₽ | AA #21 1026 | seed, 4K, 21:9 | [исследование] |
 | `qwen/image-2.1` | 3 ₽ | LMArena #17 (предв.) | seed, 10 реф.; лицензия весов | [исследование] |
-| OpenAI `low` (прямой API) | ≈ $0.006 за 1024² (≈ 0,7 ₽) | та же модель, что финал | не в polza | [проверено: C1/02] |
+| OpenAI `low` (прямой API) | ≈ $0.006 за 1024² (≈ 0,7 ₽) | та же модель, что финал | не в polza | [проверено] |
 
 - **Лучший дешёвый для перебора:** NB2 Lite — на 150 Elo выше Z-Image в AA при цене 2,9 против 1,4 ₽, есть 8:1 и 10
   референсов; Z-Image — когда нужны десятки вариантов композиции без текста.
@@ -478,7 +478,7 @@ No other text, no English words, no logos, no watermark.
 Панграмма «Съешь же ещё этих мягких французских булок» содержит все 33 буквы (включая Ё, Ъ, Ы, Щ, Э) — проверяет покрытие
 алфавита; «₽» (U+20BD) и «−» (U+2212) — редкие знаки.
 
-**Итог фазы 5 (25.09.2026, E-02)** `[проверено: 99-raw/phase5/runs/2.1-cyrillic/E-02.ocr.txt]`: прогнан промт A на 9 моделях (+ Sunburst,
+**Итог фазы 5 (25.09.2026, E-02)** `[проверено]`: прогнан промт A на 9 моделях (+ Sunburst,
 1 образец на модель, 48,30 ₽); промт B (панграмма, ₽) не прогонялся (лесенка E-03…E-06 отменена заказчиком 25.09). Дословно (глаз;
 OCR ложно тревожит на «д» ≈ g и на трафарете) — Flare, GPT Image 2, NB2, NB Pro, Seedream 5.0 Pro, Seedream 4.5 (шрифт-трафарет вместо
 гротеска); Sunburst — «– 30» (пробел после минуса); Qwen 2.1 — «Весенная», «всеђ»; FLUX.2 Pro — «Весеннаія», «всіо». Тот же промт у
@@ -558,8 +558,8 @@ Recraft V4.1 через RouterAI (E-07, 3,86 ₽) — дословно, OCR pass
 
 Нумерация [S#] общая для `03-image-models/` (реестр — `99-raw/experiments/C1/06-model-cards-build/sources.py`).
 
-- [S1] polza.ai. Каталог моделей API (type=image, с провайдерами). снят 2026-09-23 08:45. https://polza.ai/api/v1/models?type=image&include_providers=true — первичные данные: id, провайдеры, параметры с описаниями, цены ₽; бесплатный эндпоинт [проверено: 99-raw/experiments/C1/01-polza-image-catalog-providers].
-- [S5] OpenAI. Image generation guide (+ калькулятор токенов GptImageTokenCalculator). 2026-09-23. https://developers.openai.com/api/docs/guides/image-generation — параметры, размеры, маска, прозрачность, формула токенов [проверено: C1/02].
+- [S1] polza.ai. Каталог моделей API (type=image, с провайдерами). снят 2026-09-23 08:45. https://polza.ai/api/v1/models?type=image&include_providers=true — первичные данные: id, провайдеры, параметры с описаниями, цены ₽; бесплатный эндпоинт [проверено].
+- [S5] OpenAI. Image generation guide (+ калькулятор токенов GptImageTokenCalculator). 2026-09-23. https://developers.openai.com/api/docs/guides/image-generation — параметры, размеры, маска, прозрачность, формула токенов [проверено].
 - [S6] OpenAI. Image prompting guide (вкладки 2.5 / 2 / 1.5 / 1). 2026-09-23. https://developers.openai.com/api/docs/guides/image-prompting — канонический гайд по промтам GPT Image; заменил cookbook-гайд.
 - [S10] Google. Gemini API — Image generation (Nano Banana). 2026-09-23. https://ai.google.dev/gemini-api/docs/image-generation — модели, размеры, токены, референсы, языки (ru-RU), лучшие практики.
 - [S11] Google. Страницы моделей gemini-3-pro-image, gemini-3.1-flash-image, gemini-3.1-flash-lite-image. 2026-09-23. https://ai.google.dev/gemini-api/docs/models/gemini-3-pro-image — возможности, SynthID+C2PA у Lite, латентность.

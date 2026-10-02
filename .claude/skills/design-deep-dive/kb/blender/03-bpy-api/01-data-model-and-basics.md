@@ -2,7 +2,7 @@
 
 Волна 1 · агент B · 2026-09-23 · источников прочитано 47 (40 целиком, 7 разделами; в этом файле цитируются 27) ·
 экспериментов 23 папки (282 поштучно учтённые проверки, из них 25 тестов bpyx) · Blender 5.2.2 LTS (Python 3.13.13, numpy 2.3.4), модуль bpy 5.2.2 из
-PyPI. Все блоки `python` с меткой `[проверено: 99-raw/experiments/B/42-doc-snippets]` извлечены из этого файла и
+PyPI. Все блоки `python` с меткой `[проверено]` извлечены из этого файла и
 выполнены в чистой сцене 5.2.2 автоматически (скрипт эксперимента 42).
 
 ## Выжимка для агента
@@ -89,7 +89,7 @@ PyPI. Все блоки `python` с меткой `[проверено: 99-raw/ex
 разбор и правила вызовов у агента C1 (`../04-ai-agents-mcp/01-mcp-for-blender.md`).
 
 ```bash
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/40-bpyx-tests] запуск скрипта в фоне с таймаутом и журналом
+# Blender 5.2.2 — [проверено] запуск скрипта в фоне с таймаутом и журналом
 python3 ../../scripts/blender/blender_run.py my_script.py -- out/        # код выхода 0 / 1 (исключение) / 124 (таймаут)
 python3 ../../scripts/blender/blender_run.py --expr "import bpy; print(bpy.app.version_string)"
 python3 ../../scripts/blender/bpy_probe.py node ShaderNodeMix data_type=RGBA   # справка по API из самого Blender (JSON)
@@ -118,7 +118,7 @@ python3 ../../scripts/blender/bpy_probe.py node ShaderNodeMix data_type=RGBA   #
 берёт `__pycache__/*.pyc` (проверено: 1 → reload → 1). Лечится `sys.dont_write_bytecode = True` до импорта.
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] первый вызов MCP: подключить помощники
+# Blender 5.2.2 — [проверено] первый вызов MCP: подключить помощники
 import sys, importlib
 import bpy                             # в MCP bpy уже есть в пространстве имён; импорт безвреден
 sys.dont_write_bytecode = True
@@ -150,7 +150,7 @@ images, node_groups, actions, worlds, collections, scenes), — ID-блок. С�
 (связанный из другого файла), `rename()` (4.3+). В 5.2 появился `bpy.data.all_ids` — итератор по всем ID [S16, S29].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] пользователи ID и сироты
+# Blender 5.2.2 — [проверено] пользователи ID и сироты
 import bpy
 me = bpy.data.meshes.new("M")
 assert me.users == 0                         # сирота: не сохранится в .blend
@@ -172,7 +172,7 @@ print("ID всего:", sum(1 for _ in bpy.data.all_ids), "| session_uid:", ob.s
 ### 2.3 Общие данные и копии
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] общие данные (linked duplicates) и независимая копия
+# Blender 5.2.2 — [проверено] общие данные (linked duplicates) и независимая копия
 import bpy, bmesh
 me = bpy.data.meshes.new("Cube")
 bm = bmesh.new(); bmesh.ops.create_cube(bm, size=2.0); bm.to_mesh(me); bm.free()
@@ -206,7 +206,7 @@ multi-user data`, помогает параметр `single_user=True` [пров
 - Документация советует не ссылаться на данные по имени, а хранить ссылку или словарь «моё имя → ID» [S3].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] имена: .001, rename, предел 255 байт
+# Blender 5.2.2 — [проверено] имена: .001, rename, предел 255 байт
 import bpy
 x1 = bpy.data.objects.new("Mug", None); x2 = bpy.data.objects.new("Mug", None)
 assert (x1.name, x2.name) == ("Mug", "Mug.001")
@@ -237,7 +237,7 @@ Python-объект, обёртывающий данные Blender, — указ
 индексы, после операции перечитывать `ob.data.uv_layers[name]`.
 
 ```python
-# Blender 5.2.2 — падает: ReferenceError [проверено: 99-raw/experiments/B/42-doc-snippets] доступ к удалённому
+# Blender 5.2.2 — падает: ReferenceError [проверено] доступ к удалённому
 import bpy
 ob = bpy.data.objects.new("Tmp", None)
 bpy.data.objects.remove(ob, do_unlink=True)
@@ -259,7 +259,7 @@ print(ob.name)            # ReferenceError: StructRNA of type Object has been re
 ### 2.8 Интроспекция: что есть в этой версии
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] проверка свойств и фактических значений перечислений
+# Blender 5.2.2 — [проверено] проверка свойств и фактических значений перечислений
 import ast, re
 import bpy
 
@@ -305,7 +305,7 @@ Contrast» …); цветовые пространства картинок — 
 ### 3.2 Привязка объекта и коллекции
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] объект и коллекция: что видно, а что нет
+# Blender 5.2.2 — [проверено] объект и коллекция: что видно, а что нет
 import bpy
 scene, vl = bpy.context.scene, bpy.context.view_layer
 coll = bpy.data.collections.new("Props")              # коллекция вне сцены — невидима
@@ -353,7 +353,7 @@ ob.hide_set(False)
 ### 4.2 context.object после создания
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] кто «активный» после оператора и после data API
+# Blender 5.2.2 — [проверено] кто «активный» после оператора и после data API
 import bpy
 bpy.ops.mesh.primitive_cube_add(size=1, location=(3, 0, 0))
 new = bpy.context.object                       # оператор делает новый объект активным и единственным выделенным
@@ -391,7 +391,7 @@ Expected a view3d region` [проверено: 04]. Проверить зара�
 ### 4.4 temp_override
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] оператор над объектом без выделения и активности
+# Blender 5.2.2 — [проверено] оператор над объектом без выделения и активности
 import bpy, bmesh
 def cube(name, x):
     me = bpy.data.meshes.new(name); bm = bmesh.new(); bmesh.ops.create_cube(bm, size=1.0); bm.to_mesh(me); bm.free()
@@ -422,7 +422,7 @@ DOPESHEET_EDITOR, VIEW_3D), но `context.area`, `context.region`, `context.spac
 размер 1574×954 — view3d-операторы работают с override:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] view3d-оператор в фоне и замена без оператора
+# Blender 5.2.2 — [проверено] view3d-оператор в фоне и замена без оператора
 import bpy
 from mathutils import Vector
 cam, cube = bpy.data.objects["Camera"], bpy.data.objects["Cube"]      # сцена по умолчанию
@@ -456,7 +456,7 @@ assert (Vector(loc) - by_op).length < 1e-3
   `uv.cylinder_project`; не работает `uv.project_from_view` [проверено: 04].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] edit mode: правка через bmesh и синхронизация
+# Blender 5.2.2 — [проверено] edit mode: правка через bmesh и синхронизация
 import bpy, bmesh
 ob = bpy.data.objects["Cube"]
 bpy.context.view_layer.objects.active = ob
@@ -489,7 +489,7 @@ Python-потоки с доступом к bpy не поддерживаются
 ### 5.2 Меш из вычисленного объекта
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] evaluated, to_mesh, new_from_object
+# Blender 5.2.2 — [проверено] evaluated, to_mesh, new_from_object
 import bpy
 ob = bpy.data.objects["Cube"]
 sub = ob.modifiers.new("Sub", "SUBSURF"); sub.levels = 1; sub.render_levels = 2
@@ -519,7 +519,7 @@ assert len(bpy.data.meshes.new_from_object(ob).vertices) == 8   # от ориг�
 ### 5.4 Габариты
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] мировые габариты: оригинал после update, а не evaluated
+# Blender 5.2.2 — [проверено] мировые габариты: оригинал после update, а не evaluated
 import bpy
 from mathutils import Vector
 cu = bpy.data.curves.new("T", "FONT"); cu.body = "Hello"; cu.extrude = 0.1; cu.bevel_depth = 0.02
@@ -543,7 +543,7 @@ evaluated-объекта — для текста и кривых её кадр �
 `depsgraph.object_instances` [проверено: 12-geonodes].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] обход объектов и инстансов графа
+# Blender 5.2.2 — [проверено] обход объектов и инстансов графа
 import bpy
 coll = bpy.data.collections.new("Src")
 src = bpy.data.objects.new("Src", bpy.data.meshes.new("s")); coll.objects.link(src)
@@ -560,7 +560,7 @@ assert ("Src", True, "Inst") in rows
 ### 6.1 from_pydata
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] меш из списков
+# Blender 5.2.2 — [проверено] меш из списков
 import bpy
 verts = [(-1, -1, 0), (1, -1, 0), (1, 1, 0), (-1, 1, 0), (0, 0, 1)]
 faces = [(0, 1, 2, 3), (0, 1, 4), (1, 2, 4), (2, 3, 4), (3, 0, 4)]
@@ -601,7 +601,7 @@ assert not me.polygons[0].use_smooth
 [проверено: 06-geometry-data-api, 40-bpyx-tests]. `calc_uvs=True` работает, только если UV-слой создан заранее:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] примитив с UV без операторов
+# Blender 5.2.2 — [проверено] примитив с UV без операторов
 import bpy, bmesh
 bm = bmesh.new()
 bm.loops.layers.uv.new("UVMap")                     # ДО create_*: иначе calc_uvs молча ничего не делает
@@ -615,7 +615,7 @@ assert me.uv_layers.get("UVMap") and len(me.vertices) == 482
 ### 6.3 bmesh: операции
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] inset → extrude → сдвиг → фаска
+# Blender 5.2.2 — [проверено] inset → extrude → сдвиг → фаска
 import math
 import bpy, bmesh
 from mathutils import Vector
@@ -642,7 +642,7 @@ edges=…, cuts=1, use_grid_fill=True)`.
 ### 6.4 foreach_get / foreach_set и numpy
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] сетка 200×200 и правка координат массивами
+# Blender 5.2.2 — [проверено] сетка 200×200 и правка координат массивами
 import numpy as np
 import bpy
 n = 200
@@ -681,7 +681,7 @@ INT32_2D, FLOAT2, FLOAT4, BYTE_COLOR; домены: POINT, EDGE, FACE, CORNER, C
 `MeshEdge.bevel_weight` и `MeshEdge.crease` [проверено: 03].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] атрибуты и цвет вершин без операторов
+# Blender 5.2.2 — [проверено] атрибуты и цвет вершин без операторов
 import numpy as np
 import bpy
 me = bpy.data.objects["Cube"].data
@@ -704,7 +704,7 @@ assert dup.name == "height.001" and me.attributes.domain_size("CORNER") == 24
 ### 6.6 UV, материалы, цвета
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] UV, два материала, material_index, линейный цвет
+# Blender 5.2.2 — [проверено] UV, два материала, material_index, линейный цвет
 import numpy as np
 import bpy
 def srgb_to_linear(c):
@@ -752,7 +752,7 @@ assert [s.material.name for s in ob.material_slots] == ["Red", "Blue"] and ob.ma
 custom normals — `me.normals_split_custom_set(...)` [проверено: 03, 06].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] гладкость по углу без модификатора и с ним
+# Blender 5.2.2 — [проверено] гладкость по углу без модификатора и с ним
 import math
 import bpy, bmesh
 me = bpy.data.meshes.new("Cyl")
@@ -787,7 +787,7 @@ mod.properties.inputs.Input_1.value = math.radians(45); ob.update_tag()    # в�
 ### 7.2 Проверка перед применением
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] стек модификаторов и его порядок
+# Blender 5.2.2 — [проверено] стек модификаторов и его порядок
 import bpy
 ob = bpy.data.objects["Cube"]
 for t in ("BEVEL", "SUBSURF", "WEIGHTED_NORMAL"):
@@ -801,7 +801,7 @@ assert ob.modifiers.new("gp", "GREASE_PENCIL_TINT") is None
 ### 7.3 Применение без оператора
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] применить первые N модификаторов без оператора
+# Blender 5.2.2 — [проверено] применить первые N модификаторов без оператора
 import bpy, bmesh
 me = bpy.data.meshes.new("Box")
 bm = bmesh.new(); bmesh.ops.create_cube(bm, size=2.0); bm.to_mesh(me); bm.free()
@@ -830,7 +830,7 @@ Shape keys при таком применении теряются; операт
 ## 8. Текст и кривые
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] 3D-текст → меш без оператора
+# Blender 5.2.2 — [проверено] 3D-текст → меш без оператора
 import bpy
 cu = bpy.data.curves.new("Title", type="FONT")
 cu.body = "Hello"; cu.size = 1.0; cu.extrude = 0.1; cu.bevel_depth = 0.02; cu.bevel_resolution = 2
@@ -856,7 +856,7 @@ assert sum(len(p.vertices) - 2 for p in me.polygons) == 1380
   `bevel_mode` ∈ ROUND / OBJECT / PROFILE [проверено: 09].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] кривая Безье и замкнутая POLY-кривая данными
+# Blender 5.2.2 — [проверено] кривая Безье и замкнутая POLY-кривая данными
 import math
 import numpy as np
 import bpy
@@ -893,7 +893,7 @@ mathutils-объекты, полученные из свойств (`ob.location
 ### 9.2 Применить трансформации данными
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] «Apply rotation & scale» без оператора
+# Blender 5.2.2 — [проверено] «Apply rotation & scale» без оператора
 import math
 import bpy
 from mathutils import Matrix
@@ -928,7 +928,7 @@ assert all((a - b).length < 1e-5 for a, b in zip(before, after)) and tuple(ob.sc
 ### 9.4 look_at
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] направить камеру на точку и проверить проекцией
+# Blender 5.2.2 — [проверено] направить камеру на точку и проверить проекцией
 import bpy
 from mathutils import Vector
 from bpy_extras.object_utils import world_to_camera_view
@@ -966,7 +966,7 @@ assert abs(p.x - 0.5) < 1e-3 and abs(p.y - 0.5) < 1e-3 and p.z > 0
 ### 10.1 .blend в фоне
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] снимок сцены, упаковка, частичная запись и append
+# Blender 5.2.2 — [проверено] снимок сцены, упаковка, частичная запись и append
 import os, tempfile
 import bpy
 d = tempfile.mkdtemp()
@@ -1023,7 +1023,7 @@ data API); массивы — numpy float32 одним `foreach_*`; не чит�
 ## 12. Шаблон устойчивого скрипта
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] идемпотентная сборка: очистить своё, собрать, проверить
+# Blender 5.2.2 — [проверено] идемпотентная сборка: очистить своё, собрать, проверить
 import math
 import bpy, bmesh
 

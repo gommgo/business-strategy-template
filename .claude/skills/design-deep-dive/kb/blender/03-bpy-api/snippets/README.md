@@ -1,7 +1,7 @@
 # snippets — bpyx: проверенные помощники Python API для Blender 5.2
 
 Волна 1 · агент B · 2026-09-23 · Blender 5.2.2 LTS (Python 3.13.13) · bpyx 1.0.0 · тесты 25/25 в `blender -b` и в
-модуле `bpy` 5.2.2 из PyPI [проверено: 99-raw/experiments/B/40-bpyx-tests].
+модуле `bpy` 5.2.2 из PyPI [проверено].
 
 | Файл | Что это |
 |---|---|
@@ -21,7 +21,7 @@
 **Фоновый скрипт** (`blender -b`, `../../scripts/blender/blender_run.py`, модуль `bpy` из PyPI):
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/41-bpyx-example]
+# Blender 5.2.2 — [проверено]
 import sys
 SNIPPETS = "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets"
 if SNIPPETS not in sys.path:
@@ -31,7 +31,7 @@ import bpyx
 
 **MCP (`execute_blender_code`)**. Аддон выполняет код через `exec(code, {"bpy": bpy})`: пространство имён свежее на
 каждый вызов (переменные не живут, `__file__` нет, `__name__ == 'builtins'`), а модули в `sys.modules` живут
-[проверено: 99-raw/experiments/B/16-mcp-namespace]. Поэтому:
+[проверено]. Поэтому:
 
 ```python
 # Blender 5.2.2 — [проверено: 99-raw/experiments/B/40-bpyx-tests, тест t25]
@@ -57,7 +57,7 @@ bpyx.scene_report()
 
 **GUI-сеанс пользователя через MCP**: bpyx не трогает настройки и интерфейс; `clear_scene()` удаляет только объекты и
 коллекции текущей сцены (без `read_factory_settings`). Имена нод пользователя могут быть переведены (русский
-интерфейс: «Принципиальный BSDF») — bpyx ищет ноды по `type`/`bl_idname`. [проверено: 99-raw/experiments/B/15-localization]
+интерфейс: «Принципиальный BSDF») — bpyx ищет ноды по `type`/`bl_idname`. [проверено]
 
 ## Функции
 
@@ -103,7 +103,7 @@ bpyx.scene_report()
 ## Пример: собрать сцену по параметрам, отрендерить и экспортировать
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/41-bpyx-example] (3,1 с; GLB валиден: 0 ошибок Khronos)
+# Blender 5.2.2 — [проверено] (3,1 с; GLB валиден: 0 ошибок Khronos)
 import os, sys
 sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
 import bpyx

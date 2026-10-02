@@ -9,14 +9,14 @@ build 2026-09-15). Машиночитаемая версия всех запис
 
 1. **В `addons_core` Blender 5.2.2 всего 13 модулей** — это весь список «встроенного», без исключений: `bl_pkg, cycles,
    hydra_storm, io_anim_bvh, io_curve_svg, io_mesh_uv_layout, io_scene_fbx, io_scene_gltf2, node_wrangler, pose_library,
-   rigify, ui_translate, viewport_vr_preview`. Проверено `addon_utils.paths()` → §1 [проверено: L/01].
+   rigify, ui_translate, viewport_vr_preview`. Проверено `addon_utils.paths()` → §1 [проверено].
 2. **Из них по умолчанию включены только 8**: `bl_pkg, cycles, io_anim_bvh, io_curve_svg, io_mesh_uv_layout, io_scene_fbx,
    io_scene_gltf2, pose_library`. Node Wrangler, Rigify, Hydra Storm, VR Scene Inspection, UI-переводы — выключены,
    включать явно в `build()`, если нужны → §1 [проверено].
-3. **LoopTools в 5.2 частично встроены**: Flatten, Circle, Space — родные C-операторы `mesh.flatten`, `mesh.circularize`, `mesh.space_edge_loops_evenly` [проверено: X/02]; Relax, Curve, GStretch, Bridge — только в расширении `looptools` (GPL-2.0-or-later, v4.7.7). Целиком в расширениях — Bool
+3. **LoopTools в 5.2 частично встроены**: Flatten, Circle, Space — родные C-операторы `mesh.flatten`, `mesh.circularize`, `mesh.space_edge_loops_evenly` [проверено]; Relax, Curve, GStretch, Bridge — только в расширении `looptools` (GPL-2.0-or-later, v4.7.7). Целиком в расширениях — Bool
    Tool, F2, Bsurfaces. Наивная проверка `hasattr(bpy.ops.mesh, "looptools_circle")` лжёт (True для несуществующих
    операторов) — проверять `bpy.ops.mesh.<имя>.get_rna_type()` в `try/except KeyError` (`hasattr(bpy.types, "MESH_OT_…")` видит только Python-операторы и для C-операторов лжёт «нет») → §2, «Частые ошибки»
-   [проверено: L/01].
+   [проверено].
 4. **Платформа extensions.blender.org требует GPL-совместимую лицензию** для листинга — платных аддонов на ней нет;
    Hard Ops, BoxCutter, MESHmachine, RetopoFlow, BlenderKit, MACHIN3tools, fSpy, Quick Baker, Render Raw туда не попадают
    и распространяются отдельно (GitHub, Blender Market/Superhive, сайты авторов) → §3 [проверено].
@@ -68,7 +68,7 @@ build 2026-09-15). Машиночитаемая версия всех запис
 ## 1. Встроенные модули Blender 5.2.2 (`addons_core`)
 
 Проверено `bpy.utils.script_paths(subdir="addons_core")` → `/…/blender-5.2.2-linux-x64/5.2/scripts/addons_core/` (13
-папок) и `addon_utils.modules()` после `modules_refresh()` [проверено: `99-raw/experiments/L/01-addon-checks`]. Это
+папок) и `addon_utils.modules()` после `modules_refresh()` [проверено]. Это
 **весь** список «бандла» — никаких дополнительных built-in-аддонов в этой сборке нет (в отличие от Blender ≤4.1, где
 `scripts/addons/` включал десятки модулей — LoopTools, Extra Objects, Print3D Toolbox и т. п. были там; в 4.2+ они либо
 удалены из поставки, либо переехали на extensions.blender.org).
@@ -188,7 +188,7 @@ MCP и список из ~14 альтернативных серверов — `
   → M-подобная ошибка «версия по памяти», см. `03-bpy-api/04`.
 - **Проверять доступность оператора через `hasattr(bpy.ops.<cat>, "имя")`** — всегда `True`, `bpy.ops` создаёт обёртку
   динамически; правильно — `bpy.ops.<cat>.<имя>.get_rna_type()` в `try/except KeyError`; `hasattr(bpy.types, "КАТЕГОРИЯ_OT_имя")` верен только для Python-операторов (C-операторы, например `mesh.flatten`, `object.delete`, в `bpy.types` не видны — X/02)
-  [проверено: L/01].
+  [проверено].
 - **Забыть, что Node Wrangler и Rigify выключены по умолчанию** — код, который использует их операторы без
   `addon_enable()`, упадёт в чистой сессии (в т. ч. в CI/тестах на факторной установке).
 - **Принять «GPL» и «бесплатно» как синонимы законности переиспользования ассетов** — у RetopoFlow код GPL, но

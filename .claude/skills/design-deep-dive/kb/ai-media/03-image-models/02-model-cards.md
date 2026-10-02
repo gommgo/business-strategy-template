@@ -75,12 +75,12 @@
     по аренам — `google/gemini-3.1-flash-lite-image` 2,9 ₽ (AA #13). Переносимость черновика на дорогую модель никто не
     мерил → тест 9. → §2.10, §2.21 [исследование]
 21. Токенные провайдеры polza: ₽ = $ вендора × 117,992. Nano Banana Pro через Google flex ≈ 7,9 ₽ за 1K — дешевле плоских
-    13,5 ₽ у mie/bananalab, если media-эндпоинт даёт выбрать провайдера (не подтверждено). → §1.6 [проверено: C1/01]
+    13,5 ₽ у mie/bananalab, если media-эндпоинт даёт выбрать провайдера (не подтверждено). → §1.6 [проверено]
 22. Параметры одной модели у провайдеров polza различаются: `openai/gpt-5.4-image-2` — mie (4K, 6 соотношений, 16 реф.)
     против openai (до 2K, 10 соотношений с 21:9, 10 реф.); Nano Banana Pro — 8 (mie), 14 (bananalab), 10 (Google)
-    референсов. Читать `providers[].parameters`, а не общее описание. → §1.3 [проверено: C1/01]
+    референсов. Читать `providers[].parameters`, а не общее описание. → §1.3 [проверено]
 23. Прямой API OpenAI: цена GPT Image 2.5 зависит от `quality` — 1024² low $0.006, high $0.053, max $0.211; 16:9 4K high
-    $0.100. Названия уровней между версиями не переносятся: `high` у 2.5 = `medium` у GPT Image 2. → §2.1 [проверено: C1/02]
+    $0.100. Названия уровней между версиями не переносятся: `high` у 2.5 = `medium` у GPT Image 2. → §2.1 [проверено]
 24. FLUX.2 [flex] в polza (14/24 ₽) ради текста не брать: AA Text Rendering #22, ниже GPT и Nano Banana. → §2.13
     [исследование]
 25. Seedream 5.0 Pro — второй голос для фото, портретов, 3D (LMArena #8–9), но в polza только 1K/2K и без 21:9; Seedream
@@ -107,8 +107,8 @@
 | `price`, `speed` | ₽ polza и $ прямого API на 23.09.2026; секунды (AA, медиана) | каталог, прайсы, AA |
 | `provenance` | видимый знак, невидимый (SynthID и т. п.), C2PA | документация |
 | `license`, `defects`, `routing`, `phase5` | ограничения, типичные дефекты, маршрутизация, номера тестов фазы 5 | — |
-| `arenas` | места и баллы по срезам AA (t2i 20, правка 18) и LMArena (t2i 8, правка 5) | [проверено: C1/03, C1/04] |
-| `polza` | нормализованный блок каталога: провайдеры, параметры с описаниями, цены (плоские, по условиям, токенные с оценкой ₽ за картинку) | [проверено: C1/01] |
+| `arenas` | места и баллы по срезам AA (t2i 20, правка 18) и LMArena (t2i 8, правка 5) | [проверено] |
+| `polza` | нормализованный блок каталога: провайдеры, параметры с описаниями, цены (плоские, по условиям, токенные с оценкой ₽ за картинку) | [проверено] |
 | `checked`, `sources` | дата проверки; URL | — |
 
 ### 1.2 Метки, арены, числа
@@ -209,7 +209,7 @@
 | Вне polza: Grok 2.0 · MAI-2.6 · Muse · Qwen-3.0-Pro | — | 0.04–0.08 · — · — · 0.04 / 0.075 | 60 · 38,9 · 10 · 40 |
 | Вне polza: Recraft V4.1 · Ideogram 4.0 · FLUX.2 [max] | — | 0.035 (Pro 0.21, Vector 0.08) · — · от 0.07 | 35 · 100 (Quality) · 70 |
 
-Правило пересчёта токенных провайдеров polza: ₽ = $ × 117,992 (все пары каталога, [проверено: C1/01]). Токены на
+Правило пересчёта токенных провайдеров polza: ₽ = $ × 117,992 (все пары каталога, [проверено]). Токены на
 картинку у Google: Pro 1120 (1K/2K) и 2000 (4K); 3.1 Flash 747 / 1120 / 1680 / 2520 (0.5K/1K/2K/4K); 2.5 Flash 1290 [S12].
 Оценки «≈» — только картинка-выход, без входных токенов и токенов рассуждения.
 
@@ -238,7 +238,7 @@
   7. Итерации по одной правке; повторять ограничения; пиксельную неизменность дать композитингом, а не промтом.
   8. Параметры (quality, size, background) — не в промте, а в API; xhigh/max — только если high не проходит критерий.
 - **По задачам:** `IMG-HERO-PHOTO` — лидер [исследование] (AA All #1 1197; Live-Action #1 1227; Human Anatomy #1 1225; Lighting #1; LMArena Photoreal #1); `IMG-PRODUCT` — лидер [исследование] (AA Retail & E-commerce #1 1200; LMArena Product/Branding #1); `IMG-ILLUSTR` — лидер [исследование] (AA Animation & Gaming #3; LMArena Cartoon #1, Art #1); `IMG-SERIES` — сильная [исследование] (AA Identity Preserving #1; консистентность серии как таковая аренами не мерится); `IMG-ICON3D` — лидер [исследование] (LMArena 3D Imaging #1 1414); `IMG-CUTOUT` — сильная (прямой API) [документация] (background: transparent в прямом API; в polza не выставлено); `IMG-BG-ABSTRACT` — сильная [не проверено] (специальных данных нет); `IMG-TEXTURE` — нет параметра tile [документация] (бесшовность — постобработкой); `IMG-TEXT-LATIN` — лидер [исследование] (AA TR #4; LMArena TR #1); `IMG-TEXT-CYR` — сильная [мнение] (N=1 (Хабр); проверить в фазе 5, тест 1); `IMG-EDIT` — лидер [исследование] (AA/LMArena editing #1); `IMG-OUTPAINT` — сильная [исследование] (AA Composition & Framing #1 1218; отдельного outpaint-эндпоинта нет — через edit + новый size); `IMG-MOCKUP` — сильная [исследование] (AA UI/UX #2 1220; реальный скриншот — вставлять композитингом/Blender); `IMG-UPSCALE` — нет [документация] (не апскейлер; 4K-вывод в polza); `IMG-DRAFT` — дорого для перебора [документация] (в polza нет low; в прямом API low 1024² = $0.0059).
-- **Цена (23.09.2026):** polza, ₽: 1K: 4; 2K: 7; 4K: 11; прямой API, $: картинка-выход $30/1M токенов; вход-картинка $8/1M (кэш $2); текст $5/1M (кэш $1.25). 1024² high $0.053, max $0.211; 3840×2160 high $0.100, max $0.400 [проверено: 99-raw/experiments/C1/02-gpt-image-token-cost]; AA: $210.7 за 1000 (max, 1024²).
+- **Цена (23.09.2026):** polza, ₽: 1K: 4; 2K: 7; 4K: 11; прямой API, $: картинка-выход $30/1M токенов; вход-картинка $8/1M (кэш $2); текст $5/1M (кэш $1.25). 1024² high $0.053, max $0.211; 3840×2160 high $0.100, max $0.400 [проверено]; AA: $210.7 за 1000 (max, 1024²).
 - **Скорость:** AA медиана ≈ 108 с на картинку в режиме max (1024²) [исследование; значение снято с графика]; гайд: «Complex prompts may take up to 2 minutes».
 - **Водяные знаки и происхождение:** видимый: нет; невидимый: в прочитанной документации (image-generation, image-prompting, страницы моделей) не описано; C2PA: в прочитанной документации не упомянут; openai.com (справка) не открылась (403) — проверить c2patool в тесте 7 [не проверено].
 - **Модерация:** moderation: auto|low в прямом API; ошибки image_generation_user_error / moderation_blocked с moderation_stage.
@@ -1182,10 +1182,10 @@
 
 Нумерация [S#] общая для всех файлов `03-image-models/` (реестр — `99-raw/experiments/C1/06-model-cards-build/sources.py`).
 
-- [S1] polza.ai. Каталог моделей API (type=image, с провайдерами). снят 2026-09-23 08:45. https://polza.ai/api/v1/models?type=image&include_providers=true — первичные данные: id, провайдеры, параметры с описаниями, цены ₽; бесплатный эндпоинт [проверено: 99-raw/experiments/C1/01-polza-image-catalog-providers].
+- [S1] polza.ai. Каталог моделей API (type=image, с провайдерами). снят 2026-09-23 08:45. https://polza.ai/api/v1/models?type=image&include_providers=true — первичные данные: id, провайдеры, параметры с описаниями, цены ₽; бесплатный эндпоинт [проверено].
 - [S2] polza.ai. Документация polza (gaidy/*.mdx, changelog.mdx, provider-selection.mdx). снимок 2026-09-23. https://github.com/polza-ai/docs — гайды по моделям местами расходятся с каталогом (10 противоречий, §0 заметок C1).
 - [S4] OpenAI. Страницы моделей gpt-image-2.5-sunburst, -flare, gpt-image-2, gpt-image-1.5. 2026-09-23. https://developers.openai.com/api/docs/models/gpt-image-2.5-sunburst — снимки, цены токенов, статус Deprecated у 1.5.
-- [S5] OpenAI. Image generation guide (+ калькулятор токенов GptImageTokenCalculator). 2026-09-23. https://developers.openai.com/api/docs/guides/image-generation — параметры, размеры, маска, прозрачность, формула токенов [проверено: C1/02].
+- [S5] OpenAI. Image generation guide (+ калькулятор токенов GptImageTokenCalculator). 2026-09-23. https://developers.openai.com/api/docs/guides/image-generation — параметры, размеры, маска, прозрачность, формула токенов [проверено].
 - [S6] OpenAI. Image prompting guide (вкладки 2.5 / 2 / 1.5 / 1). 2026-09-23. https://developers.openai.com/api/docs/guides/image-prompting — канонический гайд по промтам GPT Image; заменил cookbook-гайд.
 - [S7] OpenAI. API changelog. 2026-09-23. https://developers.openai.com/api/docs/changelog — даты: 21.04.2026 GPT Image 2, 20.08.2026 прозрачность, 08.09.2026 GPT Image 2.5.
 - [S8] OpenAI. Deprecations. 2026-09-23. https://developers.openai.com/api/docs/deprecations — gpt-image-1 → 23.10.2026; gpt-image-1.5, gpt-image-1-mini → 01.12.2026.
@@ -1215,11 +1215,11 @@
 - [S33] Meta Superintelligence Labs. Introducing Muse Image and Muse Video. 2026-07-07. https://ai.meta.com/blog/introducing-muse-image-muse-video-msl/ — прочитано через WebFetch (прямой fetch — 400); Content Seal.
 - [S34] Midjourney. Version (V8.2, V8.1) + Enterprise API Survey. 2026-09-23 (через r.jina.ai; прямой — 403). https://docs.midjourney.com/hc/en-us/articles/32199405667853-Version — параметры V8.x; официального API нет.
 - [S35] Tencent Hunyuan. HunyuanImage-3.0 README + LICENSE (3271★, push 2026-06-23). 2026-09-23. https://github.com/Tencent-Hunyuan/HunyuanImage-3.0 — 80B MoE, VRAM, территориальные ограничения лицензии.
-- [S36] Artificial Analysis. Image Arena: text-to-image (20 срезов). снято 2026-09-23 08:59. https://artificialanalysis.ai/image/leaderboard/text-to-image — слепые пары, Elo; английские промты [проверено: C1/03].
-- [S37] Artificial Analysis. Image Arena: editing (18 срезов). снято 2026-09-23 09:01. https://artificialanalysis.ai/image/leaderboard/editing — [проверено: C1/03].
+- [S36] Artificial Analysis. Image Arena: text-to-image (20 срезов). снято 2026-09-23 08:59. https://artificialanalysis.ai/image/leaderboard/text-to-image — слепые пары, Elo; английские промты [проверено].
+- [S37] Artificial Analysis. Image Arena: editing (18 срезов). снято 2026-09-23 09:01. https://artificialanalysis.ai/image/leaderboard/editing — [проверено].
 - [S38] Artificial Analysis. Image methodology. 2026-09-23. https://artificialanalysis.ai/image/methodology — дефолты вендора, 1:1, seed 42, английские промты, цена за 1000.
-- [S39] LMArena. Text-to-Image leaderboard (8 категорий). снимок 2026-09-21. https://lmarena.ai/leaderboard/text-to-image — 6,26 млн голосов, 79 моделей [проверено: C1/04].
-- [S40] LMArena. Image Edit leaderboard. снимок 2026-09-21. https://lmarena.ai/leaderboard/image-edit — 29,9 млн голосов, 56 моделей; 4 категории устарели при съёмке [проверено: C1/04].
+- [S39] LMArena. Text-to-Image leaderboard (8 категорий). снимок 2026-09-21. https://lmarena.ai/leaderboard/text-to-image — 6,26 млн голосов, 79 моделей [проверено].
+- [S40] LMArena. Image Edit leaderboard. снимок 2026-09-21. https://lmarena.ai/leaderboard/image-edit — 29,9 млн голосов, 56 моделей; 4 категории устарели при съёмке [проверено].
 - [S41] Cheng et al. (HIT). MultiTextEdit: многоязычная правка текста в картинках, 12 языков. 2026-05 (v2). https://arxiv.org/abs/2605.08163 — правка текста, 12 языков вкл. русский; из закрытых — только GPT-image-1.5 и NB2.
 - [S42] Tencent Weixin, UESTC, DLUT. WeGenBench. 2026-06. https://arxiv.org/abs/2606.20100 — 4000 промтов zh/en; текст: Char F1, precision; судья Qwen3.5-397B.
 - [S43] —. UniGenBench++. 2025-10. https://arxiv.org/abs/2510.18701 — многоязычность = zh/en; прочитано частично.

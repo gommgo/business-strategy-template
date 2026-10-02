@@ -15,35 +15,35 @@ esbuild 0.25.12, vite 8.3.1. Выбор библиотек — `01-stack-choice.
 3. **Проверка SDA** — `@supports ((animation-timeline: scroll()) and (animation-range: 0% 100%))` и внутри
    `@media (prefers-reduced-motion: no-preference)`; `animation-timeline` пишется после шортката `animation` → §1.2. [документация: S3]
 4. **Reduce — ветка кода, а не `duration: 0` везде**: CSS — медиазапрос, GSAP — `gsap.matchMedia()` с условиями, Lenis — сам
-   (`prefersReducedMotion`), VT — не запускать; модуль эффекта имеет `reduce()` с конечным состоянием → §2. [проверено: G/02, G/03]
+   (`prefersReducedMotion`), VT — не запускать; модуль эффекта имеет `reduce()` с конечным состоянием → §2. [проверено]
 5. **В reduce не грузить тяжёлое**: загрузчик выбирает режим до `import()` — в G/03 при reduce GSAP и шейдер не загружались
-   (JS ≈ 2 КБ br против ≈ 35 КБ) → §2, §5. [проверено: G/03]
+   (JS ≈ 2 КБ br против ≈ 35 КБ) → §2, §5. [проверено]
 6. **Переключатель «меньше движения» на L2** (CRV-AL-12): атрибут `data-motion="reduced"` на `<html>` + те же ветки, что у
    медиазапроса; GSAP — `gsap.matchMediaRefresh()` → §2.2. [документация: S5; не проверено прогоном]
 7. **Ленивая инициализация**: эффект ниже первого экрана — `IntersectionObserver` с `rootMargin: '200px 0px'` → в простое
    (`requestIdleCallback`, в Safari его нет — `setTimeout`) → `import()` модуля → §3. [проверено: G/03; документация: S1]
 8. **Тяжёлая зависимость — только внутри `init()` и через прокладку**: `import('./paper-mesh.js')`, где прокладка делает
    `export { … } from '@paper-design/shaders'`; прямой `import('@paper-design/shaders')` дал 54 КБ br вместо 5,8 → §5.
-   [проверено: G/03]
+   [проверено]
 9. **Пауза**: непрерывное движение останавливается вне экрана (IO) и при `document.hidden`; петля дольше 5 с — видимая кнопка
    паузы (WCAG 2.2.2) → §4. [проверено: G/03 — пауза шейдера по IO; стандарт]
 10. **Модуль эффекта** — объект `{ id, budget, supports(), init(el), reduce(el), mobile?(el), pause?(el), resume?(el), destroy(el) }`;
-    `destroy` снимает всё: ScrollTrigger, split, canvas, pin-spacer, слушатели → §6. [проверено: G/03]
+    `destroy` снимает всё: ScrollTrigger, split, canvas, pin-spacer, слушатели → §6. [проверено]
 11. **`pagehide` без `persisted` → `destroy`**, при bfcache (`persisted: true`) — не разрушать → §6.2. [практика]
 12. **Lenis + ScrollTrigger — один цикл**: `lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add(t => lenis.raf(t * 1000));
-    gsap.ticker.lagSmoothing(0)`; `scrollerProxy` для Lenis не нужен → §7.1. [проверено: G/02]
+    gsap.ticker.lagSmoothing(0)`; `scrollerProxy` для Lenis не нужен → §7.1. [проверено]
 13. **После любой смены раскладки — `ScrollTrigger.refresh()`**: после same-document VT без refresh старт закрепления устарел в
-    Chromium и WebKit; также после `document.fonts.ready` и догрузки медиа без размеров → §7.2. [проверено: G/02]
+    Chromium и WebKit; также после `document.fonts.ready` и догрузки медиа без размеров → §7.2. [проверено]
 14. **Same-document VT при Lenis**: `lenis.stop()` → `startViewTransition` → `await t.finished` → `lenis.start()` →
     `ScrollTrigger.refresh()` → §7.2. [проверено: G/02 — без ошибок; визуально не оценивалось]
 15. **Cross-document VT — одна строка CSS** и работает поверх Lenis + ScrollTrigger в Chromium и WebKit; при reduce не запускается,
-    если правило внутри медиазапроса → §7.3. [проверено: G/02]
+    если правило внутри медиазапроса → §7.3. [проверено]
 16. **SplitText**: после `document.fonts.ready`, `autoSplit: true` и анимация внутри `onSplit` (пересоздаётся при пересплите);
     `revert()` в `destroy` → §7.4. [проверено: G/03; документация: S4]
 17. **SPA-переходы (Swup, Astro ClientRouter)**: на замене контента — `ctx.revert()` старых эффектов и `mount` новых; модульный
     скрипт Astro исполняется один раз — инициализация на `astro:page-load` → §7.5. [документация: S7, S8]
 18. **Никаких CDN в сборке**: npm + свой домен; wasm dotLottie/Rive — `setWasmUrl()` на свой адрес, отдавать с brotli → §8.
-    [проверено: G/01]
+    [проверено]
 19. **Не вырезать лицензионные комментарии** (`legalComments` по умолчанию; не `'none'`) — GSAP требует сохранять уведомления → §8.
     [документация: S2]
 20. **Шрифт — метрический фолбэк** (`size-adjust`, `ascent-override` или `next/font`/`fontaine`) и подмножества cyrillic + latin с ₽;
@@ -102,7 +102,7 @@ esbuild 0.25.12, vite 8.3.1. Выбор библиотек — `01-stack-choice.
 ### 2.1. Одна точка правды для режима
 
 ```js
-/* Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено: 99-raw/experiments/G/03-effect-module] */
+/* Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено] */
 const mqReduce = matchMedia('(prefers-reduced-motion: reduce)');
 const mqMobile = matchMedia('(pointer: coarse), (max-width: 767px)');
 const userReduce = () => document.documentElement.dataset.motion === 'reduced';   // переключатель L2
@@ -112,7 +112,7 @@ export const modeNow = () => (mqReduce.matches || userReduce() ? 'reduce' : mqMo
 - GSAP — сцены только в ветке `no-preference` через `gsap.matchMedia()` (при смене настройки созданное в ветке откатывается
   автоматически) [документация: S5]:
 ```js
-/* GSAP 3.15.0 · 2026-09-24 · [проверено: 99-raw/experiments/G/02-st-lenis-vt] при reduce ScrollTrigger не создаётся */
+/* GSAP 3.15.0 · 2026-09-24 · [проверено] при reduce ScrollTrigger не создаётся */
 const mm = gsap.matchMedia();
 mm.add({ motion: '(prefers-reduced-motion: no-preference)', reduce: '(prefers-reduced-motion: reduce)' }, (ctx) => {
   if (ctx.conditions.reduce) return;                       // конечные состояния — в CSS
@@ -121,9 +121,9 @@ mm.add({ motion: '(prefers-reduced-motion: no-preference)', reduce: '(prefers-re
 });
 ```
 - Lenis сам переходит на `lerp = 1` и мгновенные `scrollTo`; признак — `lenis.prefersReducedMotion` (опция `options.lerp` при этом
-  остаётся 0,1) [проверено: G/02].
+  остаётся 0,1) [проверено].
 - View Transitions: same-document — `if (!document.startViewTransition || modeNow() === 'reduce') return change();`;
-  cross-document — правило `@view-transition` внутри `@media (prefers-reduced-motion: no-preference)` [проверено: G/02].
+  cross-document — правило `@view-transition` внутри `@media (prefers-reduced-motion: no-preference)` [проверено].
 
 ### 2.2. Переключатель на странице (L2)
 
@@ -135,7 +135,7 @@ mm.add({ motion: '(prefers-reduced-motion: no-preference)', reduce: '(prefers-re
 ## 3. Ленивая инициализация
 
 ```js
-/* Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено: 99-raw/experiments/G/03-effect-module] */
+/* Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено] */
 const idle = (fn) => ('requestIdleCallback' in window ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 200));
 const io = new IntersectionObserver((entries) => {
   for (const e of entries) if (e.isIntersecting && !live.has(e.target)) idle(() => mount(e.target));
@@ -148,7 +148,7 @@ document.readyState === 'complete' ? start() : addEventListener('load', start, {
   `'scheduler' in window` [документация: S1].
 - Эффект первого экрана не ждёт IO: `mount` в `idle` после `load`, но LCP к этому моменту уже отрисован HTML-ом.
 - G/03: чанк ScrollTrigger (16,1 КБ br) загрузился только при подходе к закреплённой сцене; на старте — загрузчик 0,8 КБ,
-  ядро GSAP 24,5, SplitText 3,1, шейдер 5,8 (hero) [проверено: G/03].
+  ядро GSAP 24,5, SplitText 3,1, шейдер 5,8 (hero) [проверено].
 
 ## 4. Пауза: вне экрана, скрытая вкладка, кнопка
 
@@ -172,11 +172,11 @@ document.readyState === 'complete' ? start() : addEventListener('load', start, {
 - **Правило прокладки** (G/03): модуль эффекта не импортирует тяжёлое на верхнем уровне; внутри `init()` —
   `await import('./paper-mesh.js')`, а `paper-mesh.js` — `export { ShaderMount, meshGradientFragmentShader,
   getShaderColorFromString } from '@paper-design/shaders';`. Итог: 5,8 КБ br и только в режиме full; прямой
-  `import('@paper-design/shaders')` — 54,0 КБ br (пакет целиком), статический импорт — чанк грузится и в reduce [проверено: G/03].
+  `import('@paper-design/shaders')` — 54,0 КБ br (пакет целиком), статический импорт — чанк грузится и в reduce [проверено].
 - Бюджет проверяется сборкой: сумма br чанков, которые грузятся до первого взаимодействия, ≤ `js_presentation_kb_br` уровня
   (20 / 100 / 150–200); отчёт — metafile esbuild или `vite build` + brotli; K включает в ворота [не проверено: предложение G → K].
 - Замер G/03 (desktop, full): старт ≈ 35 КБ br (загрузчик, GSAP-ядро, SplitText, шейдер, модули), после прокрутки к сцене + 16,1;
-  reduce — ≈ 2 КБ br [проверено: G/03].
+  reduce — ≈ 2 КБ br [проверено].
 
 ## 6. Модуль эффекта
 
@@ -208,7 +208,7 @@ export interface EffectModule {
 ### 6.2. Загрузчик (ядро, 0,8 КБ br)
 
 ```js
-/* Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено: 99-raw/experiments/G/03-effect-module/src/loader.js] */
+/* Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено] */
 const REGISTRY = { 'pin-scrub-story': () => import('./effects/pin-scene.js'), 'shader-bg': () => import('./effects/shader-bg.js') };
 const live = new Map();                                    // element → { mod, mode, visible }
 async function mount(el) {
@@ -229,7 +229,7 @@ addEventListener('pagehide', (e) => { if (!e.persisted) for (const el of [...liv
 ### 6.3. Пример модуля: закреплённая сцена
 
 ```js
-/* GSAP 3.15.0 · Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено: 99-raw/experiments/G/03-effect-module/src/effects/pin-scene.js] */
+/* GSAP 3.15.0 · Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено] */
 let ctx = null;
 export default {
   id: 'pin-scrub-story', budget: { js_kb_br: 40 },
@@ -248,14 +248,14 @@ export default {
 };
 ```
 Результат G/03 (оба движка): desktop — сцена работает, чанк ScrollTrigger грузится при подходе; reduce и mobile — стопка кадров,
-ScrollTrigger не создаётся; `destroy` — 0 ScrollTrigger, 0 обёрток SplitText, canvas и pin-spacer удалены [проверено: G/03].
+ScrollTrigger не создаётся; `destroy` — 0 ScrollTrigger, 0 обёрток SplitText, canvas и pin-spacer удалены [проверено].
 
 ## 7. Склейка: ScrollTrigger + Lenis + View Transitions + SplitText + переходы
 
 ### 7.1. Lenis + ScrollTrigger
 
 ```js
-/* GSAP 3.15.0 · Lenis 1.3.26 · Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено: 99-raw/experiments/G/02-st-lenis-vt] */
+/* GSAP 3.15.0 · Lenis 1.3.26 · Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено] */
 const lenis = new Lenis({ anchors: true });               // autoRaf: false — цикл общий с GSAP
 lenis.on('scroll', ScrollTrigger.update);
 gsap.ticker.add((t) => lenis.raf(t * 1000));
@@ -268,7 +268,7 @@ G/02: после 8 шагов колеса `scrollY` = `lenis.scroll` (3200 = 32
 ### 7.2. Same-document View Transition, меняющий раскладку
 
 ```js
-/* GSAP 3.15.0 · Lenis 1.3.26 · Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено: 99-raw/experiments/G/02-st-lenis-vt] */
+/* GSAP 3.15.0 · Lenis 1.3.26 · Chrome 153 · WebKit 26.6 · 2026-09-24 · [проверено] */
 async function switchLayout(change) {
   if (!document.startViewTransition || modeNow() === 'reduce') { change(); ScrollTrigger.refresh(); return; }
   lenis?.stop();                                           // прокрутка не едет под снимком перехода
@@ -282,18 +282,18 @@ G/02: без `refresh()` старт закрепления не совпал с 
 ### 7.3. Cross-document View Transitions поверх всего
 
 ```css
-/* Chrome 126+ · Safari 18.2+ · Firefox — нет (обычная навигация) · 2026-09-24 · [проверено: 99-raw/experiments/G/02-st-lenis-vt] */
+/* Chrome 126+ · Safari 18.2+ · Firefox — нет (обычная навигация) · 2026-09-24 · [проверено] */
 @media (prefers-reduced-motion: no-preference) { @view-transition { navigation: auto; } }
 .site-logo { view-transition-name: logo; }  .page-title { view-transition-name: title; }   /* 1–3 общих элемента */
 ```
 G/02: переход a → b шёл при работающих Lenis и ScrollTrigger (`pagereveal` → `e.viewTransition` есть) в Chromium 153 и WebKit
 26.6; при reduce — не запускался. «Назад» перезагружал страницу (bfcache в headless не сработал), эффекты поднимались заново;
-WebKit после «Назад» прокручивал к `#hash` из адреса, а не к сохранённой позиции [проверено: G/02].
+WebKit после «Назад» прокручивал к `#hash` из адреса, а не к сохранённой позиции [проверено].
 
 ### 7.4. SplitText
 
 ```js
-/* GSAP 3.15.0 · 2026-09-24 · [проверено: 99-raw/experiments/G/03-effect-module/src/effects/split-title.js] */
+/* GSAP 3.15.0 · 2026-09-24 · [проверено] */
 await document.fonts.ready;                                // строки считаются по настоящему шрифту
 const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', autoSplit: true,
   onSplit: (self) => gsap.from(self.words, { yPercent: 110, stagger: 0.04, duration: 0.7, ease: 'power3.out' }) });
@@ -312,7 +312,7 @@ const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', autoSpl
 ## 8. Самохостинг и лицензии в сборке
 
 ```js
-/* dotLottie-web 0.80.0 · Rive 2.43.1 · 2026-09-24 · [проверено: 99-raw/experiments/G/01-lib-cost/entries] по умолчанию — jsDelivr/unpkg */
+/* dotLottie-web 0.80.0 · Rive 2.43.1 · 2026-09-24 · [проверено] по умолчанию — jsDelivr/unpkg */
 import { DotLottie } from '@lottiefiles/dotlottie-web';
 import { RuntimeLoader } from '@rive-app/canvas-lite';
 DotLottie.setWasmUrl(new URL('/wasm/dotlottie-player.wasm', location.origin).href);   // файл копируется из node_modules при сборке

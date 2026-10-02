@@ -9,34 +9,34 @@ toktx 4.4.2, Blender 5.2.2 · JS-блоки файла исполнены про
 
 ## Выжимка для агента
 
-1. **Стек по умолчанию**: `WebGLRenderer` + `GLTFLoader` (Meshopt; KTX2/Draco — по `extensionsUsed` файла) + бандлер + свой домен → §1–3. [проверено: F1/02]
-2. **Бандлер (esbuild/Vite) со своего домена**: JS 174 КБ br, three готов через 2,0 с на эмуляции Pixel 7, первый кадр модели 3,7 с; import map с jsDelivr — 443 КБ, 3,8 и 4,9 с → §1.1. [проверено: F1/02]
-3. **jsDelivr `three.module.min.js` импортирует неминифицированный `./three.core.js`** (204 КБ br): «min с CDN» без настройки экономит 10 %; ключ-URL в import map, переназначающий ядро на `three.core.min.js`, даёт 243 КБ → §1.2. [проверено: F1/01, F1/02]
+1. **Стек по умолчанию**: `WebGLRenderer` + `GLTFLoader` (Meshopt; KTX2/Draco — по `extensionsUsed` файла) + бандлер + свой домен → §1–3. [проверено]
+2. **Бандлер (esbuild/Vite) со своего домена**: JS 174 КБ br, three готов через 2,0 с на эмуляции Pixel 7, первый кадр модели 3,7 с; import map с jsDelivr — 443 КБ, 3,8 и 4,9 с → §1.1. [проверено]
+3. **jsDelivr `three.module.min.js` импортирует неминифицированный `./three.core.js`** (204 КБ br): «min с CDN» без настройки экономит 10 %; ключ-URL в import map, переназначающий ядро на `three.core.min.js`, даёт 243 КБ → §1.2. [проверено]
 4. В пакете r186 нет `*.min.js`, CJS устарел; адреса декодеров — `examples/jsm/libs/draco/gltf/` и `…/libs/basis/` (старый `examples/js/…` — 404) → §1, §3.3. [проверено: F1/01; E 03 п. 17]
-5. **GLB — одним запросом, декодеры — только нужные** (по `extensionsUsed`): Meshopt 7 КБ br, Draco 58, KTX2 ≈ 239 (транскодер 212 + zstddec 15 + ktx-parse 5 + загрузчик 7,5) → §3.2. [проверено: F1/01]
-6. **Декодеры — со своего домена**: транскодер KTX2 с jsDelivr +0,8–1,2 с к первому кадру на медленном 4G (чужой домен, gzip вместо br) → §3.3. [проверено: F1/02]
-7. **`compileAsync` не снимает долгие задачи** (внутри синхронный `compile()` + опрос `isReady()` раз в 10 мс), но первый `render()` — 14 мс вместо 541 мс: звать перед первым кадром ради кадра перехода постер → canvas → §3.4. [проверено: F1/01, F1/02]
-8. Умолчания `WebGLRenderer`: `toneMapping = NoToneMapping`, `toneMappingExposure = 1`, `outputColorSpace = SRGBColorSpace` → тонмаппинг включать явно → §5. [проверено: F1/01]
+5. **GLB — одним запросом, декодеры — только нужные** (по `extensionsUsed`): Meshopt 7 КБ br, Draco 58, KTX2 ≈ 239 (транскодер 212 + zstddec 15 + ktx-parse 5 + загрузчик 7,5) → §3.2. [проверено]
+6. **Декодеры — со своего домена**: транскодер KTX2 с jsDelivr +0,8–1,2 с к первому кадру на медленном 4G (чужой домен, gzip вместо br) → §3.3. [проверено]
+7. **`compileAsync` не снимает долгие задачи** (внутри синхронный `compile()` + опрос `isReady()` раз в 10 мс), но первый `render()` — 14 мс вместо 541 мс: звать перед первым кадром ради кадра перехода постер → canvas → §3.4. [проверено]
+8. Умолчания `WebGLRenderer`: `toneMapping = NoToneMapping`, `toneMappingExposure = 1`, `outputColorSpace = SRGBColorSpace` → тонмаппинг включать явно → §5. [проверено]
 9. **Пара по умолчанию (одинаково с D2)**: Blender «Khronos PBR Neutral», look None, exposure E ↔ `renderer.toneMapping = THREE.NeutralToneMapping`, `toneMappingExposure = 2^E` (E = 0 → 1), `outputColorSpace = SRGBColorSpace` → §5.1. [проверено: D2/01 — ΔE2000 Blender↔three 0,23–0,36 (белая печь), макс. 1,08; F1/01 — одна формула]
-10. **AgX three ≠ AgX Blender**: приближение Filament, look выключен, степень 2,2 вместо 2,4 → three светлее на 3,4–3,7 L*; если AgX обязателен — подменить степень на 2,4 до первой компиляции (D2) → §5.2. [проверено: F1/01, D2/01, E/02]
-11. **Unlit тоже тонмаппится** (`MeshBasicMaterial` из `KHR_materials_unlit`): для точного hex логотипа — `material.toneMapped = false` → §5.3. [проверено: D2/01]
-12. **Металлу нужно окружение**: `RoomEnvironment` через PMREM (0 КБ) или HDRI 1k (0,4–0,6 МБ) через `HDRLoader`; без него металл чёрный → §4. [проверено: E/23, F1/01]
-13. `scene.environment = hdrTexture` (mapping `EquirectangularReflectionMapping`) — рендерер сам строит и кэширует PMREM; руками `PMREMGenerator` — только для `fromScene` → §4.1. [проверено: F1/01]
-14. `new RoomEnvironment()` — без аргументов; `ColorEnvironment(color)` — однотонный IBL; яркость и поворот — `scene.environmentIntensity`, `environmentRotation` → §4.1. [проверено: F1/01]
-15. **`WebGPURenderer` тонмаппит сплошной `scene.background`, `WebGLRenderer` — нет**: фон canvas расходится с CSS-фоном (#eceef2 → 228,230,234); лечение — прозрачный canvas → §2.3. [проверено: F1/05]
-16. **WebGPU — не по умолчанию для лендинга**: первый кадр WebGPU 922 мс против 1353 мс у WebGL (не хуже), но откат `WebGPURenderer` на WebGL2 — 2299 мс и TBT ×1,6; это получат ≈ 16 % посетителей без WebGPU → §2.2. [проверено: F1/05]
+10. **AgX three ≠ AgX Blender**: приближение Filament, look выключен, степень 2,2 вместо 2,4 → three светлее на 3,4–3,7 L*; если AgX обязателен — подменить степень на 2,4 до первой компиляции (D2) → §5.2. [проверено]
+11. **Unlit тоже тонмаппится** (`MeshBasicMaterial` из `KHR_materials_unlit`): для точного hex логотипа — `material.toneMapped = false` → §5.3. [проверено]
+12. **Металлу нужно окружение**: `RoomEnvironment` через PMREM (0 КБ) или HDRI 1k (0,4–0,6 МБ) через `HDRLoader`; без него металл чёрный → §4. [проверено]
+13. `scene.environment = hdrTexture` (mapping `EquirectangularReflectionMapping`) — рендерер сам строит и кэширует PMREM; руками `PMREMGenerator` — только для `fromScene` → §4.1. [проверено]
+14. `new RoomEnvironment()` — без аргументов; `ColorEnvironment(color)` — однотонный IBL; яркость и поворот — `scene.environmentIntensity`, `environmentRotation` → §4.1. [проверено]
+15. **`WebGPURenderer` тонмаппит сплошной `scene.background`, `WebGLRenderer` — нет**: фон canvas расходится с CSS-фоном (#eceef2 → 228,230,234); лечение — прозрачный canvas → §2.3. [проверено]
+16. **WebGPU — не по умолчанию для лендинга**: первый кадр WebGPU 922 мс против 1353 мс у WebGL (не хуже), но откат `WebGPURenderer` на WebGL2 — 2299 мс и TBT ×1,6; это получат ≈ 16 % посетителей без WebGPU → §2.2. [проверено]
 17. `await renderer.init()` у `WebGPURenderer` — до `render()` вне `setAnimationLoop` и до `KTX2Loader.detectSupport(renderer)` → §2.1. [документация: Migration Guide r181; проверено: A/08, F1/05]
 18. Не смешивать `three` и `three/webgpu` в одной странице — два экземпляра three, «Multiple instances» → §2.1. [документация]
-19. **`PCFSoftShadowMap` в r186 удалён в обоих рендерерах** (warn и `PCFShadowMap`) — поправка к A `03 §2.3` → §7. [проверено: F1/01]
+19. **`PCFSoftShadowMap` в r186 удалён в обоих рендерерах** (warn и `PCFShadowMap`) — поправка к A `03 §2.3` → §7. [проверено]
 20. **Тени shadow map** — лишний проход глубины на источник (точечный — 6); hero: запечь свет и тень в Blender или плоскость с запечённой тенью; реальные тени — только движущимся → §7. [практика: V:Inqt1fZ3QTI 23:15; E 04 §6]
 21. **Transmission удваивает вызовы и треугольники**; `transmissionResolutionScale` по умолчанию 1 → на телефоне 0,5 → §6.3. [проверено: E/24 (×2), F1/01 (умолчание); эффект 0,5 — 1,72 → 1,39 мс без видимой потери, F2/05]
-22. **lightMap из Blender**: `channel = 1`, `flipY = false`, `lightMapIntensity = Math.PI`; `aoMap` гасит только непрямой свет → §6.2. [проверено: E/21, E/20]
+22. **lightMap из Blender**: `channel = 1`, `flipY = false`, `lightMapIntensity = Math.PI`; `aoMap` гасит только непрямой свет → §6.2. [проверено]
 23. Постобработка: WebGL — pmndrs `postprocessing` 6.39.5 (peer three < 0.187) или `EffectComposer` + `OutputPass`; WebGPU — `RenderPipeline`; без `OutputPass` тонмаппинг и sRGB в цепочке теряются → §8. [документация]
-24. **Освобождать всё**: геометрии, материалы, текстуры материалов (в т. ч. `ImageBitmap`), render targets, PMREM; `renderer.info.memory` → 0 → §9. [проверено: F1/06]
+24. **Освобождать всё**: геометрии, материалы, текстуры материалов (в т. ч. `ImageBitmap`), render targets, PMREM; `renderer.info.memory` → 0 → §9. [проверено]
 25. **Resize**: `ResizeObserver` на контейнере, `setSize(w, h, false)`, `setPixelRatio(Math.min(devicePixelRatio, 1.5))` на телефоне; DPR 2,625 с MSAA — 89 МБ одних буферов кадра → §10. [проверено: F1/04 (расчёт), A/04]
-26. **Узлы после постобработки**: имена санитизируются (`. [ ] : /` удаляются, пробел → `_`), квантование добавляет обёртку — искать по `userData.name` и `traverse(o => o.isMesh)` → §11. [проверено: E/11, E/24, E/28, F1/06]
-27. `renderer.info.render.calls` у `WebGPURenderer` накопительный (за кадр — `frameCalls`) → §2.3. [проверено: F1/05]
-28. **Первый кадр модели метить самому** (после первого `render()` модели): первый draw call страницы — это PMREM окружения (≈ 1,9 с в F1/02), а не модель → §3.5. [проверено: F1/02]
+26. **Узлы после постобработки**: имена санитизируются (`. [ ] : /` удаляются, пробел → `_`), квантование добавляет обёртку — искать по `userData.name` и `traverse(o => o.isMesh)` → §11. [проверено]
+27. `renderer.info.render.calls` у `WebGPURenderer` накопительный (за кадр — `frameCalls`) → §2.3. [проверено]
+28. **Первый кадр модели метить самому** (после первого `render()` модели): первый draw call страницы — это PMREM окружения (≈ 1,9 с в F1/02), а не модель → §3.5. [проверено]
 
 ## 1. Модули и импорт
 
@@ -49,15 +49,15 @@ toktx 4.4.2, Blender 5.2.2 · JS-блоки файла исполнены про
 | import map → min + ключ-URL для ядра (§1.2) | 243 КБ | 3,4 с | 5,9 с (1 прогон) | страница без сборки, CDN допустим |
 | **бандлер** (esbuild `--splitting`), свой домен, brotli | **174 КБ** | **2,0 с** | **3,7 с** | **продакшен** |
 
-LCP во всех вариантах — постер 404–482 мс, CLS 0 [проверено: 99-raw/experiments/F1/02-hero-variants]. Выигрыш бандлера — вес и
+LCP во всех вариантах — постер 404–482 мс, CLS 0 [проверено]. Выигрыш бандлера — вес и
 отсутствие чужого домена: DNS/TLS к CDN на медленной сети и gzip вместо br. Размеры частей (brotli q11, F1/01): `three.module.js`
 102 КБ + `three.core.js` 204 КБ (неминиф.), `three.module.min.js` 74 + `three.core.min.js` 84 КБ (jsDelivr, Terser),
 `three.webgpu.js` 316 КБ, `GLTFLoader.js` 21 КБ; бандл с `import('three')` целиком — ядро-чанк 153 КБ (весь namespace, tree-shaking
-не работает на `import * as` при динамическом импорте) [проверено: F1/01, F1/02]. С именованными импортами и статической сборкой A/03
-получал 109–160 КБ br [проверено: A/03].
+не работает на `import * as` при динамическом импорте) [проверено]. С именованными импортами и статической сборкой A/03
+получал 109–160 КБ br [проверено].
 
 ```bash
-# esbuild 0.28 — [проверено: 99-raw/experiments/F1/02-hero-variants/make_pages.py] бандл с чанками: import('three') → отдельный файл
+# esbuild 0.28 — [проверено] бандл с чанками: import('three') → отдельный файл
 npm i three@0.186.0 esbuild
 npx esbuild hero.js --bundle --format=esm --splitting --minify --outdir=dist --legal-comments=none
 # хостинг: brotli для .js/.wasm/.glb, хэш в именах чанков + Cache-Control: public, max-age=31536000, immutable
@@ -73,7 +73,7 @@ jsDelivr минифицирует файлы на лету (`*.min.js` для л
 Import map умеет переназначать разрешённые URL, не только «голые» имена:
 
 ```html
-<!-- three r186 — [проверено: 99-raw/experiments/F1/02-hero-variants/v3_min_remap.html] прототип: min-сборки jsDelivr + ядро тоже min -->
+<!-- three r186 — [проверено] прототип: min-сборки jsDelivr + ядро тоже min -->
 <script type="importmap">
 { "imports": {
   "three": "https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.min.js",
@@ -83,7 +83,7 @@ Import map умеет переназначать разрешённые URL, н�
 </script>
 ```
 
-Проверка — в Network должны быть только `three.module.min.js` и `three.core.min.js` (3 из 3 прогонов) [проверено: F1/02]. jsDelivr
+Проверка — в Network должны быть только `three.module.min.js` и `three.core.min.js` (3 из 3 прогонов) [проверено]. jsDelivr
 пишет «Do NOT use SRI with dynamically generated files» — без атрибута `integrity`. Версию — всегда полную (`@0.186.0`), не `@latest`.
 Модули addons (`GLTFLoader.js` и т. п.) импортируют `"three"` — все получат один экземпляр через import map.
 
@@ -101,12 +101,12 @@ Import map умеет переназначать разрешённые URL, н�
 - `await renderer.init()` — до первого `render()` вне `setAnimationLoop` и до `KTX2Loader.detectSupport(renderer)` (r181: async-
   методы вроде `renderAsync` устарели) [документация: Migration Guide r181; проверено: A/08, F1/05].
 - В одной странице — один «мир»: либо `three`, либо `three/webgpu` (+ `three/tsl`); import map для WebGPU-страницы переназначает
-  и `"three"` → `three.webgpu.js`, иначе addons потянут второй экземпляр [проверено: A/08, F1/05].
+  и `"three"` → `three.webgpu.js`, иначе addons потянут второй экземпляр [проверено].
 - В режиме совместимости WebGPU (compat mode, старые Android, Chrome 146+) three r186 выключает MSAA (`_samples = 0` в
   `WebGPUBackend.js`); не запрашивать функций и лимитов сверх умолчаний — лимиты разнятся по браузерам [V:3YP5Ck-7NZk 07:45, 40:25].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets; F1/05] WebGPURenderer: init() до кадра, откат на WebGL2 сам
+// three r186 — [проверено] WebGPURenderer: init() до кадра, откат на WebGL2 сам
 import * as THREE from 'three/webgpu';
 
 export async function createWebGPURenderer(host, { maxDpr = 1.5 } = {}) {
@@ -130,7 +130,7 @@ export async function createWebGPURenderer(host, { maxDpr = 1.5 } = {}) {
 | `WebGPURenderer({ forceWebGL: true })` — откат | **2299 мс** [1769–3522] | **1015 мс** | 1044 мс | 2,4 мс |
 
 Сцена `product.glb` (7,3 тыс. треуг., clearcoat), RoomEnvironment, Neutral, 800², Iris Xe, новый процесс браузера на прогон
-[проверено: 99-raw/experiments/F1/05-webgl-webgpu]. Спор «готов ли WebGPU» (mrdoob 06.2024: «not ready for production» [V:7we9mqIOKyw
+[проверено]. Спор «готов ли WebGPU» (mrdoob 06.2024: «not ready for production» [V:7we9mqIOKyw
 17:34]; HolyJS 03.2025: «больше проблем, чем пользы» [V:sqkSrTq1Kos 37:43]; Khronos 07.2026: во всех основных браузерах
 [V:3YP5Ck-7NZk 08:48]) замер разрешает так: **WebGPU уже не медленнее на первом кадре, но худший случай аудитории — откат, а он
 медленнее обычного `WebGLRenderer` в 1,7 раза**. Позиция базы (совпадает с W7 §4):
@@ -145,10 +145,10 @@ export async function createWebGPURenderer(host, { maxDpr = 1.5 } = {}) {
 ### 2.3. Различия, которые видны на странице
 
 - **Фон**: `WebGPURenderer` пропускает сплошной `scene.background` через тонмаппинг (#eceef2 → пиксель 228,230,234 = Neutral от
-  236,238,242), `WebGLRenderer` — нет (236,238,242) [проверено: F1/05]. Canvas поверх CSS-фона — `alpha: true` и без
+  236,238,242), `WebGLRenderer` — нет (236,238,242) [проверено]. Canvas поверх CSS-фона — `alpha: true` и без
   `scene.background`; или цвет фона только в CSS.
 - **`renderer.info`**: у `WebGPURenderer` `render.calls` накапливается (333 после 150 кадров), за кадр — `render.frameCalls`; у
-  `WebGLRenderer` `render.calls` — за последний кадр (`info.autoReset = true`) [проверено: F1/05].
+  `WebGLRenderer` `render.calls` — за последний кадр (`info.autoReset = true`) [проверено].
 - **Устойчивый кадр** лёгкой сцены у WebGL ниже (0,8 против 1,9 мс подачи) — WebGPU окупается на CPU-bound сценах с тысячами
   объектов (render bundles, BundleGroup: 20 → 50 FPS в демо [V:sqkSrTq1Kos 13:52]) [проверено: F1/05; практика].
 
@@ -159,12 +159,12 @@ export async function createWebGPURenderer(host, { maxDpr = 1.5 } = {}) {
 Постер и H1 в HTML → `load` + видимость + простой → `import()` three → рендерер и окружение → GLB одним `fetch` → декодеры по
 `extensionsUsed` → `parseAsync` → кадр по габариту → `compileAsync` → первый `render()` → класс `is-live` (кроссфейд на CSS) →
 цикл только при видимости, открытой вкладке и без reduce. Условия запуска и цикл — `05-performance-a11y-fallbacks.md` §2–3; сам
-паттерн и LCP — A `../01-web-3d-landscape/02-when-3d-budgets-loading.md` §4 [проверено: A/07, F1/02].
+паттерн и LCP — A `../01-web-3d-landscape/02-when-3d-budgets-loading.md` §4 [проверено].
 
 ### 3.2. Один запрос, нужные декодеры, прогресс
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] (логика — F1/02 hero.js): GLB одним fetch, декодеры по extensionsUsed
+// three r186 — [проверено] (логика — F1/02 hero.js): GLB одним fetch, декодеры по extensionsUsed
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 export function glbExtensions(buf) {                     // JSON-чанк GLB: заголовок 12 байт + заголовок чанка 8 байт
@@ -225,17 +225,17 @@ export async function loadGLB(url, renderer, { decoders = '/decoders/', onProgre
 
 Исходник r186: `compileAsync(scene, camera)` вызывает синхронный `compile()` (сборка GLSL, `compileShader`/`linkProgram` для всех
 материалов сцены с учётом окружения и света), затем раз в 10 мс опрашивает `program.isReady()` через `KHR_parallel_shader_compile`
-[проверено: F1/01]. Замер F1/02 (бандл, эмуляция телефона): с ним — компиляция 300 мс, первый `render()` 14 мс; без него — первый
-`render()` 541 мс; TBT 867 против 854 мс — в пределах шума [проверено: F1/02]. Вывод: гипотеза «`compileAsync` снимает долгие задачи»
+[проверено]. Замер F1/02 (бандл, эмуляция телефона): с ним — компиляция 300 мс, первый `render()` 14 мс; без него — первый
+`render()` 541 мс; TBT 867 против 854 мс — в пределах шума [проверено]. Вывод: гипотеза «`compileAsync` снимает долгие задачи»
 (A) **не подтверждена**; он нужен, чтобы тяжёлый кадр не пришёлся на кроссфейд постер → canvas и на первую секунду анимации. Для
-сцены с transmission первый кадр без прогрева — 387–480 мс только на шейдер `MeshPhysicalMaterial` [проверено: E/18, F1/03].
+сцены с transmission первый кадр без прогрева — 387–480 мс только на шейдер `MeshPhysicalMaterial` [проверено].
 Вызывать после того, как в сцене есть окружение и все материалы: `scene.environment`, добавленный позже, меняет программы.
 
 ### 3.5. Метка первого кадра
 
 Первый draw call страницы — рендер `RoomEnvironment` в PMREM (≈ 1,9 с на эмуляции Pixel 7), а модель рисуется на 1,8–6 с позже;
 зонд `site_probe.py` (`first_draw_ms`) ловит первый. Страница должна сама отмечать первый кадр модели (`performance.mark('hero-first-frame')`
-или `window.__t.firstFrame`) — это метрика ворот качества в `05` §6 [проверено: F1/02].
+или `window.__t.firstFrame`) — это метрика ворот качества в `05` §6 [проверено].
 
 ## 4. Окружение и свет
 
@@ -249,20 +249,20 @@ export async function loadGLB(url, renderer, { decoders = '/decoders/', onProgre
 | тот же HDRI, свой рендер студии из Blender (панорама, EXR → HDR) | 0,4–0,6 МБ | свет «как в Blender-рендере» | `../06-materials-lighting-render/` (D2) |
 
 - `PMREMGenerator.fromScene(scene, sigma = 0, near = 0.1, far = 100, { size = 256, position })`: `sigma` — размытие в радианах (0,04 —
-  как у A/07); `RoomEnvironment()` конструктор без аргументов [проверено: F1/01].
+  как у A/07); `RoomEnvironment()` конструктор без аргументов [проверено].
 - Эквиректангулярную текстуру PMREM-ит сам рендерер при первом использовании и кэширует (`getPMREM` в `WebGLRenderer`); свой
-  `PMREMGenerator.fromEquirectangular` — только чтобы прогреть заранее [проверено: F1/01]. Идеальный вход — 1k (1024×512): под
+  `PMREMGenerator.fromEquirectangular` — только чтобы прогреть заранее [проверено]. Идеальный вход — 1k (1024×512): под
   выход PMREM 256² [документация: JSDoc r186].
 - Яркость и поворот окружения: `scene.environmentIntensity` (1), `scene.environmentRotation` (Euler); фон отдельно —
-  `backgroundIntensity`, `backgroundBlurriness`, `backgroundRotation` [проверено: F1/01].
-- Металл (metallic 1) без окружения — чёрный с одним бликом; пластик — нормальный [проверено: E/23]. Окружение нужно в любой сцене
+  `backgroundIntensity`, `backgroundBlurriness`, `backgroundRotation` [проверено].
+- Металл (metallic 1) без окружения — чёрный с одним бликом; пластик — нормальный [проверено]. Окружение нужно в любой сцене
   с металлом, даже если свет запечён.
-- `HDRLoader` (r180) вместо `RGBELoader` (наследник с `console.warn`, `@deprecated r180`) [проверено: F1/01].
+- `HDRLoader` (r180) вместо `RGBELoader` (наследник с `console.warn`, `@deprecated r180`) [проверено].
 
 ### 4.2. Код: рендерер, окружение, пара тонмаппинга
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] рендерер под рендер Blender «Khronos PBR Neutral», окружение, кадр по габариту
+// three r186 — [проверено] рендерер под рендер Blender «Khronos PBR Neutral», окружение, кадр по габариту
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
@@ -304,12 +304,12 @@ export function frameObject(camera, object, { margin = 1.05, dir = [0.55, 0.3, 0
 ```
 
 `frameObject` решает «на телефоне модель обрезана»: вертикальный FOV фиксирован, и в портретном кадре горизонталь уже — камеру надо
-отодвигать по меньшему углу (так же рассуждает Bruno Simon о портретном экране [V:Uc3Ujdh8Ba4 04:16]) [проверено: F1/02, F1/06].
+отодвигать по меньшему углу (так же рассуждает Bruno Simon о портретном экране [V:Uc3Ujdh8Ba4 04:16]) [проверено].
 
 ### 4.3. Лампы
 
 - Свет из Blender по умолчанию не экспортируется (правильно для сайтов); если экспортировать — только `COMPAT` (±2 %), умолчание
-  `SPEC` даёт ×683 и белый кадр; Area и мир не экспортируются [проверено: E/14]. Интенсивности three — физические (кандела, люкс),
+  `SPEC` даёт ×683 и белый кадр; Area и мир не экспортируются [проверено]. Интенсивности three — физические (кандела, люкс),
   `physicallyCorrectLights`/`useLegacyLights` удалены [документация: A 03 §2.3].
 - Для hero обычно хватает окружения; ключевой `DirectionalLight` добавлять ради тени или акцентного блика. ≤ 4 источников на сцену,
   без area на телефоне [V:Inqt1fZ3QTI 16:05]. Запечённый свет и lightMap + окружение/лампы — свет посчитается дважды [практика: E 02 §6.2].
@@ -329,29 +329,29 @@ export function frameObject(camera, object, { margin = 1.05, dir = [0.55, 0.3, 0
 §2.2–2.6 (не дублирую); E/02; F1/01 — исходник шейдеров]. Почему Neutral совпадает: в three `NeutralToneMapping` — формула Khronos
 PBR Neutral 1:1 (`StartCompression = 0.8 − 0.04`, `Desaturation = 0.15`), в Blender — 3D-LUT того же тонмаппера [проверено: F1/01,
 D2]. Зона гарантии — линейные 0,08…0,8 (≈ 80…231 в 8-битном sRGB); каналы у 255 (ярко-жёлтый, оранжевый) бледнеют на ΔE 3–4 — компромисс
-Neutral [проверено: D2/01]. model-viewer 4.x по умолчанию тоже `tone-mapping="neutral"` (до 4.0 — ACES) [документация:
+Neutral [проверено]. model-viewer 4.x по умолчанию тоже `tone-mapping="neutral"` (до 4.0 — ACES) [документация:
 `F1-sub-AR.md` §1; V:0oIZoSg03PY ≈38:00].
 
 ### 5.2. AgX: почему не совпадает и что делать
 
 three r186 реализует AgX как приближение Filament (матрицы Rec.2020, полиномиальная сигмоида), вызов «look» закомментирован
-(`// v = agxLook(v, look)`), гамут-маппинг — простой clamp, линеаризация `pow(2.2)` [проверено: F1/01]. D2/01: с `pow 2.4` вместо 2,2
+(`// v = agxLook(v, look)`), гамут-маппинг — простой clamp, линеаризация `pow(2.2)` [проверено]. D2/01: с `pow 2.4` вместо 2,2
 (как у Blender, Rec.1886) расхождение падает с 3,78 до 1,91 ΔE и с +3,4 до +0,9 L* — если AgX обязателен, подменить степень до первой
-компиляции шейдеров (код — D2 `../06-materials-lighting-render/03-render-engines-color.md` §2.6) [проверено: D2/01]. Расхождение
+компиляции шейдеров (код — D2 `../06-materials-lighting-render/03-render-engines-color.md` §2.6) [проверено]. Расхождение
 AgX — не поломка экспорта; C1 `../04-ai-agents-mcp/05-failure-modes-catalog.md` M4.6 («одинаковый AgX в Blender и three») этого не
 учитывает [спорно → вывод F1/D2: Neutral].
 
 ### 5.3. Цветовые пространства текстур и unlit
 
-- `outputColorSpace = SRGBColorSpace` — умолчание; менять не нужно. Рабочее пространство — линейный sRGB [проверено: F1/01].
+- `outputColorSpace = SRGBColorSpace` — умолчание; менять не нужно. Рабочее пространство — линейный sRGB [проверено].
 - `GLTFLoader` сам ставит `colorSpace = SRGBColorSpace` картам `baseColorTexture`, `emissiveTexture`, `sheenColorTexture`,
   `specularColorTexture`, остальным — линейное [документация: E 01 §5.4]. Свои текстуры (`TextureLoader`, lightMap, видео, canvas):
   цветовым — `tex.colorSpace = THREE.SRGBColorSpace`, данным (нормали, шероховатость) — оставить `NoColorSpace`; карта света
-  PNG — sRGB, `.hdr` — `LinearSRGBColorSpace` [проверено: E/21].
+  PNG — sRGB, `.hdr` — `LinearSRGBColorSpace` [проверено].
 - `new THREE.Color('#e4002b')` и `color.setHex()` принимают sRGB и переводят в рабочее линейное — hex клиента писать как есть;
   сырой `ShaderMaterial` без `colorspace_fragment` выдаст цвета темнее hex [документация; V: W7 §4].
 - **Unlit**: `GLTFLoader` создаёт `MeshBasicMaterial` без `toneMapped = false`, и Neutral сдвигает плоские цвета до ΔE 5,7
-  (терракота, navy, violet, серые) — для логотипов и плашек с точным hex `material.toneMapped = false` [проверено: D2/01].
+  (терракота, navy, violet, серые) — для логотипов и плашек с точным hex `material.toneMapped = false` [проверено].
   Запечённый в Blender свет (unlit-атлас) — тоже `toneMapped = false` или тот же вид при запекании (E 02 §6.1).
 
 ## 6. Материалы из Blender в three: что настраивать на странице
@@ -362,24 +362,24 @@ AgX — не поломка экспорта; C1 `../04-ai-agents-mcp/05-failure
 `MeshPhysicalMaterial` — при clearcoat, transmission, volume, sheen, iridescence, specular, anisotropy, dispersion; `clearcoat` из
 `KHR_materials_clearcoat` (ΔE 1,7 к Blender), `emissiveIntensity` из `KHR_materials_emissive_strength` (ΔE ≤ 1) — само, без кода;
 «светится» эмиссия только с bloom (F2 `04`) [проверено: E/12–13; F1/01 — список расширений GLTFLoader]. Thin film экспортируется
-только через группу «glTF Material Output» (иначе теряется; заменить — `iridescence` в JS или текстура) [проверено: E/13].
+только через группу «glTF Material Output» (иначе теряется; заменить — `iridescence` в JS или текстура) [проверено].
 
 ### 6.2. lightMap и aoMap из Blender
 
 - В glTF нет слота lightMap: карта грузится отдельно и назначается кодом — `channel = 1` (второй UV Blender), `flipY = false`,
   `lightMapIntensity = Math.PI` (для PNG ×0,25 — `4π`; `.hdr` — π, `LinearSRGBColorSpace`); при интенсивности 1 — в π раз темнее,
-  ΔE 22. Код — E `../08-export-gltf/02-baking.md` §6.2 [проверено: E/21].
+  ΔE 22. Код — E `../08-export-gltf/02-baking.md` §6.2 [проверено].
 - `aoMap` (из `occlusionTexture`) гасит только непрямой свет (окружение, Hemisphere/Ambient): при одном `DirectionalLight` без
-  окружения AO не виден [проверено: E/20].
+  окружения AO не виден [проверено].
 - Запечённый свет целиком → unlit (`MeshBasicMaterial`, ΔE 0,73 к Cycles) — самый точный путь «как в Blender», если сцена статична
-  [проверено: E/21].
+  [проверено].
 
 ### 6.3. Прозрачность и transmission
 
 - `alphaMode` BLEND → `transparent = true`, `depthWrite = false`, сортировка по центрам объектов: вложенные прозрачные объекты
-  рисуются в неверном порядке; MASK (`alphaTest`) сортировки не требует [проверено: E/23]. `renderOrder` для ручного порядка — не проверено.
+  рисуются в неверном порядке; MASK (`alphaTest`) сортировки не требует [проверено]. `renderOrder` для ручного порядка — не проверено.
 - Transmission: `WebGLRenderer` рисует все непрозрачные объекты ещё раз в цель transmission (MSAA, half float, мипмапы) — вызовы и
-  треугольники ×2 (Camera_01: 4 → 8 вызовов) [проверено: E/24]; первый кадр с компиляцией `MeshPhysicalMaterial` — 387–480 мс [проверено:
+  треугольники ×2 (Camera_01: 4 → 8 вызовов) [проверено]; первый кадр с компиляцией `MeshPhysicalMaterial` — 387–480 мс [проверено:
   E/18, F1/03]. `renderer.transmissionResolutionScale` (умолчание 1) уменьшает цель — на телефоне 0,5 [проверено: F1/01 — свойство;
   визуально не проверено]. Движки вправе упрощать transmission до альфы [V:MFzmj1TUEKk 02:45] — для телефона стекло лучше предрендером.
 - **Стеклу нужен фон внутри canvas**: transmission преломляет только то, что нарисовано в canvas; прозрачный canvas поверх CSS-фона
@@ -397,7 +397,7 @@ AgX — не поломка экспорта; C1 `../04-ai-agents-mcp/05-failure
 | `AccumulativeShadows`/`ContactShadows` drei | несколько проходов (R3F) | F2 `02` |
 
 - r186: `shadowMap.type` по умолчанию `PCFShadowMap` (с r182 он мягкий); `PCFSoftShadowMap` удалён в **обоих** рендерерах — предупреждение
-  и замена на `PCFShadowMap` [проверено: F1/01]. `VSMShadowMap` остался.
+  и замена на `PCFShadowMap` [проверено]. `VSMShadowMap` остался.
 - Реальные тени — только движущимся объектам; статичное — запечь в Blender (AO, lightMap, тень-подложка) [V:Inqt1fZ3QTI 23:15;
   V:BH1R29YvLOk 29:49]. Размер карты: 1024² для hero, `shadow.camera` ужать до габарита объекта (иначе лесенка) [практика].
 - Цена в вызовах добавляется к оценке `glb_lint()` (E 04 §6) — считать при бюджете вызовов (`05` §4).
@@ -423,13 +423,13 @@ AgX — не поломка экспорта; C1 `../04-ai-agents-mcp/05-failure
   иначе декодированный битмап живёт в памяти процесса [документация: E 01 §7.2; проверено: F1/06].
 - Контроль: `renderer.info.memory.geometries`/`.textures` после выгрузки возвращаются к исходным значениям: Camera_01 — геометрии
   15 → 19 → 15, текстуры 5 → 15 → 6; лишняя одна — цель transmission, которую держит рендерер (у модели стекло), до `renderer.dispose()`
-  [проверено: F1/06].
+  [проверено].
 - Сцены по секциям (Shopify Editions): смонтированы только активная и соседние, остальные — `dispose()` [практика: A 02 §4.4].
 - iOS Safari перезагружает вкладку при ≈ 200–400 МБ памяти [V:BH1R29YvLOk 43:28; данные 2024, не проверено на 2026] — текстуры
   RGBA8 2048² ×9 = 192 МБ (E/18) хватит, чтобы уронить вкладку; KTX2 и 1k — `06` §3.
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] выгрузка модели: геометрии, материалы, текстуры (ImageBitmap — close)
+// three r186 — [проверено] выгрузка модели: геометрии, материалы, текстуры (ImageBitmap — close)
 export function disposeObject(root) {
   const textures = new Set();
   root.traverse((o) => {
@@ -453,7 +453,7 @@ export function disposeObject(root) {
 - Размер задаёт CSS контейнера (`aspect-ratio` — CLS 0), canvas — `width:100%; height:100%`; буфер — `renderer.setSize(w, h, false)`
   (третий аргумент `false`: не писать inline-стили) по `ResizeObserver` контейнера, а не `window.resize` [практика: A 02 §2.3].
 - `setPixelRatio(Math.min(devicePixelRatio, 1.5))` на телефоне, до 2 на десктопе; лидеры рендерят телефон в 1,5 (A/04:
-  canvas 618×1259 при CSS 412×839), Spline в полном 2,625 — TBT 1,9 с [проверено: A/04]. Память одних буферов кадра (цвет + глубина,
+  canvas 618×1259 при CSS 412×839), Spline в полном 2,625 — TBT 1,9 с [проверено]. Память одних буферов кадра (цвет + глубина,
   MSAA 4×) для экрана Pixel 7: DPR 1 — 13 МБ, 1,5 — 29 МБ, 2 — 52 МБ, 2,625 — 89 МБ, 3 — 116 МБ; без MSAA — 3/6/12/20/26 МБ; цель
   transmission — ещё столько же [проверено: F1/04 (расчёт)]. При DPR ≥ 2 MSAA можно выключать (резкость даёт сам DPR; антиалиасинг на
   ретине — лишние до ×2 [V:yibGMQ7GGVo 45:32]) [практика].
@@ -462,7 +462,7 @@ export function disposeObject(root) {
   resize, не на каждый кадр ресайза [V:Uc3Ujdh8Ba4 06:19].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] размер буфера = размер контейнера × ограниченный DPR
+// three r186 — [проверено] размер буфера = размер контейнера × ограниченный DPR
 export function autoResize(renderer, camera, host, { maxDpr = 1.5, onResize } = {}) {
   const ro = new ResizeObserver(([entry]) => {
     const { width: w, height: h } = entry.contentRect;
@@ -480,12 +480,12 @@ export function autoResize(renderer, camera, host, { maxDpr = 1.5, onResize } = 
 ## 11. Поиск узлов после экспорта и постобработки
 
 - three санитизирует имена узлов: пробел → `_`, удаляются `[ ] . : /` («Cube.001» → «Cube001»); исходное имя — `userData.name`
-  (при `export_extras`) [проверено: E/11]. Имена в Blender — латиница, цифры и `_` (`hero_body`, `btn_buy`) — тогда одинаковы везде.
+  (при `export_extras`) [проверено]. Имена в Blender — латиница, цифры и `_` (`hero_body`, `btn_buy`) — тогда одинаковы везде.
 - `gltf-transform optimize` с квантованием вставляет узел-обёртку: имя у родителя, меш — ребёнок (`hero_orb` → `hero_orb_1`);
-  `optimize` по умолчанию сливает меши и теряет имена; gltfpack без `-kn -ke` выбрасывает имена и extras [проверено: E/24, E/28].
+  `optimize` по умолчанию сливает меши и теряет имена; gltfpack без `-kn -ke` выбрасывает имена и extras [проверено].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] узел по имени из Blender: санитизация three + обёртка квантования
+// three r186 — [проверено] узел по имени из Blender: санитизация three + обёртка квантования
 export function findNode(root, blenderName) {
   const safe = blenderName.replace(/\s/g, '_').replace(/[[\].:/]/g, '');   // как PropertyBinding.sanitizeNodeName
   let node = root.getObjectByName(safe);
@@ -527,21 +527,21 @@ export function findNode(root, blenderName) {
 
 Нейросеть пишет по памяти (three r1xx до 2024) и получает в r186:
 1. `renderer.outputEncoding = THREE.sRGBEncoding` — удалено (r152) → `outputColorSpace` (и его не трогать) [документация].
-2. `new RGBELoader()` → предупреждение (r180) → `HDRLoader` [проверено: F1/01].
-3. `new THREE.Clock()` → предупреждение (r183) → `THREE.Timer` + `timer.update()` каждый кадр [проверено: F1/01].
-4. `renderer.shadowMap.type = THREE.PCFSoftShadowMap` → «has been removed. Using PCFShadowMap» в обоих рендерерах [проверено: F1/01].
-5. `new USDZLoader()` → предупреждение (r179) → `USDLoader` [проверено: F1/01].
-6. `new RoomEnvironment(renderer)` — лишний аргумент (игнорируется) [проверено: F1/01].
+2. `new RGBELoader()` → предупреждение (r180) → `HDRLoader` [проверено].
+3. `new THREE.Clock()` → предупреждение (r183) → `THREE.Timer` + `timer.update()` каждый кадр [проверено].
+4. `renderer.shadowMap.type = THREE.PCFSoftShadowMap` → «has been removed. Using PCFShadowMap» в обоих рендерерах [проверено].
+5. `new USDZLoader()` → предупреждение (r179) → `USDLoader` [проверено].
+6. `new RoomEnvironment(renderer)` — лишний аргумент (игнорируется) [проверено].
 7. `renderer.render()` у `WebGPURenderer` до `await renderer.init()` [документация r181].
 8. Декодеры с `examples/js/libs/draco/` — 404 в r186 → `examples/jsm/libs/draco/gltf/` [проверено: E 03].
 9. `<script src="three.min.js">` — в r186 нет min-сборок и UMD; import map с `three.module.min.js` без переназначения ядра тянет
-   неминифицированное ядро [проверено: F1/01, F1/02].
+   неминифицированное ядро [проверено].
 10. `renderer.physicallyCorrectLights = true` — удалено; интенсивности уже физические [документация].
-11. Тонмаппинг не включён «потому что в Blender так» — в Blender AgX включён всегда (умолчание), в three — выключен [проверено: F1/01].
-12. Все декодеры подключены «на всякий случай» — +212 КБ br за транскодер KTX2 без KTX2-текстур [проверено: F1/01].
-13. `compileAsync` как средство от TBT — не снимает синхронную часть [проверено: F1/02].
-14. Поиск `getObjectByName('Cube.001')` → `undefined` [проверено: E/26].
-15. `renderer.info.render.calls` как «вызовов за кадр» у `WebGPURenderer` — накопительный [проверено: F1/05].
+11. Тонмаппинг не включён «потому что в Blender так» — в Blender AgX включён всегда (умолчание), в three — выключен [проверено].
+12. Все декодеры подключены «на всякий случай» — +212 КБ br за транскодер KTX2 без KTX2-текстур [проверено].
+13. `compileAsync` как средство от TBT — не снимает синхронную часть [проверено].
+14. Поиск `getObjectByName('Cube.001')` → `undefined` [проверено].
+15. `renderer.info.render.calls` как «вызовов за кадр» у `WebGPURenderer` — накопительный [проверено].
 
 ## Чек-лист
 

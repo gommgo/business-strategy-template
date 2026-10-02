@@ -10,14 +10,14 @@ three r186. Все блоки `python` выполнены в напечатан�
 1. **Дерево GN — только через проверенные обёртки**: `bpyx.gn_tree` (интерфейс), `bpyx.node` (режим до сокетов), `bpyx.link_sockets` (проверка `is_valid`), `bpyx.gn_modifier`/`gn_set_input` (входы 5.2). Сырые деревья из текста компилируются в 0 % (Proc3D, через C2). → §1 [проверено: B, D1/01, D1/06, D1/07; исследование через C2]
 2. **Входы модификатора 5.2 — `mod.properties.inputs.<id>.value` + `ob.update_tag()`**; `mod["Socket_2"]` → TypeError. → §1 [проверено: B]
 3. **Свойства многих нод стали входами-меню**: значение — отображаемое имя строкой (`"Edges"`, `"Count"`), не `node.mode = 'COUNT'`. → §1 [проверено: B, D1/00]
-4. **Повторы — инстансы без Realize**: `Instance on Points` + экспорт `export_gn_mesh` + `export_gpu_instances` (пресет E `instances`) → узлы `EXT_mesh_gpu_instancing`: 25 деревьев/камней — 19,1 КБ против 69,2 КБ с Realize. → §2 [проверено: D1/07; E/08]
-5. **Разные прототипы в одном разбросе** — `Geometry to Instance` (оба прототипа) + `Instance on Points` с `Pick Instance=True` и индексом из `Random Value`; прототипы — в коллекции `glTF_not_exported`. → §2 [проверено: D1/07]
-6. **Разброс только по «верху»** — `Normal` → `Separate XYZ` → `Compare Z > 0,6` в `Selection`; ровный шаг — `POISSON` с `Distance Min`. → §2 [проверено: D1/07]
-7. **Точки GN детерминированы при том же seed** (869 = 869, координаты побайтно), **но их число = плотность × площадь**: для морфинга форм с одинаковым N — своя выборка `d1lib.surface_points(ob, N, seed)`. → §3 [проверено: D1/07]
-8. **Точки из GN читай через `Points to Vertices`** → `attributes["position"].foreach_get`; облако точек не лежит в `evaluated.data` меш-объекта. → §3 [проверено: D1/07]
+4. **Повторы — инстансы без Realize**: `Instance on Points` + экспорт `export_gn_mesh` + `export_gpu_instances` (пресет E `instances`) → узлы `EXT_mesh_gpu_instancing`: 25 деревьев/камней — 19,1 КБ против 69,2 КБ с Realize. → §2 [проверено]
+5. **Разные прототипы в одном разбросе** — `Geometry to Instance` (оба прототипа) + `Instance on Points` с `Pick Instance=True` и индексом из `Random Value`; прототипы — в коллекции `glTF_not_exported`. → §2 [проверено]
+6. **Разброс только по «верху»** — `Normal` → `Separate XYZ` → `Compare Z > 0,6` в `Selection`; ровный шаг — `POISSON` с `Distance Min`. → §2 [проверено]
+7. **Точки GN детерминированы при том же seed** (869 = 869, координаты побайтно), **но их число = плотность × площадь**: для морфинга форм с одинаковым N — своя выборка `d1lib.surface_points(ob, N, seed)`. → §3 [проверено]
+8. **Точки из GN читай через `Points to Vertices`** → `attributes["position"].foreach_get`; облако точек не лежит в `evaluated.data` меш-объекта. → §3 [проверено]
 9. **Точки для частиц — Float32 (x, z, −y), 12 байт на точку**; путь — JSON по имени кривой. → §3 [проверено: D1/07; A `../01-web-3d-landscape/05 §3.8–3.9`]
-10. **Блоб — SDF-ноды 5.2**: `Points to SDF Grid` → `SDF Grid Fillet` → `SDF Grid Mean` → `Grid to Mesh`; без Mean — «гроздь шаров». Воксель 3,5–4 мм на 0,2 м — 13–19 тыс. треуг., 0,2 с. → §4 [проверено: D1/06]
-11. **Метаболы быстрее SDF (0,01 с) и дают меньше треугольников при той же ячейке** (7,7 против 13,8 тыс.), но без сглаживания поля и булевых. → §4 [проверено: D1/06]
+10. **Блоб — SDF-ноды 5.2**: `Points to SDF Grid` → `SDF Grid Fillet` → `SDF Grid Mean` → `Grid to Mesh`; без Mean — «гроздь шаров». Воксель 3,5–4 мм на 0,2 м — 13–19 тыс. треуг., 0,2 с. → §4 [проверено]
+11. **Метаболы быстрее SDF (0,01 с) и дают меньше треугольников при той же ячейке** (7,7 против 13,8 тыс.), но без сглаживания поля и булевых. → §4 [проверено]
 12. **Нода `Mesh Bevel` (новое в 5.2)**: в режиме Edges ширину задают 4 входа `Start/End Left/Right Offset` (по умолчанию 0,1 м!), вход `Offset` на рёбра не влияет; результат = модификатор Bevel. Брать только внутри GN-деревьев. → §5 [проверено: D1/01 E, E0]
 13. **Realize Instances — только если нужна общая геометрия** (булевы, сварка, запекание); иначе ×3–53 к весу (D1/07, E/08). → §2.3 [проверено]
 14. **GN перед экспортом**: `export_apply=True` (пресет E) или `new_from_object`; инстансы без Realize в `new_from_object` не попадают. → §6 [проверено: B, E]
@@ -31,14 +31,14 @@ three r186. Все блоки `python` выполнены в напечатан�
 `is_valid`; входы модификатора 5.2 — через `mod.properties.inputs` и `update_tag()`. Имена сокетов 5.2.2 брать из
 `python3 ../../scripts/blender/bpy_probe.py node <bl_idname> [prop=value]` или зонда D1/00 (например, `GeometryNodeMeshBevel`:
 Mesh, Selection, Affect Kind, Start Left Offset, Start Right Offset, End Left Offset, End Right Offset, Offset, Miter, Spread,
-Segments, Shape, Profile → Mesh, Vertex Face, Edge Face, Outer Edge, Mid Edge) [проверено: D1/00].
+Segments, Shape, Profile → Mesh, Vertex Face, Edge Face, Outer Edge, Mid Edge) [проверено].
 
 Почему обёртки: сырые geometry nodes из текста компилируются в 0 % (Proc3D), 1–3 точных похожих примера поднимают
 компиляцию кода Blender 40,8 → 70 % (BlenderRAG), 5+ общих примеров вредят сильным моделям (C2 `../04-ai-agents-mcp/03`, через
 C1 и задание) [исследование].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] GN-дерево обёртками: интерфейс, режим до сокетов, is_valid
+# Blender 5.2.2 — [проверено] GN-дерево обёртками: интерфейс, режим до сокетов, is_valid
 import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
 import bpy, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -68,7 +68,7 @@ assert n1 > 0 and n2 > n1 * 1.5
 `Instance on Points` (`Pick Instance=True`; `Instance` = `Geometry to Instance`(дерево, камень); `Instance Index` =
 `Random Value` BOOLEAN с вероятностью 0,28; `Scale` = `Random Value` FLOAT 0,7–1,25; `Rotation` = `Random Value` FLOAT_VECTOR
 (0, 0, 0…2π)). Прототипы — объекты в коллекции `glTF_not_exported` (экспортёр её никогда не пишет, E `01 §3.3`), в дерево —
-через `Object Info`. 25 инстансов [проверено: D1/07].
+через `Object Info`. 25 инстансов [проверено].
 
 | Экспорт (пресет E) | Узлы | Треуг. в файле | GLB |
 |---|---|---|---|
@@ -80,7 +80,7 @@ E/08: 100 икосфер — 11,8 КБ и 1 вызов отрисовки про
 пишется только в `extensionsUsed` (E `01 §4.7`).
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] два прототипа по случайному выбору + разброс по «верху»
+# Blender 5.2.2 — [проверено] два прототипа по случайному выбору + разброс по «верху»
 import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
 import bpy, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -133,10 +133,10 @@ assert len(kinds) > 20 and len(set(kinds)) == 2
 Вывод на диск: `export_points_f32(points, path)` — Float32 LE в осях three `(x, z, −y)`, 12 байт на точку (2 048 точек —
 24 576 байт); путь камеры — `export_curve_json("cam_orbit", path, samples=96)`: кривая берётся **по имени** (не
 `active_object`), точки вычисленной кривой в мире, равномерная пересборка, JSON `[[x, z, −y], …]` + флаг замкнутости
-[проверено: D1/07]. Формат и загрузчики на странице — A `../01-web-3d-landscape/05 §3.8–3.9`, F.
+[проверено]. Формат и загрузчики на странице — A `../01-web-3d-landscape/05 §3.8–3.9`, F.
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] точки GN (детерминизм) и ровно N точек для морфинга
+# Blender 5.2.2 — [проверено] точки GN (детерминизм) и ровно N точек для морфинга
 import sys, os, tempfile; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import numpy as np, bpy, d1lib as D, bpyx         # d1lib первым: он добавляет путь к bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -185,7 +185,7 @@ assert info["bytes"] == 1024 * 12
 [мнение: по геометрии изоповерхности, отдельно не мерялось].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] SDF-капля из перекрывающихся шаров и метаболы
+# Blender 5.2.2 — [проверено] SDF-капля из перекрывающихся шаров и метаболы
 import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -226,7 +226,7 @@ print(bpyx.object_stats(blob)["tris"], bpyx.object_stats(meta)["tris"])
 разброса, булевых GN, процедурных панелей).
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/D1/09-doc-snippets] Mesh Bevel (5.2): ширина — во все 4 входа сторон
+# Blender 5.2.2 — [проверено] Mesh Bevel (5.2): ширина — во все 4 входа сторон
 import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -262,19 +262,19 @@ assert abs((mx - mn).x - 0.10) < 1e-4 and abs((mx - mn).z - 0.035) < 1e-4   # г
 | лента по узлу (sweep, не GN) | 26 400 | 593 КБ | 117 КБ |
 | блок с `Mesh Bevel` 3 сегм. | 956 | 33,7 КБ | — |
 
-[проверено: D1/01, D1/06, D1/07]. Бюджеты — файл 05 §4.
+[проверено]. Бюджеты — файл 05 §4.
 
 ## Частые ошибки
 
 1. **Дерево GN «по памяти»**: `node.mode = 'COUNT'`, `mod["Socket_2"]`, `outputs[1]` у Random Value — ошибки 5.x (B B8.7, №79–84).
 2. **Сокет до режима ноды** — связь с недоступным сокетом, `is_valid=False` молча (B8.2).
 3. **Вход модификатора без `update_tag()`** — результат не пересчитан (B8.8).
-4. **`Mesh Bevel` c одним `Offset`** — фаска 10 см [проверено: D1/01].
-5. **Realize Instances «на всякий случай»** — ×3,6–53 к весу [проверено: D1/07; E/08].
-6. **Прототипы разброса в экспортируемой коллекции** — лишние узлы в GLB; класть в `glTF_not_exported` [проверено: D1/07].
-7. **Точки морфинга из Distribute Points** — разное N у разных форм; нужна своя выборка ровно N [проверено: D1/07].
-8. **Чтение точек из `evaluated.data` при выходе Points** — облака там нет; `Points to Vertices` [проверено: D1/07].
-9. **Блоб из шаров без сглаживания поля** — «гроздь» [проверено: D1/06].
+4. **`Mesh Bevel` c одним `Offset`** — фаска 10 см [проверено].
+5. **Realize Instances «на всякий случай»** — ×3,6–53 к весу [проверено].
+6. **Прототипы разброса в экспортируемой коллекции** — лишние узлы в GLB; класть в `glTF_not_exported` [проверено].
+7. **Точки морфинга из Distribute Points** — разное N у разных форм; нужна своя выборка ровно N [проверено].
+8. **Чтение точек из `evaluated.data` при выходе Points** — облака там нет; `Points to Vertices` [проверено].
+9. **Блоб из шаров без сглаживания поля** — «гроздь» [проверено].
 10. **Процедурная текстура в материале как «форма»** — в glTF теряется; форма — в вершины [E; D1/06].
 
 ## Чек-лист

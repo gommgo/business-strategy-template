@@ -1,7 +1,7 @@
 # 08 · Секвенция кадров, вращение 360° и видео с альфой: предрендер вместо реалтайма
 
 Волна 3 · агент K · 23.09.2026 · Blender 5.2.2 LTS (EEVEE), Pillow 11.3, ffmpeg 7.1 (libvpx-vp9, libaom-av1, libx265), Chromium ·
-сквозной прогон: [проверено: 99-raw/experiments/K/01-run-recipes] · пример: `examples/08-sequence-video-alpha/`
+сквозной прогон: [проверено] · пример: `examples/08-sequence-video-alpha/`
 
 ## Выжимка рецепта
 
@@ -35,7 +35,7 @@
 ## 3. Код Blender: GLB → студия без фона → 24 кадра с альфой
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 08: вращение 360° импортированного GLB → PNG RGBA
+# Blender 5.2.2 — [проверено] рецепт 08: вращение 360° импортированного GLB → PNG RGBA
 import sys, math, os, bpy
 sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
 import rk
@@ -74,7 +74,7 @@ rk.save(SLUG, frames=P["frames"], sec_per_frame=round(sum(secs) / len(secs), 2),
 ## 4. Кодирование: WebP/AVIF-секвенция, VP9 с альфой, stacked AV1
 
 ```python
-# run: system — Python 3 + Pillow + ffmpeg — [проверено: 99-raw/experiments/K/01-run-recipes] команды A/06 (encode.py) на кадрах рецепта
+# run: system — Python 3 + Pillow + ffmpeg — [проверено] команды A/06 (encode.py) на кадрах рецепта
 import glob, json, os, subprocess
 from PIL import Image
 EX = "/home/mm/Документы/app-design/blender-research/12-recipes/examples/08-sequence-video-alpha"
@@ -113,7 +113,7 @@ Blender 17,7 с (импорт GLB, студия без фона, 24 кадра E
 | stacked-alpha AV1 (512 × 1024, CRF 40) | **80,1 КБ** | 14 КБ |
 
 Страница `examples/08-sequence-video-alpha/index.html` (`web_view.py --page`): видео играет с альфой поверх CSS-градиента, 144 КБ всего
-(видео 124 + постер-кадр 18), 0 ошибок консоли, 0 вызовов WebGL [проверено: 99-raw/experiments/K/08-video-page]. Детальная форма
+(видео 124 + постер-кадр 18), 0 ошибок консоли, 0 вызовов WebGL [проверено]. Детальная форма
 (лента с бликами) весит в 2–6 раз больше простой сцены A/06 — оценивать вес на своём ассете, а не по таблице A.
 
 Взгляд на `examples/08-sequence-video-alpha/sheet.png` (кадры 1, 5, 9, 13, 17, 21): оборот ровный, альфа чистая, тени нет (EEVEE без
@@ -123,7 +123,7 @@ Blender 17,7 с (импорт GLB, студия без фона, 24 кадра E
 ## 6. Страница: варианты разметки
 
 ```html
-<!-- HTML — [проверено: 99-raw/experiments/K/08-video-page] петля без JS; reduce → пауза на постере (скрипт в примере) -->
+<!-- HTML — [проверено] петля без JS; reduce → пауза на постере (скрипт в примере) -->
 <video src="web/turn_vp9_alpha.webm" poster="web/seq/f_0001.webp" width="512" height="512"
        autoplay muted loop playsinline aria-label="Скульптура из тёмно-синей ленты медленно вращается"></video>
 ```

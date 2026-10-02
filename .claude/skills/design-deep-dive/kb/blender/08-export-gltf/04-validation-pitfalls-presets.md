@@ -12,31 +12,31 @@ gltfpack 1.2, three.js r186, Chromium (Playwright) на Intel Iris Xe.
 
 ## Выжимка для агента
 
-1. **Проверять в четыре слоя**: (1) предэкспортная проверка сцены `preflight()`, (2) валидатор Khronos, (3) что создал three (`gltf_web_inspect.py`), (4) сравнение картинок Blender↔three (`gltf_diff.py`, ΔE ≤ 3.5, IoU ≥ 0.99) → §1 [проверено: 99-raw/experiments/E/02, E/22, E/26]
-2. **Валидатор ловит только структуру**: на 242 файлах единственная ошибка — текстура без UV; ни процедурные ноды, ни цветовые пространства, ни потерянные морфы, ни пересвет света он не видит → §2 [проверено: 99-raw/experiments/E/22-validator]
-3. **`UNUSED_OBJECT` (INFO) почти всегда = лишний TEXCOORD_0** у меша без текстур (195 из 242 файлов) → `export_texcoords=False` или `gltf-transform prune` → §2.1 [проверено: 99-raw/experiments/E/22, E/28]
-4. **`GENERATED_TANGENT_SPACE` (WARNING)** — карта нормалей без касательных; three строит их сам, для точного совпадения — `export_tangents=True` → §2.1 [проверено: 99-raw/experiments/E/22-validator]
-5. **`NODE_SKINNED_MESH_NON_ROOT`** — норма для Blender (меш — ребёнок арматуры); двигать арматуру, а не родителя меша → §2.1 [проверено: 99-raw/experiments/E/22, E/24]
-6. **Предупреждение про `image/ktx2`** у файлов gltfpack — ложная тревога этой сборки валидатора → §2.1 [проверено: 99-raw/experiments/E/22-validator]
-7. **Запускать `preflight()` перед каждым экспортом**: 20 проверок (морфы + модификаторы, UV > 4, два цветовых атрибута, процедурные ноды, цветовые пространства, скрытые объекты, fake-user действия, Area-свет, плотный текст, масштаб, origin) → §5 [проверено: 99-raw/experiments/E/26-doc-snippets]
-8. **Проверять готовый GLB `glb_lint()`**: декодеры для страницы, оценка вызовов и треугольников, память текстур, прозрачность, UV > 4, свет в SPEC, pointer-анимация → §6 [проверено: 99-raw/experiments/E/26-doc-snippets]
-9. **Чёрный металл** = нет окружения: `scene.environment` (RoomEnvironment через PMREM или HDR) обязателен для metallic > 0 → §3, §4.1 [проверено: 99-raw/experiments/E/23-pitfalls]
-10. **Белый экран / пересвет** = свет экспортирован в SPEC (×683) → COMPAT или свет кодом → §3 [проверено: 99-raw/experiments/E/14-lights]
-11. **Белый объект** = процедурный материал, Noise/Layer Weight в Base Color, не подключённая картинка, баг двух цветовых атрибутов → запечь / `export_all_vertex_colors=False` → §3 [проверено: 99-raw/experiments/E/05, E/12, E/19]
-12. **«Металлически-серый» объект без материала или с Diffuse BSDF** — в three metalness 1, roughness 1 → Principled BSDF → §3 [проверено: 99-raw/experiments/E/03, E/12]
-13. **Цвет в Blender и в three разный при правильном файле** — разные тонмаппинги (AgX в Blender 5.x по умолчанию против `NoToneMapping` three) или неверное цветовое пространство картинки в Blender → §4.2 [проверено: 99-raw/experiments/E/02, E/12]
-14. **Вывернутые нормали при doubleSided не видны** ни в Blender, ни в three; всплывают при culling, transmission/volume, в чужих движках → `bmesh.ops.recalc_face_normals` до экспорта → §4.3 [проверено: 99-raw/experiments/E/23, E/26]
-15. **Прозрачность BLEND сортируется по объектам** (`depthWrite=false`): вложенные и пересекающиеся прозрачные объекты рисуются в неверном порядке (IoU 0.961, ΔE 7.8) → MASK, transmission, разнести объекты → §4.4 [проверено: 99-raw/experiments/E/23-pitfalls]
-16. **Transmission удваивает вызовы и треугольники** в three r186 (все непрозрачные объекты рисуются ещё раз в текстуру): Camera_01 — 4 → 8 вызовов, 27k → 54k треуг. → §4.5 [проверено: 99-raw/experiments/E/24-presets] [S7]
-17. **Много draw calls** = много объектов × материалов: объект с тремя материалами = 3 вызова; 100 копий = 100 вызовов, инстансинг = 1 → §4.5 [проверено: 99-raw/experiments/E/08, E/17]
-18. **Модель лежит на боку** — `export_yup=False`; **гигантская/крошечная** — `scale_length` или неприменённый масштаб импорта; **вращается вокруг чужой точки** — origin → §3 [проверено: 99-raw/experiments/E/10-transforms-hierarchy]
-19. **Пропала анимация**: fake-user действие, констрейнты без запекания, pointer-анимация, `export_apply` убил морфы, `export_animations=False` в пресете статики → §4.6 [проверено: 99-raw/experiments/E/07, E/15, E/24]
-20. **Текстуры не найдены** (404 + «Couldn't load texture», белый материал) — `.gltf` без папки текстур или `export_keep_originals` со ссылками вне папки → выкладывать GLB → §3 [проверено: 99-raw/experiments/E/16, E/23]
-21. **Огромный файл**: Subdivision в `levels`, плотный текст, flat-шейдинг, Realize Instances, несжатые PNG 2k → §3 [проверено: 99-raw/experiments/E/03, E/07, E/08, E/09, E/18]
-22. **Шесть пресетов** (`static_hero`, `anim_trs`, `anim_morph`, `anim_skin`, `instances`, `mobile_light`) + команда постобработки к каждому прошли валидатор (0 ошибок) и загрузились в three с нужными сущностями → §7 [проверено: 99-raw/experiments/E/24-presets]
-23. **Морф-пресет — без `export_apply`**; скелет — `export_def_bones`, `export_rest_position_armature`; инстансы — `export_gn_mesh` + `export_gpu_instances` → §7.2 [проверено: 99-raw/experiments/E/24-presets]
-24. **Телефонный пресет — картинки AUTO (JPEG/PNG), KTX2 делает gltfpack**; WebP на входе gltfpack `-tc` не перекодирует → §7.3 [проверено: 99-raw/experiments/E/24-presets]
-25. **Постобработка меняет имена**: optimize с join/flatten и gltfpack без `-kn` переименовывают узлы; квантование вставляет узел-обёртку → в JS искать меш через `traverse` → §7.4 [проверено: 99-raw/experiments/E/24, E/28]
+1. **Проверять в четыре слоя**: (1) предэкспортная проверка сцены `preflight()`, (2) валидатор Khronos, (3) что создал three (`gltf_web_inspect.py`), (4) сравнение картинок Blender↔three (`gltf_diff.py`, ΔE ≤ 3.5, IoU ≥ 0.99) → §1 [проверено]
+2. **Валидатор ловит только структуру**: на 242 файлах единственная ошибка — текстура без UV; ни процедурные ноды, ни цветовые пространства, ни потерянные морфы, ни пересвет света он не видит → §2 [проверено]
+3. **`UNUSED_OBJECT` (INFO) почти всегда = лишний TEXCOORD_0** у меша без текстур (195 из 242 файлов) → `export_texcoords=False` или `gltf-transform prune` → §2.1 [проверено]
+4. **`GENERATED_TANGENT_SPACE` (WARNING)** — карта нормалей без касательных; three строит их сам, для точного совпадения — `export_tangents=True` → §2.1 [проверено]
+5. **`NODE_SKINNED_MESH_NON_ROOT`** — норма для Blender (меш — ребёнок арматуры); двигать арматуру, а не родителя меша → §2.1 [проверено]
+6. **Предупреждение про `image/ktx2`** у файлов gltfpack — ложная тревога этой сборки валидатора → §2.1 [проверено]
+7. **Запускать `preflight()` перед каждым экспортом**: 20 проверок (морфы + модификаторы, UV > 4, два цветовых атрибута, процедурные ноды, цветовые пространства, скрытые объекты, fake-user действия, Area-свет, плотный текст, масштаб, origin) → §5 [проверено]
+8. **Проверять готовый GLB `glb_lint()`**: декодеры для страницы, оценка вызовов и треугольников, память текстур, прозрачность, UV > 4, свет в SPEC, pointer-анимация → §6 [проверено]
+9. **Чёрный металл** = нет окружения: `scene.environment` (RoomEnvironment через PMREM или HDR) обязателен для metallic > 0 → §3, §4.1 [проверено]
+10. **Белый экран / пересвет** = свет экспортирован в SPEC (×683) → COMPAT или свет кодом → §3 [проверено]
+11. **Белый объект** = процедурный материал, Noise/Layer Weight в Base Color, не подключённая картинка, баг двух цветовых атрибутов → запечь / `export_all_vertex_colors=False` → §3 [проверено]
+12. **«Металлически-серый» объект без материала или с Diffuse BSDF** — в three metalness 1, roughness 1 → Principled BSDF → §3 [проверено]
+13. **Цвет в Blender и в three разный при правильном файле** — разные тонмаппинги (AgX в Blender 5.x по умолчанию против `NoToneMapping` three) или неверное цветовое пространство картинки в Blender → §4.2 [проверено]
+14. **Вывернутые нормали при doubleSided не видны** ни в Blender, ни в three; всплывают при culling, transmission/volume, в чужих движках → `bmesh.ops.recalc_face_normals` до экспорта → §4.3 [проверено]
+15. **Прозрачность BLEND сортируется по объектам** (`depthWrite=false`): вложенные и пересекающиеся прозрачные объекты рисуются в неверном порядке (IoU 0.961, ΔE 7.8) → MASK, transmission, разнести объекты → §4.4 [проверено]
+16. **Transmission удваивает вызовы и треугольники** в three r186 (все непрозрачные объекты рисуются ещё раз в текстуру): Camera_01 — 4 → 8 вызовов, 27k → 54k треуг. → §4.5 [проверено] [S7]
+17. **Много draw calls** = много объектов × материалов: объект с тремя материалами = 3 вызова; 100 копий = 100 вызовов, инстансинг = 1 → §4.5 [проверено]
+18. **Модель лежит на боку** — `export_yup=False`; **гигантская/крошечная** — `scale_length` или неприменённый масштаб импорта; **вращается вокруг чужой точки** — origin → §3 [проверено]
+19. **Пропала анимация**: fake-user действие, констрейнты без запекания, pointer-анимация, `export_apply` убил морфы, `export_animations=False` в пресете статики → §4.6 [проверено]
+20. **Текстуры не найдены** (404 + «Couldn't load texture», белый материал) — `.gltf` без папки текстур или `export_keep_originals` со ссылками вне папки → выкладывать GLB → §3 [проверено]
+21. **Огромный файл**: Subdivision в `levels`, плотный текст, flat-шейдинг, Realize Instances, несжатые PNG 2k → §3 [проверено]
+22. **Шесть пресетов** (`static_hero`, `anim_trs`, `anim_morph`, `anim_skin`, `instances`, `mobile_light`) + команда постобработки к каждому прошли валидатор (0 ошибок) и загрузились в three с нужными сущностями → §7 [проверено]
+23. **Морф-пресет — без `export_apply`**; скелет — `export_def_bones`, `export_rest_position_armature`; инстансы — `export_gn_mesh` + `export_gpu_instances` → §7.2 [проверено]
+24. **Телефонный пресет — картинки AUTO (JPEG/PNG), KTX2 делает gltfpack**; WebP на входе gltfpack `-tc` не перекодирует → §7.3 [проверено]
+25. **Постобработка меняет имена**: optimize с join/flatten и gltfpack без `-kn` переименовывают узлы; квантование вставляет узел-обёртку → в JS искать меш через `traverse` → §7.4 [проверено]
 
 ## 1. Цепочка проверки ассета
 
@@ -49,9 +49,9 @@ gltfpack 1.2, three.js r186, Chromium (Playwright) на Intel Iris Xe.
 | 5. как выглядит | `python3 ../../scripts/blender/gltf_diff.py scene.blend out/ --glb model.glb` | расхождение картинки: IoU силуэта, ΔE2000, SSIM, тепловая карта | 5–10 с |
 | 6. сколько стоит | `python3 ../../scripts/blender/gltf_load_bench.py model.glb` | загрузка холодная/тёплая, первый кадр, вызовы, треугольники, память GPU | 5–15 с |
 
-[проверено: 99-raw/experiments/E/02, E/22, E/24, E/26]. Пороги `gltf_diff.py` (калибровка E/02): одинаковый файл в EEVEE «Standard» и three
+[проверено]. Пороги `gltf_diff.py` (калибровка E/02): одинаковый файл в EEVEE «Standard» и three
 `NoToneMapping` даёт ΔE2000 ≈ 3.1 (фронт 2.0–2.3) и IoU 0.996 — это шум метода; поломка экспорта — ΔE > 6 или IoU < 0.95
-[проверено: 99-raw/experiments/E/02-diff-baseline]. Стекло, анизотропию и плёнку сравнивать с Cycles (`--engine cycles --samples 64`).
+[проверено]. Стекло, анизотропию и плёнку сравнивать с Cycles (`--engine cycles --samples 64`).
 
 ```bash
 # Python 3 + Blender 5.2.2 + Playwright — [проверено: 99-raw/experiments/E/22, E/24; ../../scripts/blender/README.md]
@@ -67,7 +67,7 @@ python3 ../../scripts/blender/gltf_load_bench.py /abs/path/model.glb --runs 3 --
 ### 2.1. Что он сказал о 242 файлах из экспериментов
 
 Прогон `99-raw/experiments/E/22-validator/collect.py` (gltf-validator 2.0.0-dev.3.10 через `../../scripts/blender/node/validate.mjs`) по
-всем GLB опытов E — экспорт Blender с разными настройками и выход gltf-transform/gltfpack [проверено: 99-raw/experiments/E/22-validator]:
+всем GLB опытов E — экспорт Blender с разными настройками и выход gltf-transform/gltfpack [проверено]:
 
 | уровень | код | файлов | что значит здесь | что делать |
 |---|---|---|---|---|
@@ -81,7 +81,7 @@ python3 ../../scripts/blender/gltf_load_bench.py /abs/path/model.glb --runs 3 --
 | INFO | `INCOMPLETE_EXTENSION_SUPPORT` | 2 | KHR_animation_pointer | норма (но three его не проигрывает, `01` §9.3) |
 
 `gltf-transform prune` удаляет неиспользуемый `TEXCOORD_0` у примитивов, у которых есть материал без текстур; у примитива без
-материала оставляет [проверено: 99-raw/experiments/E/28-postprocess-data].
+материала оставляет [проверено].
 
 ### 2.2. Чего валидатор не видит
 
@@ -150,7 +150,7 @@ python3 ../../scripts/blender/gltf_load_bench.py /abs/path/model.glb --runs 3 --
 
 Золото (metallic 1, roughness 0.2) на странице без окружения (HemisphereLight + DirectionalLight, `web_view.py --env none`) —
 чёрное с одним бликом; с RoomEnvironment — нормальное золото; пластик в обоих случаях нормальный
-[проверено: 99-raw/experiments/E/23-pitfalls]. Металл в PBR почти не имеет диффузной составляющей и показывает только отражение
+[проверено]. Металл в PBR почти не имеет диффузной составляющей и показывает только отражение
 окружения; лампы дают только точечные блики.
 
 ```js
@@ -164,18 +164,18 @@ scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;   // �
 ### 4.2. «Цвет не тот»: три разные причины
 
 1. **Файл правильный, Blender показывает иначе** — цветовое пространство ноды Image Texture в Blender не совпадает со слотом glTF
-   (Non-Color на base color → Blender бледнее на ΔE 15.9; sRGB на нормалях → в Blender искажён рельеф) [проверено: 99-raw/experiments/E/12-materials-core].
+   (Non-Color на base color → Blender бледнее на ΔE 15.9; sRGB на нормалях → в Blender искажён рельеф) [проверено].
 2. **Разный тонмаппинг**: Blender 5.x по умолчанию — AgX, three — `NoToneMapping`. Для сверки: EEVEE «Standard» ↔ `NoToneMapping`
    (ΔE 3.1) или «Khronos PBR Neutral» ↔ `NeutralToneMapping` (3.2); AgX ↔ `AgXToneMapping` — 4.3, реализации различаются
-   (three светлее на 2–4 L*) [проверено: 99-raw/experiments/E/02-diff-baseline].
+   (three светлее на 2–4 L*) [проверено].
 3. **Файл неправильный** — Base Color > 1 обрезан (ΔE 5.2), белый `COLOR_0` (баг), не-текстурная эмиссия → белый
-   [проверено: 99-raw/experiments/E/05-vertex-colors, E/12-materials-core].
+   [проверено].
 
 ### 4.3. Вывернутые нормали
 
 Сфера с вывернутыми гранями (`bmesh.ops.reverse_faces`) при материале по умолчанию (doubleSided) выглядит нормально и в Blender,
 и в three (ΔE 3.2) — ошибка скрыта; с `use_backface_culling=True` в обоих видна внутренняя сторона дальней половины
-[проверено: 99-raw/experiments/E/23-pitfalls]. Всплывает также в volume (экспортёр ставит doubleSided=false), в тенях и в движках
+[проверено]. Всплывает также в volume (экспортёр ставит doubleSided=false), в тенях и в движках
 без двусторонности. Лечение до экспорта:
 
 ```python
@@ -199,36 +199,36 @@ Orientation (синий — лицевая сторона) [практика; р
 
 - `alphaMode` BLEND в three: `transparent = true`, `depthWrite = false`; прозрачные объекты сортируются по расстоянию центров
   объектов до камеры, а не по пикселям [S5]. Полупрозрачная сфера с полупрозрачным кубом внутри (центры совпадают) — порядок
-  смешивания не определён: IoU 0.961, ΔE 7.8, SSIM 0.43 к EEVEE [проверено: 99-raw/experiments/E/23-pitfalls].
-- Что делать: вырез по альфе — MASK (`alphaTest`, пишет глубину, без сортировки) [проверено: 99-raw/experiments/E/12-materials-core];
+  смешивания не определён: IoU 0.961, ΔE 7.8, SSIM 0.43 к EEVEE [проверено].
+- Что делать: вырез по альфе — MASK (`alphaTest`, пишет глубину, без сортировки) [проверено];
   стекло — transmission (`01` §6.2); вложенные прозрачные объекты — разнести или объединить в один меш; порядок вручную —
   `mesh.renderOrder` в JS [документация three; не проверено].
 - Одна константа Alpha < 1 на весь материал уже даёт BLEND — для «чуть прозрачного» фона это лишняя сортировка и отключённая
-  запись глубины [проверено: 99-raw/experiments/E/12-materials-core].
+  запись глубины [проверено].
 
 ### 4.5. Draw calls
 
 - Вызов = примитив glTF × экземпляр узла: объект Blender с тремя материалами — 3 примитива (в three `Group` с тремя `Mesh`) —
-  3 вызова [S5]. 100 связанных дубликатов — 100 вызовов; с `export_gpu_instances` — 1 [проверено: 99-raw/experiments/E/08-geonodes-instances].
+  3 вызова [S5]. 100 связанных дубликатов — 100 вызовов; с `export_gpu_instances` — 1 [проверено].
 - `gltf-transform optimize` (join) сливает меши с одинаковым материалом: 36 объектов → 4 вызова, но имена теряются
-  [проверено: 99-raw/experiments/E/17-compression-geometry].
+  [проверено].
 - **Transmission удваивает работу**: `WebGLRenderer.renderTransmissionPass` r186 рисует все непрозрачные объекты ещё раз в
   отдельную цель (MSAA ≥ 4, half-float, мипмапы), а двусторонние прозрачные материалы — ещё и задней стороной [S7]. Camera_01
-  (линза с KHR_materials_transmission): 4 примитива в файле → 8 вызовов и 53 974 треуг. вместо 26 987 [проверено: 99-raw/experiments/E/24-presets].
+  (линза с KHR_materials_transmission): 4 примитива в файле → 8 вызовов и 53 974 треуг. вместо 26 987 [проверено].
   Для стекла в Blender включать `use_backface_culling` (doubleSided=false); `renderer.transmissionResolutionScale` уменьшает
   цель [S7; не проверено].
 - Бюджеты вызовов — `03` §6.5.
 
 ### 4.6. Пропала анимация: проверки по порядку
 
-1. `export_animations=True` (в пресете статики выключен намеренно) [проверено: 99-raw/experiments/E/24-presets].
-2. Действие назначено объекту или лежит в NLA-дорожке; fake user не считается [проверено: 99-raw/experiments/E/15-cameras-animation].
-3. Движение от констрейнтов/драйверов — `export_bake_animation=True` [проверено: 99-raw/experiments/E/15-cameras-animation].
-4. Морфы: у объекта нет модификаторов или экспорт без apply [проверено: 99-raw/experiments/E/07, E/24].
-5. Анимируется материал/свет/камера — это pointer, three не проиграет: переносить в JS [проверено: 99-raw/experiments/E/15-cameras-animation].
+1. `export_animations=True` (в пресете статики выключен намеренно) [проверено].
+2. Действие назначено объекту или лежит в NLA-дорожке; fake user не считается [проверено].
+3. Движение от констрейнтов/драйверов — `export_bake_animation=True` [проверено].
+4. Морфы: у объекта нет модификаторов или экспорт без apply [проверено].
+5. Анимируется материал/свет/камера — это pointer, three не проиграет: переносить в JS [проверено].
 6. На странице: `new AnimationMixer(gltf.scene)`, `clipAction(clip).play()`, `mixer.update(delta)` в цикле (`01` §9.1)
-   [проверено: 99-raw/experiments/E/26-doc-snippets].
-7. После постобработки — клипы на месте (`gltf_web_inspect.py`: список клипов и треков) [проверено: 99-raw/experiments/E/24, E/28].
+   [проверено].
+7. После постобработки — клипы на месте (`gltf_web_inspect.py`: список клипов и треков) [проверено].
 
 ### 4.7. Origin и масштаб
 
@@ -253,7 +253,7 @@ Origin — точка, вокруг которой объект будет вр�
 
 Функция обходит объекты, модификаторы, материалы (включая группы нод) и действия и возвращает список `(уровень, код, объект,
 сообщение)`. На тестовой сцене с 20 заложенными проблемами нашла все 20; на чистой сцене — ни одного WARN/ERROR
-[проверено: 99-raw/experiments/E/26-doc-snippets/preflight_test.py].
+[проверено].
 
 ```python
 # Blender 5.2.2 / glTF-IO 5.2.40 — [проверено: 99-raw/experiments/E/26-doc-snippets/preflight_test.py, run_md04.py] предэкспортная проверка сцены для веба
@@ -382,7 +382,7 @@ def preflight(scene=None):
 Чистый Python без bpy: читает JSON-чанк и заголовки картинок. Прогон на выходе пресетов E/24 и файлах E/14–E/26: mobile_light —
 декодеры KTX2Loader + MeshoptDecoder, 4 вызова по файлу (×2 в three из-за transmission — предупреждение), 26 987 треуг., 12 МБ
 текстур; static_hero — MeshoptDecoder, 192 МБ текстур; файл со светом в SPEC — предупреждение «> 500»
-[проверено: 99-raw/experiments/E/26-doc-snippets/glb_lint_result.json].
+[проверено].
 
 ```python
 # Python 3.10+ (без bpy) — [проверено: 99-raw/experiments/E/26-doc-snippets/glb_lint_result.json, run_md04.py] проверка готового GLB:
@@ -497,7 +497,7 @@ def glb_lint(path):
 | `mobile_light` | телефон | база, картинки **AUTO** (JPEG/PNG) | нативный `gltfpack -cc -tc -ts 0.5` | 6 049 → **1 530 КБ**, KTX2 1024², текстуры **12 МБ**, тёплая загрузка 33 мс |
 | вариант «адресуемые узлы» | метки `hotspot_*`, `cam_*`, extras, клики по частям | база `static_hero` | `gltfpack -cc -kn -ke` (или `optimize --flatten false --join false --simplify false`; `prune` по умолчанию удаляет пустышки) | имена и extras узлов сохраняются, extras мешей — нет (I/03, E/28) |
 
-[проверено: 99-raw/experiments/E/24-presets]. Все выходы прошли валидатор без ошибок (предупреждения: касательные у hero,
+[проверено]. Все выходы прошли валидатор без ошибок (предупреждения: касательные у hero,
 non-root skinned mesh у скелета, ложное `image/ktx2` у gltfpack) и загрузились в three r186 с ожидаемыми сущностями.
 
 ### 7.2. Код пресетов
@@ -506,7 +506,7 @@ non-root skinned mesh у скелета, ложное `image/ktx2` у gltfpack) 
 Функция `export()` проверяет ключи по RNA оператора и падает с понятной ошибкой на параметре, которого нет в этой версии.
 
 ```python
-# Blender 5.2.2 / glTF-Blender-IO 5.2.40 — пресеты bpy.ops.export_scene.gltf для веба (three r186). [проверено: 99-raw/experiments/E/24-presets]
+# Blender 5.2.2 / glTF-Blender-IO 5.2.40 — пресеты bpy.ops.export_scene.gltf для веба (three r186). [проверено]
 # Импорт: exec(open(".../presets.py").read()) или sys.path + import presets; export(path, PRESET, **overrides)
 
 BASE_WEB = dict(
@@ -574,10 +574,10 @@ def export(path, preset, **overrides):
     return bpy.ops.export_scene.gltf(filepath=os.path.abspath(path), **kw)
 ```
 
-Примеры вызова (из `99-raw/experiments/E/24-presets/export_all.py`) [проверено: 99-raw/experiments/E/24-presets]:
+Примеры вызова (из `99-raw/experiments/E/24-presets/export_all.py`) [проверено]:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/E/24-presets/export_all.py]
+# Blender 5.2.2 — [проверено]
 exec(open("/abs/path/99-raw/experiments/E/24-presets/presets.py").read())
 export("/abs/out/hero_raw.glb", "static_hero")
 export("/abs/out/scene_raw.glb", "anim_trs", collection="WEB")          # только коллекция WEB (и вложенные)
@@ -588,7 +588,7 @@ export("/abs/out/instances_raw.glb", "instances")
 ### 7.3. Постобработка к пресетам
 
 ```bash
-# gltf-transform 4.5.0, gltfpack 1.2 (нативный) — [проверено: 99-raw/experiments/E/24-presets/post_check.py]
+# gltf-transform 4.5.0, gltfpack 1.2 (нативный) — [проверено]
 BASE=/home/mm/Документы/app-design/blender-research/99-raw/tools
 export PATH="$BASE/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$BASE/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
 cd "$BASE/node"
@@ -601,37 +601,37 @@ node validate.mjs /abs/out/hero.glb                                         # в
 ### 7.4. Ловушки пресетов (найдены при проверке)
 
 - **Телефонный пресет с `export_image_format="WEBP"`** дал 2.43 МБ вместо 1.53: `gltfpack -tc` не перекодирует WebP-вход, но
-  объявляет KHR_texture_basisu обязательным → пресет держит AUTO [проверено: 99-raw/experiments/E/24-presets].
+  объявляет KHR_texture_basisu обязательным → пресет держит AUTO [проверено].
 - `export_apply=True` на объекте с shape keys **без** модификаторов морфы сохраняет (8 из 8); теряет — только при модификаторах
-  [проверено: 99-raw/experiments/E/24-presets, E/07].
+  [проверено].
 - `optimize` с квантованием у анимированного объекта: имя `hero_orb` получает обёртка, меш — `hero_orb_1` (`03` §2.4)
-  [проверено: 99-raw/experiments/E/24-presets].
+  [проверено].
 - `optimize` по умолчанию (hero) и gltfpack без `-kn` переименовывают узлы («Mesh016», «mesh_0») — для hero это допустимо, для
-  сцен с JS-логикой — нет [проверено: 99-raw/experiments/E/24-presets].
+  сцен с JS-логикой — нет [проверено].
 - `collection="WEB"` из скрипта работает (вспомогательный объект из другой коллекции не попал); `use_renderable` исключил объект с
-  `hide_render` [проверено: 99-raw/experiments/E/24-presets].
+  `hide_render` [проверено].
 - Пресеты не включают `export_lights`/`export_cameras`: свет — кодом (`01` §8.1); «камера из Blender» для скролл-сцен —
-  `export_cameras=True` отдельно [проверено: 99-raw/experiments/E/15-cameras-animation].
+  `export_cameras=True` отдельно [проверено].
 
 ## Частые ошибки
 
 1. Считать файл готовым, потому что валидатор не выдал ошибок: смысловые потери (процедуры, цветовые пространства, морфы, свет)
-   валидатор не видит [проверено: 99-raw/experiments/E/22-validator].
+   валидатор не видит [проверено].
 2. Проверять только в Blender: EEVEE показывает процедурный материал, AO из группы не рендерит, свет Area есть — в three всего
-   этого нет; сравнивать в three (`gltf_diff.py`) [проверено: 99-raw/experiments/E/12, E/14, E/20].
-3. Сравнивать AgX Blender с `NoToneMapping` three и «чинить» материалы из-за разницы тонмаппинга [проверено: 99-raw/experiments/E/02-diff-baseline].
-4. Страница без `scene.environment` для металлических материалов — чёрный металл [проверено: 99-raw/experiments/E/23-pitfalls].
-5. Прозрачность «на всякий случай» (Alpha 0.99) — BLEND, выключенная запись глубины, ошибки сортировки [проверено: 99-raw/experiments/E/12, E/23].
-6. Стекло в сцене без учёта цены: transmission удваивает вызовы и треугольники [проверено: 99-raw/experiments/E/24-presets] [S7].
-7. Экспорт с умолчаниями оператора вместо пресета: без apply, без extras, со скрытыми объектами [проверено: 99-raw/experiments/E/01, E/10, E/11].
-8. Модель по памяти пишет параметры 3.x (`export_selected`, `export_colors`) — `TypeError` в 5.2 [проверено: 99-raw/experiments/E/25-api-drift].
-9. `use_selection=True` в фоне без выделения — пустой файл без ошибки [проверено: 99-raw/experiments/E/25-api-drift].
-10. Выкладывать `.gltf` + `.bin` + текстуры по частям или с `export_keep_originals` — 404 и белые материалы [проверено: 99-raw/experiments/E/16, E/23].
-11. Телефонный пресет с WebP-картинками перед `gltfpack -tc` — KTX2 не получится [проверено: 99-raw/experiments/E/24-presets].
-12. Искать в JS меш по имени после optimize/gltfpack без учёта обёрток и переименований [проверено: 99-raw/experiments/E/24, E/28].
-13. Не проверять результат `bpy.ops.object.bake` и экспорта: `{'CANCELLED'}` и пустые файлы проходят молча [проверено: 99-raw/experiments/E/25-api-drift].
-14. Лечить вывернутые нормали включением двусторонности — ошибка остаётся для volume, теней и других движков [проверено: 99-raw/experiments/E/23-pitfalls].
-15. Предупреждение валидатора `image/ktx2` у gltfpack принимать за поломку [проверено: 99-raw/experiments/E/22-validator].
+   этого нет; сравнивать в three (`gltf_diff.py`) [проверено].
+3. Сравнивать AgX Blender с `NoToneMapping` three и «чинить» материалы из-за разницы тонмаппинга [проверено].
+4. Страница без `scene.environment` для металлических материалов — чёрный металл [проверено].
+5. Прозрачность «на всякий случай» (Alpha 0.99) — BLEND, выключенная запись глубины, ошибки сортировки [проверено].
+6. Стекло в сцене без учёта цены: transmission удваивает вызовы и треугольники [проверено] [S7].
+7. Экспорт с умолчаниями оператора вместо пресета: без apply, без extras, со скрытыми объектами [проверено].
+8. Модель по памяти пишет параметры 3.x (`export_selected`, `export_colors`) — `TypeError` в 5.2 [проверено].
+9. `use_selection=True` в фоне без выделения — пустой файл без ошибки [проверено].
+10. Выкладывать `.gltf` + `.bin` + текстуры по частям или с `export_keep_originals` — 404 и белые материалы [проверено].
+11. Телефонный пресет с WebP-картинками перед `gltfpack -tc` — KTX2 не получится [проверено].
+12. Искать в JS меш по имени после optimize/gltfpack без учёта обёрток и переименований [проверено].
+13. Не проверять результат `bpy.ops.object.bake` и экспорта: `{'CANCELLED'}` и пустые файлы проходят молча [проверено].
+14. Лечить вывернутые нормали включением двусторонности — ошибка остаётся для volume, теней и других движков [проверено].
+15. Предупреждение валидатора `image/ktx2` у gltfpack принимать за поломку [проверено].
 
 ## Чек-лист
 

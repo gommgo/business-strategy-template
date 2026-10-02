@@ -474,7 +474,7 @@ everything else the same.
 `compile.forbid_style`, `compile.quality_words`) дают фразы §1–§5; описание — `../../scripts/ai-media/README.md` (раздел D2).
 
 ```bash
-# prompt_compile.py 2.1 · polza 2026-09-23 17:45 — [проверено: 99-raw/experiments/D2/03-phase5-jobs/video_examples.py]
+# prompt_compile.py 2.1 · polza 2026-09-23 17:45 — [проверено]
 P=99-raw/tools/venv-D2/bin/python; C=../../scripts/ai-media/prompt_compile.py
 $P $C compile 99-raw/phase5/inputs/D2/briefs/V1.spec.json --model bytedance/seedance-1.5-pro          # i2v «только движение»
 $P $C compile 99-raw/phase5/inputs/D2/briefs/V1.spec.json --model bytedance/seedance-1.5-pro --opt i2v=full

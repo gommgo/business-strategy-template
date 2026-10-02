@@ -1,16 +1,16 @@
 # 01 · Hero-объект продукта: постер → 3D после LCP
 
 Волна 3 · агент K · 23.09.2026 · Blender 5.2.2 LTS, glTF-IO 5.2.40, gltf-transform 4.5.0, three r186, Chromium (Playwright,
-Iris Xe) · сквозной прогон: [проверено: 99-raw/experiments/K/01-run-recipes] · пример: `examples/01-hero-product/`
+Iris Xe) · сквозной прогон: [проверено] · пример: `examples/01-hero-product/`
 
 ## Выжимка рецепта
 
 1. Первый экран продуктового лендинга: **постер AVIF — LCP, 3D — после `load` в простое**; постер снимается со страницы из
    того же GLB и той же пары тонмаппинга → переход без скачка [проверено: F1 `09/examples/hero-lazy`, A/07].
 2. Геометрия — один идемпотентный `build(P)` в метрах реального предмета, опорная деталь, фаски и мягкие кромки
-   (`rounded_slab`, `power` 2,4–2,6), подвижная часть — отдельный объект с pivot на оси (→ рецепт 05) [проверено: D1/03].
+   (`rounded_slab`, `power` 2,4–2,6), подвижная часть — отдельный объект с pivot на оси (→ рецепт 05) [проверено].
 3. Цвет бренда — **Khronos PBR Neutral в Blender ↔ `NeutralToneMapping` в three** (ΔE 0,23–0,36), hex → линейный через
-   `bpyx.color` [проверено: D2/01].
+   `bpyx.color` [проверено].
 4. Проверки до экспорта — кодом: аудит C1/10 + утверждения C1/16 (габарит ±5 %, стыки ≤ 1 мм, бюджет) [проверено: этот прогон].
 5. Экспорт — пресет E `static_hero` (коллекция `ASSET_*`), постобработка `gltf-transform optimize` (meshopt + квантование);
    без текстур GLB весит десятки КБ — бюджет hero 0,8 / 1,5 МБ (телефон / десктоп) остаётся на текстуры [проверено: E/24, этот прогон].
@@ -35,7 +35,7 @@ Iris Xe) · сквозной прогон: [проверено: 99-raw/experimen
 ## 3. Код: build(P) → проверки → рендер → экспорт
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 01: кейс наушников → постер Blender + GLB для hero
+# Blender 5.2.2 — [проверено] рецепт 01: кейс наушников → постер Blender + GLB для hero
 import sys, math, bpy, bmesh
 sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
 import rk
@@ -123,7 +123,7 @@ rk.save(SLUG, passport=P)
 Меняются только ассет и тексты — модуль читает `window.HERO_CFG`:
 
 ```html
-<!-- three r186 — [проверено: 99-raw/experiments/K/02-hero-page] подмена ассета в эталоне hero-lazy без пересборки бандла -->
+<!-- three r186 — [проверено] подмена ассета в эталоне hero-lazy без пересборки бандла -->
 <script>window.HERO_CFG = { modelPhone: 'case.glb', modelDesktop: 'case.glb' };</script>
 <script type="module" src="dist/hero.js"></script>
 ```
@@ -140,7 +140,7 @@ reduce → один кадр (F1 `09/05 §3, §5`). Если на страниц
 Прогон (раздача с brotli `serve_br.py` F1, `site_probe.py --quick`, `gate_check()` из F1 `09/05 §7.2`):
 
 ```bash
-# bash — [проверено: 99-raw/experiments/K/02-hero-page] ворота hero-страницы: десктоп, Pixel 7 CPU ×4 + 1,6 Мбит/с, reduce
+# bash — [проверено] ворота hero-страницы: десктоп, Pixel 7 CPU ×4 + 1,6 Мбит/с, reduce
 python3 ../../scripts/blender/serve_br.py 12-recipes/examples/01-hero-product 8791 &
 U=http://127.0.0.1:8791/index.html; O=99-raw/experiments/K/02-hero-page
 python3 ../../scripts/blender/site_probe.py $U $O/desktop --quick

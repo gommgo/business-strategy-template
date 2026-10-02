@@ -127,7 +127,7 @@ for m in mats:
 ## 4. Экспорт и сжатие
 
 ```bash
-# run: skip — [проверено: 99-raw/experiments/Z/run_c_post.sh; 99-raw/experiments/KB/06-export/pack.sh] постобработка без слияния
+# run: skip — [проверено] постобработка без слияния
 T=/home/mm/Документы/app-design/blender-research/99-raw/tools
 export PATH="$T/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$T/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
 cd $T/node && npx --no-install gltf-transform optimize zveno_raw.glb zveno.glb --compress meshopt --texture-compress webp \

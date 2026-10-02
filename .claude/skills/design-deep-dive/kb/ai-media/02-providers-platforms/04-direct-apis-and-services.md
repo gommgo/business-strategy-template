@@ -47,7 +47,7 @@ API polza — `01-polza-api.md`. Скоропортящееся (цены, id, �
     → §5.4 [документация]
 15. SVG Recraft V4 — только заливки без `stroke`, фон-прямоугольник первым путём, `preserveAspectRatio="none"`,
     подпись `<recraft-signature>`: постобработка обязательна. → §5.1
-    [проверено: 99-raw/experiments/P/07-recraft-svg-structure]
+    [проверено]
 16. Инструменты Recraft дешевле аналогов: vectorize $0,01, removeBackground $0,01 (SVG на входе → SVG на выходе), crisp
     upscale $0,004, erase region $0,002. → §5.3 [документация]
 17. Ideogram 4.0 API — без `seed`, негатива и стиль-кодов; стиль-коды, негатив, character reference и кастомная модель
@@ -121,7 +121,7 @@ API polza — `01-polza-api.md`. Скоропортящееся (цены, id, �
 ### 1.3 Доступ из России: три барьера
 
 - **Сеть** — не барьер из этой среды: зарубежные API отвечают штатными 401/403 через VPN с раздельной маршрутизацией
-  (литовский выход); таймауты бывают у fal и Recraft [проверено: 99-raw/experiments/P/08-access-probe]. Для
+  (литовский выход); таймауты бывают у fal и Recraft [проверено]. Для
   эксплуатации нужен стабильный зарубежный выход или проводник в РФ.
 - **Условия** — два типа. Явный список стран без России: OpenAI [S7], Gemini API и AI Studio [S15]. Пункт о
   «комплексных санкциях США» (Restricted Territories): xAI [S49], fal [S64], BFL («U.S.-sanctioned jurisdiction») [S26],
@@ -200,7 +200,7 @@ Ideogram, xAI. BFL, Runway, Luma — только с неконфиденциа�
 
 Формула калькулятора OpenAI (порт C1/02, сверен с опубликованной таблицей GPT Image 2 до цента): сетка качества 2.5 —
 low 16, medium 24, high 48, xhigh 64, max 96; `tokens = ceil(gw·gh·(2e6 + W·H) / 4e6)`; цена = tokens × $30/1M
-[проверено: 99-raw/experiments/C1/02-gpt-image-token-cost]. Входные токены (текст $5/1M, картинка $8/1M) не включены.
+[проверено]. Входные токены (текст $5/1M, картинка $8/1M) не включены.
 
 | Размер | low | medium | high | xhigh | max | polza (mie), плоско |
 |---|---|---|---|---|---|---|
@@ -444,7 +444,7 @@ Fast со звуком у fal ($0,15) дороже прямого Google ($0,10)
 
 ### 5.1 Что именно отдаёт Recraft V4 Vector (опыт P/07)
 
-Разбор 8 публичных SVG `recraft-ai/recraft-v4-svg` (Replicate) [проверено: 99-raw/experiments/P/07-recraft-svg-structure]:
+Разбор 8 публичных SVG `recraft-ai/recraft-v4-svg` (Replicate) [проверено]:
 
 - только залитые контуры, **0 обводок** даже на промт «line icons… consistent stroke width» → `stroke-width` через CSS не
   поменять, перекраска — заменой `fill` (3–6 цветов у иконок);
@@ -896,7 +896,7 @@ P-12, P-13 (≈44 ₽) и P-5 через российский проводник
 1. **`background: "transparent"` для GPT Image через polza** — поля нет в `parameters` polza; результат будет с фоном.
    Прозрачность в polza — только `qwen/image-2.1` [S1].
 2. **Перенос уровней `quality` между версиями GPT Image**: `high` у 2.5 по токенам равен `medium` у GPT Image 2, `max` у
-   2.5 — `high` у 2 [проверено: C1/02].
+   2.5 — `high` у 2 [проверено].
 3. **Поле `negative_prompt` там, где его нет**: FLUX.2 (все каналы), Nano Banana, Veo в Gemini API, Ideogram 4.0, Kling 3 в
    новом API, Omni. У Kling 3 и Omni нежелательное пишется прозой в промте («Do not…»), у FLUX.2 и Runway Gen-4 —
    описанием желаемого («Locked camera. The camera remains still.»). Поле есть у Vertex Veo, Runway Veo, Ideogram v3,
@@ -921,7 +921,7 @@ P-12, P-13 (≈44 ₽) и P-5 через российский проводник
 15. **Цена fal = прайс вендора «всегда»**: у Kling и Recraft — да, у Seedance 2.0 fal вдвое дороже BytePlus [S2][S46][S50].
 16. **H3 и H3 Max — одно и то же**: polza даёт H3 Max (fal-вариант, 480/768p), 2K только у `MiniMax-H3` напрямую [S47].
 17. **`grok-imagine-image` = Image 2.0** — нет, в polza базовая модель; Image 2.0 — только напрямую или fal [S48].
-18. **Толщина линии SVG Recraft через CSS `stroke-width`** — обводок нет, линии — заливка [проверено: P/07].
+18. **Толщина линии SVG Recraft через CSS `stroke-width`** — обводок нет, линии — заливка [проверено].
 19. **Кириллица через `text_layout` Recraft V3** — допускаются только гомоглифы латиницы [S28].
 20. **remove.bg в конвейере** — сайт закрывается 01.12.2026, кредиты сгорают [S56].
 21. **Sora 2 в плане** — Videos API OpenAI удаляется 24.09.2026 [S6].

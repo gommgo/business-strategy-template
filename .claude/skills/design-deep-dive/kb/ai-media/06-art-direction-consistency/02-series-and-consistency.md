@@ -49,7 +49,7 @@ T2IS, OmniRef-Bench, DreamBench++, MICON-Bench, CSD, DreamSim), 9 дайджес
 17. **Seed ≠ стиль**: у OpenAI, Gemini, Seedream 4.5+ его нет; Midjourney: seed «can't capture or bookmark a specific style»
     — seed только для повтора одного запроса → §5.3 `[документация]`.
 18. **Пороги серии (фото)**: разброс оттенка ≤ 10°, ΔE палитр ≤ 0,045 (макс ≤ 0,06), σ светлоты ≤ 0,04; распад — > 25° или
-    > 0,06; pHash < 10 из 64 — дубль сюжета → §6.1 `[проверено: F/06]`.
+    > 0,06; pHash < 10 из 64 — дубль сюжета → §6.1 `[проверено]`.
 19. **Метрики цвета не видят стиль**: второй судья — голоса и бинарные VLM-вопросы, ≥ 2 прогона, проходит единогласное «да»
     → §6.2 `[исследование: MICON, T2IS; практика BFL]`.
 20. **Согласованность без копирования**: копия референса даёт рекордные метрики сходства (CIDS 0,911 при соответствии
@@ -253,7 +253,7 @@ work as expected» [S8]. Seed — только для повтора одног�
 ### 6.1. Пороги на цвете (бесплатно)
 
 ```bash
-# series_metrics.py (Python 3.13, numpy, Pillow) — [проверено: 99-raw/experiments/F/06-series-metrics]
+# series_metrics.py (Python 3.13, numpy, Pillow) — [проверено]
 python3 ../../scripts/ai-media/series_metrics.py s1.png s2.png s3.png --ref ref1.jpg ref2.jpg ref3.jpg
 ```
 

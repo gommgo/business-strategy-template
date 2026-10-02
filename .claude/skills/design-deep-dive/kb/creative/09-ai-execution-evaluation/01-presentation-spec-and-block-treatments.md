@@ -13,23 +13,23 @@
 4. **Пиков 0 / ≤ 2 / 2–4, акцентов ≤ 1 / ≤ 3 / ≤ 4, секций с фирменным приёмом ≤ 1 / ≤ 2 / ≤ 4** (L0 / L1 / L2); два пика подряд — нет. → §2.4 `[не проверено: E, A]`
 5. **Пик обязан нести `purpose: signature`**, иначе это не пик, а шум; у пика и акцента в статусе proposed — `motion_spec_ref`. → §2.3 `[практика]`
 6. **Цели — id v1 плана**: `секция.слот`, `секция.группа`, `секция.группа-N.элемент`; декоративное — `секция.fx-<имя>`; старые id E site
-   (`kak-rabotaem`, `funktsii`) — ошибка. → §2.5 `[проверено: I/01]`
-7. **`text-over` → `background.text_contrast`**, видео и прелоадер → `flash_check`, `cinematic` → ролик, секвенция или 3D (схема v1 ловит). → §2.3 `[стандарт: WCAG 2.3.1]` `[проверено: I/01]`
+   (`kak-rabotaem`, `funktsii`) — ошибка. → §2.5 `[проверено]`
+7. **`text-over` → `background.text_contrast`**, видео и прелоадер → `flash_check`, `cinematic` → ролик, секвенция или 3D (схема v1 ловит). → §2.3 `[стандарт: WCAG 2.3.1]` `[проверено]`
 8. **Reduce пиши стратегией**: `final-state`, `crossfade`, `static-poster`, `stations` (скраб → 2–6 кадров), `no-motion-needed`. → §2.2 `[консенсус: E]`
 9. **Телефон — объявленная деградация**: `mobile.strategy` + `note`, что именно меняется (`stacked`, `separate-asset` — нативный кадр, не центр-кроп). → §2.2 `[мнение вендора: higgsfield, scroll-world]`
 10. **Петля ≥ 1 → `loop_control`**; `page-toggle` — только при `reduce_toggle: true` страницы. → §2.3 `[стандарт: WCAG 2.2.2]`
-11. **Визуальный вариант блока — из `block-treatments.yaml`** (84 блока site): `visual_variant` + `structural` должен совпасть с `variant` плана. → §3 `[проверено: I/01]`
+11. **Визуальный вариант блока — из `block-treatments.yaml`** (84 блока site): `visual_variant` + `structural` должен совпасть с `variant` плана. → §3 `[проверено]`
 12. **Семейство блока задаёт потолок**: конверсия, FAQ, контакты, курс — L0; proof, offer, about, event, footer — ≤ L1; hero, value, портфолио — до L2. → §3.2 `[не проверено]`
 13. **Не бери эффект вне списка блока** без решения art-direction: предупреждение TR-12 — сигнал «приём не из жанра блока». → §3.3 `[практика]`
-14. **treatment v1 совместима с v0**: 69 известных документов проходят; site подключает v1 сменой `$ref` на `:1` и пути в `site_validate.py`. → §2.6 `[проверено: I/01]`
-15. **В примерах базы treatment — overlay по id секций**, склейка с планом site и проверка — `spec_check.py plan`. → §2.7 `[проверено: I/01]`
+14. **treatment v1 совместима с v0**: 69 известных документов проходят; site подключает v1 сменой `$ref` на `:1` и пути в `site_validate.py`. → §2.6 `[проверено]`
+15. **В примерах базы treatment — overlay по id секций**, склейка с планом site и проверка — `spec_check.py plan`. → §2.7 `[проверено]`
 16. **art-direction v1 = v0 + эмоциональная цель, money idea, мотив из бренда, характер и примитивы движения, статус прототипа главного эффекта,
     журнал вариативности, блок «чего не ставить»**; гарнитуры — из `cyrillic-display-fonts.yaml` (Oswald — нет, Nunito — средне). → §5 `[практика: W2, W3, H, D]`
 17. **Прототип главного эффекта — до утверждения**: поле статуса `prototype`, запись лабораторной страницы — вход видео-референса. → §5 `[практика: V 7nEvk6nFeS4, Ulgy6xIrdPg]`
 18. **Пакет исполнителя получает не слова, а файлы**: `DESIGN.md` (токены, в том числе `motion.marketing`), `MOTION.md` из motion-spec, `refs/README.md` с Take / Do not take,
     блок «чего не ставить» из реестра клише, `ACCEPTANCE` E-блок из acceptance. → §6 `[практика: kimi 07/02]`
 19. **Разметка исполнителя несёт id**: `data-section`, `data-slot`, `data-group`, `data-fx`, `data-moment`, `data-effect` — иначе проверка гадает селекторы. → §6.3 `[практика: K]`
-20. **Не копируй треатмент плана site как есть**: в примерах site hero «Окошка» с появлением, а art-direction A — без; источник подачи — art-direction. → §4 `[проверено: I/01]`
+20. **Не копируй треатмент плана site как есть**: в примерах site hero «Окошка» с появлением, а art-direction A — без; источник подачи — art-direction. → §4 `[проверено]`
 
 ## 1. Контур передачи подачи
 
@@ -41,7 +41,7 @@
 | пакет исполнителя | `DESIGN.md`, `MOTION.md`, `TASK.md`, `ACCEPTANCE.md`, `refs/` (kimi 07/02) | сборщик kimi + проекции `spec_check.py` | то же, в каналах, которые исполнитель читает | K3 или Claude-исполнитель; `k3_checks.py`, K |
 
 - Treatment — **место в ритме и допустимое**, motion-spec — **время и прокрутка**; одно не заменяет другое: в опыте I/02 treatment «Отвеса» был
-  верен, а сцена разошлась с замыслом на 98 px из-за неполной motion-spec (`02` §3) `[проверено: I/02]`.
+  верен, а сцена разошлась с замыслом на 98 px из-за неполной motion-spec (`02` §3) `[проверено]`.
 - Порядок работы: art-direction (выбор направления) → treatment всех секций (§4) → motion-spec пиков и акцентов → проверка `spec_check.py`
   → проекции в пакет → сборка → запись и зонд станций (K) → правка чисел в спецификации, не в коде (W3: «designing in dev») `[практика]`.
 
@@ -98,7 +98,7 @@ L2 → `cinematic` только с роликом, секвенцией или �
 | `visual_role: chrome` | `motion_level` none/subtle, `loops 0` | `[практика]` |
 
 Самопроверка `spec_check.py --selftest` подбрасывает пять нарушений (L0 + pin, пик без signature, text-over без контраста, видео без
-`flash_check`, cinematic без ролика) — схема ловит все `[проверено: I/01]`.
+`flash_check`, cinematic без ролика) — схема ловит все `[проверено]`.
 
 ### 2.4. Что проверяет скрипт, а не схема
 
@@ -124,14 +124,14 @@ L2 → `cinematic` только с роликом, секвенцией или �
 
 Счёт — примирение A и E: у A (L1) «≤ 2 секции с фирменным приёмом (peak или accent)», у E — пики ≤ 2 и акценты ≤ 3; схема считает
 **три величины** отдельно: пики (`visual_role`), акценты (`visual_role`), секции с `signature` (A «фирменный приём»). «Окошко»: 1 пик +
-2 акцента + 1 секция с signature — проходит обе нормы `[проверено: I/01]`. Числа акцентов — `[не проверено]` E, калибрует K.
+2 акцента + 1 секция с signature — проходит обе нормы `[проверено]`. Числа акцентов — `[не проверено]` E, калибрует K.
 
 ### 2.5. Цели: id v1 и разметка
 
 - `target` = `section` | `<секция>` | `<секция>.<слот>` | `<секция>.<группа>` | `<секция>.<группа-N>.<элемент>` | `<секция>.fx-<имя>`;
   группа без номера (`how-it-works.step`) — все экземпляры; `fx-` — декоративный элемент подачи, которого нет в плане (линия, маркер, пометка).
 - Id секций — из роли или блока (site v1: `hero`, `how-it-works`, `final-cta`); треатменты примеров site ссылаются на старые id E
-  (`kak-rabotaem.step`, `funktsii.row`) — `spec_check.py` отвечает TR-09 (C2 site) `[проверено: I/01]`.
+  (`kak-rabotaem.step`, `funktsii.row`) — `spec_check.py` отвечает TR-09 (C2 site) `[проверено]`.
 - Разметка исполнителя повторяет id атрибутами (контракт K, `motion-spec.schema.json` `x-dom-contract`): `data-section`, `data-slot`,
   `data-group`, `data-fx`, `data-moment`, `data-effect`; `motion_check.py` ищет `[data-moment]` → `[data-section] [data-slot|data-group|data-fx]`
   → `#секция [data-slot]` → `selector_hint` `[практика: K]`.
@@ -143,7 +143,7 @@ L2 → `cinematic` только с роликом, секвенцией или �
 - `site_validate.py` грузит treatment по пути A (`01-creative-direction/drafts-for-site/treatment.v0.schema.json`), `page-plan` v1 ссылается
   на `urn:…:treatment:0` — **v1 у site заработает после двух правок**: путь `P['treatment']` → `09-ai-execution-evaluation/treatment.schema.json`,
   `$ref` → `urn:…:treatment:1` (предложение site, отчёт I §6). До правки план с полями v1 не пройдёт site (v0 — `additionalProperties: false`).
-- `spec_check.py plan` валидирует план схемой page-plan v1 с подменой `:0` → v1 — «как будто site переключился» `[проверено: I/01]`.
+- `spec_check.py plan` валидирует план схемой page-plan v1 с подменой `:0` → v1 — «как будто site переключился» `[проверено]`.
 
 ### 2.7. Пример: «Отвес», главная (L1)
 
@@ -178,7 +178,7 @@ how-it-works:
 `blocks.yaml` 1.0). Поля: `level_max`, `roles`, `signature`, `effects {L0, L1, L2}` (накопительно), `visual_variants[{id, structural, composition,
 display_role, background, levels, note}]`, `mobile {strategy, note}`, `a11y[]`, `avoid[cliche:<id>]`. Блок наследует поля семейства.
 Проверка: `spec_check.py blocks` (84 ↔ 84 id, эффекты есть и по уровню, клише есть, `structural` — варианты site) и `vocab_lint.py` site
-(168 id — 0 ошибок) `[проверено: I/01]`.
+(168 id — 0 ошибок) `[проверено]`.
 
 ### 3.2. Потолки по семействам
 
@@ -222,14 +222,14 @@ display_role, background, levels, note}]`, `mobile {strategy, note}`, `a11y[]`, 
 5. Страница: `peaks`, `accents`, `signature_sections`, `library` (стек G), `reduce_toggle` (L2 — всегда; L1 — при `page-toggle`), `status`.
 6. `spec_check.py plan … --overlay … --spec …` → 0 ошибок; предупреждения — решить или записать причину в `notes`.
 7. Расхождение плана site и art-direction (hero «Окошка»: в плане появление, в art-direction — нет) решает art-direction; site — сообщить
-   (в пример «Окошка» заложено решение art-direction) `[проверено: I/01]`.
+   (в пример «Окошка» заложено решение art-direction) `[проверено]`.
 
 ## 5. `art-direction` v1: дельта к v0 A
 
 Схема v0 — `../01-creative-direction/art-direction.schema.json` (`urn:…:art-direction:0`, 459 строк); v1 — те же поля плюс перечисленные ниже
 (аддитивно). Схема v1 собрана скриптом из v0 без правки файла A: `09-ai-execution-evaluation/art-direction.v1.schema.json`
 (`urn:…:art-direction:1`); все 5 примеров A (v0) валидны по v1; пример `examples/art-direction-okoshko.v1.json` — новые поля и гарнитуры по
-каталогу D, 0 ошибок `[проверено: 99-raw/experiments/I/03-art-direction-v1/build_ad_v1.py]`. Владелец формата — A: перенос в
+каталогу D, 0 ошибок `[проверено]`. Владелец формата — A: перенос в
 `01-creative-direction/` — синтез S или продолжатель A.
 
 | Поле v1 | Тип | Что пишет Claude | Зачем | Источник |
@@ -276,7 +276,7 @@ Nunito → Commissioner или Golos Text; поле `type.cyrillic_checked: true
 | решения о клише | блок «чего не ставить» + `--allow` из `k3_allow` | H `08/01` §6.2 |
 | `acceptance[]` motion-spec | `ACCEPTANCE.md` E-блок и H-блок (ворота K) | вручную / K |
 
-Проверено на трёх примерах: `moments`, `motion-md`, `values` строят файлы без ошибок (`99-raw/experiments/I/01-schemas/out/`) `[проверено: I/01]`.
+Проверено на трёх примерах: `moments`, `motion-md`, `values` строят файлы без ошибок (`99-raw/experiments/I/01-schemas/out/`) `[проверено]`.
 
 ### 6.2. Что сборщику kimi не хватает (предложения, их файлы не правим)
 
@@ -295,7 +295,7 @@ Nunito → Commissioner или Golos Text; поле `type.cyrillic_checked: true
 ```css
 /* treatment: how-it-works · peak · L1 · vertical-progress-line · effect:scroll-driven-progress
  * motion-spec: otves-home 1.1 · moments: plumb-line-drop, plumb-bob-follow, step-marker-fill
- * reduce: final-state · mobile: simplified · js: 0 KB · [проверено: 99-raw/experiments/I/02-spec-sufficiency/page/v11.html] */
+ * reduce: final-state · mobile: simplified · js: 0 KB · [проверено] */
 ```
 
 ## Частые ошибки

@@ -11,7 +11,7 @@ Blender 5.2.2 LTS, mcp-for-blender 2.0.3, glTF I/O 5.2.40, three r186. Ошиб�
 ## Выжимка для агента
 
 1. **Исполнимость зависит от модели на порядок, форма — нет**: haiku — 8 из 8 скриптов с исключением, sonnet и opus — 0
-   из 8; но годных по рендеру у sonnet 1 из 8. → §1 `[проверено: 99-raw/experiments/C1/11-naive-first-try]`
+   из 8; но годных по рендеру у sonnet 1 из 8. → §1 `[проверено]`
 2. **«Исполнилось» — не проверка**: главный класс ошибок сильных моделей — масштаб, кадр, стыки и экспортируемость, не
    API. → M6.1 `[проверено: 11]`
 3. **Масштаб в реальных метрах**: кружка у трёх моделей 1,4–2,2 м, телефон 1–2,9 м, ракета 5,7 м (×10–25). Детектор —
@@ -54,7 +54,7 @@ Blender 5.2.2 LTS, mcp-for-blender 2.0.3, glTF I/O 5.2.40, three r186. Ошиб�
 умолчанию; 8 независимых скриптов (mug, phone, tree, rocket, sculpture, laptop, logo NOVA, room): модель, материалы, свет,
 камера для рендера и GLB». Каждый скрипт исполнен как `execute_blender_code` (заводская сцена, `exec(code, {"bpy": bpy})`,
 `redirect_stdout`), затем .blend, аудит (`scene_audit.py`), экспорт GLB, рендер из камеры сцены (≤640 px, ≤32 сэмплов),
-4 студийных ракурса `render_views.py`, габариты без служебных объектов [проверено: 99-raw/experiments/C1/11-naive-first-try].
+4 студийных ракурса `render_views.py`, габариты без служебных объектов [проверено].
 
 **По протоколу (C1/12).** Те же 8 объектов: паспорт, идемпотентный `build(P)` на проверенных функциях, аудит, рендер,
 критика, правка; затем GLB, валидатор, браузер [проверено: 12].
@@ -244,14 +244,14 @@ Blender 5.2.2 LTS, mcp-for-blender 2.0.3, glTF I/O 5.2.40, three r186. Ошиб�
 ## 10. Проверенные фрагменты для обнаружения
 
 ```python
-# использование аудита [проверено: 99-raw/experiments/C1/10-scene-audit] — на стороне агента: отправить файл целиком
+# использование аудита [проверено] — на стороне агента: отправить файл целиком
 # (scene_audit.py самодостаточен, проходит BLENDER_MCP_SAFE_MODE); результат — последняя строка "AUDIT {json}"
 exec_text = open("/abs/path/99-raw/experiments/C1/10-scene-audit/scene_audit.py").read()   # на стороне агента
 # → mcp__blender__execute_blender_code(code=exec_text) → json.loads(stdout.splitlines()[-1][6:])["flag_codes"]
 ```
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/17-doc-snippets] — как не стирать чужую сцену: удалить только своё
+# Blender 5.2.2 — [проверено] — как не стирать чужую сцену: удалить только своё
 import bpy
 TAG = "c1_asset"                                    # свой тег в custom property
 for ob in [o for o in bpy.data.objects if o.get("owner") == TAG]:
@@ -261,7 +261,7 @@ print("removed own objects")
 ```
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/17-doc-snippets] — 3D-текст стоит лицом к камере (−Y), низ на z=0
+# Blender 5.2.2 — [проверено] — 3D-текст стоит лицом к камере (−Y), низ на z=0
 import bpy, math
 from mathutils import Matrix
 cu = bpy.data.curves.new("Logo_text", "FONT"); cu.body = "NOVA"; cu.size = 0.3; cu.extrude = 0.045
@@ -375,7 +375,7 @@ print(tuple(round(d, 3) for d in ob.dimensions))                   # ширин�
 **M1.9 — `transform_apply` переносит начало координат.**
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/17-doc-snippets]
+# Blender 5.2.2 — [проверено]
 import bpy
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0.6, 0.6, 0.35))
 ob = bpy.context.active_object
@@ -388,7 +388,7 @@ print(tuple(ob.location), tuple(ob.scale), tuple(round(d, 3) for d in ob.dimensi
 **M4.9 — `join`, затем слоты без индексов граней.**
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/17-doc-snippets]
+# Blender 5.2.2 — [проверено]
 import bpy
 bpy.ops.mesh.primitive_cylinder_add(radius=0.1, depth=1.0, location=(0, 0, 0.5)); trunk = bpy.context.active_object
 bpy.ops.mesh.primitive_ico_sphere_add(radius=0.5, location=(0, 0, 1.3)); crown = bpy.context.active_object
@@ -407,7 +407,7 @@ print(sorted({p.material_index for p in trunk.data.polygons}))   # [0, 1]
 **M1.2, M1.3 — имя ноды и старое имя входа.**
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/17-doc-snippets]
+# Blender 5.2.2 — [проверено]
 import bpy
 m = bpy.data.materials.new("Screen")              # use_nodes не нужен: дерево уже есть
 # антипример: m.node_tree.nodes["Principled BSDF"].inputs["Emission"]  → KeyError (и None на русском интерфейсе)
@@ -420,7 +420,7 @@ print(list(p.inputs["Emission Color"].default_value))
 **M1.1, M6.7 — сэмплы и тяжёлый рендер в MCP-вызове.**
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/17-doc-snippets]
+# Blender 5.2.2 — [проверено]
 import bpy
 s = bpy.context.scene
 # антипример: s.render.samples = 128  → AttributeError; s.render.engine = 'CYCLES' без сэмплов → 4 096 по умолчанию

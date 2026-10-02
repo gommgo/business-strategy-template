@@ -10,28 +10,28 @@
 
 1. **Цепочка GLB по порядку E**: `preflight()` в Blender → валидатор Khronos (`gltf_check.py`) → `glb_lint()` → что создал three
    (`gltf_web_inspect.py`) → Blender против three (`gltf_diff.py`) → цена загрузки (`gltf_load_bench.py`); первые четыре — секунды,
-   гоняйте всегда; diff и бенч — перед сдачей. → §1 `[проверено: J/03]`
+   гоняйте всегда; diff и бенч — перед сдачей. → §1 `[проверено]`
 2. **Валидатор не видит смысловых потерь** (процедуры, цветовое пространство, морфы) — их ловят `preflight()` и `gltf_diff`. → §2 `[проверено: E]`
 3. **`gltf_diff` сравнивает только ассет**: по `.blend` со студией он рендерит циклораму и пол, а GLB — без них → IoU 0,002, ΔE 9,96
-   на кружке C1/12; копия `.blend` только с `ASSET_*` → IoU 0,997, ΔE 3,07. `qa_pipeline` делает копию сам. → §2.2 `[проверено: J/03]`
+   на кружке C1/12; копия `.blend` только с `ASSET_*` → IoU 0,997, ΔE 3,07. `qa_pipeline` делает копию сам. → §2.2 `[проверено]`
 4. **Пороги `gltf_diff` (E/02)**: ΔE2000 ≤ 3,5 и IoU ≥ 0,99 — совпадает; ΔE > 6 или IoU < 0,95 — поломка; между — смотреть лист.
-   Шум метода на одном файле ΔE ≈ 3,1. → §2.2 `[проверено: E/02, J/03]`
+   Шум метода на одном файле ΔE ≈ 3,1. → §2.2 `[проверено]`
 5. **Перед `gltf_diff` в EEVEE**: `world.sun_threshold = 0` (иначе яркое HDRI выносится в «солнце», +13 L* на гранях вверх);
    HDRI само даёт ±6 L*; материалы (стекло, анизотропия, плёнка) — `--engine cycles`. → §2.2 `[проверено: D2]`
 6. **Цвет бренда — отдельная проверка**: пара Khronos PBR Neutral ↔ `NeutralToneMapping`, ΔE к hex ≤ 2, Blender ↔ three ≤ 1,1 (D2:
    0,23–0,36 и 1,8–1,9); AgX выцветает бренд (ΔE 7–9). → §4 `[проверено: D2]`
 7. **Анимация проверяется числами без рендера**: список клипов и длительностей, начало в 0 с, углы турнтейбла в четвертях,
    позиции узлов в 3–5 моментах (`three_probe.py`); рендеры по кадрам (`anim_diff.py --mute-nla`, IoU ≥ 0,99) — только при
-   расхождении. → §3 `[проверено: H/10, J/03]`
+   расхождении. → §3 `[проверено]`
 8. **Турнтейбл без сэмплирования ломается молча**: 3 ключа 0/180/360° → в three крутится назад (318 / 228 / 138 / 48° вместо
-   45 / 135 / 225 / 315°); ворота по четвертям это ловят. → §3 `[проверено: H/10, J/03]`
+   45 / 135 / 225 / 315°); ворота по четвертям это ловят. → §3 `[проверено]`
 9. **Ворота страницы** — `gate_check()` F1 по отчёту `site_probe.py`: LCP-элемент не canvas, LCP, CLS, TBT, вес, 3D-ассеты,
    вызовы в покое, DPR, 0 ошибок консоли, reduce → 0 вызовов и 0 движения. → §5 `[проверено: F1, J/03]`
 10. **Порог TBT десктопа 150 мс** для hero с 3D — на границе: hero-lazy F1 175 мс, повтор J 172 мс на почти пустой странице;
     держите 150 как цель, 200 — как предел `[спорно]`. → §5.2
 11. **Статика import map**: одна версия three у ядра и addons; `three.module.min.js` с jsDelivr только с переназначением
     `three.core.js → three.core.min.js` (иначе +204 КБ br). Оба демо F2 (`camera-path-scroll`, `shader-background`) эту
-    ловушку F1 содержат. → §5.3 `[проверено: J/03]`
+    ловушку F1 содержат. → §5.3 `[проверено]`
 12. **Консоль**: «Multiple instances of Three.js» — две копии three (import map + бандл); любая ошибка консоли — `fail`. → §5.3
 13. **Метка первого кадра модели своя** (`performance.mark` после первого `render()` с моделью): первый вызов отрисовки на странице —
     PMREM окружения, а не модель (F1). → §5.4 `[проверено: F1]`
@@ -51,14 +51,14 @@
 валидатора и `glb_lint`, подсказки о сжатии, `diff` между нормой и поломкой, import map — WARN.
 
 ```bash
-# Python 3 + Blender 5.2.2 + three r186 — [проверено: 99-raw/experiments/J/03-qa-pipeline] GLB кружки: цепочка E + diff
+# Python 3 + Blender 5.2.2 + three r186 — [проверено] GLB кружки: цепочка E + diff
 cd /home/mm/Документы/app-design/blender-research
 C=99-raw/experiments/C1/12-protocol-objects/out
 python3 ../../scripts/blender/qa_pipeline.py glb $C/mug.glb --blend $C/mug.blend --diff || [ $? -le 2 ]
 ```
 
 Вывод: `{"verdict": "review", "codes": ["hint"], …}` — геометрия не сжата (Meshopt добавит постобработка, E `08/03`); diff:
-IoU 0,997, ΔE2000 3,07 (p95 7,1) — совпадает [проверено: J/03].
+IoU 0,997, ΔE2000 3,07 (p95 7,1) — совпадает [проверено].
 
 ## 2. Ворота экспорта
 
@@ -80,7 +80,7 @@ IoU 0,997, ΔE2000 3,07 (p95 7,1) — совпадает [проверено: J/
 
 Результаты J/03: `camera_1k.glb` (hero-lazy, KTX2 + Meshopt) — 22 предупреждения валидатора, `glb_lint`: transmission рисует
 непрозрачное ещё раз (10 вызовов, 53 974 треугольника в кадре при 26 987 в файле), бенч: холодная загрузка 200 мс, тёплая 25,
-первый кадр 242 мс; `rocket.glb` — ΔE 3,52 (граница), IoU 0,996 [проверено: J/03].
+первый кадр 242 мс; `rocket.glb` — ΔE 3,52 (граница), IoU 0,996 [проверено].
 
 ### 2.2. `gltf_diff`: как не получить ложную поломку
 
@@ -110,7 +110,7 @@ IoU 0,997, ΔE2000 3,07 (p95 7,1) — совпадает [проверено: J/
 | картинка | `anim_diff.py --frames … --mute-nla` | IoU ≥ 0,99 на каждом кадре |
 
 ```bash
-# three r186 (Chromium) — [проверено: 99-raw/experiments/J/03-qa-pipeline] турнтейбл: сэмплирование (a) против 3 ключей без сэмплов (f)
+# three r186 (Chromium) — [проверено] турнтейбл: сэмплирование (a) против 3 ключей без сэмплов (f)
 cd /home/mm/Документы/app-design/blender-research
 H=99-raw/experiments/H/10-turntable
 for v in a_linear_2keys_sampled f_linear_3keys_curves_180; do
@@ -125,7 +125,7 @@ done
 ```
 
 Вывод: `a_linear_2keys_sampled Turntable 4 OK [45, 135, 225, 315]`; `f_linear_3keys_curves_180 Turntable 4.0333 FAIL [318, 228, 138, 48]`
-— вращение назад и сдвиг на кадр ловятся числом без рендера [проверено: J/03; H/10]. Для других клипов — свой `check.js` по образцу
+— вращение назад и сдвиг на кадр ловятся числом без рендера [проверено]. Для других клипов — свой `check.js` по образцу
 `99-raw/experiments/H/10-turntable/check_rot.js`.
 
 ## 4. Ворота цвета (D2)
@@ -161,7 +161,7 @@ done
 
 ```python
 # run: system
-# Python 3 — [проверено: 99-raw/experiments/J/03-qa-pipeline] ворота F1 по готовому отчёту site_probe.py + статика import map
+# Python 3 — [проверено] ворота F1 по готовому отчёту site_probe.py + статика import map
 import sys
 sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/tools")
 from qa_pipeline import gate_check, importmap_check
@@ -174,17 +174,17 @@ assert [i["code"] for i in importmap_check(EX + "camera-path-scroll/index.html")
 ```
 
 Вывод: у hero-lazy (замер F1) 8 из 9 ворот десктопа OK, TBT 175 > 150; статика: hero-lazy — чисто (бандл esbuild),
-`camera-path-scroll` и `shader-background` — `importmap_min_core` [проверено: J/03]; после правки волны 4 (ключ import map
+`camera-path-scroll` и `shader-background` — `importmap_min_core` [проверено]; после правки волны 4 (ключ import map
 `…/three.core.js` → `…/three.core.min.js`, аудит X П-67) — чисто; `qa_pipeline.py page`: shader-background — pass, camera-path-scroll —
 9/9 ворот в 5 из 7 прогонов (TBT 93–158 мс у порога 150, 373,7 КБ вместо 532) [проверено: S1].
 
 ```bash
-# Python 3 + Chromium — [проверено: 99-raw/experiments/J/03-qa-pipeline] живой прогон страницы с prefers-reduced-motion
+# Python 3 + Chromium — [проверено] живой прогон страницы с prefers-reduced-motion
 cd /home/mm/Документы/app-design/blender-research
 python3 ../../scripts/blender/qa_pipeline.py page 09-web-runtime/examples/hero-lazy --reduced || [ $? -le 2 ]
 ```
 
-Вывод: `pass` — LCP 36 мс (постер), 0 вызовов и 0 % движения в покое, 0 ошибок консоли (≈ 12 с) [проверено: J/03].
+Вывод: `pass` — LCP 36 мс (постер), 0 вызовов и 0 % движения в покое, 0 ошибок консоли (≈ 12 с) [проверено].
 
 ### 5.2. Результаты J/03 на демо F1 и F2
 

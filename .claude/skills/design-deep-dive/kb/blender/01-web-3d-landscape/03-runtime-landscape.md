@@ -15,12 +15,12 @@ WebGPU, discoverthreejs, pmndrs/postprocessing README) · реестр 42 пак
 2. three.js — де-факто стандарт веб-3D: 27 из 33 наградных сайтов, 115 764★, релиз каждые 1–2,5 мес. (11 стабильных за 12 мес.); ревизии в продакшене — от r141 до r186 → §2. [проверено]
 3. three **ломает API почти каждый релиз**: r180 `RGBELoader`→`HDRLoader`, r183 `Clock`→`Timer` и `PostProcessing`→`RenderPipeline`, r182 `PCFSoftShadowMap` устарел, r186 удалён в обоих рендерерах (предупреждение и `PCFShadowMap`), r185 `positionLocal` не учитывает скиннинг, r186 `Source`→`TextureSource` → сверяйся с Migration Guide, а не с памятью → §2.3. [документация]
 4. r186 **удалил минифицированные сборки** (`build/*.min.js`) и объявил CommonJS устаревшим → бандлер (esbuild/Vite) или автоминификация jsDelivr (`three.module.min.js` 90 КБ br — только с ключом import map `three.core.js` → `three.core.min.js` 104 КБ br, иначе тянет неминифицированное ядро 204 КБ br; `../09-web-runtime/01-threejs-core.md` §1.2) → §2.1. [документация; проверено: A/03]
-5. `WebGPURenderer` + TSL в r186 — рабочий путь с автоматическим откатом на WebGL2: один и тот же TSL-материал проверен на обоих бэкендах (картинки совпали) → §2.2. [проверено: A/08]
+5. `WebGPURenderer` + TSL в r186 — рабочий путь с автоматическим откатом на WebGL2: один и тот же TSL-материал проверен на обоих бэкендах (картинки совпали) → §2.2. [проверено]
 6. Выбирай WebGPU/TSL, когда нужны compute-частицы (100 тыс.+), сплаты three (`GaussianSplat` требует `WebGPURenderer`), TSL-эффекты r184+; иначе `WebGLRenderer` — меньше (109 против 171 КБ br) и вся экосистема pmndrs/postprocessing работает только с ним → §2.2. [проверено: A/03; документация]
 7. WebGPU у пользователей: 84 % + 3 % частично (caniuse, 09.2026): Chrome/Edge 113+, iOS Safari 26+, Samsung 24+; Safari macOS — только Tahoe (26); Firefox — частично (Windows, macOS 26 на Apple Silicon); Firefox Android — нет → фолбэк обязателен → §2.2. [документация]
 8. Всегда `await renderer.init()` у `WebGPURenderer` перед `render()` вне `setAnimationLoop` (с r181 async-методы `renderAsync` устарели) → §2.2. [документация; проверено: A/08]
 9. R3F 9.8: React 19 (**peer: react ≥ 19 < 19.4**), async-фабрика `gl` для WebGPU, `useLoader(loaderInstance)`, типы `ThreeElements['mesh']` вместо `MeshProps`; с three r186 выдаёт 2 предупреждения (внутри `THREE.Clock` и `PCFSoftShadowMap`), но работает → §3. [документация; проверено: A/08]
-10. R3F стоит ≈ 140 КБ br сверх three (react-dom + fiber) и мешает tree-shaking three: сцена R3F — 249 КБ br, + drei — 286, + пост — 345, WebGPU-сборка — 400 КБ br → на лендинге без React не тянуть React ради 3D → §3. [проверено: A/03, A/08]
+10. R3F стоит ≈ 140 КБ br сверх three (react-dom + fiber) и мешает tree-shaking three: сцена R3F — 249 КБ br, + drei — 286, + пост — 345, WebGPU-сборка — 400 КБ br → на лендинге без React не тянуть React ради 3D → §3. [проверено]
 11. drei 10.7.8 закрывает большинство эффектов каталога готовыми компонентами (Environment, ContactShadows, Float, MeshTransmissionMaterial, Text, ScrollControls, Sampler, PerformanceMonitor, AdaptiveDpr, Instances, Splat…) → §3.2. [документация]
 12. pmndrs `postprocessing` 6.39.5 (Zlib) — peer **three ≥ 0.168 < 0.187** и только `WebGLRenderer`; v7 в бете → для WebGPU — пост на TSL (`RenderPipeline`, `bloom()` и т. п.) → §3.3. [документация npm/README]
 13. Babylon.js 9 — полный движок (Apache-2.0) с очень частыми релизами (153 за 12 мес.), сплаты (PLY/SPLAT/SPZ/SOG), Frame Graph, объёмный свет; но **665 КБ br** с glTF-загрузчиком → выбирать для приложений/конфигураторов, не для лендинга → §4. [документация; проверено: A/03]
@@ -28,9 +28,9 @@ WebGPU, discoverthreejs, pmndrs/postprocessing README) · реестр 42 пак
 15. model-viewer 4.3.1 — веб-компонент «витрина + AR» за 240 КБ br; **peer three ^0.183** (конфликт с r186 в одном бандле) → подключать его готовую сборку отдельно; тон по умолчанию Khronos PBR Neutral → §6. [документация; проверено: A/03]
 16. Needle Engine: бесплатный план только некоммерческий (логотип, 1 проект, только Needle Cloud), коммерция — Pro €49/место/мес.; **`npm i @needle-tools/engine` ставит 6.0.0-alpha.3** (стабильная — тег `stable` 5.1.13) → §7. [документация]
 17. Spline: удобен дизайнеру, но рантайм 834 КБ br (+ physics.wasm 419 КБ br), 192 draw calls в покое на spline.design; экспорт в three/R3F (анимации и события — только Vanilla JS/React); **Spline MCP — только в десктоп-приложении macOS/Windows** → агенту на Linux недоступен → §8.3. [проверено: A/03, замер; документация]
-18. OGL (12 КБ br) — для одного шейдера без three; но без релизов с 01.2025 → для каталога эффектов «только шейдер» проще `@paper-design/shaders` (6 КБ br в минимальном бандле esbuild; на странице через jsDelivr — 119 КБ JS, F2 `../09-web-runtime/04-shaders-effects-catalog-impl.md` §2.4; 27 релизов/12 мес.) или свой квад на three → §9. [проверено: A/02, A/03]
-19. Vue — TresJS 5.9 (peer vue ≥ 3.4), Svelte 5 — Threlte 8.6; обе обёртки над three, живые (20–30 релизов/12 мес.) → §9. [проверено: A/02]
-20. A-Frame 1.8 (276 КБ br) — WebXR-декларативка; на npm 12 не ставится без разрешения git-зависимостей (`three-bmfont-text` из GitHub → EALLOWGIT) → не выбирать для лендинга → §9. [проверено: A/03]
+18. OGL (12 КБ br) — для одного шейдера без three; но без релизов с 01.2025 → для каталога эффектов «только шейдер» проще `@paper-design/shaders` (6 КБ br в минимальном бандле esbuild; на странице через jsDelivr — 119 КБ JS, F2 `../09-web-runtime/04-shaders-effects-catalog-impl.md` §2.4; 27 релизов/12 мес.) или свой квад на three → §9. [проверено]
+19. Vue — TresJS 5.9 (peer vue ≥ 3.4), Svelte 5 — Threlte 8.6; обе обёртки над three, живые (20–30 релизов/12 мес.) → §9. [проверено]
+20. A-Frame 1.8 (276 КБ br) — WebXR-декларативка; на npm 12 не ставится без разрешения git-зависимостей (`three-bmfont-text` из GitHub → EALLOWGIT) → не выбирать для лендинга → §9. [проверено]
 21. Прокрутка: GSAP 3.15 + ScrollTrigger (40 КБ br) + Lenis 1.3.26 (5 КБ br); связка — `lenis.on('scroll', ScrollTrigger.update); gsap.ticker.add(t => lenis.raf(t * 1000)); gsap.ticker.lagSmoothing(0)` → §10. [документация; проверено: A/03]
 22. Лицензия GSAP (Webflow, с 30.04.2025): бесплатно, включая коммерцию и все плагины (SplitText, MorphSVG), **но запрещено** использовать в no-code-конструкторах анимаций, конкурирующих с Webflow; код GSAP, сгенерированный ИИ, прямо разрешён → для системы генеративного дизайна как продукта — юридическая проверка → §10.1. [документация; спорно]
 23. Lenis: пакет `@studio-freight/lenis` устарел (переименован в `lenis`); `respectReducedMotion: true` по умолчанию; в Safari не больше 60 fps (30 в энергосбережении) → §10.2. [документация npm/README]
@@ -79,7 +79,7 @@ minify, brotli q11) [проверено]. «Релизов» — стабиль�
   `examples/jsm/` (импорт `three/addons/...`) [проверено: пакет 0.186.0].
 - Размер: неминифицированные `three.module.js` + `three.core.js` = 102 + 204 КБ br; jsDelivr-автоминификация
   `three.module.min.js` + `three.core.min.js` = 90 + 104 КБ br (только если import map переназначает `three.core.js` на `three.core.min.js`: min-модуль импортирует `./three.core.js` — 204 КБ br, F1/01); `three.webgpu.js` = 316 КБ br; бандлер с именованными
-  импортами — 109 КБ br (куб), 158 КБ br (GLTF + декодеры + OrbitControls + RoomEnvironment) [проверено: A/03].
+  импортами — 109 КБ br (куб), 158 КБ br (GLTF + декодеры + OrbitControls + RoomEnvironment) [проверено].
 - Документация: новая JSDoc-документация с r181 (только английский), manual, 607 примеров (files.json), «TSL Guide»,
   «llms build» документации [документация].
 
@@ -106,7 +106,7 @@ minify, brotli q11) [проверено]. «Релизов» — стабиль�
   PlayCanvas приводит «≈ 85 % пользователей» [документация вендора].
 - Когда WebGPU: compute-частицы 100 тыс.+ (PlayCanvas: сплаты 35 млн — 75,8 против 13,3 fps на M4 Max; 1 млн на iPhone
   13 Pro Max — 77,6 против 38,1) [замеры вендора], сплаты three, TSL-эффекты. Когда WebGL: лендинг/hero/витрина —
-  меньше JS (109 против 171 КБ br), быстрее первый кадр в стенде, вся экосистема [проверено: A/03, A/08].
+  меньше JS (109 против 171 КБ br), быстрее первый кадр в стенде, вся экосистема [проверено].
 
 ### 2.3. Дрейф API: что нейросеть напишет по памяти и как правильно (r150 → r186)
 | По памяти (старое) | С какой версии иначе | Правильно в r186 |
@@ -147,7 +147,7 @@ Clock `@deprecated since 183`, предупреждение PCFSoftShadowMap п�
   `Props`→`CanvasProps`, `MeshProps` удалён → `ThreeElements['mesh']`; StrictMode наследуется [документация].
 - WebGPU в R3F (проверено A/08, r186 + R3F 9.8, работает на WebGPU и на откате WebGL2):
 ```jsx
-// R3F 9.8 + three r186 WebGPURenderer — [проверено: 99-raw/experiments/A/08-webgpu-fallback] (бандл 400 КБ br)
+// R3F 9.8 + three r186 WebGPURenderer — [проверено] (бандл 400 КБ br)
 import * as THREE from 'three/webgpu';
 import { color, mix, uv } from 'three/tsl';
 import { Canvas, extend, useFrame } from '@react-three/fiber';
@@ -176,7 +176,7 @@ export default function App() {
 - Производительность R3F: прокрутку и частые значения — в `useFrame` через refs, **не** в React-состояние (Shopify
   Editions; Codrops 2026-06-26); `frameloop="demand"` + `invalidate()` для статичных сцен; `dpr={[1, 1.5]}` [практика].
 - Цена: +≈ 140 КБ br (react-dom 205 КБ min + fiber 165 КБ min) и `* as THREE` в каталоге ломает tree-shaking three
-  (729 КБ min three в сборке против 522 у vanilla) [проверено: A/03].
+  (729 КБ min three в сборке против 522 у vanilla) [проверено].
 
 ### 3.2. drei 10.7.8 — что закрывает из каталога
 - Постановка: `Environment` (пресеты HDR — внешняя загрузка), `ContactShadows`, `AccumulativeShadows`, `Lightformer`,
@@ -199,7 +199,7 @@ export default function App() {
   alpha/beta [документация npm/README]. `@react-three/postprocessing` 3.1.2 — обёртка для R3F.
 - Для `WebGPURenderer` — пост на TSL: `RenderPipeline` (r183+), узлы `bloom()`, DOF, SSAO, GTAO, SSR, TRAA, `pass()`
   [документация three r186].
-- Цена: pmndrs-пост ≈ 12 КБ br сверх three [проверено: A/03]; GPU — каждый эффект-проход полноэкранный (discoverthreejs:
+- Цена: pmndrs-пост ≈ 12 КБ br сверх three [проверено]; GPU — каждый эффект-проход полноэкранный (discoverthreejs:
   объединять проходы) [практика].
 
 ## 4. Babylon.js 9
@@ -207,18 +207,18 @@ export default function App() {
   Editor, flow maps и аттракторы частиц, объёмный свет (compute WebGPU с откатом), **Frame Graph v1** (до −40 % памяти
   GPU в примерах), ретаргетинг анимации, **сплаты: PLY, .splat, SPZ, SOG/SOGS, треугольные сплаты, тени, сборка
   нескольких сплатов**, Inspector v2, OpenPBR (часть 3) [документация].
-- npm @babylonjs/core 9.27.1 — 153 стабильных релиза за 12 месяцев (почти еженедельно), Apache-2.0, 26 094★ [проверено: A/02].
+- npm @babylonjs/core 9.27.1 — 153 стабильных релиза за 12 месяцев (почти еженедельно), Apache-2.0, 26 094★ [проверено].
 - Бандл (ES6 поимпортно): ядро + куб 209 КБ br; + glTF-загрузчик и `createDefaultEnvironment` — 665 КБ br; `import *` —
-  1 448 КБ br [проверено: A/03]. Движок печатает в консоль «Babylon.js vX - WebGL2/WebGPU» (удобно для детекции).
+  1 448 КБ br [проверено]. Движок печатает в консоль «Babylon.js vX - WebGL2/WebGPU» (удобно для детекции).
 - Когда: сложные приложения (конфигураторы, редакторы, игровые механики), нужна «всё-в-одном» функциональность, команда
   знает Babylon; когда нет: лендинг/hero (в 4–6 раз тяжелее three). В замере 33 сайтов Babylon не встретился [проверено].
 - Нейросети знают Babylon хорошо (стабильный API, Playground); риск — частые релизы 9.x меняют мелочи.
 
 ## 5. PlayCanvas 2
 - Движок 2.22.3 (MIT, 16 886★, 54 релиза/12 мес.; тег `lts` = 1.77.0 — старая ветка v1), облачный редактор, `@playcanvas/react`
-  0.11.5 (peer playcanvas ^2.11.8, React 18/19), веб-компоненты [проверено: A/02].
+  0.11.5 (peer playcanvas ^2.11.8, React 18/19), веб-компоненты [проверено].
 - Бандл: Application + куб + загрузка glb — 393 КБ br (Node-воркеры `node:worker_threads` в сборке надо исключить)
-  [проверено: A/03].
+  [проверено].
 - Сплаты — сильнейшая сторона: формат **SOG** (lossless WebP-атласы + meta.json, ZIP `.sog`; в 15–20 раз меньше PLY;
   `splat-transform`), потоковый SOG с LOD и бюджетом гауссиан на устройство, compute-рендер на WebGPU (engine 2.19+),
   SuperSplat (редактор и вьюер) — всё MIT [документация].
@@ -236,7 +236,7 @@ export default function App() {
 - Декодеры: Draco и KTX2 — по требованию с CDN Google (Draco > 100 КБ), Meshopt — только при `meshoptDecoderLocation`
   [документация].
 - Бандл: npm-сборка 240 КБ br (внутри three 0.183); `dist/model-viewer.min.js` 230 КБ br; `model-viewer-module.min.js`
-  (без three) 117 КБ br [проверено: A/03]. **peer three ^0.183** → с three r186 в одном бандле конфликт; держать
+  (без three) 117 КБ br [проверено]. **peer three ^0.183** → с three r186 в одном бандле конфликт; держать
   model-viewer отдельным скриптом [проверено: npm ERESOLVE].
 - Когда: витрина товара, AR, e-commerce без 3D-разработчика; когда нет: кастомные шейдеры, прокрутка-сторителлинг,
   несколько объектов со сложной логикой.
@@ -248,7 +248,7 @@ export default function App() {
   €49/место/мес. (€588/год) — коммерция, без водяного знака, self-hosting; Enterprise — договор [документация].
 - npm: `latest` = **6.0.0-alpha.3**, `stable` = 5.1.13, `version-4` = 4.16.12 → `npm i @needle-tools/engine@stable`
   [проверено: npm dist-tags]. Сборка 5.1.13: `needle-engine.bundle.min.js` 311 КБ br + `three-core.min.js` 209 КБ br
-  (+ `rapier` 2,2 МБ и `materialx` 9,5 МБ по требованию) [проверено: A/03].
+  (+ `rapier` 2,2 МБ и `materialx` 9,5 МБ по требованию) [проверено].
 - В замере: needle.tools (диорама, до 184 draw calls, 12–15 МБ) [проверено].
 - Для агента: Blender-путь Needle требует аддона и лицензии для коммерции; альтернатива без лицензии — свой экспорт GLB
   (`../08-export-gltf/`) + three.
@@ -259,7 +259,7 @@ export default function App() {
 - Редактор в браузере/десктопе; **Spline v2 (2026-08-20)** — редактор переписан на WebGPU, ИИ-агент, MCP [документация].
 - Рантайм `@splinetool/runtime` 2.0.55 (190 версий за 12 мес., лицензия в npm не указана): `runtime.standalone.webgl.js`
   2 168 КБ (449 КБ br), `webgpu.min.js` 1 698 КБ (386 КБ br); через бандлер — 834 КБ br; `physics.wasm` 1,5 МБ (419 КБ br)
-  [проверено: A/03]. Рантайм рисует на WebGPU по умолчанию с откатом на WebGL [документация].
+  [проверено]. Рантайм рисует на WebGPU по умолчанию с откатом на WebGL [документация].
 - В замере: spline.design (three-форк r149, 192 draw calls в покое, JS 2,9 МБ), zentry.com (`.splinecode` 892 КБ)
   [проверено].
 
@@ -281,19 +281,19 @@ export default function App() {
   «≈ 50 КБ gzip» по словам вендора), `unicornstudio-react` 2.2.13 (MIT); в замере — главная Unicorn (3 draw calls,
   TBT 0,25–1,2 с) [документация вендора; проверено].
 - `@paper-design/shaders` 0.0.81 (Apache-2.0, 27 релизов/12 мес.) — mesh gradient и др. шейдеры, 6 КБ br; сайт
-  shaders.paper.design [проверено: A/03].
-- `@shadergradient/react` 2.4.20 (R3F, последний релиз 2025-12-08) — градиенты-формы [проверено: A/02].
+  shaders.paper.design [проверено].
+- `@shadergradient/react` 2.4.20 (R3F, последний релиз 2025-12-08) — градиенты-формы [проверено].
 - Rive (`@rive-app/canvas` 2.42) и Lottie (`dotlottie-web` 0.80) — 2D-анимация; на наградных 3D-сайтах Rive встречается
   рядом с 3D (6 из 33) [проверено].
 
 ## 9. Лёгкие и специальные библиотеки
 - **OGL** 1.0.11 (Unlicense, 12 КБ br для куба): минимальная обёртка WebGL; популярна в Codrops-демо эффектов над
   картинками; **нет релизов с 2025-01-27**, push 2025-04 → для нового кода — только если нужен сверхмалый вес
-  [проверено: A/02, A/03].
+  [проверено].
 - **Threlte** 8.6.0 (Svelte 5, three ≥ 0.160) и **TresJS** 5.9.0 (Vue ≥ 3.4, three ≥ 0.133) — живые обёртки (30 и 20 релизов
-  за 12 мес.) [проверено: A/02]. Пример Codrops 2026-09-06: маска лица MediaPipe + Threlte.
+  за 12 мес.) [проверено]. Пример Codrops 2026-09-06: маска лица MediaPipe + Threlte.
 - **A-Frame** 1.8.0 (MIT, 17 635★, 1 релиз за год): 276 КБ br (dist); npm 12 отказывается ставить из-за git-зависимости
-  `three-bmfont-text` (EALLOWGIT) → нужен `--allow-git` или dist-скрипт [проверено: A/03].
+  `three-bmfont-text` (EALLOWGIT) → нужен `--allow-git` или dist-скрипт [проверено].
 - **Сплаты для three**: Spark `@sparkjsdev/spark` 2.2.0 (MIT, World Labs, 3 647★, 744 КБ br вместе с three) — живая;
   `@mkkellogg/gaussian-splats-3d` 0.4.7 — без релизов с 2025-01; three r186 `GaussianSplat` + лоадеры PLY/SPLAT/KSPLAT/SPZ
   и `GLTFGaussianSplatLoaderExtension` (`KHR_gaussian_splatting`, только `WebGPURenderer`) [проверено: A/02, A/03;
@@ -302,7 +302,7 @@ export default function App() {
 - Прочее: `cobe` 2.0.1 (глобус, 5 КБ br), `globe.gl` 2.46.2, `troika-three-text` 0.52.5, `camera-controls` 3.1.2,
   `three-mesh-bvh` 0.9.15 (рейкаст/коллизии), `@dimforge/rapier3d-compat` 0.20 / `@react-three/rapier` 2.2 (физика wasm),
   `leva`/`lil-gui` (отладочный GUI), `maath` (сглаживание; с r186 есть `THREE.MathUtils.damp` — отчёт V), `pixi.js`
-  8.21 (2D, для сравнения) [проверено: A/02].
+  8.21 (2D, для сравнения) [проверено].
 
 ## 10. Анимация и прокрутка
 
@@ -337,7 +337,7 @@ export default function App() {
 
 ### 10.4. Motion
 - `motion` 13.4.1 (MIT, 73 релиза/12 мес.): `animate`, `scroll` для DOM/SVG (22 КБ br); **`framer-motion-3d` на npm —
-  «Package no longer supported»** → 3D-анимацию через Motion не делать [проверено: A/02, A/03].
+  «Package no longer supported»** → 3D-анимацию через Motion не делать [проверено].
 
 ### 10.5. Нативная прокрутка CSS
 - `animation-timeline: scroll()` / `view()` — анимации CSS от прокрутки без JS (Codrops 2024-01-17, 2024-01-24);
@@ -365,7 +365,7 @@ export default function App() {
    postprocessing, R3F).
 2. Для three — прочитать разделы Migration Guide между «своей» версией и r186 (таблица §2.3 — выжимка).
 3. Прогнать страницу в headless (`../../scripts/blender/web_view.py --page` или `99-raw/experiments/A/tools/site_probe.py`):
-   0 ошибок консоли, предупреждения `deprecated` разобрать, draw calls > 0, первый кадр есть [проверено: A/07, A/08].
+   0 ошибок консоли, предупреждения `deprecated` разобрать, draw calls > 0, первый кадр есть [проверено].
 
 ## 12. Стек по умолчанию для агента
 
@@ -398,7 +398,7 @@ Theatre.js (заморожен), `framer-motion-3d` (снят), A-Frame для �
 - Код «по памяти» с `THREE.Clock`, `RGBELoader`, `outputEncoding`, `PCFSoftShadowMap` — предупреждения/поломки в r186
   (таблица §2.3) [проверено].
 - `renderer.render()` у `WebGPURenderer` до `await renderer.init()` вне `setAnimationLoop` [документация r181].
-- three из CDN неминифицированными `three.module.js` + `three.core.js` (391 КБ вместо 194 КБ br) [проверено: A/07].
+- three из CDN неминифицированными `three.module.js` + `three.core.js` (391 КБ вместо 194 КБ br) [проверено].
 - Lenis из `@studio-freight/lenis` [проверено: npm deprecated]; «SplitText платный» — неверно с 2025-04-30 [документация].
 - Theatre.js в новом проекте (заморожен с 2024; studio — AGPL) [проверено].
 - R3F-состояние, обновляемое прокруткой каждый кадр (ре-рендер React) — лаги; прокрутка → refs/uniforms [практика].

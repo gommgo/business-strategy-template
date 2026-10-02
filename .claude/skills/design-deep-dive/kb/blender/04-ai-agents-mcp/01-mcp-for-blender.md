@@ -12,7 +12,7 @@ README, TERMS, страница телеметрии, GitHub (API, 6 issues, PR,
 1. **Устройство**: сервер `mcp-for-blender` (stdio, FastMCP) держит одно TCP-соединение с аддоном в Blender
    (127.0.0.1:9876); аддон исполняет команды в главном потоке Blender из таймера каждые 50 мс. → §1.2 `[исходник]`
 2. **В фоне (`blender -b`) штатно не работает**: аддон отказывается стартовать; мост C1 (копия аддона + ручной цикл
-   `_drain_command_queue`) даёт все 32 инструмента без окна. → §8 `[проверено: 99-raw/experiments/C1/04-headless-bridge]`
+   `_drain_command_queue`) даёт все 32 инструмента без окна. → §8 `[проверено]`
 3. **Первый вызов — `get_addon_status`**: ждать `protocol_version: 9`, `telemetry_consent: false`; после перезапуска
    Blender первый ответ бывает ложным («Addon handshake failed») — повторить. → §3.1 `[проверено: 04, 09]`
 4. **`execute_blender_code` — новое пространство имён `{"bpy": bpy}` на каждый вызов**: переменные, функции и импорты
@@ -30,7 +30,7 @@ README, TERMS, страница телеметрии, GitHub (API, 6 issues, PR,
 10. **Вызов дольше 180 с теряет ответ**, Blender всё равно доисполнит код, следующая команда ждёт его окончания; держи
     вызов < 30 с. → §2.3 `[проверено: 04]`
 11. **Ответ длиннее ~5–6 МБ обрывается** (сервер перечитывает JSON после каждых 8 КБ, аддон отправляет с таймаутом 1 с) —
-    не печатай дампы сцены и base64. → §2.3 `[проверено: 99-raw/experiments/C1/08-response-size]`
+    не печатай дампы сцены и base64. → §2.3 `[проверено]`
 12. **`get_scene_info` показывает только первые 10 объектов** (имя, тип, location до 0,01 м) — состав и габариты сцены
     проверяй своим аудитом кодом. → §3.2 `[проверено: 02, 08]`
 13. **`get_object_info`: габарит учитывает модификаторы, счётчики вершин и граней — нет** (исходный меш). → §3.3 `[проверено: 02]`
@@ -54,7 +54,7 @@ README, TERMS, страница телеметрии, GitHub (API, 6 issues, PR,
 22. **Сокет без аутентификации, в окне сервер поднимается сам** при запуске Blender (`auto_start` = True) — любой
     локальный процесс может исполнить Python в Blender пользователя. → §6.1 `[исходник, проверено: 09]`
 23. **CVE-2026-10661 (чтение любого файла через `input_image_url` Hunyuan3D) в 2.0.3 не исправлена, SSRF (#203, CVE-2026-10662) — тоже;
-    безопасный режим их не закрывает.** → §6.2 `[проверено: 99-raw/experiments/C1/13-cve-check]`
+    безопасный режим их не закрывает.** → §6.2 `[проверено]`
 24. **CVE-2026-10688 — это сам свободный `exec`**; `BLENDER_MCP_SAFE_MODE=1` фильтрует только `execute_blender_code`
     и отвергает 23 из 40 типичных фрагментов (lambda, numpy, `time`, `class`, `getattr` с вычисляемым именем). → §4
     `[проверено: 07]`
@@ -202,7 +202,7 @@ Exception`, дописывая «Communication error with Blender:» и обну
 | Blender закрылся (например, `sys.exit()` в коде) | `Communication error with Blender: Connection closed before receiving any data` | сразу | перезапустить Blender, восстановить из сохранения |
 | Ошибка обработчика с `{"error": …}` | `Error: …` или `Error <действие>: …` (текстом, без исключения) | сразу | читать текст |
 
-[проверено: 99-raw/experiments/C1/14-server-error-texts]
+[проверено]
 
 ### 2.5. Несколько клиентов
 
@@ -287,7 +287,7 @@ AABB, модификаторами и связями — 592 КБ за 0,09 с �
 Минимальный шаблон вызова (печать итога одной строкой JSON):
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/02-handlers-direct] — тело для execute_blender_code
+# Blender 5.2.2 — [проверено] — тело для execute_blender_code
 import bpy, json
 from mathutils import Vector          # каждый вызов — своё пространство имён: импорты заново
 
@@ -298,7 +298,7 @@ print(json.dumps(report))             # последняя строка stdout =
 Оператор, которому нужен вьюпорт (в Blender с окном):
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/09-gui-session] — в окне; в фоне область VIEW_3D тоже есть в screen
+# Blender 5.2.2 — [проверено] — в окне; в фоне область VIEW_3D тоже есть в screen
 import bpy
 area = next(a for a in bpy.context.screen.areas if a.type == "VIEW_3D")
 region = next(r for r in area.regions if r.type == "WINDOW")
@@ -329,7 +329,7 @@ module to be initialized», запасной путь падает на `poll()`
 проверки «как на сайте» — рендер в файл кодом и чтение PNG (0,78 с на 512×320 EEVEE 16 сэмплов) [проверено: 04]:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/04-headless-bridge] — рендер из камеры сцены в PNG
+# Blender 5.2.2 — [проверено] — рендер из камеры сцены в PNG
 import bpy, os, time
 s = bpy.context.scene
 s.render.engine = "BLENDER_EEVEE"
@@ -345,7 +345,7 @@ print({"png": s.render.filepath, "sec": round(time.time() - t, 2), "exists": os.
 Подготовка вьюпорта для снимка (если нужен именно он):
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/04-headless-bridge]
+# Blender 5.2.2 — [проверено]
 import bpy
 area = next(a for a in bpy.context.screen.areas if a.type == "VIEW_3D")
 space = area.spaces.active
@@ -490,7 +490,7 @@ AST-валидатор на стороне **сервера** проверяет
 
 Замер на 40 типичных фрагментах кода агента: 17 проходят, 23 отвергаются — среди отвергнутых безобидные
 `sorted(objs, key=lambda o: o.name)`, `import time`, `import numpy`, `if __name__…`, `class Params`, цикл
-`setattr(cam, k, v)` по словарю параметров [проверено: 99-raw/experiments/C1/07-safe-mode]. Чего режим не закрывает:
+`setattr(cam, k, v)` по словарю параметров [проверено]. Чего режим не закрывает:
 инструменты Hunyuan/Hyper3D читают файлы по пути от модели, `export_scene` пишет куда угодно, а включить интеграцию и
 перенаправить её URL можно разрешённым кодом (`scene.blendermcp_hunyuan3d_api_url = …` → `is_safe: True`)
 [проверено: 13]. Стиль кода под безопасный режим: явные присваивания вместо циклов `setattr`, `def` вместо `lambda`, без
@@ -620,7 +620,7 @@ commands would never execute… use a virtual display: xvfb-run -a blender» и 
 главный поток сам крутит `_drain_command_queue()`:
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/C1/04-headless-bridge] — ядро bridge.py (полная версия — в эксперименте)
+# Blender 5.2.2 — [проверено] — ядро bridge.py (полная версия — в эксперименте)
 # запуск: blender -b --factory-startup --python bridge.py -- --port 9876 --gpu
 import bpy, importlib.util, socket, threading, time
 spec = importlib.util.spec_from_file_location("blender_mcp_bridge_addon", "/abs/path/addon_bundled_p9.py")
@@ -651,7 +651,7 @@ srv.stop()
 Запуск в фоне и остановка:
 
 ```bash
-# [проверено: 99-raw/experiments/C1/04-headless-bridge]
+# [проверено]
 cd 99-raw/experiments/C1/04-headless-bridge
 ss -ltn | grep -q ':9876 ' && echo "порт занят" || \
   timeout 7400 blender -b --factory-startup --python bridge.py -- --port 9876 --gpu --ttl 7200 > bridge_stdout.log 2>&1 &
@@ -678,7 +678,7 @@ data», затем «Not connected to Blender».
 ## 9. Цена контекста
 
 Методика mcp-context-cost (athakur3) воспроизведена: их снимок 28 инструментов — 6 928 токенов o200k, совпало
-[проверено: 06][S15]. Снимок 2.0.3 (stdio, 32 инструмента) [проверено: 99-raw/experiments/C1/06-context-cost]:
+[проверено: 06][S15]. Снимок 2.0.3 (stdio, 32 инструмента) [проверено]:
 
 | Что | Токены o200k |
 |---|---|

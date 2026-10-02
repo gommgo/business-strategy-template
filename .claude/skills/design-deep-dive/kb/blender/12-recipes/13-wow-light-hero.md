@@ -169,7 +169,7 @@ def chamfer_strip(st, cam, point, normal, along, name, E=2.4, dist=0.34, length=
 
 ```python
 # run: system
-# Python 3 — [проверено: 99-raw/notes/trial/RC-checks/rc_shift_shoulder.py] доля кадра ↔ shift Blender; сверка с замером Z
+# Python 3 — [проверено] доля кадра ↔ shift Blender; сверка с замером Z
 def shift_for(frac_w, frac_h, W, H, sensor_fit="AUTO"):
     """Доли кадра (x — ширины вправо, y — высоты вниз, как setViewOffset three) → (shift_x, shift_y) Blender."""
     S = max(W, H) if sensor_fit == "AUTO" else (W if sensor_fit == "HORIZONTAL" else H)

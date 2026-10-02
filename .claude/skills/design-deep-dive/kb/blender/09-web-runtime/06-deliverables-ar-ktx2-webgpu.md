@@ -14,25 +14,25 @@ D1 (`../05-modeling/`), H (`../07-animation/`).
 1. **Секвенция кадров — окно памяти, а не все кадры**: декодированный кадр 1080² = 4,5 МБ RGBA; окно 12 кадров ≈ 54 МБ; телефону — отдельный набор 720 px (2 МБ/кадр) → §1.1. [расчёт; проверено: F1/06 — окно держит ≤ 12 битмапов]
 2. **Сначала первые 10 кадров, потом окно по направлению прокрутки** (OPTIKKA: ±5), кадры через `createImageBitmap` и `close()` вне окна → §1.1. [практика: A 02 §4.4; проверено: F1/06]
 3. **Видео с альфой**: `<video>` с HEVC-alpha первым (Safari) и VP9-alpha WebM (Chrome/Firefox) или один stacked-файл (цвет сверху, альфа снизу) + шейдер; анимированный AVIF — нет → §1.2. [проверено: A/06 — альфа 0/255 в Chromium; практика: Archibald 2024]
-4. **Stacked-альфа в three**: текстура без sRGB-декодирования (`NoColorSpace`), альфа из нижней половины по R, цвет — из верхней (при `flipY = true`), вывод без повторного перевода в sRGB → §1.2. [проверено: F1/06]
+4. **Stacked-альфа в three**: текстура без sRGB-декодирования (`NoColorSpace`), альфа из нижней половины по R, цвет — из верхней (при `flipY = true`), вывод без повторного перевода в sRGB → §1.2. [проверено]
 5. **Точки для частиц**: `.bin` Float32 little-endian (x, y, z) уже в осях three (Blender (x, y, z) → (x, z, −y)), 12 Б/точку; для морфинга — одинаковое число и порядок точек на форму → §1.3. [проверено: F1/06 — загрузчик; формат — согласовать с D1]
 6. **Путь камеры — JSON точек в осях three** → `CatmullRomCurve3(points, closed, 'catmullrom', 0.5)`; равномерный ход — `getPointAt(t)` → §1.4. [проверено: F1/06; практика: Codrops 2026-07-07]
-7. **Маркеры — пустышки Blender с префиксом имени** (`hotspot_*`) и custom properties (`export_extras=True`) → `userData`; искать по санитизированному имени или `userData.name`, позиция — `getWorldPosition` → §1.5. [проверено: E/11, F1/06]
+7. **Маркеры — пустышки Blender с префиксом имени** (`hotspot_*`) и custom properties (`export_extras=True`) → `userData`; искать по санитизированному имени или `userData.name`, позиция — `getWorldPosition` → §1.5. [проверено]
 8. **AR — отдельный GLB без сжатия**: Scene Viewer в документации знает только `KHR_materials_unlit` и `KHR_texture_transform`; Draco, Meshopt, KTX2, WebP не упомянуты, а model-viewer отдаёт Scene Viewer исходный `src` → `src` веб-версии со сжатием нельзя давать в AR на Android → §2.2. [документация: F1-sub-AR §1–2]
 9. **Лимиты Scene Viewer**: ≤ 100 тыс. треуг. (идеал 30–50 тыс.), ≤ 10 материалов (2 с альфой), текстуры ≤ 2048², 1 UV, ≤ 254 кости, 4 веса, ≤ 10 МБ (15 — ошибка), морфы и цвета вершин — ошибки, одна анимация → §2.2. [документация: Scene Viewer, обновл. 2024-10-31]
 10. **model-viewer: `ios-src` почти обязателен**: без него USDZ генерируется на лету (без анимаций), а в Chrome/Edge/Firefox на iOS Quick Look работает только с `ios-src`; в приложении Google на iOS Quick Look выключен → §2.3. [документация: исходник model-viewer 4.3.1 `ar.ts`]
 11. **model-viewer 4.3.1 требует three ^0.183** — держать отдельным скриптом (CDN Google), не в бандле с r186 → §2.1. [проверено: A — npm ERESOLVE]
 12. **USDZ из Blender 5.2.2**: `bpy.ops.wm.usd_export(filepath="….usdz", …)`, UsdPreviewSurface (`generate_preview_surface=True`), текстуры в пакет (`export_textures_mode="NEW"`), `usdz_downscale_size="2048"`, `export_subdivision="TESSELLATE"`, Y-up (`convert_orientation=True`); `visible_objects_only` и `export_textures` в 5.2 нет → §2.4. [проверено: bpy_probe (имена, умолчания), F1/06 (экспорт куба); вид в Quick Look — не проверено, нет Mac]
-13. **three r186 читает USDZ** (`USDLoader`; `USDZLoader` — устаревшее имя с r179) и пишет (`USDZExporter`: `maxTextureSize` 1024, клипы анимации, KTX2 через `setTextureUtils`) → §2.4. [проверено: F1/01]
-14. **KTX2 выигрывает память и CPU, не байты**: Camera_01 1k — ETC1S 1157 КБ (WebP 940), GPU 12 МБ (48), первый кадр при CPU ×4 108 мс (206) → §3.1. [проверено: F1/03]
+13. **three r186 читает USDZ** (`USDLoader`; `USDZLoader` — устаревшее имя с r179) и пишет (`USDZExporter`: `maxTextureSize` 1024, клипы анимации, KTX2 через `setTextureUtils`) → §2.4. [проверено]
+14. **KTX2 выигрывает память и CPU, не байты**: Camera_01 1k — ETC1S 1157 КБ (WebP 940), GPU 12 МБ (48), первый кадр при CPU ×4 108 мс (206) → §3.1. [проверено]
 15. **На медленной сети с текстурами 512² KTX2 проигрывает** (транскодер 212 КБ br: wasm 199 + js 13): первый кадр hero 7,1 с против 5,2 с у WebP → телефону при ≤ 512² и одной модели — WebP → §3.2. [проверено: hero-lazy]
-16. **UASTC для веба — точечно**: с RDO по KTX Artist Guide (λ 0,25 нормали / 0,5 ORM, zstd 22) 1k-набор — 5,6 МБ против 6,0 без RDO, кодирование 139 с → только критичная нормаль крупного плана → §3.1. [проверено: F1/03]
-17. **ETC1S «по Artist Guide» (`--quality 255 --compression 4`) не лучше умолчаний** на этом ассете (ΔE 0,24 против 0,25) при файле ×1,5 → умолчание `etc1s` → §3.1. [проверено: F1/03]
+16. **UASTC для веба — точечно**: с RDO по KTX Artist Guide (λ 0,25 нормали / 0,5 ORM, zstd 22) 1k-набор — 5,6 МБ против 6,0 без RDO, кодирование 139 с → только критичная нормаль крупного плана → §3.1. [проверено]
+17. **ETC1S «по Artist Guide» (`--quality 255 --compression 4`) не лучше умолчаний** на этом ассете (ΔE 0,24 против 0,25) при файле ×1,5 → умолчание `etc1s` → §3.1. [проверено]
 18. **KTX2 — из PNG, размеры кратны 4**, для телефона — `gltfpack -cc -tc -ts 0.5` или `gltf-transform etc1s` + `resize`; вход gltfpack `-tc` — JPEG/PNG, не WebP → §3.3. [проверено: F1/03, E/24; документация: KTX Artist Guide]
 19. **Linux/Mesa — BC7, телефон — ETC/ASTC**: все наши замеры KTX2 — путь BC7 (KTX2Loader отключает ETC/ASTC на Mesa); ASTC 12×12 и XUASTC новых кодеров Basis `KTX2Loader` r186 не читает → §3.4. [проверено: E/18; документация: W7 §8]
-20. **`WebGPURenderer` рисует GLB из Blender без правок**: классические материалы → node-материалы автоматически; lightMap, transmission, тени PCF поддержаны; `onBeforeCompile`/`ShaderMaterial` — нет → §4. [проверено: F1/01, F1/05]
+20. **`WebGPURenderer` рисует GLB из Blender без правок**: классические материалы → node-материалы автоматически; lightMap, transmission, тени PCF поддержаны; `onBeforeCompile`/`ShaderMaterial` — нет → §4. [проверено]
 21. **WebGPU-мелочи**: `await init()` до `KTX2Loader.detectSupport`; фон `scene.background` тонмаппится; `info.render.calls` накопительный; в compat mode MSAA выключен; постобработка — `RenderPipeline` → §4. [проверено: F1/05; документация: W7 §8]
-22. **Когда WebGPU на сайте** — `01` §2.2: первый кадр не хуже WebGL, но откат на WebGL2 медленнее обычного `WebGLRenderer` в 1,7 раза → только ради compute/сплатов/TSL. [проверено: F1/05]
+22. **Когда WebGPU на сайте** — `01` §2.2: первый кадр не хуже WebGL, но откат на WebGL2 медленнее обычного `WebGLRenderer` в 1,7 раза → только ради compute/сплатов/TSL. [проверено]
 
 ## 1. Загрузчики поставок не-GLB (карта поставок — A `05` §1, §3)
 
@@ -47,7 +47,7 @@ D1 (`../05-modeling/`), H (`../07-animation/`).
 | окно в памяти | 12–20 кадров (54–90 МБ) | 10–12 (20–24 МБ) | позиция; весь ряд 200 × 1080² = 900 МБ — падение вкладки |
 
 ```js
-// Canvas 2D / createImageBitmap — [проверено: 99-raw/experiments/F1/06-doc-snippets] секвенция с окном памяти: кадр по индексу, соседние — заранее
+// Canvas 2D / createImageBitmap — [проверено] секвенция с окном памяти: кадр по индексу, соседние — заранее
 export class ImageSequence {
   constructor(canvas, urls, { window: win = 12, preload = 10 } = {}) {
     Object.assign(this, { canvas, urls, win, preload, frames: new Map(), pending: new Map(), current: 0, dir: 1 });
@@ -86,7 +86,7 @@ export class ImageSequence {
 
 - Canvas 2D, а не WebGL: одна операция `drawImage` на кадр, нет three (0 КБ JS), не нужен контекст WebGL [практика: A 05 §3.14].
 - Reduce: один ключевой кадр без привязки к прокрутке; привязку к прокрутке (ScrollTrigger/Lenis/CSS) — F2 `03`.
-- Короткий ролик (≤ 3–5 с) с перемоткой — all-intra видео (`-g 1`, ×3–4 к весу) вместо секвенции [проверено: A/06].
+- Короткий ролик (≤ 3–5 с) с перемоткой — all-intra видео (`-g 1`, ×3–4 к весу) вместо секвенции [проверено].
 
 ### 1.2. Видео с альфой
 
@@ -99,11 +99,11 @@ export class ImageSequence {
 ```
 
 Размеры (A/06, 2 с, 768²): VP9-alpha 19–61 КБ, stacked AV1 14–39 КБ, stacked HEVC 28–77 КБ; HEVC-alpha кодируется только на macOS
-(VideoToolbox) — поэтому stacked-путь для генерации на Linux [проверено: A/06]. Команды ffmpeg — A `05` §3.15. Reduce и WCAG 2.2.2:
+(VideoToolbox) — поэтому stacked-путь для генерации на Linux [проверено]. Команды ffmpeg — A `05` §3.15. Reduce и WCAG 2.2.2:
 петля > 5 с — пауза (или постер при reduce) [документация: UM3 §2.2].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] stacked-alpha: цвет — верх кадра, альфа — низ (ffmpeg vstack), VideoTexture с flipY
+// three r186 — [проверено] stacked-alpha: цвет — верх кадра, альфа — низ (ffmpeg vstack), VideoTexture с flipY
 import * as THREE from 'three';
 
 export function createStackedAlphaMaterial(texture) {
@@ -126,7 +126,7 @@ export function createStackedAlphaMaterial(texture) {
 // scene.add(new THREE.Mesh(new THREE.PlaneGeometry(1, 1), mat));   // плоскость с пропорциями половины кадра
 ```
 
-Для stacked-видео без three хватает WebGL2-квада на 20 строк (A/06 `playback.html`, фильтрация `NEAREST`) [проверено: A/06].
+Для stacked-видео без three хватает WebGL2-квада на 20 строк (A/06 `playback.html`, фильтрация `NEAREST`) [проверено].
 
 ### 1.3. Точки для частиц (Float32)
 
@@ -135,7 +135,7 @@ export function createStackedAlphaMaterial(texture) {
 число точек и стабильный порядок (морфинг по индексу); цвет/нормаль — отдельные файлы того же порядка [практика: A 05 §3.8].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] точки из .bin (Float32 xyz в осях three) → THREE.Points
+// three r186 — [проверено] точки из .bin (Float32 xyz в осях three) → THREE.Points
 import * as THREE from 'three';
 
 export async function loadPoints(url, { size = 0.01, color = 0xffffff } = {}) {
@@ -157,7 +157,7 @@ export async function loadPoints(url, { size = 0.01, color = 0xffffff } = {}) {
 по имени, а не `active_object` [практика: A 05 §3.9; Codrops 2026-07-07].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] путь из Blender (JSON, оси three) → кривая с равномерным ходом
+// three r186 — [проверено] путь из Blender (JSON, оси three) → кривая с равномерным ходом
 import * as THREE from 'three';
 
 export async function loadPath(url) {
@@ -175,10 +175,10 @@ export async function loadPath(url) {
 
 Пустышки Blender (Empty) с именами-соглашениями (`hotspot_*`, `cam_*`, `collider_*`) и custom properties → узлы glTF (`export_extras=True`)
 → `Object3D` с `userData`; имя санитизируется (`hotspot.buy` → `hotspotbuy`, исходное — `userData.name`); gltfpack без `-kn -ke`
-выбрасывает и то, и другое [проверено: E/11, E/28].
+выбрасывает и то, и другое [проверено].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] маркеры из GLB: пустышки по префиксу имени, мировые позиции, проекция на экран
+// three r186 — [проверено] маркеры из GLB: пустышки по префиксу имени, мировые позиции, проекция на экран
 import * as THREE from 'three';
 
 export function collectMarkers(root, prefix = 'hotspot_') {
@@ -307,7 +307,7 @@ def export_usdz(path, **overrides):
 [не проверено]; сложные ноды Principled (процедуры, coat, transmission) в UsdPreviewSurface не проверялись — запекать, как для glTF. Альтернатива без Blender — USDZ из того же GLB через three `USDZExporter` (как делает model-viewer): `maxTextureSize`
 1024 по умолчанию, `quickLookCompatible` false, клипы анимации поддержаны в r186 (в model-viewer 4.3.1 с three 0.183 — «animations are
 not yet supported»), KTX2-текстуры — через `setTextureUtils(WebGLTextureUtils)` [проверено: F1/01 исходник; документация: F1-sub-AR §1].
-Прочитать USDZ в three — `USDLoader` (`.usdz`, `.usda`, `.usdc`) [проверено: F1/01].
+Прочитать USDZ в three — `USDLoader` (`.usdz`, `.usda`, `.usdc`) [проверено].
 
 ## 3. Текстурный конвейер KTX2
 
@@ -324,7 +324,7 @@ not yet supported»), KTX2-текстуры — через `setTextureUtils(WebG
 | ETC1S цвет + UASTC RDO (нормали λ 0,25, ORM λ 0,5) | 5 601 КБ | **139 с** | 242 / 581 мс | 61 / 122 мс | 12 МБ | 0,20 / 1,14 |
 
 [проверено: 99-raw/experiments/F1/03-ktx2-webp; ΔE по всему кадру, модель ≈ 40 % — абсолютные значения занижены, ранжирование верно].
-Первая загрузка KTX2 — +транскодер: холодная 919 мс против 64 мс тёплой (скачивание 212 КБ wasm) [проверено: F1/03]. В hero на
+Первая загрузка KTX2 — +транскодер: холодная 919 мс против 64 мс тёплой (скачивание 212 КБ wasm) [проверено]. В hero на
 медленном 4G (512²): KTX2 7,1 с до первого кадра против 5,2 с у WebP [проверено: hero-lazy].
 
 ### 3.2. Какой формат когда
@@ -344,7 +344,7 @@ not yet supported»), KTX2-текстуры — через `setTextureUtils(WebG
 ### 3.3. Команды
 
 ```bash
-# gltf-transform 4.5.0 + toktx 4.4.2 (PATH), gltfpack 1.2 нативный — [проверено: 99-raw/experiments/F1/03-ktx2-webp/make_variants.sh, E/24]
+# gltf-transform 4.5.0 + toktx 4.4.2 (PATH), gltfpack 1.2 нативный — [проверено]
 R=/home/mm/Документы/app-design/blender-research/99-raw/tools
 export PATH="$R/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$R/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
 cd $R/node
@@ -374,18 +374,18 @@ RGBA32; на Linux с Mesa отключает ETC/ASTC (драйвер их эм
 
 | тема | `WebGPURenderer` r186 | источник |
 |---|---|---|
-| материалы GLTFLoader | `MeshStandard/Physical/Basic` → node-материалы автоматически (NodeLibrary), картинка совпадает с WebGL | [проверено: F1/01, F1/05] |
+| материалы GLTFLoader | `MeshStandard/Physical/Basic` → node-материалы автоматически (NodeLibrary), картинка совпадает с WebGL | [проверено] |
 | свой шейдер | `ShaderMaterial`, `onBeforeCompile` — нет; TSL (`colorNode`, `positionNode`, `Fn`) — один код на WebGPU и WebGL2 | [проверено: A/08; документация] |
 | lightMap, aoMap, transmission | поддержаны в node-материалах | [проверено: F1/01 исходник] |
-| тени | `PCFShadowMap` по умолчанию, `PCFSoftShadowMap` удалён (warn) | [проверено: F1/01] |
+| тени | `PCFShadowMap` по умолчанию, `PCFSoftShadowMap` удалён (warn) | [проверено] |
 | постобработка | `RenderPipeline` (r183) + TSL-узлы; pmndrs `postprocessing` — нет | [документация: A 03 §3.3] |
-| фон | сплошной `scene.background` тонмаппится (в WebGL — нет) → прозрачный canvas | [проверено: F1/05] |
-| `renderer.info` | `render.calls` накопительный, за кадр — `frameCalls` | [проверено: F1/05] |
+| фон | сплошной `scene.background` тонмаппится (в WebGL — нет) → прозрачный canvas | [проверено] |
+| `renderer.info` | `render.calls` накопительный, за кадр — `frameCalls` | [проверено] |
 | KTX2 | `await renderer.init()` до `KTX2Loader.detectSupport(renderer)` | [документация: Migration Guide r181] |
 | MSAA | в compat mode (старые Android) выключен (`_samples = 0`) | [документация: W7 §8] |
 | лимиты | не запрашивать функций/лимитов сверх умолчаний; `powerPreference` на Windows игнорируется | [V:3YP5Ck-7NZk 34:13, 40:25] |
 | сплаты | `GaussianSplat`, `GLTFGaussianSplatLoaderExtension` (`KHR_gaussian_splatting`) — только WebGPU | G `../10-ai-3d-generation-assets/`; A 03 §9 |
-| первый кадр | 922 мс против 1353 у WebGL; откат на WebGL2 — 2299 мс, TBT ×1,6 | [проверено: F1/05] |
+| первый кадр | 922 мс против 1353 у WebGL; откат на WebGL2 — 2299 мс, TBT ×1,6 | [проверено] |
 
 Код рендерера — `01` §2.1 (`createWebGPURenderer`); `loadGLB` из `01` §3.2 работает на WebGPU-странице без правок, если import map
 переназначает `"three"` на `three.webgpu.js` (addons импортируют `"three"`) [проверено: F1/05 — та же схема импорта].
@@ -394,13 +394,13 @@ RGBA32; на Linux с Mesa отключает ETC/ASTC (драйвер их эм
 
 1. Секвенция: все 200 кадров в памяти (≈ 900 МБ декодированных) — вкладка падает на телефоне [расчёт; практика: A 01 §14].
 2. Видео с альфой только VP9 (в Safari прозрачности нет) или только HEVC (в Chrome нет) [практика: A 05].
-3. Stacked-альфа с `SRGBColorSpace` на текстуре — маска «линеаризуется», края темнеют; с `colorspace_fragment` — двойной перевод [проверено: F1/06].
+3. Stacked-альфа с `SRGBColorSpace` на текстуре — маска «линеаризуется», края темнеют; с `colorspace_fragment` — двойной перевод [проверено].
 4. Точки/пути в осях Blender (Z-up) — всё «лежит на боку» [практика: A 05].
 5. Один GLB для веба и AR: Meshopt/KTX2 в `src` model-viewer уходят в Scene Viewer [документация].
 6. model-viewer в одном бандле с three r186 — конфликт peer ^0.183 [проверено: A].
 7. USDZ по памяти: `visible_objects_only=True`, `export_textures=True` → `TypeError` в 5.2.2 [проверено: bpy_probe].
-8. KTX2 из WebP-входа в gltfpack `-tc` — картинки остаются WebP, а файл требует `KHR_texture_basisu` [проверено: E/24].
-9. UASTC «для качества» на всех картах — 5–6 МБ вместо 1,2 [проверено: F1/03].
+8. KTX2 из WebP-входа в gltfpack `-tc` — картинки остаются WebP, а файл требует `KHR_texture_basisu` [проверено].
+9. UASTC «для качества» на всех картах — 5–6 МБ вместо 1,2 [проверено].
 10. `WebGPURenderer` без `await init()` перед `KTX2Loader.detectSupport` [документация].
 11. Шейдер через `onBeforeCompile` на WebGPU-странице — не применится; TSL [документация].
 

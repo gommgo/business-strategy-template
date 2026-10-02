@@ -9,25 +9,25 @@ three-stdlib 2.36.1, PlayCanvas 2.22.3, Babylon.js 9.27.1, model-viewer 4.3.1, g
 
 ## Выжимка для агента
 
-1. **React в проекте есть → R3F 9.8 + drei 10.7.8; нет → vanilla three r186.** R3F-чанк hero-сцены — 293 КБ br (three 727 КБ min + react-dom 205 + fiber 165 + three-stdlib 101), TBT 496–757 мс на десктопе против 172 мс у vanilla-паттерна A/07 → React ради одного 3D-блока не тянуть → §1. [проверено: 99-raw/experiments/F2/02-r3f-hero; A/07]
-2. **Грузи R3F-сцену отдельным чанком** динамическим `import()` после `load` и в простое (`requestIdleCallback`) по `IntersectionObserver`; H1, текст и CTA — в HTML: LCP 156 мс = текст, CLS 0 → §4. [проверено: F2/02]
+1. **React в проекте есть → R3F 9.8 + drei 10.7.8; нет → vanilla three r186.** R3F-чанк hero-сцены — 293 КБ br (three 727 КБ min + react-dom 205 + fiber 165 + three-stdlib 101), TBT 496–757 мс на десктопе против 172 мс у vanilla-паттерна A/07 → React ради одного 3D-блока не тянуть → §1. [проверено]
+2. **Грузи R3F-сцену отдельным чанком** динамическим `import()` после `load` и в простое (`requestIdleCallback`) по `IntersectionObserver`; H1, текст и CTA — в HTML: LCP 156 мс = текст, CLS 0 → §4. [проверено]
 3. **Меняй дефолты `<Canvas>`**: ACES (по умолчанию) → `gl={{ toneMapping: THREE.NeutralToneMapping }}` (пара с Blender «Khronos PBR Neutral» — `01-threejs-core.md` §5), `dpr={[1, 2]}` → `[1, 1.5]`, `shadows` не включать без нужды (даёт `PCFSoftShadowMap`, в r186 удалённый — three подменяет его на `PCFShadowMap` с предупреждением) → §2.1. [проверено: F2/02 — `gl.toneMapping` = 7; документация R3F Canvas]
-4. **reduce → `frameloop="demand"`** и выключенные `Float`/контролы: 0 вызовов отрисовки в покое, 0 % движения; в обычном режиме — стоп вне экрана `setFrameloop('never')` по `IntersectionObserver` → §2.2. [проверено: F2/02]
+4. **reduce → `frameloop="demand"`** и выключенные `Float`/контролы: 0 вызовов отрисовки в покое, 0 % движения; в обычном режиме — стоп вне экрана `setFrameloop('never')` по `IntersectionObserver` → §2.2. [проверено]
 5. **Анимация — мутацией ref в `useFrame((state, delta) => …)`**, не `setState`; плавность — `THREE.MathUtils.damp(x, y, λ, delta)`: пример из документации R3F «`lerp(x, target, 0.1)` в useFrame» зависит от частоты (на 144 Гц в 2,4 раза быстрее) → §2.3, `03-scroll-interaction-animation.md` §4. [проверено: 99-raw/experiments/F2/06-anim-damp; документация R3F pitfalls]
-6. **`useGLTF` drei грузит загрузчиком three-stdlib 2.36.1, а не three r186**: нет `KHR_meshopt_compression`, `KHR_materials_variants`, `KHR_animation_pointer`, `KHR_gaussian_splatting` → gltfpack с `-ce khr` ломает загрузку («Invalid typed array length»); оставляй умолчание `-ce ext` или грузи `useLoader(GLTFLoader из three/addons)` → §3.1. [проверено: F2/02]
+6. **`useGLTF` drei грузит загрузчиком three-stdlib 2.36.1, а не three r186**: нет `KHR_meshopt_compression`, `KHR_materials_variants`, `KHR_animation_pointer`, `KHR_gaussian_splatting` → gltfpack с `-ce khr` ломает загрузку («Invalid typed array length»); оставляй умолчание `-ce ext` или грузи `useLoader(GLTFLoader из three/addons)` → §3.1. [проверено]
 7. **Draco у `useGLTF` по умолчанию с CDN gstatic 1.5.5, пресеты `<Environment preset>` — с raw.githack** («not meant for production»): в продакшене — свои пути (`useGLTF(url, '/draco/')`) и свои файлы или `<Lightformer>` (0 КБ) → §3.2. [документация drei; проверено исходником]
-8. **Окружение для продукта без файлов** — `<Environment resolution={256}>` c 3–4 `<Lightformer>`: снимается кубокамерой один раз, даёт студийные блики клиркоута → §4. [проверено: F2/02]
+8. **Окружение для продукта без файлов** — `<Environment resolution={256}>` c 3–4 `<Lightformer>`: снимается кубокамерой один раз, даёт студийные блики клиркоута → §4. [проверено]
 9. **Статичные тени — `<ContactShadows frames={1}>`** (иначе рендер тени каждый кадр) или `<AccumulativeShadows>` (0 цены после накопления) → §3.2. [документация drei; проверено: F2/02]
 10. **В drei нет ни одной проверки `prefers-reduced-motion`** (поиск по исходникам 10.7.8): `Float`, `PresentationControls`, `ScrollControls`, `MeshWobble/Distort` двигаются всегда — агент сам передаёт `speed={0}`, `enabled={false}`, `damping` → §3.3. [проверено: исходники drei]
 11. **`ScrollControls` заменяет нативную прокрутку своим контейнером** (pages, damping 0,2 с): годится для полноэкранной сцены-истории, не для обычного лендинга с HTML-контентом → бери GSAP ScrollTrigger + Lenis (`03` §1) → §3.2. [документация drei; практика]
 12. **`MeshTransmissionMaterial` = доп. проход сцены на каждый материал** (samples 6, буфер полноэкранный по умолчанию); ставь `resolution={256…512}` или `transmissionSampler` (общий буфер three); на телефоне — 1 объект → §3.2, `04` §3. [документация drei]
 13. **gltfjsx 6.5.3 превращает GLB из Blender в JSX-компонент** (имена узлов сохраняются, `useAnimations` подключается сам); поза в JSX = кадр 0 экспорта; `userData` из `extras` — только с `--meta`; `--transform` сливает меши и материалы (ломает поиск по именам) → §3.4. [проверено: gltfjsx на сцене F2/03]
 14. **События R3F — рейкаст по мешам** (`onPointerOver/Out/Click`), `stopPropagation` отсекает объекты позади; для hover без движения мыши при движении камеры — `events.update()` → §2.4. [документация R3F events]
-15. **WebGPU в R3F 9.8** — `gl={async (props) => { const r = new WebGPURenderer(props); await r.init(); return r; }}` + `extend(THREE)` из `three/webgpu`: работает и на откате WebGL2, 400 КБ br, два предупреждения внутри R3F (`THREE.Clock`, `PCFSoftShadowMap`) → §2.5. [проверено: A/08]
-16. **Предупреждение `THREE.Clock: This module has been deprecated` в R3F 9.8 — внутреннее** (`state.clock`), не ошибка кода страницы; в своём коде — `THREE.Timer` → §2.1. [проверено: F2/02]
+15. **WebGPU в R3F 9.8** — `gl={async (props) => { const r = new WebGPURenderer(props); await r.init(); return r; }}` + `extend(THREE)` из `three/webgpu`: работает и на откате WebGL2, 400 КБ br, два предупреждения внутри R3F (`THREE.Clock`, `PCFSoftShadowMap`) → §2.5. [проверено]
+16. **Предупреждение `THREE.Clock: This module has been deprecated` в R3F 9.8 — внутреннее** (`state.clock`), не ошибка кода страницы; в своём коде — `THREE.Timer` → §2.1. [проверено]
 17. **Витрина товара + AR без кода** — model-viewer 4.3.1 отдельным скриптом (peer three ^0.183 конфликтует с r186 в одном бандле); AR и USDZ — у F1 (`06-…`) → §5.1. [документация; проверено A: npm ERESOLVE]
-18. **PlayCanvas 2.22 встраивается ESM-модулем за 20 строк**, но GLB после gltfpack (`EXT_meshopt_compression`) не читает без явного декодера; для лендинга тяжелее three (393 КБ br) → §5.3. [проверено: 99-raw/experiments/F2/07-engines]
-19. **Babylon.js 9 — только ES-модули через бандлер** (665 КБ br с glTF): `+esm` jsDelivr падает на CORS, полная UMD — 8,6 МБ по сети; в стенде UMD-вариант после загрузки не рисовал (не выяснено) → §5.2. [проверено частично: F2/07]
+18. **PlayCanvas 2.22 встраивается ESM-модулем за 20 строк**, но GLB после gltfpack (`EXT_meshopt_compression`) не читает без явного декодера; для лендинга тяжелее three (393 КБ br) → §5.3. [проверено]
+19. **Babylon.js 9 — только ES-модули через бандлер** (665 КБ br с glTF): `+esm` jsDelivr падает на CORS, полная UMD — 8,6 МБ по сети; в стенде UMD-вариант после загрузки не рисовал (не выяснено) → §5.2. [проверено частично]
 20. **Needle Engine** — связка Blender/Unity-компонентов с three, но коммерция только по Pro-лицензии, `npm i` ставит альфу 6.0 → `@needle-tools/engine@stable` (5.1.13); **Spline** — дизайнерский рантайм 834 КБ br, MCP только в десктопе macOS/Windows → агенту на Linux — свой GLB + three → §5.4–5.5. [документация; A/03]
 21. **«Живое превью» Blender ↔ R3F через WebSocket** (arXiv 2601.05016) агенту не нужно: превью в обход экспорта показывает не то, что приедет в GLB; проверка — экспорт → страница в headless → скриншоты и числа → §6. [мнение F2 на основе исследования]
 
@@ -46,7 +46,7 @@ three-stdlib 2.36.1, PlayCanvas 2.22.3, Babylon.js 9.27.1, model-viewer 4.3.1, g
 - React уже на сайте → R3F: компонентный код, готовые решения drei, `Suspense` для загрузки; цена — ≈ 140 КБ br react-dom +
   fiber и `import * as THREE` в каталоге R3F (tree-shaking three хуже: 727 КБ min против 522 у vanilla) [проверено: F2/02 meta.json; A/03].
 - Без React → vanilla: меньше JS, меньше долгих задач (TBT hero: R3F 496–757 мс, vanilla A/07 172 мс на десктопе; CPU×4 —
-  765 против 369 мс) [проверено: F2/02, A/07].
+  765 против 369 мс) [проверено].
 - Vue/Svelte → TresJS/Threlte (A `03` §9), не R3F.
 - Автор R3F: R3F — реконсилер React для three, а не набор обёрток, поэтому не отстаёт от three [V:YyqBdN71nFs 04:42];
   DOM — для типографики и вёрстки, GPU — для остального [V:YyqBdN71nFs 20:51]. [мнение автора]
@@ -75,7 +75,7 @@ three-stdlib 2.36.1, PlayCanvas 2.22.3, Babylon.js 9.27.1, model-viewer 4.3.1, g
   старт в `requestAnimationFrame` [документация R3F scaling-performance].
 - `Float` в `demand` рисует только с `autoInvalidate` [документация drei].
 - Стоп вне экрана и в скрытой вкладке: `setFrameloop('never')` из `useThree` по `IntersectionObserver` и `visibilitychange`,
-  при возврате — прежний режим + `invalidate()` (код §4) [проверено: F2/02].
+  при возврате — прежний режим + `invalidate()` (код §4) [проверено].
 - Регрессия качества при движении: `performance={{ min: 0.5 }}` + `regress()` + `<AdaptiveDpr pixelated />`; адаптация к FPS —
   `<PerformanceMonitor onDecline onIncline flipflops={3} onFallback>` (замер 250 мс × 10 итераций, порог 0,75, bounds по частоте
   экрана) [документация drei/R3F]. Не проверено здесь.
@@ -85,7 +85,7 @@ three-stdlib 2.36.1, PlayCanvas 2.22.3, Babylon.js 9.27.1, model-viewer 4.3.1, g
   `useFrame` и в быстрых событиях — ре-рендер React каждый кадр (антипаттерн документации R3F pitfalls) [документация].
 - Документация R3F рядом с «используй дельты» показывает «✅ `THREE.MathUtils.lerp(x, target, 0.1)` в useFrame» — это
   frame-rate-зависимо: при 144 Гц объект через 0,25 с проходит 97,7 % пути против 79,4 % при 60 Гц; правильная форма —
-  `damp(x, target, λ, delta)` (λ = −ln(1 − k)·60) [проверено: F2/06]. Реальный антипример: поворот логотипа «0.2 за кадр» на
+  `damp(x, target, λ, delta)` (λ = −ln(1 − k)·60) [проверено]. Реальный антипример: поворот логотипа «0.2 за кадр» на
   экране 142 Гц крутится в ~2,3 раза быстрее задуманного [V:vmqMt8U8l6Y 25:48].
 - Не создавай объекты в `useFrame` (`new Vector3` 60 раз в секунду → сборщик мусора) — переиспользуй [документация R3F].
 - Прокрутку и курсор храни в ref/uniform, не в состоянии React (Shopify Editions; A `03` §3.1) [практика].
@@ -100,7 +100,7 @@ three-stdlib 2.36.1, PlayCanvas 2.22.3, Babylon.js 9.27.1, model-viewer 4.3.1, g
   `useFrame`, когда изменилась `camera.matrixWorld` [документация].
 - Поиск по имени: `const { nodes } = useGLTF(url)` → `nodes.ring_1`; имена из Blender санитизируются (`Cube.001` → `Cube001`) —
   называть `латиница_через_подчёркивание` (E `08-export-gltf/01` §10); после gltfpack с квантованием меш — ребёнок узла с именем
-  (`01-threejs-core.md` §11) [проверено: F2/03].
+  (`01-threejs-core.md` §11) [проверено].
 - Рейкаст по сотням мешей дорог (CPU): кликабельное — отдельные невидимые увеличенные hit-области [V:5uTwZVGgDpA 26:10],
   у Bruno Simon — сферы вместо треугольников [V:EhZwt9P4GP4 15:01] [практика].
 
@@ -124,7 +124,7 @@ three-stdlib 2.36.1, PlayCanvas 2.22.3, Babylon.js 9.27.1, model-viewer 4.3.1, g
   2025), а не three r186. Разница в расширениях (сравнение исходников): только в three r186 — `KHR_meshopt_compression`,
   `KHR_materials_variants` (плагин), `KHR_animation_pointer` (плагин), `KHR_gaussian_splatting` [проверено: исходники].
 - Проверка: `gltfpack -cc -ce khr` → `KHR_meshopt_compression` → drei: «Could not load …: Invalid typed array length: 28800»;
-  `-cc` (по умолчанию `EXT_meshopt_compression`) → грузится; three r186 `GLTFLoader` читает оба файла [проверено: F2/02].
+  `-cc` (по умолчанию `EXT_meshopt_compression`) → грузится; three r186 `GLTFLoader` читает оба файла [проверено].
 - KTX2 — через `extendLoader`: `loader.setKTX2Loader(new KTX2Loader().setTranscoderPath('/basis/').detectSupport(gl))` [документация drei].
 - Нужен загрузчик three r186 (варианты материалов, KHR meshopt) → `useLoader(GLTFLoader, url, (l) => l.setMeshoptDecoder(MeshoptDecoder))`
   с импортом из `three/addons/…` [не проверено запуском; API useLoader — документация R3F].
@@ -133,7 +133,7 @@ three-stdlib 2.36.1, PlayCanvas 2.22.3, Babylon.js 9.27.1, model-viewer 4.3.1, g
 | Компонент | Для чего | Цена и ловушки |
 |---|---|---|
 | `<Environment preset>` / `files` / дети | `scene.environment` для PBR | пресеты тянутся с raw.githack.com — «not meant for production»; `.hdr` читает `RGBELoader` three-stdlib (в r186 у three — `HDRLoader`); дети (`<Lightformer>`) рендерятся кубокамерой один раз (`frames` 1), 0 КБ [документация; проверено F2/02] |
-| `<Lightformer form="rect|ring" intensity scale position>` | студийные софтбоксы в окружении | блики на клиркоуте и металле без HDRI [проверено: F2/02] |
+| `<Lightformer form="rect|ring" intensity scale position>` | студийные софтбоксы в окружении | блики на клиркоуте и металле без HDRI [проверено] |
 | `<ContactShadows opacity scale blur far resolution frames={1}>` | мягкая тень под объектом | без `frames={1}` — рендер глубины каждый кадр («rather expensive») [документация] |
 | `<AccumulativeShadows temporal frames={100}>` + `<RandomizedLight>` | мягкие тени и AO на полу | после накопления 0 цены [документация] |
 | `<Float speed rotationIntensity floatIntensity floatingRange autoInvalidate>` | «дыхание» героя | reduce не учитывает — `speed={0}`; с `demand` только `autoInvalidate` [документация; проверено F2/02] |
@@ -271,11 +271,11 @@ io.observe(hero);
   с 4.0), `environment-image`, `ar ar-modes="webxr scene-viewer quick-look"`, варианты `variant-name`, аннотации `slot="hotspot-*"`,
   `camera-orbit` с `env(window-scroll-y)` — орбита от прокрутки без JS [документация; A `03` §6].
 - peer three ^0.183 → в одном бандле с r186 ERESOLVE; подключать готовый `model-viewer.min.js` (230 КБ br) отдельным скриптом
-  [проверено: A/03]. AR, USDZ, Scene Viewer — F1 `06-…` и его демо `model-viewer-ar`.
+  [проверено]. AR, USDZ, Scene Viewer — F1 `06-…` и его демо `model-viewer-ar`.
 - Когда: товар, e-commerce, нет 3D-разработчика. Когда нет: свои шейдеры, прокрутка-история, несколько объектов с логикой.
 
 ### 5.2. Babylon.js 9 — приложения и конфигураторы
-- Вес: ядро 209 КБ br, с glTF и `createDefaultEnvironment` — 665 КБ br (ES-модули поимпортно, бандлер) [проверено: A/03].
+- Вес: ядро 209 КБ br, с glTF и `createDefaultEnvironment` — 665 КБ br (ES-модули поимпортно, бандлер) [проверено].
 - Проверка F2/07: `import … from 'https://cdn.jsdelivr.net/npm/@babylonjs/core@9.27.1/+esm'` — CORS-ошибка, 75 запросов / 3,4 МБ;
   UMD официального CDN (`cdn.babylonjs.com/babylon.js` + `loaders/babylonjs.loaders.min.js`) — 8,6 МБ по сети, GLB загрузился
   (4 меша, камера по габариту `createDefaultCameraOrLight`), но в headless-стенде кадры после загрузки не рисовались (0 вызовов,
@@ -302,7 +302,7 @@ engine.runRenderLoop(() => scene.render());
 
 ### 5.3. PlayCanvas 2.22 — движок + облачный редактор, сильные сплаты
 ```js
-// PlayCanvas 2.22.3 — [проверено: 99-raw/experiments/F2/07-engines/playcanvas.html] 2 вызова, 1-й кадр 3,3 с (CDN), 0 ошибок
+// PlayCanvas 2.22.3 — [проверено] 2 вызова, 1-й кадр 3,3 с (CDN), 0 ошибок
 import * as pc from 'https://cdn.jsdelivr.net/npm/playcanvas@2.22.3/+esm';
 const canvas = document.querySelector('canvas');
 const app = new pc.Application(canvas, { graphicsDeviceOptions: { antialias: true } });
@@ -321,8 +321,8 @@ const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 app.on('update', (dt) => { if (!reduce.matches) model.rotate(0, 20 * dt, 0); });
 ```
 - GLB после gltfpack (`EXT_meshopt_compression`) — ошибка «Invalid typed array length: 93312»: декодер meshopt в PlayCanvas надо
-  подключать явно (как именно — не проверено); несжатая GLB 346 КБ — грузится [проверено: F2/07].
-- Вес: 393 КБ br в бандле, 602 КБ по сети ESM с jsDelivr [проверено: A/03, F2/07]; тег npm `lts` = старая ветка 1.77 — код
+  подключать явно (как именно — не проверено); несжатая GLB 346 КБ — грузится [проверено].
+- Вес: 393 КБ br в бандле, 602 КБ по сети ESM с jsDelivr [проверено]; тег npm `lts` = старая ветка 1.77 — код
   нейросетей «по памяти» часто v1 (`pc.Application` со старыми скриптами) [A `03` §5].
 - Когда: сплаты как главное содержимое (SOG, потоковый LOD), редакторный конвейер, игры; когда нет — простой hero.
 

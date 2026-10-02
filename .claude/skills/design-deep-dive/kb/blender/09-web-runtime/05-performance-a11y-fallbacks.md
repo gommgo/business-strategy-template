@@ -20,7 +20,7 @@
 8. **Цикл — только когда кадр виден и нужен**: `IntersectionObserver` + `visibilitychange` + reduce → `setAnimationLoop(null)`; статичная сцена — рендер по требованию (`controls.addEventListener('change', …)`) → §3. [проверено: A/07, hero-lazy — 0 вызовов в покое при reduce]
 9. **25 из 33 наградных сайтов рисуют каждый кадр без движения**; Stripe — образец (кадр и стоп) — не копировать лидеров → §3. [проверено: A 04 §6]
 10. **Повторы — инстансами**: 1000 мешей → 1 вызов (`InstancedMesh`/`BatchedMesh`); палитра-текстура сняла у Bruno Simon 375 → 222 вызова; статику с одним материалом — сливать → §4.1. [V:EhZwt9P4GP4 02:13, 05:22; проверено: E/08]
-11. **Вызов = меш × материал**, transmission ×2, каждая тень — ещё проход; считать до выкладки (`glb_lint()`, E 04 §6) → §4.1. [проверено: E/24]
+11. **Вызов = меш × материал**, transmission ×2, каждая тень — ещё проход; считать до выкладки (`glb_lint()`, E 04 §6) → §4.1. [проверено]
 12. **Frustum culling в three включён по умолчанию; автоматического occlusion culling нет** (в `WebGPURenderer` есть запрос `isOccluded`, отсечение — своим кодом) → §4.2. [V:CHYxjpYep_M 02:04; W7]
 13. **DPR ≤ 1,5 на телефоне**, при DPR ≥ 2 MSAA можно выключать; на встроенной графике ноутбука цена DPR не видна (стенд не упирается в заполнение) → §1.2, `01` §10. [проверено: F1/04 (расчёт памяти), A/04; время на телефоне — не проверено]
 14. **Canvas не участвует в LCP**: LCP — постер < 80 % вьюпорта или H1; 3D не портит LCP, портит TBT → §5.1. [проверено: A/04, hero-lazy 52/460 мс]
@@ -64,13 +64,13 @@
 - Сначала найти, во что упирается кадр — CPU (число вызовов, JS в цикле) или GPU (заполнение, пост) [V:sqkSrTq1Kos 07:29–10:55];
   GPU-время отдельно — `renderer.info`, timestamp-запросы (`trackTimestamp` у `WebGPURenderer`) [V:O8cRa9HNlOQ 04:06].
 - Память GPU (формулы — E 03 §3.1): RGBA8 + мипмапы = w × h × 4 × 4/3; KTX2 → BC7/ASTC 1 Б/пикс., ETC1/BC1 0,5. 9 карт 1024²:
-  48 МБ (PNG/WebP/AVIF) против 12 МБ (KTX2) [проверено: F1/03]. Буферы кадра экрана Pixel 7 (цвет + глубина, MSAA 4×): DPR 1 —
+  48 МБ (PNG/WebP/AVIF) против 12 МБ (KTX2) [проверено]. Буферы кадра экрана Pixel 7 (цвет + глубина, MSAA 4×): DPR 1 —
   13 МБ, 1,5 — 29, 2 — 52, 2,625 — 89, 3 — 116 МБ; без MSAA — 3/6/12/20/26 МБ [проверено: F1/04 расчёт].
 - iOS Safari даёт вкладке ≈ 200–400 МБ, дальше — перезагрузка страницы [V:BH1R29YvLOk 43:28; данные 2024, на 2026 не проверено];
   у Самоката мобильные модели — ×3 меньше на диске и ×8 в памяти [V:BH1R29YvLOk 31:57]. Позиция: текстуры телефона ≤ 32–64 МБ в
   GPU (E 03 §6.5).
 - На встроенной графике ноутбука цена DPR почти не видна (F1/04: пикселей ×6,9 → время кадра ×1,2–1,3) — стенд не заменяет
-  телефон; решения о DPR — по памяти и практике лидеров (1,5) [проверено: F1/04, A/04].
+  телефон; решения о DPR — по памяти и практике лидеров (1,5) [проверено].
 
 ## 2. Устройства: наборы ассетов, уровни, решение «3D или постер»
 
@@ -85,13 +85,13 @@
 
 [проверено: `examples/hero-lazy/probe`, F1/02, F1/03]. Признак телефона в hero-lazy — `matchMedia('(max-width: 768px), (pointer:
 coarse)')`; сервер может отдавать набор по Client Hints — не проверено. Лидеры: Igloo 2,8 МБ против 16,6 МБ десктопа, Lusion 9,5
-против 16,3; Apple на телефоне 3D не грузит вовсе [проверено: A/04].
+против 16,3; Apple на телефоне 3D не грузит вовсе [проверено].
 
 ### 2.2. Уровни GPU
 
 - @pmndrs/detect-gpu: tier 0 (< 15 fps, блок-лист, нет WebGL), 1, 2, 3 (≥ 60); A/05: Iris Xe → 3 («intel arc» — ошибочное сопоставление),
   SwiftShader → 0, iPhone → 1 FALLBACK (Safari скрывает GPU), Adreno 610 → 2, Mali-G52 → 1; база gfxbench заморожена с 12.2025
-  [проверено: A/05]. Надёжен только tier 0 (→ постер).
+  [проверено]. Надёжен только tier 0 (→ постер).
 - Bruno Simon отказался от detect-gpu и подстройки по FPS: мобильный пресет (меньше теней, дешевле bloom, без DoF/размытий)
   выбирается по признакам устройства, пользователь может переключить [V:EhZwt9P4GP4 21:06, 22:09].
 - Shopify Editions: уровни 0–3, телефоны ограничены «агрессивно — память важнее пикового бенчмарка» [практика: A 02 §5.2].
@@ -113,7 +113,7 @@ coarse)')`; сервер может отдавать набор по Client Hint
 пропускаются (3D грузится) [документация: MDN].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] подстройка качества по времени кадра первых секунд
+// three r186 — [проверено] подстройка качества по времени кадра первых секунд
 export function createQualityGovernor(renderer, { maxDpr = 1.5, minDpr = 1, budgetMs = 20, onDegrade } = {}) {
   let dpr = Math.min(devicePixelRatio, maxDpr), samples = [], last = 0, done = false;
   return function frame(now) {                         // вызывать в начале каждого кадра цикла с временем rAF
@@ -146,7 +146,7 @@ export function createQualityGovernor(renderer, { maxDpr = 1.5, minDpr = 1, budg
   `timer.reset()`, иначе скачок [проверено: F1/01 исходник `Timer.reset`].
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] цикл только при видимости, открытой вкладке и без reduce; кадр по требованию
+// three r186 — [проверено] цикл только при видимости, открытой вкладке и без reduce; кадр по требованию
 export function createRenderLoop(renderer, scene, camera, host, { animate = null, onFrame = null } = {}) {
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
   let visible = true, paused = false, dirty = true, on = false;
@@ -190,7 +190,7 @@ export function createRenderLoop(renderer, scene, camera, host, { animate = null
 | палитра-текстура вместо материалов | лендинг Bruno Simon 375 → 222 вызова | Blender (UV в палитру) [V:EhZwt9P4GP4 05:22; V:H1oNuKChsdU 23:59] |
 | слияние статики с одним материалом | меньше вызовов и памяти | gltf-transform `join` (теряет имена — E 03 §4.1) или `BufferGeometryUtils.mergeGeometries` [V:BH1R29YvLOk 31:57] |
 | 2–3 материала на сцену | вызов = меш × материал | Blender [V:H1oNuKChsdU 24:13; E 04 §4.5] |
-| без transmission и лишних теней | transmission ×2, тень — +проход | `01` §6.3, §7 [проверено: E/24] |
+| без transmission и лишних теней | transmission ×2, тень — +проход | `01` §6.3, §7 [проверено] |
 | `renderer.sortObjects = false` при малом перекрытии | снимает сортировку на CPU | JS [V:EhZwt9P4GP4 12:37] |
 
 ### 4.2. Отсечение и LOD
@@ -273,7 +273,7 @@ Neutral» (A/07: постер с процедурной этикеткой пр�
 ### 6.2. Потеря контекста
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/F1/06-doc-snippets] потеря и восстановление WebGL-контекста: постер вместо пустого canvas
+// three r186 — [проверено] потеря и восстановление WebGL-контекста: постер вместо пустого canvas
 export function handleContextLoss(renderer, host, { onLost, onRestored } = {}) {
   const canvas = renderer.domElement;
   const lost = (e) => { e.preventDefault(); renderer.setAnimationLoop(null); host.classList.remove('is-live'); onLost?.(); };
@@ -285,7 +285,7 @@ export function handleContextLoss(renderer, host, { onLost, onRestored } = {}) {
 ```
 
 `e.preventDefault()` в `webglcontextlost` обязателен, иначе браузер не вернёт контекст [документация: MDN]. Проверка —
-`renderer.getContext().getExtension('WEBGL_lose_context').loseContext()` / `.restoreContext()` [проверено: F1/06].
+`renderer.getContext().getExtension('WEBGL_lose_context').loseContext()` / `.restoreContext()` [проверено].
 
 ## 7. Чек-лист «страница с 3D готова к публикации» — ворота качества (заготовка для J)
 
@@ -354,16 +354,16 @@ def gate_check(probe_path, mode="mobile", reduced=False):
 
 ## Частые ошибки
 
-1. Цикл `renderer.setAnimationLoop(tick)` навсегда — рендер вне экрана, в скрытой вкладке и при reduce (25 из 33 сайтов) [проверено: A/04].
+1. Цикл `renderer.setAnimationLoop(tick)` навсегда — рендер вне экрана, в скрытой вкладке и при reduce (25 из 33 сайтов) [проверено].
 2. Reduce через CSS-медиазапрос для WebGL — цикл продолжает крутиться; нужен `matchMedia` + `change` [документация: XM3 §7.2].
-3. Полный DPR 2,625–3 на телефоне (Spline: TBT 1,9 с) [проверено: A/04].
+3. Полный DPR 2,625–3 на телефоне (Spline: TBT 1,9 с) [проверено].
 4. Один набор ассетов для телефона и десктопа [проверено: A/04, hero-lazy].
 5. KTX2 «везде, потому что лучше» — на телефоне с медленной сетью и текстурами 512² транскодер съедает выигрыш (+1,9 с) [проверено: hero-lazy].
-6. Решение по detect-gpu без других сигналов (iPhone всегда tier 1) [проверено: A/05].
-7. Первый кадр 3D по первому draw call зонда — это PMREM окружения [проверено: F1/02].
+6. Решение по detect-gpu без других сигналов (iPhone всегда tier 1) [проверено].
+7. Первый кадр 3D по первому draw call зонда — это PMREM окружения [проверено].
 8. Автоповорот без кнопки паузы (2.2.2) и «дыхание» с периодом 4–6 с [документация: UM3 §2.2, XM3 §7.4].
 9. Орбита только перетаскиванием (2.5.7) и стрелки, перехваченные без фокуса [документация: XA1 §12.3, §6.1].
-10. Прелоадер на весь экран поверх H1 — LCP 31,6 с у Immersive Garden [проверено: A/04].
+10. Прелоадер на весь экран поверх H1 — LCP 31,6 с у Immersive Garden [проверено].
 11. `aria-hidden` на контейнере, внутри которого есть кнопки [документация: XA2 §6].
 12. Потеря контекста без `preventDefault()` — пустой прямоугольник до перезагрузки [документация: MDN].
 

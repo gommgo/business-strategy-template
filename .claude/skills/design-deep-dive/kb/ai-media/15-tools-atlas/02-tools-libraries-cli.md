@@ -13,24 +13,24 @@ CUDA) командами `--version` и метаданными пакетов (`
    (`asset_audit.py`, `edit_check.py`, `video_loop_check.py`) → кодирование (`avif_pick.sh`, J `make_*`) → `stamp` → страница
    (`page_accept.py`). → §6 [практика]
 3. **Кодеки — свои свежие сборки**: libavif 1.4.2 (aom 3.14.1 / dav1d 1.5.3), libjxl 0.12.0 (`cjxl`, `ssimulacra2`),
-   libwebp 1.6.0, ffmpeg 7.1.5 (Debian). AVIF подбирать по SSIMULACRA2, не по `q`. → §2 [проверено: H/04]
+   libwebp 1.6.0, ffmpeg 7.1.5 (Debian). AVIF подбирать по SSIMULACRA2, не по `q`. → §2 [проверено]
 4. **ffmpeg 7.1.5 теряет последний кадр MP4 при `trim` без `-r`** — `video_loop_check.py trim` это учитывает; свои команды —
-   с `-r` исходника. → §2 [проверено: I/02]
+   с `-r` исходника. → §2 [проверено]
 5. **rembg 2.0.85 по умолчанию грузит некоммерческую RMBG-2.0** — модель всегда явно (`u2netp`, `isnet-general-use`),
-   `REMBG_HOME=99-raw/tools/models/rembg`. → §3 [проверено: P/10]
+   `REMBG_HOME=99-raw/tools/models/rembg`. → §3 [проверено]
 6. **Тяжёлое — под блокировкой и после `free -g`**: Blender (`blender.lock`), ONNX > 300 МБ, Real-ESRGAN, RIFE, OCR
-   (`heavy.lock`), Chromium (`browser.lock`); BiRefNet-lite на CPU съел 6,5 ГБ. → §4 [проверено: P/10]
+   (`heavy.lock`), Chromium (`browser.lock`); BiRefNet-lite на CPU съел 6,5 ГБ. → §4 [проверено]
 7. **Real-ESRGAN — не для фото** (хуже Lanczos на 15–103 п.); RIFE — не для кадров с текстом. → §2 [проверено: H/02, I]
 8. **OCR кириллицы — RapidOCR 3.9.2 + PP-OCRv5 eslav** (0,1 с на строку): пропуск, удвоение, лишнее слово ловит на 100 %,
-   латинских «близнецов» не видит. → §3 [проверено: K/01]
+   латинских «близнецов» не видит. → §3 [проверено]
 9. **Провенанс — c2patool 0.27.22 + exiftool 13.59**: C2PA переживает только побайтное хранение; производной — XMP
-   `DigitalSourceType` (+1–3 КБ). → §2 [проверено: H/04b, L/01]
+   `DigitalSourceType` (+1–3 КБ). → §2 [проверено]
 10. **Вектор — resvg-js 2.6.2, svgo 4.1.0, vtracer 1.0.0-alpha.4, potrace 1.16**; эталон иконок — `lucide-static` 1.47.0 (ISC). → §3
     [проверено: G/01–03]
 11. **Лицензии в `bin/` и venv — разрешительные, кроме potrace/potracer (GPL-2.0+), exiftool (GPL-3.0 в сборке) и CairoSVG (LGPL-3.0)** — их используем как
     внешние инструменты, не встраиваем в продукт клиента. → §2–3 [документация: LICENSE, метаданные пакетов]
 12. **Новые утилиты N**: `routing_check.py` (валидатор маршрутов, 0 ошибок, отрицательный тест 9/9) и `channel_diff.py`
-    (разница снимков RouterAI и Gen-API). → §1 [проверено: N/01, N/04]
+    (разница снимков RouterAI и Gen-API). → §1 [проверено]
 
 ## 1. Утилиты базы (`99-raw/tools/`)
 

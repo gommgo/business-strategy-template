@@ -1,7 +1,7 @@
 # 09 · Стекло и металл продукта: флакон с transmission + volume, фон — внутри canvas
 
 Волна 3 · агент K · 23.09.2026 · Blender 5.2.2 LTS (EEVEE с трассировкой), glTF-IO 5.2.40, gltf-transform 4.5.0, three r186,
-Chromium · сквозной прогон: [проверено: 99-raw/experiments/K/01-run-recipes] · страница: [проверено: 99-raw/experiments/K/05-glass-page]
+Chromium · сквозной прогон: [проверено] · страница: [проверено]
 · пример: `examples/09-glass-product/`
 
 ## Выжимка рецепта
@@ -39,7 +39,7 @@ Chromium · сквозной прогон: [проверено: 99-raw/experimen
 ## 3. Код Blender: build(P) → проверки → EEVEE-RT постер → GLB
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 09: стеклянный флакон (transmission + volume) + сцена за ним
+# Blender 5.2.2 — [проверено] рецепт 09: стеклянный флакон (transmission + volume) + сцена за ним
 import sys, math, json, struct, bpy
 from mathutils import Matrix
 sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
@@ -109,7 +109,7 @@ rk.save(SLUG, glass_material=g, passport=P)
 ±20° только при видимости и без reduce. Разница — одна строка:
 
 ```js
-// three r186 — [проверено: 99-raw/experiments/K/05-glass-page] стекло видит только то, что нарисовано в canvas
+// three r186 — [проверено] стекло видит только то, что нарисовано в canvas
 renderer.toneMapping = THREE.NeutralToneMapping;               // пара к Blender «Khronos PBR Neutral»
 renderer.transmissionResolutionScale = 0.5;                    // −20 % цены прохода пропускания (F2)
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;

@@ -11,7 +11,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 ## Выжимка для агента
 
 1. **Маршрут берётся из `routing.yaml`, а не из памяти**: id модели, провайдер, ценовые параметры и цена — оттуда; после
-   нового снимка каталога — `routing_check.py` (0 ошибок) до первого вызова. → §1, `04-update-procedure.md` [проверено: N/01]
+   нового снимка каталога — `routing_check.py` (0 ошибок) до первого вызова. → §1, `04-update-procedure.md` [проверено]
 2. **Сначала код, потом модель**: градиент, паттерн, текст, схема, линейная иконка, бренд-палитра — CSS/SVG/HTML (0 ₽);
    модель — только атмосфера, свет, материал, сцена. → §7 [консенсус]
 3. **Фото-hero — `openai/gpt-image-2.5-sunburst` 2K 16:9 за 7 ₽** (Flare — та же цена, решает E-08); запас — NB2 2K 7,2 ₽;
@@ -44,7 +44,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
     нет (облако фона с блочной маской 16 px, серый ореол на тёмном); Riverflow `transparent` — пусто ×2]
 12. **Бесшовности у моделей нет**: генерация + `tile_check.py cut` (шов ≤ 1,3); геометрия — SVG/CSS. → §2 [документация]
 13. **Апскейл фото — не Real-ESRGAN**: генерировать в целевой ступени 2K/4K; Lanczos по умолчанию; Topaz — после H-05. → §2
-    [проверено: H/02] [фаза 5, 25.09.2026: E-01 — 4K у Sunburst настоящий (3840×2160, 11 ₽), «4K» Seedream 4 через mie — 2352×1008;
+    [проверено] [фаза 5, 25.09.2026: E-01 — 4K у Sunburst настоящий (3840×2160, 11 ₽), «4K» Seedream 4 через mie — 2352×1008;
     H-05 не прогонялся]
 14. **Черновик — NB2 Lite 2,9 ₽; Z-Image 1,4 ₽ — только композиция без текста и цвета**; новые Grok Image 2.0 (3 ₽) и
     Recraft V4.1 Flash (0,77 ₽) — через мини-стенд. → §2 [исследование] [поправка фазы 5, 25.09.2026: CM-09 — Flash даёт синий
@@ -56,7 +56,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 16. **Seedance 2.x петлю не строит**: `images` — «референсы», не кадры (проверяет I-08). → §3 [документация] [фаза 5, 25.09.2026:
     подтверждено — I-08 SSIM кадра 0 к A 0,60, шов 7,21; с фразой «Use @Image1 as the first frame.» Seedance 2 Fast кадр держит (0,85)]
 17. **Приёмка петли — шов И живость**: `seam_ratio_local` ≤ 1,5 на мезонине без потерь после `trim`, `motion_vs_control`
-    ≥ 0,5; VLM видео не судит. → §3 [проверено: I/02, K/03]
+    ≥ 0,5; VLM видео не судит. → §3 [проверено]
 18. **Звук — параметром там, где он есть** (`generate_audio`/`sound` = `"false"`); у Veo, Omni, Wan 2.5/2.6, Grok, H3 — `-an`
     при кодировании. → §5 [документация]
 19. **Альфа-видео — хромакей с неподвижной камерой → кеинг → stacked alpha**; пурпурный ключ для зелёных и золотых объектов;
@@ -80,7 +80,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 26. **Модели в интервале лидера равны — берётся дешевле**; «лучшая» по одному голосованию 60/40 не доказывается. → §1
     [исследование: `01-stand-method.md` §4.4]
 27. **Ценовые параметры и `provider` — всегда явно**: запасная ступень = максимум (Kling `mode` не из списка → 225 ₽ вместо
-    60 — поймано валидатором). → §1 [проверено: N/01]
+    60 — поймано валидатором). → §1 [проверено]
 28. **`[не проверено]` меняется на `[стенд: N задач × моделей × повторов, судья, дата]`** только по правилу
     `01-stand-method.md` §5 после фазы 5. → §8 [практика] [фаза 5, 25.09.2026: правило стенда не выполнено ни разу (1–2 образца
     на модель, голос одного заказчика) → живые прогоны помечены `[проверено: путь]` с n, `[стенд]` не поставлен → §2.2]
@@ -113,15 +113,15 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 | `IMG-ILLUSTR` | `gpt-image-2-5-flare` 1K 1:1 — 4 | Sunburst 1K — 4 (alt); NB2 1K — 4,8; схемы — `openai/gpt-5.4-image-2` 1K — 4 | Grok Image 2.0 — 3 (мини-стенд) | gpt-image · sections | проверка тёплого сдвига, грейд; подписи схем — кодом | `image --dna` · `illustration` | [исследование] | E-11, D2-01 |
 | `IMG-SERIES` | метод F + `gpt-image-2-5-flare` 1K 3:2 + 3 референса — 4 | `google/gemini-3-pro-image-preview` 2K — 13,5 (flex 7,95 после T5); RouterAI `recraft/recraft-v4-styles` — 3,84 | `bytedance/seedream-4.5` — 5 (ворота E-01; не с несколькими людьми) | gpt-image · sections, `reference_group` | палитра к паспорту (ΔE OKLab ≤ 0,045, оттенок ≤ 10°) | `series --ref --grid 2x2` · `series` | [спорно] | E-12, F-01, F-02, F-06, G-11, G-12 |
 | `IMG-ICON3D` | `openai/gpt-image-2.5-sunburst` 1K 1:1, сетка 2×2, форма-рендер + кубик материала — 4 | NB2 1K — 4,8; Blender — точный набор | Qwen 2.1 transparent — 3 (черновик) | gpt-image · sections | вырез: ровный фон → u2netp/isnet по краю | `cutout --grid 2x2 --series` · `icon3d` | [исследование]; набор — [не проверено] | E-14, F-07, G-17, G-18 |
-| `IMG-CUTOUT` | ровный светлый фон → rembg `u2netp` (явно) + decontaminate — 0 | RouterAI GPT 2.5 `background: transparent` medium — 1,45; polza `/v2` — 4 (H-02); Gen-API Ideogram RB — 2,5, Pixelcut — 4 | Qwen 2.1 transparent — 3 (черновик) | gpt-image · sections | по типу объекта (мех — matting/ключ; стекло — ключ или нативная альфа); поле ≥ 2 %; тень слоем | `cutout` · `cutout` (ореол ≤ 2 px) | [проверено: H/01] локально; модели — [не проверено] | H-01…H-04, T2 |
+| `IMG-CUTOUT` | ровный светлый фон → rembg `u2netp` (явно) + decontaminate — 0 | RouterAI GPT 2.5 `background: transparent` medium — 1,45; polza `/v2` — 4 (H-02); Gen-API Ideogram RB — 2,5, Pixelcut — 4 | Qwen 2.1 transparent — 3 (черновик) | gpt-image · sections | по типу объекта (мех — matting/ключ; стекло — ключ или нативная альфа); поле ≥ 2 %; тень слоем | `cutout` · `cutout` (ореол ≤ 2 px) | [проверено] локально; модели — [не проверено] | H-01…H-04, T2 |
 | `IMG-BG-ABSTRACT` | код: CSS/SVG/шейдер 6–25 КБ — 0; атмосфера — `gpt-image-2-5-flare` 1K 16:9 — 4 | `black-forest-labs/flux.2-pro` 1K — 5 (hex не лучше GPT, pup не выключается) | Seedream 4 4K 21:9 — 3 (ворота E-01); лента 8:1 — NB2 Lite 2,9 | gpt-image · sections | палитра грейдом, не hex; зерно SVG/CSS; градиенты — CSS | `image --dna` · `bg-abstract` | [исследование]; бренд-цвет — [не проверено] | E-13, E-01, D2-04 |
-| `IMG-TEXTURE` | `bytedance/seedream-4` 2K 1:1 seed 101 — 3 (ворота E-01) + `tile_check.py cut --overlap 96` | Flare 1K — 4; геометрия — SVG/CSS 130–180 байт | — | seedream · prose | сдвиг 50 % → шов ≤ 1,3 → cut96 или заделка маской | `texture` · `bg-abstract` | [документация] + [проверено: H/05] | H-09 |
+| `IMG-TEXTURE` | `bytedance/seedream-4` 2K 1:1 seed 101 — 3 (ворота E-01) + `tile_check.py cut --overlap 96` | Flare 1K — 4; геометрия — SVG/CSS 130–180 байт | — | seedream · prose | сдвиг 50 % → шов ≤ 1,3 → cut96 или заделка маской | `texture` · `bg-abstract` | [документация] + [проверено] | H-09 |
 | `IMG-TEXT-LATIN` | HTML/CSS-шаблон → Playwright — 0; декоративная надпись — `openai/gpt-5.4-image-2` 1K — 4 | `bytedance/seedream-4.5` — 5 (дословность, ворота E-01); Sunburst — 4 (текст в сцене) | — | gpt-image · sections, `Text (EXACT, verbatim)` | best-of-4 для постеров; OCR → откат на HTML | `og --expect` · `text-image` + вычитка | [исследование] | E-17, E-02 |
 | `IMG-TEXT-CYR` | HTML/CSS поверх ИИ-фона — 0 | после E-02…E-04: лидер (Sunburst / GPT 2 / …) ≤ 4 слов крупно; RouterAI Recraft V4.1 — 3,84 (E-07, G-09) | — | gpt-image · sections; 3-я форма — блок типографики `product7` | OCR → NFC → двойники → кодовые точки | `og` + `ocr --expect` · `text-image` + вычитка | [не проверено] | E-02…E-07, G-09, K-05 |
 | `IMG-EDIT` | «не трогать остальное» — NB2 1K — 4,8; сложная инструкция — Sunburst 1K + композит — 4 | «обвёл — убери» — Seedream 4.5 — 5 (ворота E-01); маска — RouterAI `openai/gpt-image-2` medium ≈ 6,47 | Qwen 2.1 + `mask_url` (белое = менять) — 3 (черновик) | nano-banana · sections; ≤ 5 изменений, целевые значения | `edit_check.py --match-color --composite`; удаление: маска + 9 %, растушёвка 3 % | `edit --orig [--mask] [--protect]` · `edit` | [исследование]; сохранность в polza — [спорно] | E-15, H-06, H-07, D2-06 |
 | `IMG-OUTPAINT` | NB2 1K с целевым `aspect_ratio` — 4,8 (+ композит центра) | Sunburst 1K — 4 (2K — 7); точный кроп по фокусу — код | — | nano-banana · sections | `edit_check.py outpaint`: SSIM центра ≥ 0,9 И ΔE00 ≤ 3 И резкость ≥ 0,85 → иначе `--composite` | `edit` · `edit` | [исследование]; в polza — [не проверено] | H-08 |
 | `IMG-MOCKUP` | композит скриншота (Blender / CSS 3D) — 0 | сцена и устройство — Sunburst 2K — 7 | — | gpt-image · sections | скриншот поверх, OCR до/после | `edit --protect` · `edit` | [исследование] + [документация] | не тестируется (S21) |
-| `IMG-UPSCALE` | генерировать в целевой ступени (Sunburst 2K — 7); Lanczos — 0 | `topaz/image-upscale` ×2 — 7,5 (после H-05) | Seedream 4 4K перегенерацией — 3 (ворота E-01) | без промта | Real-ESRGAN — только графика; генеративная доводка — только декор | `image` (SSIMULACRA2 к мастеру) · `hero-photo` | [проверено: H/02] локально | H-05 |
+| `IMG-UPSCALE` | генерировать в целевой ступени (Sunburst 2K — 7); Lanczos — 0 | `topaz/image-upscale` ×2 — 7,5 (после H-05) | Seedream 4 4K перегенерацией — 3 (ворота E-01) | без промта | Real-ESRGAN — только графика; генеративная доводка — только декор | `image` (SSIMULACRA2 к мастеру) · `hero-photo` | [проверено] локально | H-05 |
 | `IMG-DRAFT` | `google/gemini-3.1-flash-lite-image` — 2,9 | Grok Image 2.0 — 3; RouterAI Recraft V4.1 Flash — 0,77 (новые, мини-стенд) | `tongyi-mai/z-image` — 1,4 (композиция без текста и цвета) | nano-banana · sections | черновик → финал референсом «keep composition of image 1» | `image` (pHash разнообразия) | [исследование]; перенос — [не проверено] | E-16 |
 | `IMG-LAYERS` (предложение H) | Gen-API `qwen-image-layered` 4 слоя — 12,5 | вырез по альфе + Depth Anything V2 Small 518² — 0; RouterAI Ming Image Design Layer (цена не указана) | — | без промта | сумма слоёв ≈ исходник (SSIM ≥ 0,95) | `cutout` · `cutout` | [не проверено] | H-10 |
 
@@ -213,12 +213,12 @@ V2V — не маршрут по решению заказчика (п. 12). Т�
 
 | Код | Основная | Запас / альтернатива | Цена | Постобработка | Чем проверять | Метка | Фаза 5 решит |
 |---|---|---|---|---|---|---|---|
-| `VEC-ICON-LINE` | готовый набор (Lucide ISC, `lucide-static` 1.47.0); новые метафоры — LLM → SVG в сессии по спецификации 24/2 + `check_icons.py` | polza-chat: `google/gemini-3.8-flash` (≈ 0,92 ₽), `openai/gpt-5.6-sol` (≈ 2,46 ₽) | 0 / токены | svgo, спрайт `<symbol>`, `currentColor`, тёмная тема | `svg-icon` · `svg-icon`; узнаваемость — VLM без подсказки (G-06) | [исследование] + [проверено: G/01] | G-01…G-06 |
+| `VEC-ICON-LINE` | готовый набор (Lucide ISC, `lucide-static` 1.47.0); новые метафоры — LLM → SVG в сессии по спецификации 24/2 + `check_icons.py` | polza-chat: `google/gemini-3.8-flash` (≈ 0,92 ₽), `openai/gpt-5.6-sol` (≈ 2,46 ₽) | 0 / токены | svgo, спрайт `<symbol>`, `currentColor`, тёмная тема | `svg-icon` · `svg-icon`; узнаваемость — VLM без подсказки (G-06) | [исследование] + [проверено] | G-01…G-06 |
 | `VEC-ICON-FILLED` | RouterAI `recraft/recraft-v4.1-vector`, палитра словами | RouterAI `recraft/recraft-v4-styles-vector` (набор по стилю); Gen-API `recraft-v4` vector `pro: false` (colors документирован); растр Sunburst 2×2 → vtracer | 8,78 / 5,49 / 20 / 4 | удалить фон-прямоугольник до svgo; `keep-signature`; отверстия цветом фона → potrace | `svg-icon` · `svg-icon` (ΔE00 заливок ≤ 3) | [документация]; палитра через RouterAI — [не проверено] | B2-01, G-07, G-08, G-13, G-14, G-15, G-17, G-18 |
 | `VEC-ILLUSTR` | RouterAI `recraft/recraft-v4.1-vector` | Utility (растр) → vtracer; Gen-API `recraft-v4` vector; растр Flare → vtracer `--palette` | 8,78 / 3,84 / 20 / 4 | чистка SVG; 68–123 КБ → `<img>`, не inline | `svg-icon` · `illustration` (≤ 5 заливок, ≤ 40 КБ) | [исследование]; уровень студии — [не проверено] | G-10, G-11, G-12, G-16 |
 | `VEC-PATTERN` | SVG/CSS кодом (130–180 байт); `mask-image` + `var(--brand)` | — | 0 | штрих через край плитки | `svg-icon` | [проверено: G] | не нужен |
-| `VEC-ANIM` | inline SVG + CSS с `prefers-reduced-motion` | Lottie/dotLottie кодом (lottie_light 46 КБ gzip) | 0 | SMIL, SVG в `<img>`, Lottie reduce не слушают | `svg-icon` + `page_accept.py` (reduce) | [проверено: G/05] | не нужен |
-| `VEC-TRACE` | vtracer 1.0.0-alpha.4 `--palette` (≤ 8 цветов, SSIM 0,985); ч/б — potrace 1.16 | Gen-API `image-2-svg` | 0 / 1 | палитра с цветом контура; svgo | `svg-icon` (SSIM ≥ 0,95, ≤ 5 КБ) | [проверено: G/03] | G-13, G-16 |
+| `VEC-ANIM` | inline SVG + CSS с `prefers-reduced-motion` | Lottie/dotLottie кодом (lottie_light 46 КБ gzip) | 0 | SMIL, SVG в `<img>`, Lottie reduce не слушают | `svg-icon` + `page_accept.py` (reduce) | [проверено] | не нужен |
+| `VEC-TRACE` | vtracer 1.0.0-alpha.4 `--palette` (≤ 8 цветов, SSIM 0,985); ч/б — potrace 1.16 | Gen-API `image-2-svg` | 0 / 1 | палитра с цветом контура; svgo | `svg-icon` (SSIM ≥ 0,95, ≤ 5 КБ) | [проверено] | G-13, G-16 |
 
 ## 5. Сквозные поля маршрута: проверка, доставка, право
 
@@ -371,4 +371,4 @@ V2V — не маршрут по решению заказчика (п. 12). Т�
 - [S13] Фаза 5 (25.09.2026): `99-raw/phase5/runs/README.md` (заходы 1–3), разборы `99-raw/phase5/runs/*/`, журнал
   `99-raw/experiments/_ledger.jsonl`, отчёты `99-raw/reports/session4-{A,B,C}-report.md`, провенанс
   `99-raw/experiments/L/05-phase5-provenance/2026-09-25/provenance.md`; снимки `99-raw/cache/{polza,routerai,genapi}/2026-09-25_1411/` —
-  [проверено: 99-raw/phase5/runs/README.md].
+  [проверено].

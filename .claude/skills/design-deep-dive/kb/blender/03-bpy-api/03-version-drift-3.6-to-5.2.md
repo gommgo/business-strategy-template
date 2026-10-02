@@ -5,7 +5,7 @@
 5.0 Compositor, 5.2 Geometry Nodes); в этом файле цитируются 22 источника · экспериментов 7 (00, 01, 02, 03, 12, 16,
 19) · Blender 5.2.2 LTS, Python 3.13.13. Таблица §4 сгенерирована из `99-raw/experiments/B/03-version-drift/
 drift_results.json`: каждая пара «было → стало» выполнена в чистой сцене 5.2.2. Блоки `python` с меткой
-`[проверено: 99-raw/experiments/B/42-doc-snippets]` выполнены автоматически.
+`[проверено]` выполнены автоматически.
 
 ## Выжимка для агента
 
@@ -51,7 +51,7 @@ drift_results.json`: каждая пара «было → стало» выпо�
 ## 1. Как узнать, что есть в этой сборке
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] проверки возможностей в рантайме
+# Blender 5.2.2 — [проверено] проверки возможностей в рантайме
 import bpy
 V = bpy.app.version                                            # (5, 2, 2)
 has = lambda T, name: name in T.bl_rna.properties or name in T.bl_rna.functions
@@ -263,7 +263,7 @@ _Строк: 95; «стало» OK: 95/95; «было»: ERR 87, WARN 2, OK 6 (B
 Помощник с переводом имён 3.x — `bpyx.principled(...)` [проверено: 40-bpyx-tests].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] перевод имён входов Principled из 3.x в 5.2
+# Blender 5.2.2 — [проверено] перевод имён входов Principled из 3.x в 5.2
 import bpy
 RENAMED = {"Specular": "Specular IOR Level", "Subsurface": "Subsurface Weight", "Transmission": "Transmission Weight",
            "Clearcoat": "Coat Weight", "Clearcoat Roughness": "Coat Roughness", "Clearcoat Normal": "Coat Normal",
@@ -319,7 +319,7 @@ smooth 180°) [S30; проверено: 03, 06]. Ассет в 5.2 лежит в
 (`bpy_probe.py type SceneEEVEE --own`) [проверено: 42-doc-snippets; S16: в 5.2 удалён `fast_gi_thickness_far`].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] настройки EEVEE 5.2 вместо удалённых legacy-свойств
+# Blender 5.2.2 — [проверено] настройки EEVEE 5.2 вместо удалённых legacy-свойств
 import bpy
 scene = bpy.context.scene
 scene.render.engine = "BLENDER_EEVEE"
@@ -353,7 +353,7 @@ Color`, `Z` → `Depth` [S27, S34; проверено: 03, 13]. Рабочий �
 В 5.0 удалены прокси `action.fcurves`, `action.groups`, `action.id_root` [S27].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] ключи, F-кривые через channelbag, действие вручную
+# Blender 5.2.2 — [проверено] ключи, F-кривые через channelbag, действие вручную
 import bpy
 from bpy_extras import anim_utils
 ob = bpy.data.objects["Cube"]
@@ -427,7 +427,7 @@ rna_info` → ModuleNotFoundError) [S27; проверено: 42]. `bgl` удал
 initialized»].
 
 ```python
-# Blender 5.2.2 — [проверено: 99-raw/experiments/B/42-doc-snippets] модули, которых больше нет, и замены
+# Blender 5.2.2 — [проверено] модули, которых больше нет, и замены
 import importlib
 gone = []
 for name in ("imp", "cgi", "crypt", "telnetlib", "asyncore", "imghdr", "pipes", "lib2to3", "audioop", "bgl", "rna_info"):

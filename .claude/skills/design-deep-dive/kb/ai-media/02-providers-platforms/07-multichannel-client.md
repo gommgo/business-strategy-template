@@ -378,7 +378,7 @@ Gen-API 106,50, polza-chat 19,53, polza-images 4,00. Таблица по фай�
 **Закрыто фазой 5 (25.09.2026)**: `provider.options.recraft.controls` доходит (B2-01, 0 ₽); SVG — `b64_json` с `media_type`
 `image/svg+xml` и C2PA в `<metadata>`; строгость Gen-API — 422 `errors_validation` на неверный тип (`data:URI`), на длину `prompt` и
 на пустой `negative_prompt`, без списания; рассуждения — сверх `max_tokens`; `/v2` (Z7) и возврат `is_payment_upfront` при `error`
-(ошибки фазы 5 — 0 ₽) — не проверены `[проверено: 99-raw/experiments/_ledger.jsonl]`.
+(ошибки фазы 5 — 0 ₽) — не проверены `[проверено]`.
 
 ## 7. Устройство клиента и проверка
 
@@ -419,7 +419,7 @@ SVG и PNG RouterAI, `url`-ответ без ключа, 429/500/обрыв, п�
 first/last, Gen-API очередь / `is_sync` / `error` / истёкшая ссылка / 400 `errors_validation`, `translate_input` явно,
 polza-chat JSON / SVG / картинка base64 / 402, `/v2` sync / pending / b64, бюджеты (0 по умолчанию, лимит H-06, общий
 с `polza.py`), параллельность 2 и 3, 401 со стопом серии, `status`, 12 настоящих файлов фазы 5 одной серией, утечки ключей
-— 0 [проверено: 99-raw/experiments/B2/01-mock/RESULTS.md].
+— 0 [проверено].
 
 ## Частые ошибки
 
