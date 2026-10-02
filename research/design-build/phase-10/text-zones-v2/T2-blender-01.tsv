@@ -1,0 +1,8 @@
+file	read	lines	tokens	ctx_tokens	marker_lines	actions	other
+blender/00-glossary/README.md	окна	570	33409	4141	33	GL-46: пометки процесса уходят при уборке баз вместе с журнальными частями [место названо вручную]	
+blender/01-web-3d-landscape/01-effects-catalog.md	окна	752	40635	6885	24	VI-05: ai-media 01/03 §5.2 (IMG-M05, M06) и 06/01 R3 — «на странице сайта — умолчание L0, снимает арт-дирекция» (ca-03); blender §22 — «замена — один из вариантов»; cd 06/05 §2, §6 — оговорка «решение брифа или арт-дирекции»; VI-36: blender §22 — колонка «запись реестра» и «замена — один из вариантов» (cb-10); ui 11/04 §5 — «клише 3D — `common/tells.yaml`» (3.4)	
+blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	окна	432	20364	6912	29	GT-05: blender 11/05 §9 WEB-04 — «доля 3D ≤ 0,8 / 1,5 МБ (Б ассета); вес страницы — профиль site»; 09/05 §1.1 строка «вес страницы», §7.2 строка 5, 01/02 §3.1 и §8 — ссылкой на профиль; GT-07: 01/02 §3.1, KIT §5, cd 06/01 §6 — ссылкой; 08/03 §6.5 — метка сцены `[мнение]`; GT-31: blender 01/02 §1.3 — строка «Вредит» с условием по секциям и ссылкой на site 04/01 §3.2; CN-79: 08/03 §3.1 — метка `[консенсус]` (П-55); 01/02 — ссылкой	
+blender/01-web-3d-landscape/03-runtime-landscape.md	окна	449	22871	8881	32	GT-22: blender 01/03 §1, §8.4 — версии и веса рантаймов ссылкой на stack.yaml (cb-08); CN-98: blender 01/03 п. 25 и §10.4 — «`motion/three` есть в Motion+ (платно); 3D-анимация — не через Motion»	
+blender/01-web-3d-landscape/04-reference-sites-measured.md	окна	292	17098	6552	20	CN-96: blender 01/04 §5.1 — метод ссылкой на creative 03/01 §1.1	
+blender/01-web-3d-landscape/05-blender-deliverables-map.md	окна	266	12736	5191	30		
+blender/01-web-3d-landscape/README.md	окна	25	1524	1059	3		

@@ -1,0 +1,19 @@
+file	read	lines	tokens	ctx_tokens	marker_lines	actions	other
+ai-media/03-image-models/03-capabilities-by-task.md	окна	587	27507	7884	44	VI-37: пять мест ai-media — одной строкой из site 08/02 §2.2 («Предложение ai-media»); 12/04 №12 — канон ai-media для декора, совпадает [по колонке copies]	
+ai-media/03-image-models/README.md	окна	36	2362	2619	9		
+ai-media/04-video-models/01-landscape-and-benchmarks.md	окна	417	18475	3095	15		
+ai-media/04-video-models/02-model-cards.md	окна	922	46115	9115	48		
+ai-media/04-video-models/03-capabilities-by-task.md	окна	557	25533	6562	40		
+ai-media/04-video-models/README.md	окна	27	2360	2542	9		
+ai-media/05-prompting/01-vendor-prompt-guides.md	окна	1751	77714	7813	32		
+ai-media/05-prompting/02-structured-json-prompting.md	окна	558	25216	5202	31		
+ai-media/05-prompting/03-asset-spec-and-dialects.md	окна	669	33351	5553	32		W1-Z7: `output.format: svg` и поле `output_format` модели канала
+ai-media/05-prompting/04-video-prompting.md	окна	590	28805	6027	33		
+ai-media/05-prompting/05-edit-reference-series.md	окна	498	23026	6788	38		
+ai-media/05-prompting/06-ab-protocol.md	окна	271	11664	6354	42	JU-30: 11/02 — выжимка пп. 14–15, §5 «Модели судьи», §6.1 K-01b, частые ошибки, чек-лист, откр. вопр. п. 6; 11/README п. 8; 11/01 частые ошибки; 05/06 выжимка п. 13 и §4 «Судья»; 14/04 §2.7 строка «VLM-судья»; 14/00 «Деньги и сеть»; 15/01 §1 строка «polza — chat»; README «Сводная выжимка» — цена судьи	
+ai-media/05-prompting/README.md	окна	65	3652	3173	18		
+ai-media/06-art-direction-consistency/01-visual-dna-from-ui.md	окна	446	19373	8583	48	VI-05: ai-media 01/03 §5.2 (IMG-M05, M06) и 06/01 R3 — «на странице сайта — умолчание L0, снимает арт-дирекция» (ca-03); blender §22 — «замена — один из вариантов»; cd 06/05 §2, §6 — оговорка «решение брифа или арт-дирекции»; VI-20: ai-media 06/01 §7.3 — «зерно страницы — creative 04/03 §4.2; здесь — зерно ассета»; VI-34: R3 — «страница — по кадру, доля — `art-direction`» (ca-05); демо `pages/00-hero-summary.html` — CTA без полосы (ca-06; демо — код, Р76 п. 14); VI-49: ui 12/01 §6 — текст blender handoff §1.3 (вступление со ссылкой, §6.1 с колонкой «рецепт», §6.2 — ссылка, §6.3 `[не проверено]`, §6.4 как есть, выжимка п. 19, ошибки п. 15, чек-лист п. 21 — ссылка); ui 07/02 §5 — рецепт 02 и паспорт (3.3); blender 04/04 §3.1 — ссылка на 06/02 §6; ai-media R6 — «свет 3D — паспорт blender»; VI-52: рецепт blender 12/01 — ветка «без HDRI» (cb-13); ai-media R6 — ссылка на паспорт blender (с VI-49); VI-53: ui 07/02 §3 — поля облика → раздел `illustration` паспорта визуала ссылкой, поля системы остаются; «негативный-промт» → «запреты позитивными заменами», `seed` и правило 3 → «эталон, блок стиля, референсы» (ai-media 06/02 §3) [по имени `seed` в файле]; VI-57: ai-media 06/01 §5.2 — строка о чужих работах (ca-04); VI-60: копии — порядок «ассеты → ДС» ссылкой на этапы скилла: ai-media 06/01 §1, §3 и выжимка п. 1–2; ui 14/01 «Вход»; cd 05/01 §4 п. 1; cd 06/07 «Как пользоваться» [по колонке copies]	F9-075: §7.3 — способ доставки зерна: слой страницы по умолчанию, впекание — только в мастер-файл
+ai-media/06-art-direction-consistency/02-series-and-consistency.md	окна	373	16563	4840	27		
+ai-media/06-art-direction-consistency/03-composition-for-web.md	окна	384	15858	3744	20		
+ai-media/06-art-direction-consistency/04-slop-and-color-harmony.md	окна	305	11791	5902	36		
+ai-media/06-art-direction-consistency/README.md	окна	38	2181	1805	6		

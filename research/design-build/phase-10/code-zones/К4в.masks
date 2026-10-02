@@ -3,3 +3,4 @@
 .claude/skills/design-deep-dive/scripts/text/copydeck.py
 .claude/skills/design-deep-dive/kb/ai-media/13-routing-matrix/stand/briefs/*.spec.json
 .claude/skills/design-deep-dive/kb/ai-media/14-recipes/examples/demo-landing/brand/specs/*.spec.json
+.claude/skills/design-deep-dive/scripts/creative/spec_check.py
