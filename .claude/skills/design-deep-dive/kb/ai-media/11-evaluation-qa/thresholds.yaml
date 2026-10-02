@@ -25,6 +25,8 @@ thresholds:
       source: "F/04 README: «Instagram-фильтр» = colorfulness > +50 % и hdr_index > +0,1 к эталону (синтетический фильтр ×1,9–2,2 на 3 CC0-фото)"}
     warm_b_max: {value: 4.0, status: calibrated,
       source: "A 01/03 §5.2 IMG-M04 и §6.1.1: b* нейтралей > +4 — жёлтый сдвиг; у 9 из 51 фото лидеров это стиль → warn только при нейтральном белом в паспорте"}
+    soft_probe_scale: {value: 2, status: uncalibrated,
+      source: "08-image-post-processing/02-upscale-edit-outpaint.md §1.2: консервативное увеличение — Lanczos ×2 (копия из половинного размера: гладкий рендер — SSIMULACRA2 86,2, ткань 74,7, органический узор 52,2); проба резкости источника — кадр против своей копии вдвое меньшего размера, граница — encoding.ssimulacra2_hero_min; гладкий сюжет проходит границу без увеличения — только info"}
     purple_share_max: {value: 0.5, status: position, source: "A 01/03 §6.1 IMG-M05: доля пурпура 270–320° > 0,5 без пурпура в бренде (в замере 1 из 83)"}
   composition:
     center_offset_min: {value: 0.08, status: position,
@@ -74,8 +76,23 @@ thresholds:
     seam_ratio_fail: {value: 1.5, status: calibrated, source: "H 08/03 §2.2: > 1,5 — чинить (tile_check.py cut или заделка маской)"}
   video:
     seam_local_max: {value: 1.5, status: position,
-      source: "I 09-video-pipeline/01 §1.1: seam_ratio_local после среза ≤ 1,5 — мерить на мезонине или выходе модели (пульс H.264: 0,98 → 3,4)"}
-    cut_ratio_max: {value: 10, status: position, source: "I 09/01 §1.1: склейка — локальный пик cut_ratio ≥ 10 (selftest 25,7)"}
+      source: "I 09-video-pipeline/01 §1.1: seam_ratio_local ≤ 1,5 по файлу как есть — порог мезонина без потерь и выхода модели (пульс H.264: 0,98 → 3,4)"}
+    seam_encoded_max: {value: 2.5, status: position,
+      source: "10-web-integration/02-video-delivery.md §6.1 и CONTRADICTIONS.md X20: шов петли после кодирования ≤ 2,5 — пульс ключевого кадра (шов мезонина 0,8 → AV1 CRF 28 — 2,40, H.264 CRF 22 — 1,76)"}
+    cut_ratio_max: {value: 10, status: position, source: "I 09/01 §1.1: склейка — локальный пик cut_ratio ≥ 10 (selftest 25,7); в монтаже этим же порогом находятся склейки планов и принимается стык петли как склейка"}
+    dead_pair_frac: {value: 0.25, status: position,
+      source: "09-video-pipeline/01-seamless-loops.md §1.1: «мёртвая» пара кадров — движение ниже 0,25 медианы (dead_start, dead_end, static_frac, dup_last, повторы кадров внутри ролика)"}
+    dead_trim_max: {value: 3, status: position,
+      source: "09-video-pipeline/01-seamless-loops.md §1.1: мёртвых пар у конца больше 3 — подозрение на угасание (collapse_suspect)"}
+    pingpong_mirror_max: {value: 0.25, status: position,
+      source: "09-video-pipeline/01-seamless-loops.md §1.1: зеркальность кадров во времени ниже 0,25 — пинг-понг (справочно)"}
+    flash_luma_delta_min: {value: 0.1, status: calibrated,
+      source: "WCAG 2.2 SC 2.3.1 (Understanding): переход — изменение относительной яркости не меньше 10 % при тёмном состоянии ниже 0,80; creative 09-ai-execution-evaluation/effect-gates.yaml EG-A11Y-04"}
+    flash_dark_max: {value: 0.8, status: calibrated, source: "WCAG 2.2 SC 2.3.1 (Understanding): тёмное состояние перехода ниже 0,80 относительной яркости; EG-A11Y-04"}
+    flash_per_s_max: {value: 3, status: calibrated,
+      source: "WCAG 2.2 SC 2.3.1 (A): не больше трёх вспышек в любую секунду; 10-web-integration/02-video-delivery.md §5.2; EG-A11Y-04"}
+    flash_area_frac_min: {value: 0.25, status: calibrated, source: "WCAG 2.2 SC 2.3.1: порог общей вспышки — 25 % поля 10°; EG-A11Y-04"}
+    flash_field_css_px: {value: [341, 256], status: calibrated, source: "WCAG 2.2 SC 2.3.1: поле 10° — прямоугольник 341×256 CSS px (при 1024×768); EG-A11Y-04"}
     event_ratio_warn: {value: 3, status: uncalibrated, source: "K/03: всплеск движения ×3 к соседям (вспышка 40×40 px на 4 кадра — 3,36; чистая петля 1,22, H.264 CRF 23 — 1,66) — «событие в фоновой петле» (VID-M18, A 01/03 §5.3), только info"}
     head_tail_min: {value: 0.5, status: position, source: "I 09/01 §1.1: head/tail_motion ≥ 0,5 — движение не угасает"}
     static_frac_max: {value: 0.3, status: position, source: "I 09/01 §1.1: static_frac (относительный, v0.2) ≤ 0,3"}
@@ -86,7 +103,7 @@ thresholds:
     flicker_max: {value: 2.0, status: uncalibrated, source: "K/03: отклонение средней яркости кадра от медианы 11 соседних > 2 из 255 — «дышит» (VID-M14), только info"}
     cinemagraph_drift_max: {value: 1.0, status: calibrated, source: "I 09/02 §3: drift_max < 1,0 (шум кодека; заморозка по маске 0,23–0,25)"}
     quiet_motion_med: {value: 0.3, status: position,
-      source: "I 09/01 §1.2–§1.3: тихие петли лидеров motion_med 0,13–0,2 — зона, где пульс ключевого кадра спорит со швом"}
+      source: "I 09/01 §1.2–§1.3: тихие петли лидеров motion_med 0,13–0,2 — зона, где пульс ключевого кадра спорит со швом; тот же уровень — граница «почти неподвижных концов»: шов у них принимается по абсолютной разнице кадров не выше этого числа"}
     mezzanine_kbps_min: {value: 15000, status: uncalibrated, source: "K: битрейт ниже 15 Мбит/с у H.264/AV1 — скорее финальный сжатый файл, а не мезонин CRF 10"}
     loop_len_min_s: {value: 4, status: position, source: "I 09/01 §4: петля hero 4–8 с (короче 4 с повтор заметен)"}
     loop_len_max_s: {value: 10, status: position, source: "A 01/01 выжимка п. 13 (петля 6–10 с) и I 09/01 §4"}
@@ -152,9 +169,9 @@ thresholds:
     swap_consistency_min: {value: 0.8, status: position, source: "Arena Bench (E-helper §2): два прогона со сменой сторон; D2-03: согласованность повторов ≥ 90 % ответов"}
     position_bias_max: {value: 0.15, status: position, source: "LMArena журнал 12.05.2026: перевес левой стороны → поправка; |доля A − 0,5| > 0,15 — судья смещён"}
 ocr_models:
-  engine: "RapidOCR 3.9.2 (Apache-2.0) + onnxruntime 1.30, venv 99-raw/tools/venv-K"
+  engine: "RapidOCR 3.9.2 (Apache-2.0) + onnxruntime 1.30, Python окружения скилла ($DDD_HOME/venv, scripts/install.sh --groups ocr)"
   det: {file: "PP-OCRv6_det_small.onnx (колесо rapidocr)", sha256: "090f04abcd9d9a7498bc4ebf677e4cb9bdce1fe4197ddb7e529f1ef44e1ff94f"}
-  rec_ru: {file: "99-raw/tools/models/ocr/eslav_PP-OCRv5_rec_mobile.onnx", sha256: "08705d6721849b1347d26187f15a5e362c431963a2a62bfff4feac578c489aab"}
-  rec_sniff: {file: "99-raw/tools/models/ocr/en_PP-OCRv5_rec_mobile.onnx", sha256: "c3461add59bb4323ecba96a492ab75e06dda42467c9e3d0c18db5d1d21924be8"}
+  rec_ru: {file: "$DDD_HOME/models/ocr/eslav_PP-OCRv5_rec_mobile.onnx", sha256: "08705d6721849b1347d26187f15a5e362c431963a2a62bfff4feac578c489aab"}
+  rec_sniff: {file: "$DDD_HOME/models/ocr/en_PP-OCRv5_rec_mobile.onnx", sha256: "c3461add59bb4323ecba96a492ab75e06dda42467c9e3d0c18db5d1d21924be8"}
   alt: ["cyrillic_PP-OCRv5_rec_mobile.onnx 90f761b4…", "ch_PP-OCRv5_det_mobile.onnx 4d97c44a…"]
   source: "99-raw/experiments/K/01-ocr-cyrillic (README, RESULTS.md)"

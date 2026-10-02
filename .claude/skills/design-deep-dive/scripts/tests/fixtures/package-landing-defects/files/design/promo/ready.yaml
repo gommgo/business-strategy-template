@@ -18,7 +18,7 @@ sources:
   - {path: site/promo/copy/spasibo.yaml, status: draft, sha256: 2581080140d75c4969637d8e93f5b0219bc1a3726a56d9b8c26e800aeec891e8}
   - {path: site/promo/plans/home.yaml, status: proposed, sha256: 5584feff2c6b6716f4c364ef46e8373eb4039bffe91064efb2f46f95b1651943}
   - {path: site/promo/plans/spasibo.yaml, status: approved, sha256: 44b0cfe94c6a1200e64b7bee9e08367b663b21e196203b75d723443100aabb8e}
-  - {path: site/promo/site-brief.yaml, status: proposed, sha256: 087ff8becac7fd526d830ac0c7d7cc81b26a5f8e02a8a441a74b45e50c2082af}
+  - {path: site/promo/site-brief.yaml, status: proposed, sha256: 49f01bcd854f6caf4f9d7c75145be4b72cd935ec34a1417e19089b835db05643}
   - {path: voice.yaml, status: draft, sha256: b5da5e0a52608d3c9ccf51e506f61cd8a3b20b13419d3e25b2e597a95b3eb029}
 
 units:

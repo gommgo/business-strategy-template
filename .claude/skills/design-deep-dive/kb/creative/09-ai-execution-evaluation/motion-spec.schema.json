@@ -20,7 +20,7 @@
         "характер": {"rule": "copy", "from": ["/page/character"]},
         "база": {"rule": "copy", "from": ["/page/base"], "note": "базовая длительность и кривая; доли моментов — от неё"},
         "примитивы": {"rule": "copy", "from": ["/page/primitives"]},
-        "LCP": {"rule": "copy", "from": ["/page/lcp"], "note": "кандидат LCP: без анимации или только transform"},
+        "LCP": {"rule": "copy", "from": ["/page/lcp"], "note": "кандидат LCP: без анимации или вход по норме CRV-AL-09 — transform, clip-path или opacity от 0,01"},
         "переключатель движения": {"rule": "copy", "from": ["/page/toggle"]},
         "прокрутка": {"rule": "copy", "from": ["/page/scroll"]},
         "переходы страниц": {"rule": "copy", "from": ["/page/transitions"]},
@@ -134,7 +134,7 @@
         "property": {
           "type": "string",
           "pattern": "^(transform|translate|scale|rotate|opacity|clip-path|mask|filter|color|background-color|stroke-dashoffset|font-variation-settings|currentTime|block-size|uniform:[a-zA-Z0-9_]+|--[a-z0-9-]+|view-transition)$",
-          "description": "Разрешённое свойство; набор по уровню страницы — 01-creative-direction/ambition-levels.yaml#levels.motion_hints.properties_allowed и blur_max_px (сверяет spec_check.py). Свойства раскладки (width, height, top, left, margin, padding) — никогда: генераторы анимируют раскладку по умолчанию. Исключение — ambition-levels.yaml property_exceptions: block-size — только ::details-content аккордеона <details> (effect:details-accordion, семейство micro каталога, класс transition) через interpolate-size: allow-keywords, ≤ 300 мс, reduce — мгновенно; без поддержки interpolate-size (Safari, Firefox на 2026-09-24) — мгновенное открытие. Это UI-отклик по клику, не сцена подачи."
+          "description": "Разрешённое свойство; набор по уровню страницы — 01-creative-direction/ambition-levels.yaml#levels.motion_hints.properties_allowed и blur_max_px (сверяет spec_check.py). Свойства раскладки (width, height, top, left, margin, padding) — никогда: генераторы анимируют раскладку по умолчанию. Свойство вне списка уровня — только у приёма каталога, названного таблицей property_exceptions файла уровней (ambition-levels.yaml): clip-path, filter и пользовательские свойства (маска --*) — у приёмов уровня L0, собранных на них; block-size — только ::details-content аккордеона <details> (effect:details-accordion, семейство micro каталога, класс transition) через interpolate-size: allow-keywords, ≤ 300 мс, reduce — мгновенно; без поддержки interpolate-size (Safari, Firefox на 2026-09-24) — мгновенное открытие. Это UI-отклик по клику, не сцена подачи."
         },
         "from": {"type": ["string", "number"]},
         "to": {"type": ["string", "number"]},
@@ -350,7 +350,7 @@
         },
         "lcp": {
           "enum": ["is-lcp", "not-lcp"],
-          "description": "is-lcp — элемент — кандидат LCP: без анимации или только transform ≤ 24 px, не из opacity: 0, не маской строк (E 05-motion/02 §10)."
+          "description": "is-lcp — элемент — кандидат LCP: без анимации или вход по норме CRV-AL-09 (01-creative-direction/ambition-levels.yaml): transform со сдвигом ≤ 24 px, clip-path или opacity от 0,01; не из opacity: 0 и не маской строк (E 05-motion/02 §10)."
         },
         "params": {
           "type": "object",
@@ -394,8 +394,24 @@
         {"if": {"properties": {"class": {"const": "pointer"}}}, "then": {"required": ["mobile"]}},
         {"if": {"properties": {"model": {"const": "spring"}}, "required": ["model"]}, "then": {"required": ["spring"]}},
         {
+          "$comment": "Вход элемента LCP — норма CRV-AL-09 (01-creative-direction/ambition-levels.yaml): transform, clip-path или opacity от 0,01; opacity из 0 и mask — нет. Значение меньше 0,01, записанное строкой, ловит spec_check.py (MS-09).",
           "if": {"properties": {"lcp": {"const": "is-lcp"}}, "required": ["lcp"]},
-          "then": {"properties": {"tracks": {"items": {"properties": {"property": {"enum": ["transform", "translate"]}}}}}}
+          "then": {
+            "properties": {
+              "tracks": {
+                "items": {
+                  "properties": {"property": {"enum": ["transform", "translate", "clip-path", "opacity"]}},
+                  "if": {"required": ["property"], "properties": {"property": {"const": "opacity"}}},
+                  "then": {
+                    "properties": {
+                      "from": {"$ref": "#/$defs/lcp-opacity-start"},
+                      "keyframes": {"prefixItems": [{"properties": {"value": {"$ref": "#/$defs/lcp-opacity-start"}}}]}
+                    }
+                  }
+                }
+              }
+            }
+          }
         },
         {
           "$comment": "block-size — только аккордеону <details>: effect:details-accordion, класс transition (ambition-levels.yaml property_exceptions).",
@@ -408,6 +424,13 @@
             "properties": {"effect": {"const": "effect:details-accordion"}, "class": {"const": "transition"}}
           }
         }
+      ]
+    },
+    "lcp-opacity-start": {
+      "description": "Начальная прозрачность элемента LCP: не 0 — появление из 0,01 (CRV-AL-09).",
+      "anyOf": [
+        {"type": "number", "minimum": 0.01},
+        {"type": "string", "not": {"pattern": "^\\s*0*\\.?0*\\s*%?\\s*$"}}
       ]
     },
     "station": {
@@ -684,7 +707,7 @@
           "required": ["target", "entrance"],
           "properties": {
             "target": {"$ref": "#/$defs/target"},
-            "entrance": {"enum": ["none", "transform-only"]},
+            "entrance": {"enum": ["none", "transform-only"], "description": "none — элемент LCP не анимируется; transform-only — вход по норме CRV-AL-09: transform, clip-path или opacity от 0,01."},
             "note": {"type": "string"}
           }
         },

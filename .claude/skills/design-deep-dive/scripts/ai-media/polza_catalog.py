@@ -2,27 +2,32 @@
 """polza_catalog.py — каталог polza.ai как данные: снимки, нормализация медиа-моделей, таблица, сравнение
 снимков, калькулятор цены и валидатор входа по каталогу (библиотека для polza.py).
 
-Агент B, волна 1 ai-media-research, 2026-09-23. Python 3.13, только стандартная библиотека.
+Python 3.13, только стандартная библиотека.
 Сеть: только бесплатные публичные GET https://polza.ai/api/v1/models (с include_providers) и /v1/models/catalog;
 флаг --with-openapi дополнительно берёт публичную спецификацию https://polza.ai/api/openapi.json.
 
 Команды:
   snapshot [--root DIR] [--with-openapi] [--no-providers]   снимок в $DDD_HOME/cache/ai-media/polza/<дата>[_ЧЧММ]/ (не
                                                              перезаписывает): файлы качаются во временную папку,
-                                                             готовый снимок встаёт на место переименованием — при
-                                                             обрыве последним остаётся прежний снимок, код выхода 1
+                                                             готовый снимок встаёт на место переименованием;
+                                                             оборванный запрос повторяется, скачанные файлы снимка
+                                                             не перекачиваются; попытки кончились — последним
+                                                             остаётся снимок до запуска, код выхода 1
   normalize [SNAP] [--providers SNAP2] [--out FILE]          media-models.normalized.json (картинки и видео)
   table [SNAP] [--type image|video] [--out FILE]             Markdown-таблица медиа-моделей
   diff A B [--all-types] [--json]                            что изменилось между снимками (модели, цены, параметры, провайдеры)
   price MODEL [k=v ...] [--provider NAME] [--ref-seconds S]  быстрая оценка цены (значения как в input задания); в
                                                              stderr — какой снимок взят и сколько ему
   check MODEL [k=v ...]                                      проверка входа по каталогу (ошибки и предупреждения)
-  selftest [--offline]                                       встроенные проверки: снимок при обрыве и возраст снимка
-                                                             (без каталога), затем калькулятор и валидатор по снимку
-                                                             --snapshot; --offline — только первая часть
+  selftest [--offline] [--snapshot SNAP]                     встроенные проверки без сети: снимок при обрыве, возраст
+                                                             снимка, калькулятор на вымышленном каталоге; затем
+                                                             калькулятор и валидатор по снимку (по умолчанию —
+                                                             последний): ожидаемая цена считается из полей этого же
+                                                             снимка; снимков нет — раздел пропускается, код 0;
+                                                             --offline — только первая часть
 
-SNAP — имя папки в 99-raw/cache/polza/ (например 2026-09-23), путь к папке или к api-v1-models.json; по умолчанию —
-последний снимок. Все цены — рубли по каталогу (top_provider.pricing или providers[].pricing).
+SNAP — имя папки в $DDD_HOME/cache/ai-media/polza/ (например 2026-09-23), путь к папке или к api-v1-models.json; по
+умолчанию — последний снимок. Все цены — рубли по каталогу (top_provider.pricing или providers[].pricing).
 
 Семантика ступеней цены (tiers) выведена из каталога и спецификации OpenAPI (ClientTierPresenter, unitParam) и НЕ
 описана polza явно [не проверено]: выбирается ступень, все условия которой выполнены для эффективных значений
@@ -49,14 +54,14 @@ from pathlib import Path
 
 VERSION = "1.0 (2026-09-23)"
 TOOLS = Path(__file__).resolve().parent
-sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(TOOLS.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
-ROOT = kbpaths.kb("ai-media")                # перенос: kb/ai-media
+ROOT = kbpaths.kb("ai-media")
 CACHE = kbpaths.cache("ai-media", "polza")
 BASE = "https://polza.ai/api"
 MSK = dt.timezone(dt.timedelta(hours=3))
 MEDIA_TYPES = ("image", "video")
-UA = "polza_catalog.py/1.0 (ai-media-research; catalog snapshot)"
+UA = "polza_catalog.py/1.0 (catalog snapshot)"
 
 # ---------------------------------------------------------------------------------------------------------------
 # Справочные константы (с источниками). Скоропортящееся — с датой.
@@ -154,7 +159,7 @@ DOC_VS_CATALOG = {
                                "гайд: выбор провайдера @-синтаксисом openai/gpt-5.4-image-2@mie, aliases.mdx: для Media API алиасы не работают"],
     "openai/gpt-5-image": ["mask_url «чёрные = менять, белые = оставить» — противоположно qwen/image-2.1"],
     "qwen/image-2.1": ["mask_url «белое — менять, чёрное — оставить» — противоположно openai/gpt-5-image"],
-    "topaz/image-upscale": ["upscale_factor 8 есть в каталоге; у KIE — 1/2/4 (агент P)"],
+    "topaz/image-upscale": ["upscale_factor 8 есть в каталоге; у KIE — 1/2/4"],
     "bytedance/seedream-4": ["последний cURL гайда использует id bytedance/seedream-v4 (ошибка)"],
     "gemini-omni-video": ["гайд: async «по умолчанию true» и «обязателен»; OpenAPI MediaRequestDto: async default false"],
 }
@@ -280,6 +285,23 @@ class SnapshotError(Exception):
 NET_ERRORS = (urllib.error.URLError, http.client.HTTPException, TimeoutError, ConnectionError, OSError)
 REQUIRED_FILES = ("api-v1-models.json", "api-v1-models.providers.json")   # без них цены и параметры считать не по чему
 STALE_TMP_S = 3600        # временная папка старше часа — след прерванного снимка, её убирает следующий запуск
+SNAPSHOT_TRIES = 3        # попыток на файл снимка: обрыв сети — повтор запроса этого файла
+
+
+def get_retry(get, url: str, name: str, tries: int = SNAPSHOT_TRIES, retry_pause: float = 2.0):
+    """Запрос файла снимка с повтором при обрыве сети → (статус, заголовки, тело). Ответ канала с кодом ошибки — не
+    обрыв: он возвращается как есть. Попытки кончились — SnapshotError."""
+    for attempt in range(1, tries + 1):
+        try:
+            return get(url)
+        except urllib.error.HTTPError as e:
+            return e.code, dict(e.headers.items()), e.read()
+        except NET_ERRORS as e:
+            if attempt == tries:
+                raise SnapshotError(f"{name}: сеть оборвалась ({type(e).__name__}: {e}), попыток — {tries} ← {url}") from e
+            print(f"… {name}: сеть оборвалась ({type(e).__name__}) — повтор запроса, попытка {attempt + 1} из {tries}")
+            if retry_pause:
+                time.sleep(retry_pause * attempt)
 
 
 def fmt_age(seconds: float) -> str:
@@ -318,11 +340,13 @@ def snapshot_note(snap: Snapshot, now: dt.datetime | None = None) -> tuple[str, 
 
 
 def take_snapshot(root: Path, *, with_openapi=False, no_providers=False, get=http_get, pause: float = 1.0,
-                  stamp: dt.datetime | None = None) -> tuple[Path, Snapshot, dict]:
+                  stamp: dt.datetime | None = None, tries: int = SNAPSHOT_TRIES,
+                  retry_pause: float = 2.0) -> tuple[Path, Snapshot, dict]:
     """Снять снимок в root/<дата>[_ЧЧММ]/ → (папка, снимок, метаданные). Файлы качаются во временную папку рядом и
     встают на место одним переименованием, когда скачаны и разобраны все: недокачанная папка с api-v1-models.json
-    стала бы «последним снимком» для всех утилит. Обрыв сети, ответ не 200 или не каталог у обязательного файла —
-    SnapshotError; временная папка убирается, последним остаётся прежний снимок."""
+    стала бы «последним снимком» для всех утилит. Оборванный запрос повторяется (tries попыток на файл), скачанные
+    файлы снимка остаются во временной папке и не перекачиваются. Попытки кончились, ответ не 200 или не каталог у
+    обязательного файла — SnapshotError; временная папка убирается, последним остаётся снимок до запуска."""
     stamp = stamp or now_msk()
     root.mkdir(parents=True, exist_ok=True)
     d = root / stamp.strftime("%Y-%m-%d")
@@ -351,12 +375,7 @@ def take_snapshot(root: Path, *, with_openapi=False, no_providers=False, get=htt
             if i and pause:
                 time.sleep(pause)  # вежливость: публичный каталог отвечает x-ratelimit-limit: 30
             t0 = time.time()
-            try:
-                status, headers, body = get(url)
-            except urllib.error.HTTPError as e:
-                status, headers, body = e.code, dict(e.headers.items()), e.read()
-            except NET_ERRORS as e:
-                raise SnapshotError(f"{name}: сеть оборвалась ({type(e).__name__}: {e}) ← {url}") from e
+            status, headers, body = get_retry(get, url, name, tries, retry_pause)
             if name in REQUIRED_FILES:
                 try:
                     raw = json.loads(body)
@@ -566,8 +585,10 @@ def estimate(model: dict, inp: dict | None = None, *, provider: str | None = Non
         res["values_used"], res["sources"] = vals, src
         tier, fb, tie = match_tier(pr["tiers"], vals)
         res["fallback_rub"] = float(fb["cost_rub"]) if fb else None
+        cond_keys = tier_keys(pr)
         for k, s in src.items():
-            if s == "absent" and k not in ("has_video", "input_images_count"):
+            # единица цены (unitParam) — не условие ступени: о длительности без параметра говорит units_from_duration
+            if s == "absent" and k in cond_keys and k not in ("has_video", "input_images_count"):
                 W.append(f"ценовой параметр {k!r} не задан и нет default — polza может применить запасную ступень "
                          f"[] = {fmt_rub(res['fallback_rub'])} ₽; задайте явно")
         if tie:
@@ -813,7 +834,7 @@ def validate(model: dict, inp: dict, *, provider: str | None = None, providers: 
         if ar == "1:1" and as_str(res) == "4K":
             add("error", "image_resolution", "для 1:1 недоступен 4K (описание каталога)")
         if ar in ("27:16", "16:27", "9:8", "8:9") and as_str(res) not in (None, "1K"):
-            add("warn", "image_resolution", f"{ar}: у KIE только 1K (документация KIE, агент P) [не проверено]")
+            add("warn", "image_resolution", f"{ar}: у KIE только 1K (документация KIE) [не проверено]")
     if mid == "qwen/image-2.1":
         if inp.get("mask_url"):
             if _len_items(inp.get("images")) != 1:
@@ -1116,7 +1137,7 @@ def normalize_snapshot(snap: Snapshot) -> dict:
     models.sort(key=lambda x: (x["type"], x["id"]))
     return {
         "schema": "polza-media-normalized/1",
-        "generated_by": f"99-raw/tools/polza_catalog.py {VERSION}",
+        "generated_by": f"scripts/ai-media/polza_catalog.py {VERSION}",
         "generated_at": now_msk().isoformat(timespec="seconds"),
         "checked": now_msk().date().isoformat(),
         "snapshot_dir": str(snap.dir.relative_to(ROOT)) if snap.dir.is_relative_to(ROOT) else str(snap.dir),
@@ -1397,9 +1418,81 @@ def cmd_check(a):
     print(json.dumps(inp3, ensure_ascii=False))
 
 
+DEFAULT = object()          # в случае самопроверки цен: значение — default параметра каталога
+
+
+def price_by_fields(m: dict, eff: dict, units) -> tuple[float | None, str | None]:
+    """Ожидаемая цена случая самопроверки прямо из полей записи каталога → (цена, причина пропуска). eff — значения
+    условий ступеней, названные случаем (DEFAULT — default параметра каталога); units — число единиц цены (секунд),
+    DEFAULT — default длительности, None — единиц нет. Цена за запрос — поле per_request; за секунду —
+    video_per_second × units; ступени — самая точная ступень, все условия которой выполнены значениями eff (равные по
+    точности — дороже; ни одной — запасная []), при unitParam — × units. Цена за единицу без единиц — None. Случай к
+    записи не подходит (схема цены формулой не сверяется; ступени зависят от параметра, которого случай не называет)
+    — причина пропуска: каталог сменил устройство цены, калькулятор тут ни при чём."""
+    tp = m.get("top_provider") or {}
+    pr = tp.get("pricing") or {}
+    params = m.get("parameters") or tp.get("parameters") or {}
+    kind = pricing_kind(pr)
+
+    def default(k):
+        name = "generate_audio" if k == "sound" and "sound" not in params and "generate_audio" in params else k
+        return as_str((params.get(name) or {}).get("default"))
+
+    if units is DEFAULT:
+        units = to_num(default("duration"))
+        if units is None:
+            return None, "у длительности нет default в каталоге"
+    if kind == "per_request":
+        return float(pr["per_request"]), None
+    if kind == "per_second":
+        return (round(float(pr["video_per_second"]) * units, 6) if units is not None else None), None
+    if kind not in ("tiers", "tiers_per_unit"):
+        return None, f"схема цены {kind} формулой не сверяется"
+    vals = {}
+    for k in tier_keys(pr):
+        if k not in eff:
+            return None, f"ступени зависят от {k} — случай его не называет"
+        vals[k] = default(k) if eff[k] is DEFAULT else eff[k]
+    best = None
+    for t in pr["tiers"]:
+        conds = [c.partition("=")[::2] for c in t.get("conditions") or []]
+        if conds and all(vals.get(k) == v for k, v in conds):
+            best = max(best or (0, 0.0), (len(conds), float(t["cost_rub"])))
+    if best is None:
+        fb = [float(t["cost_rub"]) for t in pr["tiers"] if not t.get("conditions")]
+        if not fb:
+            return None, "ни одна ступень не подошла, запасной нет"
+        best = (0, fb[0])
+    if kind == "tiers_per_unit":
+        return (round(best[1] * units, 6) if units is not None else None), None
+    return best[1], None
+
+
+def check_prices(by: dict, cases: list, ok, skip):
+    """Калькулятор против полей каталога: случай — (модель, input, значения условий ступеней, единицы[, число]).
+    Число есть только у вымышленного каталога самопроверки — с ним сверяются и формула, и калькулятор."""
+    for mid, inp, eff, units, *num in cases:
+        m = by.get(mid)
+        if m is None:
+            skip(f"цена {mid}: модели нет в снимке")
+            continue
+        want, why = price_by_fields(m, eff, units)
+        if why:
+            skip(f"цена {mid} {inp}: {why}")
+            continue
+        e = estimate(m, inp, ref_seconds=None)
+        got = e["rub"]
+
+        def same(x, y):
+            return (x is None and y is None) or (x is not None and y is not None and abs(x - y) < 1e-6)
+
+        ok(f"цена {mid} {inp} = {want} — из полей каталога", same(got, want) and (not num or same(want, num[0])),
+           f"калькулятор {got}, по полям {want}" + (f", число случая {num[0]}" if num else "") + f" | {e['formula']}")
+
+
 def selftest_offline() -> int:
-    """Проверки без снимка каталога и без сети: снимок при обрыве и при ответе не каталогом, возраст снимка. Каталог и
-    ответы канала — вымышленные, во временной папке. Возвращает число ошибок."""
+    """Проверки без снимка каталога и без сети: снимок при обрыве и при ответе не каталогом, возраст снимка,
+    калькулятор цены. Каталог и ответы канала — вымышленные, во временной папке. Возвращает число ошибок."""
     import contextlib
     import io
     import tempfile
@@ -1408,29 +1501,79 @@ def selftest_offline() -> int:
 
     def take(*args, **kw):       # строки хода снимка самопроверке не нужны: итог — строки OK и FAIL
         with contextlib.redirect_stdout(io.StringIO()):
-            return take_snapshot(*args, **kw)
+            return take_snapshot(*args, retry_pause=0, **kw)
 
     def ok(name, cond, got=""):
         nonlocal bad
         bad += not cond
         print(("OK  " if cond else "FAIL"), name + (f" — {got}" if got != "" and not cond else ""))
 
-    body = json.dumps({"data": [{"id": "demo/image", "type": "image", "name": "Demo Image", "top_provider": {
-        "name": "demo", "pricing": {"per_request": 1.5}, "parameters": {"prompt": {"type": "string"}}}}]}).encode()
+    def skip(name):
+        nonlocal bad
+        bad += 1                 # у вымышленного каталога пропусков не бывает: случай обязан подойти
+        print("FAIL", name)
+
+    def tiers(*rows, unit=None):
+        pr = {"tiers": [{"conditions": list(c), "cost_rub": f"{rub:.8f}"} for c, rub in rows], "currency": "RUB"}
+        if unit:
+            pr["unitParam"] = unit
+        return pr
+
+    def model(mid, typ, pricing, params):
+        return {"id": mid, "type": typ, "name": mid, "parameters": params,
+                "top_provider": {"name": "demo", "pricing": pricing}}
+
+    choice = {"default": "false", "values": ["true", "false"]}
+    demo = [
+        model("demo/image", "image", {"per_request": "1.50"}, {"prompt": {"max_length": 100}}),
+        model("demo/image-tiers", "image",
+              tiers(((), 9), (("image_resolution=1K",), 3), (("image_resolution=2K",), 6)),
+              {"image_resolution": {"default": "1K", "values": ["1K", "2K"]}, "images": {"min": 0, "max": 4}}),
+        model("demo/image-refs", "image",
+              tiers(((), 5), (("quality=basic",), 5), (("quality=high",), 10),
+                    (("quality=high", "input_images_count=2"), 10.5)),
+              {"quality": {"required": True, "default": "basic", "values": ["basic", "high"]},
+               "images": {"min": 0, "max": 4}}),
+        model("demo/video", "video",
+              tiers(((), 40), (("mode=std", "sound=false"), 8), (("mode=std", "sound=true"), 12),
+                    (("mode=pro", "sound=false"), 11), (("mode=pro", "sound=true"), 16), unit="duration"),
+              {"mode": {"default": "std", "values": ["std", "pro"]}, "sound": dict(choice),
+               "duration": {"min": 3, "max": 15, "default": 5}}),
+        model("demo/video-audio", "video",
+              tiers(((), 100), (("resolution=480p", "duration=4", "sound=false"), 5.5),
+                    (("resolution=480p", "duration=4", "sound=true"), 11)),
+              {"resolution": {"values": ["480p", "720p"]}, "duration": {"values": ["4", "8"]},
+               "generate_audio": dict(choice)}),
+        model("demo/video-ref", "video",
+              tiers(((), 80), (("resolution=720p", "has_video=false"), 20), (("resolution=720p", "has_video=true"), 30),
+                    unit="duration"),
+              {"resolution": {"default": "720p", "values": ["480p", "720p"]},
+               "duration": {"min": 4, "max": 15, "default": 10}, "videos": {"min": 0, "max": 1}}),
+        model("demo/video-second", "video", {"video_per_second": "2.50000000"},
+              {"duration": {"default": "5", "values": ["5", "6", "7", "8"]}}),
+        model("demo/video-upscale", "video",
+              tiers(((), 6), (("upscale_factor=2",), 6), (("upscale_factor=4",), 10), unit="duration"),
+              {"videos": {"required": True, "min": 1, "max": 1},
+               "upscale_factor": {"default": "2", "values": ["1", "2", "4"]}}),
+    ]
+    body = json.dumps({"data": demo}).encode()
+    by = {m["id"]: m for m in demo}
 
     def good(url):
         return 200, {"Content-Type": "application/json"}, body
 
-    def failing(exc_at=None, status_at=None):
+    def failing(exc_at=(), status_at=None):
+        """Запрос самопроверки: обрыв на вызовах с номерами exc_at, ответ 502 на вызове status_at; calls — журнал."""
         calls = []
 
         def get(url):
             calls.append(url)
-            if len(calls) == exc_at:
+            if len(calls) in exc_at:
                 raise http.client.IncompleteRead(body[:40], len(body) - 40)
             if len(calls) == status_at:
                 return 502, {"Content-Type": "text/html"}, b"<html>Bad Gateway</html>"
             return good(url)
+        get.calls = calls
         return get
 
     def names(root):
@@ -1439,24 +1582,26 @@ def selftest_offline() -> int:
     cache = CACHE
     try:
         with tempfile.TemporaryDirectory(prefix="polza-catalog-selftest-") as t:
-            root = CACHE = Path(t)
+            root = CACHE = Path(t) / "polza"
             t1 = dt.datetime(2026, 1, 10, 9, 0, tzinfo=MSK)
             d1, snap1, meta = take(root, get=good, pause=0, stamp=t1)
             norm = json.loads((d1 / "media-models.normalized.json").read_text())
             ok("снимок: папка даты с метаданными и нормализацией, временной папки нет",
                names(root) == ["2026-01-10"] and len(meta["files"]) == 4 and (d1 / "snapshot.meta.json").exists()
-               and norm["snapshot_dir"] == str(d1) and len(snap1.models) == 1, (names(root), norm.get("snapshot_dir")))
-            for label, get in (("обрыв сети на втором файле", failing(exc_at=2)),
-                               ("обрыв сети на первом файле", failing(exc_at=1)),
+               and norm["snapshot_dir"] == str(d1) and len(snap1.models) == len(demo), (names(root), norm.get("snapshot_dir")))
+            tries = (1, 2, 3)
+            for label, get in (("обрыв сети на втором файле во всех попытках", failing(exc_at=tuple(n + 1 for n in tries))),
+                               ("обрыв сети на первом файле во всех попытках", failing(exc_at=tries)),
                                ("ответ 502 вместо каталога", failing(status_at=1))):
                 try:
-                    take(root, get=get, pause=0, stamp=t1 + dt.timedelta(hours=2))
+                    take(root, get=get, pause=0, stamp=t1 + dt.timedelta(hours=2), tries=len(tries))
                     err = None
                 except SnapshotError as e:
                     err = str(e)
                 ok(f"{label}: снимок не снят, новой и временной папок нет", err is not None and names(root) == ["2026-01-10"],
                    (err, names(root)))
                 ok(f"{label}: последним остаётся прежний снимок", find_snapshot(None) == d1, find_snapshot(None))
+            ok("ответ 502 вместо каталога — не обрыв: запрос не повторяется", len(get.calls) == 1, get.calls)
             half = root / ".snapshot-20260110-120000-1.part"
             half.mkdir()
             (half / "api-v1-models.json").write_bytes(body)
@@ -1465,6 +1610,14 @@ def selftest_offline() -> int:
             ok("вспомогательный файл с ответом не 200 снимок не срывает: статус — в метаданных",
                d2.name == "2026-01-10_1200" and json.loads((d2 / "snapshot.meta.json").read_text())["files"][
                    "api-v1-models-catalog.image.json"]["status"] == 502, d2.name)
+            once = failing(exc_at=(2,))
+            d3, snap3, meta3 = take(Path(t) / "retry", get=once, pause=0, stamp=t1)
+            ok("обрыв сети один раз: запрос повторён, снимок снят целиком",
+               d3.name == "2026-01-10" and len(meta3["files"]) == 4 and len(snap3.models) == len(demo)
+               and names(Path(t) / "retry") == ["2026-01-10"], (d3.name, names(Path(t) / "retry")))
+            ok("обрыв сети один раз: повторён только оборванный файл, скачанный не перекачивается",
+               len(once.calls) == 5 and once.calls.count(once.calls[0]) == 1 and once.calls[1] == once.calls[2],
+               once.calls)
             note, check = snapshot_note(snap1, now=t1 + dt.timedelta(hours=3))
             ok("возраст: снимок за сегодня — строка с папкой и возрастом, без отметки",
                not check and "2026-01-10" in note and "3 ч назад" in note, note)
@@ -1474,56 +1627,111 @@ def selftest_offline() -> int:
             (d1 / "snapshot.meta.json").unlink()
             note, check = snapshot_note(Snapshot(str(d1)), now=dt.datetime.fromtimestamp(d1.stat().st_mtime, MSK))
             ok("возраст: папка без snapshot.meta.json — отметка «не до конца»", check and "не до конца" in note, note)
+            empty = CACHE = Path(t) / "empty"
+            empty.mkdir()
+            try:
+                find_snapshot(None)
+                err = None
+            except SystemExit as e:
+                err = str(e)
+            ok("снимков нет: отказ с путём папки снимков", err is not None and str(empty) in err, err)
     finally:
         CACHE = cache
+    check_prices(by, [
+        ("demo/image", {}, {}, None, 1.5),
+        ("demo/image-tiers", {"image_resolution": "2K"}, {"image_resolution": "2K"}, None, 6.0),
+        ("demo/image-tiers", {}, {"image_resolution": DEFAULT}, None, 3.0),
+        ("demo/image-refs", {"quality": "high", "images": ["a", "b"]}, {"quality": "high", "input_images_count": "2"},
+         None, 10.5),
+        ("demo/image-refs", {"quality": "basic"}, {"quality": "basic", "input_images_count": "0"}, None, 5.0),
+        ("demo/video", {"mode": "pro", "sound": False, "duration": 5}, {"mode": "pro", "sound": "false"}, 5, 55.0),
+        ("demo/video", {}, {"mode": DEFAULT, "sound": DEFAULT}, DEFAULT, 40.0),
+        ("demo/video-audio", {"resolution": "480p", "duration": "4", "generate_audio": "false"},
+         {"resolution": "480p", "duration": "4", "sound": "false"}, None, 5.5),
+        ("demo/video-ref", {"resolution": "720p", "duration": 5, "videos": ["v"]},
+         {"resolution": "720p", "has_video": "true"}, 5, 150.0),
+        ("demo/video-second", {}, {}, DEFAULT, 12.5),
+        ("demo/video-upscale", {"upscale_factor": "4"}, {"upscale_factor": "4"}, None, None),
+    ], ok, skip)
+    want, why = price_by_fields(by["demo/image-tiers"], {}, None)
+    ok("формула: случай без значения условия ступени — пропуск с причиной, а не цена",
+       want is None and "image_resolution" in (why or ""), (want, why))
+    up = by["demo/video-upscale"]
+    e = estimate(up, {"upscale_factor": "4", "videos": ["v"]}, ref_seconds=5)
+    ok("апскейл видео с длиной входного ролика: цена за секунду × длину, предупреждений нет",
+       e["rub"] == 50.0 and e["warnings"] == [], (e["rub"], e["warnings"]))
+    e = estimate(up, {"upscale_factor": "4", "videos": ["v"]})
+    ok("апскейл видео без длины ролика: цены нет, одно предупреждение — о длине входного видео",
+       e["rub"] is None and len(e["warnings"]) == 1 and "длина входного видео" in e["warnings"][0], e["warnings"])
+    e = estimate(by["demo/video-audio"], {"duration": "4"})
+    ok("условие ступени без значения и без default — предупреждение о запасной ступени",
+       any("'resolution'" in w and "запасн" in w for w in e["warnings"]), e["warnings"])
     return bad
 
 
 def cmd_selftest(a):
-    bad = selftest_offline()
-    if a.offline:
-        print("ИТОГО:", "все проверки пройдены" if not bad else f"{bad} ошибок")
+    bad = skipped = 0
+
+    def ok(name, cond, got=""):
+        nonlocal bad
+        bad += not cond
+        print(("OK  " if cond else "FAIL"), name + (f" — {got}" if got != "" and not cond else ""))
+
+    def skip(name):
+        nonlocal skipped
+        skipped += 1
+        print("ПРОПУСК", name)
+
+    def total():
+        print("ИТОГО:", ("все проверки пройдены" if not bad else f"{bad} ошибок")
+              + (f"; пропущено случаев — {skipped}" if skipped else ""))
         sys.exit(1 if bad else 0)
-    snap = Snapshot(a.snapshot)
+
+    bad += selftest_offline()
+    if a.offline:
+        total()
+    try:
+        snap = Snapshot(a.snapshot)
+    except SystemExit as e:
+        if a.snapshot:
+            raise
+        skip(f"раздел цен по снимку каталога: {e} — снимок ставит scripts/install.sh --catalogs или "
+             f"polza_catalog.py snapshot (бесплатный GET)")
+        total()
+    print(f"# снимок каталога {snap.dir.name}: ожидаемая цена случая считается из полей этого снимка")
     by = snap.by_id
-    cases = [
-        ("tongyi-mai/z-image", {}, 1.40),
-        ("openai/gpt-image-2.5-sunburst", {"image_resolution": "2K"}, 7.0),
-        ("openai/gpt-image-2.5-sunburst", {}, 4.0),                      # default 1K
-        ("qwen/image", {"aspect_ratio": "16:9"}, 2.25),
-        ("seedream/5-pro-text-to-image", {"quality": "high", "images": ["a", "b", "c"]}, 10.6),
-        ("seedream/5-pro-text-to-image", {"quality": "basic"}, 5.0),
-        ("kling/v3", {"mode": "pro", "sound": False, "duration": 5}, 60.0),
-        ("bytedance/seedance-1.5-pro", {"resolution": "480p", "duration": "4", "generate_audio": "false"}, 5.25),
-        ("bytedance/seedance-2", {"resolution": "480p", "duration": 5}, 64.125),
-        ("bytedance/seedance-2", {"resolution": "720p", "duration": 5, "videos": ["v"]}, 168.75),
-        ("grok-imagine-video-1-5", {"resolution": "480p", "duration": 1}, 1.62),
-        ("gemini-omni-video", {"resolution": "4k", "duration": "8"}, 82.0),
-        ("gemini-omni-video", {"resolution": "4k", "videos": ["v"]}, 115.0),
-        ("alibaba/wan-3.0", {"duration": "5"}, 117.992),
-        ("minimax/hailuo-3-max", {}, 47.1968),
-        ("wan/2.6", {"resolution": "1080p", "duration": "15"}, 236.25),
-        ("topaz/video-upscale", {"upscale_factor": "4"}, None),
-        ("google/veo3", {}, 187.5),
-    ]
-    for mid, inp, want in cases:
-        e = estimate(by[mid], inp, ref_seconds=None)
-        got = e["rub"]
-        ok = (got is None and want is None) or (got is not None and want is not None and abs(got - want) < 1e-6)
-        bad += not ok
-        print(("OK  " if ok else "FAIL"), mid, inp, "→", got, "ожидалось", want, "|", e["formula"])
-    iss = validate(by["openai/gpt-image-2.5-sunburst"], {"prompt": "x", "aspect_ratio": "1:1", "image_resolution": "4K"})
-    ok = any(i["level"] == "error" and "1:1" in i["msg"] for i in iss)
-    bad += not ok
-    print(("OK  " if ok else "FAIL"), "gpt-image-2.5 1:1+4K → ошибка")
-    fid = "openai/gpt-image-2.5-flare" if "openai/gpt-image-2.5-flare" in by else "gpt-image-2-5-flare"   # id сменился 25.09.2026
-    if fid in by:
-        iss = validate(by[fid], {"prompt": "x", "aspect_ratio": "1:1", "image_resolution": "4K"})
-        ok = any(i["level"] == "error" and "1:1" in i["msg"] for i in iss)
-        bad += not ok
-        print(("OK  " if ok else "FAIL"), f"{fid} 1:1+4K → ошибка (правило mie для Flare)")
-    print("ИТОГО:", "все проверки пройдены" if not bad else f"{bad} ошибок")
-    sys.exit(1 if bad else 0)
+    check_prices(by, [
+        ("tongyi-mai/z-image", {}, {}, None),
+        ("openai/gpt-image-2.5-sunburst", {"image_resolution": "2K"}, {"image_resolution": "2K"}, None),
+        ("openai/gpt-image-2.5-sunburst", {}, {"image_resolution": DEFAULT}, None),
+        ("qwen/image", {"aspect_ratio": "16:9"}, {"aspect_ratio": "16:9"}, None),
+        ("seedream/5-pro-text-to-image", {"quality": "high", "images": ["a", "b", "c"]},
+         {"quality": "high", "input_images_count": "3"}, None),
+        ("seedream/5-pro-text-to-image", {"quality": "basic"}, {"quality": "basic", "input_images_count": "0"}, None),
+        ("kling/v3", {"mode": "pro", "sound": False, "duration": 5}, {"mode": "pro", "sound": "false"}, 5),
+        ("bytedance/seedance-1.5-pro", {"resolution": "480p", "duration": "4", "generate_audio": "false"},
+         {"resolution": "480p", "duration": "4", "sound": "false"}, None),
+        ("bytedance/seedance-2", {"resolution": "480p", "duration": 5}, {"resolution": "480p", "has_video": "false"}, 5),
+        ("bytedance/seedance-2", {"resolution": "720p", "duration": 5, "videos": ["v"]},
+         {"resolution": "720p", "has_video": "true"}, 5),
+        ("grok-imagine-video-1-5", {"resolution": "480p", "duration": 1}, {"resolution": "480p"}, 1),
+        ("gemini-omni-video", {"resolution": "4k", "duration": "8"},
+         {"resolution": "4k", "duration": "8", "has_video": "false"}, None),
+        ("gemini-omni-video", {"resolution": "4k", "videos": ["v"]},
+         {"resolution": "4k", "duration": DEFAULT, "has_video": "true"}, None),
+        ("alibaba/wan-3.0", {"duration": "5"}, {}, 5),
+        ("minimax/hailuo-3-max", {}, {}, DEFAULT),
+        ("wan/2.6", {"resolution": "1080p", "duration": "15"}, {"resolution": "1080p", "duration": "15"}, None),
+        ("topaz/video-upscale", {"upscale_factor": "4"}, {"upscale_factor": "4"}, None),
+        ("google/veo3", {}, {}, None),
+    ], ok, skip)
+    for mid in ("openai/gpt-image-2.5-sunburst", "openai/gpt-image-2.5-flare"):
+        if mid not in by:
+            skip(f"{mid} 1:1 + 4K: модели нет в снимке")
+            continue
+        iss = validate(by[mid], {"prompt": "x", "aspect_ratio": "1:1", "image_resolution": "4K"})
+        ok(f"{mid} 1:1 + 4K → ошибка валидатора", any(i["level"] == "error" and "1:1" in i["msg"] for i in iss), iss)
+    total()
 
 
 def main(argv=None):
@@ -1560,8 +1768,9 @@ def main(argv=None):
         s.add_argument("--ref-seconds", type=float)
         s.set_defaults(fn=fn)
     s = sp.add_parser("selftest")
-    s.add_argument("--snapshot", default="2026-09-23")
-    s.add_argument("--offline", action="store_true", help="только проверки без снимка каталога: обрыв снимка, возраст")
+    s.add_argument("--snapshot", help="снимок для раздела цен (имя папки или путь; по умолчанию — последний)")
+    s.add_argument("--offline", action="store_true",
+                   help="только проверки без снимка каталога: обрыв снимка, возраст, калькулятор на вымышленном каталоге")
     s.set_defaults(fn=cmd_selftest)
     a = ap.parse_args(argv)
     a.fn(a)

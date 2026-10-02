@@ -156,12 +156,12 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 | `IMG-SERIES` | Flare; запас NB Pro 13,5 (flex 7,95); Seedream 4.5 дёшево; `[спорно]` | Flare; запас — Sunburst по методу F; сетка 2×2 Sunburst 2K — alt; NB Pro и Seedream 4.5 → `not` | E-12: стиль держит только Flare; F-01: ΔE OKLab 0,031–0,035 (3 из 3); F-02: сетка = по одному — `99-raw/phase5/runs/2.3-series/F-01_sheet.jpg` |
 | `IMG-ICON3D` | Sunburst, форма + кубик; `[исследование]` | тот же; метод — `[проверено]` | F-07: IoU 0,95 и 0,92 — `99-raw/phase5/runs/2.3-series/F-07_sheet.jpg` |
 | `IMG-CUTOUT` | ровный фон + u2netp; альфа моделей `[не проверено]` | тот же; Riverflow → `not`; RouterAI GPT 2.5 `transparent` — мех да, стекло нет (стекло — хромакей или Ideogram) | T2: 64 % прозрачных; H-03: мех — мягкая кайма, стекло — облако фона, маска блоками 16 px; CM-05: пусто ×2 — `99-raw/phase5/runs/S5-analysis/H-03_alpha.json` |
-| `IMG-BG-ABSTRACT` | код; Flare 1K; FLUX.2 alt | + Sunburst 2K (крупная форма), + RouterAI Recraft Vector (векторный фон) | SC-01, MS-01…MS-02, CM-01…CM-02, D2-04 — `99-raw/phase5/runs/MS-marea/audit-MS-01/` |
+| `IMG-BG-ABSTRACT` | код; Flare 1K; FLUX.2 alt | + Sunburst 2K (крупная форма), + RouterAI Recraft Vector (векторный фон) | SC-01, MS-01…MS-02, CM-01…CM-02, D2-04 |
 | Seedream (7 вариантов) | флаг `visible-vendor-mark`, ворота E-01 | флаг и ворота сняты | E-01 (Seedream 4) + углы 7 кадров Seedream 4.5 / 5 Pro — меток нет, C2PA Valid — `99-raw/notes/session5/U-work/prov-seedream/provenance.md` |
 | `IMG-TEXT-CYR` | HTML; модели `final: false` до лесенки E-02…E-04 | HTML основной; RouterAI Recraft V4.1 — `final: true` для ≤ 4 слов с OCR и чтением; Flare, GPT Image 2, NB2, Seedream 4.5 — `final: false`; Qwen 2.1, FLUX.2 Pro, Sunburst → `not` | E-02: 6 из 9 дословно; K-05: OCR 15/24, VLM 11/24; E-07/G-09: 3 из 3 глазом — `99-raw/phase5/runs/2.1-cyrillic/` |
 | `IMG-EDIT` | NB2 / Sunburst по типу; ≤ 5 изменений за вызов | + Seedream 5 Pro (удаление); композит обязателен; до 10 изменений одним вызовом | E-15: утечки и сдвиги у 3 из 4; D2-06: 10 из 10 одним вызовом — `99-raw/phase5/runs/4-edits/E-15-check/` |
 | `IMG-OUTPAINT` | NB2 + композит при REGENERATED | композит всегда; телефону — свой мастер | H-08: резкость 0,14 / 0,56 < 0,85 у обеих — `99-raw/phase5/runs/4-edits/H-08-check/` |
-| `VID-HERO-LOOP` | Seedance 1.5 Pro A,A 720p 10,5; премиум Omni 48, Kling std 50; запас Veo, H3; кроссфейд хвоста; `[не проверено]` | Seedance 1.5 Pro 720p 10,5 + premium 1080p 8 с 45; Omni, Kling std, Kling pro, H3 → `not`; стык — RIFE-мост 8 кадров | I-03 шов 1,28; I-09 2,12; I-15 5,08; I-08 7,21; MS-03 3,29 → RIFE 0,69, 8 с 0,84, MS-05 1080p 0,41; VM-02 движение 0,024 — `99-raw/phase5/runs/2.4-loops/`, `99-raw/phase5/runs/MS-marea/loops/` |
+| `VID-HERO-LOOP` | Seedance 1.5 Pro A,A 720p 10,5; премиум Omni 48, Kling std 50; запас Veo, H3; кроссфейд хвоста; `[не проверено]` | Seedance 1.5 Pro 720p 10,5 + premium 1080p 8 с 45; Omni, Kling std, Kling pro, H3 → `not`; стык — RIFE-мост 8 кадров | I-03 шов 1,28; I-09 2,12; I-15 5,08; I-08 7,21; MS-03 3,29 → RIFE 0,69, 8 с 0,84, MS-05 1080p 0,41; VM-02 движение 0,024 |
 | `VID-CINEMAGRAPH` | Seedance A fixed_lens; `[документация]` | без изменений; форма промта — `[проверено]` | D2-07: движение 1,61 / 1,69 / 2,45, SSIM0 0,814; MS-03: сдвиг камеры до 36,5 px — `99-raw/phase5/runs/3-prompt-form/video/D2-07/` |
 | `VID-I2V-PRODUCT` | Kling 3 std 50; `[мнение вендора]` | тот же + Seedance FLF по кадрам 3D (10,5) | SC-03: OCR 11 из 11; 3D-21: силуэт 0,82–0,90 — `99-raw/phase5/runs/SC-showcase/SC-03-frames/` |
 | `VID-ABSTRACT` | Seedance 2 Mini 12,83 | **Seedance 1.5 Pro i2v по кадру 10,5**; 2 Mini — без кадра; 2 Fast — `final: false`; Grok — переходы | VM-01, решение заказчика п. 14 («картинка → видео») — `99-raw/phase5/runs/6-video-models/sheets/` |
@@ -202,7 +202,7 @@ I-14, I-18 — нет), `VEC-PATTERN`, `VEC-ANIM`, `VEC-TRACE` (G-13, G-16).
 Sora 2 (API снят 24.09.2026), preview `gemini-omni-video` после 30.09.2026, видео через RouterAI (×1,4–5,4 к polza, B2), Luma
 Ray 3.2 `loop` (единственная нативная петля — вне доступа, иностранная оплата).
 
-**Поправка фазы 5 (25.09.2026)** [проверено: 99-raw/phase5/runs/2.4-loops/, 99-raw/phase5/runs/MS-marea/loops/, по 1 образцу]:
+**Поправка по прогонам** [проверено: по 1 образцу]:
 премиумы петли хуже дешёвой по шву — Kling 3 std [A, A] 2,12, GA Omni 1.1 FLF 5,08 (+ звук всегда), Kling 3 pro 1080p — почти
 стоп-кадр (движение 0,024); Seedance 2 Mini — 7,21 → в v2 премиумов петли нет, 1080p — тот же Seedance 1.5 Pro (8 с — 45 ₽).
 Наезд камеры — Seedance 1.5 Pro 720p 10,5 / 1080p 22,5 (основной `VID-CAMERA` вместо Kling 3 pro); переход раздела — Grok 1.5

@@ -69,6 +69,6 @@
     root.__heroVideo = {video: video, sync: sync};
   }
 
-  window.MareaHeroVideo = heroVideo;
+  window.VelmoraHeroVideo = heroVideo;
   document.querySelectorAll('[data-hero-video]').forEach(heroVideo);
 })();

@@ -42,21 +42,24 @@
         "effect_role": { "type": "array", "items": { "enum": ["signature", "support", "feedback"] },
           "description": "Роль эффекта — как обычно используется в treatment.effects[].purpose (signature — фирменный приём, support — поддержка системы, feedback — отклик). До S1 2026-09-25 ключ назывался roles; не путать с section_role site (роль секции сюжета) и visual_role treatment (X-54, site C4)." },
         "level_min": { "$ref": "#/$defs/level" },
-        "limits": { "type": "object", "description": "Потолки по уровню и странице: per_page_L0/L1/L2 (null — по бюджету внимания), scroll_vh_L1 и т. п.",
+        "limits": { "type": "object", "description": "Потолки по уровню и странице: per_page_L0/L1/L2 (null — по бюджету внимания), scroll_vh_L1 и т. п. Число, у которого канон в другом файле, стоит строкой-ссылкой на него: длина закрепления — токен marketing-tokens.json#motion.marketing.scroll.pin-l1-max-vh / pin-l2-max-vh, длина видео-петли — пороги ai-media/11-evaluation-qa/thresholds.yaml.",
           "additionalProperties": { "type": ["number", "string", "null", "array"] } },
         "status": { "enum": ["measured", "draft", "external"],
-          "description": "measured — есть lab/<id>/ и замер effect_bench; draft — страница есть, замера нет; external — только ссылки на соседей (3D, секвенции)." },
+          "description": "measured — есть lab/<id>/ и замер effect_bench; draft — замера нет: страница lab/<id>/ есть или ещё не собрана (demo: null); external — только ссылки на соседей (3D, секвенции)." },
         "replaces": { "type": "array", "items": { "$ref": "#/$defs/effect-ref" } },
         "motion": {
           "type": "object", "additionalProperties": false, "required": ["kind", "attention_cost"],
           "properties": {
-            "kind": { "description": "Класс движения эффекта; список — у эффекта с несколькими классами моментов (первый — главный; 3d-scene: скраб сюжета + разовое пробуждение). MS-05 spec_check.py принимает класс момента из списка (X-64, S1b 2026-09-25)", "anyOf": [ { "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"] }, { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"] } } ] },
+            "kind": { "description": "Класс движения приёма; список — допустимые классы у приёма, который запускают по-разному (первый — главный): 3d-scene — скраб сюжета и разовое пробуждение; mask-reveal и text-mask-media — по времени и по прокрутке. Класс момента спецификации движения сверяется со списком (spec_check.py, MS-05).", "anyOf": [ { "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"] }, { "type": "array", "minItems": 2, "uniqueItems": true, "items": { "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"] } } ] },
             "trigger": { "type": "array", "items": { "enum": ["load", "in-view", "scroll", "pin-scroll", "hover", "click", "idle-loop", "page-transition"] } },
             "attention_cost": { "type": "integer", "minimum": 0, "maximum": 3,
               "description": "Сколько непрерывных движений добавляет в видимую зону в покое: петля = 1 на объект (дорожка бегущей строки = 1), остальное 0 (E)." },
             "duration_ms": { "type": ["array", "null"], "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
             "scroll_vh": { "type": ["array", "null"], "items": { "type": "number" }, "minItems": 2, "maxItems": 2 },
-            "props": { "type": "array", "items": { "type": "string" }, "description": "Анимируемые свойства (transform, opacity, clip-path, mask-position, font-variation-settings, uniform …)." },
+            "props": { "type": "array", "items": { "type": "string" }, "description": "Анимируемые свойства описанием, с пояснением в скобках (transform, opacity, clip-path, mask-position, font-variation-settings, uniform …); машинный список — properties." },
+            "properties": { "type": "array", "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^(transform|translate|scale|rotate|opacity|clip-path|mask|filter|color|background-color|stroke-dashoffset|font-variation-settings|currentTime|block-size|view-transition|uniform:([a-zA-Z0-9_]+|\\*)|--([a-z0-9-]+|\\*))$" },
+              "description": "Машинный список анимируемых свойств приёма в словаре track.property спецификации движения (09-ai-execution-evaluation/motion-spec.schema.json) и properties_allowed уровня (01-creative-direction/ambition-levels.yaml): свойство CSS, uniform:<имя> шейдера, --<имя> пользовательского свойства; --* и uniform:* — когда имя задаёт проект. Список читает сверка уровней: свойства приёма на его level_min — из properties_allowed уровня или записи property_exceptions. Свойства вне словаря (textContent, scrollTop, background-position, дискретные overlay и display, атрибуты SVG, кадр видео и рантайма) в список не входят и остаются в props; поля нет — свойств из словаря у приёма нет." },
             "rules_ref": { "type": "string", "description": "Где нормы движения (E, 05-motion/…)." }
           }
         },
@@ -157,7 +160,7 @@
       "effects": [ {
         "id": "marquee-logos", "name_ru": "Бегущая строка логотипов", "family": "marquee",
         "purpose": "Показать ширину клиентской базы одной строкой без сетки из 12 плиток.", "level_min": "L0", "status": "measured",
-        "motion": { "kind": "loop", "trigger": ["idle-loop"], "attention_cost": 1, "props": ["transform"] },
+        "motion": { "kind": "loop", "trigger": ["idle-loop"], "attention_cost": 1, "props": ["transform"], "properties": ["transform"] },
         "implementation": { "type": "css", "demo": "lab/marquee-logos/" },
         "cost": { "bytes_br": 1500, "js_kb_br": 0.5, "fps_desktop": 60, "gpu": "compositor" },
         "fallback": { "no_js": "дорожка едет с длительностью по умолчанию; пауза — чекбокс :has()", "reduce": { "strategy": "final-state", "note": "статичная сетка без дубля" } },

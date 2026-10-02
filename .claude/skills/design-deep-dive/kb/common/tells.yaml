@@ -901,7 +901,9 @@ tells:
 # (у её проверок `cliche:<id>` примета — запись реестра с тем же id, строк здесь нет); ключ `copy_lint:<id>` —
 # анализатор линтера текстов `scripts/text/copy_lint.py`. Находка утилиты несёт `tell` своей строки. `allow` — ключ `--allow`: он снимает находку, когда бриф или арт-дирекция записали решение; те же ключи
 # пишет поле `k3_allow` арт-дирекции creative. Группа: look — приметы вида, honesty — честность содержимого,
-# acceptance — проверки приёмки, которые приметами не являются. У проверки `ui_audit` L4 строки нет: она находит разные
+# acceptance — проверки приёмки, которые приметами не являются. У проверки приёмки ключ `allow` снимает находку решением
+# плана страницы: `no-nav` у `M-NAV` — страница без меню по замыслу (посадочная, вход, «не найдено»); тяжесть находки
+# без ключа — как у её пункта приёмки. У проверки `ui_audit` L4 строки нет: она находит разные
 # приметы по профилю (декоративный градиент экрана, градиентный текст и фиолетовый герой страницы).
 checks:
   LOOK-BG-WARM: {group: look, tell: warm-paper, allow: warm}
@@ -931,7 +933,7 @@ checks:
   HON-FILLER: {group: honesty, tell: filler-text}
   HON-CAPTION: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (подписи и alt против списка ассетов)"}
   HON-COPY: {group: honesty, norm: "claude-design/06-design-process/04-checks.md §3 (текст против copy deck)"}
-  M-NAV: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
+  M-NAV: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)", allow: no-nav}
   M-BODY-16: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   M-OVERFLOW: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}
   M-H1-LINES: {group: acceptance, norm: "claude-design/06-design-process/04-checks.md §3 (группа B)"}

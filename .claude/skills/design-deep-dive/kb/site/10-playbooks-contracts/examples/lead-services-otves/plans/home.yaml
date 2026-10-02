@@ -21,7 +21,6 @@ refs:
   budgets: ../../../../07-seo-geo-performance-analytics/budgets.yaml
   asset_plan: ../asset-plan.home.yaml
   copy_deck: 'copy-deck: ждём text (заглушка — ../stubs-sisters.yaml)'
-  treatment: ../../../../../creative-research/99-raw/experiments/A/02-c1-check/treatments.yaml
 page:
   id: home
   page_type: landing-lead-services

@@ -5,7 +5,7 @@
   "description": "Карта многостраничного сайта (владелец — site, 06-multipage-ia). Строится из site-brief (pages.mode: by-type — карта по умолчанию для site_type из 06-multipage-ia/01 §2; listed — список брифа) и порождает план страницы на каждый шаблон или уникальную страницу (page-plan.schema.json: page.id = pages[].id, page.template = templates[].instances == 'collection'). Общие шапка и подвал живут здесь один раз (chrome); план только выбирает вариант (navigation.header/footer). Порядок передачи в дизайн и сборку — build_order и templates[].package: первой — главная с общими шапкой и подвалом. Id — словарь 02-site-types/vocabulary.yaml. Проверки: форма — эта схема; id — vocab_lint.py; связи (шаблон есть, родитель есть, пункты меню ведут на страницы карты, у формы есть «спасибо») — site_validate.py.",
   "x-version": 1,
   "x-checked": "2026-09-24",
-  "x-owner": "site-research · 06-multipage-ia · G (v0, волна 2); J (v1, волна 3)",
+  "x-owner": "site · 06-multipage-ia (карта сайта); форма — site 10-playbooks-contracts",
   "x-doc": "06-multipage-ia/01-sitemaps-templates-content-model.md, 06-multipage-ia/02-navigation-linking-i18n.md",
   "type": "object",
   "additionalProperties": false,
@@ -72,7 +72,7 @@
         "campaign-site",
         "landing-site"
       ],
-      "description": "Тип сайта (словарь B, site_type). landing-site допустим: карта из лендинга и служебных страниц."
+      "description": "Тип сайта (словарь, site_type). landing-site допустим: карта из лендинга и служебных страниц."
     },
     "refs": {
       "type": "object",
@@ -107,11 +107,11 @@
         },
         "legal_requirements": {
           "type": "string",
-          "description": "legal-requirements.yaml I — юридический набор страниц."
+          "description": "legal-requirements.yaml — юридический набор страниц."
         },
         "head_kit": {
           "type": "string",
-          "description": "head-kit.yaml H — sitemap.xml, hreflang, canonical, BreadcrumbList."
+          "description": "head-kit.yaml — sitemap.xml, hreflang, canonical, BreadcrumbList."
         }
       }
     },
@@ -167,7 +167,7 @@
         "primary",
         "structure"
       ],
-      "description": "Языковые версии: набор — из site-brief languages[]; структура адресов и переключатель — G; hreflang и x-default — H.",
+      "description": "Языковые версии: набор — из site-brief languages[]; структура адресов и переключатель — site 06/02 §5; hreflang и x-default — head-kit.yaml.",
       "properties": {
         "primary": {
           "$ref": "#/$defs/lang"
@@ -278,7 +278,7 @@
         "trailing_slash",
         "max_depth"
       ],
-      "description": "Правила адресов (06-02 §4). Техника canonical и sitemap.xml — H.",
+      "description": "Правила адресов (site 06/02 §4). Техника canonical и sitemap.xml — head-kit.yaml.",
       "properties": {
         "case": {
           "const": "lower"
@@ -386,7 +386,7 @@
           },
           "page_type": {
             "$ref": "#/$defs/id",
-            "description": "page_type словаря B (новые — с пометкой в note)."
+            "description": "page_type словаря (новые — с пометкой в note)."
           },
           "name": {
             "type": "string"
@@ -426,21 +426,7 @@
             "description": "Правило: true для страниц глубины ≥ 2 от главной у раздела со своей страницей-хабом (06-02 §2.1; перелинковка — §3.1)."
           },
           "local_nav": {
-            "type": "object",
-            "additionalProperties": false,
-            "properties": {
-              "kind": {
-                "enum": [
-                  "siblings",
-                  "subpages",
-                  "anchors"
-                ],
-                "description": "siblings — соседи раздела; subpages — подстраницы программы или модели (обзор, преподаватели, цены); anchors — оглавление по странице."
-              },
-              "sticky": {
-                "type": "boolean"
-              }
-            }
+            "$ref": "#/$defs/local-nav"
           },
           "related": {
             "$ref": "#/$defs/id",
@@ -588,7 +574,7 @@
             "items": {
               "$ref": "#/$defs/id"
             },
-            "description": "traffic_source словаря B."
+            "description": "traffic_source словаря."
           },
           "action": {
             "$ref": "#/$defs/id",
@@ -731,7 +717,7 @@
                 },
                 "slot": {
                   "$ref": "#/$defs/id",
-                  "description": "id слота словаря B (без префикса), куда идёт поле в page-plan."
+                  "description": "id слота словаря (без префикса), куда идёт поле в page-plan."
                 },
                 "note": {
                   "type": "string"
@@ -765,7 +751,7 @@
           "properties": {
             "block": {
               "const": "header",
-              "description": "id блока E (blocks.yaml)"
+              "description": "id блока blocks.yaml"
             },
             "archetype": {
               "$ref": "#/$defs/header-archetype"
@@ -866,7 +852,8 @@
                     },
                     "target": {
                       "type": "string",
-                      "description": "id страницы или #якорь формы."
+                      "pattern": "^([a-z0-9]+(-[a-z0-9]+)*|#\\S+|messenger:[a-z0-9]+(-[a-z0-9]+)*)$",
+                      "description": "Куда ведёт призыв шапки: id страницы карты; #якорь формы; messenger:<fact-id> — канал-мессенджер из facts.yaml, когда своей формы у сайта нет (та же форма цели — у action-слота плана: target.value при kind: messenger). Валидатор сверяет страницу с pages[] и факт с facts.yaml."
                     }
                   }
                 }
@@ -915,7 +902,7 @@
               "items": {
                 "$ref": "#/$defs/id"
               },
-              "description": "Страницы под платный трафик без меню сайта (C 02 §2.3)."
+              "description": "Страницы под платный трафик без меню сайта (site 03/02 §2.3)."
             },
             "announcement": {
               "type": "object",
@@ -953,7 +940,7 @@
                 "statement",
                 "newsletter-first"
               ],
-              "description": "Варианты block:footer E; site — группы разделов (карта подвала)."
+              "description": "Варианты block:footer (blocks.yaml); site — группы разделов (карта подвала)."
             },
             "groups": {
               "type": "array",
@@ -986,12 +973,12 @@
               "items": {
                 "$ref": "#/$defs/id"
               },
-              "description": "Юридические страницы (состав — I, legal-requirements.yaml)."
+              "description": "Юридические страницы (состав — legal-requirements.yaml)."
             },
             "requisites_fact": {
               "type": "string",
               "pattern": "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$",
-              "description": "Сведения о продавце: наименование, ОГРН/ИНН, адрес (I)."
+              "description": "Сведения о продавце: наименование, ОГРН/ИНН, адрес (site 08)."
             },
             "contacts": {
               "type": "boolean",
@@ -1036,7 +1023,7 @@
             },
             "structured_data": {
               "const": "H",
-              "description": "BreadcrumbList — H; первый трейл разметки = видимому."
+              "description": "BreadcrumbList — head-kit.yaml; первый трейл разметки = видимому."
             }
           }
         },
@@ -1162,7 +1149,7 @@
                   "service-cards",
                   "team-grid"
                 ],
-                "description": "id блока E (blocks.yaml)"
+                "description": "id блока blocks.yaml"
               },
               "placement": {
                 "enum": [
@@ -1199,7 +1186,7 @@
       "properties": {
         "not_found": {
           "$ref": "#/$defs/id",
-          "description": "not-found-page: код 404 (H), пути на хабы, поиск при chrome.search.enabled, без крошек."
+          "description": "not-found-page: код 404 (head-kit.yaml), пути на хабы, поиск при chrome.search.enabled, без крошек."
         },
         "thank_you": {
           "type": "array",
@@ -1227,7 +1214,7 @@
           "items": {
             "$ref": "#/$defs/id"
           },
-          "description": "Состав — I (legal-requirements.yaml)."
+          "description": "Состав — legal-requirements.yaml."
         },
         "search_results": {
           "$ref": "#/$defs/id"
@@ -1344,6 +1331,24 @@
       "type": "string",
       "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
     },
+    "local-nav": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Локальная навигация раздела на страницах шаблона; план страницы повторяет её в page.navigation.local_nav.",
+      "properties": {
+        "kind": {
+          "enum": [
+            "siblings",
+            "subpages",
+            "anchors"
+          ],
+          "description": "siblings — соседи раздела; subpages — подстраницы программы или модели (обзор, преподаватели, цены); anchors — оглавление по странице."
+        },
+        "sticky": {
+          "type": "boolean"
+        }
+      }
+    },
     "header-archetype": {
       "enum": [
         "minimal-cta",
@@ -1354,7 +1359,7 @@
         "search-led",
         "editorial-masthead"
       ],
-      "description": "Структурные архетипы шапки G (06-02 §1.2): minimal-cta — логотип + призыв + контакт (лендинг, промо, landing-minimal); bar-links — 3–7 ссылок без подменю; bar-dropdowns — пункты с одноуровневыми списками ≤ 8; two-tier — утилитарная полоса (телефон, город, адрес, язык, вход) над основной (услуги РФ, корпоративный); mega-menu — панели с группами и описаниями (≥ 2 пунктов по ≥ 10 страниц); search-led — поле поиска на виду + меню (сотни страниц: сеть клиник, каталог программ, база знаний); editorial-masthead — название по центру, только редакционный жанр и с явной ссылкой «Главная». Подача (Hallmark N1b, N5, N6, N9, N11, N12, N13) — creative."
+      "description": "Структурные архетипы шапки (site 06/02 §1.2): minimal-cta — логотип + призыв + контакт (лендинг, промо, landing-minimal); bar-links — 3–7 ссылок без подменю; bar-dropdowns — пункты с одноуровневыми списками ≤ 8; two-tier — утилитарная полоса (телефон, город, адрес, язык, вход) над основной (услуги РФ, корпоративный); mega-menu — панели с группами и описаниями (≥ 2 пунктов по ≥ 10 страниц); search-led — поле поиска на виду + меню (сотни страниц: сеть клиник, каталог программ, база знаний); editorial-masthead — название по центру, только редакционный жанр и с явной ссылкой «Главная». Подача (Hallmark N1b, N5, N6, N9, N11, N12, N13) — creative."
     }
   }
 }

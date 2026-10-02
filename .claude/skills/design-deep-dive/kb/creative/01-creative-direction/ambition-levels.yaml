@@ -16,9 +16,9 @@
 #                     budgets.yaml; ворота эффектов берут его числа по threshold_ref «profile.*» зеркалом D.
 # Величина, у которой владелец — другая база, стоит ссылкой: 3D героя и первого экрана — ворота blender (three_d_ref),
 # картинка первого экрана — бюджет ассета ai-media (hero_image_ref).
-# Единицы: вес — байты «на проводе» (как считают ai-media 01/02, blender 01/04, site M: CDP / responseBodySize);
-# «первый экран» = всё, что пришло за load + 5–6 с до действий пользователя; «сессия» = с прокруткой страницы до конца.
-# Телефон — эмуляция Pixel 7 (412×839, DPR 2,625) с CPU ×4; десктоп — 1440×900, CPU ×1 (методы site M и ai-media).
+# Единицы: вес — байты «на проводе» (как считают ai-media 01/02, blender 01/04, site M: CDP / responseBodySize).
+# Окно первого экрана, «сессию» и условия замера на телефоне и десктопе ведёт site:
+# ../site/07-seo-geo-performance-analytics/budgets.yaml — conditions (first_screen, lab_mobile, lab_desktop) и layers.
 #
 # Сокращения источников: `ai-media:01-02#4.3` = ../ai-media/01-web-assets-landscape/02-live-sites-measured.md §4.3;
 # `blender:01-02#3.1` = ../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md §3.1; `A/03` = наш опыт
@@ -109,7 +109,7 @@ levels:
       - {id: smooth-scroll, why: "перехват прокрутки ломает ожидания и доступность на страницах «прочитать и решить»"}
       - {id: pin-scrub, why: "закреплённые сцены удлиняют путь к форме"}
       - {id: scroll-reveal-every-section, why: "почерк генераторов: fade-and-slide-up на каждой секции (ui 11/04 маркер 28)"}
-      - {id: preloader, why: "решение заказчика п. 13: прелоадер только в L2-кампании"}
+      - {id: preloader, why: "прелоадер — только в L2-кампании по явному решению (allowed.preloader уровня L2)"}
       - {id: autoplay-video-bg, why: "сюжетное видео-фон с автозапуском: вес и отвлечение на странице с формой (site 01/02 M6); тихий синемаграф — см. quiet-loop"}
     motion_hints:                  # бюджет внимания и свойства движения уровня; нормы движения — 05-motion/01
       continuous_motions_in_view_max: {mobile: 1, desktop: 1}   # объектов-петель в зоне видимости; 3D-сцена входит в бюджет
@@ -183,7 +183,7 @@ levels:
       - {id: scroll-jacking, why: "изменение скорости и направления прокрутки — только L2 и только закрепление со скрабом"}
       - {id: horizontal-scroll-section, why: "L2-приём; на L1 — одна закреплённая сцена"}
       - {id: custom-cursor, why: "замена системного курсора — L2"}
-      - {id: preloader, why: "решение заказчика п. 13"}
+      - {id: preloader, why: "прелоадер — только в L2-кампании по явному решению (allowed.preloader уровня L2)"}
       - {id: effects-in-conversion, why: "форма, цена, калькулятор — L0 (blender 01/02 §1.3: «прайсинг и лиды — 3D вредит»)"}
     motion_hints:
       continuous_motions_in_view_max: {mobile: 1, desktop: 2}   # телефон на 1 меньше, минимум 1
@@ -208,7 +208,7 @@ levels:
       page_ref: "site/07-seo-geo-performance-analytics/budgets.yaml#levels.L1"
     appropriate_for:
       conditions:
-        - "умолчание для лендингов (решение заказчика п. 13); лидогенерация услуг — L1 с L0-блоками конверсии (правило levels[L0].appropriate_for.lead_services), вес первого экрана телефона — overrides профиля site"
+        - "умолчание для лендингов по задаче страницы (таблица defaults_by_page_type); лидогенерация услуг — L1 с L0-блоками конверсии (правило levels[L0].appropriate_for.lead_services), вес первого экрана телефона — overrides профиля site"
         - "главные страницы брендов, запуски средней значимости, мероприятия (крупные — L2)"
         - "бренд с выраженным характером, которому одного L0-приёма мало"
     avoid_for:
@@ -277,7 +277,7 @@ levels:
     appropriate_for:
       site_types: [campaign-site, portfolio-site]
       conditions:
-        - "кампании и флагманские запуски, где впечатление и есть сообщение (решение заказчика п. 13: кампании — L2)"
+        - "кампании и флагманские запуски, где впечатление и есть сообщение (умолчание по задаче страницы: кампании — L2)"
         - "крупное мероприятие, мода и культура, портфолио студий, рекрутинг в креативные команды"
         - "брендовый и прямой трафик, заметная доля десктопа, тёплая и лояльная аудитория"
         - "landing-product — только флагманский запуск по явному решению заказчика"
@@ -317,7 +317,7 @@ section_caps:
   chrome_roles: [header, footer, utility, legal]     # вне ритма: visual_role chrome, движение — только отклик
   label: "[практика] blender 01/02 §1.3 + [гипотеза] для списка блоков"
 
-# Умолчания уровня по типу страницы — решение заказчика п. 13 (сервисы L0, лендинги L1, кампании L2) и таблица site
+# Умолчания уровня по типу страницы — по задаче страницы (сервисы L0, лендинги L1, кампании L2) и по таблице site
 # 03-site-brief.md §3. Отклонение — только с причиной (site-brief ambition.source + note).
 defaults_by_page_type:
   L0: [service-page, seo-landing-page, pricing-page, comparison-page, alternatives-page, faq-page, contacts-page, form-page, thank-you-page, legal-page, article-page, blog-index-page, careers-page, case-list-page, not-found-page, specialist-page, location-page, documents-page, search-results-page]
@@ -326,8 +326,8 @@ defaults_by_page_type:
   proposed:                        # типы site со status proposed (vocabulary.yaml); переносятся в L0/L1 вместе с их выпуском у site
     L0: [event-program-page, integrations-page, security-page, html-sitemap-page]   # «прочитать и найти»: расписание, каталог, доверие, навигация
     L1: [speakers-page]                                                            # витрина людей события; фото с согласием
-    why: "уровень по задаче страницы — чтение и поиск → L0, витрина → L1 (решение заказчика п. 13; site 03-site-brief.md §3); ecommerce-catalog-page и ecommerce-product-page — вне рамок site (промо товара — landing-product)"
-  note: "одна таблица умолчаний уровня по типу страницы; site читает её (budgets.yaml page_type_levels — ссылка, site_validate.py, page_gates.py): service-page, seo-landing-page, pricing-page и прочие внутренние — L0 (решение п. 13 их не называет); landing-lead-services — L1 с L0-блоками конверсии, L0 — по правилу levels[L0].appropriate_for.lead_services"
+    why: "уровень по задаче страницы — чтение и поиск → L0, витрина → L1 (site 03-site-brief.md §3); ecommerce-catalog-page и ecommerce-product-page — вне рамок site (промо товара — landing-product)"
+  note: "одна таблица умолчаний уровня по типу страницы; site читает её (budgets.yaml page_type_levels — ссылка, site_validate.py, page_gates.py): service-page, seo-landing-page, pricing-page и прочие внутренние — L0 (умолчание по задаче страницы); landing-lead-services — L1 с L0-блоками конверсии, L0 — по правилу levels[L0].appropriate_for.lead_services"
   rules:
     - "уровень страницы не выше уровня сайта в брифе (site-brief ambition.level) — ограничение site"
     - "подъём внутренней страницы на уровень — только с причиной в брифе (ambition.by_page[].why)"
@@ -336,10 +336,14 @@ defaults_by_page_type:
 # Потолок движения поверх уровня (site-brief ambition.motion_cap): визуальный уровень L1, движение — subtle.
 motion_caps: [none, subtle, expressive, cinematic]
 
-# Свойство вне properties_allowed уровня — только у названных эффектов, на любом уровне.
+# Свойство вне properties_allowed уровня — только у названных эффектов, на любом уровне. Ключ — свойство словаря
+# track.property спецификации движения или маска `--*` (любое пользовательское свойство). Свойства каждого приёма
+# каталога на его минимальном уровне сверяет с этой таблицей spec_check.py levels --check (effects.yaml motion.properties).
 property_exceptions:
   block-size: [effect:details-accordion]   # ::details-content аккордеона <details> — отклик по клику (motion-spec.schema.json $defs/moment)
-  clip-path: [effect:mask-reveal, effect:button-expand-label]   # приёмы каталога уровня L0, собранные на clip-path (effects.yaml motion.props)
+  clip-path: [effect:mask-reveal, effect:button-expand-label, effect:expanding-columns]   # приёмы каталога уровня L0, собранные на clip-path
+  filter: [effect:sticky-stack]            # приём каталога уровня L0: карточка стопки, уходящая под следующую, темнеет через filter: brightness()
+  "--*": [effect:mesh-gradient-css]        # приём каталога уровня L0: mesh-градиент движется зарегистрированными пользовательскими свойствами (@property)
 
 # Проекция уровня во вход холста — форма ключа одна у всех источников входа (references/claude-design.md § 6. Вход
 # холста). Уровень страницы выбирает бриф (site-brief.ambition: level, by_page, by_section_role, motion_cap); этот файл

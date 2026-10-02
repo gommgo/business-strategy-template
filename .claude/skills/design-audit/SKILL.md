@@ -113,7 +113,7 @@ stderr). Утилита проверяет детерминированные п
 - **Порядок** — `../design-deep-dive/references/phases.md § Порядок проверок`: дорогой слой не идёт, пока дешёвый
   красный. Перечень прогона по поверхностям — `design_audit check … --visual-list`. Кадры статичных копий артбордов —
   все ширины приёмки (`shot.py --manifest kit.json`) → `mockup_checks.py page --json`,
-  `literal_tokens.py check --accepted` → `ui_audit.py`, у сайта — `marketing_audit.py` → `claims_check.py` на копиях →
+  `literal_tokens.py check --accepted` → `ui_audit.py`, у сайта — `marketing_audit.py` → `claims_check.py` на копиях (с `--deck <copy deck страницы>`) →
   пункты критериев приёмки места «макет» → судья по рубрике.
   Отчёты `mockup_checks.py page` сводит `design_audit visual <project-slug> <surface> --report [ЕДИНИЦА=]ОТЧЁТ.json …`:
   находки R-VIS-001 по шкале ворот и приметы по доменам в единице домена. Правила — категория R-VIS.

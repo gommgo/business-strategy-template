@@ -21,7 +21,9 @@ voice.schema.yaml: схема и смысловые проверки.
   4. голос продукта — профиль, у которого все scope.surfaces[].voice — product: жанр interface; юмора нет в ситуациях
      service-error, destructive-action, money, security; образцы — по роли строки интерфейса (role), не по slot_type;
      «!» нет в success-routine и destructive-action; карта тона без service-error, destructive-action или money и
-     ситуации только сайта в ней — предупреждения. У профиля бренда образец только с role — предупреждение;
+     ситуации только сайта в ней — предупреждения. У профиля бренда образец только с role — предупреждение.
+     Голос продукта самостоятелен: у продукта без сайта (кабинет, приложение, бот) это единственный профиль, профиль
+     бренда рядом не нужен; brand.facts_ref ему обязателен, только когда образцы ссылаются на факты;
   5. отрицательные мутации (только --selftest; профиль бренда и голос продукта): каждая обязана дать ошибку схемы или
      смысловую ошибку.
 Выход: 0 — всё прошло; 1 — есть ошибки. Итог печатается и пишется в $DDD_HOME/out/text/validate_voice.last-run.txt.
@@ -93,6 +95,11 @@ def is_product(voice: dict) -> bool:
     return bool(surf) and all(s.get("voice") == "product" for s in surf)
 
 
+def fact_refs(voice: dict) -> list:
+    """Ссылки образцов на факты и пробелы (fact:…, missing:…)."""
+    return [r for s in voice.get("samples") or [] for r in s.get("fact_ids") or []]
+
+
 def semantic_product(voice: dict) -> tuple[list, list]:
     """Проверки голоса продукта (интерфейс за входом, письма и уведомления продукта)."""
     errs, warns = [], []
@@ -125,9 +132,10 @@ def semantic(voice: dict, voice_path: Path, base_example: bool) -> tuple[list, l
     avoid = [(t["term"], words_regex(t["term"]), t.get("lang", "ru")) for t in (voice.get("vocabulary") or {}).get("avoid") or []]
     ids = {s["id"] for s in samples}
     fids, mids, ferr = facts_ids(voice, voice_path)
-    if ferr:
-        errs.append(ferr)
     product = is_product(voice)
+    # голос продукта без сайта живёт и без файла фактов: facts_ref нужен, когда образцы ссылаются на факты
+    if ferr and not (product and ferr == "нет facts_ref" and not fact_refs(voice)):
+        errs.append(ferr)
     # 1. типы слотов (у голоса продукта — роли строк) по языкам
     by_lang: dict = {}
     for s in samples:
@@ -376,6 +384,27 @@ def mutations(validator, say) -> bool:
         hit = bool(errs or serr)
         pcaught += hit
         say(f"  {'пойман ' if hit else 'ПРОПУЩЕН'} {name}: схема {len(errs)}, смысл {len(serr)}")
+    # голос продукта — единственный профиль: без профиля бренда, ссылки на него и файла фактов
+    solo = copy.deepcopy(prod)
+    solo["brand"].pop("facts_ref", None)
+    for smp in solo["samples"]:
+        smp["fact_ids"] = []
+    solo_errs = list(validator.iter_errors(solo))
+    solo_serr, _ = semantic(solo, Path("voice.product.yaml"), False)
+    sok = not solo_errs and not solo_serr and is_product(solo) and "product_voice_ref" not in solo["scope"]
+    need = copy.deepcopy(solo)
+    need["samples"][0]["fact_ids"] = ["fact:no-such-fact"]
+    need_serr, _ = semantic(need, Path("voice.product.yaml"), False)
+    brand_only = copy.deepcopy(base_voice)
+    brand_only["brand"].pop("facts_ref", None)
+    for smp in brand_only["samples"]:
+        smp["fact_ids"] = []
+    brand_serr, _ = semantic(brand_only, base_path, False)
+    sok = sok and any("нет facts_ref" in x for x in need_serr) and any("нет facts_ref" in x for x in brand_serr)
+    ok &= sok
+    say(f"  {'OK' if sok else 'FAIL'} голос продукта — единственный профиль (без профиля бренда и файла фактов): схема "
+        f"{len(solo_errs)} ошибок, смысл {len(solo_serr)} ошибок; ссылка образца на факт без facts_ref — ошибка; "
+        "профилю бренда facts_ref обязателен")
     v = copy.deepcopy(prod)
     v["tone_map"] = [t for t in v["tone_map"] if t["situation"] != "money"] + [{"situation": "hero", "rules": ["Коротко"]}]
     _, w = semantic(v, base_path, True)

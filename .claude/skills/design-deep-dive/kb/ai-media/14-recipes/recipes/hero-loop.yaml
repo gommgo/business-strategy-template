@@ -71,8 +71,7 @@ spec:
   - 'motion.camera.move: static'
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E4.spec.json
-compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
-  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+compile: scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --out $DDD_HOME/out/ai-media/<ассет>.jsonl
 phase5:
   jobs:
   - 99-raw/phase5/jobs/I-01-control-i2v-A.json
@@ -113,7 +112,7 @@ steps:
   status: checked
   evidence: 99-raw/experiments/M/03-cinemagraph/encode.py
 - id: poster
-  cmd: ffmpeg -i hero.av1.mp4 -frames:v 1 poster.png && 99-raw/tools/avif_pick.sh poster.png poster.avif 80
+  cmd: ffmpeg -i hero.av1.mp4 -frames:v 1 poster.png && scripts/ai-media/avif_pick.sh poster.png poster.avif 80
   status: checked
   evidence: 99-raw/experiments/M/09-demo-acceptance/audit_poster
 - id: stamp
@@ -157,7 +156,7 @@ provenance:
   note: AIGC вендора — флагами ffmpeg одной строкой
 numbers:
   phase5_i03_seam_local: '1,28, живость 0,83 (рябь, 480p 4 с, 5,25 ₽; n = 1) — 99-raw/phase5/runs/2.4-loops/I-03.loop.json'
-  phase5_large_form_seam_local: '3,29 (4 с) / 3,45 (8 с) без моста; форма «гуляет» до 36,5 px и при fixed_lens — 99-raw/phase5/runs/MS-marea/loops/MS-03-nacre-loop-4s.report.json'
+  phase5_large_form_seam_local: '3,29 (4 с) / 3,45 (8 с) без моста; форма «гуляет» до 36,5 px и при fixed_lens'
   phase5_rife_bridge_seam: '0,69 (4 с) / 0,84 (8 с 720p) / 0,41 (8 с 1080p) без двоения — 99-raw/phase5/runs/README.md'
   phase5_crossfade_tail: 'шов 1,46–1,76 по метрике, но «фантом» (двоение формы) — голос заказчика; только для мелкой ряби'
   phase5_pingpong_seam: '0,66–0,74 без двоения; только ненаправленное движение'

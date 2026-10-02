@@ -39,10 +39,21 @@ fit=fail|drop, language=en|ru, quality_words=true, enhancer=on|off, labels=globa
 anti_average=true, seed=101, shuffle_seed=7, i2v=motion_only|full, forbid_style=sentence|positive,
 max_changes=10.
 
+Вход проверяется до вызова модели. Спецификация, которая не проходит схему, даёт строки ошибок и код 1 — без
+трассировки и у спецификации без обязательного поля (`edit.operation`). Картинки входа — референсы, исходник правки,
+кадры — сверяются с минимальным размером модели (`min_input_px` записи модели в dialects.yaml): меньшая сторона ниже
+минимума — ошибка. `output.resolution` у модели, в каталоге которой нет параметра разрешения, в задание не идёт —
+предупреждение с именем модели.
+
+Правка (`edit`): инструкция собирается из `changes`; у `extend` в неё идут и `changes` (что видно в новых областях), и
+зона текста `composition.text_zone` — кадрирование нового кадра; цель `remove` пишется с одним артиклем. Запрет текста в
+правке — «No added text.»: надписи исходника остаются. Фраза контекста структурного промта — из `role.page_class`.
+
 Запуск — Python окружения скилла ($DDD_HOME/venv/bin/python, scripts/install.sh): PyYAML; jsonschema и Pillow —
-необязательно (без jsonschema схема не проверяется — предупреждение; без Pillow маска не инвертируется — ошибка). Сеть не
-используется. Код выхода: 0 — без ошибок; 1 — ошибки спецификации или компиляции (validate, compile); 2 — ошибка
-компиляции одной строкой (модель вне dialects.yaml и т. п.) или нет снимка каталога.
+необязательно (без jsonschema схема не проверяется — предупреждение; без Pillow маска не инвертируется — ошибка, размер
+входа не сверяется — предупреждение). Сеть не используется. Код выхода: 0 — без ошибок; 1 — ошибки спецификации или
+компиляции (validate, compile); 2 — ошибка одной строкой: файл спецификации не читается, компиляция невозможна (модель вне
+dialects.yaml, правка без `edit.operation` и т. п.) или нет снимка каталога.
 """
 from __future__ import annotations
 
@@ -114,6 +125,8 @@ DETERMINERS = {"a", "an", "the", "one", "two", "three", "four", "five", "six", "
 SIZE_WORDS = {"small": "small", "medium": "medium", "large": "large", "xl": "very large"}
 SERVICE_SENTENCES = {"text": "No text.", "watermark": "No watermark.", "logo": "No logos.",
                      "subtitles": "No subtitles.", "music": "No background music.", "dialogue": "No dialogue."}
+# правка настоящего кадра: надписи исходника остаются («No text.» велит их стереть) — запрещается только новый текст
+EDIT_SERVICE_SENTENCES = {"text": "No added text."}
 CYR = re.compile(r"[А-Яа-яЁё]")
 DESCRIPTIVE_PATHS = ("subject", "composition", "camera", "light", "palette", "materials", "style", "mood",
                      "exclusions", "motion", "product", "series", "edit", "references")
@@ -279,17 +292,35 @@ def words_in(text, words):
 
 # ---------------------------------------------------------------- проверки спецификации
 
-def validate_spec(spec, model_id=None, dialects=None, catalog=None, *, channel=None, options=None):
-    """Возвращает (errors, warnings). Совместимо с v1: validate_spec(spec, model_id, dialects, catalog)."""
+def validate_spec(spec, model_id=None, dialects=None, catalog=None, *, channel=None, options=None, spec_path=None):
+    """Возвращает (errors, warnings). Совместимо с v1: validate_spec(spec, model_id, dialects, catalog).
+    spec_path — файл спецификации: от его папки считаются пути картинок входа при сверке их размера. Спецификация,
+    которая не проходит схему и на которой смысловые проверки обрываются (нет обязательного поля, не тот тип значения),
+    получает ошибку строкой, а не исключение."""
     errors, warnings = [], []
-    dfl = defaults(dialects)
-    opts = compile_options(spec, options)
     if jsonschema is None:
         warnings.append("jsonschema не установлен — схема не проверена")
     else:
         v = jsonschema.Draft202012Validator(load_json(SCHEMA))
         for e in sorted(v.iter_errors(spec), key=lambda e: list(e.path)):
             errors.append(f"схема: {'/'.join(map(str, e.path)) or '(корень)'}: {e.message}")
+    by_schema = len(errors)
+    try:
+        _meaning_checks(spec, model_id, dialects, catalog, errors, warnings, channel=channel, options=options,
+                        spec_path=spec_path)
+    except (KeyError, TypeError, AttributeError, IndexError) as e:
+        if jsonschema is not None and not by_schema:
+            raise                     # схема пройдена, а проверка упала — ошибка кода, а не входа
+        why = "спецификация не проходит схему" if by_schema else "схема не проверена (нет jsonschema)"
+        errors.append(f"смысловые проверки остановлены: {why} — {type(e).__name__}: {e}")
+    return errors, warnings
+
+
+def _meaning_checks(spec, model_id, dialects, catalog, errors, warnings, *, channel=None, options=None, spec_path=None):
+    """Смысловые проверки validate_spec — сверх схемы: палитра, зоны, движение, язык, серия, правка, текст, модель.
+    Пишет в errors и warnings; рассчитаны на спецификацию, прошедшую схему."""
+    dfl = defaults(dialects)
+    opts = compile_options(spec, options)
     comp = spec.get("composition", {})
     # палитра
     pal = spec.get("palette", [])
@@ -388,7 +419,10 @@ def validate_spec(spec, model_id=None, dialects=None, catalog=None, *, channel=N
     # правка
     ed = spec.get("edit")
     if ed:
-        if ed["operation"] not in ("extend",) and not ed.get("changes") and ed["operation"] not in ("restyle", "relight"):
+        op = ed.get("operation")
+        if not op and jsonschema is None:
+            errors.append("правка: нет edit.operation")
+        if op and op not in ("extend", "restyle", "relight") and not ed.get("changes"):
             errors.append("правка: нет changes (что → на что)")
         comps = set(dfl.get("comparatives", []))
         for ch in ed.get("changes", []):
@@ -399,7 +433,7 @@ def validate_spec(spec, model_id=None, dialects=None, catalog=None, *, channel=N
         src = ed.get("source")
         if src and not ref_by_id(spec, src) and not re.search(r"\.(png|jpe?g|webp)$|^https?://", src, re.I):
             errors.append(f"правка: источник {src!r} не найден среди references (id/src) и не похож на файл")
-        if ed["operation"] == "extend" and not ed.get("target_ratio"):
+        if op == "extend" and not ed.get("target_ratio"):
             errors.append("аутпейнт (extend): нужен edit.target_ratio")
     # текст
     t = spec.get("text", {})
@@ -428,7 +462,42 @@ def validate_spec(spec, model_id=None, dialects=None, catalog=None, *, channel=N
         mref = (fam["models"][model_id] or {}).get("max_refs")
         if mref is not None and len(refs) > mref:
             errors.append(f"{model_id}: референсов {len(refs)} > {mref}")
-    return errors, warnings
+        input_size_check(spec, fam, model_id, spec_path, errors, warnings)
+
+
+def image_size(path):
+    """(ширина, высота) локальной картинки; None — файла нет или он не читается как картинка. Нужен Pillow."""
+    from PIL import Image
+    try:
+        with Image.open(path) as im:
+            return im.size
+    except (OSError, ValueError, Image.DecompressionBombError):
+        return None
+
+
+def input_size_check(spec, fam, model_id, spec_path, errors, warnings):
+    """Картинки входа против минимального размера модели — `min_input_px` записи модели в dialects.yaml: меньшая
+    сторона референса, исходника правки или кадра ниже минимума — ошибка до вызова (вход меньше минимума модель не
+    принимает). URL и отсутствующие файлы не сверяются: о них говорит сборка заданий."""
+    need = ((fam.get("models") or {}).get(model_id) or {}).get("min_input_px")
+    if not need:
+        return
+    images = collect_inputs(spec, fam, model_id, detect_mode(spec), spec_path)[0]
+    local = [p for p in dict.fromkeys(images) if p and not re.match(r"^(https?|data):", p) and pathlib.Path(p).exists()]
+    if not local:
+        return
+    try:
+        sizes = [(p, image_size(p)) for p in local]
+    except ImportError:
+        warnings.append(f"{model_id}: размер входа не сверен с min_input_px {need} — нет Pillow")
+        return
+    for p, size in sizes:
+        name = pathlib.Path(p).name
+        if size is None:
+            warnings.append(f"{model_id}: вход {name} не читается как картинка — размер не сверен с min_input_px {need}")
+        elif min(size) < need:
+            errors.append(f"{model_id}: вход {name} — {size[0]}×{size[1]} px, меньшая сторона {min(size)} < {need} "
+                          f"(min_input_px модели): такой вход модель не принимает — увеличить картинку или взять другую")
 
 
 def _point(p):
@@ -609,7 +678,9 @@ def style_phrase(spec, short=False):
     return ", ".join(bits) or None
 
 
-def exclusion_sentences(spec, fam, warnings, negation="family"):
+def exclusion_sentences(spec, fam, warnings, negation="family", edit=False):
+    """(позитивные замены, предложения-запреты). edit — запреты для правки настоящего кадра: служебный запрет текста
+    пишется «No added text.» — надписи исходника остаются."""
     neg = fam.get("negative") or {}
     service_mode, object_mode = neg.get("service", "sentence"), neg.get("object", "positive")
     if negation == "sentence":
@@ -626,7 +697,7 @@ def exclusion_sentences(spec, fam, warnings, negation="family"):
         what = e["what"].lower()
         if e["kind"] == "service":
             if service_mode == "sentence":
-                out.append(SERVICE_SENTENCES.get(what, f"No {what}."))
+                out.append((edit and EDIT_SERVICE_SENTENCES.get(what)) or SERVICE_SENTENCES.get(what, f"No {what}."))
             elif service_mode == "positive":
                 r = e.get("replace_with") or repl.get(what)
                 if r:
@@ -899,7 +970,7 @@ def motion_sentences(spec, fam, warnings, dfl=None, fname=None):
 
 def detect_mode(spec):
     if spec.get("edit"):
-        return "outpaint" if spec["edit"]["operation"] == "extend" else "edit"
+        return "outpaint" if spec["edit"].get("operation") == "extend" else "edit"
     mo = spec.get("motion")
     if not mo:
         return "t2i"
@@ -1159,6 +1230,16 @@ def to_ideogram_json(spec, b):
     return json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
 
 
+def context_phrase(spec):
+    """Фраза контекста структурного промта: секция и класс страницы — `role.page_class` (слово контекста; в
+    `role.page_type` лежит id типа страницы словаря site, в промт он не идёт). Без класса и у класса other — «a website»."""
+    role = spec["role"]
+    cls = role.get("page_class")
+    if not cls or cls == "other":
+        return f"{role['section']} image for a website"
+    return f"{role['section']} image for {'an' if cls[:1] in 'aeiou' else 'a'} {cls} website"
+
+
 def fibo_object(spec, b):
     """Bria FIBO structured_prompt (ключи — по значению по умолчанию Gen-API bria-fibo) [не проверено]."""
     s = spec["subject"]
@@ -1192,15 +1273,41 @@ def fibo_object(spec, b):
                                                               "camera_angle": ANGLE_WORDS.get(spec["composition"].get("angle", ""), None),
                                                               "lens_focal_length": f"{cam['lens_mm']:g}mm" if cam.get("lens_mm") else None}.items() if v},
            "style_medium": (spec.get("style") or {}).get("medium", "photograph").replace("-", " "),
-           "context": f"{spec['role']['section']} image for a {spec['role'].get('page_type', 'website')} website",
+           "context": context_phrase(spec),
            "artistic_style": ", ".join((spec.get("style") or {}).get("anchors", []))}
     return {k: v for k, v in obj.items() if v}
 
 
-# ---------------------------------------------------------------- D2: правки
+# ---------------------------------------------------------------- правки
 
 EDIT_CLOSINGS = {"nano-banana": "Keep everything else in the image exactly the same, preserving the original style, lighting, and composition.",
                  "gpt-image": "Keep all other aspects of the image unchanged."}
+
+
+def _the(noun):
+    """Именная группа с одним определителем: свой артикль снимается и ставится «the» («the floor lamp» не даёт
+    «the the floor lamp»); своё местоимение или квантор (its, all, every …) остаётся как есть."""
+    words = noun.split()
+    first = words[0].lower() if words else ""
+    if first in KEEP_OWN_DETERMINERS:
+        return noun.strip()
+    if first in ("the", "a", "an") and len(words) > 1:
+        noun = noun.split(None, 1)[1]
+    return f"the {noun.strip()}"
+
+
+def extend_framing(spec, fam, opts, changes):
+    """Кадрирование аутпейнта — предложения после инструкции extend: что видно в новых областях (`edit.changes`:
+    target — область нового кадра, to — что в ней) и зона текста нового кадра (`composition.text_zone`)."""
+    out = []
+    for ch in changes:
+        where = f" {ch['where']}" if ch.get("where") else ""
+        val = f" ({ch['value']})" if ch.get("value") else ""
+        out.append(sentence(f"{_the(ch['target'])}{where} shows {ch['to']}{val}"))
+    zone = text_zone_phrase(spec, fam, opts.get("text_zone_style", "base"))
+    if zone:
+        out.append(zone)
+    return out
 
 
 def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
@@ -1212,10 +1319,13 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
     out = []
     if op == "extend":
         cap_ = ed.get("caption") or spec["subject"]["summary"]
-        if fname == "qwen-image":
-            return f"Extend the image beyond its boundaries using outpainting. The original caption is: {cap_}"
+        framing = extend_framing(spec, fam, opts, changes)
+        if fname == "qwen-image":     # шаблон переписчика Qwen: кадрирование — предложениями после описания исходника
+            lead = "Extend the image beyond its boundaries using outpainting. The original caption is:"
+            return " ".join([f"{lead} {_period(cap_)}"] + framing) if framing else f"{lead} {cap_}"
         out.append(f"Extend the scene of {src_label} to fill a {ed['target_ratio']} frame; keep the original image content "
                    f"unchanged and continue {cap_} naturally at the new edges.")
+        out += framing
     elif op == "inpaint" and fname == "qwen-image":
         return f"Perform inpainting on this image. The original caption is: {ed.get('caption') or spec['subject']['summary']}"
     elif op == "restyle":
@@ -1231,7 +1341,7 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
             if cop == "add":
                 items.append(f"add {ch['to']}{val}{where}")
             elif cop == "remove":
-                items.append(f"remove the {ch['target']}{where}, showing {ch['to']} in its place")
+                items.append(f"remove {_the(ch['target'])}{where}, showing {ch['to']} in its place")
             else:
                 items.append(f"change the {ch['target']}{where} to {ch['to']}{val}")
         lead = "Using the provided image, make only these changes" if fname == "nano-banana" and src_label == "the provided image" \
@@ -1253,7 +1363,7 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
             val = f" ({ch['value']})" if ch.get("value") else ""
             cop = ch.get("op") or op     # D2b: одиночное изменение со своей операцией
             if cop == "remove":
-                out.append(f"Remove the {ch['target']}{where}; in its place the frame shows {ch['to']}.")
+                out.append(f"Remove {_the(ch['target'])}{where}; in its place the frame shows {ch['to']}.")
             elif cop == "add":
                 out.append(f"Add {ch['to']}{val}{where}.")
             elif op in ("text_replace",):
@@ -1286,7 +1396,7 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
     out.append(EDIT_CLOSINGS.get(fname, e.get("closing", "Change nothing else.")))
     if ed.get("preserve_suffix", True) and op not in ("extend",):
         out.append(e.get("suffix", "Maintain the original composition and subject."))
-    positive_excl, neg = exclusion_sentences(spec, fam, warnings, opts.get("negation", "family"))
+    positive_excl, neg = exclusion_sentences(spec, fam, warnings, opts.get("negation", "family"), edit=True)
     if neg:
         out.append(" ".join(neg))
     return " ".join(x for x in out if x)
@@ -1323,6 +1433,13 @@ def _nearest(vals, want):
     return min(vals, key=lambda v: (abs(_res_num(v) - _res_num(want)), _res_num(v)))
 
 
+def resolution_dropped(model_id, res, channel=None):
+    """Предупреждение: разрешение спецификации в задание не идёт — у модели нет такого параметра."""
+    where = f" ({channel})" if channel else ""
+    return (f"{model_id}{where}: output.resolution {res} в задание не идёт — в каталоге модели нет параметра разрешения; "
+            f"модель отдаст своё разрешение, оно может быть ниже запрошенного")
+
+
 def build_params(spec, model_id, fam, catalog, errors, warnings, mode=None, opts=None, prompt=None):
     """Параметры запроса polza только из тех, что есть в каталоге модели (01 §1.2); ценовые — явно (B §4)."""
     opts = opts or {}
@@ -1357,6 +1474,8 @@ def build_params(spec, model_id, fam, catalog, errors, warnings, mode=None, opts
             elif vals:   # D2: ценовой параметр — явно, самая дешёвая ступень
                 out[key] = min(vals, key=_res_num)
     rmap = pcat.RESOLUTION_MAP.get(model_id)
+    if res and not any(k in cp for k in ("image_resolution", "resolution")) and not (rmap and rmap[0] in cp):
+        warnings.append(resolution_dropped(model_id, res))
     for key in ("quality", "mode"):
         if key in cp and (cp[key].get("values")):
             vals = cp[key]["values"]
@@ -1606,6 +1725,8 @@ def channel_body(channel, chcfg, info, model_id, spec, prompt, dialect, b, image
             body["aspect_ratio"] = ratio
         if "resolution" in params:
             body["resolution"] = spec["output"].get("resolution") or "1K"
+        elif spec["output"].get("resolution"):
+            warnings.append(resolution_dropped(model_id, spec["output"]["resolution"], channel))
         if "seed" in params and seed is not None:
             body["seed"] = int(seed)
         elif seed is not None:
@@ -1633,6 +1754,8 @@ def channel_body(channel, chcfg, info, model_id, spec, prompt, dialect, b, image
             body["prompt"] = prompt
         if "width" in params and "height" in params:
             body["width"], body["height"] = genapi_dims(ratio)
+        if spec["output"].get("resolution") and "resolution" not in params:
+            warnings.append(resolution_dropped(model_id, spec["output"]["resolution"], channel))
         if "aspect_ratio" in params:
             body["aspect_ratio"] = ratio
         if "seed" in params and seed is not None:
@@ -1702,7 +1825,11 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
     channel = channel or "polza"
     ch = None if channel == "polza" else channel
     fname, fam = family_of(model_id, dialects, ch)
-    errors, warnings = validate_spec(spec, model_id, dialects, catalog, channel=ch, options=options)
+    errors, warnings = validate_spec(spec, model_id, dialects, catalog, channel=ch, options=options, spec_path=spec_path)
+    if any(e.startswith("смысловые проверки остановлены") for e in errors):   # промт из такой спецификации не собрать
+        raise CompileError(f"спецификация {spec.get('id')} не проходит схему — {'; '.join(errors[:3])}")
+    if spec.get("edit") is not None and not (spec["edit"] or {}).get("operation"):
+        raise CompileError(f"спецификация {spec.get('id')}: у edit нет operation — инструкция правки не собирается")
     dialect = dialect or fam["format"]
     allowed = [fam["format"]] + list(fam.get("alt_formats") or [])
     if dialect not in allowed:
@@ -1818,8 +1945,8 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
               "frame_fields": frame_fields, "price_rub": None, "catalog_issues": [], "notes": notes,
               "dropped_blocks": dropped}
     if frame_fields:
-        warnings.append(f"{model_id}: кадры — полями {', '.join(frame_fields)}; polza.py их не загружает — перед запуском "
-                        f"polza.py upload <файл> --live → URL в поле")
+        warnings.append(f"{model_id}: кадры — полями {', '.join(frame_fields)}; локальный файл в поле polza.py загружает "
+                        f"в хранилище сам перед отправкой")
     if channel == "polza":
         params = build_params(spec, model_id, fam, catalog, errors, warnings, mode=mode, opts=opts, prompt=prompt)
         result["params"] = params
@@ -2028,11 +2155,11 @@ def make_jobs(spec_paths, models, dialects_list=None, repeats=1, seeds=(), tag=N
                                 inp["videos"] = [_rel(s, out_dir) for s in r["videos"]]
                             if r["mask"]:
                                 inp["mask_url"] = _rel(derive_mask(r["mask"], out_dir or "."), out_dir)
-                            if ff:   # D2b: GA Omni — локальный путь в поле *_url; перед запуском заменить на URL
+                            if ff:   # кадры полями *_url: в задании — локальный путь от файла заданий
                                 inp.update({k: _rel(v, out_dir) for k, v in ff.items()})
                                 m["url_fields"] = {k: _rel(v, out_dir) for k, v in ff.items()}
-                                m["prepare"] = ("polza.py upload <файл> --live → data.url → input.<поле> (polza.py загружает "
-                                                "только images, videos, mask_url)")
+                                m["prepare"] = ("подготовка не нужна: локальный файл в поле *_url polza.py загружает в "
+                                                "хранилище сам перед отправкой; путь — от файла заданий")
                             if seed is not None and "seed" not in inp and "seeds" not in inp:
                                 m["seed_note"] = "у модели нет seed в каталоге — повторы независимые (variant)"
                             if price is None:
@@ -2118,7 +2245,7 @@ def main(argv=None):
     if args.cmd == "validate":
         dialects, catalog = load_dialects(), (load_catalog() if args.model else None)
         ch_ = None if args.channel == "polza" else args.channel
-        errs, warns = validate_spec(load_json(args.spec), args.model, dialects, catalog, channel=ch_)
+        errs, warns = validate_spec(load_json(args.spec), args.model, dialects, catalog, channel=ch_, spec_path=args.spec)
         for w in warns:
             print("предупреждение:", w)
         for e in errs:
@@ -2191,9 +2318,12 @@ def main(argv=None):
 
 
 if __name__ == "__main__":
-    # ошибка компиляции (модель канала вне dialects.yaml и т. п.) — сообщением, без трассировки
+    # ошибка компиляции (модель канала вне dialects.yaml и т. п.) и нечитаемый файл входа — сообщением, без трассировки
     try:
         sys.exit(main())
     except CompileError as e:
         print(f"ошибка компиляции: {e}", file=sys.stderr)
+        sys.exit(2)
+    except (OSError, json.JSONDecodeError) as e:
+        print(f"ошибка входа: {e}", file=sys.stderr)
         sys.exit(2)

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Офлайн-тесты prompt_compile.py: CLI и API, ценовые параметры, видео, правки, референсы, каналы, соотношения,
-задания polza.py и чтение снимка каталога. Без сети и генераций; нужен снимок каталога polza (scripts/install.sh
+задания polza.py, чтение снимка каталога и проверки входа (минимальный размер картинки, спецификация без обязательного
+поля, разрешение у модели без такого параметра). Без сети и генераций; нужен снимок каталога polza (scripts/install.sh
 --catalogs) — без него тесты завершаются строкой о снимке и кодом 2.
 Запуск: $DDD_HOME/venv/bin/python scripts/ai-media/tests/test_prompt_compile.py [-v]"""
-import json, os, pathlib, re, subprocess, sys, tempfile
+import copy, json, os, pathlib, re, subprocess, sys, tempfile
 HERE = pathlib.Path(__file__).resolve().parent
 TOOLS = HERE.parent
 sys.path.insert(0, str(TOOLS.parent / "lib"))  # scripts/lib: kbpaths
@@ -256,8 +257,9 @@ check("GA Omni: кадры + видео-референс → ошибка (по�
 with tempfile.TemporaryDirectory() as td:
     jobs, skipped = pc.make_jobs([FX / "v2-loop.spec.json"], ["google/gemini-omni-1.1-flash"], ["prose"], 1, (101,), "t", out_path=pathlib.Path(td) / "j.jsonl")
     j0 = jobs[0]["input"] if jobs else {}
-    check("GA Omni: в задании поля *_url и meta.url_fields/prepare", "first_frame_url" in j0 and "images" not in j0 and j0.get("seed") == 101
-          and jobs[0]["meta"].get("url_fields") and "upload" in jobs[0]["meta"].get("prepare", ""), (j0.keys(), skipped))
+    check("GA Omni: в задании поля *_url и meta.url_fields; meta.prepare — файл поля клиент загружает сам",
+          "first_frame_url" in j0 and "images" not in j0 and j0.get("seed") == 101 and jobs[0]["meta"].get("url_fields")
+          and "загружает в хранилище сам" in jobs[0]["meta"].get("prepare", ""), (j0.keys(), skipped))
 s = F("v2-series"); s["references"] = [dict(s["references"][0], id=f"s{i}") for i in (1, 2, 3)]
 r = comp(s, "black-forest-labs/flux.2-pro", spec_path=FX / "v2-series.spec.json")
 check("F2 (1): три стилевых референса — одна фраза «Images 1-3 are style references»", "Images 1-3 are style references from one shoot" in r["prompt"]
@@ -334,6 +336,116 @@ with tempfile.TemporaryDirectory() as td:
     check("без снимка каталога: validate --model и compile — код 2 и строка с командой установки",
           all(x.returncode == 2 and "нет снимков" in x.stderr and "install.sh --catalogs" in x.stderr for x in rs),
           [(x.returncode, x.stderr[-200:]) for x in rs])
+
+# --- 14. вход до вызова: минимальный размер картинки, спецификация без обязательного поля, разрешение без параметра
+FLUX = "black-forest-labs/flux.2-pro"
+with tempfile.TemporaryDirectory() as td:
+    from PIL import Image
+    td = pathlib.Path(td)
+    Image.new("RGB", (64, 48), "white").save(td / "ref.png")
+    s = B("B1"); s["references"] = [{"id": "r1", "src": "ref.png", "role": "style"}]
+    sp_ = td / "ref.spec.json"; sp_.write_text(json.dumps(s))
+    D2 = copy.deepcopy(D); D2["families"]["flux2"]["models"][FLUX]["min_input_px"] = 49
+    errs = pc.validate_spec(s, FLUX, D2, C, spec_path=sp_)[0]
+    check("минимальный вход: референс 64×48 при минимуме модели 49 — ошибка validate", any("48 < 49" in e and "ref.png" in e for e in errs), errs)
+    r = pc.compile_prompt(s, FLUX, None, D2, C, spec_path=sp_)
+    check("минимальный вход: та же ошибка у compile — до вызова модели", any("min_input_px" in e for e in r["errors"]), r["errors"])
+    D2["families"]["flux2"]["models"][FLUX]["min_input_px"] = 48
+    errs = pc.validate_spec(s, FLUX, D2, C, spec_path=sp_)[0]
+    check("минимальный вход: меньшая сторона равна минимуму — чисто", not errs, errs)
+    check("минимальный вход: у модели без min_input_px размер не сверяется", not pc.validate_spec(s, FLUX, D, C, spec_path=sp_)[0])
+    D2 = copy.deepcopy(D); D2["families"]["qwen-image"]["models"]["qwen/image-2.1"]["min_input_px"] = 49
+    s = F("v2-edit"); s["edit"].pop("mask"); s["references"][0]["src"] = "ref.png"
+    errs = pc.validate_spec(s, "qwen/image-2.1", D2, C, spec_path=sp_)[0]
+    check("минимальный вход: исходник правки меньше минимума — ошибка", any("48 < 49" in e for e in errs), errs)
+    s = F("v2-edit"); s["edit"].pop("operation"); s["edit"].pop("mask")
+    errs = pc.validate_spec(s, None, D, C)[0]
+    check("правка без operation: validate_spec — ошибка схемы, без исключения", any("operation" in e for e in errs), errs)
+    sp_ = td / "no-operation.spec.json"; sp_.write_text(json.dumps(s))
+    for extra in ((), ("--model", "qwen/image-2.1")):
+        r = cli("validate", str(sp_), *extra)
+        check(f"CLI validate {' '.join(extra) or 'без модели'}: правка без operation — строка ошибки и код 1, без трассировки",
+              r.returncode == 1 and "operation" in r.stdout and "Traceback" not in r.stderr, (r.returncode, r.stderr[-300:]))
+    r = cli("compile", str(sp_), "--model", "qwen/image-2.1")
+    check("CLI compile: правка без operation — одна строка и код 2, без трассировки",
+          r.returncode == 2 and "operation" in r.stderr and "Traceback" not in r.stderr, (r.returncode, r.stderr[-300:]))
+    (td / "broken.spec.json").write_text("{")
+    rs = [cli("validate", str(td / "none.spec.json")), cli("validate", str(td / "broken.spec.json"))]
+    check("CLI validate: файла нет или он не JSON — «ошибка входа» и код 2, без трассировки",
+          all(x.returncode == 2 and "ошибка входа" in x.stderr and "Traceback" not in x.stderr for x in rs),
+          [(x.returncode, x.stderr[-200:]) for x in rs])
+s = F("v2-loop"); s["motion"].pop("camera")
+try:
+    errs = pc.validate_spec(s, None, D, C)[0]
+    ok_ = any("camera" in e and "схема" in e for e in errs) and any("смысловые проверки остановлены" in e for e in errs)
+except KeyError as e:
+    ok_, errs = False, [repr(e)]
+check("движение без camera: ошибка схемы и строка об остановке проверок, без исключения", ok_, errs)
+try:
+    comp(s, "bytedance/seedance-1.5-pro", spec_path=FX / "v2-loop.spec.json")
+    ok_ = False
+except pc.CompileError as e:
+    ok_ = "camera" in str(e)
+except KeyError:
+    ok_ = False
+check("движение без camera: compile_prompt — CompileError со строкой схемы, а не KeyError", ok_)
+NB2 = "google/gemini-3.1-flash-image-preview"
+C2 = dict(C); C2[NB2] = copy.deepcopy(C[NB2]); C2[NB2]["parameters"].pop("image_resolution", None)
+r = pc.compile_prompt(B("B1"), NB2, None, D, C2)
+check("разрешение у модели без параметра разрешения: предупреждение с именем модели, параметра в задании нет",
+      any(NB2 in w and "output.resolution 1K" in w for w in r["warnings"]) and "image_resolution" not in r["params"], (r["warnings"], r["params"]))
+check("разрешение у модели с параметром: без предупреждения", not any("output.resolution" in w for w in comp(B("B1"), NB2)["warnings"]))
+check("разрешение через quality (Seedream 4.5): без предупреждения", not any("output.resolution" in w for w in comp(E("E2"), "bytedance/seedream-4.5")["warnings"]))
+r = comp(B("B1"), FLUX, channel="routerai")
+check("канал: у модели нет resolution — предупреждение с именем модели и канала",
+      any(f"{FLUX} (routerai)" in w and "output.resolution" in w for w in r["warnings"]) and not r["errors"], r["warnings"])
+check("канал: у модели есть resolution — без предупреждения",
+      not any("output.resolution" in w for w in comp(B("B1"), "bytedance-seed/seedream-4.5", channel="routerai")["warnings"]))
+r = fx("v2-loop", "google/gemini-omni-1.1-flash")
+check("кадры полями *_url: предупреждение говорит, что файл загружает клиент", any("загружает в хранилище сам" in w for w in r["warnings"]), r["warnings"])
+
+# --- 15. правка настоящего кадра: запрет нового текста, кадрирование extend, артикль remove
+s = F("v2-edit"); s["edit"].pop("mask"); s["edit"]["keep"] = ["shop sign lettering", "window light"]
+p = comp(s, "qwen/image-2.1", spec_path=FX / "v2-edit.spec.json")["prompt"]
+check("правка с keep надписей: «No added text.», а не «No text.»", "Keep the shop sign lettering and window light unchanged." in p
+      and p.endswith("No added text.") and "No text." not in p, p)
+check("генерация с нуля: «No text.» остаётся", "No text." in comp(B("B1"), "qwen/image-2.1")["prompt"])
+s = F("v2-edit"); s["edit"].pop("mask"); s["edit"].pop("keep"); s["edit"].pop("visible_after")
+s["edit"].update({"operation": "extend", "target_ratio": "16:9", "changes": [{"target": "the left side", "to": "more of the plain plaster wall"}]})
+s["composition"]["text_zone"] = {"side": "left", "rect": [0, 0, 0.4, 1], "purpose": "headline", "surface": "plain plaster wall"}
+s["text"] = {"mode": "html_overlay"}
+r = comp(s, "openai/gpt-image-2.5-sunburst", spec_path=FX / "v2-edit.spec.json")
+p = r["prompt"]
+check("extend: changes и зона текста идут в промт после инструкции", p.startswith("Extend the scene of the provided image to fill a 16:9 frame")
+      and "The left side shows more of the plain plaster wall." in p and "The left 40 percent of the frame is an empty" in p
+      and p.find("naturally at the new edges.") < p.find("The left side shows") < p.find("The left 40 percent") and not r["errors"], (p, r["errors"]))
+p = comp(s, "qwen/image-2.1", spec_path=FX / "v2-edit.spec.json")["prompt"]
+check("extend у Qwen: кадрирование — после описания исходника", p.startswith("Extend the image beyond its boundaries using outpainting. "
+      "The original caption is: a reading nook with an armchair by a window. The left side shows more of the plain plaster wall. The left 40 percent"), p)
+s["edit"].pop("changes"); s["composition"].pop("text_zone")
+check("extend у Qwen без кадрирования: шаблон вендора без добавлений", comp(s, "qwen/image-2.1", spec_path=FX / "v2-edit.spec.json")["prompt"]
+      == "Extend the image beyond its boundaries using outpainting. The original caption is: a reading nook with an armchair by a window")
+s = F("v2-edit"); s["edit"].pop("mask"); s["edit"]["operation"] = "remove"; s["edit"]["changes"] = [{"target": "the floor lamp", "to": "the bare wall"}]
+p = comp(s, "openai/gpt-image-2.5-sunburst", spec_path=FX / "v2-edit.spec.json")["prompt"]
+check("remove: цель с артиклем — один артикль", p.startswith("Remove the floor lamp; in its place the frame shows the bare wall.") and "the the" not in p, p[:200])
+s["edit"]["changes"] = [{"target": "all cables", "to": "a clean floor"}]
+check("remove: цель с квантором — без «the»", comp(s, "openai/gpt-image-2.5-sunburst", spec_path=FX / "v2-edit.spec.json")["prompt"].startswith("Remove all cables;"))
+s["edit"]["operation"] = "recolor"
+s["edit"]["changes"] = [{"target": "armchair upholstery", "to": "deep green velvet"}, {"op": "remove", "target": "The floor lamp", "to": "the bare wall"}]
+p = comp(s, "openai/gpt-image-2.5-sunburst", spec_path=FX / "v2-edit.spec.json")["prompt"]
+check("смешанная правка: remove цели с артиклем — один артикль", "remove the floor lamp, showing the bare wall in its place" in p and "the The" not in p, p[:240])
+
+# --- 16. класс страницы — role.page_class: фраза контекста структурного промта и спецификации тестов
+ctx = lambda spec: comp(spec, "bria-fibo", "fibo_json", channel="genapi")["body"]["structured_prompt"].get("context")
+check("контекст структурного промта — из role.page_class", ctx(B("B1")) == "hero image for a landing website", ctx(B("B1")))
+s = B("B1"); s["role"]["page_class"] = "ecommerce"
+check("контекст: артикль по первой букве класса", ctx(s) == "hero image for an ecommerce website", ctx(s))
+s = B("B1"); s["role"].pop("page_class"); s["role"]["page_type"] = "landing-campaign"
+check("контекст: id типа страницы (role.page_type) в промт не идёт", ctx(s) == "hero image for a website", ctx(s))
+specs = [E(n) for n in ("E1", "E2", "E3", "E4", "E5")] + [B(n) for n in ("B1", "B2")]
+check("спецификации тестов: класс страницы — в role.page_class, схема проходит",
+      all(x["role"].get("page_class") and "page_type" not in x["role"] and not [e for e in pc.validate_spec(x, None, D, C)[0] if e.startswith("схема")]
+          for x in specs))
 
 ok = sum(x[1] for x in R)
 verbose = "-v" in sys.argv

@@ -153,6 +153,38 @@ facts:
     section_roles: []
     slot_types: []
   lang: ru
+- id: staff-count
+  kind: metric
+  claim_class:
+  - fact-number
+  verbatim:
+  - 240 сотрудников в штате (демо)
+  canonical: В штате «Сталькона» 240 сотрудников (штатное расписание на 1 сентября 2026 года).
+  values:
+  - value: 240
+    unit: pcs
+    what: сотрудники в штате
+    as_of: '2026-09-01'
+  entities:
+  - company-stalkon
+  source:
+    type: customer-document
+    who: заказчик (директор)
+    where: штатное расписание (демо)
+    date: '2026-09-01'
+    document: staff-demo.xlsx
+    quote: 'Штатная численность: 240'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
 - id: case-warehouse
   kind: case
   claim_class:

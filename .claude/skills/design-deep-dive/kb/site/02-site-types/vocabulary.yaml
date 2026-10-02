@@ -1,41 +1,18 @@
 # vocabulary.yaml — единый словарь идентификаторов системы генеративного дизайна сайтов (site-research).
-# v1 (агент J, волна 3, 2026-09-24; v0 — агент B, волна 1): переименований нет — только status: deprecated + replaced_by;
-# журнал изменений — поле changelog ниже. Новый id — заметка «## Для J» (до волны 4) или «## Для S» и пометка (новый id).
+# Id не переименовываются: вышедший из употребления получает status: deprecated и replaced_by; новый id — запись в своём
+# пространстве имён (до подтверждения владельцем темы — status: proposed).
 # Описание и правила: 02-site-types/02-vocabulary-and-crosswalk.md; соответствие старым словарям соседей, сестёр и внешних
-# скиллов: 02-site-types/crosswalk.tsv; проверка файлов: python3 ../../scripts/site/vocab_lint.py <файлы> (--selftest).
+# скиллов: 02-site-types/crosswalk.tsv; проверка файлов (от корня скилла): scripts/site/vocab_lint.py <файлы> (--selftest).
 # Ссылка на id из другого файла или базы — с префиксом пространства (ref_prefixes): block:hero-media, slot:headline,
 # section-role:proof-logos, page-type:landing-saas. Чужие пространства (effect:, copy-rule:, fact:, task:, recipe:) здесь
 # не определяются — их ведут владельцы (foreign_prefixes).
 
 vocabulary: site-research
 version: 1
-revision: 1                # v0: r1 11:55 — черновик для M, C, A; r2 12:58 — заметка C. v1 r1 — J, волна 3 (журнал — changelog)
-status: released           # draft (v0) → released (v1, J, волна 3); правки v1.x — только добавления и deprecated
+revision: 1
+status: released           # правки — только добавления и status: deprecated
 checked: 2026-09-24
-owner: "site-research · 02-site-types · B (v0, волна 1); J (v1, волна 3); дальше — аудит X и синтез S (волна 4)"
-changelog:
-  - version: "1.0"
-    date: "2026-09-24"
-    by: "J (волна 3)"
-    added:
-      - "page_type: specialist-page, location-page, program-catalog-page, search-results-page, documents-page — G (06-multipage-ia/01 §2, заметки G «Для J (итог G2)»; примеры site-map G)"
-      - "page_type (proposed): event-program-page, speakers-page, integrations-page, security-page, html-sitemap-page — кандидаты B и G для карт event-site и saas-marketing-site (плейбуки J 10-playbooks-contracts/03)"
-      - "block: service-area — E (отчёт E §4, 04-blocks/02 §5 откр. вопрос 5; опыт E/04 — секция без блока); был вариант location-map.service-area"
-      - "slot: qr-code — E (04-blocks/blocks.yaml app-download: QR кодом SVG, только десктоп)"
-      - "namespace conversion_channel (12 id) — каналы приёма действия из site-brief v0 $defs.conversion-channel (A; механика — F lead-forms.yaml); префикс conversion-channel:"
-      - "namespace procedure_step (13 id) — шаги процедуры «бриф → страницы» (J 10-playbooks-contracts/01; имена — K, каталог дефектов DEF-*); префикс step:"
-      - "ref_prefixes: conversion-channel, step; foreign_prefixes: site-pre (K, SITE-PRE-*), def (K, DEF-*), ref (creative, библиотека референсов)"
-    status_changes:
-      - "slot: promise, announcement, stat-source, price-old, spec-row, image-caption, article-date, article-sources — proposed → active (используются в blocks.yaml v1, кроме promise — смысловой слот проекции product.goal kimi; решение J по отчёту B §4)"
-    not_added:
-      - "header_archetype — остаётся перечислением в 06-multipage-ia/site-map.schema.json#/$defs/header-archetype (G); page-plan v1 ссылается на него $ref (один источник)"
-      - "реферальная страница, мультиссылка, страница партнёрской акции (кандидаты B §7) — нет случая в плейбуках J; ждут живой фазы"
-    checks: "build_crosswalk.py --check — 0 ошибок; vocab_lint.py по всем YAML базы (кроме самого словаря) — 0 ошибок (99-raw/experiments/J/00-vocabulary-v1/README.md)"
-  - version: "1.0"
-    date: "2026-09-25"
-    by: "S1 (волна 4, правки по аудиту X; id не менялись)"
-    fixed:
-      - "page_type search-results-page, def: «noindex, путь закрыт в robots.txt» → новый сайт — Disallow, уже в индексе — noindex до выпадения, не оба (аудит X В-13; G 06-multipage-ia/01 §5.2)"
+owner: "site-research · 02-site-types"
 id_pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
 id_pattern_exceptions:
   ambition_level: '^L[0-2]$'   # L0, L1, L2 — как в контракте тройки и PLAN creative
@@ -444,6 +421,8 @@ namespaces:
       # --- text при медиа
       - {id: image-alt, kind: text, name: "alt картинки", def: "Текстовая альтернатива (правила — ai-media 10/01 §8)"}
       - {id: in-image-text, kind: text, name: "Строка в картинке", def: "Текст внутри картинки: ≤ 3 строк, ≤ 40 знаков (ai-media 05/03 §7); по умолчанию — HTML поверх"}
+      # --- text при действии
+      - {id: messenger-prefill, kind: text, name: "Готовое сообщение мессенджера", def: "Текст, который ссылка подставляет в поле ввода мессенджера: посетитель отправляет его как есть или дописывает; на слот ссылается target.prefill действия"}
       # --- media
       - {id: hero-visual, kind: media, name: "Главный визуал", def: "Главная картинка, видео-постер или рендер первого экрана; кандидат LCP"}
       - {id: background, kind: media, name: "Фон секции", def: "Фото, текстура, градиент, паттерн, видео-петля за контентом"}
@@ -520,7 +499,7 @@ namespaces:
       - {id: sales-longread, layout_family: document, name: "Продающий лонгрид", def: "Длинный лендинг услуг: много доводов и призывов по ходу (рынок РФ)", source: "рынок РФ; landing.csv"}
       - {id: quiz-funnel, layout_family: flow, name: "Квиз-воронка", def: "Квиз — главный путь страницы: короткое обещание → вопросы → контакт", source: "рынок РФ; landing.csv"}
       - {id: form-first, layout_family: flow, name: "Страница вокруг формы", def: "Короткая страница: обещание с формой → доказательства → повтор формы", source: "landing.csv"}
-      - {id: scroll-story, layout_family: poster, name: "Сайт-история", def: "Кино-прокрутка: сцены и главы, «вау» по ритму, призыв в конце (L2)", source: "kimi W3; landing.csv"}
+      - {id: scroll-story, layout_family: poster, name: "Сайт-история", def: "Кино-прокрутка: сцены и главы, «вау» по ритму, призыв в конце (L2)", source: "сайт-референс W3; landing.csv"}
       - {id: pricing-first, layout_family: document, name: "Страница от цены", def: "Цена и тарифы — главное содержание, остальное отвечает на вопросы о выборе", source: "landing.csv"}
       - {id: comparison-led, layout_family: document, name: "Страница от сравнения", def: "Сравнение с альтернативами ведёт сюжет", source: "landing.csv"}
       - {id: event-schedule, layout_family: document, name: "Страница события", def: "Дата и место → программа → спикеры → билеты", source: "landing.csv"}
@@ -580,6 +559,7 @@ namespaces:
   traffic_temperature:
     name: "Температура трафика"
     owner: "site B (id); A — что меняет"
+    def: "Сила намерения посетителя, которую задаёт источник: cold — не искал, warm — ищет решение, hot — ищет продукт или бренд. Температура ≠ осведомлённость: тип первого экрана выбирается по уровню осведомлённости (meaning.awareness.by_source), температура — подсказка"
     values:
       - {id: cold, name: "Холодный", def: "Не искал: реклама в ленте, контентная площадка, блогер"}
       - {id: warm, name: "Тёплый", def: "Ищет решение задачи, сравнивает"}

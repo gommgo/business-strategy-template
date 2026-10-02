@@ -1,36 +1,34 @@
 # Диалекты промтов по семействам моделей — машиночитаемая часть 05-prompting/01-vendor-prompt-guides.md §13.
-# Читает прототип ../../scripts/ai-media/prompt_compile.py; правила отображения полей — 03-asset-spec-and-dialects.md §9–§10.
-# Лимиты и параметры — из каталога polza (снимок ниже); остальное — из официальных гайдов вендоров (ссылка source).
-# Статусы: documented — так пишет вендор; untested — наша компиляция, не проверена генерацией (фаза 5).
+# Читает компилятор ../../scripts/ai-media/prompt_compile.py; правила отображения полей — 03-asset-spec-and-dialects.md §9–§10.
+# Лимиты и параметры — из каталога polza; остальное — из официальных гайдов вендоров (ссылка source).
+# Статусы: documented — так пишет вендор; untested — форма компилятора, генерацией не проверена.
+# Запись модели (families.<семейство>.models.<id> и channels.<канал>.models.<id>) — лимиты и особенности входа:
+#   max_prompt_chars, max_refs, mask (полярность маски), frames_via (кадры полями *_url), price_rub;
+#   min_input_px (необязательно) — меньшая сторона каждой входной картинки (референс, исходник правки, кадр) не меньше
+#   этого числа пикселей: компилятор сверяет файлы входа до вызова, картинка меньше — ошибка.
 version: "0.4"
 checked_at: "2026-09-25"
-changelog:
-  - "0.1 (2026-09-23, D, волна 1): 20 семейств, лимиты = каталог"
-  - "0.2 (2026-09-23, D2, волна 2): defaults.{slop_words, quality_words, comparatives, anti_average, reference_roles, motion_forbid, edit, strict_spelling}; у видео-семейств motion_forbid, multishot, timestamps.template; семейство bria-fibo; раздел channels (routerai, genapi); только добавления — прежние ключи не менялись"
-  - "0.4 (2026-09-25, U, сессия 5): итоги фазы 5 — ab_results (D2-01, D2-02, D2-04…D2-08, D2-11, D2-12; ни одно плечо не заменило умолчание); id Flare в polza с 25.09.2026 — openai/gpt-image-2.5-flare (старый gpt-image-2-5-flare оставлен с пометкой «до 25.09.2026»: на нём задания и паспорта фазы 5, тесты компилятора); пометки D2-06 у defaults.edit.max_changes, D2-08 у video.grok-video, D2-12 у bria-fibo; снимок каталога дня — 2026-09-25_1411 (компилятор по-прежнему берёт последний); только добавления и пометки — ключи и умолчания не менялись"
-  - "0.3 (2026-09-23 18:40, D2b): снимок каталога 17:45; модели google/gemini-omni-1.1-flash (GA, FLF полями frames_via) и grok-imagine-image-2-0/text-to-image; сверка видео с 99-raw/notes/wave2/D2-helper-video.md: звук (audio.by_model, у wan/2.5 и 2.6 не выключается), мульти-шот Kling (max_shots, shot_max_chars, только стартовый кадр), фраза одного плана Wan, таймкоды Seedance 2.5 (unit_s, no_gaps), позиции вендоров о словах качества (quality_vendor), переписчики Vertex и H3, camera_fixed «not guaranteed»; defaults.reference_group (одна фраза на группу референсов одной роли, F2); только добавления и уточнения заметок"
-catalog_snapshot: "99-raw/cache/polza/2026-09-25_1411/api-v1-models.json"   # компилятор берёт последний снимок (как polza.py); закрепить — POLZA_CATALOG=<папка>; задания фазы 5 собраны на 2026-09-23_1745
+catalog_snapshot: "99-raw/cache/polza/2026-09-25_1411/api-v1-models.json"   # компилятор берёт последний снимок (как polza.py); закрепить — POLZA_CATALOG=<папка>
 catalog_extract: "99-raw/experiments/D/01-catalog-prompt-limits/prompt_limits.json"
 
 defaults:
   description_language: en          # описание — по-английски (01 §12.7)
-  text_policy: html_overlay          # текст по умолчанию — HTML-слоем (PLAN.md, 01 §12.7)
+  text_policy: html_overlay          # текст по умолчанию — HTML-слоем (01 §12.7)
   enhancers: off                     # усилители вендоров выключены для скомпилированных промтов (02 §6.3)
   max_palette_colors: 5              # BFL: 3–5 цветов
   on_over_limit: fail                # промт длиннее лимита не обрезается (02 §9.2)
   service_exclusions: [text, watermark, logo, subtitles, music, dialogue]
-  # ---- D2, волна 2 ----
   slop_words: [luminous, radiant, vibrant, lush, dynamic, glowing, gorgeous, stunning, breathtaking, mesmerizing,
                masterpiece, 8k, 4k, ultra-detailed, hyperrealistic, hyper-realistic, epic, cinematic, award-winning,
                trending on artstation, best quality, high quality, ultra hd, octane render, unreal engine, beautiful,
                amazing, perfect, professional photo]   # Ideogram magic prompt v1, BFL «Filler hurts», MiniMax «abstract words like cinematic»
-  quality_words: [cinematic, 4k, 8k, masterpiece, ultra-detailed, high quality, best quality, hdr, award-winning]   # W3: «слова качества» не работают; для плеча A/B — compile.quality_words
-  quality_words_policy: "не добавлять по умолчанию: против — MiniMax («abstract words like cinematic»), Runway, BFL, скиллы sd25-pe и wan3-pe («Do not automatically add quality packs»); за — Seedance 2.0 (гайд и скилл sd2-pe: «4K HD, rich details» + анти-искажения обязательно), в примерах Kling и Vertex; ByteDance противоречит сам себе → [спорно], плечо A/B — compile.quality_words (W3-13); у семейства — quality_vendor"   # 99-raw/notes/wave2/D2-helper-video.md §7
+  quality_words: [cinematic, 4k, 8k, masterpiece, ultra-detailed, high quality, best quality, hdr, award-winning]   # «слова качества» не работают; для плеча A/B — compile.quality_words
+  quality_words_policy: "не добавлять по умолчанию: против — MiniMax («abstract words like cinematic»), Runway, BFL, скиллы sd25-pe и wan3-pe («Do not automatically add quality packs»); за — Seedance 2.0 (гайд и скилл sd2-pe: «4K HD, rich details» + анти-искажения обязательно), в примерах Kling и Vertex; ByteDance противоречит сам себе → [спорно], плечо A/B — compile.quality_words (W3-13); у семейства — quality_vendor"
   grading_words: [warm]      # Ideogram: «The word "warm"… is BANNED as a grading adjective» — задавать источник света
   comparatives: [darker, lighter, brighter, dimmer, warmer, cooler, bigger, smaller, larger, more, less, softer, harder,
                  sharper, stronger, weaker, higher, lower, redder, greener, bluer]   # правка: целевые значения вместо сравнительных [V:8kM5aDD5gLI 25:38]
-  anti_average: "Off-center subject placed on a rule-of-thirds line, gaze turned away from the camera, asymmetric composition with natural imperfections."   # [V:AxV8TR3BdqI 30:46–32:51]; позитивная форма для всех семейств (v0.2; с v0.3 — по частям ниже)
-  anti_average_parts:        # D2b: взгляд — только если в кадре люди; несовершенства — только у фото; «по центру» + это правило — ошибка спецификации
+  anti_average: "Off-center subject placed on a rule-of-thirds line, gaze turned away from the camera, asymmetric composition with natural imperfections."   # [V:AxV8TR3BdqI 30:46–32:51]; позитивная форма целиком — когда нет частей anti_average_parts
+  anti_average_parts:        # взгляд — только если в кадре люди; несовершенства — только у фото; «по центру» + это правило — ошибка спецификации
     base: "Off-center subject placed on a rule-of-thirds line, asymmetric composition"
     people: "gaze turned away from the camera"
     photo: "natural imperfections"
@@ -51,14 +49,14 @@ defaults:
     effect: "Apply the visual effect shown in {ref} ({note}) to the new subject."
     pose: "Take the pose from {ref} ({note})."
     video_motion: "Reference the motion and camera movement in {ref} ({note})."
-  reference_group:           # D2b по замечанию F2: ≥ 2 референса одной роли — одна фраза, а не повтор на каждый (FLUX 319 слов > 300)
-    style: "{refs} are style references from one shoot: match their {note}; do not copy their scenes or composition; the subject and scene come from this prompt."   # = F-01 A
+  reference_group:           # ≥ 2 референса одной роли — одна фраза, а не повтор на каждый (у FLUX.2 повтор выводит промт за 300 слов)
+    style: "{refs} are style references from one shoot: match their {note}; do not copy their scenes or composition; the subject and scene come from this prompt."
     identity: "{refs} show the same subject; use them only to preserve the subject's identity ({note}) and create a completely new shot."
     subject: "{refs} show the subject from different angles: keep it recognizable ({note})."
     character: "{refs} show the same character: keep the face, proportions and clothing identical ({note})."
     product: "{refs} show the same product from different angles: keep its shape, proportions, materials, label and colors exactly as in the images ({note})."
     default: "{refs}: {note}."
-  motion_forbid:             # D2: запреты движения; sentence — для семейств, где вендоры пишут запреты сами; positive — без отрицаний
+  motion_forbid:             # запреты движения; sentence — для семейств, где вендоры пишут запреты сами; positive — без отрицаний
     zoom: {sentence: "No zoom.", positive: "The focal length stays fixed."}
     spin: {sentence: "No spin.", positive: "The subject keeps its orientation."}
     reposition_subject: {sentence: "Do not reposition the subject.", positive: "The subject stays in the same place in the frame."}
@@ -71,7 +69,7 @@ defaults:
     fast_motion: {sentence: "No fast or sudden movement.", positive: "All movement is slow and gentle."}
   tempo_words: {slow: "All movement is slow and gentle.", medium: "Movement is steady and natural.", fast: "Movement is quick and energetic."}
   edit:
-    max_changes: 5           # ≤ 5 изменений за вызов, цепочкой [V:H6ZXujE1qBA 15:16]; «одна правка на вызов» (Gamma, VideoSmile) — [спорно], тест D2; фаза 5 D2-06 (NB2 1K, 1 образец): 10 из 10 одним вызовом = цепочка 5 + 5 (вдвое дешевле, без дрейфа ΔE00 4,69 шага 1) → для NB2 — --opt max_changes=10; умолчание 5 оставлено до повтора (ab_results)
+    max_changes: 5           # ≤ 5 изменений за вызов, больше — цепочкой [V:H6ZXujE1qBA 15:16]; «одна правка на вызов» (Gamma, VideoSmile) — [спорно]; у Nano Banana 2 десять правок одним вызовом сошлись на одном образце (ab_results, D2-06) — для неё --opt max_changes=10
     keep_position: "Keep its position and size exactly the same."   # формула Jamey [V:2RD3FP5iWJY 36:34]
     closing: "Change nothing else."
     suffix: "Maintain the original composition and subject."         # [V:8kM5aDD5gLI 24:36]
@@ -268,7 +266,7 @@ families:
       gemini-omni-video: {max_prompt_chars: 20000, max_refs: 7, price_rub: {"4s": 35, "6s": 45, "8s": 50, "10s": 60, "4k": 70}, seed: true, note: "preview; снимается 30.09.2026; FLF — только тегами в промте (references.declare)"}
       google/gemini-omni-1.1-flash: {max_prompt_chars: 20000, max_refs: 7, price_rub: {"4s": 48, "6s": 63, "8s": 79, "10s": 95, "4k,4s": 111, "v2v": 126}, seed: true,
                                      frames_via: {first: first_frame_url, last: last_frame_url, last_needs_first: true, exclusive_with: [images, videos, audio_ids, character_ids]},
-                                     note: "GA (снимок 17:45): кадры — полями *_url, не images и не тегами; 360p = 720p = 1080p по цене; polza.py поля *_url (кроме mask_url) не загружает — сначала polza.py upload <файл> --live → URL (I2, I-15)"}
+                                     note: "GA: кадры — полями *_url, не images и не тегами; 360p = 720p = 1080p по цене; локальный файл в поле *_url polza.py загружает в хранилище сам перед отправкой"}
     format: prose
     alt_formats: [sections]
     status: documented
@@ -369,7 +367,7 @@ families:
     language: {description: en, note: "Chinese and English"}
     references: {syntax: "Image {n}", video: "Video {n}"}
     timestamps: {supported: true, syntax: "Shot {k} [{t0}–{t1} s] {beat}", single_shot: "Generate single shot.", single_shot_api: "Generate a single-shot video (API Wan 2.7)"}
-    single_shot_phrase: "Generate a single-shot video: one continuous shot, same set and geometry, no cuts."   # D2b: [33] «Generate single shot.», [36] «Generate a single-shot video»
+    single_shot_phrase: "Generate a single-shot video: one continuous shot, same set and geometry, no cuts."   # [33] «Generate single shot.», [36] «Generate a single-shot video»
     camera: {one_move: true, static: "fixed camera", orbit_max_deg: 45}
     i2v: {motion_only: true, formula: "Motion + Camera movement"}
     audio: {param: generate_audio, set: "false",
@@ -494,7 +492,6 @@ families:
     camera: {static: "Locked camera. The camera remains still.", loop: "The camera must start and end on the exact same frame to create a perfect loop."}
     status: documented
 
-  # ---- D2, волна 2 ----
   bria-fibo:
     class: D                       # обучена только на JSON-подписях ~1 000 слов (arXiv 2511.06876)
     source: "02 §2; Gen-API bria-fibo (99-raw/cache/gen-api.ru_model_bria-fibo_api_1dd5eda0.md)"
@@ -509,9 +506,9 @@ families:
     status: untested               # схема — из значения по умолчанию Gen-API; порядок и полнота ключей не сверены с первоисточником Bria
     phase5: "D2-12 (Gen-API, 25.09.2026): structured_prompt объектом — 3 из 3 отклонено провайдером («параметры сформированы некорректно», 0 ₽); проза ≤ 1 000 символов работает (10 ₽), > 1 000 — 422; FIBO сам разворачивает прозу в свою JSON-схему (4 006 и 4 761 символ против 723 и 683) → через Gen-API писать прозу; JSON строкой (D2-12v2) не прогонялся"
 
-# ---- D2, волна 2: видео-диалекты (дополняют семейства выше; компилятор сливает по имени семейства) ----
+# ---- видео-диалекты: дополняют семейства выше, компилятор сливает их по имени семейства ----
 # motion_forbid: sentence — запреты движения предложениями (так пишут вендоры: Seedance «keep it subtitle-free»,
-# Omni «Do not do X», W5 «no zoom, no spin…»); positive — только утвердительно (Runway «Negative phrasing is not supported»).
+# Omni «Do not do X»); positive — только утвердительно (Runway «Negative phrasing is not supported»).
 # timestamps_template / multishot.template — Python format: {t0}, {t1}, {beat}, {n}, {m} (секунды), {words}, {t0_ord}.
 video:
   veo:          {motion_forbid: sentence, timestamps_template: "[00:{t0:02.0f}-00:{t1:02.0f}] {beat}", multishot: null}
@@ -527,7 +524,7 @@ video:
   grok-video:   {motion_forbid: positive, timestamps_template: null, multishot: null, note: "D2-08 (фаза 5, n = 2): запреты предложениями (--opt forbid_style=sentence: «No zoom. No spin. Do not reposition the subject.») против без запретов — дрейф объекта 8,1 % против 19,1 % ширины; positive против sentence не сравнивались"}
   runway:       {motion_forbid: positive, timestamps_template: "[00:{t0:02.0f}] {beat}", multishot: null}
 
-# ---- D2, волна 2: каналы вне Media API polza (задания .routerai.json / .genapi.json, 99-raw/phase5/README.md) ----
+# ---- каналы вне Media API polza: задания .routerai.json и .genapi.json для mp_client.py ----
 channels:
   routerai:
     method: POST
@@ -535,7 +532,7 @@ channels:
     docs: "99-raw/cache/routerai.ru_docs_guides_overview_multimodal_image-generation_753f42c7.md"
     catalog: "99-raw/experiments/P/04-ru-aggregators/routerai_models.json (23.09.2026 09:34, supported_parameters)"
     price_source: "99-raw/experiments/P/05-price-compare/price_table_2026-09-23.md (RouterAI ×1,30 к ЦБ)"
-    input_reference: {type: image_url, image_url: {url: "{src}"}}   # src → data URI при отправке (клиент B2)
+    input_reference: {type: image_url, image_url: {url: "{src}"}}   # src → data URI при отправке (mp_client.py)
     # output_format модели — формат, который она отдаёт, когда его не называет маршрут задачи (routing.yaml); без поля —
     # png. У векторных моделей — svg: другого формата канал у них не принимает (supported_output_formats каталога).
     models:
@@ -564,9 +561,9 @@ channels:
       recraft-v4:  {family: recraft-v4, params: [prompt, translate_input, model, pro, aspect_ratio, colors, background_color, is_sync],
                     fixed: {translate_input: false}, price_rub: null, price_unit: "см. прайс Gen-API", note: "translate_input по умолчанию true — выключать (перевод текста в картинке)"}
 
-# Результаты A/B (02 §9) фазы 5 (25.09.2026). Правило решения — 06-ab-protocol.md §5: плечо заменяет умолчание, только если
+# Результаты A/B форм промта (02 §9). Правило решения — 06-ab-protocol.md §5: плечо заменяет умолчание, только если
 # Δ ≥ 10 п. п. И нижняя граница 95 % ДИ > 0. Судья — google/gemini-3.1-flash-lite вслепую, балл — доля «да» по 10–12 атомарным
-# вопросам брифа (DSG); согласие на повторах 100 % (n = 4). Разбор — 99-raw/phase5/runs/3-prompt-form/README.md, analysis/d2_report.md.
+# вопросам брифа (DSG); согласие на повторах 100 % (n = 4).
 # Итог: ни одно плечо умолчание не заменило; JSON — спецификация системы (asset-spec → компилятор), не формат промта модели.
 ab_results:
   - {test: D2-01, family: nano-banana, model: google/gemini-3.1-flash-lite-image, channel: polza, date: "2026-09-25", arms: "json против sections", pairs: 10, delta_pp: 2.8, ci95: [-2.7, 9.1], sign_p: 0.625, scores: "json 98,1 (sd 4,0) / sections 95,3 (sd 6,6) — потолок", dialect_winner: none, decision: "оставить умолчание (sections)", run: "99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}

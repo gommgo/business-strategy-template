@@ -51,6 +51,55 @@
         "null"
       ]
     },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version"
+      ],
+      "description": "Версия паспорта и история его подтверждений — та же форма, что lifecycle арт-дирекции (creative 01, art-direction.schema.json). dna_version — версия схемы, а lifecycle.version — версия документа: новую версию утверждённого паспорта называет это поле, а не разница значений.",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+$",
+          "description": "major.minor — версия паспорта; меняется с каждым подтверждённым изменением значений."
+        },
+        "history": {
+          "type": "array",
+          "description": "Запись на каждое подтверждение: какая версия, когда, кто подтвердил и что изменилось против предыдущей.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "version",
+              "date",
+              "by",
+              "change"
+            ],
+            "properties": {
+              "version": {
+                "type": "string",
+                "pattern": "^[0-9]+\\.[0-9]+$"
+              },
+              "date": {
+                "type": "string",
+                "pattern": "^20[0-9]{2}-[0-1][0-9]-[0-3][0-9]$"
+              },
+              "by": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Кто подтвердил: роль у заказчика (имя — только с согласия)."
+              },
+              "change": {
+                "type": "string",
+                "minLength": 1,
+                "description": "Что изменилось: поля и значения."
+              }
+            }
+          }
+        }
+      }
+    },
     "derived_from_ui": {
       "type": "object",
       "additionalProperties": false,
@@ -522,8 +571,10 @@
                 "left",
                 "right",
                 "top",
-                "bottom"
-              ]
+                "bottom",
+                "center"
+              ],
+              "description": "Сторона зоны текста, как в плане страницы; center — текст по центру кадра (центрированный первый экран): зона — центральная полоса шириной share."
             },
             "share": {
               "type": "number",

@@ -20,27 +20,45 @@
   facts.schema.yaml, на языке текста); места use (ориентир: вне их — COPY-F-USE warning, места x-use-always законны
   всегда); [PLACEHOLDER] — info со счётчиком. Вопрос (FAQ, предложение с «?») утверждением не считается. Цифры в
   именах сущностей facts.yaml (entities[].names: модель «Атлас Р 45») — часть имени, числом утверждения не считаются.
+  Слово внутри имени продукта или услуги (сущность вида product: «Доставка обедов») — не маркер условий покупки.
+  Орган власти (Роскомнадзор, ФНС) вне списка клиентов и подписи отзыва — не имя, которому нужен факт.
 
 Входы (формат определяется сам или --format):
   copy deck (copy_deck.pages[].sections[].slots[] — slot_type, variants[].text, chosen, fact_ids, claim_flags) ·
   copy.md входа холста («## <section_id>» + «[<slot_id>] <status>: текст», синтаксис — copydeck.py) · Markdown ·
   текст · HTML (у статичной копии артборда служебный <title> не читается).
+  Вход без слотов (HTML, Markdown, текст) привязывает к copy deck ключ --deck: единица, чей текст — текст слота,
+  сверяется как этот слот — с его типом, секцией, страницей и fact_ids; текст, которого в copy deck нет, остаётся без
+  привязки. У статичной копии артборда (строка происхождения dc_to_html в <head>) текст без привязки не знает слота и
+  его фактов, поэтому находки эвристик сверки — число, дата, рейтинг, цитата, имя, маркер класса, свойство, место
+  факта — у него info; право (COPY-L-…), запреты never_claim, «утверждение шире факта» и проблемы самих фактов
+  (разрешение, срок, проверка, вывод, проверка юриста) уровня не меняют.
 
 Подкоманды:
   [check] INPUT [--facts facts.yaml] [--format auto|deck|copy-md|md|text|html] [--rules FILE ...] [--no-external-rules]
           [--no-default-never] [--today ГГГГ-ММ-ДД] [--genre landing] [--all-variants] [--strict] [--final] [--verbose]
           [--json OUT] [--md OUT] [--quiet] [--jurisdiction ru|eu|us|other] [--legal-category finance,medical,…]
-          [--legal-only]
+          [--legal-only] [--deck DECK] [--allow FILE]
           --final — ворота публикации: демо-данные (example: true у файла или факта) — error, без него — info;
-          --all-variants — все варианты, кроме отклонённых; соседние варианты слота текстом «рядом» не считаются.
+          --all-variants — все варианты, кроме отклонённых; соседние варианты слота текстом «рядом» не считаются;
+          --deck DECK — copy deck, к слотам которого по тексту привязывается вход без слотов; отрасль и юрисдикция —
+          из его шапки;
+          --allow FILE — обходы сверки, принятые человеком: JSON с полем allowed (вывод copydeck.py validate --final
+          --json, check --json или claims --json) либо список записей {rule, where, reason, by[, fragment]}. Находка
+          под обходом — info с причиной и тем, кто решил. Обходятся только COPY-F-CLASS и COPY-F-NUM (с
+          COPY-F-NUM-MISMATCH); запись без reason или by и запись с другим правилом не действуют. Место обхода — слот
+          или страница copy deck (вход — copy deck или привязка --deck); у единицы без привязки — запись с тем же
+          фрагментом (fragment).
           exit 0 — нет error; 2 — есть error; 1 — ошибка входа или утилиты
-  inventory INPUT [--format …] [--json OUT] [--md OUT]  — без фактов: утверждения по классам и видимый ли источник на
-          странице (метрика «доля утверждений с видимым источником»); exit 0
   lint-facts FACTS [--today …] [--final] — проверка самого инвентаря (вывод без основания, истёкшие, без разрешений,
           id мест use по словарю site, демо-данные); разрешение pending и демо-данные — warning, с --final (ворота
           публикации) — error; exit 0/2/1
-  rules-schema — JSON Schema формата claims-rules.yaml
   --selftest — офлайн-тесты извлечения, сопоставления, правил, калибровок и ложных срабатываний; exit 0/1
+
+Обслуживание базы (в маршруте этапов проекта не участвует):
+  inventory INPUT [--format …] [--json OUT] [--md OUT]  — без фактов: утверждения по классам и видимый ли источник на
+          странице (метрика «доля утверждений с видимым источником» для замеров корпуса страниц); exit 0
+  rules-schema — JSON Schema формата claims-rules.yaml
 
 Идентификаторы правил — префикс COPY-F-; правила права — COPY-L-.
 Правила ux: kb/ux/07-ux-writing/06-banned-words-and-patterns.md §5.2 (регулярки соцдоказательств),
@@ -675,6 +693,10 @@ NAME_OK = {'вы', 'вас', 'вам', 'ваш', 'ваша', 'ваше', 'ваш
            'все', 'всё', 'это', 'как', 'что', 'наш', 'наша', 'наши', 'для', 'при', 'без', 'или', 'если', 'когда', 'где',
            'почему', 'зачем', 'только', 'уже', 'еще', 'ещё', 'сейчас', 'здесь', 'там', 'да', 'нет', 'не', 'и', 'а', 'но',
            'права', 'защищены', 'политика', 'конфиденциальности', 'согласие', 'оферта', 'главная', 'контакты', 'меню'}
+# органы власти: имя ведомства в тексте (политика, документы, порядок жалобы) — не клиент и не человек, факт ему не нужен;
+# в списке клиентов и в подписи отзыва имя ведомства сверяется как любое другое
+PUBLIC_BODIES = ('роскомнадзор', 'роспотребнадзор', 'росздравнадзор', 'росреестр', 'росстандарт', 'росаккредитация', 'фас', 'фнс',
+                 'мвд', 'гибдд', 'мчс', 'минздрав', 'минцифры', 'минюст')
 SOURCE_HINT_RX = re.compile(
     r'по\s+данным|источник|согласно|по\s+(?:итогам|результатам|оценке|версии|опросу)|на\s+\d{1,2}\.\d{1,2}\.\d{2,4}|'
     r'as\s+of|according\s+to|source:|data\s+from|survey|исследовани|опрос|\bg2\b|capterra|trustpilot|яндекс[ .]?карт|2гис|'
@@ -1005,11 +1027,16 @@ class _HTMLUnits(html.parser.HTMLParser):
 CANVAS_COPY_RX = re.compile(r'<!--\s*dc_to_html:')   # строка происхождения статичной копии артборда в <head>
 
 
+def is_canvas_copy(text):
+    """HTML — статичная копия артборда: строка происхождения dc_to_html в <head>."""
+    end = re.search(r'</head\s*>', text, re.I)
+    return bool(CANVAS_COPY_RX.search(text[:end.start()] if end else text[:4000]))
+
+
 def load_html(text):
     """HTML → единицы текста. У статичной копии артборда <title> — служебное имя артборда («Главная · 1440»), а не
     заголовок страницы: он не читается, иначе ширина и номер из имени сверяются как числа утверждения."""
-    end = re.search(r'</head\s*>', text, re.I)
-    p = _HTMLUnits(skip_title=bool(CANVAS_COPY_RX.search(text[:end.start()] if end else text[:4000])))
+    p = _HTMLUnits(skip_title=is_canvas_copy(text))
     p.feed(text)
     p.close()
     seen, out = set(), []
@@ -1051,9 +1078,143 @@ def load_input(path, fmt='auto', all_variants=False):
         units = load_md(text)
     elif fmt == 'html':
         units = load_html(text)
+        meta['canvas_copy'] = is_canvas_copy(text)
     else:
         units = load_text(text)
     return units, fmt, meta
+
+
+def _flat(s):
+    """Текст для привязки к слоту: вид пробелов, тире и кавычек приведён, регистр сохранён."""
+    return re.sub(r'\s+', ' ', unicodedata.normalize('NFKC', (s or '').translate(_HARD)).replace('…', '...')).strip()
+
+
+def bind_units(units, deck_units):
+    """Привязка единиц входа без слотов к слотам copy deck по тексту. Единица с текстом слота (без регистра, вида
+    пробелов, тире и кавычек) получает его страницу, секцию, слот, тип и fact_ids; единица, в которой тексты
+    нескольких слотов стоят подряд (строка без блочных тегов), делится на привязанные части и остаток без привязки.
+    Текст, которого в copy deck нет, остаётся как был. → (единицы, число привязанных)."""
+    by_text = {}
+    for d in deck_units:
+        k = _flat(d['text']).lower()
+        if k and not d.get('alt'):
+            by_text.setdefault(k, d)
+    parts_rx = [(re.compile(r'(?<!\w)' + re.escape(k) + r'(?!\w)'), d) for k, d in sorted(by_text.items(), key=lambda x: -len(x[0]))]
+
+    def bound(u, d, text, uid):
+        return dict(d, id=uid, text=text, line=u.get('line'), alt=False, bound=True)
+
+    out, n = [], 0
+    for u in units:
+        t = _flat(u['text'])
+        low = t.lower()
+        d = by_text.get(low)
+        if d is not None:
+            out.append(bound(u, d, u['text'], u['id']))
+            n += 1
+            continue
+        hits = []
+        if len(low) == len(t):   # позиции в тексте без регистра те же, что в исходном
+            taken = [False] * len(t)
+            for rx, d in parts_rx:
+                m = rx.search(low)
+                while m and any(taken[m.start():m.end()]):
+                    m = rx.search(low, m.end())
+                if m:
+                    hits.append((m.start(), m.end(), d))
+                    taken[m.start():m.end()] = [True] * (m.end() - m.start())
+        if not hits:
+            out.append(u)
+            continue
+        for i, (a, b, d) in enumerate(sorted(hits, key=lambda x: x[0]), 1):
+            out.append(bound(u, d, t[a:b], f"{u['id']}.{i}"))
+            n += 1
+        rest = re.sub(r'\s+', ' ', ''.join(' ' if taken[i] else ch for i, ch in enumerate(t))).strip()
+        if re.search(r'\w', rest):
+            out.append(dict(u, id=f"{u['id']}.0", text=rest))
+    return out, n
+
+
+# Обход эвристик сверки — как claims_allow слота и страницы copy deck: запись покрывает находки своего семейства. Право
+# (COPY-L-…), never_claim, «утверждение шире факта» и остальная сверка не обходятся.
+ALLOW_FAMILIES = {'COPY-F-CLASS': ('COPY-F-CLASS',), 'COPY-F-NUM': ('COPY-F-NUM', 'COPY-F-NUM-MISMATCH')}
+
+
+def load_allow(path):
+    """Обходы сверки из JSON: поле allowed вывода copydeck.py (validate --final, check, claims) или список записей
+    {rule, where, reason, by[, fragment]}. → (действующие записи, заметки о недействующих). Действует запись с правилом
+    семейства ALLOW_FAMILIES, причиной (reason) и тем, кто решил (by)."""
+    with open(path, encoding='utf-8') as f:
+        data = json.load(f)
+    raw = data.get('allowed') if isinstance(data, dict) else data
+    if not isinstance(raw, list):
+        raise SystemExit(f'{path}: нет списка обходов (поле allowed или список записей)')
+    family = {r: fam for fam, rs in ALLOW_FAMILIES.items() for r in rs}
+    ok, notes = [], []
+    for e in raw:
+        e = e if isinstance(e, dict) else {'rule': e}
+        rule, where, reason, by = (str(e.get(k) or '').strip() for k in ('rule', 'where', 'reason', 'by'))
+        if rule not in family:
+            notes.append(f"обход «{rule or '—'}» ({where or '—'}) не действует: обходятся только {' и '.join(ALLOW_FAMILIES)}")
+        elif not reason or not by:
+            notes.append(f"обход {rule} ({where or '—'}) не действует: нет reason или by")
+        else:
+            rec = {'rule': family[rule], 'where': where, 'reason': reason, 'by': by, 'fragment': norm(str(e.get('fragment') or ''))}
+            if rec not in ok:
+                ok.append(rec)
+    return ok, notes
+
+
+def unit_place(u):
+    """Место единицы в copy deck: «страница/секция/слот» или None — у единицы без слота."""
+    return '/'.join(str(u[k]) for k in ('page', 'section', 'slot')) if all(u.get(k) for k in ('page', 'section', 'slot')) else None
+
+
+def apply_allow(F, units, entries):
+    """Находка под обходом → info с причиной и тем, кто решил. Место обхода — слот или страница единицы; у единицы без
+    слота — запись с тем же фрагментом. → (число обойдённых находок, число записей, которым не нашлось места: слот или
+    страница без единиц со слотами во входе)."""
+    by_id = {u['id']: u for u in units}
+    places = {unit_place(u) for u in units} | {str(u.get('page')) for u in units if unit_place(u)}
+    n = 0
+    for f in F:
+        u = by_id.get(f['unit']) or {}
+        place = unit_place(u)
+        for e in entries:
+            if f['rule'] not in ALLOW_FAMILIES[e['rule']]:
+                continue
+            if place:
+                if e['where'] not in (place, str(u.get('page'))):
+                    continue
+            elif not e['fragment'] or e['fragment'] != norm(str(f['fragment'])):
+                continue
+            if f['level'] != 'info':
+                f['level_was'], f['level'] = f['level'], 'info'
+            f['allowed'] = {k: e[k] for k in ('rule', 'where', 'reason', 'by')}
+            f['message'] += f" — обход claims_allow: {e['reason']} ({e['by']})"
+            n += 1
+            break
+    return n, sum(1 for e in entries if e['where'] not in places and not e['fragment'])
+
+
+# Эвристики сверки, которым нужен слот и его факты: у текста статичной копии артборда без привязки к copy deck они —
+# info. Право, never_claim, «утверждение шире факта» и проблемы самих фактов в список не входят.
+UNBOUND_SOFT = {'COPY-F-NUM', 'COPY-F-NUM-MISMATCH', 'COPY-F-NUM-WORDS', 'COPY-F-DATE', 'COPY-F-RATING', 'COPY-F-QUOTE',
+                'COPY-F-QUOTE-EDIT', 'COPY-F-QUOTE-RECUT', 'COPY-F-NAME', 'COPY-F-CLASS', 'COPY-F-PROPERTY', 'COPY-F-USE',
+                'COPY-F-NEARBY', 'COPY-F-UNSUPPORTED', 'COPY-F-PLACEHOLDER-UNLISTED'}
+
+
+def soften_unbound(F, units):
+    """Статичная копия артборда: находки эвристик у единиц без привязки к слоту copy deck → info. → число смягчённых."""
+    bound = {u['id'] for u in units if u.get('bound')}
+    n = 0
+    for f in F:
+        if f['unit'] in bound or f['rule'] not in UNBOUND_SOFT or f['level'] == 'info':
+            continue
+        f['level_was'], f['level'] = f['level'], 'info'
+        f['message'] += ' — копия артборда: текст не привязан к слоту copy deck (сверка по слотам — ключ --deck)'
+        n += 1
+    return n
 
 
 # ================================================================ факты
@@ -1144,6 +1305,7 @@ class Facts:
             for w in WORD_RX.findall(n):
                 self.name_stems.setdefault(stem(w), v)
         self.digit_names = [name_rx(str(n)) for e in self.entities for n in e.get('names') or [] if re.search(r'\d', str(n))]
+        self.product_names = [name_rx(str(n)) for e in self.entities if e.get('type') == 'product' for n in e.get('names') or []]
         self.all_stems = set().union(*self.stems.values()) if self.stems else set()
         self.never = []
         for r in data.get('never_claim') or []:
@@ -1165,6 +1327,12 @@ class Facts:
         телефоны и даты. Написание заявил владелец фактов, поэтому имя из одних цифр закрывает это число в любом месте
         текста."""
         return [m.span() for rx in self.digit_names for m in rx.finditer(text or '')]
+
+    def product_spans(self, text):
+        """Места имён продуктов и услуг (entities[] вида product): [(начало, конец)]. Слово внутри имени — часть
+        названия, а не условие покупки: услуга «Доставка обедов» — не условие доставки, «Обмен валюты» — не обмен
+        товара."""
+        return [m.span() for rx in self.product_names for m in rx.finditer(text or '')]
 
 
 def name_rx(name):
@@ -1198,10 +1366,10 @@ def load_schema(path=SCHEMA_PATH):
 
 
 # ================================================================ внешние правила: правовой модуль
-# Правила — 08-russian-legal-typography/claims-rules.yaml (подхватывается сам) и --rules.
-# Файл правил общий с copy_lint.py: у правила есть `pattern` в синтаксисе линтера (макросы %B% %E% %W%), `unless`,
-# `examples: {bad, good}` строками, поля линтера (group, count_as_marker, priority…) claims_check не читает; поля права
-# (claim_class, requires, jurisdiction, legal_category, law) не читает copy_lint. Это не юридическое заключение.
+# Правила — 08-russian-legal-typography/claims-rules.yaml (подхватывается сам) и --rules. Право формулировок
+# проверяется только здесь: copy_lint.py этот файл не подключает. Формат правила совместим с линтером: `pattern` в его
+# синтаксисе (макросы %B% %E% %W%), `unless`, `examples: {bad, good}` строками; поля линтера (group, count_as_marker,
+# priority…) claims_check не читает. Это не юридическое заключение.
 LEGAL_MODULE_VERSION = '2.1'
 JURISDICTIONS = ('ru', 'eu', 'us', 'other')
 LEGAL_CATEGORIES = ('finance', 'medical', 'dietary-supplements', 'alcohol', 'education', 'real-estate', 'other', 'general')
@@ -1220,7 +1388,7 @@ _STRS = {'type': 'array', 'items': {'type': 'string'}}
 RULES_SCHEMA = {
     '$schema': 'https://json-schema.org/draft/2020-12/schema',
     '$id': 'urn:app-design:text-research:claims-rules:1',
-    'title': 'claims-rules.yaml — правовые правила формулировок для claims_check.py; файл читает и copy_lint.py',
+    'title': 'claims-rules.yaml — правовые правила формулировок для claims_check.py; формат правила совместим с copy_lint.py',
     'type': 'object', 'required': ['version', 'date', 'rules'], 'additionalProperties': True,
     'properties': {
         'version': {'const': 1}, 'date': {'type': 'string'}, 'jurisdiction': {'type': 'string'},
@@ -1233,7 +1401,7 @@ RULES_SCHEMA = {
                 'title': _STR, 'level': {'enum': ['error', 'warning', 'info']},
                 'claim_class': {'type': 'array', 'items': {'type': 'string'}, 'description': 'классы x-claim-classes: маркер класса (trigger class|any) и отбор фактов для requires'},
                 'patterns': {'type': 'array', 'items': {'type': 'string'}, 'description': 'Python re, регистр не важен; ищутся в soft-тексте (ё→е, тире→«-», NBSP→пробел)'},
-                'pattern': {'type': 'string', 'description': 'одна регулярка в синтаксисе copy_lint (макросы %B% %E% %W%) — её читают обе утилиты'},
+                'pattern': {'type': 'string', 'description': 'одна регулярка в синтаксисе copy_lint (макросы %B% %E% %W%)'},
                 'unless': {'type': 'string', 'description': 'исключение — найдено в том же предложении, что и срабатывание, — правило молчит (как в copy_lint)'},
                 'trigger': {'enum': ['pattern', 'class', 'any'], 'description': 'pattern — только регулярки; class — только маркеры claim_class; any (по умолчанию) — регулярки, затем маркеры'},
                 'lang': {'enum': ['ru', 'en', 'any'], 'description': 'язык единицы (кириллица против латиницы)'},
@@ -1262,7 +1430,7 @@ RULES_SCHEMA = {
                     'in_force': {'type': 'string', 'description': 'дата вступления, если норма новая или не вступила'},
                     'url': {'type': 'string'}, 'note': {'type': 'string'}}}},
                 'date': _STR, 'evidence': _STR, 'note': _STR,
-                'examples': {'type': 'object', 'description': 'bad / good — строки (их проверяют selftest обеих утилит); bad_en, good_en; контекст теста: slot_type, legal_category, jurisdiction, genre'},
+                'examples': {'type': 'object', 'description': 'bad / good — строки (их проверяет --selftest); bad_en, good_en; контекст теста: slot_type, legal_category, jurisdiction, genre'},
                 # поля формата copy_lint (06-anti-slop/02-linter-spec-and-profiles.md §2.1): claims_check их не читает
                 'group': _STR, 'marker_id': _STR, 'count_as_marker': {'type': 'boolean'}, 'flags': _STR,
                 'priority': {'type': 'integer'}, 'levels': {'type': 'object'}, 'slot_levels': {'type': 'object'},
@@ -1892,6 +2060,8 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                     add(F, 'error', 'COPY-F-NAME', u, name, 'client-logo', f"сущность {ent.get('id')} ({ent.get('type')}) без факта с разрешением", 'Добавьте fact_id с разрешением или уберите имя.')
                 continue
             ctx = u.get('slot_type') in ATTRIB_SLOTS or bool(find_markers(body, ['client-logo', 'testimonial-quote']))
+            if not ctx and is_public_body(name):
+                continue   # орган власти вне списка клиентов и подписи отзыва — не имя, которому нужен факт
             add(F, 'error' if ctx else 'warning', 'COPY-F-NAME', u, name, 'client-logo' if ctx else None,
                 'имя или название не найдено в facts.yaml (entities, факты)',
                 'Проверьте, что это реальный клиент, человек или место с фактом и разрешением; иначе уберите или замените на [PLACEHOLDER].')
@@ -1913,8 +2083,14 @@ def check_units(units, facts, today, rules=(), strict=False, genre=None, verbose
                     'Подпишите так, как разрешил человек (permission.shows: имя, инициалы, должность, город), или получите письменное согласие и согласие на распространение ПДн.', [fid])
         # ---- маркеры классов
         markers = find_markers(body)
-        for cl in sorted(set(u.get('claim_flags') or []) - set(markers) - {'fact-number', 'fact-property'}):
-            pass
+        if 'purchase-terms' in markers and facts.product_names:
+            # корень условия покупки внутри имени услуги или продукта из entities — название, а не условие
+            pspans = facts.product_spans(soft(body))
+            kept = [(frag, pos) for frag, pos in markers['purchase-terms'] if not any(a <= pos < b for a, b in pspans)]
+            if kept:
+                markers['purchase-terms'] = kept
+            else:
+                del markers['purchase-terms']
         spans = sentence_spans(body)
         for cl, hits in markers.items():
             for frag, pos in hits[:3]:
@@ -2287,6 +2463,13 @@ def class_fix(cl, facts):
     return f'Нужен факт класса {cl} ({needs})' + (f'; нормы права: {law}' if law else '') + '; до этого — убрать утверждение или [PLACEHOLDER].'
 
 
+def is_public_body(name):
+    """Имя — орган власти из PUBLIC_BODIES (в любом падеже, с «России» или «РФ» рядом), а не название с тем же словом."""
+    ws = [soft(w) for w in re.split(r'[\s-]+', name) if w]
+    body = [w for w in ws if w not in ('россии', 'рф')]
+    return bool(body) and all(w in PUBLIC_BODIES or any(stem_like(stem(w), stem(b)) for b in PUBLIC_BODIES if len(b) > 4) for w in body)
+
+
 def stem_like(a, b):
     """Основы одного имени в разных падежах: «серге» (Сергея) и «серг» (Сергей), «лапин» и «лапин»."""
     return a == b or (min(len(a), len(b)) >= 4 and (a.startswith(b) or b.startswith(a)) and abs(len(a) - len(b)) <= 2)
@@ -2396,6 +2579,13 @@ def to_md(res):
         L += ['', '## Подтверждённые утверждения', '', '| Единица | Фрагмент | Факт | Как |', '|---|---|---|---|']
         for c in res['supported'][:200]:
             L.append(f"| {md_escape(c['unit'])} | {md_escape(str(c['fragment'])[:60])} | fact:{c['fact']} | {c['how']} |")
+    if res.get('binding'):
+        b = res['binding']
+        L += ['', f"Привязка к copy deck `{b['deck']}`: единиц {b['units']}, со слотом {b['bound']}, без привязки {b['unbound']}"]
+    if res.get('softened'):
+        L += ['', f"Копия артборда: {res['softened']} находок эвристик у текста без привязки к слоту — info (сверка по слотам — ключ --deck)"]
+    if res.get('allow'):
+        L += ['', f"Обходы `{res['allow']['file']}`: записей {res['allow']['entries']}, находок под обходом {res['allow']['applied']}"]
     if res.get('rules_loaded'):
         L += ['', f"Внешние правила: {', '.join(res['rules_loaded'])}"]
     lg = res.get('legal')
@@ -2428,6 +2618,14 @@ def cmd_check(a):
     schema = load_schema(a.schema)
     facts = load_facts(a.facts, schema, not a.no_default_never)
     units, fmt, meta = load_input(a.input, a.format, a.all_variants)
+    binding = None
+    if a.deck:
+        if fmt == 'deck':
+            raise SystemExit('--deck: вход — copy deck, его единицы уже со слотами; ключ нужен HTML, Markdown и тексту')
+        dunits, _dfmt, dmeta = load_input(a.deck, 'deck')
+        units, n_bound = bind_units(units, dunits)
+        meta = dict({k: v for k, v in dmeta.items() if k in ('jurisdiction', 'legal_category')}, **meta)
+        binding = {'deck': a.deck, 'units': len(units), 'bound': n_bound, 'unbound': sum(1 for u in units if not u.get('bound'))}
     rule_paths = list(a.rules or [])
     if not a.no_external_rules and os.path.exists(RULES_PATH):
         rule_paths.insert(0, RULES_PATH)
@@ -2440,18 +2638,37 @@ def cmd_check(a):
     ctx = legal_ctx(jur, cats)
     F, ok_claims, stats = check_units(units, facts, today, rules, a.strict, a.genre, a.verbose, ctx, final=a.final)
     rule_ids = {r['id'] for r in rules}
+    allow = None
+    if a.allow:
+        entries, anotes = load_allow(a.allow)
+        n_allowed, n_lost = apply_allow(F, units, entries)
+        if n_lost:
+            anotes.append(f'обходов без места во входе: {n_lost} — слот или страница copy deck; у входа без слотов нужен ключ --deck '
+                          'или записи с фрагментом (copydeck.py check --json)')
+        if not a.quiet:
+            for x in anotes:
+                print('обходы:', x, file=sys.stderr)
+        allow = {'file': a.allow, 'entries': len(entries), 'applied': n_allowed, 'notes': anotes}
+    softened = soften_unbound(F, units) if meta.get('canvas_copy') else 0
     if a.legal_only:
         F = [f for f in F if f['rule'] in rule_ids]
     res = {'tool': 'claims_check.py', 'version': VERSION, 'today': today.isoformat(), 'input': a.input, 'format': fmt,
            'facts': a.facts, 'schema': os.path.relpath(a.schema, ROOT) if os.path.exists(a.schema) else None,
            'rules_loaded': [os.path.relpath(p, ROOT) if p.startswith(ROOT) else p for p in rule_paths if os.path.exists(p)],
            'summary': summarize(F, stats), 'findings': F, 'supported': ok_claims if a.verbose else [], 'verbose': a.verbose, 'final': bool(a.final),
+           'canvas_copy': bool(meta.get('canvas_copy')), 'softened': softened, 'binding': binding, 'allow': allow,
            'legal': {'module': LEGAL_MODULE_VERSION, 'jurisdiction': ctx['jurisdiction'], 'legal_category': sorted(ctx['categories']),
                      'rules': len(rules), 'findings': sum(1 for f in F if f['rule'] in rule_ids), 'legal_only': bool(a.legal_only)}}
     write_outputs(res, a)
     if not a.quiet:
         s = res['summary']
         print(f"claims_check: {s['error']} error, {s['warning']} warning, {s['info']} info; утверждений {s['claims']}, подтверждено {s['supported']}; [PLACEHOLDER] {s['placeholders']}")
+        if binding:
+            print(f"  привязка к copy deck: единиц {binding['units']}, со слотом {binding['bound']}, без привязки {binding['unbound']}")
+        if softened:
+            print(f"  копия артборда: {softened} находок эвристик у текста без привязки к слоту — info (сверка по слотам — ключ --deck)")
+        if allow:
+            print(f"  обходы {os.path.basename(a.allow)}: записей {allow['entries']}, находок под обходом {allow['applied']}")
         for f in F:
             if f['level'] == 'error' or a.verbose:
                 print(f"  {f['level'].upper():7} {f['rule']:26} {loc_str(f['location'])[:40]:40} «{str(f['fragment'])[:50]}» — {f['message'][:110]}")
@@ -2810,6 +3027,110 @@ def _selftest_legal(check):
         with open(pout, encoding='utf-8') as f:
             res = json.load(f)
         check('право: CLI --legal-only: только COPY-L, код 2, блок legal', code == 2 and res['findings'] and all(x['rule'].startswith('COPY-L-') for x in res['findings']) and res['legal']['jurisdiction'] == 'ru', (code, res.get('legal'), [x['rule'] for x in res['findings']]))
+        check('право: одно нарушение — одна находка права', [(x['rule'], x['level']) for x in res['findings']] == [('COPY-L-SUP-01', 'error')], [(x['rule'], x['level']) for x in res['findings']])
+
+
+def _selftest_binding(check, facts):
+    """Привязка входа без слотов к copy deck, обходы --allow, статичная копия артборда, имена услуг и ведомств."""
+    today = dt.date(2026, 9, 24).isoformat()
+    deck = {'copy_deck': {'version': 0, 'pages': [{'page_id': 'home', 'page_type': 'landing-waitlist', 'sections': [
+        {'section_id': 'hero', 'section_role': 'hero', 'slots': [
+            {'slot_id': 'h1', 'slot_type': 'headline', 'variants': [{'id': 'a', 'text': 'Лампа для чтения'}], 'chosen': 'a', 'fact_ids': []},
+            {'slot_id': 'sub', 'slot_type': 'subheadline', 'variants': [{'id': 'a', 'text': 'Первые 300 ламп — 8 900 ₽'}], 'chosen': 'a', 'fact_ids': ['price']},
+            {'slot_id': 'note', 'slot_type': 'cta-note', 'variants': [{'id': 'a', 'text': 'Зарплата мастера — в смете'}], 'chosen': 'a', 'fact_ids': []}]}]}]}}
+    head = '<!doctype html><html><head><title>Главная · 1440</title>\n<!-- dc_to_html: статичная копия артборда Home-1440.dc.html -->'
+    copy_html = (head + '</head><body><h1>Лампа для чтения</h1><p>Первые 300\u00a0ламп — 8 900 ₽</p><div><span>Зарплата мастера — в смете</span> '
+                 '<span>Ещё 5 000 довольных клиентов</span></div><p>Лампа бережёт глаза</p></body></html>')
+    with tempfile.TemporaryDirectory() as td:
+        fp, dp, hp, jp = (os.path.join(td, x) for x in ('facts.yaml', 'deck.yaml', 'Home-1440.html', 'out.json'))
+        with open(fp, 'w', encoding='utf-8') as fo:
+            yaml.safe_dump(facts.data, fo, allow_unicode=True, sort_keys=False)
+        with open(dp, 'w', encoding='utf-8') as fo:
+            yaml.safe_dump(deck, fo, allow_unicode=True, sort_keys=False)
+        with open(hp, 'w', encoding='utf-8') as fo:
+            fo.write(copy_html)
+
+        def run(inp, *keys):
+            code = main(['check', inp, '--facts', fp, '--today', today, '--quiet', '--no-external-rules', '--json', jp, *keys])
+            with open(jp, encoding='utf-8') as fi:
+                return code, json.load(fi)
+
+        def lv(res, rule):
+            return sorted({f['level'] for f in res['findings'] if f['rule'] == rule})
+        code, res = run(hp)
+        soft_rules = {f['rule'] for f in res['findings'] if f.get('level_was')}
+        check('копия артборда без --deck: находки эвристик — info, never_claim остаётся error',
+              res['canvas_copy'] and res['softened'] >= 2 and {'COPY-F-CLASS', 'COPY-F-NUM'} <= soft_rules and lv(res, 'COPY-F-NEVER') == ['error']
+              and not [f for f in res['findings'] if f['level'] == 'error' and f['rule'] != 'COPY-F-NEVER'], (code, [(f['rule'], f['level']) for f in res['findings']]))
+        with open(hp, 'w', encoding='utf-8') as fo:
+            fo.write(copy_html.replace('<p>Лампа бережёт глаза</p>', ''))
+        code, res = run(hp)
+        check('копия артборда без --deck и без запретов: 0 error, код 0', code == 0 and res['summary']['error'] == 0 and res['softened'] >= 2,
+              (code, [(f['rule'], f['level']) for f in res['findings']]))
+        code, res = run(hp, '--deck', dp)
+        bound = {(f['rule'], f['location'].get('slot'), f['level']) for f in res['findings']}
+        check('копия артборда с --deck: текст слота сверяется как слот (страница, секция, тип, fact_ids), текст вне copy deck — без привязки',
+              res['binding'] and res['binding']['bound'] == 3 and res['binding']['unbound'] == 1
+              and ('COPY-F-CLASS', 'note', 'error') in bound and not [x for x in bound if x[1] == 'sub' and x[2] == 'error']
+              and lv(res, 'COPY-F-NUM') == ['info'] and code == 2, (code, res.get('binding'), sorted(bound, key=str)))
+        ap = os.path.join(td, 'allowed.json')
+        with open(ap, 'w', encoding='utf-8') as fo:
+            json.dump({'allowed': [{'rule': 'COPY-F-CLASS', 'where': 'home/hero/note', 'reason': 'зарплата — строка сметы, не доход клиента', 'by': 'заказчик', 'scope': 'slot'},
+                                   {'rule': 'COPY-L-SUP-01', 'where': 'home', 'reason': 'слоган', 'by': 'заказчик', 'scope': 'page'},
+                                   {'rule': 'COPY-F-NUM', 'where': 'home/hero/sub', 'reason': '', 'by': 'заказчик'}]}, fo, ensure_ascii=False)
+        code_a, res_a = run(hp, '--deck', dp, '--allow', ap)
+        fa = [f for f in res_a['findings'] if f.get('allowed')]
+        check('--allow: находка слота под обходом — info с причиной и тем, кто решил; без файла она error',
+              code_a == 0 and len(fa) == 1 and fa[0]['rule'] == 'COPY-F-CLASS' and fa[0]['level'] == 'info' and fa[0]['level_was'] == 'error'
+              and 'строка сметы' in fa[0]['message'] and fa[0]['allowed']['by'] == 'заказчик' and res_a['allow']['applied'] == 1,
+              (code_a, [(f['rule'], f['level'], f.get('allowed')) for f in res_a['findings']]))
+        check('--allow: запись с правилом права и запись без reason не действуют',
+              res_a['allow']['entries'] == 1 and len(res_a['allow']['notes']) == 2, res_a['allow'])
+        code_d, res_d = run(dp, '--allow', ap)
+        check('--allow на copy deck: место обхода — слот страницы', code_d == 0 and res_d['allow']['applied'] == 1
+              and [f['location'].get('slot') for f in res_d['findings'] if f.get('allowed')] == ['note'], (code_d, res_d['allow']))
+        tp = os.path.join(td, 'page.txt')
+        with open(tp, 'w', encoding='utf-8') as fo:
+            fo.write('Зарплата мастера — в смете\n')
+        with open(ap, 'w', encoding='utf-8') as fo:
+            json.dump([{'rule': 'COPY-F-CLASS', 'where': 'home/hero/note', 'fragment': 'Зарплата', 'reason': 'строка сметы', 'by': 'аналитик'}], fo, ensure_ascii=False)
+        code_t0, res_t0 = run(tp)
+        code_t, res_t = run(tp, '--allow', ap)
+        check('--allow у текста без слотов: обход по фрагменту записи; без файла находка есть',
+              code_t0 == 2 and lv(res_t0, 'COPY-F-CLASS') == ['error'] and code_t == 0 and lv(res_t, 'COPY-F-CLASS') == ['info'], (code_t0, code_t, res_t['findings']))
+        with open(ap, 'w', encoding='utf-8') as fo:
+            json.dump([{'rule': 'COPY-F-CLASS', 'where': 'home/hero/note', 'reason': 'строка сметы', 'by': 'аналитик'}], fo, ensure_ascii=False)
+        code_t, res_t = run(tp, '--allow', ap)
+        check('--allow у текста без слотов: записи слота без фрагмента не находится места — находка остаётся',
+              code_t == 2 and res_t['allow']['applied'] == 0 and any('без места' in x for x in res_t['allow']['notes']), (code_t, res_t['allow']))
+    schema = load_schema()
+    svc = Facts({'facts': [], 'never_claim_defaults': 'none',
+                 'entities': [{'id': 'svc-lunch', 'type': 'product', 'names': ['Доставка обедов', 'доставки обедов']}]}, schema, False)
+
+    def classes(text, fx):
+        F_, _, _ = check_units([unit('t', text)], fx, dt.date(2026, 9, 24))
+        return [(f['fragment'], f['claim_class']) for f in F_ if f['rule'] == 'COPY-F-CLASS']
+    check('имя услуги из entities вида product с корнем условия покупки — не маркер класса',
+          not classes('Доставка обедов в офис — наша главная услуга', svc) and not classes('У доставки обедов есть меню на неделю', svc),
+          classes('Доставка обедов в офис — наша главная услуга', svc))
+    check('тот же корень вне имени услуги — находка класса purchase-terms',
+          [c for _f, c in classes('Доставка по городу — в день заказа', svc)] == ['purchase-terms']
+          and [c for _f, c in classes('Доставка обедов в офис — наша главная услуга', Facts({'facts': [], 'never_claim_defaults': 'none'}, schema, False))] == ['purchase-terms'],
+          classes('Доставка по городу — в день заказа', svc))
+
+    def names(text, **kw):
+        F_, _, _ = check_units([unit('t', text, **kw)], facts, dt.date(2026, 9, 24))
+        return [(f['fragment'], f['level']) for f in F_ if f['rule'] == 'COPY-F-NAME']
+    check('ведомство в тексте (жалоба в Роскомнадзор, сведения ФНС) — не имя без факта',
+          not names('Жалобу на обработку данных можно подать в Роскомнадзор') and not names('Реквизиты проверены по сведениям ФНС'),
+          names('Жалобу на обработку данных можно подать в Роскомнадзор') + names('Реквизиты проверены по сведениям ФНС'))
+    check('название со словом ведомства и другим словом — имя без факта', [n for n, _l in names('Поставщик плитки — завод ФАС Керамика')] == ['ФАС Керамика'],
+          names('Поставщик плитки — завод ФАС Керамика'))
+    check('ведомство в списке клиентов — имя без факта, error',
+          ('Роскомнадзор', 'error') in names('Нам доверяют Роскомнадзор и другие заказчики'), names('Нам доверяют Роскомнадзор и другие заказчики'))
+    check('город из сущности вида place и неизвестный город: первый известен, второй — имя без факта',
+          not names('Собираем и отправляем из Казани') and [n for n, _l in names('Собираем и отправляем из Самары')] == ['Самары'],
+          (names('Собираем и отправляем из Казани'), names('Собираем и отправляем из Самары')))
 
 
 EXAMPLE_DECKS = os.path.join(ROOT, '10-templates-recipes', 'examples')
@@ -3155,6 +3476,7 @@ def cmd_selftest(_a=None):
     F, _, _ = check_units([unit('r', 'Купите в кредит, банк Альфа')], facts, dt.date(2026, 9, 24), rules)
     check('внешнее правило: оговорка рядом снимает', not any(f['rule'] == 'COPY-L-TEST-01' for f in F), F)
     check('rules-schema — валидный JSON', bool(json.loads(json.dumps(RULES_SCHEMA))))
+    _selftest_binding(check, facts)   # привязка к copy deck, обходы, копия артборда, имена услуг и ведомств
     _selftest_legal(check)   # правовой модуль
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
@@ -3167,7 +3489,11 @@ def main(argv=None):
         return cmd_selftest()
     cmds = {'check', 'inventory', 'lint-facts', 'rules-schema'}
     cmd = argv.pop(0) if argv and argv[0] in cmds else 'check'
-    p = argparse.ArgumentParser(prog=f'claims_check.py {cmd}', description=__doc__.split('\n')[0])
+    p = argparse.ArgumentParser(prog=f'claims_check.py {cmd}', description=__doc__.split('\n')[0],
+                                formatter_class=argparse.RawDescriptionHelpFormatter,
+                                epilog='подкоманды: check INPUT (по умолчанию) — сверка текста с фактами; lint-facts FACTS — проверка инвентаря фактов\n'
+                                       'обслуживание базы (в маршруте этапов проекта не участвует): inventory INPUT — утверждения по классам и\n'
+                                       '  доля с видимым источником (замеры корпуса страниц); rules-schema — JSON Schema правил права')
     if cmd == 'rules-schema':
         return cmd_rules_schema(p.parse_args(argv))
     p.add_argument('input')
@@ -3190,6 +3516,9 @@ def main(argv=None):
         p.add_argument('--jurisdiction', choices=list(JURISDICTIONS), help='право: ru (по умолчанию), eu, us, other; иначе — из facts.yaml')
         p.add_argument('--legal-category', help='отрасль через запятую: finance, medical, dietary-supplements, alcohol, education, real-estate, other, general')
         p.add_argument('--legal-only', action='store_true', help='в отчёт — только находки правил права (claims-rules.yaml, --rules)')
+        p.add_argument('--deck', help='copy deck: вход без слотов (HTML, Markdown, текст) привязывается к его слотам по тексту')
+        p.add_argument('--allow', help='обходы сверки: JSON с полем allowed (вывод copydeck.py validate --final --json) или список '
+                                       'записей {rule, where, reason, by[, fragment]}; находка под обходом — info с причиной')
     if cmd in ('check', 'lint-facts'):
         p.add_argument('--final', action='store_true', help='ворота публикации: демо-данные (example: true) — error; '
                                                             'у lint-facts ещё разрешение pending — error')

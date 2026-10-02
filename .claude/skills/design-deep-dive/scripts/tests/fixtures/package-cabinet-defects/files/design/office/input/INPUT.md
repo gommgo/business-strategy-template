@@ -11,6 +11,7 @@ units:
 - request-new
 - requests-list
 built_by: canvas_input
+demo_anchor: '2026-09-29'
 check:
   error: 0
   warning: 1
@@ -19,10 +20,10 @@ files:
   ACCEPTANCE.md: sha256:47e828cf4ce6cc63c3bc5da36f502966275a56de8cdee88eae2d0aeddcec11ab
   assets.md: sha256:a639c884bedb7f5b4700e4bd3596e31300b46c0c2907362cd7c79aaf88149206
   brief.yaml: sha256:a9f03843d8f3610c6f464aaa0831d5df7b1c351cc7f7e0b5f236d2b2ea7907f2
-  contract.md: sha256:252acc176ad7ee4459cedae6478aa5e4c31836ab2c892ed937140d7a37af239a
+  contract.md: sha256:0dbacd12e0d58c123db1d6fb714556763b9374dd870947d9b0bbc6a9ee582fb7
   copy.md: sha256:456134aab65cafd47882c90ebe6414b6e9284975c2257a982e503b0a4e5f637c
-  demo-data.json: sha256:0ed1f8ddd7d77b02b3cbeb13d767e8dfa6f0f322c0deff152a703371e4efac7d
-manifest: sha256:747f898d95cdf3c8905b7ecb30fc7cf3dcf6e05d764c4c2644e8e60d0f0be090
+  demo-data.json: sha256:8ad5dbea9e6ed789b5dac16dea5b10a576c3f9e175371612108095d6c7042315
+manifest: sha256:138f919c12abc793e8d6199af7a06f4a739049a277e9678ff77d4b20aa008026
 ---
 # Вход холста — `office` (web · app), этап `mockup`
 
@@ -36,7 +37,7 @@ manifest: sha256:747f898d95cdf3c8905b7ecb30fc7cf3dcf6e05d764c4c2644e8e60d0f0be09
 |---|---|---|---|
 | action | `docs/projects/otves-office/action.md` | — | `sha256:42b81e17beec1f006327da6d298c8d8908f5c0d42a3c675f0c1a57b651985da0` |
 | capability | `docs/projects/otves-office/capability/office.md` | — | `sha256:5d0868c88cd752e22a40af5505ec4d1d6172a1e4a287f05013318b3cfc1ea654` |
-| artifacts | `docs/projects/otves-office/design/ARTIFACTS.md` | — | `sha256:4d37f2993831cfdda940c370b20efec32163c82b8ed96960894449e5638db581` |
+| artifacts | `docs/projects/otves-office/design/ARTIFACTS.md` | — | `sha256:d911d55426326653f1a55eb9eecd867ed1555e14f222d4846b9f4331b3b240d1` |
 | design-md | `docs/projects/otves-office/design/DESIGN.md` | — | `sha256:980e7fe3f24016bce4ab20e8f587a60960c55f1e0740930686e9f77133b2ddbe` |
 | ds-project | `docs/projects/otves-office/design/_design-system/project` | — | `sha256:93c9fd471cdb7d3ecf400a3c53999e842144114d1bc0617d2699af0ca89d1433` |
 | app-brief | `docs/projects/otves-office/design/app-brief.yaml` | approved | `sha256:d3c25364ef2a51ab12af4ad6e014b10dc3f75210a147497a1f7a05bcba142808` |
@@ -63,9 +64,10 @@ manifest: sha256:747f898d95cdf3c8905b7ecb30fc7cf3dcf6e05d764c4c2644e8e60d0f0be09
 | screens | `docs/projects/otves-office/screens/office/texts.md` | — | `sha256:3d3c2bd1084e1cfa0faa333734834fdb497e558ced21b457e43b66859e0d3ef2` |
 | user | `docs/projects/otves-office/user.md` | — | `sha256:f6a3d8a78c812a87cb1f62e4673ec8329d5cee88c9a0a5ec97aefc1827958e84` |
 | vision | `docs/projects/otves-office/vision.md` | draft | `sha256:fe81774f1e9ad71dfff632bd52ef7afab2f2b37a1cf93d00e0b42c56ee930a5d` |
+| acceptance-criteria | `kb/common/acceptance-criteria.yaml` | база | `sha256:3b1a196a765688d42b23b296188ac43acb90f88989637fa24a2e323278804bbf` |
 | acceptance-widths | `kb/common/acceptance-widths.yaml` | база | `sha256:d4526b119a7da5391670c82cbd16e7458455c5fd7b84cf72c11bb0add78a2d7c` |
 | components | `kb/common/components.yaml` | база | `sha256:303205c9eacc3da0dc23ec2eed9fb36fc5282c47b874a3dea4df82c47d28d7e6` |
-| tells | `kb/common/tells.yaml` | база | `sha256:eedf4532a72101f9cdbb9b915a4e9751d0c7f5db5cfb5b82ad490a86f40973ff` |
+| tells | `kb/common/tells.yaml` | база | `sha256:d91a66d002b618398844833bc6d1eeae835cb2e4e0b54261219db83458ca5a8e` |
 | 04-dark-patterns-and-ethics | `kb/ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md` | база | `sha256:5f7a47bffe9d873b2c5d80f721af6a87d199ea306b193e8f37a0938cd82747f4` |
 | screen-states | `kb/ux/06-feedback-states-motion/screen-states.yaml` | база | `sha256:9410eac88fa3489e8fda4ff3c9626819d360bede542567c1e24107c0d11ec0da` |
 | 06-banned-words-and-patterns | `kb/ux/07-ux-writing/06-banned-words-and-patterns.md` | база | `sha256:ee35b9a3e32a1fddae3887b4b99480b1141727a3452dbba7f7adce02b02481f1` |

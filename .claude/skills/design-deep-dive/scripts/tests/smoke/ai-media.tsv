@@ -5,21 +5,21 @@ scripts/ai-media/asset_audit.py	utility	help; run: selftest
 scripts/ai-media/asset_inventory.py	utility	help; run: --selftest	
 scripts/ai-media/avif_pick.sh	utility	compile	
 scripts/ai-media/channel_diff.py	step	compile	
-scripts/ai-media/check_icons.py	utility	help	
+scripts/ai-media/check_icons.py	utility	help; run: --selftest	
 scripts/ai-media/composition_metrics.py	module	import-only	
 scripts/ai-media/data/svgo.keep-signature.config.mjs	data	compile	
 scripts/ai-media/edit_check.py	utility	help; run: selftest	
 scripts/ai-media/image_metrics.py	module	import-only	
 scripts/ai-media/layout_check.py	step	import-only	
-scripts/ai-media/loop_rife_bridge.py	step	compile	
-scripts/ai-media/mp_client.py	utility	help; run: selftest	run: оценки цен сверяются с числами снимков каталогов routerai, genapi, polza на дату самопроверки — без снимков (install.sh --catalogs) данных нет, со свежими снимками цены расходятся
+scripts/ai-media/loop_rife_bridge.py	step	help; run: --selftest	
+scripts/ai-media/mp_client.py	utility	help; run: selftest	
 scripts/ai-media/page_accept.py	utility	help; run: --selftest	
 scripts/ai-media/palette.py	utility	help	
 scripts/ai-media/polza.py	utility	help; run: selftest	
-scripts/ai-media/polza_catalog.py	utility	help; run: selftest --offline	
+scripts/ai-media/polza_catalog.py	utility	help; run: selftest	
 scripts/ai-media/prompt_compile.py	utility	help	
 scripts/ai-media/provenance_check.py	utility	help; run: selftest	run: нужны c2patool 0.27.22 и exiftool 13.59 в $DDD_HOME/bin — install.sh
-scripts/ai-media/routing_check.py	utility	help	
+scripts/ai-media/routing_check.py	utility	help; run: --selftest	
 scripts/ai-media/series_metrics.py	module	import-only	
 scripts/ai-media/split_grid.py	module	import-only	
 scripts/ai-media/split_recraft.py	step	compile	
@@ -43,8 +43,8 @@ scripts/ai-media/tests/fixtures/v2-product.spec.json	data	data
 scripts/ai-media/tests/fixtures/v2-series.spec.json	data	data	
 scripts/ai-media/tests/fixtures/v2-shots.spec.json	data	data	
 scripts/ai-media/tests/test_asset_audit.py	test	help	
-scripts/ai-media/tests/test_prompt_compile.py	test	run: 	run: нужен снимок каталога polza — install.sh --catalogs
-scripts/ai-media/tests/test_prompt_compile_x2.py	test	run: 	run: нужен снимок каталога polza — install.sh --catalogs
+scripts/ai-media/tests/test_prompt_compile.py	test	run: 	
+scripts/ai-media/tests/test_prompt_compile_x2.py	test	run: 	
 scripts/ai-media/text_zone.py	module	import-only	
 scripts/ai-media/tile_check.py	utility	help	
 scripts/ai-media/video_loop_check.py	utility	help; run: selftest	

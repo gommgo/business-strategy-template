@@ -6,8 +6,9 @@
 06-anti-slop/lexicon/ux-07-06.yaml собирает ux_dict_to_yaml.py).
 
 Что делает. Находит маркеры нейрослопа и ошибки жанра по правилам 06-anti-slop/lexicon/*.yaml и внешним файлам
-(G — мета и GEO, H — право и набор; profiles.yaml → external_rules), профилю жанра 06-anti-slop/profiles.yaml и порогам
-03-corpus-measured/thresholds.yaml. Считает метрики на 100 слов: маркеры, тире, «не X, а Y», вопросы, тройки,
+(мета, GEO и набор; profiles.yaml → external_rules), профилю жанра 06-anti-slop/profiles.yaml и порогам
+03-corpus-measured/thresholds.yaml. Право формулировок (правила COPY-L-…) линтер не проверяет — это делает
+claims_check.py: одно нарушение права даёт одну находку. Считает метрики на 100 слов: маркеры, тире, «не X, а Y», вопросы, тройки,
 восклицания, конкретика; ритм предложений и абзацев; ищет следы сверхкоррекции («текст хуманайзера»).
 
 Жанры: landing, site-page, article, meta, geo, email-form — тексты сайта; interface — тексты продукта за входом
@@ -31,8 +32,14 @@ action, object, group, context, status; жанр — interface); «-» — stdin
   scripts/text/copy_lint.py deck.yaml --json                     # copy deck: выбранные варианты; --all-variants — все
   scripts/text/copy_lint.py docs/projects/<slug>/screens/<surface>/texts.md     # реестр текстов, жанр interface
   scripts/text/copy_lint.py - --genre interface --role action    # одна строка интерфейса со stdin
-  scripts/text/copy_lint.py text.txt --metrics-only --json       # только метрики (замеры корпуса)
+  scripts/text/copy_lint.py page.md --facts facts.yaml           # адреса и названия мест из фактов — не деепричастия
   scripts/text/copy_lint.py --selftest                           # словари, сводка уровней по жанрам, калибровки
+Обслуживание базы (в маршруте этапов проекта не участвует):
+  scripts/text/copy_lint.py text.txt --metrics-only --json       # только метрики — замеры корпуса для порогов жанров
+
+Места из фактов. Имена сущностей вида place файла фактов (entities[]: адрес, улица, название места) правило о слове на
+«-ая,» (ux-6-4-10) не трогает: «улица Лесная, дом 3» — адрес, а не деепричастный оборот. Файл фактов — ключ --facts,
+у copy deck — его facts_ref.
 
 Коды выхода: 0 — нет находок уровня error; 2 — есть error (ворота не пройдены); 1 — ошибка вызова, входа или словаря.
 Интерпретатор — $DDD_HOME/venv/bin/python (PyYAML, морфология pymorphy3); без pymorphy3 работают регулярные
@@ -560,6 +567,7 @@ class Document:
     genre_hint: str = ""
     notes: list = field(default_factory=list)
     registry: dict | None = None   # реестр текстов: объекты и действия продукта для межстрочных проверок
+    places: list = field(default_factory=list)   # регулярки имён мест из фактов (entities[] вида place)
 
 
 def ltype(u: Unit) -> str:
@@ -870,6 +878,30 @@ def parse_copy_deck(data, vocab: dict, path: str, all_variants: bool = False) ->
     return units, genre_hint
 
 
+PLACE_RULES = {"ux-6-4-10"}     # слово на «-ая,» в адресе и названии места — не деепричастный оборот
+_PLACES: dict = {}
+
+
+def place_patterns(facts_path: str | Path) -> list:
+    """Имена сущностей вида place файла фактов (entities[]) → регулярки: без регистра, целым словом, пробел имени —
+    любой пробел, дефис — любое тире. Нет файла или сущностей — пустой список."""
+    p = Path(facts_path)
+    key = (str(p), _mtime(p))
+    if key not in _PLACES:
+        out = []
+        data = (load_yaml(p) or {}) if p.is_file() else {}
+        for e in (data.get("entities") or []) if isinstance(data, dict) else []:
+            if not isinstance(e, dict) or e.get("type") != "place":
+                continue
+            for name in e.get("names") or []:
+                parts = [r"\s+" if x.isspace() else r"[-‐‑–—−]" if x in "-‐‑–—−" else re.escape(x)
+                         for x in re.split(r"(\s+|[-‐‑–—−])", str(name).strip()) if x]
+                if parts:
+                    out.append(re.compile(r"(?<!\w)" + "".join(parts) + r"(?!\w)", re.I))
+        _PLACES[key] = out
+    return _PLACES[key]
+
+
 def is_registry(path: str, text: str, fmt: str = "") -> bool:
     """Реестр текстов интерфейса: формат texts или файл texts.md с таблицей key · role · text."""
     if fmt == "texts":
@@ -973,6 +1005,9 @@ def read_document(path: str, genre: str, vocab: dict, all_variants: bool = False
         units, ghint = parse_copy_deck(data, vocab, path, all_variants)
         doc.units, doc.genre_hint = units, ghint
         doc.source_text = ""
+        root = data.get("copy_deck", data) if isinstance(data, dict) else {}
+        if path != "-" and isinstance(root, dict) and root.get("facts_ref"):
+            doc.places = place_patterns(Path(path).parent / str(root["facts_ref"]))
     elif ext in ("html", "htm"):
         doc.units = parse_html(text, genre or "landing", vocab, path)
         doc.source_text = ""
@@ -1127,6 +1162,19 @@ def sentence_of(text: str, pos: int) -> tuple[int, int]:
 
 
 MORPH_REPLACES = {"ru-syn-gerund-tail", "ru-syn-genitive-chain", "ru-syn-passive", "ru-syn-passive-agent"}
+NBSP_AFTER_RULES = {"typo-hanging-preposition"}   # правка — неразрывный пробел после найденного слова
+
+
+def fix_from_text(r: Rule, text: str, m: re.Match) -> tuple[str, dict]:
+    """Правка и пример находки. У правил о неразрывном пробеле после короткого слова — из текста находки: найденное
+    слово связано со следующим («в городе» → «в⍽городе», ⍽ — U+00A0); у остальных — правка и примеры правила."""
+    if r.id in NBSP_AFTER_RULES:
+        nxt = re.match(r"[«\"]?[" + WORDCH + r"]+(?:-[" + WORDCH + r"]+)*", text[m.end():])
+        if nxt:
+            word = m.group(0).strip()
+            good = f"{word}\u00a0{nxt.group(0)}"
+            return f"«{good}» — неразрывный пробел после «{word}»", {"bad": f"{word} {nxt.group(0)}", "good": good}
+    return r.replacement, r.examples or {}
 
 
 def run_rules(doc: Document, rules: list[Rule], genre: str, lang: str, profile: dict,
@@ -1138,6 +1186,7 @@ def run_rules(doc: Document, rules: list[Rule], genre: str, lang: str, profile: 
         ugenre = u.genre or genre
         masks = masked_spans(u.text)
         icu = icu_spans(u.text) if ugenre == "interface" else []
+        places = [m.span() for rx in doc.places for m in rx.finditer(u.text)] if doc.places else []
         for r0 in rules:
             if skip_ids and r0.id in skip_ids:
                 continue
@@ -1157,6 +1206,8 @@ def run_rules(doc: Document, rules: list[Rule], genre: str, lang: str, profile: 
                     continue
                 if icu and r.group == "ART" and inside((m.start(), m.end()), icu):
                     continue          # подстановка ICU {name} в строке интерфейса — синтаксис, а не шаблон-заглушка
+                if places and r.id in PLACE_RULES and any(a <= m.start() < b for a, b in places):
+                    continue          # слово внутри адреса или названия места из фактов
                 if r.unless_re is not None:
                     ss, se = sentence_of(u.text, m.start())
                     if r.unless_re.search(u.text[ss:se]):
@@ -1168,9 +1219,10 @@ def run_rules(doc: Document, rules: list[Rule], genre: str, lang: str, profile: 
             if len(hits) < max(1, r.min_count):
                 continue
             for m in hits:
+                fix, example = fix_from_text(r, u.text, m)
                 f = Finding(r.id, r.marker_id, lvl, r.group, r.message, fragment=m.group(0)[:120],
                             context=context_of(u.text, m.start(), m.end()), unit=ui, start=m.start(), end=m.end(),
-                            replacement=r.replacement, example=r.examples or {}, source=r.source,
+                            replacement=fix, example=example, source=r.source,
                             evidence=r.evidence, slot=slot_info(u), count_as_marker=bool(r.count_as_marker),
                             note=r.note)
                 if u.src_offset is not None and doc.source_text:
@@ -2654,14 +2706,16 @@ def text_document(text: str, genre: str, vocab: dict, slot_type: str = "", role:
 
 
 def lint_text(text: str, genre: str = "landing", lang: str = "auto", slot_type: str = "", profile: str = "",
-              fmt: str = "md", metrics_only: bool = False, role: str = "", component: str = "") -> dict:
+              fmt: str = "md", metrics_only: bool = False, role: str = "", component: str = "", facts: str = "") -> dict:
     """API для других утилит: текст → результат линтера (dict как один элемент results в JSON). slot_type — id слота
-    вида text словаря site; role, component — роль строки интерфейса (жанр interface). Неизвестные — UsageError."""
+    вида text словаря site; role, component — роль строки интерфейса (жанр interface); facts — путь файла фактов: имена
+    мест из него (entities[] вида place) правило о слове на «-ая,» не трогает. Неизвестные — UsageError."""
     vocab = load_vocab()
     profiles = load_profiles()
     log: list = []
     rules = load_rules(profiles=profiles, log=log)
     doc = text_document(text, genre, vocab, slot_type, role, component, fmt)
+    doc.places = place_patterns(facts) if facts else []
     return lint_document(doc, rules, profiles, genre, lang, profile, None, metrics_only=metrics_only, log=log)
 
 
@@ -3023,6 +3077,11 @@ def selftest() -> int:
           found(lt("Анамнез - это разговор с пациентом.", "landing", slot_type="body"), "ru-pun-hyphen-as-dash"))
     check("К3: сообщение ru-mkt-superlatives ссылается на COPY-L-SUP-01", "COPY-L-SUP-01" in rb["ru-mkt-superlatives"].message
           and "38-ФЗ" not in rb["ru-mkt-superlatives"].message)
+    sup = lt("Лучшая мастерская в городе — по мнению наших гостей.", "landing", slot_type="headline")
+    check("право — только в claims_check.py: правил COPY-L-… в словарях линтера нет, превосходная степень — одна "
+          "находка стиля", not [i for i in ids if i.startswith("COPY-L-")] and not found(sup, "COPY-L-*") and
+          [f["id"] for f in sup["findings"] if f["fragment"] == "Лучшая"] == ["ru-mkt-superlatives"],
+          str([(f["id"], f["fragment"]) for f in sup["findings"]]))
     check("К4: «По статистике, 78 %» — размытая атрибуция, в geo — error",
           found(lt("По статистике, 78 % клиентов возвращаются.", "geo", slot_type="geo-answer"),
                 "ru-lex-vague-attribution", "error"))
@@ -3033,10 +3092,42 @@ def selftest() -> int:
              "Комплексное решение для вашего бизнеса — это наш приоритет и наша миссия.")
     full, page = lt(dense, "landing"), lt(dense, "landing", page_audit=True)
     check("К5: аудит страницы без copy deck — анализаторы не выше warning, вердикт — сигнал",
-          found(full, "an-marker-density", "error") and not found(page, "an-*", "error") and
+          found(full, "an-marker-density") and not found(page, "an-*", "error") and
           page["summary"]["mode"] == "page-audit" and page["summary"]["verdict"] != "rewrite",
           f"{full['summary']} / {page['summary']}")
+    check("плотность маркеров выше верхнего порога жанра — warning, не error (allow_error: false)",
+          found(full, "an-marker-density", "warning") and not found(full, "an-marker-density", "error") and
+          all(resolve_profile(profiles, g, None)[0]["analyzers"]["marker_density"].get("allow_error") is False
+              for g in SITE_GENRES), str(found(full, "an-marker-density")))
+    check("правила микрокопи интерфейса на тексте страницы — один набор уровней у всех жанров сайта",
+          all((resolve_profile(profiles, g, None)[0].get("level_overrides") or {}).get("ux-6-4-10") == "info" and
+              (resolve_profile(profiles, g, None)[0].get("level_overrides") or {}).get("ux-6-4-*") == "warning"
+              for g in SITE_GENRES) and "ux-6-4-10" not in
+          (resolve_profile(profiles, "interface", None)[0].get("level_overrides") or {}))
     check("К6: «Подробнее» на лендинге — не error", not found(rp, "ux-3-2-07", "error"))
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        fpath = Path(td) / "facts.yaml"
+        fpath.write_text(yaml.safe_dump({"facts": [], "entities": [
+            {"id": "office", "type": "place", "names": ["улица Лесная", "Лесная улица, 3"]},
+            {"id": "brand", "type": "brand", "names": ["Ясная"]}]}, allow_unicode=True), encoding="utf-8")
+        addr = "Приезжайте: улица Лесная, дом 3, вход со двора."
+        check("слово на «-ая,» внутри имени места из фактов (entities вида place) — вне правила; без фактов — находка",
+              found(lt(addr, "landing", slot_type="subheadline"), "ux-6-4-10") and
+              not found(lint_text(addr, "landing", slot_type="subheadline", facts=str(fpath)), "ux-6-4-10") and
+              found(lint_text("Заходите: площадь Ясная, дом 3.", "landing", slot_type="subheadline", facts=str(fpath)),
+                    "ux-6-4-10"))
+        dpath = Path(td) / "deck.yaml"
+        dpath.write_text(yaml.safe_dump({"copy_deck": {"facts_ref": "facts.yaml", "pages": [
+            {"page_id": "p", "page_type": "contacts-page", "sections": [{"section_id": "s", "slots": [
+                {"slot_id": "a", "slot_type": "subheadline", "text": addr}]}]}]}}, allow_unicode=True), encoding="utf-8")
+        ddoc = read_document(str(dpath), "", vocab)
+        check("copy deck: места берутся из его facts_ref", ddoc.places and not found(
+            lint_document(ddoc, rules, profiles, "", "auto", "", None), "ux-6-4-10"))
+    hp = found(lt("Ремонт квартир в Нижнем Новгороде и области", "landing", slot_type="headline"), "typo-hanging-preposition")
+    check("висячий предлог: пример правки — из текста находки, у каждой находки свой",
+          [f["example"].get("good") for f in hp] == ["в\u00a0Нижнем", "и\u00a0области"] and
+          all("неразрывный пробел после" in f["replacement"] for f in hp), str([(f["fragment"], f["example"]) for f in hp]))
     tag = deck({"slots": [{"slot_type": "footer-tagline", "text": "Быстро. Просто. Надёжно."}]}, "landing")
     check("К7: рубленый драматизм в слогане (footer-tagline) — сигнал", found(tag, "ru-syn-chopped", "info") and
           not found(tag, "ru-syn-chopped", "warning"))
@@ -3171,7 +3262,10 @@ def main(argv=None) -> int:
     ap.add_argument("--customer-words", default="", help="voc.yaml или meaning.yaml: слова клиента (customer_words)")
     ap.add_argument("--json", action="store_true", help="вывод JSON")
     ap.add_argument("--md", action="store_true", help="вывод Markdown")
-    ap.add_argument("--metrics-only", action="store_true", help="только метрики (для замеров корпуса)")
+    ap.add_argument("--facts", default="", help="файл фактов facts.yaml: имена мест (entities вида place) — вне правила о "
+                                                "слове на «-ая,»; у copy deck — его facts_ref")
+    maint = ap.add_argument_group("обслуживание базы (в маршруте этапов проекта не участвует)")
+    maint.add_argument("--metrics-only", action="store_true", help="только метрики — замеры корпуса для порогов жанров")
     ap.add_argument("--units", action="store_true", help="добавить в JSON разбор на блоки")
     ap.add_argument("--rules", action="append", default=[], help="доп. файл или папка YAML-правил")
     ap.add_argument("--profiles", default="", help="путь к profiles.yaml")
@@ -3202,6 +3296,8 @@ def main(argv=None) -> int:
         for p in a.paths:
             doc = read_document(p, a.genre or "", vocab, a.all_variants, a.slot_type, a.format, a.role, a.component,
                                 a.objects, a.actions)
+            if a.facts:
+                doc.places = place_patterns(a.facts)
             page_audit = doc.fmt in ("md", "txt", "html", "htm") and not (a.slot_type or a.role or a.component) \
                 and (a.genre or "landing") not in ("interface", "meta")
             res = lint_document(doc, rules, profiles, a.genre or "", a.lang, a.profile,

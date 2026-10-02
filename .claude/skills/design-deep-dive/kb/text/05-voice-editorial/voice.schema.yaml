@@ -26,8 +26,10 @@
 #    `projections.brand_voice` — коротко «говорим / не говорим» для людей; `prompt_brief` — короткая «методичка» для
 #    промта генератора (опыт Т—Ж: короткая методичка для авторов, полная редполитика — для редакторов).
 # 8. Голос продукта — профиль, у которого все `scope.surfaces[].voice` — product: карта тона — по ситуациям интерфейса
-#    ux 07/01 §7.1 (`situation`: empty-first-use … notification, имена — x-situations), образцы — по ролям строк;
-#    профиль бренда ссылается на него `scope.product_voice_ref`.
+#    ux 07/01 §7.1 (`situation`: empty-first-use … notification, имена — x-situations), образцы — по ролям строк.
+#    Профиль самостоятелен: у продукта без сайта (кабинет, приложение, бот) `voice.product.yaml` — единственный профиль
+#    голоса, профиль бренда ради него не заводится, а `brand.facts_ref` нужен, только когда образцы ссылаются на факты.
+#    Когда профилей два, профиль бренда ссылается на голос продукта `scope.product_voice_ref`.
 #
 # Даты — строкой в кавычках «ГГГГ-ММ-ДД». Проверка: `scripts/text/validate_voice.py` скилла (метасхема, примеры,
 # отрицательные мутации профиля бренда и голоса продукта, смысловые проверки: образцы против обращения, эмодзи,
@@ -113,7 +115,7 @@ properties:
             note: {type: string}
       product_voice_ref:
         type: string
-        description: "Путь к профилю голоса продукта (интерфейс за входом), если он отдельный. Граница — 01 §2.3."
+        description: "Поле профиля бренда: путь к профилю голоса продукта (интерфейс за входом), когда у продукта два профиля. Профиль голоса продукта самостоятелен — у продукта без сайта он единственный, и этой ссылки нет. Граница — 01 §2.3."
 
   derived_from:
     type: object
@@ -712,7 +714,7 @@ x-canvas-map:
   files:
     brief.yaml:
       design_system.tone_of_voice: {rule: copy, from: [/projections/tone_of_voice], note: "одна строка ≤ 240 знаков: обращение, 2–3 принципа, чего нет"}
-      design_system.voice_ref: {rule: derive, from: [/voice_id, /scope/surfaces, /scope/product_voice_ref], note: "путь профиля, из которого взята строка тона: канал scope.surfaces ↔ род поверхности; голос продукта — по product_voice_ref"}
+      design_system.voice_ref: {rule: derive, from: [/voice_id, /scope/surfaces, /scope/product_voice_ref], note: "путь профиля, из которого взята строка тона: канал scope.surfaces ↔ род поверхности; голос продукта — профиль voice.product.yaml, единственный или названный в product_voice_ref профиля бренда"}
   drop:
     - {from: [/voice_version, /date, /status, /brand, /review, /open_questions], note: "служебные поля, ссылки и подпись: статус, путь и отпечаток — в INPUT.md"}
     - {from: [/scope/genres, /scope/surfaces/*/note, /derived_from, /summary, /key_phrase, /principles, /pairs, /axes, /tone_words,

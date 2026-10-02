@@ -1,4 +1,4 @@
 path	kind	smoke	xfail
-scripts/lib/color.py	module	run: selftest	
+scripts/lib/color.py	module	run: selftest; run: contrast --help	
 scripts/lib/kbpaths.py	module	help; run: --selftest	
 scripts/lib/docpaths.py	module	help; run: --selftest	

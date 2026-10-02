@@ -50,8 +50,7 @@ route:
       generate_audio: 'false'
     price_rub: 12.825
     note: 'routing v0 округляет до 12,8; фаза 5: Seedance 2 Mini [A,A] — images как референсы, петлю не строит (I-08: шов 7,21); петля — Seedance 1.5 Pro (hero-loop)'
-compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
-  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+compile: scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --out $DDD_HOME/out/ai-media/<ассет>.jsonl
 phase5:
   jobs:
   - 99-raw/phase5/jobs/E-13-bg-hex.jsonl

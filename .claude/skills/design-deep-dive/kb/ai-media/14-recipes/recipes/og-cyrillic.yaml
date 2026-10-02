@@ -32,7 +32,7 @@ phase5:
   estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
 steps:
 - id: render
-  cmd: flock -w 900 99-raw/tools/.locks/browser.lock python3 99-raw/experiments/M/06-og-marketplace/render.py
+  cmd: flock -w 900 $DDD_HOME/locks/browser.lock python3 99-raw/experiments/M/06-og-marketplace/render.py
   status: checked
   evidence: 99-raw/experiments/M/06-og-marketplace
 - id: layout-safe-zone

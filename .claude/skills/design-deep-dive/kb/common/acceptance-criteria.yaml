@@ -1,0 +1,676 @@
+# Критерии приёмки макета и сборки
+#
+# Список пунктов файла ACCEPTANCE.md входа холста: вопрос (да — норма), серьёзность, способ и место проверки, этап
+# холста, с которого пункт проверяется, источник нормы. Файл читает сборщик входа холста
+# (scripts/project/canvas_input.py): он отбирает пункты по роду поверхности, проверяет условия и подставляет значения
+# проекта. Правка пункта — правка этого файла; условие или подстановка, которых сборщик не знает, — ошибка сборки.
+#
+# Поля пункта:
+#   id        id пункта; первая буква — группа (`groups`); у пункта `each: state` — шаблон id с подстановками
+#   for       род поверхности: site (лендинг и многостраничник), app (кабинет); поля нет — пункт общий
+#   each      state — пункт повторяется на каждое состояние каждого экрана партии входа
+#   question  вопрос; `{имя}` — подстановка сборщика
+#   add       хвосты вопроса: `text` дописывается, когда выполнено условие `when`
+#   severity  B — блокирует приёмку · S — исправить или принять с записью заказчика · D — по месту
+#   method    скрипт · глаза · судья · заказчик · протокол
+#   where     макет · после сборки
+#   stage     этап холста, с которого пункт проверяется: wireframe · mockup · motion; «—» — у пунктов «после сборки»
+#   source    источник нормы
+# Значение severity, stage и source — строка или словарь «условие: значение» с ключом `else`.
+#
+# Условия (`when` и ключи словарей):
+#   site, app        род поверхности
+#   a11y             в брифе задана цель доступности
+#   dark             у дизайн-системы есть тёмная тема
+#   cookie           у страниц партии есть баннер cookie
+#   state_required   состояние входит в обязательный набор экрана
+#
+# Подстановки:
+#   общие     themes, a11y, overflow, artboards — темы ДС, цель доступности, ширина проверки вылета, ширины артбордов
+#   сайт      mains, a3, h1s, types, events, jur, forms_line — главные действия, политика первого экрана, H1, типы
+#             JSON-LD, события, юрисдикции и формы планов партии; pd_consent, privacy_policy, cookie_banner,
+#             cookie_mode, ad_marking — блок legal плана; lvl, properties_allowed, in_view_max, under_text_max, modes —
+#             уровень страницы и его нормы движения и 3D (ambition-levels.yaml); prof — профиль бюджета
+#   кабинет   first_bp, bp_source — первый брейкпоинт ДС и его источник; screen, state_id, state_key — экран и
+#             состояние пункта `each: state`
+#
+# Порядок пунктов — порядок строк ACCEPTANCE.md; группы идут в порядке первого пункта группы.
+
+# Группы пунктов: буква id → название раздела ACCEPTANCE.md. Пункты состояний экранов (ST-…) — группа S.
+groups:
+  A: Структура
+  B: Честность
+  C: Система
+  D: Адаптив и доступность
+  E: Движение
+  F: Ассеты и скорость
+  G: Публикация и слияние
+  H: Арт-директор
+  I: SEO и мета
+  J: Право
+  K: Формы
+  L: События
+  N: Доступность и узкий экран
+  S: Состояния экранов
+  V: Среда
+
+# Политики первого экрана — текст подстановки {a3} по `first_screen_policy` плана страницы (site 03/03 §2).
+first_screen_policies:
+  offer-cta: обещание (что это и результат) и главный призыв в потоке hero, виден признак продолжения
+  offer-cta-header: обещание и призыв в шапке или липкой панели без прокрутки, виден признак продолжения
+  poster: заявление или образ, видимый признак продолжения и призыв в шапке
+
+criteria:
+- id: A1
+  for: [site]
+  question: Секции каждой страницы — id и порядок плана (sections[] в page.yaml), других секций нет
+  severity: S
+  method: скрипт, глаза
+  where: макет
+  stage: wireframe
+  source: site/<s>/plans/*.yaml
+- id: A1
+  for: [app]
+  question: Экраны и маршруты — карта экранов (contract.md § Карта экранов); ссылок вне списка 0
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: ux 13/04 §29; map.md
+- id: A2
+  for: [site]
+  question: Одно главное действие на страницу — page.primary_action плана ({mains}); подпись главной кнопки
+    — утверждённый литерал copy deck; у страницы мероприятия главное действие — регистрация
+  severity: S
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: планы; copy deck; text 04/03 §3.5
+- id: A2
+  for: [app]
+  question: На экране одно ключевое действие — key-action экрана
+  severity: S
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: экраны; contract.md
+- id: A3
+  for: [site]
+  question: 'Первый экран на окнах 1440×900 и 390×844 — по политике плана: {a3}'
+  add:
+  - when: cookie
+    text: ; отдельный кадр первого визита с баннером cookie
+  severity: S
+  method: скрипт, глаза
+  where: макет
+  stage: wireframe
+  source: site 03/03 §2; first_screen_policy планов
+- id: B1
+  for: [site]
+  question: 'Весь видимый текст — из copy.md дословно, без «рыбы»; пропуск — [PLACEHOLDER: что] из раздела
+    «Нет» facts.md'
+  severity: B
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: cd 06/04 §3; copy.md
+- id: B1
+  for: [app]
+  question: Тексты — литералы copy.md (строки texts.md); строка на утверждении — заглушка
+  severity: B
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: copy.md; texts.md
+- id: B2
+  for: [site]
+  question: Каждое число, имя, дата, цена, логотип и цитата — из «Фактов» facts.md; ничего из «Нельзя утверждать»
+  severity: B
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: facts.md; claims_check.py
+- id: B2
+  for: [app]
+  question: Числа, имена, даты и записи — только из демо-набора demo-data.json
+  severity: B
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: demo-data.json
+- id: B3
+  for: [site]
+  question: Картинки — только загрузки из assets.md с подписью и alt дословно; внешних картинок 0; пустой
+    слот — заглушка «placeholder»
+  severity: B
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: assets.md; cd 06/04 §3
+- id: B3
+  for: [app]
+  question: Картинки и иллюстрации — только загрузки из assets.md
+  severity: B
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: assets.md
+- id: C1
+  question: Шрифты — только объявленные в ДС и реально отрисованные
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: cd 06/04 §3 (fonts_missing)
+- id: C2
+  question: Каждое значение на артборде — литерал из значений токенов ДС
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: cd 06/02 §2; literal_tokens.py
+- id: C3
+  question: Кегли — по шкале ДС; заголовок не длиннее 2 строк на 1440 и 4 строк на 390
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: cd 06/02 §4 (C3)
+- id: C4
+  question: Нет кластера примет бан-листа brief.yaml#design_system.bans (одиночная примета — вопрос заказчику);
+    приметы design_system.allow — только заказанные
+  severity: S
+  method: скрипт, глаза
+  where: макет
+  stage: mockup
+  source: brief.yaml; kb/common/tells.yaml
+- id: C5
+  for: [app]
+  question: Компоненты — только из карты решений system.yaml (components, extensions)
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: system.yaml; ds_coverage
+- id: D1
+  for: [site]
+  question: Артборды — все ширины приёмки ({artboards}), горизонтальный вылет 0 на каждом
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: kb/common/acceptance-widths.yaml
+- id: D1
+  for: [app]
+  question: 'Артборды — по классу экрана: viewport экрана → by_viewport, первый брейкпоинт ДС {first_bp} px
+    ({bp_source}); горизонтальный вылет 0 на каждом (таблица ниже)'
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: kb/common/acceptance-widths.yaml#by_viewport
+- id: D2
+  question: На 390 навигация видна (меню ≥ 44×44 или две видимые ссылки), тело ≥ 16 px, основные цели касания
+    ≥ 44 px, никакие — меньше 24 px
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: cd 06/04 §3
+- id: D3
+  question: Ничего мельче 12 px; один h1; lang = язык страницы
+  severity: D
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: cd 06/04 §3
+- id: D4
+  question: Фокус с клавиатуры виден на каждой остановке; контраст текста ≥ 4,5:1, крупного и контролов ≥
+    3:1
+  add:
+  - when: a11y
+    text: ; цель доступности — {a11y}
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source:
+    app: ux 08/01; app-brief constraints
+    else: ux 08/01; site-brief constraints.accessibility
+- id: D5
+  question: Горизонтальный вылет 0 на {overflow} (только вылет)
+  add:
+  - when: app
+    text: ' у экранов классов mobile и any'
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: acceptance-widths.yaml#overflow_only; ux 08/01 §3.2; ui_audit.py --acceptance
+- id: E1
+  for: [site]
+  question: 'Анимируются только свойства спецификации движения, не шире уровня {lvl}: {properties_allowed};
+    без transition: all и анимации свойств раскладки'
+  severity: S
+  method: скрипт
+  where: макет
+  stage: motion
+  source: motion.md; ambition-levels.yaml#levels.motion_hints
+- id: E1
+  for: [app]
+  question: 'Отклик компонентов — токены движения ДС; без transition: all и анимации свойств раскладки; движения
+    подачи у рабочих экранов нет'
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: creative 01/03 §1.3; токены ДС
+- id: E2
+  for: [site]
+  question: При prefers-reduced-motion — конечные состояния, невидимого текста 0
+  severity: S
+  method: скрипт
+  where: макет
+  stage: motion
+  source: motion.md (сокращённое движение)
+- id: E3
+  for: [site]
+  question: Моменты — как в motion.md и decisions.motion; петель в зоне видимости не больше {in_view_max},
+    под читаемым текстом — {under_text_max}
+  severity: S
+  method: глаза
+  where: макет
+  stage: motion
+  source: motion.md; ambition-levels.yaml#levels.motion_hints
+- id: F1
+  for: [site]
+  question: 'Ассеты — в бюджетах владельцев: hero и первый экран, ниже первого экрана — lazy, видео с постером;
+    кадр под маской раскрытия (mask-reveal, scroll-mask-expand) — исключение: без lazy или с предзагрузкой
+    до входа в окно — закрытый маской кадр браузер лениво не грузит'
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: ai-media 10/04 §1.1; ambition-levels.yaml#levels.budgets.effects; effects.yaml (mask-reveal, scroll-mask-expand)
+- id: F1
+  for: [app]
+  question: Ассеты — в бюджетах владельцев
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: ai-media 10/04 §1.1
+- id: F2
+  for: [site]
+  question: 'Вес и скорость — профиль бюджета страницы ({prof}, build.perf): первый экран и LCP по профилю'
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: page_gates.py --resolve; budgets.yaml
+- id: F2
+  for: [app]
+  question: 'Скорость — поле p75 и живые замеры (RUM): лабораторных порогов у экранов нет'
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: design/README.md § Пакет для кода
+- id: F3
+  for: [site]
+  question: 3D — только в режимах уровня ({modes}) и в бюджете уровня; у 3D-слота — постер из той же модели
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: ambition-levels.yaml#levels.maps_to, budgets.effects
+- id: G1
+  question: Публикация принята инструментом; консоль HTML-копий без ошибок
+  severity: S
+  method: протокол
+  where: макет
+  stage: wireframe
+  source: claude-design.md § Создание и публикация
+- id: G2
+  question: Изменены только свои файлы; правки заказчика слиты по «прочитать → слить → опубликовать», чужие
+    ключи и маркеры сохранены
+  severity: S
+  method: протокол
+  where: макет
+  stage: wireframe
+  source: claude-design.md § Синхронизация
+- id: H1
+  for: [site]
+  question: ui_audit.py — без blocker и serious (уровень {lvl})
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: ui_audit.py; cd 06/04 §3
+- id: H1
+  for: [app]
+  question: ui_audit.py — без blocker и serious
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: ui_audit.py
+- id: H2
+  for: [site]
+  question: Приметы дом-стиля и маркеры страницы — ниже порогов владельцев доменов house-style, page-visual,
+    page-structure, text-site с учётом ключей --allow
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: kb/common/tells.yaml; mockup_checks.py page
+- id: H2
+  for: [app]
+  question: Приметы доменов house-style, app-visual, text-interface — ниже порогов владельцев с учётом ключей
+    --allow
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: kb/common/tells.yaml
+- id: H3
+  for: [site]
+  question: «Брать» референсов refs.md есть на макете, «не брать» — нет
+  severity: S
+  method: глаза
+  where: макет
+  stage: mockup
+  source: refs.md
+- id: H4
+  for: [site]
+  question: Силуэт макета в 200 px отличается от референсов и соседних вариантов
+  severity: D
+  method: судья
+  where: макет
+  stage: mockup
+  source: cd 06/02 §4 (H4)
+- id: H5
+  for: [site]
+  question: Ресайз 1440 → 390 → 1440 без перезагрузки; медиа первого экрана ≤ 1 с
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: mockup_checks.py resize
+- id: I1
+  for: [site]
+  question: Ровно один H1 — слот seo.h1 плана ({h1s})
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: page.yaml seo.h1; site 09/01 §6.2
+- id: I2
+  for: [site]
+  question: title, description, canonical на себя и lang заданы и уникальны
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: head-kit.yaml; geo_probe.py
+- id: I3
+  for: [site]
+  question: H1, цены, условия и главный призыв — в исходном HTML без JS
+  severity: B
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: page_gates.py
+- id: I4
+  for: [site]
+  question: JSON-LD только типов плана ({types}), значения видны на странице
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: seo.structured_data планов
+- id: I5
+  for: [site]
+  question: robots — по seo.indexable плана
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: seo.indexable планов
+- id: I6
+  for: [site]
+  question: og:image — абсолютный адрес
+  severity: D
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: head-kit.yaml
+- id: J1
+  for: [site]
+  question: 'Согласие на ПД — отдельный неотмеченный чекбокс у каждой формы (legal.pd_consent: {pd_consent})'
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: legal-requirements.yaml; план
+- id: J2
+  for: [site]
+  question: Ссылка на политику ПД ({privacy_policy}) — у каждой формы и в подвале
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: legal-requirements.yaml; план
+- id: J3
+  for: [site]
+  question: Реквизиты продавца в подвале — только из «Фактов» facts.md
+  severity: B
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: facts.md; legal.requisites плана
+- id: J4
+  for: [site]
+  question: 'Баннер cookie ({cookie_banner}, {cookie_mode}): «Принять» и «Отклонить» равного вида'
+  severity: S
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: legal-requirements.yaml; overlays плана
+- id: J4b
+  for: [site]
+  question: Счётчики и пиксели загружаются только после выбора в баннере cookie
+  severity: B
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: page_gates.py (SG-LEGAL)
+- id: J5
+  for: [site]
+  question: 'Маркировка рекламы у рекламных блоков (ad_marking: {ad_marking})'
+  severity: S
+  method: глаза
+  where: макет
+  stage: mockup
+  source: legal-requirements.yaml
+- id: J6
+  for: [site]
+  question: Рассылка — отдельная неотмеченная галочка, если она есть
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: lead-forms.yaml#defaults.consent
+- id: K1
+  for: [site]
+  question: Настоящий <form> с type=submit и отправкой на сервер
+  severity: B
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: lead-forms.yaml
+- id: K2
+  for: [site]
+  question: Поля и видимые подписи — набор lead-forms.yaml ({forms_line})
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: page.yaml forms[]; mockup_checks.py FORM-FIELDS
+- id: K3
+  for: [site]
+  question: 'Запретов lead-forms.yaml#forbidden нет: предотметка, «нажимая кнопку», disabled submit и другие'
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: page.yaml forms[].forbidden; FORM-FORBIDDEN
+- id: K4
+  for: [site]
+  question: '«Спасибо» — по success.must_show набора: экран пути прототипа'
+  severity: S
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: page.yaml forms[].set.success_must_show
+- id: K5
+  for: [site]
+  question: Антиспам — honeypot и time-trap без видимой капчи
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: lead-forms.yaml#defaults.antispam
+- id: K6
+  for: [site]
+  question: Скрытые поля источника (utm_*, yclid, ym_client_id, landing_url, page_url, form_id, variant)
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: lead-forms.yaml#defaults.hidden_fields
+- id: L1
+  for: [site]
+  question: События плана — на своих триггерах с именами из events.yaml ({events})
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: events.yaml; планы
+- id: L2
+  for: [site]
+  question: lead-submit — только по успеху сервера
+  severity: B
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: events.yaml
+- id: L3
+  for: [site]
+  question: Счётчики — после согласия по юрисдикции ({jur})
+  severity: B
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: legal-requirements.yaml
+- id: L4
+  for: [site]
+  question: Цели не ставятся на клик
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: events.yaml
+- id: N1
+  for: [app]
+  question: Один main; один заголовок роли title вне оверлеев
+  severity: S
+  method: скрипт
+  where: макет
+  stage: wireframe
+  source: screens/README.md § Доступность и узкий экран
+- id: N2
+  for: [app]
+  question: Порядок фокуса — по дереву экрана
+  severity: S
+  method: скрипт
+  where: макет
+  stage: mockup
+  source: tree экранов
+- id: N3
+  for: [app]
+  question: Оверлей на узком экране — fullscreen или bottom-sheet
+  severity: S
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: экраны
+- id: N4
+  for: [app]
+  question: 3–5 разделов навигации на узком экране — ui:BottomNav
+  severity: S
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: экраны
+- id: N5
+  for: [app]
+  question: master-detail на узком экране — серия из двух экранов
+  severity: S
+  method: глаза
+  where: макет
+  stage: wireframe
+  source: экраны
+- id: ST-{screen}-{state_id}
+  for: [app]
+  each: state
+  question: 'Экран {screen}: состояние {state_key} ({state_id}) — что показать и что предложить (ux 06/01
+    §2) видны на артборде состояния'
+  severity:
+    state_required: S
+    else: D
+  method: глаза
+  where: макет
+  stage: mockup
+  source: contract.md § Экран; states
+- id: ST-DYN
+  for: [app]
+  question: Динамика состояний — задержка 3 с, отключение сети, двойная отправка — сценариями shared-api FSD-карты
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: ux 06/01 §2; FSD-карта
+- id: V1
+  question: Темы ДС ({themes}) — на всех ширинах приёмки
+  add:
+  - when: dark
+    text: ; на холсте тёмная тема — твиком
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: acceptance-widths.yaml#themes; ux 06/01 §7.3
+- id: V2
+  question: 'Сокращённое движение: конечные состояния, невидимого текста 0 (ui_audit.py --reduced-motion)'
+  severity: S
+  method: скрипт
+  where: макет
+  stage:
+    app: mockup
+    else: motion
+  source: ux 06/01 §7.3
+- id: V3
+  question: Зум браузера 200 % на 1280 — без потери текста и функций
+  severity: S
+  method: скрипт
+  where: после сборки
+  stage: —
+  source: ux 08/01 §3.2
+- id: V4
+  question: forced-colors — смысл не потерян; кадр с эмуляцией смотрят глазами
+  severity: D
+  method: глаза
+  where: макет
+  stage: mockup
+  source: ux 06/01 §7.3

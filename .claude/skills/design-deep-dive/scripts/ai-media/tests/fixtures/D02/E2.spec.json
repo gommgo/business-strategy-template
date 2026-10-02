@@ -5,7 +5,7 @@
  "id": "onboarding-plane-02",
  "task": "IMG-SERIES",
  "role": {
-  "page_type": "saas",
+  "page_class": "saas",
   "section": "onboarding",
   "slot": "onboarding-step-2",
   "series_id": "onboarding-flat-v1",

@@ -21,6 +21,10 @@
     python3 scripts/lib/color.py de "#e5484d" "#30a46c"              -> ΔE в OKLab
     python3 scripts/lib/color.py composite "#000000" 0.08 "#ffffff"  -> результат наложения с альфой
     python3 scripts/lib/color.py selftest                            -> контрольные точки
+    python3 scripts/lib/color.py --help | <команда> --help           -> эта справка, код 0
+
+Коды выхода: 0 — расчёт выполнен, справка или самопроверка прошла; 1 — неизвестная команда, не то число аргументов
+или самопроверка не прошла.
 
 Контрольные точки сверены с калькулятором APCA: apca(#000,#fff)=106.0, apca(#fff,#000)=-107.9, apca(#888,#fff)=63.1,
 wcag(#000,#fff)=21.0, wcag(#767676,#fff)=4.54. Алгоритмы — kb/ui/01-color/01-color-models-and-scales.md и
@@ -146,10 +150,15 @@ def composite(fg_hex, alpha, bg_hex):
     return '#%02x%02x%02x' % tuple(round(255*(f[i]*alpha + b[i]*(1-alpha))) for i in range(3))
 
 
+def wants_help(args):
+    """Справку просят вызовом без аргументов и ключом -h или --help в любом месте, в том числе после подкоманды."""
+    return not args or any(x in ("-h", "--help") for x in args)
+
+
 if __name__ == "__main__":
     import json
     a = sys.argv[1:]
-    if not a or a[0] in ("-h", "--help"):
+    if wants_help(a):
         print(__doc__); sys.exit(0)
     cmd = a[0]
     if cmd == "contrast" and len(a) == 3:
@@ -177,6 +186,11 @@ if __name__ == "__main__":
             flag = abs(got - want) < 0.06
             ok &= flag
             print(f"{'OK ' if flag else 'FAIL'} {name}: {got} (ожидалось {want})")
+        for name, got, want in [("справка у подкоманды: contrast --help", wants_help(["contrast", "--help"]), True),
+                                ("справка ключом -h после аргумента", wants_help(["oklch", "#2563eb", "-h"]), True),
+                                ("расчёт — не справка", wants_help(["contrast", "#000000", "#ffffff"]), False)]:
+            ok &= got == want
+            print(f"{'OK ' if got == want else 'FAIL'} {name}")
         sys.exit(0 if ok else 1)
     else:
         print(__doc__); sys.exit(1)

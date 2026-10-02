@@ -17,9 +17,10 @@
 # `slots[].fact_ids` ← `proof_ids`), вход холста (работа секций `site.sections[].job` брифа холста — проекция `x-canvas-map`).
 #
 # Даты — строкой в кавычках. Проверка: `../../scripts/text/validate_meaning.py` (схема + смысловые
-# проверки: тип страницы и роли секций — id словаря site, первая секция — hero, каждая опора стоит хотя бы в одной
-# секции, у опоры есть доказательство или missing, возражения-блокеры из meaning закрыты до финального призыва — кроме
-# справочных и служебных страниц, `x-blocker-optional`).
+# проверки: тип страницы и роли секций — id словаря site, первая секция — hero у типов страниц с hero в начале сюжета
+# (кроме `x-hero-first-optional`), каждая опора стоит хотя бы в одной секции, у опоры есть доказательство или missing,
+# возражения-блокеры из meaning закрыты до финального призыва — кроме справочных и служебных страниц,
+# `x-blocker-optional`).
 
 $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "urn:app-design:text-research:message-hierarchy:1"
@@ -283,6 +284,14 @@ $defs:
 # страницу читают за адресом, документом или выходом из тупика, решение о покупке принимается не на ней. `page_class` —
 # поле `class` типа страницы в словаре site, `page_types` — отдельные типы.
 x-blocker-optional:
+  page_class: [utility]
+  page_types: [contacts-page, location-page, documents-page]
+
+# Первая секция — hero: правило действует у типов страниц, чей сюжет начинается с hero (site
+# 03-page-structure/01-narratives-and-section-order.md §3). Страница контактов открывается секцией contacts, служебная
+# страница (класс utility: «спасибо», 404, юридическая, результаты поиска) — своей ролью: у них роль первой секции
+# проверка не задаёт, а главное сообщение первая секция несёт у любого типа.
+x-hero-first-optional:
   page_class: [utility]
   page_types: [contacts-page]
 

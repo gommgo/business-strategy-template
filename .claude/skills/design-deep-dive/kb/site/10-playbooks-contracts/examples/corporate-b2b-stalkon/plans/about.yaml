@@ -47,6 +47,8 @@ page:
     archetype: two-tier
     logo_link: /
     breadcrumbs: false
+    local_nav:
+      kind: subpages
     footer: site
   seo:
     indexable: true

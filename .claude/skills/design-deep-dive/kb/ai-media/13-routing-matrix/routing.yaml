@@ -1,20 +1,15 @@
-# routing.yaml v2 — «задача → модель → параметры → цена → запас → чем проверять» · агент U, сессия 5, 25.09.2026
-# Текст и обоснования — 13-routing-matrix/03-routing-matrix.md (§ по коду, изменения v1 → v2 — §2.2); доказательства — 02-existing-evidence.md.
-# Основа: routing.v1.yaml (N, 24.09) + итоги фазы 5 (живые прогоны 25.09.2026, заходы 1–3: 99-raw/phase5/runs/README.md).
-# Метки: живой прогон — `[проверено: путь от корня базы]` с n (1–2 образца на модель, метрика кодом и/или голос заказчика вслепую,
-# 1 чел.); `[стенд: …]` не ставится — правило 04-update-procedure.md §3 (≥ 2 задачи, ≥ 70 % решающих пар) в фазе 5 не выполнено.
-# Проверка: python3 ../../scripts/ai-media/routing_check.py 13-routing-matrix/routing.yaml  (0 ошибок, цены = polza_catalog.py price).
+# routing.yaml — матрица маршрутов генерации: «задача → модель → параметры → цена → запас → чем проверять».
+# Обоснования — 03-routing-matrix.md (раздел по коду маршрута), доказательства — 02-existing-evidence.md.
+# Метки: живой прогон — `[проверено: путь от корня базы]` с числом образцов; `[стенд: …]` — по правилу
+# 04-update-procedure.md §3 (≥ 2 задачи, ≥ 70 % решающих пар).
+# Проверка: python3 ../../scripts/ai-media/routing_check.py — 0 ошибок: коды, поля, модели, параметры и цены вариантов
+# сходятся с последними снимками каталогов (цена варианта polza = polza_catalog.py price).
 version: 2
 checked_at: "2026-09-25"
-catalog_snapshots:
-  polza: 99-raw/cache/polza/2026-09-25_1411            # id Flare сменился: gpt-image-2-5-flare → openai/gpt-image-2.5-flare (параметры и цены те же)
-  routerai: 99-raw/cache/routerai/2026-09-25_1411      # к 25.09 11:11 без изменений
-  genapi: 99-raw/cache/genapi/2026-09-25_1411          # +1 чат-сеть (gpt-6-luna), медиа без изменений
-supersedes: 13-routing-matrix/routing.v1.yaml
-changelog:
-  - "v0 (E, 23.09.2026) — стенд и первые маршруты; хранится 13-routing-matrix/routing.v0.yaml"
-  - "v1 (N, 24.09.2026) — 33 маршрута, 124 варианта, check/delivery/legal; поправка X2 24.09 (флаги visible-vendor-mark у H3 Max, people-consent); хранится 13-routing-matrix/routing.v1.yaml"
-  - "v2 (U, 25.09.2026) — итоги фазы 5 (261 медиа-генерация + 190 чат-вызовов; polza 1 343,57 ₽, RouterAI 212,68 ₽, Gen-API 384 ₽): id Flare → openai/gpt-image-2.5-flare; записи прогонов фазы 5 (evidence class: run) — у 22 маршрутов, метки изменены у 21 (живой прогон — [проверено: путь] с n; [стенд] — ни у одного); петля — RIFE-мост вместо кроссфейда; наезд и 1080p — Seedance 1.5 Pro; вектор — Recraft Pro Vector для наборов; Seedream — флаг visible-vendor-mark снят (E-01 + проверка углов 7 кадров); выбывшие 25.09 (defaults.unavailable_2026_09_25); 3D по картинке — defaults.not_routes; V2V — не маршрут (решение заказчика); подробности — 03-routing-matrix.md §2.2"
+catalog_snapshots:                                 # снимки каталогов, с которыми матрицу сверяли при обновлении: имена папок в $DDD_HOME/cache/ai-media/<канал>/
+  polza: "2026-09-25_1411"
+  routerai: "2026-09-25_1411"
+  genapi: "2026-09-25_1411"
 
 enums:
   channel:
@@ -69,11 +64,12 @@ defaults:
     - {model: minimax/hailuo-3-max, channel: polza, provider: openrouter, error: "503 SERVICE_UNAVAILABLE «Нет доступных провайдеров для генерации медиа типа video» × 2 (12:22, 13:27)", tests: [VM-01, I-10]}
     - {model: topaz/video-upscale, channel: polza, provider: mie, error: "INTERNAL_ERROR провайдера × 2 (12:24, 12:29)", tests: [VM-05]}
     - {model: alibaba/wan-3.0, channel: polza, error: "503 SERVICE_UNAVAILABLE × 1 (14:00); петлю и так не строит (один кадр)", tests: [VM-03]}
+  unavailable:                                     # выбывшие по правилу «две ошибки модели в блоке — модель выбывает»; вариантом — только с final: false или в not; вернуть — после успешного вызова на свежем снимке каталога
+    - {model: topaz/image-upscale, channel: polza, provider: mie, error: "внутренняя ошибка модели × 2"}
   not_routes:                                      # возможности, проверенные в фазе 5 и не ставшие маршрутом (кодов таксономии у них нет или код снят решением заказчика)
     - what: "3D-модель по картинке (GLB) для страницы"
       tried: "Gen-API: TRELLIS 4 ₽ (раковина, флакон), TRELLIS.2 1024 75 ₽, Tripo Standard 75 ₽, Hunyuan3D с текстурой 96 ₽ (каталог — 32: ступень «с покраской»)"
       why: "органика — узнаваема, но только после обязательной доводки (сырой GLB 4,5–5,6 МБ, metallicFactor 1 без карты → 0; TRELLIS-раковина после meshopt + WebP 1K — 241 КБ); стекло → белый фарфор, надпись теряется; вердикт заказчика 25.09 13:40 (п. 14): «генерация 3D-моделей — так себе, лишнее»; красоту, блик и надпись даёт видео-модель по картинке (VID-I2V-PRODUCT, 10,5–50 ₽)"
-      except: "управляемый поворот объекта (мышь крутит 360°, конфигуратор, AR) и точные ракурсы для FLF-видео: кадры облёта из 3D → Seedance 1.5 Pro FLF 10,5 ₽ — силуэт 0,82–0,90 к рендеру (3D-21 v2); слои рендера сводить до отправки (по слою тени без объекта модель дорисовала чужую ракушку)"
       evidence: "99-raw/experiments/3D/README.md; 99-raw/reports/session4-C-report.md; 99-raw/experiments/3D/04-3d-to-video/"
     - what: "правка готового видео (V2V) — код VID-V2V"
       why: "решение заказчика 25.09 (п. 12): не нужна; I-17, I-20 не запускались; preview gemini-omni-video снимается 30.09.2026"
@@ -125,12 +121,11 @@ routes:
       - {class: run, src: "E-08 (25.09, 1K, интерьер с окном × 6 моделей + люди за работой × 5): голос заказчика вслепую, 1 чел. — хорошо Sunburst, Flare, NB2; «слишком ровно» NB Pro; «сразу минус» Seedream 5 Pro; «так себе» FLUX.2 Pro; люди — «все хороши» — 99-raw/phase5/runs/2.5-stand/E-08_blind_sheet.jpg, ключ E-08_blind_key.json, увеличения E-08-zoom/"}
       - {class: run, src: "F-04 (Sunburst 1K × 6): блок композиции 3 из 3 — центр масс x 0,81–0,85 (порог ≥ 0,62), зона заголовка 0,001–0,006 (≤ 0,06), colorfulness 25–31 против 51–53 без блока — 99-raw/phase5/runs/2.5-stand/F-04_A-vs-B_sheet.jpg, audit-F-04/"}
       - {class: run, src: "E-01: Sunburst 4K = 3840×2160 (11 ₽); Seedream 4 «4K» 21:9 = 2352×1008 (3 ₽), видимой метки нет; C2PA — OpenAI Trusted, Seedream Valid — 99-raw/experiments/L/05-phase5-provenance/2026-09-25/provenance.md"}
-      - {class: run, src: "MS-01/MS-02 (крупная абстрактная форма на тёмном, Sunburst 1K/2K): пробы трёх направлений 24 ₽ → выбор заказчика; мастер по одобренной пробе-референсу почти копирует пробу, без референса — другой кадр — 99-raw/phase5/runs/MS-marea/audit-MS-01/"}
+      - {class: run, src: "MS-01/MS-02 (крупная абстрактная форма на тёмном, Sunburst 1K/2K): пробы трёх направлений 24 ₽ → выбор заказчика; мастер по одобренной пробе-референсу почти копирует пробу, без референса — другой кадр"}
       - {class: run, src: "N-01 (RouterAI Sunburst, промты = E-08 S01/S02): medium 0,93 ₽ и high 3,57 ₽, оба 1536×864; polza 1K 4 ₽ — 1672×941; глаз ×2 и метрики (лапласиан, градиент, доля ВЧ) не отделяют medium от high сверх разброса содержимого — 99-raw/phase5/runs/S5-analysis/N-01_metrics.json"}
       - {class: run, src: "CM-09 (RouterAI, 1 образец, глаз): Qwen Image 3 — настоящие 2K (2048×1152) за 3,31 ₽, свет «каталожный»; Krea 2 medium 3,31 — самый естественный; FLUX.2 max — 11,04 ₽ при ожидании 7,73 (+43 %) — 99-raw/phase5/runs/S4-capability/capability-map-draft.md"}
     label: "[исследование]; в конфигурации polza — [проверено: 99-raw/phase5/runs/2.5-stand/E-08_blind_sheet.jpg, n = 1 на модель, голос заказчика вслепую, 1 чел.; F-04 блок композиции 3 из 3]"
     checked: "2026-09-25"
-    phase5_test: [E-08, E-09, E-01, F-04, D2-04, K-06, N-01, N-07, CM-09, MS-01, MS-02]
     decides: "ИТОГ: E-08 — хорошо Sunburst, Flare, NB2 (голос вслепую, 1 чел.); NB Pro «слишком ровно», Seedream 5 Pro «минус», FLUX.2 Pro «так себе» → основной без изменений (Sunburst 2K 7 ₽), Flare и NB2 — равные запасные; F-04 — блок композиции обязателен; E-01 — Seedream 4 годен дёшево без метки, но «4K» = 2352×1008; CM-09 — Qwen Image 3 и Krea 2 (RouterAI, 3,31 ₽) — кандидаты мини-стенда, зону заголовка держат все 4 новые модели (края 0,0004–0,0199); VAR (1 образец на сцену) — зону держат 9 из 12 сцен, Sunburst «2K» бывает 2736×1536 и тогда без C2PA (2 из 56); N-01 — «polza ниже high» не подтверждено, RouterAI medium — тот же класс за 0,93 ₽ (меньше 2K); E-09, N-07, K-06 не прогонялись (отменено заказчиком 25.09)"
 
   IMG-PRODUCT:
@@ -139,6 +134,7 @@ routes:
     ai_fit: "⚠️ фон и сцена вокруг реального товара; ❌ сам товар (A 01 §2.1)"
     options:
       - {role: primary, channel: local, tool: "композит: вырез настоящего товара (08/01) + сцена моделью + edit_check.py check --protect", price_rub: 0, final: true}
+      - {role: alt, channel: local, tool: "композит со светом сцены: маска товара с отсечкой по глубине (Depth Anything V2 Small) — предметы за объектом в маску не входят; детали товара — настоящие пиксели, свет окружения — из ответа модели; edit_check.py check --protect по этой маске", price_rub: 0, final: true, gate: "маска захватывает предметы за объектом или полный композит не сходится по свету на тёмной поверхности", note: "порог проверки правки — из check маршрута"}
       - {role: primary, channel: polza, provider: mie, model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "2K", aspect_ratio: "4:3"}, inputs: {images: 1}, price_rub: 7.0, final: true, note: "сцена и свет под композит; E-10: этикетка по эталону дословна и во фронте, и сбоку (единственная из 4); AA Retail #1, Rapidata Food & Drink #1"}
       - {role: alt, channel: polza, provider: mie, model: google/gemini-3.1-flash-image-preview, params: {image_resolution: "1K", aspect_ratio: "4:3"}, inputs: {images: 1}, price_rub: 4.8, final: true, note: "E-10: фронт дословно, сбоку край этикетки уходит за изгиб; товар правкой «вокруг реального»: NB сохраняет товар в 74,6 % против 52,9 % у GPT-1.5 (Pinterest, J14)"}
       - {role: alt, channel: polza, provider: mie, model: seedream/5-pro-text-to-image, params: {quality: basic, aspect_ratio: "4:3"}, inputs: {images: 1}, price_rub: 5.0, final: false, note: "E-10: фронт дословно (OCR), сбоку — край этикетки за изгибом; для фото-hero не брать (E-08 «минус») → только концепт"}
@@ -159,7 +155,6 @@ routes:
       - {class: run, src: "SC-02: продукт, придуманный моделью (флакон с надписью: Sunburst 2K 7 ₽, NB2 2K 7,2 ₽) — годен как концепт и вход видео (облёт SC-03 — OCR 11 из 11); рендер «настоящего» продукта заказчик счёл слабее — 99-raw/experiments/_polza/SC/2026-09-25/"}
     label: "[исследование] для сцены; перенос товара референсом — [проверено: 99-raw/phase5/runs/2.5-stand/E-10_sheet.jpg, n = 1 на модель и ракурс, OCR + глаз]"
     checked: "2026-09-25"
-    phase5_test: [E-10, H-07, E-15, SC-01]
     decides: "ИТОГ: E-10 — этикетка во фронте у всех 4 (дословно Sunburst, NB2, Seedream 5 Pro), сбоку — только Sunburst → основной (композит настоящего товара + сцена Sunburst) без изменений; продукт, придуманный моделью, — концепт и вход видео (SC-02/SC-03), не замена настоящему; H-07 (окружение правкой вокруг реального товара) не прогонялся (отменено заказчиком 25.09)"
 
   IMG-ILLUSTR:
@@ -189,7 +184,6 @@ routes:
       - {class: run, src: "D2-01 (NB2 Lite, 10 пар, судья вслепую): JSON против разделов +2,8 п. п., ДИ [−2,7; +9,1] — форма промта не важна — 99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
     label: "[исследование]; [проверено: 99-raw/phase5/runs/2.3-series/E-11-blind, n = 1 на модель, голос заказчика вслепую, 1 чел.]"
     checked: "2026-09-25"
-    phase5_test: [E-11, D2-01]
     decides: "ИТОГ: E-11 — Flare, NB2, Seedream 5 Pro равны на глаз заказчика («все по-своему хороши»), Seedream 5 Pro темнит → основной Flare без изменений, NB2 — запас; D2-01 — форма промта (JSON/разделы) не меняет результат"
 
   IMG-SERIES:
@@ -220,7 +214,6 @@ routes:
       - {class: run, src: "F-02 (Sunburst 2K, сетка 2×2 одним вызовом, 7 ₽): 4 клетки 1152×768, ΔE 0,031–0,036, свет единый — 99-raw/phase5/runs/2.3-series/F-02.log"}
     label: "[проверено: 99-raw/phase5/runs/2.3-series/F-01_sheet.jpg, E-12, F-01, F-02 — n = 2–3 сюжета, ΔE OKLab кодом + голос заказчика вслепую, 1 чел.]; было [спорно]"
     checked: "2026-09-25"
-    phase5_test: [E-12, F-01, F-02, F-06, G-11, G-12, MS-02]
     decides: "ИТОГ: E-12 — стиль эталона держит только Flare (NB2, NB Pro, Seedream 4.5 уводят палитру) → основной Flare без изменений, запас — Sunburst по методу F; NB Pro и Seedream 4.5 — в not; F-01 — метод «3 референса + роль + блок» подтверждён (ΔE ≤ 0,035 в 3 из 3), без референсов — дрейф; F-02 — сетка 2×2 одним вызовом = по одному; F-06, G-11, G-12 не прогонялись (отменено заказчиком 25.09)"
 
   IMG-ICON3D:
@@ -244,7 +237,6 @@ routes:
       - {class: run, src: "F-07 (25.09, Sunburst 1K, форма-рендер + кубик материала, 2 иконки, 8 ₽): IoU силуэта 0,95 и 0,92 → ворота M-04 открыты — 99-raw/phase5/runs/2.3-series/F-07_sheet.jpg"}
     label: "[исследование]; метод «форма рендером + материал референсом» — [проверено: 99-raw/phase5/runs/2.3-series/F-07_sheet.jpg, IoU 0,95 и 0,92, n = 2]; единый свет набора — [не проверено]"
     checked: "2026-09-25"
-    phase5_test: [E-14, F-07, G-17, G-18]
     decides: "ИТОГ: F-07 — форма из рендера держится (IoU ≥ 0,9 в 2 из 2) → маршрут без изменений; G-17/G-18 (сетка 2×2 против 4 вызовов, 4 + 16 ₽) — выходы есть (99-raw/experiments/_polza/G/2026-09-25/), разбор не сделан; E-14 не прогонялся (отменено заказчиком 25.09)"
 
   IMG-CUTOUT:
@@ -280,7 +272,6 @@ routes:
       - {class: run, src: "H-03 (RouterAI GPT 2.5 transparent, 2 × 1,454 ₽): мех — годен (α=0 27 %, 1–249 36 %, ≥ 250 36,5 %); стекло — тело непрозрачно, облако фона медиана 76 px, маска блоками 16 px (энергия края ×1,6–1,7) → не годится; для сравнения T2 Qwen 2.1 — 64 / 1,5 / 35 % — 99-raw/phase5/runs/S5-analysis/H-03_alpha.json, лист H-03_sheet.jpg"}
     label: "[проверено: 99-raw/experiments/H/01] для локального; нативная альфа Qwen 2.1 — [проверено: 99-raw/phase5/runs/0-protocol/t2-qwen-alpha_on-white-dark-checker.jpg, 1 образец]; RouterAI GPT 2.5 — [проверено: 99-raw/phase5/runs/S5-analysis/H-03_alpha.json, мех да, стекло нет, 1 образец]"
     checked: "2026-09-25"
-    phase5_test: [H-01, H-02, H-03, H-04, T2, CM-05]
     decides: "ИТОГ: маршрут по типу объекта (ровный фон + локальный вырез) без изменений; T2 — Qwen 2.1 даёт настоящую альфу, но лицензия исследовательская → черновик; H-03 — RouterAI GPT 2.5 transparent (1,45 ₽): мех — годен, стекло — нет (облако фона, блочная маска) → стекло — хромакей или Ideogram; Riverflow transparent — пусто ×2 → not; H-01 v2–v4, H-02, H-04 не прогонялись (отменено заказчиком 25.09)"
 
   IMG-BG-ABSTRACT:
@@ -306,11 +297,10 @@ routes:
       - {class: B, src: "GenColorBench-Mini: hex GPT-1.5 51,8 / FLUX.2 48,7 / Qwen 25,6 / Z-Image 22,2 % (J11) — гипотеза «FLUX.2 = механизм hex» не подтверждена"}
       - {class: B, src: "GDB: перекраска в палитру картинкой — «All models fail», JSON→рендер 0,946/0,929 (J13)"}
       - {class: A, src: "PaintBench: градиент правкой NB2 13,0 против GPT-2 1,4 mIoU (J16)"}
-      - {class: run, src: "SC-01 (25.09): тёмный фон с переливом — Flare 1K 4 ₽, NB2 1K 4,8 ₽, Sunburst 2K 7 ₽, все три годны (глаз заказчика, демо «перелив + зерно»); MS-01 — пробы трёх направлений (Sunburst 1K × 6, 24 ₽), выбрана крупная абстрактная форма на тёмном — 99-raw/experiments/_polza/SC/2026-09-25/, 99-raw/phase5/runs/MS-marea/audit-MS-01/"}
+      - {class: run, src: "SC-01 (25.09): тёмный фон с переливом — Flare 1K 4 ₽, NB2 1K 4,8 ₽, Sunburst 2K 7 ₽, все три годны (глаз заказчика, демо «перелив + зерно»); MS-01 — пробы трёх направлений (Sunburst 1K × 6, 24 ₽), выбрана крупная абстрактная форма на тёмном — 99-raw/experiments/_polza/SC/2026-09-25/"}
       - {class: run, src: "D2-04 (Z-Image, 4 + 4 пары, судья): формулировка зоны текста — Δ +5,3 [0,0; +10,6] и +2,2 [−8,3; +10,0], «copy space» дал самую шумную зону → умолчание компилятора верно — 99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
-    label: "[исследование]; [проверено: 99-raw/phase5/runs/MS-marea/audit-MS-01, SC-01 — 1 образец на модель, глаз заказчика]; попадание в бренд-цвет — [не проверено]"
+    label: "[исследование]; [проверено: SC-01 — 1 образец на модель, глаз заказчика]; попадание в бренд-цвет — [не проверено]"
     checked: "2026-09-25"
-    phase5_test: [E-13, E-01, D2-04, SC-01, MS-01, CM-01]
     decides: "ИТОГ: сначала код; атмосфера — Flare 1K / Sunburst 2K (тёмный перелив и крупная форма одобрены); D2-04 — фраза зоны текста не нужна сверх умолчания; E-13 (попадание hex) не прогонялся (отменено заказчиком 25.09) → бренд-цвет — грейдом и перекраской, не hex"
 
   IMG-TEXTURE:
@@ -334,7 +324,6 @@ routes:
       - {class: B, src: "параметра tile нет ни у одной модели polza [документация]; H/05 — заделка локально [проверено]"}
     label: "[документация] + [проверено: 99-raw/experiments/H/05-tiling-banding] для постобработки"
     checked: "2026-09-25"
-    phase5_test: [H-09]
     decides: "ИТОГ: без изменений — H-09 не прогонялся (отменено заказчиком 25.09); ворота E-01 сняты (метки Seedream через mie нет)"
 
   IMG-TEXT-LATIN:
@@ -361,7 +350,6 @@ routes:
       - {class: B, src: "GDB вёрстка по брифу: «1 in 4 strings rendered illegibly» (J13) → интерфейсный текст HTML"}
     label: "[исследование]"
     checked: "2026-09-25"
-    phase5_test: [E-17, E-02]
     decides: "ИТОГ: без изменений — E-17 (латиница, «штраф кириллицы») не прогонялся (отменено заказчиком 25.09); по E-02 GPT Image 2 и Seedream 4.5 пишут короткий текст дословно (1 образец, кириллица)"
 
   IMG-TEXT-CYR:
@@ -394,7 +382,6 @@ routes:
       - {class: run, src: "E-07, G-09 (RouterAI Recraft V4.1 и V4.1 utility, 3,86 ₽): 3 из 3 дословно на глаз (агенты U и V), OCR E-07 и G-09 V4.1 — pass, CER 0 — 99-raw/phase5/runs/S5-analysis/E-07_G-09_sheet.jpg, E-07.ocr.json"}
     label: "[проверено: 99-raw/phase5/runs/2.1-cyrillic/E-02.ocr.txt, n = 1 на модель, глаз + OCR; K-05 — 32 картинки]; Recraft V4.1 — 3 из 3 глазом; модель в финал — только короткая надпись"
     checked: "2026-09-25"
-    phase5_test: [E-02, E-03, E-04, E-05, E-06, E-07, G-09, K-05, N-09, N-14]
     decides: "ИТОГ: HTML-слой остаётся основным; E-02 — 6 из 9 моделей пишут короткий кириллический баннер дословно (1 образец): Flare, GPT Image 2, NB2, NB Pro, Seedream 5 Pro, Seedream 4.5; ошибаются Qwen 2.1 и FLUX.2 Pro, Sunburst — типографика; Recraft V4.1 (RouterAI) — 3 из 3 → надпись ≤ 4 слов моделью допустима с OCR + чтением человеком; K-05 — проверка кириллицы: OCR основной (15/24), VLM — не замена (11/24), «близнецов» читает человек; E-03…E-06 не прогонялись (отменено заказчиком 25.09)"
 
   IMG-EDIT:
@@ -428,7 +415,6 @@ routes:
       - {class: run, src: "D2-06 (NB2 1K, 10 правок): одним вызовом 10 из 10 (4,8 ₽) = цепочка 5 + 5 10 из 10 (9,6 ₽); шаг 1 цепочки — global ΔE00 4,69 > 2, LEAK 0,28 — 99-raw/phase5/runs/3-prompt-form/D2-06-check/D2-06_sheet.jpg"}
     label: "[исследование]; в polza — [проверено: 99-raw/phase5/runs/4-edits/E-15-check, n = 1 на модель и правку; D2-06 — 1 образец]"
     checked: "2026-09-25"
-    phase5_test: [E-15, H-06, H-07, D2-06]
     decides: "ИТОГ: разбиение по типу правки в силе; «не трогать остальное» не гарантирует ни одна модель (E-15: утечки и сдвиги у 3 из 4) → композит исходника обязателен; удаление — Seedream 5 Pro (PASS, 1 образец), перекраска — NB2 (ΔE00 3,9); D2-06 — 10 правок одним вызовом NB2 = цепочка, вдвое дешевле и без дрейфа → «≤ 5 правок за вызов» не подтвердилось (1 образец); H-06, H-07 не прогонялись (отменено заказчиком 25.09)"
 
   IMG-OUTPAINT:
@@ -450,7 +436,6 @@ routes:
       - {class: run, src: "H-08 (25.09, 16:9 → 9:16, Sunburst и NB2, 8,80 ₽): оба REGENERATED — SSIM центра 0,94 / 0,98 и ΔE 1,15 / 0,97 проходят, резкость краёв 0,14 / 0,56 < 0,85; композит вставкой — 99-raw/phase5/runs/4-edits/H-08-check/"}
     label: "[исследование]; в polza — [проверено: 99-raw/phase5/runs/4-edits/H-08-check, n = 1 на модель: центр перерисован у обеих]"
     checked: "2026-09-25"
-    phase5_test: [H-08, MS-02]
     decides: "ИТОГ: H-08 — у обеих моделей аутпейнт перерисовывает центр (резкость 0,14 / 0,56 при пороге 0,85) → аутпейнт только с композитом исходника; телефонный формат — своим мастером по референсу (MS-02 3:4, зона текста сверху); 21:9 не прогонялся (отменено заказчиком 25.09)"
 
   IMG-MOCKUP:
@@ -470,7 +455,6 @@ routes:
       - {class: B, src: "GEBench: попадание по координате < 10 %; GDB — правки вылезают за маску (J13)"}
     label: "[исследование] + [документация]"
     checked: "2026-09-24"
-    phase5_test: []
     decides: "не тестируется в фазе 5 (S21 отложен): маршрут — композит"
 
   IMG-UPSCALE:
@@ -480,7 +464,7 @@ routes:
     options:
       - {role: primary, channel: polza, provider: mie, model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "2K", aspect_ratio: "16:9"}, price_rub: 7.0, final: true, note: "генерировать сразу в целевой ступени 2K/4K; E-01: 4K у Sunburst настоящий — 3840×2160 за 11 ₽"}
       - {role: local, channel: local, tool: "Lanczos (Pillow) — по умолчанию; Real-ESRGAN ncnn — только графика (на фото хуже Lanczos на 15–103 п., выдумывает структуру, H/02)", price_rub: 0, final: true}
-      - {role: alt, channel: polza, provider: mie, model: topaz/image-upscale, params: {upscale_factor: "2"}, inputs: {images: 1}, price_rub: 7.5, final: true, gate: "H-05: альфа и детали против Lanczos", note: "модель Topaz внутри не указана"}
+      - {role: alt, channel: polza, provider: mie, model: topaz/image-upscale, params: {upscale_factor: "2"}, inputs: {images: 1}, price_rub: 7.5, final: false, gate: "H-05: альфа и детали против Lanczos", note: "модель Topaz внутри не указана; выбыла — две внутренние ошибки модели подряд (defaults.unavailable)"}
       - {role: regen, channel: polza, provider: mie, model: bytedance/seedream-4, params: {image_resolution: "4K", aspect_ratio: "16:9"}, price_rub: 3.0, final: true, note: "E-01: «4K» через mie — не 4K (21:9 → 2352×1008, ≈ 2,4K); видимой метки нет"}
     not:
       - {model: "генеративная реставрация (NB2 и др.) для товара, лиц, текста", why: "галлюцинирует детали, сдвигает цвет, нестабильна между прогонами (J18)"}
@@ -493,7 +477,6 @@ routes:
       - {class: B, src: "H/02: Real-ESRGAN хуже Lanczos на фото [проверено]; J18: NB2 ≈ PiSA-SR по PSNR, но галлюцинации"}
     label: "[проверено: 99-raw/experiments/H/02] для локального; Topaz — [не проверено]"
     checked: "2026-09-25"
-    phase5_test: [H-05, E-01]
     decides: "ИТОГ: без изменений — генерировать в целевой ступени (Sunburst 4K = 3840×2160, 11 ₽; Seedream 4 «4K» ≈ 2,4K); H-05 (Topaz ×2) не прогонялся (отменено заказчиком 25.09)"
 
   IMG-DRAFT:
@@ -515,7 +498,6 @@ routes:
       - {class: B, src: "Design Arena общий: NB2 Lite #18 1241, Z-Image #64 1102 (J5)"}
     label: "[исследование]; перенос черновика — [не проверено]"
     checked: "2026-09-25"
-    phase5_test: [E-16, N-03, CM-09, D2-05, MS-01]
     decides: "ИТОГ: без изменений — E-16 (черновик → финал референсом) и N-03 (мини-стенд Grok Image 2.0) не прогонялись (отменено заказчиком 25.09); CM-09 — Recraft Flash 0,77 ₽ даёт синий сдвиг; D2-05 — «No people.» у Z-Image безопасно; пробы направлений арт-дирекшена в фазе 5 шли финальной моделью (MS-01: Sunburst 1K × 6 = 24 ₽, выбор заказчика за один показ)"
 
   IMG-LAYERS:
@@ -536,13 +518,13 @@ routes:
       - {class: B, src: "LiWi: Qwen-Image-Layered фото 0,6133, дизайн 0,87–0,92 (J10)"}
     label: "[не проверено]"
     checked: "2026-09-25"
-    phase5_test: [H-10]
     decides: "ИТОГ: без изменений — H-10 не прогонялся (отменено заказчиком 25.09); у Ming Image Design Layer цены в снимке 2026-09-25_1411 по-прежнему нет; слои рендера перед видео-моделью сводить (3D-21 v1 — ошибка входа)"
 
   VID-HERO-LOOP:
     name: "бесшовная фоновая петля hero"
     slots: [hero, cta]
     ai_fit: "✅ абстракция, природа, свет (04 §2 стр. 20)"
+    conditions: ["кадр со знаком марки (логотип, шильдик, надпись на объекте): камера неподвижна (fixed_lens: \"true\") или кадр без знака — при движении камеры модель дорисовывает знак"]
     options:
       - {role: primary, channel: polza, provider: mie, model: bytedance/seedance-1.5-pro, params: {resolution: "720p", duration: "4", generate_audio: "false", fixed_lens: "true", aspect_ratio: "16:9"}, inputs: {images: 2}, price_rub: 10.5, final: true, note: "images A, A (первый = последний); I-03: шов 1,28, живость 0,83; крупная форма, не возвращающаяся к кадру (MS-03), — шов 3,29 → RIFE-мост (post); 8 с — 21 ₽"}
       - {role: premium, channel: polza, provider: mie, model: bytedance/seedance-1.5-pro, params: {resolution: "1080p", duration: "8", generate_audio: "false", fixed_lens: "true", aspect_ratio: "16:9"}, inputs: {images: 2}, price_rub: 45.0, final: true, note: "MS-05: 1080p 8 с + RIFE-мост — шов 0,41 (лучший); 1080p 4 с — 22,5 ₽; решение заказчика 25.09: «чем выше качество, тем круче»"}
@@ -557,7 +539,7 @@ routes:
       - {model: "kling/v3 pro 1080p", why: "VM-02 (A,A 4 с, 48 ₽): почти стоп-кадр — движение 0,024 против 0,61 у Seedance 1.5 Pro на том же кадре, шов относительно движения 6,98 (1 образец)"}
       - {model: minimax/hailuo-3-max, why: "25.09: 2 × 503 «нет провайдеров» (0 ₽) → выбыл (defaults.unavailable_2026_09_25); ToS — метка в кадре"}
     dialect: {family: seedance-1-5, format: prose, note: "только движение + перечень фонового движения + неподвижное + запреты предложениями; циклическая природа (вода, дым, листва); форма промта (JSON/проза) на движение не влияет (D2-11)"}
-    post: ["video_loop_check.py trim --auto (срез дубля последнего кадра)", "шов на мезонине без потерь", "шов > 1,5 (крупная форма не возвращается к кадру A) — RIFE-мост 8 кадров на стыке (rife-ncnn-vulkan v4.6 локально 10–15 с под heavy.lock; ../../scripts/ai-media/loop_rife_bridge.py): 3,29 → 0,69 (4 с), 3,45 → 0,84 (8 с), 1080p — 0,41, без двоения", "кроссфейд хвоста 12–24 кадров — только мелкая рябь: на крупной форме шов 1,46–1,76 и «фантом» (двоение), голос заказчика", "пинг-понг — чистый шов 0,66–0,74, но видно движение назад — только симметричное движение", "после кодирования мерить шов снова: пульс ключевого кадра (мезонин 0,8 → AV1 CRF 28 — 2,4)", "«две половины» — I-07 (не прогонялся)"]
+    post: ["video_loop_check.py trim --auto (срез дубля последнего кадра)", "шов на мезонине без потерь", "шов > 1,5 (крупная форма не возвращается к кадру A) — RIFE-мост 8 кадров на стыке (rife-ncnn-vulkan v4.6 локально 10–15 с под heavy.lock; ../../scripts/ai-media/loop_rife_bridge.py): 3,29 → 0,69 (4 с), 3,45 → 0,84 (8 с), 1080p — 0,41, без двоения", "кроссфейд хвоста 12–24 кадров — только мелкая рябь: на крупной форме шов 1,46–1,76 и «фантом» (двоение), голос заказчика", "пинг-понг — чистый шов 0,66–0,74, но видно движение назад — только симметричное движение", "после кодирования мерить шов снова: пульс ключевого кадра (мезонин 0,8 → AV1 CRF 28 — 2,4)", "«две половины» — I-07 (не прогонялся)", "приёмка знаков по кадрам до монтажа: на каждом кадре, где знак марки виден, он совпадает с настоящим; ролик с дорисованным знаком в монтаж не идёт"]
     check: {audit_mode: video-loop, rubric: video-loop, extra: "--control <i2v того же кадра> --mezzanine: seam_ratio_local ≤ 1,5, motion_vs_control ≥ 0,5, cut_ratio < 10, tail_motion ≥ 0,5; --master → motion_keep ≥ 0,75"}
     delivery: video
     legal: {flags: [vendor-mark-keep], policy_rows: ["04 §2 стр. 20 (AIGC сохранить флагами ffmpeg)"]}
@@ -566,11 +548,10 @@ routes:
       - {class: C, src: "вендорские петли из одинаковых кадров (Seedance 2.5, Kling 3.0, Omni); Loopy — static collapse"}
       - {class: run, src: "I-01…I-03 (25.09, пейзаж с водой, Seedance 1.5 Pro 480p 4 с, 5,25 ₽): I-03 (A,A + fixed_lens) шов 1,28, живость 0,83 — проходит; I-02 (A,A) 1,55 / 0,56; контроль I-01 (i2v) 4,81; заказчик: «плюс-минус одинаково» — 99-raw/phase5/runs/2.4-loops/I-03.loop.json, I-03_x3.mp4"}
       - {class: run, src: "I-08 / I-09 / I-15 (премиум и 2.x на том же кадре): Seedance 2 Mini шов 7,21; Kling 3 std 2,12; GA Omni 1.1 FLF 5,08 — 99-raw/phase5/runs/2.4-loops/*.report.json"}
-      - {class: run, src: "MS-03 / MS-05 (крупная абстрактная форма, Seedance 1.5 Pro 720p A,A + fixed_lens): шов 3,29 (4 с) / 3,45 (8 с); кроссфейд 1,46–1,76 + «фантом»; пинг-понг 0,66–0,74; RIFE-мост 8 кадров 0,69 / 0,84, 1080p 8 с (45 ₽) — 0,41; заказчик: «сейчас хорошо стык сделан» — 99-raw/phase5/runs/MS-marea/loops/, 99-raw/phase5/runs/README.md"}
+      - {class: run, src: "MS-03 / MS-05 (крупная абстрактная форма, Seedance 1.5 Pro 720p A,A + fixed_lens): шов 3,29 (4 с) / 3,45 (8 с); кроссфейд 1,46–1,76 + «фантом»; пинг-понг 0,66–0,74; RIFE-мост 8 кадров 0,69 / 0,84, 1080p 8 с (45 ₽) — 0,41; заказчик: «сейчас хорошо стык сделан» — 99-raw/phase5/runs/README.md"}
       - {class: run, src: "VM-02 (Kling 3 pro 1080p A,A 4 с, 48 ₽): движение 0,024, шов 6,98 — 99-raw/phase5/runs/6-video-models/VM-02-kling3pro-loop-1080p.loop.json"}
-    label: "[проверено: 99-raw/phase5/runs/2.4-loops/I-03.loop.json шов 1,28; 99-raw/phase5/runs/MS-marea/loops RIFE-мост 0,84 / 0,69, 1080p 0,41 — по 1 образцу]"
+    label: "[проверено: 99-raw/phase5/runs/2.4-loops/I-03.loop.json шов 1,28; RIFE-мост 0,84 / 0,69, 1080p 0,41 — по 1 образцу]"
     checked: "2026-09-25"
-    phase5_test: [I-01, I-02, I-03, I-08, I-09, I-15, I-10, I-11, I-12, T9, MS-03, MS-05, VM-02]
     decides: "ИТОГ: основной — Seedance 1.5 Pro A,A + fixed_lens (720p 10,5 ₽; 1080p 8 с 45 ₽) + RIFE-мост на стыке, если шов > 1,5; премиум хуже по шву (Kling 3 std 2,12, GA Omni 5,08, Seedance 2 Mini 7,21, Kling 3 pro 1080p — почти стоп-кадр) → премиум-вариантов петли нет, I-10/I-11 не покупались; кроссфейд на крупной форме — «фантом», пинг-понг — движение назад; H3 Max — 2 × 503, выбыл; I-12 не прогонялся"
 
   VID-CINEMAGRAPH:
@@ -589,10 +570,9 @@ routes:
     evidence:
       - {class: B, src: "fixed_lens документирован BytePlus: «the actual result is not guaranteed» (D2b)"}
       - {class: run, src: "D2-07 (25.09, Seedance 1.5 Pro 480p i2v, 3 формы × 2): движение 1,61 («только движение») / 1,69 (пересказ сцены) / 2,45 («одно событие», +52 %); кадр 0 не перерисован ни в одной форме (SSIM к кадру A 0,814) — 99-raw/phase5/runs/3-prompt-form/video/D2-07/metrics.md"}
-      - {class: run, src: "MS-03 (720p A,A + fixed_lens): сдвиг камеры до 36,5 px за 4 с — fixed_lens не гарантирует неподвижность — 99-raw/phase5/runs/MS-marea/loops/MS-03-nacre-loop-4s.report.json"}
+      - {class: run, src: "MS-03 (720p A,A + fixed_lens): сдвиг камеры до 36,5 px за 4 с — fixed_lens не гарантирует неподвижность"}
     label: "[документация]; держит ли камеру — [не проверено]; форма промта — [проверено: 99-raw/phase5/runs/3-prompt-form/video/D2-07/metrics.md, n = 2]"
     checked: "2026-09-25"
-    phase5_test: [D2-07, I-03, I-04, MS-03]
     decides: "ИТОГ: без изменений маршрута; D2-07 — пересказ сцены не уменьшает движение и не перерисовывает кадр, «только движение» — по краткости (463 против 796 символов); живой синемаграф (маска + maskedmerge) не прогонялся — задание MS-02 motion отменено заказчиком 25.09; fixed_lens даёт сдвиг камеры до 36,5 px (MS-03) → дрейф неподвижного мерить drift --mask"
 
   VID-I2V-PRODUCT:
@@ -616,7 +596,6 @@ routes:
       - {class: run, src: "D2-08 (Grok 1.5 480p, продукт на ровном фоне, 2 × 2): с запретами движения дрейф 8,1 % против 19,1 % ширины (−58 %), площадь ±1,2 %; без запретов в 1 из 2 продукт почти ушёл из кадра — 99-raw/phase5/runs/3-prompt-form/README.md"}
     label: "[проверено: 99-raw/phase5/runs/SC-showcase/SC-03-frames, OCR 11 из 11, 1 образец]; 3 референса Veo — [не проверено]"
     checked: "2026-09-25"
-    phase5_test: [I-13, I-19, D2-08, SC-03, 3D-21]
     decides: "ИТОГ: I-13 закрыт SC-03 — Kling 3 std облётом держит надпись (OCR 11/11) → основной без изменений; товар в кадре — придуманный моделью (концепт) или настоящий по фото (политика product-real-only); поворот по кадрам 3D — Seedance FLF 10,5 ₽ (форма держится); запреты движения предложениями — всегда (D2-08); I-19 (3 референса Veo) не прогонялся"
 
   VID-ABSTRACT:
@@ -640,13 +619,13 @@ routes:
       - {class: run, src: "VM-01 (25.09, кадр крупной абстрактной формы на тёмном): Grok 1.5 720p — сильная трансформация формы (движение 2,65); Seedance 1.5 Pro наезд 720p — кинематографичный вход (радужная полоса-блик); Seedance 2 Fast 480p с фразой роли — держит кадр (SSIM0 0,85); H3 Max — 503, Topaz — INTERNAL_ERROR; слепой показ — «все красивые, зависит от задачи» — 99-raw/phase5/runs/6-video-models/blind-VM-a/, листы sheets/"}
     label: "[исследование]; [проверено: 99-raw/phase5/runs/6-video-models/sheets, VM-01 — 1 образец на модель, голос заказчика вслепую, 1 чел.]"
     checked: "2026-09-25"
-    phase5_test: [I-08, I-12, VM-01, MS-03]
     decides: "ИТОГ: главный путь — кадр-мастер высокого качества → i2v Seedance 1.5 Pro (решение заказчика 25.09 п. 14); без кадра — Seedance 2 Mini; раскладка по роли (голос заказчика вслепую «все красивые, зависит от задачи»): спокойный фон и петля — Seedance 1.5 Pro, вход камерой — наезд Seedance 1.5 Pro, переход раздела — Grok 1.5; I-12 (Grok как перебор движения) не прогонялся"
 
   VID-CAMERA:
     name: "движение камеры по сцене для сторителлинга"
     slots: [campaign, case]
     ai_fit: "⚠️ места как настоящие — спросить (04 §2 стр. 6)"
+    conditions: ["кадр со знаком марки (логотип, шильдик, надпись на объекте) движением камеры не снимается — модель дорисовывает знак: такой план — с неподвижной камерой (VID-HERO-LOOP, VID-CINEMAGRAPH) или от кадра без знака"]
     options:
       - {role: primary, channel: polza, provider: mie, model: bytedance/seedance-1.5-pro, params: {resolution: "720p", duration: "4", generate_audio: "false", fixed_lens: "false", aspect_ratio: "16:9"}, inputs: {images: 1}, price_rub: 10.5, final: true, note: "наезд по кадру: VM-01 — кинематографичный вход (1 образец), на 720p — радужная полоса-блик; для прокрутки — VID-SCROLL"}
       - {role: premium, channel: polza, provider: mie, model: bytedance/seedance-1.5-pro, params: {resolution: "1080p", duration: "4", generate_audio: "false", fixed_lens: "false", aspect_ratio: "16:9"}, inputs: {images: 1}, price_rub: 22.5, final: true, note: "MS-05: наезд 1080p 4 с — 22,5 ₽ (1920×1080)"}
@@ -654,7 +633,7 @@ routes:
       - {role: fallback, channel: polza, provider: mie, model: google/veo3_fast, params: {generationType: FIRST_AND_LAST_FRAMES_2_VIDEO, aspect_ratio: "16:9", enableTranslation: "false"}, inputs: {images: 2}, price_rub: 45.0, final: true, note: "в фазе 5 не вызывался"}
       - {role: draft, channel: polza, provider: mie, model: grok-imagine-video-1-5, params: {resolution: "480p", duration: "5", aspect_ratio: "16:9"}, inputs: {images: 1}, price_rub: 8.1, final: false, note: "VM-01 (720p, 12,15 ₽): наезд с сильной трансформацией формы — переход, не камера; звук → -an"}
     dialect: {family: seedance-1-5, format: prose, note: "одно движение камеры на клип, словарь кино; орбита ≤ 45°; у Kling — семейство kling"}
-    post: ["наезд не возвращается к кадру 0 → воспроизведение один раз + постер или прокрутка (VID-SCROLL), не петля", "кодирование 1080p: CRF по motion_keep; цвет — BT.709 полными тегами (выходы без тегов)"]
+    post: ["наезд не возвращается к кадру 0 → воспроизведение один раз + постер или прокрутка (VID-SCROLL), не петля", "кодирование 1080p: CRF по motion_keep; цвет — BT.709 полными тегами (выходы без тегов)", "приёмка знаков по кадрам до монтажа: на каждом кадре, где знак марки виден, он совпадает с настоящим; ролик с дорисованным знаком в монтаж не идёт"]
     check: {audit_mode: video-loop, rubric: video-loop, extra: "--camera-move"}
     delivery: video
     legal: {flags: [vendor-mark-keep], policy_rows: ["04 §2 стр. 6"]}
@@ -663,7 +642,6 @@ routes:
       - {class: run, src: "VM-01, VM-02, MS-05 (25.09, один кадр крупной абстрактной формы): наезд Seedance 1.5 Pro 720p (10,5 ₽) и 1080p (22,5 ₽), Kling 3 pro 1080p 3 с (36 ₽), Grok 1.5 720p (12,15 ₽); слепой показ — «все красивые, зависит от задачи» — 99-raw/phase5/runs/6-video-models/sheets/, blind-VM-a/"}
     label: "[проверено: 99-raw/phase5/runs/6-video-models/sheets/VM-01-sd15pro-pushin-720p.jpg, 1 образец на модель, голос заказчика вслепую, 1 чел.]; метрики и бенчмарка нет"
     checked: "2026-09-25"
-    phase5_test: [VM-01, VM-02, MS-05]
     decides: "ИТОГ: наезд по кадру — Seedance 1.5 Pro (720p 10,5 ₽, 1080p 22,5 ₽) дешевле Kling 3 pro 1080p (36 ₽ за 3 с) в 1,6–3,4 раза при равном голосе заказчика → основной сменён с Kling 3 pro на Seedance 1.5 Pro; Grok 1.5 — трансформация формы (переход), не камера; облёт товара — VID-I2V-PRODUCT; сессия 5: у Kling 3 pro 1080p 3 с камера почти стоит — меняется сама форма (SSIM первого и последнего кадра 0,645 против 0,157 у наезда Seedance 1080p; глаз, 1 образец — 99-raw/phase5/runs/6-video-models/VM-02-kling3pro-pushin.compare.json)"
 
   VID-CHARACTER:
@@ -682,7 +660,6 @@ routes:
       - {class: C, src: "только документация вендора (C2)"}
     label: "[не проверено]"
     checked: "2026-09-24"
-    phase5_test: []
     decides: "в фазе 5 не тестируется"
 
   VID-LONG:
@@ -703,7 +680,6 @@ routes:
       - {class: run, src: "SC-04 (25.09): FLF Seedance 1.5 Pro — вторая картинка становится последним кадром (кадр 0 = A, последний = B) — основа цепочки клипов по общим кадрам — 99-raw/phase5/runs/SC-showcase/SC-04_endpoints.jpg"}
     label: "[документация]; стык по общему кадру — [проверено: 99-raw/phase5/runs/SC-showcase/SC-04_endpoints.jpg, 1 образец]"
     checked: "2026-09-25"
-    phase5_test: [I-05, I-07, I-18, I-14, SC-04]
     decides: "ИТОГ: без изменений — I-07 (две половины), I-14, I-18 не прогонялись (отменено заказчиком 25.09); SC-04 подтвердил, что последний кадр FLF = вторая картинка → цепочка по общим кадрам возможна"
 
   VID-V2V:
@@ -723,7 +699,6 @@ routes:
       - {class: A, src: "арена правок видео: Wan 3.0 edit №1 (вне polza), Runway Aleph 2 (вне polza) (C2)"}
     label: "[не проверено]"
     checked: "2026-09-25"
-    phase5_test: [I-17, I-20]
     decides: "ИТОГ: не маршрут по решению заказчика 25.09 (п. 12) — I-17 и I-20 не запускались; нужна другая версия ролика — новая генерация от кадра-мастера (VID-HERO-LOOP, VID-CAMERA)"
 
   VID-ALPHA:
@@ -746,7 +721,6 @@ routes:
       - {class: run, src: "D2-08 (Grok 1.5) и D2-11 (Seedance 1.5 Pro) на продукте с ключом: запреты движения у Grok — дрейф −58 %, масштаб ±1,2 %; Seedance наезжает (площадь ×1,8–2,1) в 3 из 4 при любой форме промта — 99-raw/phase5/runs/3-prompt-form/README.md, video/D2-11/metrics.md"}
     label: "[практика]; ровный ключ у модели — [не проверено]; удержание объекта — [проверено: 99-raw/phase5/runs/3-prompt-form/README.md, D2-08 и D2-11, n = 2]"
     checked: "2026-09-25"
-    phase5_test: [I-06, I-14, D2-08, D2-11]
     decides: "ИТОГ: схема (объект на ключе → chromakey → stacked alpha) без изменений; D2-08/D2-11 — Seedance на ключе наезжает, Grok 1.5 с запретами держит масштаб → Grok 1.5 (8,10 ₽) поднят до alt final: true, основной — проверять наезд; I-06, I-14 (живой ключ и чистота кеинга) не прогонялись (отменено заказчиком 25.09)"
 
   VID-SCROLL:
@@ -767,13 +741,18 @@ routes:
       - {class: run, src: "SC-04 (25.09, «рассвет → восход», Seedance 1.5 Pro 720p [A,B] + fixed_lens, 10,5 ₽): кадр 0 = A, последний = B — 99-raw/phase5/runs/SC-showcase/SC-04_endpoints.jpg; доставка под мышь и прокрутку — 99-raw/experiments/B/10-scrub-delivery (секвенция против короткого GOP)"}
     label: "[проверено: 99-raw/phase5/runs/SC-showcase/SC-04_endpoints.jpg, кадр 0 = A и последний = B, 1 образец]; доставка — [проверено: 99-raw/experiments/B/10-scrub-delivery, Chromium headless]"
     checked: "2026-09-25"
-    phase5_test: [I-05, SC-04, SC-03, MS-05]
     decides: "ИТОГ: SC-04 закрыл I-05 — вторая картинка Seedance 1.5 Pro становится последним кадром; мышь — секвенция кадров (0 отставания, но ≈ 214 МБ памяти), касание — видео с коротким GOP (AV1 GOP 4) — числа B/10 (лаборатория, настоящий телефон не проверялся); «две половины» (I-07) не прогонялись"
 
   VID-UPSCALE:
     name: "апскейл и интерполяция кадров"
     slots: [hero]
     ai_fit: "✅"
+    resolution_by:                                 # чем у модели задаётся разрешение ролика: параметр каталога (values — значение → разрешение, когда параметр зовётся не resolution) или операция над готовым роликом; resolution у модели без такого параметра не действует
+      bytedance/seedance-1.5-pro: {param: resolution}
+      google/gemini-omni-1.1-flash: {param: resolution}
+      kling/v3: {param: mode, values: {std: "720p", pro: "1080p", "4K": "2160p"}}
+      kling/v3-motion-control: {param: mode, values: {"720p": "720p", "1080p": "1080p"}}
+      google/veo3_fast: {operations: {upscale_1080p: "1080p", upscale_4k: "2160p"}}
     options:
       - {role: primary, channel: polza, provider: mie, model: bytedance/seedance-1.5-pro, params: {resolution: "1080p", duration: "4", generate_audio: "false", fixed_lens: "true", aspect_ratio: "16:9"}, inputs: {images: 2}, price_rub: 22.5, final: true, note: "генерировать нативно в целевом разрешении: MS-05 — 1080p (1920×1080) 4 с 22,5 ₽, 8 с 45 ₽ (720p — 10,5 / 21)"}
       - {role: alt, channel: polza, provider: mie, model: google/gemini-omni-1.1-flash, params: {resolution: "1080p", duration: "4", aspect_ratio: "16:9"}, price_rub: 48.0, final: true, note: "1080p = 720p по цене; звук всегда → -an; для петли не годится (I-15, шов 5,08)"}
@@ -787,10 +766,9 @@ routes:
     legal: {flags: [vendor-mark-keep], policy_rows: []}
     evidence:
       - {class: B, src: "консенсус практиков: натив лучше апскейла (W1-8)"}
-      - {class: run, src: "MS-05 (25.09, Seedance 1.5 Pro 1080p): петля 8 с (45 ₽) + RIFE-мост — шов 0,41; наезд 4 с (22,5 ₽); VM-05 Topaz — 2 × INTERNAL_ERROR — 99-raw/phase5/runs/MS-marea/loops/MS-05-nacre-loop-8s-1080p_rife8.mp4, 99-raw/phase5/runs/6-video-models/VM-05.log"}
-    label: "[проверено: 99-raw/phase5/runs/MS-marea/loops/MS-05-nacre-loop-8s-1080p_rife8.mp4, натив 1080p, 1 образец]; Topaz — выбыл"
+      - {class: run, src: "MS-05 (25.09, Seedance 1.5 Pro 1080p): петля 8 с (45 ₽) + RIFE-мост — шов 0,41; наезд 4 с (22,5 ₽); VM-05 Topaz — 2 × INTERNAL_ERROR — 99-raw/phase5/runs/6-video-models/VM-05.log"}
+    label: "[проверено: натив 1080p, 1 образец]; Topaz — выбыл"
     checked: "2026-09-25"
-    phase5_test: [I-16, VM-05, MS-05]
     decides: "ИТОГ: натив в целевом разрешении — Seedance 1.5 Pro 1080p (22,5 ₽ за 4 с) вместо GA Omni (48 ₽); Topaz видео выбыл (2 × INTERNAL_ERROR) → вопрос «720p + апскейл против 1080p» (VM-05, I-16) не решён; RIFE — для моста стыка петли"
 
   VEC-ICON-LINE:
@@ -817,7 +795,6 @@ routes:
       - {class: run, src: "G-01, G-02, G-04, G-06 (25.09, polza-chat): 99-raw/experiments/_mp/G/2026-09-25/ (3,43 / 0,84 / 1,17 / 0,21 ₽); G-03 — пустой ответ за 9,77 ₽; разбор V (check_icons + лист 16/24/48): GPT-5.6 Sol и Gemini 3.8 Flash — поле и зазор 4 из 6 против 6 из 6 у Claude в сессии (G/01); новые метафоры съезжают к знакомым глифам; VLM-узнавание (G-06, лист G/01) совпало с глазом 12 из 12 — 99-raw/phase5/runs/S5-analysis/G-llm-svg/nearest-lucide.json"}
     label: "[исследование] + [проверено: 99-raw/experiments/G/01] + [проверено: 99-raw/phase5/runs/S5-analysis/G-llm-svg/nearest-lucide.json, G-01, G-02, n = 6 иконок на модель]"
     checked: "2026-09-25"
-    phase5_test: [G-01, G-02, G-03, G-04, G-05, G-06]
     decides: "ИТОГ: маршрут без изменений (набор продукта или LLM → SVG в сессии, 0 ₽); G-01, G-02 (разбор V): поле и зазор 4 из 6 у обеих платных LLM против 6 из 6 у Claude в сессии, новые метафоры съезжают к знакомым глифам → платная LLM лучше «Claude в сессии, 0 ₽» не оказалась; урок фазы 5 — рассуждающий чат может израсходовать весь max_tokens без ответа (G-03 Sonnet 5 — 9,77 ₽, G-04 DeepSeek — 1,17 ₽ при оценке 0,17: 8 000 ток. планирования текстом и ставка провайдера ×3,6), верх цены — max_tokens × ставка провайдера; G-05 не прогонялся"
 
   VEC-ICON-FILLED:
@@ -841,7 +818,6 @@ routes:
       - {class: run, src: "B2-01: неверный controls → 200 без data[] (0 ₽), смоук без него — картинка → controls доходит до Recraft; точность палитры параметром (G-07, G-08) не проверялась — 99-raw/phase5/runs/5-vector/B2-01.log"}
     label: "[проверено: 99-raw/phase5/runs/5-vector/analysis/icons/metrics.md, CM-01 — 1 пара, код + глаз; голос заказчика — «сложно выбрать»]"
     checked: "2026-09-25"
-    phase5_test: [G-07, G-08, G-13, G-14, G-15, G-17, G-18, B2-01, CM-01, CM-03]
     decides: "ИТОГ: основной сменён — наборы иконок: Recraft V4.1 Pro Vector (33,11 ₽; 8 из 8, путей −44 %, без градиентов), черновики — Vector (8,83 ₽; повторы); палитра — перекраской SVG (словами — только тон); CM-03 — Styles переносит палитру и вес, не состав; controls доходит (B2-01); G-07, G-08, G-13…G-15 не прогонялись; G-17/G-18 (разбор V): сетка 2×2 GPT Image 2.5 (4 ₽) против 4 вызовов (16 ₽) — палитра держится у обоих, «вес» гуляет у обоих (0,29 / 0,37 при критерии ≤ 0,15), vtracer → SVG 2,5–8,1 КБ, SSIM 0,97–0,99"
 
   VEC-ILLUSTR:
@@ -864,7 +840,6 @@ routes:
       - {class: run, src: "CM-01 spot/bg, CM-02, CM-03 (25.09, RouterAI): спот Pro 14 путей / Vector 20; фон Vector 8 путей (Pro — 12, белый фон); CM-02 — 131 путь, 2 555 узлов, 102 892 Б; Styles Pro — палитра ΔE 2,73 — 99-raw/phase5/runs/5-vector/analysis/illustrations/metrics.md, слепые листы blind-spot.jpg, blind-bg.jpg"}
     label: "[проверено: 99-raw/phase5/runs/5-vector/analysis/illustrations/metrics.md, CM-01…CM-03 — 1 образец на вариант, код + глаз]; голоса заказчика по слепым листам нет"
     checked: "2026-09-25"
-    phase5_test: [G-10, G-11, G-12, G-16, CM-01, CM-02, CM-03]
     decides: "ИТОГ: фон секции и иллюстрации — Vector (8,83 ₽) по умолчанию, спот «с первого раза» — Pro (33,11 ₽); фото → вектор — через input_references (image-to-image, тяжёлый SVG → <img>/AVIF); серия от своей иконки — Styles (палитра и вес, не состав); решение заказчика 25.09 (п. 14): Recraft SVG — для фонов и иконок; G-10…G-12, G-16 не прогонялись"
 
   VEC-PATTERN:
@@ -882,7 +857,6 @@ routes:
       - {class: B, src: "G 07/03 [проверено: 99-raw/experiments/G/]"}
     label: "[проверено]"
     checked: "2026-09-24"
-    phase5_test: []
     decides: "не нужен"
 
   VEC-ANIM:
@@ -901,7 +875,6 @@ routes:
       - {class: B, src: "G/05: reduce в Chromium — CSS inline слушает, SMIL/<img>/Lottie — нет [проверено]"}
     label: "[проверено: 99-raw/experiments/G/05]"
     checked: "2026-09-24"
-    phase5_test: []
     decides: "не нужен"
 
   VEC-TRACE:
@@ -920,5 +893,4 @@ routes:
       - {class: B, src: "G/03: vtracer с эталоном [проверено]; GDB image-to-SVG GPT-5.4 SSIM 0,918 (J13)"}
     label: "[проверено: 99-raw/experiments/G/03]"
     checked: "2026-09-24"
-    phase5_test: [G-13, G-16]
     decides: "G-16: Image2svg (1 ₽) против локального vtracer"

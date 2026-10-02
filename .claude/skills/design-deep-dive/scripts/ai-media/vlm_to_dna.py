@@ -18,16 +18,28 @@ kb/ai-media/06-art-direction-consistency/visual-dna.schema.json; поля и п�
                                                         JSON) → черновик паспорта; по сетке — палитра, баланс белого и
                                                         хрома, снятые локально, критерий «≥ 3 из 5 hex в ΔE ≤ 0,05» и
                                                         «придуманные» цвета; два ответа и больше — сверка прогонов
-  validate DNA.json...                                  схема + смысловой линт (запрещённые оттенки, слова, роли, паспорт
-                                                        3D-серии, метафоры иллюстраций)
+  validate DNA.json... [--art-direction AD.json]        схема + смысловой линт (запрещённые оттенки, слова, роли, паспорт
+                                                        3D-серии, метафоры иллюстраций); с --art-direction — сверка
+                                                        скрима: числа прозрачности рядом со словом «скрим» в текстах
+                                                        арт-дирекции против post.scrim.max_alpha паспорта, расхождение —
+                                                        предупреждение
   compare A.json B.json                                 два прогона разбора: совпадение grade и light, ΔE палитр
   lut DNA.json --out FILE.cube [--size 33]              параметрический грейд паспорта → 3D LUT (.cube)
   from-tokens TOKENS.json --out DNA.json [--adjectives a,b,c] [--id ID]
                                                         скелет паспорта из токенов DTCG (ui 09/04)
-  to-spec DNA.json --kind photo|illustration|icon3d --task CODE --subject TEXT [--slot hero]
-          [--ratio 16:9] [--no-text-zone] [--ref-class CLASS] [--out SPEC.json]
-                                                        спецификация ассета (05-prompting) из паспорта
+  to-spec DNA.json --kind photo|illustration|icon3d --task CODE --subject TEXT [--section hero] [--slot hero-visual]
+          [--ratio 16:9] [--no-text-zone] [--ref-class CLASS] [--edit SOURCE --operation OP] [--out SPEC.json]
+                                                        спецификация ассета (05-prompting) из паспорта: --section — id
+                                                        секции плана страницы, --slot — id строки плана ассетов (без
+                                                        --section секцией служит значение --slot); --edit — профиль
+                                                        правки настоящего кадра: в спецификацию не идут исключения
+                                                        паспорта и композиция генерации с нуля, референсы паспорта —
+                                                        только с --ref-class; `edit.changes` и `edit.keep` дописывает
+                                                        автор
   selftest                                              самопроверка на синтетике и заглушках ответа
+
+Код выхода: 0 — ошибок нет; 1 — ошибки схемы или линта (validate, parse, to-spec) или провал самопроверки; 2 — ошибка
+вызова или входа (нет ответов пакета, файл арт-дирекции не читается, --edit без --operation).
 """
 import argparse, copy, datetime as dt, hashlib, io, json, math, os, re, shutil, subprocess, sys
 from pathlib import Path
@@ -303,6 +315,9 @@ def lint(dna, dna_path=None):
     if tz and tz.get("side") in ("left", "right") and comp.get("subject_region") in ("left-third", "right-third"):
         if (tz["side"] == "left") == (comp["subject_region"] == "left-third"):
             errs.append(f"composition: объект ({comp['subject_region']}) и зона текста ({tz['side']}) на одной стороне")
+    if tz and tz.get("side") == "center" and comp.get("subject_region") == "center":
+        warns.append("composition: объект и зона текста оба в центре кадра — спецификацию с такой парой компилятор промтов "
+                     "отклоняет; объект — в стороне от центральной полосы текста")
     acc = dna.get("acceptance", {})
     if acc.get("text_zone_percentile", 99.9) < 99:
         warns.append("acceptance.text_zone_percentile < 99: скрим по p95 оставил нечитаемыми 14 из 64 комбинаций (F/02)")
@@ -744,6 +759,11 @@ def from_tokens(tokens, dna_id="from-tokens", adjectives=None, tokens_path=None)
 MEDIUM_3D = (("glass", "glass-3d"), ("clay", "clay-3d"), ("ceramic", "clay-3d"), ("matte", "clay-3d"))
 
 
+def edit_operations():
+    """Операции правки — перечень edit.operation схемы спецификации ассета."""
+    return load_json(SPEC_SCHEMA_PATH)["properties"]["edit"]["properties"]["operation"]["enum"]
+
+
 def pick_palette(entries, limit=5):
     order = {"dominant": 0, "background": 1, "secondary": 2, "accent": 3, "text": 4, "shadow": 5, "highlight": 6}
     sel = sorted(entries, key=lambda e: order.get(e["role"], 9))[:limit]
@@ -763,7 +783,12 @@ def pick_palette(entries, limit=5):
 
 
 def to_spec(dna, kind, task, subject, slot="hero", ratio=None, text_zone=True, ref_class=None, dna_path=None, out_path=None,
-            shot=None, section=None, purpose=None):
+            shot=None, section=None, purpose=None, edit=None):
+    """Паспорт → спецификация ассета. section — id секции плана страницы, slot — id строки плана ассетов (без section
+    секцией служит slot). edit = {"operation", "source"} — профиль правки настоящего кадра: исключения паспорта и
+    композиция генерации с нуля (область объекта, ракурс, зона текста, правило «против среднего») в спецификацию не
+    идут — кадр уже снят; референсы паспорта идут только при названном ref_class; что менять (`edit.changes`) и что
+    сохранить (`edit.keep`) дописывает автор."""
     comp, cam, light, pal = dna["composition"], dna["camera"], dna["light"], dna["palette"]
     if kind not in dna["style_blocks"]:
         raise SystemExit(f"в паспорте нет style_blocks.{kind}")
@@ -777,9 +802,10 @@ def to_spec(dna, kind, task, subject, slot="hero", ratio=None, text_zone=True, r
             "output": {"primary_ratio": ratio or (comp.get("master_ratio", "16:9") if kind == "photo" else "1:1"), "resolution": "1K"}}
     c = spec["composition"]
     if kind == "photo":
-        c["subject_region"] = comp["subject_region"]
-        if cam.get("angle"):
-            c["angle"] = cam["angle"]
+        if not edit:
+            c["subject_region"] = comp["subject_region"]
+            if cam.get("angle"):
+                c["angle"] = cam["angle"]
         spec["camera"] = {k: cam[k] for k in ("lens_mm", "depth_of_field", "capture") if k in cam}
         spec["light"] = {k: light[k] for k in ("direction", "quality", "time_of_day", "source") if light.get(k)}
         if dna.get("materials"):
@@ -789,17 +815,19 @@ def to_spec(dna, kind, task, subject, slot="hero", ratio=None, text_zone=True, r
         if gp:
             spec["style"]["grain"] = "fine natural film grain" if gp < 2.5 else "visible natural film grain"
         tz = comp.get("text_zone_default")
-        if text_zone and tz:
+        if text_zone and tz and not edit:
             s = tz["share"]
-            rect = {"left": [0, 0, s, 1], "right": [round(1 - s, 3), 0, 1, 1], "top": [0, 0, 1, s], "bottom": [0, round(1 - s, 3), 1, 1]}[tz["side"]]
+            rect = {"left": [0, 0, s, 1], "right": [round(1 - s, 3), 0, 1, 1], "top": [0, 0, 1, s], "bottom": [0, round(1 - s, 3), 1, 1],
+                    "center": [round((1 - s) / 2, 3), 0, round((1 + s) / 2, 3), 1]}[tz["side"]]   # center — полоса шириной share
             bg = next((e for e in pal["image_palette"] if e["role"] == "background"), None)
             surface = tz.get("surface") or (bg["applies_to"] if bg and bg.get("applies_to") else "plain, evenly lit area")
             c["text_zone"] = {"side": tz["side"], "rect": rect, "tone": "even, low contrast", "surface": surface,
                               "purpose": "caption" if tz["side"] == "bottom" and s <= 0.3 else "headline"}
             spec["text"] = {"mode": "html_overlay"}
     elif kind == "icon3d":
-        c["subject_region"] = "center"
-        c["angle"] = "high-angle"
+        if not edit:
+            c["subject_region"] = "center"
+            c["angle"] = "high-angle"
         ic = dna.get("icon3d", {})
         spec["light"] = {"direction": "left", "quality": "soft", "source": "soft key light from the upper left, gentle fill and rim"}
         mat = ic.get("material", "")
@@ -821,10 +849,14 @@ def to_spec(dna, kind, task, subject, slot="hero", ratio=None, text_zone=True, r
         spec["style"] = {"medium": medium if medium in ("flat-illustration", "vector", "line-art", "watercolor", "gouache", "collage") else "other"}
         if il.get("line_px"):
             spec["style"]["line"] = f"uniform {il['line_px']:g} px lines at {il.get('display_px', 160)} px width"
-        c["subject_region"] = "center"
-    spec["series"] = {"id": dna["id"], "block": dna["style_blocks"][kind], "avoid_average": bool(comp.get("asymmetry")) and kind == "photo"}
+        if not edit:
+            c["subject_region"] = "center"
+    spec["series"] = {"id": dna["id"], "block": dna["style_blocks"][kind],
+                      "avoid_average": bool(comp.get("asymmetry")) and kind == "photo" and not edit}
     refs = [r for r in dna.get("references", []) if r["role"] in ("style", "palette", "material")
             and (ref_class is None or r.get("class") == ref_class)][:3]
+    if edit and ref_class is None:  # вход правки — сам кадр; референсы паспорта («сюжет и сцена — из промта») — по явному классу
+        refs = []
     if refs:
         base_in = Path(dna_path).parent if dna_path else Path.cwd()
         base_out = Path(out_path).parent if out_path else Path.cwd()
@@ -839,9 +871,68 @@ def to_spec(dna, kind, task, subject, slot="hero", ratio=None, text_zone=True, r
     ex = dna["exclusions"].get("replace_with", [])
     if kind != "photo":  # фото-замены («soft late-morning daylight», «desk») не вносить в иллюстрации и 3D
         ex = [e for e in ex if e.get("kind") in ("artifact", "service")]
-    if ex:
+    if ex and not edit:  # в правке настоящего кадра запреты генерации с нуля («без людей») стёрли бы то, что снято
         spec["exclusions"] = [{k: e[k] for k in ("what", "kind", "replace_with") if e.get(k)} for e in ex]
+    if edit:
+        src = edit["source"]
+        if not re.match(r"^[a-z]+://", src):
+            src = os.path.relpath(Path(src).resolve(), (Path(out_path).parent if out_path else Path.cwd()).resolve())
+        spec["edit"] = {"operation": edit["operation"], "source": src}
     return spec
+
+
+# ---------------------------------------------------------------- скрим: арт-дирекция против паспорта
+SCRIM_WORD = re.compile(r"скрим|scrim", re.I)
+OTHER_LAYER = re.compile(r"вуал|veil|оверле|overlay|затемнени", re.I)   # число после этих слов — не о скриме
+SCRIM_ALPHA = re.compile(r"(?<![\w.,])(?:(0[.,]\d{1,3}|1[.,]0{1,3})(?!\d|[.,]\d|\s?%)|(\d{1,3}(?:[.,]\d+)?)\s?%)")
+SIZE_AFTER = re.compile(r"\s*(?:высот|ширин|кадр|экран|окна|of the |height|width)", re.I)   # доля размера, а не прозрачность
+
+
+def scrim_mentions(obj, path=""):
+    """Числа прозрачности, названные рядом со словом «скрим» в текстовых полях арт-дирекции → [(путь поля, значение
+    0–1, фраза)]. Берётся число в той же фразе после слова «скрим»: доля 0,xx или проценты; число размера («30 %
+    высоты») и число после слова о другом слое («вместо вуали 25 %») не берутся."""
+    out = []
+    if isinstance(obj, dict):
+        for k, v in obj.items():
+            out += scrim_mentions(v, f"{path}.{k}" if path else str(k))
+    elif isinstance(obj, list):
+        for i, v in enumerate(obj):
+            out += scrim_mentions(v, f"{path}[{i}]")
+    elif isinstance(obj, str):
+        for clause in re.split(r"[;\n]|\.\s", obj):
+            m = SCRIM_WORD.search(clause)
+            if not m:
+                continue
+            tail = clause[m.end():]
+            other = OTHER_LAYER.search(tail)
+            tail = tail[:other.start()] if other else tail
+            for n in SCRIM_ALPHA.finditer(tail):
+                if SIZE_AFTER.match(tail[n.end():]):
+                    continue
+                val = float(n.group(1).replace(",", ".")) if n.group(1) else float(n.group(2).replace(",", ".")) / 100
+                if 0 <= val <= 1:
+                    out.append((path, val, " ".join(clause.split())[:160]))
+    return out
+
+
+def scrim_check(dna, art_direction):
+    """Скрим арт-дирекции против паспорта визуала: числа прозрачности скрима из текстов арт-дирекции сверяются с
+    `post.scrim.max_alpha` паспорта (равенство до сотых). Фраза сходится, если одно из её чисел равно значению паспорта
+    (диапазон «от 0,3 до 0,55»); расхождение или число без значения в паспорте — предупреждение."""
+    alpha = ((dna.get("post") or {}).get("scrim") or {}).get("max_alpha")
+    phrases = {}
+    for path, val, quote in scrim_mentions(art_direction):
+        phrases.setdefault((path, quote), []).append(val)
+    warns = []
+    for (path, quote), vals in phrases.items():
+        named = ", ".join(f"{v:g}" for v in vals)
+        if alpha is None:
+            warns.append(f"скрим: арт-дирекция ({path}) называет {named} — «{quote}», а в паспорте post.scrim.max_alpha не задан")
+        elif all(round(v, 2) != round(alpha, 2) for v in vals):
+            warns.append(f"скрим: арт-дирекция ({path}) называет {named} — «{quote}», в паспорте post.scrim.max_alpha {alpha:g}: "
+                         "значения расходятся — привести к одному")
+    return warns
 
 
 # ---------------------------------------------------------------- команды
@@ -1019,11 +1110,20 @@ def cmd_parse(a):
 
 
 def cmd_validate(a):
+    ad = None
+    if a.art_direction:
+        try:
+            ad = load_json(a.art_direction)
+        except (OSError, json.JSONDecodeError) as e:
+            print(f"vlm_to_dna.py validate: арт-дирекция не читается — {e}", file=sys.stderr)
+            sys.exit(2)
     bad = 0
     for p in a.files:
         dna = load_json(p)
         errs, eng = schema_errors(dna, force_builtin=a.builtin)
         lerrs, lwarns = lint(dna, p)
+        if ad is not None:
+            lwarns += scrim_check(dna, ad)
         ok = not errs and not lerrs
         bad += not ok
         print(json.dumps({"file": p, "ok": ok, "validator": eng, "schema_errors": errs[:20], "lint_errors": lerrs,
@@ -1053,8 +1153,12 @@ def cmd_from_tokens(a):
 
 
 def cmd_to_spec(a):
+    if bool(a.edit) != bool(a.operation):
+        print("vlm_to_dna.py to-spec: профиль правки — оба ключа: --edit SOURCE и --operation OP", file=sys.stderr)
+        sys.exit(2)
     dna = load_json(a.dna)
-    spec = to_spec(dna, a.kind, a.task, a.subject, a.slot, a.ratio, not a.no_text_zone, a.ref_class, a.dna, a.out, a.shot)
+    spec = to_spec(dna, a.kind, a.task, a.subject, a.slot, a.ratio, not a.no_text_zone, a.ref_class, a.dna, a.out, a.shot,
+                   section=a.section, edit={"operation": a.operation, "source": a.edit} if a.edit else None)
     errs, eng = schema_errors(spec, SPEC_SCHEMA_PATH)
     if a.out:
         dump_json(spec, a.out)
@@ -1253,9 +1357,80 @@ def selftest():
     s3 = to_spec(load_json(EXAMPLES / "dna-strict-saas.json"), "icon3d", "IMG-ICON3D", "a small parcel box", "section")
     check("to-spec icon3d: свет — схема паспорта 3D-серии, спецификация проходит схему",
           "fill and rim" in s3["light"]["source"] and not schema_errors(s3, SPEC_SCHEMA_PATH)[0], s3["light"])
-    dump_json(spec, tmp / "spec.json")
+    sp2 = to_spec(load_json(wc), "photo", "IMG-HERO-PHOTO", "a wooden park bench", "hero-visual", section="hero")
+    check("to-spec: секция и слот — раздельные значения; без секции секцией служит слот",
+          (sp2["role"]["section"], sp2["role"]["slot"]) == ("hero", "hero-visual") and spec["role"]["section"] == spec["role"]["slot"] == "hero",
+          (sp2["role"], spec["role"]))
+    se = to_spec(load_json(wc), "photo", "IMG-EDIT", "a wooden park bench under a birch tree", "hero-visual", section="hero",
+                 out_path=tmp / "edit.spec.json", edit={"operation": "relight", "source": str(tmp / "shot0.png")})
+    check("to-spec, профиль правки: edit с исходником от папки спецификации; без исключений и референсов паспорта, "
+          "области объекта, ракурса и зоны текста; схема проходит",
+          se.get("edit") == {"operation": "relight", "source": "shot0.png"} and "exclusions" not in se and "references" not in se
+          and list(se["composition"]) == ["shot"] and se["text"] == {"mode": "none"} and se["series"]["avoid_average"] is False
+          and not schema_errors(se, SPEC_SCHEMA_PATH)[0], (se.get("edit"), se["composition"], schema_errors(se, SPEC_SCHEMA_PATH)[0][:2]))
+    se = to_spec(load_json(wc), "photo", "IMG-EDIT", "a wooden park bench", "hero-visual", ref_class="exterior-park-autumn", dna_path=wc,
+                 out_path=tmp / "edit.spec.json", edit={"operation": "restyle", "source": str(tmp / "shot0.png")})
+    check("to-spec, профиль правки с --ref-class: референсы названного класса идут", len(se.get("references") or []) >= 1, se.get("references"))
+    check("to-spec без профиля правки: исключения и композиция паспорта — в спецификации",
+          spec.get("exclusions") and {"subject_region", "text_zone"} <= set(spec["composition"]) and "edit" not in spec, spec["composition"])
+    d = load_json(wc)
+    d["composition"].update({"text_zone_default": {"side": "center", "share": 0.4}, "subject_region": "bottom"})
+    e1, _ = schema_errors(d)
+    e2, _ = schema_errors(d, force_builtin=True)
+    sc = to_spec(d, "photo", "IMG-HERO-PHOTO", "a wooden park bench", "hero")
+    check("зона текста по центру: паспорт проходит схему, в спецификации — центральная полоса шириной share",
+          not e1 and not e2 and sc["composition"]["text_zone"]["side"] == "center" and sc["composition"]["text_zone"]["rect"] == [0.3, 0, 0.7, 1]
+          and not schema_errors(sc, SPEC_SCHEMA_PATH)[0], (e1 or e2, sc["composition"].get("text_zone")))
+    d["composition"]["subject_region"] = "center"
+    le, lw = lint(d)
+    check("зона текста и объект оба в центре — предупреждение линта, не ошибка", any("в центре кадра" in w for w in lw) and not le, (le, lw))
+    d = load_json(wc)
+    d["lifecycle"] = {"version": "1.1", "history": [
+        {"version": "1.0", "date": "2030-01-15", "by": "владелец продукта", "change": "первая утверждённая версия"},
+        {"version": "1.1", "date": "2030-02-01", "by": "владелец продукта", "change": "post.scrim.max_alpha: 0,55 → 0,6"}]}
+    e1, _ = schema_errors(d)
+    e2, _ = schema_errors(d, force_builtin=True)
+    check("версия паспорта и история подтверждений (lifecycle) — необязательные поля, схема проходит", not e1 and not e2, (e1 or e2)[:2])
+    d["lifecycle"]["history"][1].pop("by")
+    e1, _ = schema_errors(d)
+    e2, _ = schema_errors(d, force_builtin=True)
+    check("история подтверждений: запись без «кто» — ошибка схемы у обоих валидаторов", any("by" in e for e in e1) and any("by" in e for e in e2),
+          (e1[:2], e2[:2]))
+    # 7. скрим: числа прозрачности из текстов арт-дирекции против post.scrim.max_alpha паспорта
+    ad = {"visual_language": {"composition": [
+        "скрим под заголовком — не слабее 0,7 тёмного слоя; контраст строк ≥ 4,5:1",
+        "подпись карточки лежит на скриме 30 % высоты карточки", "скрим у меню вместо вуали 25 % на всё фото"]}}
+    d = load_json(wc)
+    d["post"]["scrim"]["max_alpha"] = 0.55
+    w = scrim_check(d, ad)
+    check("скрим: арт-дирекция 0,7 против 0,55 паспорта — одно предупреждение; число размера и число вуали не берутся",
+          len(w) == 1 and "0.7" in w[0] and "0.55" in w[0] and "visual_language.composition[0]" in w[0], w)
+    d["post"]["scrim"]["max_alpha"] = 0.7
+    check("скрим: значения равны — чисто", not scrim_check(d, ad), scrim_check(d, ad))
+    rng = {"notes": "скрим — градиент от 0,3 до 0,7 под колонкой текста"}
+    check("скрим: диапазон с числом паспорта — чисто; диапазон без него — одно предупреждение на фразу",
+          not scrim_check(d, rng) and len(scrim_check(dict(d, post={"scrim": {"max_alpha": 0.5}}), rng)) == 1, scrim_check(d, rng))
+    d["post"].pop("scrim")
+    check("скрим: в паспорте значения нет, арт-дирекция его называет — предупреждение", len(scrim_check(d, ad)) == 1, scrim_check(d, ad))
+    d = load_json(wc)
+    d["references"] = []
+    dump_json(d, tmp / "dna-scrim.json")
+    dump_json(ad, tmp / "art-direction.json")
     venv = Path(kbpaths.python())
     py = str(venv) if venv.exists() else sys.executable
+    me = str(Path(__file__).resolve())
+    r = subprocess.run([py, me, "validate", str(tmp / "dna-scrim.json"), "--art-direction", str(tmp / "art-direction.json")],
+                       capture_output=True, text=True, timeout=120)
+    check("validate --art-direction: расхождение скрима — предупреждение в lint_warnings, код 0",
+          r.returncode == 0 and "скрим: арт-дирекция" in r.stdout, (r.returncode, (r.stderr or r.stdout)[-300:]))
+    r = subprocess.run([py, me, "validate", str(tmp / "dna-scrim.json"), "--art-direction", str(tmp / "none.json")],
+                       capture_output=True, text=True, timeout=120)
+    check("validate --art-direction: файл не читается — строка в stderr и код 2", r.returncode == 2 and "арт-дирекция не читается" in r.stderr,
+          (r.returncode, r.stderr[-200:]))
+    r = subprocess.run([py, me, "to-spec", str(wc), "--kind", "photo", "--task", "IMG-EDIT", "--subject", "a wooden park bench",
+                        "--edit", str(tmp / "shot0.png")], capture_output=True, text=True, timeout=120)
+    check("to-spec --edit без --operation — код 2", r.returncode == 2 and "--operation" in r.stderr, (r.returncode, r.stderr[-200:]))
+    dump_json(spec, tmp / "spec.json")
     r = subprocess.run([py, str(TOOLS / "prompt_compile.py"), "compile", str(tmp / "spec.json"), "--model", "openai/gpt-image-2.5-sunburst"],
                        capture_output=True, text=True, timeout=120)
     block = load_json(wc)["style_blocks"]["photo"]
@@ -1287,15 +1462,22 @@ def main():
     s.add_argument("--id"); s.add_argument("--brand")
     s.add_argument("--art-direction", help="путь к art-direction.json, из которого выведен паспорт (происхождение)")
     s.set_defaults(f=cmd_parse)
-    s = sub.add_parser("validate"); s.add_argument("files", nargs="+"); s.add_argument("--builtin", action="store_true"); s.set_defaults(f=cmd_validate)
+    s = sub.add_parser("validate"); s.add_argument("files", nargs="+"); s.add_argument("--builtin", action="store_true")
+    s.add_argument("--art-direction", help="art-direction.json: сверить скрим арт-дирекции с post.scrim паспорта (предупреждение)")
+    s.set_defaults(f=cmd_validate)
     s = sub.add_parser("compare"); s.add_argument("a"); s.add_argument("b"); s.set_defaults(f=cmd_compare)
     s = sub.add_parser("lut"); s.add_argument("dna"); s.add_argument("--out", required=True); s.add_argument("--size", type=int, default=33)
     s.set_defaults(f=cmd_lut)
     s = sub.add_parser("from-tokens"); s.add_argument("tokens"); s.add_argument("--out", required=True); s.add_argument("--id", default="from-tokens")
     s.add_argument("--adjectives"); s.set_defaults(f=cmd_from_tokens)
     s = sub.add_parser("to-spec"); s.add_argument("dna"); s.add_argument("--kind", required=True, choices=["photo", "illustration", "icon3d"])
-    s.add_argument("--task", required=True); s.add_argument("--subject", required=True); s.add_argument("--slot", default="hero")
+    s.add_argument("--task", required=True); s.add_argument("--subject", required=True)
+    s.add_argument("--slot", default="hero", help="id строки плана ассетов (role.slot)")
+    s.add_argument("--section", help="id секции плана страницы (role.section); без ключа — значение --slot")
     s.add_argument("--ratio"); s.add_argument("--shot"); s.add_argument("--no-text-zone", action="store_true"); s.add_argument("--ref-class")
+    s.add_argument("--edit", metavar="SOURCE", help="профиль правки: файл настоящего кадра — без исключений паспорта и "
+                                                    "композиции генерации с нуля; нужен --operation")
+    s.add_argument("--operation", choices=edit_operations(), help="операция правки (edit.operation) для --edit")
     s.add_argument("--out"); s.set_defaults(f=cmd_to_spec)
     s = sub.add_parser("selftest"); s.set_defaults(f=lambda a: sys.exit(selftest()))
     a = ap.parse_args()

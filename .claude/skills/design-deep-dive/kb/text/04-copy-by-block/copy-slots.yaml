@@ -11,7 +11,7 @@
 copy_slots_version: 1
 date: '2026-09-24'
 status: draft
-owner: text-research · 04-copy-by-block · E (волна 2)
+owner: text · 04-copy-by-block
 description: "Правила текста по типам слотов (slot_type): назначение, роли секций, длины RU и EN по замеру D, структура, формулы A, запреты, профиль линтера C, нужен ли факт B2, юридические правила H, примеры «плохо / хорошо» (ai-self, проверены claims_check.py и copy_lint.py). Ключ — slot_type: id слота вида text словаря site."
 doc: "04-copy-by-block/01-hero-and-cta.md, 02-section-blocks.md, 03-page-types.md, 04-form-emails-notifications.md"
 lengths_source: "D thresholds.yaml v2 (03-corpus-measured/thresholds.yaml → genres.<жанр>.slots, 03-thresholds-by-genre.md §4; лидеры, выборка «marketing» = лендинги + страницы сайта; сообщение оркестратора 2026-09-24)"
@@ -43,11 +43,10 @@ slot_types:
 - id: eyebrow
   name: Надзаголовок (над H1 или H2)
   purpose: "Бирка над заголовком: категория, сегмент, место и дата события, имя бренда для product-aware — снимает подробности с основной строки заголовка."
-  section_roles: [hero, benefits, how-it-works, case-studies, pricing, event-program, faq, audience, story]
+  section_roles: [hero, benefits, how-it-works, case-studies, pricing, event-program, faq, audience, story, solution, product-demo, objections, lead-form]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: micro
   length:
     ru:
       words: {min: 1, target: 3, max: 5}
@@ -109,11 +108,10 @@ slot_types:
 - id: headline
   name: Заголовок первого экрана (H1)
   purpose: "Что это и чем ценно для этого посетителя; тип задаёт уровень осведомлённости (hero_approach B1): сделка, продукт с превосходством, решение против альтернатив, узнаваемая ситуация, идентичность."
-  section_roles: [hero, story, not-found]
+  section_roles: [hero, story, not-found, product-demo, proof-stats, testimonials, lead-form]
   genres: [landing, site-page]
   genre: landing
   ux_role: title
-  kimi: h
   length:
     ru:
       words: {min: 2, target: 5, max: 10}
@@ -140,8 +138,8 @@ slot_types:
     - "Название категории как hero для most-aware и страницы услуги: 1–2 слова («Поддерживающая уборка») — законно."
     - "Число-заголовок (Hallmark H4 Stat led): число + объект счёта, 2–5 слов, факт обязателен."
     viewport:
-      desktop: "не больше 2 строк при 1440 px (kimi 04 T8); размер кегля — creative"
-      mobile: не больше 4 строк при 390 px (kimi 04 T8)
+      desktop: "не больше 2 строк при 1440 px; размер кегля — creative"
+      mobile: не больше 4 строк при 390 px
   length_by_page_type:
     note: "люди (лидеры + средний рынок) D tables.md; p50 [p10–p90] слов, страниц"
     ru:
@@ -196,11 +194,10 @@ slot_types:
 - id: subheadline
   name: "Подзаголовок, лид первого экрана"
   purpose: "Второй слой первого экрана: механизм или результат и чем это подтверждено; раскрывает заголовок, а не повторяет его."
-  section_roles: [hero]
+  section_roles: [hero, product-demo, proof-stats, lead-form]
   genres: [landing, site-page]
   genre: landing
   ux_role: subtitle
-  kimi: lead
   length:
     ru:
       words: {min: 6, target: 11, max: 29}
@@ -276,11 +273,10 @@ slot_types:
 - id: hero-proof
   name: Микродоказательство в первом экране
   purpose: "Одна строка доказательства рядом с кнопкой или заголовком: рейтинг площадки с датой, счётчик с объектом счёта и датой, гарантия по договору, узнаваемый клиент с разрешением."
-  section_roles: [hero, cross-sell]
+  section_roles: [hero, cross-sell, product-demo, cta-band, lead-form, final-cta]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: micro
   length:
     ru:
       words: {min: 2, target: 6, max: 11}
@@ -346,11 +342,10 @@ slot_types:
 - id: cta-label
   name: Подпись главной кнопки
   purpose: "Называет, что случится сразу после нажатия, или повторяет ценность заголовка; одна задача — получить нажатие."
-  section_roles: [hero, cta-band, final-cta, pricing, lead-form, audience, story, services, offer, promo, not-found]
+  section_roles: [hero, cta-band, final-cta, pricing, lead-form, audience, story, services, offer, promo, not-found, header, solution, benefits, how-it-works, product-demo, proof-stats, testimonials, case-studies, comparison, guarantee, objections, faq, contacts, event-program, article-body, utility]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: action
-  kimi: btn
   length:
     ru:
       words: {min: 1, target: 2, max: 4}
@@ -415,11 +410,10 @@ slot_types:
 - id: cta-secondary-label
   name: Подпись второстепенной кнопки или ссылки
   purpose: "Путь для не готового действовать: посмотреть пример, цены, программу, переслать смету — вторая цель страницы (B1 goal.secondary_goal)."
-  section_roles: [hero, pricing, final-cta, case-studies, story, confirmation]
+  section_roles: [hero, pricing, final-cta, case-studies, story, confirmation, solution, product-demo, audience, integrations, testimonials, portfolio, team, services, cross-sell, objections, faq, cta-band, lead-form, about, contacts, event-program, article-body, related, utility, footer]
   genres: [landing, site-page]
   genre: landing
   ux_role: link
-  kimi: btn
   length:
     ru:
       words: {min: 1, target: 2, max: 5}
@@ -475,11 +469,10 @@ slot_types:
 - id: cta-note
   name: "Строка у кнопки: снятие риска, что будет дальше, цена и время"
   purpose: "Отвечает на страх «закрытой двери»: что будет после нажатия, сколько стоит, что не обязывает; снимает блокер до главного призыва."
-  section_roles: [hero, cta-band, final-cta, pricing, lead-form, offer]
+  section_roles: [hero, cta-band, final-cta, pricing, lead-form, offer, how-it-works, product-demo]
   genres: [landing, site-page]
   genre: landing
   ux_role: hint
-  kimi: micro
   length:
     ru:
       words: {min: 2, target: 7, max: 11}
@@ -534,16 +527,15 @@ slot_types:
   - ux 06/04 §8.1
   date: '2026-09-24'
 - id: promise
-  name: Обещание первого экрана (product.goal kimi)
+  name: Обещание первого экрана
   purpose: "Одна фраза главного обещания для исполнителя (K3 ставит её в первый экран); сверяется с фактами как текст страницы."
   proposal: true
-  proposal_note: "предложение к временному словарю (вслед за J, схема copy-deck v1): обещание первого экрана = product.goal пакета kimi (строка «Promise:» в TASK) — B2 отчёт п. 9"
+  proposal_note: "предложение к словарю site (схема copy-deck v1): обещание первого экрана — отдельный слот, сверяется как подзаголовок hero"
   lint_as: subheadline
   section_roles: [hero]
   genres: [landing, site-page]
   genre: landing
   ux_role: subtitle
-  kimi: product.goal
   length:
     ru:
       words: {min: 6, target: 14, max: 30}
@@ -556,7 +548,7 @@ slot_types:
   structure: "Главное сообщение иерархии (core_message B1) без внутренних пометок: что + для кого + главное отличие с фактом."
   formula_ids: [category-statement, four-p]
   rules:
-  - "Выводится из core_message иерархии B1, только утверждения с доказательством (x-kimi-map B1)."
+  - "Выводится из core_message иерархии B1, только утверждения с доказательством."
   - "Проходит claims_check.py как текст страницы: обещание здоровья, дохода, «без усталости глаз» здесь так же запрещено («Кварц», B2/02)."
   - "Не больше, чем подтверждено: если опора в missing — обещание без неё."
   bans:
@@ -581,16 +573,14 @@ slot_types:
   sources:
   - "02-strategy-messaging/03 §7 (Promise:)"
   - 99-raw/notes/wave3/J-notes.md (slot_type promise)
-  - ../kimi-research/07-brief-handoff/templates/TASK.md
   date: '2026-09-24'
 - id: section-title
   name: Заголовок секции (H2)
   purpose: "Ответ на вопрос посетителя, который закрывает секция (sections[].question иерархии B1); заголовки секций вместе пересказывают страницу."
-  section_roles: [problem, solution, benefits, how-it-works, case-studies, testimonials, proof-stats, comparison, pricing, guarantee, objections, faq, about, team, final-cta, specs, audience, story, services, offer, promo, awards-press, cross-sell, related, seo-text]
+  section_roles: [problem, solution, benefits, how-it-works, case-studies, testimonials, proof-stats, comparison, pricing, guarantee, objections, faq, about, team, final-cta, specs, audience, story, services, offer, promo, awards-press, cross-sell, related, seo-text, product-demo, integrations, proof-logos, portfolio, cta-band, lead-form, contacts, event-program, article-body]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: section-title
-  kimi: h
   length:
     ru:
       words: {min: 2, target: 4, max: 8}
@@ -653,11 +643,10 @@ slot_types:
 - id: section-lead
   name: Лид секции
   purpose: "1–2 предложения под заголовком секции: сообщение секции (message иерархии) с фактом; дальше — карточки, шаги или тело."
-  section_roles: [problem, solution, benefits, how-it-works, case-studies, pricing, guarantee, about, integrations, audience, story, services, offer, promo, cross-sell]
+  section_roles: [problem, solution, benefits, how-it-works, case-studies, pricing, guarantee, about, integrations, audience, story, services, offer, promo, cross-sell, product-demo, testimonials, team, comparison, objections, cta-band, final-cta, contacts, event-program]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: lead
   length:
     ru:
       words: {min: 6, target: 11, max: 26}
@@ -716,11 +705,10 @@ slot_types:
 - id: body
   name: "Проза блока: абзацы «о нас», история, описание услуги"
   purpose: "Абзац, который объясняет механизм, историю или условия так, чтобы посетитель сам сделал вывод («не выводы, а то, из чего их делают»)."
-  section_roles: [about, solution, how-it-works, problem, team, guarantee, story, offer, seo-text, not-found]
+  section_roles: [about, solution, how-it-works, problem, team, guarantee, story, offer, seo-text, not-found, hero, testimonials, contacts, event-program, article-body]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 12, target: 30, max: 60}
@@ -771,11 +759,10 @@ slot_types:
 - id: list-item
   name: Пункт списка
   purpose: "Состав услуги или тарифа, что входит, для кого, условия — по одной мысли на пункт."
-  section_roles: [benefits, pricing, how-it-works, about, event-program, story, seo-text]
+  section_roles: [benefits, pricing, how-it-works, about, event-program, story, seo-text, hero, problem, solution, product-demo, audience, team, offer, lead-form, contacts, article-body]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 1, target: 5, max: 15}
@@ -834,11 +821,10 @@ slot_types:
 - id: card-title
   name: "Заголовок карточки (фича, выгода, услуга)"
   purpose: "Короткое обещание или название возможности; первая фраза карточки объясняет его механизмом."
-  section_roles: [benefits, solution, how-it-works, pricing, team, portfolio, integrations]
+  section_roles: [benefits, solution, how-it-works, pricing, team, portfolio, integrations, hero, problem, product-demo, audience, awards-press, services, offer, comparison, cross-sell, objections, about, event-program, related]
   genres: [landing, site-page]
   genre: landing
   ux_role: section-title
-  kimi: h
   length:
     ru:
       words: {min: 1, target: 3, max: 6}
@@ -896,11 +882,10 @@ slot_types:
 - id: card-body
   name: Текст карточки
   purpose: "Механизм или факт, который объясняет заголовок карточки, и что это меняет для клиента."
-  section_roles: [benefits, solution, how-it-works, team, integrations, portfolio]
+  section_roles: [benefits, solution, how-it-works, team, integrations, portfolio, hero, problem, product-demo, audience, awards-press, services, offer, cross-sell, objections, about, event-program, article-body, related]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 2, target: 8, max: 19}
@@ -978,7 +963,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: section-title
-  kimi: h
   length:
     ru:
       words: {min: 2, target: 4, max: 7}
@@ -1025,7 +1009,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 5, target: 12, max: 25}
@@ -1067,11 +1050,10 @@ slot_types:
 - id: stat-value
   name: Число в ряду цифр
   purpose: "Значение с единицей; объект счёта — в подписи (stat-label), источник и дата — в stat-source."
-  section_roles: [proof-stats, hero, about, case-studies]
+  section_roles: [proof-stats, hero, about, case-studies, benefits, product-demo, testimonials, lead-form, final-cta]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 1, target: 2, max: 3}
@@ -1131,11 +1113,10 @@ slot_types:
 - id: stat-label
   name: Подпись числа
   purpose: "Объект счёта, период или дата; при нехватке места — источник выносится в stat-source."
-  section_roles: [proof-stats, hero, about, case-studies]
+  section_roles: [proof-stats, hero, about, case-studies, testimonials]
   genres: [landing, site-page]
   genre: landing
   ux_role: caption
-  kimi: micro
   length:
     ru:
       words: {min: 1, target: 4, max: 9}
@@ -1209,7 +1190,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: micro
   length:
     en:
       words: {min: 1, target: 5, max: 12}
@@ -1256,11 +1236,10 @@ slot_types:
 - id: testimonial-quote
   name: Текст отзыва
   purpose: "Слова клиента о его ситуации и результате — дословно из facts.yaml (verbatim), с разрешением автора."
-  section_roles: [testimonials, case-studies, hero]
+  section_roles: [testimonials, case-studies, hero, solution, benefits, product-demo, awards-press]
   genres: [landing, site-page]
   genre: landing
   ux_role: user-content
-  kimi: body
   length:
     ru:
       words: {min: 12, target: 28, max: 86}
@@ -1334,7 +1313,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: caption
-  kimi: micro
   length:
     ru:
       words: {min: 1, target: 2, max: 6}
@@ -1393,11 +1371,10 @@ slot_types:
 - id: case-title
   name: Заголовок кейса
   purpose: "Ситуация клиента и результат числом — так, чтобы похожий клиент узнал себя."
-  section_roles: [case-studies]
+  section_roles: [case-studies, portfolio]
   genres: [landing, site-page]
   genre: landing
   ux_role: section-title
-  kimi: h
   length:
     ru:
       words: {min: 2, target: 4, max: 7}
@@ -1448,7 +1425,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 20, target: 45, max: 90}
@@ -1490,11 +1466,10 @@ slot_types:
 - id: case-result
   name: Результат кейса (число из фактов)
   purpose: "Результат клиента числом с базой и сроком — и рядом обычный результат (B2 §5.4)."
-  section_roles: [case-studies, hero]
+  section_roles: [case-studies, hero, portfolio]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 3, target: 10, max: 20}
@@ -1539,7 +1514,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: section-title
-  kimi: h
   length:
     ru:
       words: {min: 1, target: 4, max: 12}
@@ -1600,7 +1574,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 2, target: 9, max: 30}
@@ -1657,11 +1630,10 @@ slot_types:
 - id: pricing-price
   name: Цена
   purpose: "Сколько стоит — в рублях, с единицей и периодом; «от» — с составом рядом."
-  section_roles: [pricing, hero, offer, promo]
+  section_roles: [pricing, hero, offer, promo, services, cross-sell]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 1, target: 3, max: 7}
@@ -1725,11 +1697,10 @@ slot_types:
 - id: pricing-price-note
   name: "Условия цены: «от», период, скидка, пробный период"
   purpose: "Условия, без которых цена или скидка вводят в заблуждение: что входит, от чего зависит итог, срок и условия акции, что после пробного периода."
-  section_roles: [pricing, hero, final-cta, services, offer, promo]
+  section_roles: [pricing, hero, final-cta, services, offer, promo, cross-sell]
   genres: [landing, site-page]
   genre: landing
   ux_role: hint
-  kimi: micro
   length:
     ru:
       words: {min: 1, target: 2, max: 11}
@@ -1794,7 +1765,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 1, target: 3, max: 10}
@@ -1851,11 +1821,10 @@ slot_types:
 - id: badge
   name: "Бейдж на карточке («Популярный», «Новое»)"
   purpose: "Метка с проверяемым основанием: условие скидки, новизна с датой, доля выбора по данным."
-  section_roles: [pricing, benefits, portfolio, offer]
+  section_roles: [pricing, benefits, portfolio, offer, how-it-works, about]
   genres: [landing, site-page]
   genre: landing
   ux_role: badge
-  kimi: micro
   length:
     ru:
       words: {min: 1, target: 2, max: 4}
@@ -1907,7 +1876,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 10, target: 25, max: 50}
@@ -1954,7 +1922,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 12, target: 30, max: 60}
@@ -1999,11 +1966,10 @@ slot_types:
 - id: comparison-row
   name: Строка сравнения с альтернативой
   purpose: "Сравнение по подходам (сделать самому, частник, таблица, другой класс решения) по одному критерию — без имён конкурентов, с «когда подходит»."
-  section_roles: [comparison]
+  section_roles: [comparison, pricing]
   genres: [landing, site-page]
   genre: landing
   ux_role: column-header
-  kimi: body
   length:
     ru:
       words: {min: 3, target: 10, max: 18}
@@ -2048,11 +2014,10 @@ slot_types:
 - id: faq-q
   name: Вопрос FAQ
   purpose: "Вопрос, который клиенты задают до покупки, их словами (voc.yaml, отдел продаж, поиск) — по одному предмету."
-  section_roles: [faq]
+  section_roles: [faq, objections]
   genres: [landing, site-page, article, geo]
   genre: landing
   ux_role: section-title
-  kimi: h
   length:
     ru:
       words: {min: 3, target: 6, max: 9}
@@ -2109,11 +2074,10 @@ slot_types:
 - id: faq-a
   name: Ответ FAQ
   purpose: "Ответ первой фразой (да / нет / число / условие), затем подробность и факт; самодостаточен для выдачи и нейросетей."
-  section_roles: [faq]
+  section_roles: [faq, objections]
   genres: [landing, site-page, article, geo]
   genre: landing
   ux_role: help
-  kimi: body
   length:
     ru:
       words: {min: 3, target: 22, max: 44}
@@ -2172,11 +2136,10 @@ slot_types:
 - id: form-title
   name: Заголовок формы
   purpose: "Что человек получит, отправив форму, — продолжение главной кнопки, а не название процедуры."
-  section_roles: [lead-form, final-cta, hero]
+  section_roles: [lead-form, final-cta, hero, utility]
   genres: [landing, site-page]
   genre: landing
   ux_role: title
-  kimi: h
   length:
     ru:
       words: {min: 2, target: 5, max: 9}
@@ -2219,11 +2182,10 @@ slot_types:
 - id: form-lead
   name: "Ценность формы: что получите"
   purpose: "Одна-две фразы: что будет результатом, сколько стоит и сколько займёт; для лид-магнита — объём, состав, автор."
-  section_roles: [lead-form, final-cta]
+  section_roles: [lead-form, final-cta, pricing, utility]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: marketing
-  kimi: lead
   length:
     ru:
       words: {min: 7, target: 9, max: 15}
@@ -2271,11 +2233,10 @@ slot_types:
 - id: form-next-steps
   name: Что будет после отправки
   purpose: "Кто, когда и каким каналом ответит, что подготовить — снимает страх «закрытой двери» у формы."
-  section_roles: [lead-form, final-cta, confirmation]
+  section_roles: [lead-form, final-cta, confirmation, contacts]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: hint
-  kimi: micro
   length:
     ru:
       words: {min: 8, target: 18, max: 35}
@@ -2317,11 +2278,10 @@ slot_types:
 - id: form-consent
   name: "Строка о персональных данных, согласие"
   purpose: "Отдельное конкретное согласие на обработку ПДн для ответа на заявку и отдельная необязательная галочка на рекламные письма."
-  section_roles: [lead-form, final-cta, footer]
+  section_roles: [lead-form, final-cta, footer, hero, utility]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: checkbox-label
-  kimi: micro
   length:
     ru:
       words: {min: 5, target: 8, max: 21}
@@ -2372,11 +2332,10 @@ slot_types:
 - id: form-success
   name: Экран или блок «спасибо»
   purpose: "Подтверждает, что заявка принята, говорит, что будет дальше, и даёт вторую цель: что можно сделать сейчас."
-  section_roles: [lead-form, confirmation]
+  section_roles: [lead-form, confirmation, final-cta]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: inline-message
-  kimi: micro
   length:
     ru:
       words: {min: 8, target: 22, max: 45}
@@ -2419,11 +2378,10 @@ slot_types:
 - id: nav-label
   name: Пункт навигации
   purpose: "Называет раздел так, как его ищут: конвенции «Услуги», «Цены», «О компании», «Контакты» на многостраничнике."
-  section_roles: [footer]
+  section_roles: [footer, header, benefits, how-it-works, product-demo, story, portfolio, about, not-found]
   genres: [site-page, landing]
   genre: site-page
   ux_role: nav
-  kimi: micro
   length:
     ru:
       words: {min: 1, target: 1, max: 3}
@@ -2472,7 +2430,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: micro
   length:
     ru:
       words: {min: 3, target: 8, max: 15}
@@ -2517,7 +2474,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: caption
-  kimi: micro
   length:
     note: "длина не нормируется: состав задаёт закон (38-ФЗ ст. 8; ЗоЗПП ст. 26.1 п. 2 — через site I)"
   structure: "«[Полное наименование], ОГРН [..], ИНН [..], [адрес]» · «Политика обработки персональных данных» · «Публичная оферта» или «Договор (образец)» · © [год] [бренд]."
@@ -2560,7 +2516,6 @@ slot_types:
   genres: [meta]
   genre: meta
   ux_role: ''
-  kimi: ''
   length:
     ru:
       chars: {min: 40, target: 60, max: 70}
@@ -2605,7 +2560,6 @@ slot_types:
   genres: [meta]
   genre: meta
   ux_role: ''
-  kimi: ''
   length:
     ru:
       chars: {min: 110, target: 150, max: 180}
@@ -2650,7 +2604,6 @@ slot_types:
   genres: [meta]
   genre: meta
   ux_role: ''
-  kimi: ''
   length:
     ru:
       words: {min: 2, target: 6, max: 16}
@@ -2704,7 +2657,6 @@ slot_types:
   genres: [meta]
   genre: meta
   ux_role: ''
-  kimi: ''
   length:
     ru:
       words: {min: 5, target: 21, max: 38}
@@ -2759,7 +2711,6 @@ slot_types:
   genres: [meta]
   genre: meta
   ux_role: alt
-  kimi: ''
   length:
     ru:
       words: {min: 3, target: 8, max: 16}
@@ -2805,7 +2756,6 @@ slot_types:
   genres: [article]
   genre: article
   ux_role: title
-  kimi: h
   length:
     ru:
       words: {min: 3, target: 5, max: 9}
@@ -2870,7 +2820,6 @@ slot_types:
   genres: [article]
   genre: article
   ux_role: marketing
-  kimi: lead
   length:
     ru:
       words: {min: 14, target: 38, max: 47}
@@ -2933,7 +2882,6 @@ slot_types:
   genres: [article, geo]
   genre: geo
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 40, target: 60, max: 80}
@@ -2975,11 +2923,10 @@ slot_types:
   name: "Подзаголовок статьи (H2, H3)"
   purpose: "Вопрос или тезис раздела — так, как его ищут; разделы по смыслу, не по чанкам для ИИ."
   rules_owner: "G — 07-seo-geo-copy/02, 03 (COPY-GEO-09, -10)"
-  section_roles: [article-body]
+  section_roles: [article-body, legal]
   genres: [article]
   genre: article
   ux_role: section-title
-  kimi: h
   length:
     ru:
       words: {min: 1, target: 3, max: 9}
@@ -3038,11 +2985,10 @@ slot_types:
   name: Абзац статьи
   purpose: "Одна мысль с фактом или примером из опыта; абзац понятен без соседних."
   rules_owner: G — 07-seo-geo-copy/02; ритм и маркеры — C (профиль article)
-  section_roles: [article-body]
+  section_roles: [article-body, legal]
   genres: [article]
   genre: article
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 6, target: 23, max: 45}
@@ -3099,11 +3045,10 @@ slot_types:
   name: "Автор, его опыт (E-E-A-T)"
   purpose: "Кто пишет и почему ему можно верить: должность, опыт в годах и объектах — только из фактов."
   rules_owner: "G — 07-seo-geo-copy/03 §3.5 (COPY-GEO-05, -19)"
-  section_roles: [article-body, story]
+  section_roles: [article-body, story, hero, team, about]
   genres: [article]
   genre: article
   ux_role: caption
-  kimi: micro
   length:
     ru:
       words: {min: 4, target: 10, max: 20}
@@ -3146,11 +3091,10 @@ slot_types:
   name: Самодостаточный абзац-ответ для цитирования нейросетью
   purpose: "Ответ на один вопрос, понятный без окружения: сущность названа, факт с датой и источником."
   rules_owner: "G — 07-seo-geo-copy/geo-checklist.yaml, geo-rules.yaml, 03-geo-copy.md"
-  section_roles: [faq, about, article-body, pricing, story, seo-text]
+  section_roles: [faq, about, article-body, pricing, story, seo-text, problem, solution]
   genres: [geo]
   genre: geo
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 40, target: 60, max: 80}
@@ -3195,11 +3139,10 @@ slot_types:
   name: Определение термина или сущности
   purpose: "«X — это Y, который Z» одной-двумя фразами: для глоссария, FAQ и ответов нейросетей."
   rules_owner: "G — geo-rules.yaml (geo-definition-form), 03-geo-copy.md §3.6"
-  section_roles: [faq, article-body, about, story, seo-text]
+  section_roles: [faq, article-body, about, story, seo-text, problem, solution]
   genres: [geo, article]
   genre: geo
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 12, target: 25, max: 45}
@@ -3244,7 +3187,6 @@ slot_types:
   genres: [email-form]
   genre: email-form
   ux_role: email
-  kimi: ''
   length:
     ru:
       words: {min: 2, target: 5, max: 8}
@@ -3293,7 +3235,6 @@ slot_types:
   genres: [email-form]
   genre: email-form
   ux_role: email
-  kimi: ''
   length:
     ru:
       words: {min: 5, target: 10, max: 16}
@@ -3340,7 +3281,6 @@ slot_types:
   genres: [email-form]
   genre: email-form
   ux_role: email
-  kimi: ''
   length:
     ru:
       words: {min: 2, target: 5, max: 9}
@@ -3383,7 +3323,6 @@ slot_types:
   genres: [email-form]
   genre: email-form
   ux_role: email
-  kimi: ''
   length:
     ru:
       words: {min: 25, target: 60, max: 120}
@@ -3434,7 +3373,6 @@ slot_types:
   genres: [email-form]
   genre: email-form
   ux_role: action
-  kimi: ''
   length:
     ru:
       words: {min: 1, target: 2, max: 3}
@@ -3495,7 +3433,6 @@ slot_types:
   genres: [email-form]
   genre: email-form
   ux_role: email
-  kimi: ''
   length:
     ru:
       words: {min: 10, target: 25, max: 45}
@@ -3539,11 +3476,10 @@ slot_types:
   name: alt картинки
   purpose: "Что изображено и зачем картинка на странице — для читалок и поиска; правила доставки — ai-media."
   rules_owner: "ai-media — ../ai-media/10-web-integration/01-images-delivery.md §8"
-  section_roles: [hero, case-studies, team, portfolio, product-demo, story]
+  section_roles: [hero, case-studies, team, portfolio, product-demo, story, problem, solution, benefits, how-it-works, audience, integrations, proof-logos, testimonials, services, offer, cross-sell, objections, lead-form, about, contacts, event-program, article-body, related, seo-text]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: alt
-  kimi: ''
   length:
     ru:
       words: {min: 3, target: 10, max: 20}
@@ -3589,7 +3525,6 @@ slot_types:
   genres: [landing]
   genre: landing
   ux_role: ''
-  kimi: ''
   length:
     ru:
       chars: {min: 8, target: 25, max: 40}
@@ -3635,11 +3570,10 @@ slot_types:
   proposal: true
   proposal_note: "предложение B2 (x-vocabulary-proposals), принято E: источник и дата числа, рейтинга, подборки отзывов — requires_nearby фактов"
   lint_as: stat-label
-  section_roles: [proof-stats, hero, testimonials, case-studies]
+  section_roles: [proof-stats, hero, testimonials, case-studies, pricing, comparison]
   genres: [landing, site-page]
   genre: landing
   ux_role: caption
-  kimi: micro
   length:
     ru:
       words: {min: 2, target: 4, max: 8}
@@ -3701,7 +3635,6 @@ slot_types:
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 1, target: 2, max: 4}
@@ -3750,11 +3683,10 @@ slot_types:
   proposal: true
   proposal_note: "предложение B2 (specs, spec-row), принято E: строка характеристик для продуктовой страницы (Hallmark F3 Tabular spec sheet); роль секции specs — предложение к section_roles (site)"
   lint_as: list-item
-  section_roles: [solution, pricing, comparison]
+  section_roles: [solution, pricing, comparison, product-demo, specs, offer]
   genres: [landing, site-page]
   genre: landing
   ux_role: marketing
-  kimi: body
   length:
     ru:
       words: {min: 2, target: 5, max: 10}
@@ -3801,11 +3733,10 @@ slot_types:
   proposal: true
   proposal_note: "предложение E (вслед за J: asset_ref image-caption в схеме copy-deck v1): подпись к фото работы, объекта, скриншоту; alt — отдельный слот"
   lint_as: stat-label
-  section_roles: [portfolio, case-studies, product-demo, team, story, seo-text]
+  section_roles: [portfolio, case-studies, product-demo, team, story, seo-text, problem, solution, about, article-body]
   genres: [landing, site-page, article]
   genre: landing
   ux_role: caption
-  kimi: micro
   length:
     ru:
       words: {min: 3, target: 8, max: 16}
@@ -3852,11 +3783,10 @@ slot_types:
   proposal: true
   proposal_note: "предложение E: строка объявления над навигацией (Hallmark N12 Announcement banner) — акция с датой, событие, изменение; как баннер — реклама с пометкой (H §8.3)"
   lint_as: cta-note
-  section_roles: [hero]
+  section_roles: [hero, header]
   genres: [landing, site-page]
   genre: landing
   ux_role: hint
-  kimi: micro
   length:
     ru:
       words: {min: 4, target: 9, max: 16}
@@ -3939,7 +3869,7 @@ slot_types:
 - id: article-date
   name: Дата статьи
   purpose: "Дата публикации и обновления"
-  section_roles: [article-body, legal]
+  section_roles: [article-body, legal, related]
   genres: [article]
   genre: article
   ux_role: caption
@@ -4037,8 +3967,26 @@ slot_types:
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
   - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
+- id: messenger-prefill
+  name: Готовое сообщение мессенджера
+  purpose: "Первое сообщение посетителя, уже набранное в мессенджере по ссылке страницы: человеку остаётся нажать «Отправить». На странице текст не виден — его несёт ссылка действия плана (target.prefill называет слот)."
+  genres: [email-form]
+  genre: email-form
+  ux_role: user-content
+  rules_owner: "E — 04-copy-by-block (готовое сообщение мессенджера); ссылки мессенджеров — ../site/05-conversion-funnels/01-cta-and-lead-capture.md"
+  structure: "От первого лица посетителя: приветствие и просьба — что человек хочет (записаться, узнать цену, задать вопрос) и о какой услуге или странице речь."
+  rules:
+  - "Короткое: приветствие и просьба без абзацев и списков — человек дочитывает сообщение перед отправкой и правит под себя."
+  - "Слова посетителя, а не бренда: стиль и типографика страницы сообщение не правят (роль user-content), проверяются заглушки и числа без факта."
+  bans:
+  - "Обещания и условия от имени посетителя: цена, скидка, срок, гарантия — человек их не подтверждал, а получатель прочтёт как договорённость."
+  - "Персональные данные и заготовки под них: имя, телефон, адрес, номер заказа — человек допишет сам."
+  fact_required: never
+  sources:
+  - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
+  - "../site/05-conversion-funnels/01-cta-and-lead-capture.md (каналы связи: ссылки мессенджеров)"
 crosswalk:
-  note: "Соответствие slot_type → слоты ассетов ai-media, элементы copy.md kimi, архетипы секций Hallmark."
+  note: "Соответствие slot_type → слоты ассетов ai-media, архетипы секций Hallmark."
   ai_media_asset_slots:
     source: "../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md §2.1 (19 слотов ассетов)"
     map:
@@ -4086,21 +4034,8 @@ crosswalk:
     - asset_slot: "404, пустые состояния, онбординг"
       text_slots: []
       note: "микрокопи — ux 07/02 §5, §15"
-  kimi_copy_md:
-    source: "../kimi-research/07-brief-handoff/templates/copy.md (ключи [элемент]: текст по секциям site.sections[].id) и brief.yaml"
-    map:
-      h: [headline, section-title, card-title, step-title, case-title, pricing-plan-name, faq-q, form-title, article-title, article-heading]
-      lead: [subheadline, section-lead, form-lead, article-lead]
-      body: [body, list-item, card-body, step-body, stat-value, testimonial-quote, case-summary, case-result, pricing-plan-summary, pricing-price, price-old, pricing-feature, spec-row, guarantee-text, objection-answer, comparison-row, faq-a, article-summary, article-paragraph, geo-answer, definition]
-      btn: [cta-label, cta-secondary-label]
-      micro: [eyebrow, hero-proof, cta-note, stat-label, stat-source, logos-caption, testimonial-attribution, pricing-price-note, badge, form-next-steps, form-consent, form-success, nav-label, footer-tagline, footer-legal, article-author, image-caption, announcement]
-      brief.yaml product.goal: [promise]
-      head (мета): [meta-title, meta-description, og-title, og-description, og-image-alt]
-      assets alt / caption: [image-alt, image-caption]
-      "text.mode: in_image": [in-image-text]
-      вне пакета K3 (письма): [email-subject, email-preheader, email-heading, email-body, email-cta-label, email-footer]
   hallmark_archetypes:
-    source: "../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/component-cookbook.md (MIT; клон 2026-09-23)"
+    source: "Hallmark component-cookbook (Nutlope/hallmark: skills/hallmark/references/component-cookbook.md; MIT)"
     map:
     - archetype: H1 Marquee
       text_slots: [headline]
@@ -4163,5 +4098,3 @@ crosswalk:
       text_slots: [nav-label, cta-label]
     - archetype: N12 Announcement banner
       text_slots: [announcement]
-  temp_vocabulary_kimi_ux:
-    note: "ux_role и kimi каждого типа — в записи slot_types (из временного словаря, для предложений — от E)"

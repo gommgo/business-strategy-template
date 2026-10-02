@@ -220,7 +220,8 @@
 Схема — `kb/ai-media/06-art-direction-consistency/visual-dna.schema.json`. Заводится, когда его читает генерация
 (сайт) или иллюстрации и генерация (продукт); иначе — «не применимо: причина» в заметке этапа.
 
-- **Закрыто:** `status: approved` и `approved_by` — человек; `vlm_to_dna.py validate` без ошибок. Нужны `dna_version`,
+- **Закрыто:** `status: approved` и `approved_by` — человек; `vlm_to_dna.py validate ФАЙЛ --art-direction <арт-дирекция>`
+  без ошибок; предупреждение «скрим: …» — расхождение значений арт-дирекции и паспорта, их приводят к одному. Нужны `dna_version`,
   `id`, `checked_at`, `status`, `character`, `palette`, `grade`, `light`, `camera`, `composition`, `subject_matter`,
   `style_blocks`, `exclusions`, `acceptance`; у продуктового паспорта — раздел `illustration`: места `places`, формат
   `format`, перекраска `recolor`, список метафор `metaphors`; у 3D-иконок — паспорт серии `icon3d.series_passport`.
@@ -242,7 +243,8 @@
   `territories`, `directions`, `lifecycle`; у `proposed` — одна рекомендация среди направлений; решения `use` и `twist`
   не проваливают ни одной из пяти проверок.
 - **Ссылки:** `ambition` — проекция брифа; бюджет — профиль бюджета плана; у референса — одно место (`applies_to`);
-  `k3_allow` и `lifted_markers` — с решением (`decision_ref`); `decisions[].k3_allow` — строка: один ключ `--allow` на
+  `k3_allow` и `lifted_markers` — с решением (`decision_ref`, вид решения — `use` или `twist`; необязательные `page` и
+  `section` сужают снятую примету до страницы или секции); `decisions[].k3_allow` — строка: один ключ `--allow` на
   решение, список ключей — `exclusions.k3_allow`.
 - **Расширение:** `x-direction-bans` — запреты направлений до выбора, `{<id направления>: [запрет]}`: на странице
   «Направления» каждый список идёт своему артборду; после выбора запреты живут в `exclusions`.

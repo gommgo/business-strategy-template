@@ -597,11 +597,12 @@ def localization(lay):
 
 
 def build(lay, seed=None, anchor=None, trees=None):
-    """Документ демо-набора поверхности (словарь в порядке вывода)."""
+    """Документ демо-набора поверхности (словарь в порядке вывода). anchor — опорная дата «сегодня» набора
+    (ГГГГ-ММ-ДД); без неё — день сборки: вход холста передаёт дату своей сборки и хранит её в манифесте."""
     trees = trees or T.parse_layer(lay)
     n = norms()
     window, few, fallback = int(n["window"]["value"]), int(n["few"]["value"]), n["fallback"]["value"]
-    anchor_d = date.fromisoformat(str(anchor or n["dates"]["anchor"]))
+    anchor_d = date.fromisoformat(str(anchor)) if anchor else date.today()
     seed = str(seed or lay.slug)
     objs = objects(lay)
     surf = surface_objects(lay, trees, objs)
@@ -726,7 +727,7 @@ def main(argv=None):
                          accept=lambda s: s.app)
     ap.add_argument("--seed", help="зерно набора (по умолчанию — slug проекта)")
     ap.add_argument("--anchor", metavar="ГГГГ-ММ-ДД", help="опорная дата «сегодня» набора (по умолчанию — "
-                                                           "data/demo.yaml)")
+                                                           "день сборки)")
     call = docpaths.parse(ap, argv)
     try:
         lays = T.layers_of(call)
@@ -807,9 +808,12 @@ def _selftest():
     import fixture_project
     with fixture_project.built("cabinet-demo") as fx:
         lay = L.Layer(fx.slug, "office", fx.root)
-        doc = build(lay)
+        day = "2026-10-01"                                  # постоянная опорная дата — только у самопроверки
+        doc = build(lay, anchor=day)
         text = dumps(doc)
-        check("повторная сборка — тот же JSON байт в байт", dumps(build(L.Layer(fx.slug, "office", fx.root))) == text)
+        check("повторная сборка с той же опорной датой — тот же JSON байт в байт",
+              dumps(build(L.Layer(fx.slug, "office", fx.root), anchor=day)) == text)
+        check("без опорной даты — день сборки", build(lay)["anchor"] == date.today().isoformat())
         check("каждая запись, набор и документ — example: true", not _walk_examples(doc))
         coll = doc["collections"].get("requests-list") or {"sets": {}}
         counts = {k: v["count"] for k, v in coll["sets"].items()}
@@ -862,18 +866,19 @@ def _selftest():
         loc = {x["role"]: x for x in doc["localization"]}
         check("локализация: самая длинная строка каждой роли", loc.get("empty", {}).get("key") ==
               "requests.list.empty-first-run.empty" and loc["empty"]["length"] == len(loc["empty"]["text"]))
-        check("зерно и опорная дата меняют значения", dumps(build(lay, seed="x")) != text and
+        check("зерно и опорная дата меняют значения", dumps(build(lay, seed="x", anchor=day)) != text and
               build(lay, anchor="2027-01-01")["anchor"] == "2027-01-01")
         check("источники — файлы проекта, пути существуют", doc["sources"] and
               all((fx.root / p).is_file() for p in doc["sources"]))
         check("check: чистая фикстура — 0 находок", not gaps(lay) and doc["gaps"] == [])
         script = HERE / "demo_data.py"
         with tempfile.TemporaryDirectory(prefix="ddd-demo-") as td:
-            r = subprocess.run([sys.executable, str(script), "build", fx.slug, "office", "--repo", str(fx.root)],
-                               cwd=td, capture_output=True, text=True)
+            r = subprocess.run([sys.executable, str(script), "build", fx.slug, "office", "--repo", str(fx.root),
+                                "--anchor", day], cwd=td, capture_output=True, text=True)
             check("build из чужой рабочей папки с --repo — тот же JSON", r.returncode == 0 and r.stdout == text)
             r = subprocess.run([sys.executable, str(script), "build", fx.slug, "office", "--repo", str(fx.root),
-                                "--out", str(Path(td) / "in")], cwd=td, capture_output=True, text=True)
+                                "--anchor", day, "--out", str(Path(td) / "in")], cwd=td, capture_output=True,
+                               text=True)
             check("build --out: DIR/demo-data.json", r.returncode == 0 and
                   (Path(td) / "in" / "demo-data.json").read_text(encoding="utf-8") == text)
             r = subprocess.run([sys.executable, str(script), "check", fx.slug, "--repo", str(fx.root), "--json"],

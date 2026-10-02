@@ -50,6 +50,9 @@ page:
     archetype: two-tier
     logo_link: /
     breadcrumbs: true
+    local_nav:
+      kind: siblings
+      sticky: false
     footer: site
   seo:
     indexable: true

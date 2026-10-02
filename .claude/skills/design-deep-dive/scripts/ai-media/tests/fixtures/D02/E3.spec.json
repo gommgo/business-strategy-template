@@ -5,7 +5,7 @@
  "id": "bg-abstract-teal",
  "task": "IMG-BG-ABSTRACT",
  "role": {
-  "page_type": "saas",
+  "page_class": "saas",
   "section": "cta",
   "slot": "cta-bg",
   "purpose": "фон блока призыва; белый заголовок по центру — HTML"

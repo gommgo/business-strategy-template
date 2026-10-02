@@ -15,12 +15,13 @@ thresholds_ref: 03-corpus-measured/thresholds.yaml
 vocabulary_ref: ../site/02-site-types/vocabulary.yaml   # id типов страниц (жанр) и слотов
 slot_rules_ref: 04-copy-by-block/copy-slots.yaml          # роль ux и жанры типа слота, lint_as
 lexicon_dir: 06-anti-slop/lexicon
-# Внешние файлы правил других агентов (формат правила — как в lexicon/*.yaml). Отсутствующие пропускаются с заметкой.
+# Внешние файлы правил (формат правила — как в lexicon/*.yaml). Отсутствующие пропускаются с заметкой.
+# Правил права (08-russian-legal-typography/claims-rules.yaml) в списке нет: право формулировок проверяет одна утилита —
+# claims_check.py (факты, отрасль и юрисдикция известны только ей), иначе одно нарушение даёт две находки разного уровня.
 external_rules:
   - {path: 07-seo-geo-copy/meta-rules.yaml, owner: G, wave: 2, note: "длины и шаблоны title/description/OG, проверки мета"}
   - {path: 07-seo-geo-copy/geo-rules.yaml, owner: G, wave: 2, note: "текстовые проверки GEO-абзацев (если G вынесет их из geo-checklist.yaml)"}
   - {path: 08-russian-legal-typography/typography-rules.yaml, owner: H, wave: 2, note: "набор: тире, неразрывные пробелы, кавычки, цены, диапазоны"}
-  - {path: 08-russian-legal-typography/claims-rules.yaml, owner: H, wave: 2, note: "текстовые сигналы права для линтера; ворота права — claims_check.py"}
 
 defaults:
   groups:
@@ -40,7 +41,9 @@ defaults:
   prose_roles: []           # роли строк с прозой (жанр interface): там, где у строки нет типа слота
   level_overrides: {}
   analyzers:
-    marker_density: {enabled: true, min_words: 40, min_count: 2, warn_per_100w: 1.5, error_per_100w: 4.0, allow_error: true, level: warning, provisional: true}
+    # allow_error: false — плотность маркеров не выше warning: пороги корпуса сняты без морфологии, а линтер считает
+    # маркеры с морфологией, и плотность живого текста выходит выше; error вернётся с порогами, снятыми тем же способом
+    marker_density: {enabled: true, min_words: 40, min_count: 2, warn_per_100w: 1.5, error_per_100w: 4.0, allow_error: false, level: warning, provisional: true}
     rhythm: {enabled: true, min_sentences: 8, mean_diff_min: 4, min_mean_len: 9, target: 6, min_sentences_short: 10, level: info, provisional: true}
     paragraph_uniformity: {enabled: true, min_paragraphs: 5, cv_min: 0.25, level: info, provisional: true}
     dash_density: {enabled: true, min_count: 3, warn_per_100w: 1.5, level: info, provisional: true}
@@ -80,7 +83,8 @@ profiles:
     level_overrides:
       # Правила микрокопи интерфейса (ux 07/06 §6.4, §3.1) на тексте страницы — сигнал, а не запрет: «Адрес: Казань» —
       # имя собственное после двоеточия, «собираем вручную» — описание ручной работы, «улица Лесная,» — не деепричастие.
-      # Один набор на жанры текста страницы (landing, site-page, article, meta); у interface — уровни канона.
+      # Один набор на жанры текста страницы (landing, site-page, article, meta, geo, email-form); у interface —
+      # уровни канона.
       <<: &ux_on_page {"ux-6-4-*": warning, ux-6-4-10: info, ux-3-1-03: warning}
       ru-syn-sales-question: info
     analyzers:
@@ -135,6 +139,7 @@ profiles:
     genre: geo
     description: "Тексты для ответов нейросетей: «коротко» в начале, вопрос — ответ, определения, факты с источником и датой"
     level_overrides:
+      <<: *ux_on_page
       "ru-syn-rhetorical-cliche": error
       "en-syn-rhetorical-cliche": error
       "ru-lex-vague-attribution": error
@@ -149,6 +154,7 @@ profiles:
     genre: email-form
     description: "Письма и уведомления вокруг форм: подтверждение заявки, двойная подписка, выдача материала, напоминания"
     level_overrides:
+      <<: *ux_on_page
       "ru-ton-sycophancy": warning
     analyzers:
       exclamations: {warn_per_100w: 1.0}
@@ -171,7 +177,7 @@ profiles:
       typo-double-space: error                # строки пробелов ux 07/06 §6.5 — правила набора H, в интерфейсе — запрет
       typo-space-before-punct: error
       typo-no-space-after-punct: error
-      "COPY-L-*": "off"                       # право рекламы — страницы сайта и claims_check.py
+      "COPY-L-*": "off"                       # право рекламы — claims_check.py; правила права, поданные --rules, здесь молчат
     analyzers:
       marker_density: {enabled: false}        # плотность маркеров — примета слоп-прозы сайта
       rhythm: {enabled: false}                # ux 07/06 §6.2: однотипные строки одной длины — достоинство интерфейса

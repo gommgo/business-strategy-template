@@ -101,7 +101,7 @@
 | Wan2.2 A14B / TI2V-5B (Alibaba) | Apache-2.0 | T2V без звука 1116 / 950 | TI2V-5B — 720P@24 fps на 24 ГБ; FLF — Wan2.1-FLF2V-14B | [S37][S40] |
 | HunyuanVideo-1.5 (Tencent) | Tencent Hunyuan Community | T2V без звука 1020, I2V 1133 | 8,3B, ≥14 ГБ с offload, 480p I2V за ~75 с на RTX 4090 | [S38][S40] |
 
-Для RTX A5000 24 ГБ реалистичны Wan2.2-TI2V-5B, HunyuanVideo-1.5 и, возможно, LTX-2.5 в fp8 `[не проверено]`; метод
+Для видеокарта 24 ГБ реалистичны Wan2.2-TI2V-5B, HunyuanVideo-1.5 и, возможно, LTX-2.5 в fp8 `[не проверено]`; метод
 петель Loopy работает на Wan 2.1/2.2 и HunyuanVideo 1.5 [S44] — идея для этапа «после сигнала» по GPU.
 
 ### 1.4 Главные сдвиги года

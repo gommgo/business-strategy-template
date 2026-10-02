@@ -52,7 +52,9 @@ DIR/contract.md и печатает путь. В репозиторий прое
   R-MAT-011   пункт блока PRE ux 12/02 §2 не заполнен: экран партии не stable (вход — на stable-экранах); нет
               texts.md, map.md, object.md, action.md; у vision нет Problem или Users; у пользователя поверхности нет
               строки постуры; у экрана нет главной задачи; раздел «Переход» пуст; обязательное состояние экрана не
-              покрыто; коллекция без объёма (demo_data) — доклад заказчику, пункт закрывает слой проекта  warning
+              покрыто; коллекция без объёма (demo_data) — доклад заказчику, пункт закрывает слой проекта. Запись
+              экрана не разбирается (файл или frontmatter) — одна находка с причиной разбора: находок о статусе,
+              главной задаче и состояниях этой записи нет — её поля не читаются                          warning
   R-MAT-003   этап mockup: строки texts.md не approved — одна находка на реестр (отчёт контракта; во входе
               холста canvas_input поднимает её в R-MAT-012 error — гейт макета на утверждённых текстах)  warning
   R-COV-005   этап mockup: нет карты решений design/system.yaml — типам экранов не сопоставить компоненты  error
@@ -333,6 +335,19 @@ def text_rows(lay, stage, keys=None):
     return [r for r in rows if r.status in allowed], [r for r in rows if r.status not in allowed]
 
 
+def record_error(rec):
+    """Причина, по которой поля записи слоя не читаются: файл или frontmatter не разбираются; запись читается —
+    None."""
+    if rec.error or rec.md is None:
+        return f"файл не читается: {rec.error}"
+    return rec.md.fm_error
+
+
+def record_note(rec):
+    """Пометка записи не stable: «не разбирается» — раньше статуса; иначе статус или «без статуса»."""
+    return "не разбирается" if record_error(rec) else rec.status or "без статуса"
+
+
 def batch_scope(lay, trees, screens):
     """Состав экранов партии: {screens, blocks — блоки состава с вложенными, shells — каркасы экранов, keys — ключи
     texts.md, которые называют экраны, их блоки и каркасы (порядок — первое упоминание), objects — объекты глоссария
@@ -447,7 +462,7 @@ class Ctx:
         if lost:
             raise F.ToolError(f"экранов {', '.join(lost)} нет на поверхности {lay.surface}")
         self.units = [s for s in sorted(self.trees.screens) if want is None or s in want]
-        self.outside = [(s, lay.screens[s].status or "без статуса") for s in sorted(self.trees.screens)
+        self.outside = [(s, record_note(lay.screens[s])) for s in sorted(self.trees.screens)
                         if s not in self.units]
         self.scope = batch_scope(lay, self.trees, self.units) if want is not None else None
         self.keys = self.scope["keys"] if self.scope is not None else None
@@ -1024,12 +1039,18 @@ def screen_part(c, slug):
     part.sources.append(c.src(rec.path, "поля, slot-fills, states"))
     part.sources += [c.src(lay.blocks[b].path, "tree") for b in blocks if b in lay.blocks]
     fix = c.fix_screens(f"screen:{slug}")
-    if not rec.stable:
+    # запись не разбирается — первая и единственная находка записи: её поля не читаются, и находки о статусе,
+    # главной задаче и состояниях были бы следствием разбора, а не пробелами экрана
+    broken = record_error(rec)
+    if broken:
+        c.pre(part, "второй вход", f"запись экрана `{slug}` не разбирается — {broken}: поля записи не читаются, "
+                                   "раздел экрана собран без них", "screen", slug, rec.path, fix)
+    elif not rec.stable:
         c.pre(part, "второй вход", f"экран `{slug}` — {rec.status or 'без статуса'}: вход холста кабинета "
                                    "собирается на stable-экранах", "screen", slug, rec.path, fix)
     typ, obj = str(fm.get("type") or "").strip(), L.cell(str(fm.get("object") or ""))
     mt, ka = L.cell(str(fm.get("main-task") or "")), L.cell(str(fm.get("key-action") or ""))
-    if not mt and typ != "service":
+    if not mt and typ != "service" and not broken:
         c.pre(part, "PRE-02", f"у экрана `{slug}` нет главной задачи (`main-task`)", "screen", f"{slug}#/main-task",
               rec.path, fix)
     caps, acts = lay.product.capabilities, lay.product.actions
@@ -1088,7 +1109,7 @@ def screen_part(c, slug):
                          [[x["id"], f"`{x['key']}`", _covered(x["covered"], x["na"]), "; ".join(x["reasons"])]
                           for x in part.states])
     uncovered = [x for x in part.states if x["required"] and not x["covered"]]
-    if uncovered:
+    if uncovered and not broken:
         c.pre(part, "PRE-08", f"у экрана `{slug}` не покрыты обязательные состояния: "
                               + ", ".join(f"{x['id']} `{x['key']}`" for x in uncovered), "screen", f"{slug}#/states",
               rec.path, fix)
@@ -1306,6 +1327,16 @@ def _selftest():
                        f.severity == "warning" for f in items if f.rule == "R-MAT-011")
                    and F.exit_code(items) == F.EXIT_OK)
             check_("у находки — путь файла проекта", all(f.path.startswith("docs/projects/") for f in items))
+            card = proj / "screens" / "office" / "screens" / "request-card" / "index.md"
+            card.write_text(re.sub(r"(?m)^name: .*$", "name: Карточка: заявка", card.read_text(encoding="utf-8"),
+                                   count=1), encoding="utf-8")
+            lay3 = L.Layer(fx.slug, "office", root)
+            mine = [f for f in check(lay3) if f.ref.split("#")[0] == "request-card"]
+            check_("двоеточие в name экрана — одна находка: запись не разбирается, причина — frontmatter; находок о "
+                   "статусе, главной задаче и состояниях этой записи нет",
+                   len(mine) == 1 and mine[0].rule == "R-MAT-011" and mine[0].severity == "warning"
+                   and "не разбирается" in mine[0].message and "frontmatter" in mine[0].message
+                   and record_note(lay3.screens["request-card"]) == "не разбирается")
             # партия экранов: экран вне партии (draft requests-list) находок не даёт, объём его коллекции — тоже
             part = build(L.Layer(fx.slug, "office", root), "mockup", screens=["plan-dashboard"])
             keys = set(part.keys or [])

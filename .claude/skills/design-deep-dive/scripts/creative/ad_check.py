@@ -20,6 +20,12 @@
 brand_expression_mode и references_given, решает заказчик): направлений меньше трёх (схема — от 1 до 5), пара
 направлений различается меньше чем по двум осям из 4, территории — меньше трёх материальных семейств.
 Ключ k3_allow без решения и lifted_markers на несуществующее решение — предупреждение, у документа approved — ошибка.
+Предупреждения о согласованности документа: у эффекта из effects_by_section нет записи decisions[] (technique называет
+effect:<id>); снятую примету (lifted_markers) держит решение не вида use или twist; до выбора направления уровень требует
+больше пиков, чем один главный приём направления (section_distribution.peaks_min файла уровней); варианты подачи
+(treatment_variants) записаны без выбора направления; расширение x-direction-bans — не {id направления: [запрет]}, зовёт
+несуществующее направление или расходится с полем bans направления; трекинг заголовков, названный в type.note числом в
+em, ниже нормы гарнитуры из kb/creative/04-visual-language/cyrillic-display-fonts.yaml (tracking_touch и запас файла).
 """
 import argparse
 import copy
@@ -46,10 +52,12 @@ EFFECTS = kbpaths.kb('creative', '06-effects-catalog', 'effects.yaml')
 CLICHES = kbpaths.kb('creative', '08-uniqueness-anti-slop', 'cliche-registry.yaml')
 VOCAB = kbpaths.kb('site', '02-site-types', 'vocabulary.yaml')
 TELLS = kbpaths.kb(None, 'common', 'tells.yaml')
+FONTS = kbpaths.kb('creative', '04-visual-language', 'cyrillic-display-fonts.yaml')
 EXAMPLES = sorted(glob.glob(str(kbpaths.kb('creative', '01-creative-direction', 'examples', 'art-direction-*.json')))
                   + glob.glob(str(kbpaths.kb('creative', '09-ai-execution-evaluation', 'examples', 'art-direction-*.json'))))
 ORDER = {'L0': 0, 'L1': 1, 'L2': 2}
 CORE = ['paper', 'display_style', 'accent_hue', 'macrostructure']
+TRACKING = re.compile(r'трекинг\w*\s*([+−–-]?\s*\d+(?:[.,]\d+)?)\s*em', re.I)      # «трекинг +0,015 em» в заметке шрифтов
 VD_SUB = {'character': '#/properties/character', 'palette_forbidden_hues': '#/properties/palette/properties/forbidden_hues',
           'exclusions': '#/properties/exclusions', 'abstract': '#/properties/abstract', 'video': '#/properties/video',
           'composition': '#/properties/composition', 'subject_matter': '#/properties/subject_matter', 'materials': '#/properties/materials'}
@@ -78,6 +86,18 @@ class Ctx:
         voc = load(VOCAB)
         self.vocab = {p: {x['id'] for x in voc['namespaces'][ns]['values']} for p, ns in voc['ref_prefixes'].items()}
         self.allow_keys = {v['allow'] for v in (load(TELLS).get('checks') or {}).values() if isinstance(v, dict) and v.get('allow')}
+        with open(FONTS, encoding='utf-8') as f:
+            fonts_text = f.read()
+        self.touch = {}       # гарнитура (нижний регистр) → tracking_touch каталога, em
+        for ft in (yaml.safe_load(fonts_text) or {}).get('fonts') or []:
+            t = (ft.get('metrics') or {}).get('tracking_touch')
+            if isinstance(t, (int, float)):
+                for name in re.sub(r'\s*\(.*?\)', '', str(ft.get('family') or '')).split('/'):
+                    if name.strip():
+                        self.touch[name.strip().lower()] = float(t)
+        # запас над tracking_touch — число из шапки каталога («трекинг display не ниже tracking_touch + …»)
+        m = re.search(r'tracking_touch \+ (\d+[.,]\d+)', fonts_text)
+        self.touch_margin = float(m.group(1).replace(',', '.')) if m else 0.0
         pref = '|'.join(sorted(set(self.vocab) | {'effect', 'cliche', 'fact'}, key=len, reverse=True))
         self.prefix_re = re.compile(rf'(?<![A-Za-z0-9_-])({pref}):([a-z0-9]+(?:-[a-z0-9]+)*)')
 
@@ -91,6 +111,14 @@ class Ctx:
 
     def boldness(self, lvl):
         return ((self.levels[lvl].get('maps_to') or {}).get('visual_dna') or {}).get('character.boldness')
+
+    def peaks_min(self, lvl):
+        return (self.levels[lvl].get('section_distribution') or {}).get('peaks_min') or 0
+
+    def tracking_floor(self, family):
+        """Нижняя граница трекинга заголовков гарнитуры, em: tracking_touch каталога + запас; гарнитуры нет — None."""
+        t = self.touch.get(str(family or '').strip().lower())
+        return None if t is None else t + self.touch_margin
 
 
 def errs(v, doc):
@@ -189,6 +217,35 @@ def cross(ctx, ad):
             if e.split(':', 1)[-1] in ctx.effects and ORDER[ctx.effects[e.split(':', 1)[-1]]['level_min']] > ORDER[max(d['level_fit'], key=ORDER.get)]:
                 W.append(f'{d["id"]}: главный приём {e} требует уровня выше level_fit {d["level_fit"]}')
     ch = ad.get('choice')
+    if not ch:
+        # до выбора: один главный приём направления — один пик; уровню с большим числом пиков его мало
+        need = ctx.peaks_min(lvl)
+        if need > 1:
+            for d in ad['directions']:
+                W.append(f'направление {d["id"]} не держит ритм уровня {lvl}: главный приём один, уровню нужно пиков от {need} '
+                         f'(ambition-levels.yaml section_distribution.peaks_min) — назовите остальные пики до выбора')
+        if ad.get('treatment_variants'):
+            W.append('treatment_variants записаны без выбора направления (choice): варианты подачи — у выбранного направления')
+    xb = ad.get('x-direction-bans')
+    if xb is not None:
+        if not isinstance(xb, dict) or not all(isinstance(v, list) and all(isinstance(x, str) and x.strip() for x in v)
+                                               for v in xb.values()):
+            W.append('x-direction-bans — не {id направления: [запрет строкой]}')
+        else:
+            for k in sorted(set(xb) - set(dirs)):
+                W.append(f'x-direction-bans: направления {k} нет среди directions')
+            for k in sorted(k for k in xb if k in dirs and dirs[k].get('bans') and list(dirs[k]['bans']) != list(xb[k])):
+                W.append(f'направление {k}: запреты записаны полем bans и расширением x-direction-bans, списки расходятся')
+    for where, tp in [(f'направление {d["id"]}', d.get('type') or {}) for d in ad['directions']] + \
+                     [('visual_language', (ad.get('visual_language') or {}).get('type') or {})]:
+        floor = ctx.tracking_floor(tp.get('display'))
+        if floor is None:
+            continue
+        for raw in TRACKING.findall(str(tp.get('note') or '')):
+            val = float(re.sub(r'\s', '', raw).replace(',', '.').replace('−', '-').replace('–', '-'))
+            if val < floor - 1e-9:
+                W.append(f'{where}: трекинг {val:+g} em у {tp["display"]} ниже нормы каталога гарнитур {floor:+g} em '
+                         f'(cyrillic-display-fonts.yaml: tracking_touch + {ctx.touch_margin:g})')
     if ch:
         if ch['chosen'] not in dirs:
             E.append(f'choice.chosen {ch["chosen"]} нет среди направлений')
@@ -240,6 +297,11 @@ def cross(ctx, ad):
             if band['from'] <= H <= band['to']:
                 W.append(f"акцент {vl['accent']} (H {H:.0f}°) внутри запретной полосы {band['from']}–{band['to']}°")
     decisions = {d['id']: d for d in ad.get('decisions', [])}
+    techniques = ' '.join(str(d.get('technique') or '') for d in decisions.values())
+    for s in ad.get('effects_by_section', []):
+        for e in s['effects']:
+            if not re.search(rf'(?<![A-Za-z0-9_-]){re.escape(e)}(?![a-z0-9-])', techniques):
+                W.append(f'эффект {e} секции {s["section"]} без решения: в decisions[] нет записи с technique {e}')
     keys = set(ad.get('exclusions', {}).get('k3_allow', [])) | {d['k3_allow'] for d in decisions.values() if d.get('k3_allow')}
     for k in sorted(keys - ctx.allow_keys):
         E.append(f'ключа --allow {k} нет у проверок утилиты макета (kb/common/tells.yaml#checks)')
@@ -249,6 +311,9 @@ def cross(ctx, ad):
     for lm in ad.get('exclusions', {}).get('lifted_markers', []):
         if lm['decision_ref'] not in decisions:
             (E if approved else W).append(f"lifted_markers {lm['marker']}: решения {lm['decision_ref']} нет в decisions")
+        elif decisions[lm['decision_ref']].get('decision') not in ('use', 'twist'):
+            W.append(f"lifted_markers {lm['marker']}: решение {lm['decision_ref']} — {decisions[lm['decision_ref']].get('decision')}; "
+                     f"примету снимает решение вида use или twist")
     return E, W
 
 
@@ -352,6 +417,74 @@ def selftest(ctx):
     neg('lifted_markers на несуществующее решение (approved — ошибка)',
         lambda d: d['exclusions'].update({'lifted_markers': [{'marker': 'IMG-M05', 'decision_ref': 'no-such-decision'}]}), 'rules')
     neg('референс со значениями без measured и estimated', lambda d: d['moodboard'][0].update({'values': {}}), 'schema')
+    expect('пример-основа посеянных случаев — без предупреждений', not check(ctx, base)['warnings'])
+
+    def warns(mut, text):
+        """Копия основы после mut даёт предупреждение с text; ошибок правка не добавляет."""
+        d = copy.deepcopy(base)
+        mut(d)
+        r = check(ctx, d)
+        return any(text in m for m in r['warnings']) and not (r['schema'] or r['refs'])
+    use_id = next(x['id'] for x in base['decisions'] if x['decision'] in ('use', 'twist'))
+    avoid_id = next(x['id'] for x in base['decisions'] if x['decision'] == 'avoid')
+    ebs_eff = base['effects_by_section'][0]['effects'][0]
+    expect('эффект из effects_by_section без записи decisions[] — предупреждение',
+           warns(lambda d: d.update(decisions=[x for x in d['decisions'] if ebs_eff not in x['technique']]), f'эффект {ebs_eff}'))
+    expect('снятая примета с решением вида avoid — предупреждение',
+           warns(lambda d: d['exclusions'].update({'lifted_markers': [{'marker': 'IMG-M05', 'decision_ref': avoid_id}]}), 'use или twist'))
+    d = copy.deepcopy(base)
+    d['exclusions']['lifted_markers'] = [{'marker': 'MS-10', 'decision_ref': use_id, 'page': 'home', 'section': 'hero'}]
+    d['directions'][0].update(bans=['без градиента в заголовках'], notes='смотреть на первый экран и на ритм секций')
+    d['treatment_variants'] = [{'id': 'v-calm', 'name': 'Спокойный', 'shows': 'первый экран без сцены, секции появляются по очереди',
+                                'effects': [ebs_eff], 'chosen': True, 'chosen_by': 'customer'},
+                               {'id': 'v-scene', 'shows': 'первый экран сценой по прокрутке, остальное спокойно'}]
+    r = check(ctx, d)
+    expect('запись снятой нормы с page и section, запреты и заметка направления, варианты подачи: схема проходит, 0 предупреждений',
+           r['ok'] and not r['warnings'])
+    neg('запрет направления не строкой', lambda d: d['directions'][0].update(bans=[{'what': 'градиент'}]), 'schema')
+    neg('выбранный вариант подачи без chosen_by', lambda d: d.update(
+        treatment_variants=[{'id': 'v-calm', 'shows': 'первый экран без сцены', 'chosen': True}]), 'schema')
+    expect('варианты подачи без выбора направления — предупреждение',
+           warns(lambda d: (d.pop('choice'), d.pop('approved_by', None), d.pop('approved_at', None),
+                            d.update(status='proposed', treatment_variants=[{'id': 'v-calm', 'shows': 'первый экран без сцены'}])),
+                 'treatment_variants записаны без выбора'))
+    known = base['directions'][0]['id']
+    expect('x-direction-bans: список своему направлению — без предупреждений; чужой id и не список — предупреждение',
+           not check(ctx, dict(copy.deepcopy(base), **{'x-direction-bans': {known: ['без градиента в заголовках']}}))['warnings']
+           and warns(lambda d: d.update({'x-direction-bans': {'no-such-direction': ['без градиента']}}), 'no-such-direction нет среди directions')
+           and warns(lambda d: d.update({'x-direction-bans': {known: 'без градиента'}}), 'x-direction-bans — не'))
+    expect('x-direction-bans расходится с полем bans направления — предупреждение',
+           warns(lambda d: (d['directions'][0].update(bans=['без градиента в заголовках']),
+                            d.update({'x-direction-bans': {known: ['без капса в заголовках']}})), 'списки расходятся'))
+    # ритм уровня до выбора: уровень с peaks_min больше одного — предупреждение у каждого направления
+    many = next((k for k in ctx.levels if ctx.peaks_min(k) > 1), None)
+    d = copy.deepcopy(base)
+    for k in ('choice', 'approved_by', 'approved_at'):
+        d.pop(k, None)
+    d['status'] = 'proposed'
+    lvl0 = d['ambition']['level']
+    r = check(ctx, d)
+    expect('ритм уровня до выбора: уровню хватает одного пика — предупреждения нет',
+           ctx.peaks_min(lvl0) <= 1 and not any('не держит ритм уровня' in m for m in r['warnings']))
+    d['ambition']['level'] = many
+    r = check(ctx, d)
+    expect('ритм уровня до выбора: уровню нужно больше пиков — «направление не держит ритм уровня» у каждого направления',
+           many and sum('не держит ритм уровня' in m for m in r['warnings']) == len(d['directions']))
+    d = copy.deepcopy(base)
+    d['ambition']['level'] = many
+    expect('ритм уровня после выбора: предупреждения нет (норму пиков сверяет план)',
+           not any('не держит ритм уровня' in m for m in check(ctx, d)['warnings']))
+    # трекинг заголовков против каталога гарнитур
+    fam = base['visual_language']['type']['display']
+    floor = ctx.tracking_floor(fam)
+    expect('гарнитура заголовков примера есть в каталоге гарнитур с tracking_touch', floor is not None)
+    if floor is not None:
+        expect('трекинг заголовков ниже нормы каталога гарнитур — предупреждение',
+               warns(lambda d: d['visual_language']['type'].update(note=f'заголовки — трекинг {floor - 0.01:+.3f} em'.replace('.', ',').replace('-', '−')),
+                     'ниже нормы каталога гарнитур'))
+        d = copy.deepcopy(base)
+        d['visual_language']['type']['note'] = f'заголовки — трекинг {floor + 0.01:+.3f} em'.replace('.', ',')
+        expect('трекинг заголовков не ниже нормы каталога — предупреждения нет', not check(ctx, d)['warnings'])
     d = copy.deepcopy(base)
     one_direction(d, 'strict')
     r = check(ctx, d)

@@ -19,7 +19,7 @@ conventions:
   level_max: "потолок уровня секции с этим блоком; секции конверсии — L0 (ambition-levels.yaml section_caps)"
   roles: "допустимые treatment.visual_role"
   signature: "может ли секция нести фирменный приём (effects[].purpose: signature)"
-  visual_variants: "визуальные варианты поверх структурного variant site: id уникален в блоке (treatment.visual_variant); structural — к каким вариантам site применим; composition и display_role — умолчания treatment"
+  visual_variants: "визуальные варианты поверх структурного variant site: id уникален в блоке (treatment.visual_variant); structural — к каким вариантам site применим; composition и display_role — умолчания treatment; level_max, roles и signature варианта — потолок, роли и фирменный приём секции с этим вариантом вместо полей блока"
   mobile: "умолчание treatment.mobile.strategy и что меняется; раскладка на телефоне — blocks.yaml mobile (site)"
   a11y: "правила подачи этого блока сверх общих CRV-AL-* (A) и CRV-MO-* (E)"
   avoid: "записи реестра клише, которые блок притягивает: брать только с решением art-direction (decisions[], H 01 §6)"
@@ -119,7 +119,7 @@ families:
     a11y: ["адрес, телефон, часы — текстом; карта не единственный носитель адреса"]
   portfolio-gallery:
     level_max: L2
-    roles: [support, accent, peak, pause]
+    roles: [support, calm, accent, peak, pause]
     signature: true
     effects:
       L0: [effect:mask-reveal]
@@ -420,7 +420,8 @@ blocks:
     roles: [support, calm]
     signature: false
     effects: {L0: [effect:mask-reveal], L1: [effect:scroll-reveal-system]}
-    visual_variants: []
+    visual_variants:
+      - {id: routes-scene, structural: [routes], level_max: L2, roles: [support, calm, accent, peak], signature: true, note: "секция-маршрут главной многостраничника: карточка — ссылка на страницу сегмента; секция может нести пик и фирменный приём страницы, потолок варианта — L2; остальные варианты блока — по потолку блока"}
   pain-points:
     family: value
     level_max: L1
@@ -649,6 +650,7 @@ blocks:
       - {id: grid-varied-scale, structural: [grid], composition: {asymmetry: strong}, levels: [L1, L2], note: "работы разного масштаба по важности; переход работа → кейс — effect:page-transition (многостраничник) или effect:view-transition (SPA), общий элемент — обложка"}
       - {id: list-hover-preview, structural: [list-with-thumbnails], levels: [L1, L2], note: "список названий; превью появляется у курсора (cursor-accent) — только десктоп с точным указателем, телефон — миниатюры в строке"}
       - {id: filterable-vt, structural: [filterable], levels: [L1, L2], note: "фильтр — view-transition перестановки (persistent, FLIP), reduce — мгновенно"}
+      - {id: grid-quiet, structural: [grid, list-with-thumbnails], note: "роль calm: обложки и подписи стоят — появления, каскада и эффекта наведения нет; отклик — только состояние ссылки работы (наведение, фокус)"}
   gallery:
     family: portfolio-gallery
     level_max: L1

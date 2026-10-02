@@ -9,7 +9,10 @@ jurisdiction, ambition_level, conversion_channel, procedure_step).
   1. значения ключей из карты «ключ → пространство» (по умолчанию — ключи blocks.yaml, page-plan, site-map, site-brief,
      чек-листа: page_type, role, block, slot, action, awareness …) на любой глубине; значение — строка или список строк;
      у copy deck сверяются slot_type, section_role, block и page_type — локальный slot_id и действие страницы словами
-     в карту не входят; у facts.yaml — места use, а роли людей (owner, responsible, attribution) — нет;
+     в карту не входят; у facts.yaml и голоса клиента — места use (типы страниц, роли секций, типы слотов), а роли
+     людей (owner, responsible, attribution) — нет; у смысла — тип слота места ответа на возражение
+     (where.slot_type), у голоса — тип слота образца (samples.slot_type); у плана ассетов и манифеста ассетов роль
+     ассета (slots.role, assets.role: informational, decorative) — не роль секции и в карту не входит;
   2. ссылки с префиксом пространства в любой строке и в Markdown: block:hero-media, slot:headline, section-role:faq,
      page-type:…, site-type:…, action:…, macrostructure:… (чужие префиксы effect:, fact:, task:, recipe:, copy-rule: —
      пропускаются: их словари ведут владельцы);
@@ -72,6 +75,12 @@ DEFAULT_MAP = {
     "slots.slot_type": "slot", "pages.primary_action": None, "in_image.role": None,
     # facts.yaml: роль владельца инвентаря, ответственного за факт и автора отзыва — должность словами
     "owner.role": None, "responsible.role": None, "attribution.role": None,
+    # план ассетов (slots[].role) и манифест ассетов (assets[].role): роль ассета — informational или decorative,
+    # а не роль секции
+    "slots.role": None, "assets.role": None,
+    # типы слотов вне плана и copy deck: места use фактов и голоса клиента, место ответа на возражение в смысле,
+    # образец строки в голосе
+    "use.slot_types": "slot", "where.slot_type": "slot", "samples.slot_type": "slot",
 }
 PREFIX_RE = re.compile(r"(?<![\w/.-])(site-type|page-type|section-role|block-family|block|slot-kind|slot|macrostructure|first-screen-policy|"
                        r"action|awareness|traffic-temperature|traffic-source|jurisdiction|ambition):([A-Za-z0-9][A-Za-z0-9-]*)")
@@ -305,7 +314,8 @@ def selftest():
         "namespaces": {
             "block": {"values": [{"id": "hero-media"}, {"id": "logo-wall"}, {"id": "other", "status": "measurement-only"},
                                  {"id": "hero-old", "status": "deprecated", "replaced_by": "hero-media"}]},
-            "slot": {"values": [{"id": "headline"}, {"id": "cta-primary"}, {"id": "price-old", "status": "proposed"}]},
+            "slot": {"values": [{"id": "headline"}, {"id": "cta-primary"}, {"id": "hero-visual"},
+                                {"id": "price-old", "status": "proposed"}]},
             "section_role": {"values": [{"id": "hero"}, {"id": "faq"}]},
             "page_type": {"values": [{"id": "landing-saas"}, {"id": "ecommerce-product-page", "status": "out-of-scope"}]},
             "action": {"values": [{"id": "lead-request"}]},
@@ -347,6 +357,20 @@ def selftest():
             "    attribution: {role: владелец кофейни}\n"
             "    use: {page_types: [landing-saas], section_roles: [hero, heroo]}\n", encoding="utf-8")
         cases.append(("facts.yaml: места use сверяются, роли людей — нет", ["facts.yaml"], {}, 1, 1))
+        (td / "assets.yaml").write_text(
+            "page: {page_type: landing-saas}\nslots:\n"
+            "  - {id: hero-shot, section: hero, slot: hero-visual, role: informational}\n"
+            "  - {id: backdrop, section: hero, slot: hero-visul, role: decorative}\n"
+            "assets:\n  - {file: hero-shot.webp, role: informational}\n", encoding="utf-8")
+        cases.append(("план и манифест ассетов: роль ассета — не роль секции, вид слота сверяется",
+                      ["assets.yaml"], {}, 1, 1))
+        (td / "slot-types.yaml").write_text(
+            "meaning:\n  objections:\n    - id: o1\n"
+            "      where: [{section_role: faq, slot_type: headline}, {section_role: hero, slot_type: headlne}]\n"
+            "voice:\n  samples:\n    - {id: s1, slot_type: cta-primary, lang: ru, text: Записаться}\n"
+            "    - {id: s2, slot_type: cta-primry, lang: ru, text: Узнать}\n"
+            "facts:\n  - id: f1\n    use: {slot_types: [headline, hedline]}\n", encoding="utf-8")
+        cases.append(("типы слотов в смысле, голосе и местах use сверяются", ["slot-types.yaml"], {}, 1, 3))
         ok = True
         for name, files, kai, code_exp, err_exp in cases:
             km = dict(DEFAULT_MAP)
@@ -369,6 +393,10 @@ def selftest():
                 good = good and errs[0].value == "headlin" and "возможно, headline" in errs[0].msg
             if name.startswith("facts.yaml"):
                 good = good and errs[0].value == "heroo"
+            if name.startswith("план и манифест ассетов"):
+                good = good and errs[0].value == "hero-visul" and errs[0].ns == "slot"
+            if name.startswith("типы слотов"):
+                good = good and sorted(e.value for e in errs) == ["cta-primry", "headlne", "hedline"]
             ok &= good
             print(("PASS " if good else "FAIL ") + name + f" (код {code}, ошибок {len(errs)})")
         # приоритет relation в подсказке crosswalk

@@ -1,21 +1,31 @@
 """check_icons.py — проверка линейных SVG-иконок кодом, без глаз: нормы ui 07/01 и спецификация Lucide.
 
-  python check_icons.py DIR [--ref DIR_LUCIDE] [--set lucide|НАБОР] [--json out.json] [--md out.md] [--title T]
+  python check_icons.py DIR [--ref DIR_LUCIDE] [--set lucide|НАБОР] [--stroke ШТРИХ] [--viewbox "0 0 24 24"]
+                            [--conventions SYSTEM.yaml] [--json out.json] [--md out.md] [--title T]
+  python check_icons.py --selftest
 
 Python окружения скилла, группа svg (svgelements, cairosvg — ему нужна системная libcairo2; numpy, scipy, scikit-image):
 `scripts/install.sh --groups svg`; без пакетов — одна строка с этой командой и код 2.
 Пороги откалиброваны на 20 иконках Lucide 1.47 + circle/square (вес 0,75–1,5, пик размытия 0,58–0,87, доля узлов
 на целой сетке 23–100 %, смещение центра масс до 3,1 px у download): флаг ставится только за пределами этого коридора.
-Проверки: шапка (viewBox 0 0 24 24, width/height 24, fill none, stroke currentColor, stroke-width 2, round cap/join),
+Эталон шапки — параметры: viewBox (--viewbox, по умолчанию 0 0 24 24; width и height — его стороны) и штрих (--stroke, по
+умолчанию 2); --conventions — карта решений дизайн-системы: набор и штрих берутся из conventions.icons (set, stroke),
+ключи --set, --stroke и --viewbox сильнее файла. Вес сверяется с эталонными circle/square, отрисованными штрихом продукта.
+Проверки: шапка (viewBox, width/height, fill none, stroke currentColor, stroke-width, round cap/join — по эталону),
 нет жёстких цветов, поле ≥ 1 px (по растру 10×), доля узлов на целой сетке, центры дуг на сетке, число сегментов,
 минимальный зазор между раздельными элементами (≥ 2 px), «узкие» участки фона < 2 px (приём Lucide с кругом ⌀2),
 покрытие (вес) против эталонных circle/square Lucide, пик размытия (плотность), смещение центра масс,
 IoU с одноимённой иконкой Lucide.
 Набор (--set, по умолчанию lucide; у продукта — conventions.icons.set карты решений) задаёт уровень флага — поле levels
-записи JSON: жёсткий цвет — брак (fail) у любого набора: перекраска через currentColor не работает; шапка и штрих Lucide
-(24×24, stroke 2, round) — брак только у набора Lucide, у другого набора — предупреждение (warn): сверить шапку и штрих
-со спецификацией набора, иконки под Lucide не подгонять; остальные флаги — предупреждения."""
+записи JSON: жёсткий цвет — брак (fail) у любого набора: перекраска через currentColor не работает; шапка и штрих не по
+эталону — брак только у набора Lucide, у другого набора — предупреждение (warn): сверить шапку и штрих со спецификацией
+набора, иконки под Lucide не подгонять; остальные флаги (поле, зазор, узкий фон, вес, центр, сетка) — предупреждения у
+любого набора: их пороги сняты с Lucide.
+Код выхода: 0 — проверка выполнена (флаги — в таблице и JSON), самопроверка прошла; 1 — самопроверка не прошла; 2 — ошибка
+вызова или окружения."""
 import argparse, io, json, math, os, re, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))  # scripts/lib: kbpaths
+import kbpaths  # noqa: E402
 try:
     import numpy as np
     from PIL import Image
@@ -28,9 +38,45 @@ except (ImportError, OSError) as e:   # OSError — cairocffi не нашёл с
     DEPS_ERROR = e
 
 S_HI = 240  # 10× для геометрических замеров
-HEADER_RULES = {
-    'viewBox': '0 0 24 24', 'width': '24', 'height': '24', 'fill': 'none', 'stroke': 'currentColor',
-    'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}
+VIEWBOX, STROKE = '0 0 24 24', 2.0      # эталон Lucide: шапка и штрих по умолчанию
+LUCIDE_REF = kbpaths.data('ai-media', 'lucide-ref')
+
+
+def num(v):
+    """Число шапки без хвостовых нулей: 2.0 → '2', 1.50 → '1.5'."""
+    return ('%g' % float(v))
+
+
+def header_rules(viewbox=None, stroke=None):
+    """Эталон шапки: viewBox и штрих — параметры набора продукта; width и height — стороны viewBox."""
+    vb = ' '.join(num(x) for x in str(viewbox or VIEWBOX).replace(',', ' ').split())
+    side = vb.split()
+    if len(side) != 4:
+        raise ValueError(f'viewBox — четыре числа, а не «{viewbox}»')
+    return {'viewBox': vb, 'width': side[2], 'height': side[3], 'fill': 'none', 'stroke': 'currentColor',
+            'stroke-width': num(STROKE if stroke is None else stroke), 'stroke-linecap': 'round', 'stroke-linejoin': 'round'}
+
+
+HEADER_RULES = header_rules()
+
+
+def same(k, got, want):
+    """Значение атрибута шапки против эталона: числа сравниваются как числа («1.50» = «1.5»)."""
+    if k in ('viewBox', 'width', 'height', 'stroke-width'):
+        try:
+            return [float(x) for x in got.replace(',', ' ').split()] == [float(x) for x in want.split()]
+        except ValueError:
+            return False
+    return got.strip() == want
+
+
+def icon_conventions(path):
+    """conventions.icons карты решений дизайн-системы: {set, stroke, sizes} или пусто."""
+    import yaml
+    with open(path, encoding='utf-8') as fh:
+        doc = yaml.safe_load(fh) or {}
+    icons = (doc.get('conventions') or {}).get('icons') if isinstance(doc, dict) else None
+    return icons if isinstance(icons, dict) else {}
 COLOR_RE = re.compile(r'#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(|\b(?:black|white|red|blue|green|gray|grey)\b')
 SHAPE_TAGS = ('path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'ellipse')
 LUCIDE = 'lucide'
@@ -66,12 +112,12 @@ def split_elements(svg_text):
     els = re.findall(r'<(?:%s)\b[^>]*/>' % '|'.join(SHAPE_TAGS), body)
     return head, els
 
-def header_check(svg_text):
+def header_check(svg_text, rules=None):
     head = re.search(r'<svg\b([^>]*)>', svg_text).group(1)
     bad = []
-    for k, v in HEADER_RULES.items():
+    for k, v in (rules or HEADER_RULES).items():
         mm = re.search(r'(?<![\w:-])' + re.escape(k) + r'="([^"]*)"', head)   # width — не хвост stroke-width
-        if not mm or mm.group(1).strip() != v:
+        if not mm or not same(k, mm.group(1), v):
             bad.append(f'{k}={mm.group(1) if mm else "нет"}')
     body = svg_text[svg_text.find('>') + 1:]
     colors = COLOR_RE.findall(body) + COLOR_RE.findall(head.replace('currentColor', ''))
@@ -187,13 +233,16 @@ def raster_metrics(svg_text):
 def iou(a, b):
     return round(float((a & b).sum()) / max(float((a | b).sum()), 1), 3)
 
-def check_dir(d, ref=None, icon_set=LUCIDE):
+def check_dir(d, ref=None, icon_set=LUCIDE, viewbox=None, stroke=None):
     if DEPS_ERROR is not None:
         raise ImportError(deps_hint(DEPS_ERROR))
+    rules = header_rules(viewbox, stroke)
     ref_cover = None
     if ref:
-        rc = raster_metrics(open(os.path.join(ref, 'circle.svg')).read())
-        rs = raster_metrics(open(os.path.join(ref, 'square.svg')).read())
+        # вес — к эталонным фигурам, отрисованным штрихом продукта: иначе набор с другим штрихом весь «легче» или «тяжелее»
+        restroke = lambda s: re.sub(r'stroke-width="[^"]*"', 'stroke-width="%s"' % rules['stroke-width'], s)
+        rc = raster_metrics(restroke(open(os.path.join(ref, 'circle.svg')).read()))
+        rs = raster_metrics(restroke(open(os.path.join(ref, 'square.svg')).read()))
         ref_cover = (rc['cover24'] + rs['cover24']) / 2
     out = {}
     for fn in sorted(os.listdir(d)):
@@ -201,7 +250,7 @@ def check_dir(d, ref=None, icon_set=LUCIDE):
             continue
         p = os.path.join(d, fn); name = fn[:-4]
         txt = open(p).read()
-        bad, colors = header_check(txt)
+        bad, colors = header_check(txt, rules)
         head, els = split_elements(txt)
         g = geometry(p)
         r = raster_metrics(txt)
@@ -224,6 +273,7 @@ def check_dir(d, ref=None, icon_set=LUCIDE):
         if r['centroid_off'] > 1.6: flags.append(f"центр {r['centroid_off']}")
         if g['grid_int_pct'] < 30: flags.append(f"сетка {g['grid_int_pct']}%")
         rec['flags'] = flags
+        rec['header_rules'] = rules
         rec['set'] = icon_set
         rec['levels'] = flag_levels(flags, icon_set)
         out[name] = rec
@@ -250,21 +300,96 @@ def to_md(res, title):
         lines.append(f'| {n} | ' + ' | '.join(str(r.get(c, '')) if c != 'flags' else flags_md(r) for c in cols) + ' |')
     return '\n'.join(lines) + '\n'
 
+SELFTEST_ICON = ('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" '
+                 'stroke="currentColor" stroke-width="{sw}" stroke-linecap="round" stroke-linejoin="round">'
+                 '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>')
+
+
+def selftest():
+    """Вымышленная иконка со штрихом 1,5: при эталоне 1,5 — чисто, при эталоне Lucide — шапка (брак у Lucide, предупреждение
+    у другого набора); эталон из карты решений; viewBox параметром; жёсткий цвет — брак при любом эталоне."""
+    import tempfile
+    ok = True
+
+    def check(msg, cond, info=''):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(('OK   ' if cond else 'FAIL ') + msg + (f'  → {info}' if info and not cond else ''))
+    with tempfile.TemporaryDirectory() as td:
+        d = os.path.join(td, 'icons')
+        os.makedirs(d)
+        with open(os.path.join(d, 'mark.svg'), 'w', encoding='utf-8') as fh:
+            fh.write(SELFTEST_ICON.format(sw='1.5'))
+        ref = str(LUCIDE_REF) if os.path.isdir(LUCIDE_REF) else None
+        r15 = check_dir(d, ref, LUCIDE, stroke=1.5)['mark']
+        check('иконка со штрихом 1.5 при параметре 1.5 — чисто', r15['flags'] == [] and r15['header_bad'] == [], r15['flags'])
+        r2 = check_dir(d, ref, LUCIDE)['mark']
+        check('та же иконка при эталоне Lucide (штрих 2) — шапка, брак у набора Lucide',
+              r2['flags'] == ['шапка'] and r2['header_bad'] == ['stroke-width=1.5'] and r2['levels'] == {'шапка': 'fail'}, r2['flags'])
+        ro = check_dir(d, ref, 'outline-set')['mark']
+        check('при другом наборе шапка не по эталону — предупреждение', ro['levels'] == {'шапка': 'warn'}, ro['levels'])
+        conv = os.path.join(td, 'system.yaml')
+        with open(conv, 'w', encoding='utf-8') as fh:
+            fh.write('conventions:\n  icons: {set: lucide, sizes: [16, 20], stroke: 1.5}\n')
+        ic = icon_conventions(conv)
+        rc = check_dir(d, ref, ic.get('set'), stroke=ic.get('stroke'))['mark']
+        check('эталон из карты решений (conventions.icons: set lucide, stroke 1.5) — чисто',
+              ic == {'set': 'lucide', 'sizes': [16, 20], 'stroke': 1.5} and rc['flags'] == [], rc['flags'])
+        if ref:
+            check('вес — к эталонным фигурам со штрихом продукта: в коридоре', 0.7 <= r15['weight_vs_circle_square'] <= 1.55,
+                  r15.get('weight_vs_circle_square'))
+        with open(os.path.join(d, 'mark.svg'), 'w', encoding='utf-8') as fh:
+            fh.write(SELFTEST_ICON.format(sw='1.50').replace('width="24" height="24" viewBox="0 0 24 24"',
+                                                             'width="24.0" height="24" viewBox="0,0,24,24"'))
+        rn = check_dir(d, ref, LUCIDE, stroke=1.5)['mark']
+        check('числа шапки сравниваются как числа («1.50», «24.0», запятые в viewBox)', rn['header_bad'] == [], rn['header_bad'])
+        rv = check_dir(d, ref, LUCIDE, viewbox='0 0 20 20', stroke=1.5)['mark']
+        check('эталон viewBox параметром: шапка 24×24 при эталоне 0 0 20 20 — viewBox, width и height в находке',
+              [x.split('=')[0] for x in rv['header_bad']] == ['viewBox', 'width', 'height'], rv['header_bad'])
+        with open(os.path.join(d, 'mark.svg'), 'w', encoding='utf-8') as fh:
+            fh.write(SELFTEST_ICON.format(sw='1.5').replace('stroke="currentColor"', 'stroke="#c2410c"'))
+        rr = check_dir(d, ref, 'outline-set', stroke=1.5)['mark']
+        check('жёсткий цвет — брак у любого набора и эталона', rr['levels'].get('цвет') == 'fail', rr['levels'])
+    print('check_icons selftest:', 'OK' if ok else 'FAIL')
+    return 0 if ok else 1
+
+
 if __name__ == '__main__':
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('dir', help='папка с SVG-иконками')
+    ap.add_argument('dir', nargs='?', help='папка с SVG-иконками')
     ap.add_argument('--ref', help='эталоны Lucide (circle.svg, square.svg и одноимённые иконки): вес и IoU')
-    ap.add_argument('--set', default=LUCIDE, metavar='НАБОР',
-                    help='набор иконок продукта (conventions.icons.set), по умолчанию lucide: шапка и штрих Lucide — брак '
-                         'только у набора Lucide')
+    ap.add_argument('--set', metavar='НАБОР',
+                    help='набор иконок продукта (conventions.icons.set), по умолчанию — из --conventions, иначе lucide: шапка и '
+                         'штрих не по эталону — брак только у набора Lucide')
+    ap.add_argument('--stroke', type=float, metavar='ШТРИХ', help='штрих набора продукта — эталон шапки (по умолчанию 2)')
+    ap.add_argument('--viewbox', metavar='VIEWBOX', help='viewBox набора продукта — эталон шапки (по умолчанию «0 0 24 24»)')
+    ap.add_argument('--conventions', metavar='SYSTEM.yaml',
+                    help='карта решений дизайн-системы: набор и штрих — conventions.icons (set, stroke)')
     ap.add_argument('--json', help='записи по иконкам: замеры, flags, levels')
     ap.add_argument('--md', help='таблица Markdown в файл (в stdout она печатается всегда)')
     ap.add_argument('--title', default='', help='заголовок таблицы (по умолчанию — папка)')
+    ap.add_argument('--selftest', action='store_true', help='самопроверка на вымышленной иконке, без сети')
     a = ap.parse_args()
     if DEPS_ERROR is not None:   # одна строка вместо трассировки, код 2 — окружение
         print(f'check_icons.py: {deps_hint(DEPS_ERROR)}', file=sys.stderr)
         sys.exit(2)
-    res = check_dir(a.dir, a.ref, a.set)
+    if a.selftest:
+        sys.exit(selftest())
+    if not a.dir:
+        ap.error('нужна папка с SVG-иконками или --selftest')
+    conv = {}
+    if a.conventions:
+        try:
+            conv = icon_conventions(a.conventions)
+        except (OSError, ValueError) as e:
+            print(f'check_icons.py: карта решений {a.conventions} не прочитана: {e}', file=sys.stderr)
+            sys.exit(2)
+    try:
+        res = check_dir(a.dir, a.ref, a.set or conv.get('set') or LUCIDE, a.viewbox,
+                        a.stroke if a.stroke is not None else conv.get('stroke'))
+    except ValueError as e:
+        print(f'check_icons.py: {e}', file=sys.stderr)
+        sys.exit(2)
     if a.json:
         json.dump(res, open(a.json, 'w'), ensure_ascii=False, indent=1)
     md = to_md(res, a.title or a.dir)

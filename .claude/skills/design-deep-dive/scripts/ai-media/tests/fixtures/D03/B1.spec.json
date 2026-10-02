@@ -5,7 +5,7 @@
  "id": "ab-b1-hero",
  "task": "IMG-HERO-PHOTO",
  "role": {
-  "page_type": "landing",
+  "page_class": "landing",
   "section": "hero",
   "slot": "hero-bg",
   "priority": "lcp",

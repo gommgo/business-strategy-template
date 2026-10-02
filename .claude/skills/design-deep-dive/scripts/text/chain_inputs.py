@@ -5,7 +5,7 @@
 пишет и оценивает агент сессии (судья — по kb/common/judge.md).
 
 Команды (python3 scripts/text/chain_inputs.py <команда> …):
-  meaning-claims  --meaning M [--hierarchy H …] -o OUT.yaml               смысл и иерархии → copy deck для сверки
+  meaning-claims  --meaning M [--hierarchy H …] [--brief B] -o OUT.yaml    смысл и иерархии → copy deck для сверки
                                                                           copydeck.py claims (этап meaning)
   judge-input     --deck D --page P --criterion ID [--scope …] [--hierarchy H] [--meaning M] [--lang ru] [-o OUT]
                                                                           вход судьи текстов по критерию рубрики
@@ -14,7 +14,10 @@
 meaning-claims берёт утверждения страницы: из смысла — ядро ценностного предложения, сводку предложения, оффер,
 уникальные свойства, снятие риска; из иерархий — главное сообщение, первый экран, опоры и сообщения секций. Возражения,
 страхи и альтернативы — слова аудитории, а не утверждения страницы: возражения смысла и секции иерархии с ролью
-problem, objections, comparison в проекцию не идут (их число — в выводе). Сверка смысла — сигнал до текстов; ворота
+problem, objections, comparison в проекцию не идут (их число — в выводе). Тип страницы проекции — primary_page_type
+брифа (--brief), без брифа — landing-lead-services; у иерархии со своим page.page_type — он. Проекция помечена
+projection: meaning: это не страница, поэтому места фактов (use фактов — на каких страницах и в каких секциях факт
+уместен) copydeck.py claims на ней не сверяет. Сверка смысла — сигнал до текстов; ворота
 текстов — copydeck.py check. Факты — meaning.proof_ref; рубрика — 09-ai-generation-evaluation/copy-rubric.yaml.
 """
 import argparse
@@ -110,8 +113,21 @@ def _slot(slot_id, slot_type, text, fact_ids=(), missing_ids=(), note=""):
             "claim_flags": [], "notes": note}
 
 
+DEFAULT_PAGE_TYPE = "landing-lead-services"
+
+
+def brief_page_type(brief_path):
+    """primary_page_type брифа сайта — тип страницы проекции смысла; брифа или поля нет — None."""
+    if not brief_path:
+        return None
+    b = load(brief_path)
+    pt = b.get("primary_page_type") if isinstance(b, dict) else None
+    return str(pt) if pt else None
+
+
 def cmd_meaning_claims(a):
     m = load(a.meaning)
+    ptype = brief_page_type(getattr(a, "brief", None)) or DEFAULT_PAGE_TYPE
     fpath = facts_file_for_meaning(a.meaning, m)
     out_dir = os.path.dirname(os.path.abspath(a.o))
     pages = []
@@ -137,7 +153,7 @@ def cmd_meaning_claims(a):
         secs.append({"section_id": "m-risk", "section_role": "guarantee", "slots": [
             _slot(r["id"], "guarantee-text", r["summary"], *split_ids([r.get("fact_id")]), note=f"risk_reversal.{r['id']}")
             for r in rr]})
-    pages.append({"page_id": "meaning", "page_type": "landing-lead-services", "sections": secs})
+    pages.append({"page_id": "meaning", "page_type": ptype, "sections": secs})
     for hp in a.hierarchy or []:
         h = load(hp)
         hs = []
@@ -164,8 +180,9 @@ def cmd_meaning_claims(a):
                        "slots": [_slot("message", "subheadline" if sc["section_role"] == "hero" else "body", sc.get("message", ""),
                                        ff, mm, f"sections[{sc['order']}].message")]})
         pages.append({"page_id": re.sub(r"[^a-z0-9-]", "-", h.get("id", os.path.basename(hp).split(".")[0])),
-                      "page_type": (h.get("page") or {}).get("page_type", "landing-lead-services"), "sections": hs})
+                      "page_type": (h.get("page") or {}).get("page_type") or ptype, "sections": hs})
     deck = {"copy_deck": {"version": 1, "date": TODAY, "site": m.get("site", "site"), "lang": "ru",
+                          "projection": "meaning",   # не страница: copydeck.py claims не сверяет места фактов (use)
                           "facts_ref": rel(fpath, out_dir) if fpath else "",
                           "notes": "Проекция смысла и иерархий для сверки до текста (chain_inputs.py meaning-claims): "
                                    "это не тексты страницы, а внутренние формулировки; путь слота → поле смысла в notes. "
@@ -173,6 +190,7 @@ def cmd_meaning_claims(a):
                           "pages": pages}}
     dump(deck, a.o)
     print(f"meaning-claims: страниц {len(pages)}, слотов {sum(len(s['slots']) for p in pages for s in p['sections'])} → {a.o}; "
+          f"тип страницы проекции — {ptype}; "
           f"не сверяются (слова аудитории): возражений {n_obj}, секций иерархий {n_aud} ({', '.join(AUDIENCE_ROLES)})", file=sys.stderr)
 
 
@@ -363,6 +381,33 @@ def selftest():
         with contextlib.redirect_stderr(err):
             cmd_meaning_claims(argparse.Namespace(meaning=mp, hierarchy=[hp], o=op))
         out = load(op)["copy_deck"]
+        # смысл многостраничника: факт уместен на своей странице и в своей секции (use), проекция — не страница
+        import subprocess
+        bp, fp, op2, jp = (os.path.join(td, x) for x in ("site-brief.yaml", "facts.yaml", "claims-site.yaml", "claims.json"))
+        dump({"primary_page_type": "home-multipage"}, bp)
+        dump({"facts_version": 1, "date": "2026-09-24", "site": "t", "lang": "ru", "jurisdiction": "ru", "missing": [], "never_claim": [],
+              "facts": [{"id": "promo", "kind": "promo", "claim_class": ["price-discount", "promo-deadline"],
+                         "verbatim": ["Скидка 10 % на работы до 31 октября"], "canonical": "Скидка 10 % на работы до 31 октября 2026 года.",
+                         "values": [{"value": 10, "unit": "%", "what": "скидка"}],
+                         "source": {"type": "customer-document", "who": "заказчик", "date": "2026-09-01", "document": "prikaz.pdf",
+                                    "quote": "скидка 10% на работы до 31.10.2026"},
+                         "verification": {"status": "verified"}, "permission": {"status": "not-required"}, "valid": {"until": "2026-10-31"},
+                         "use": {"page_types": ["service-page"], "section_roles": ["offer"]}, "lang": "ru"}]}, fp)
+        with contextlib.redirect_stderr(err):
+            cmd_meaning_claims(argparse.Namespace(meaning=mp, hierarchy=[], brief=bp, o=op2))
+        site = load(op2)
+        site_meta = (site["copy_deck"]["pages"][0]["page_type"], site["copy_deck"].get("projection"))
+        use_n = []
+        for marked in (True, False):   # с пометкой проекции и без неё — та же сверка тем же файлом фактов
+            if not marked:
+                site["copy_deck"].pop("projection")
+                dump(site, op2)
+            r = subprocess.run([sys.executable, os.path.join(HERE, "copydeck.py"), "claims", op2, "--facts", fp, "--today", "2026-09-24",
+                                "--json", jp, "--quiet"], capture_output=True, text=True)
+            found = json.load(open(jp, encoding="utf-8"))["findings"] if r.returncode in (0, 2) and os.path.exists(jp) else None
+            use_n.append(None if found is None else sum(1 for f in found if f["rule"] == "COPY-F-USE"))
+            if os.path.exists(jp):
+                os.remove(jp)
     secs = {p["page_id"]: [s["section_id"] for s in p["sections"]] for p in out["pages"]}
     texts = {sl["variants"][0]["text"] for p in out["pages"] for s in p["sections"] for sl in s["slots"]}
     res.append(("meaning-claims: ядро, сводка предложения, оффер, свойства и снятие риска — в проекции",
@@ -374,6 +419,11 @@ def selftest():
     res.append(("meaning-claims: иерархия — главное сообщение, первый экран, опоры, секции hero и pricing",
                 secs.get("h-test") == ["h-core", "h-pillars", "s01-hero", "s05-pricing"], secs))
     res.append(("meaning-claims: facts_ref — от папки выхода", out["facts_ref"] == "facts.yaml", out["facts_ref"]))
+    res.append(("meaning-claims: без брифа тип страницы проекции — landing-lead-services, с брифом — его primary_page_type; пометка projection",
+                out["pages"][0]["page_type"] == DEFAULT_PAGE_TYPE and out.get("projection") == "meaning"
+                and site_meta == ("home-multipage", "meaning"), (out["pages"][0]["page_type"], site_meta)))
+    res.append(("сверка смысла многостраничника: факт с use своих страниц и секций — 0 COPY-F-USE; без пометки проекции та же сверка их даёт",
+                use_n[0] == 0 and (use_n[1] or 0) >= 1, use_n))
     ok = sum(1 for r in res if r[1])
     for r in res:
         print(("OK   " if r[1] else "FAIL ") + r[0] + ("" if r[1] or len(r) < 3 else f": {r[2]}"))
@@ -386,6 +436,7 @@ def main():
     ap.add_argument("--selftest", action="store_true")
     sub = ap.add_subparsers(dest="cmd")
     s = sub.add_parser("meaning-claims"); s.add_argument("--meaning", required=True); s.add_argument("--hierarchy", nargs="*"); s.add_argument("-o", required=True)
+    s.add_argument("--brief", help="бриф сайта (site-brief.yaml): тип страницы проекции — его primary_page_type")
     s = sub.add_parser("judge-input")
     for k in ("--deck", "--page", "--criterion"):
         s.add_argument(k, required=True)

@@ -80,13 +80,13 @@ fonts:
      metrics: {k: 0.349, xh: 0.495, lh_floor_lc: 0.900, lh_floor_caps: 0.985, tracking_touch: -0.030}, weight_tested: 800,
      good_for: [hero, stat, section], notes: "Extra Condensed: k 0,349 — длинные русские заголовки в 2 строки при крупном кегле; без метрического фолбэка CLS до 0,070 (D/03)"}
   - {id: science-gothic, family: "Science Gothic", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,
-     class: sans-gothic, display_style: condensed, axes: {wdth: [50, 200], wght: [100, 900], slnt: [-10, 0], CTRS: [0, 85]}, weights: "100–900", italic: false, cyrillic: full,
-     quality: {verdict: unreviewed, source: none, note: "новая (2025-11), рецензий нет"},
+     class: sans-gothic, display_style: wide, axes: {wdth: [50, 200], wght: [100, 900], slnt: [-10, 0], CTRS: [0, 85]}, weights: "100–900", italic: false, cyrillic: full,
+     quality: {verdict: unreviewed, source: none, note: "новая (2025-11), рецензий нет; «д» и «л» по умолчанию — нерусской формы («д» как «g», «л» как «Λ»): в русский заголовок — только после проверки образца, что рисуются русские формы, иначе — другая гарнитура"},
      metrics: {k: 0.690, xh: 0.510, lh_floor_lc: 0.960, lh_floor_caps: 1.045, tracking_touch: -0.025}, weight_tested: 700,
-     good_for: [hero, stat, footer-wordmark], notes: "ширина 50–200 и контраст CTRS в одном файле — ширину подбирать под длину заголовка (k измерен при wdth 100)"}
+     good_for: [hero, stat, footer-wordmark], notes: "широкая при wdth 100 (k 0,690 — класс широких, 01-display-typography.md §2.3): роль на шаг меньше; ширина 50–200 и контраст CTRS в одном файле — ширину подбирать под длину заголовка (k измерен при wdth 100)"}
   - {id: tektur, family: "Tektur", source: "Google Fonts / A. Jagosz", license: OFL-1.1, web_license: included, default_or_option: caution,
      class: display-industrial, display_style: display, axes: {wdth: [75, 100], wght: [400, 900]}, weights: "400–900", italic: false, cyrillic: full,
-     quality: {verdict: caution, source: "tt-display 04.11.2025", note: "качественный, кириллица неидеальна (Ч, Ю, плечи Щ Ц Д в лёгких) — с осторожностью"},
+     quality: {verdict: caution, source: "tt-display 04.11.2025", note: "качественный, кириллица неидеальна (Ч, Ю, плечи Щ Ц Д в лёгких) — с осторожностью; «д» и «л» по умолчанию — нерусской формы («д» как «g», «л» как «Λ»): в русский заголовок — только после проверки образца, что рисуются русские формы, иначе — другая гарнитура"},
      metrics: {k: 0.565, xh: 0.560, lh_floor_lc: 0.885, lh_floor_caps: 1.025, tracking_touch: -0.035}, weight_tested: 700,
      good_for: [hero, stat], notes: "индустриальный, «технический» тон"}
   - {id: russo-one, family: "Russo One", source: "Google Fonts", license: OFL-1.1, web_license: included, default_or_option: caution,

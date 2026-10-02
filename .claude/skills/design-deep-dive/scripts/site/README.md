@@ -41,7 +41,7 @@ referencing: в системном python без них утилита пере�
 |---|---|
 | `site_validate.py PATH… [--today ГГГГ-ММ-ДД] [--json [OUT]] [--quiet]` | тип файла по ключам: бриф (SB-*), план (PL-*), карта (SM-*), каталог (BL-*), формы (LF-*); папка слоя страницы `docs/projects/<slug>/site/<surface>/` — бриф, факты, карта и планы `plans/<page-id>.yaml` со связями (PJ-*) |
 | `site_validate.py --all` | каталог блоков, наборы форм и примеры `kb/site/10-playbooks-contracts/examples/` |
-| `site_validate.py --selftest` | пример `lead-services-otves` проходит; посеянные дефекты находятся каждый своим кодом и своей тяжестью |
+| `site_validate.py --selftest` | примеры `lead-services-otves` и `corporate-b2b-stalkon` проходят; посеянные дефекты находятся каждый своим кодом и своей тяжестью, законные правки — без находки |
 
 Выход — строки «уровень, код, где, сообщение» и итог по уровням; `--json OUT` — те же находки списком JSON (`level`,
 `code`, `where`, `msg`) в файл, `--json` без файла — тот же список в stdout вместо строк отчёта, итог — в stderr;
@@ -80,7 +80,10 @@ referencing: в системном python без них утилита пере�
 `fact:`, `recipe:` пропускаются), статусы (`deprecated`, `out-of-scope` — предупреждение, `measurement-only` —
 ошибка). Карта по умолчанию знает и copy deck — `slot_type`, `section_role`, `block`, `page_type` (локальный `slot_id` и
 действие страницы словами в неё не входят), и `facts.yaml` — места `use` (роли людей `owner`, `responsible`,
-`attribution` — нет): эти файлы сверяются тем же вызовом, без `--map`. `--check-crosswalk` — таблица соответствий
+`attribution` — нет): эти файлы сверяются тем же вызовом, без `--map`. Роль ассета у плана и манифеста ассетов
+(`slots[].role`, `assets[].role`) — не id словаря; типы слотов сверяются и вне плана: места `use` фактов и голоса клиента
+(`use.slot_types`), место ответа на возражение в смысле (`where.slot_type`), образец голоса (`samples.slot_type`).
+`--check-crosswalk` — таблица соответствий
 `kb/site/02-site-types/crosswalk.tsv`: колонки, отношение `relation`,
 `our_id` из словаря. Выход — строки «путь:строка: уровень пространство 'id' — сообщение» и сводка, подсказка — ближайший
 id и строка таблицы соответствий; код 1 при ошибках. Разрешён ли слот блоку и есть ли факт — это `site_validate.py`;

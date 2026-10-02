@@ -257,9 +257,7 @@ def recipe_package_landing(ctx: Ctx, spec: dict):
                     R("\nstatus: approved\n", "\nstatus: proposed\n"),
                     R("  facts: ../../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml\n",
                       "  facts: ../../../facts.yaml\n"),
-                    R("  copy_deck: ../copy/home.yaml\n", ""),
-                    R("  treatment: ../../../../../creative-research/99-raw/experiments/A/02-c1-check/treatments.yaml\n",
-                      "  treatment: ../../../design/promo/art-direction.json\n")],
+                    R("  copy_deck: ../copy/home.yaml\n", "  treatment: ../../../design/promo/art-direction.json\n")],
                 "site/promo/plans/spasibo.yaml": [
                     R("\nstatus: proposed\n", "\nstatus: approved\n"),
                     R("  facts: ../../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml\n",

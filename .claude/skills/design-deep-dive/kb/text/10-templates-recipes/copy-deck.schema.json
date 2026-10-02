@@ -8,7 +8,7 @@
   "x-status": "v1.2: совместима с v1 — поля и статусы v0 на месте, новые значения и поля необязательны; процесс — 01-copy-deck-workflow.md, примеры — examples/ (02, 03)",
   "x-owner": "text-research · 10-templates-recipes · J (контракт тройки v2 §3 п.8)",
   "x-doc": ["10-templates-recipes/README.md", "../../scripts/text/README.md#copydeck"],
-  "x-tool": "../../scripts/text/copydeck.py (skeleton, validate, claims, lint, check, approve, export, import-copy, export-assets, export-variants, apply-selection, before-after, --selftest)",
+  "x-tool": "../../scripts/text/copydeck.py (skeleton, validate, claims, lint, check, approve, export, import-copy, export-assets, export-variants, apply-selection, select, before-after, --selftest)",
 
   "type": "object",
   "required": ["copy_deck"],
@@ -118,13 +118,15 @@
     },
     "claims-allow": {
       "type": "array",
-      "description": "Обход эвристик сверки с фактами — решение человека с записанной причиной: находка правила не считается в error сверки и записях claims, а copydeck.py claims, check, approve и validate --final перечисляют обход отдельным списком. Обходятся только COPY-F-CLASS (маркер класса утверждения без факта: «Зарплата и кадры» — название услуги) и COPY-F-NUM (число без факта и число, не совпавшее с фактом: COPY-F-NUM, COPY-F-NUM-MISMATCH). Право (COPY-L-…), never_claim, «утверждение шире факта» и остальная сверка не обходятся. Запись без reason или by, с другим правилом или с fact:<id>, которого нет в facts.yaml, — не обход: находка остаётся, validate — warning COPY-D-CLAIMS-ALLOW.",
+      "description": "Обход эвристик сверки с фактами — решение человека с записанной причиной: находка правила не считается в error сверки и записях claims, а copydeck.py claims, check, approve и validate --final перечисляют обход отдельным списком. Обходятся только COPY-F-CLASS (маркер класса утверждения без факта: «Зарплата и кадры» — название услуги) и числа: семейство COPY-F-NUM (число без факта и число, не совпавшее с фактом: COPY-F-NUM, COPY-F-NUM-MISMATCH) или одна находка COPY-F-NUM-MISMATCH. Запись с value или fragment снимает одну названную находку, без них — все находки правила на своём месте: у слота — в его тексте, у мета — в текстах мета, у страницы — во всех текстах страницы. Право (COPY-L-…), never_claim, «утверждение шире факта» и остальная сверка не обходятся. Запись без reason или by, с другим правилом, с value не числом или с fact:<id>, которого нет в facts.yaml, — не обход: находка остаётся, validate — warning COPY-D-CLAIMS-ALLOW.",
       "items": {
         "type": "object",
         "additionalProperties": false,
         "patternProperties": {"^x-": {}},
         "properties": {
-          "rule": {"type": "string", "description": "COPY-F-CLASS или COPY-F-NUM."},
+          "rule": {"type": "string", "description": "Семейство или id находки: COPY-F-CLASS; COPY-F-NUM (семейство: число без факта и несовпавшее число); COPY-F-NUM-MISMATCH (только несовпавшее число)."},
+          "value": {"type": ["string", "number"], "description": "Что именно снято у числа: само число («12», «7 900», «4,9») — запись снимает находки с этим числом во фрагменте, остальные числа на том же месте остаются находками. Только у COPY-F-NUM и COPY-F-NUM-MISMATCH."},
+          "fragment": {"type": "string", "description": "Что именно снято: фрагмент находки — слово или фраза целиком, как в отчёте сверки («Зарплата», «семь лет»); без учёта регистра."},
           "reason": {"type": "string", "description": "Почему находка ложная. У числа — fact:<id> факта, на котором оно стоит («fact:company-since-2014 — 12 лет = 2026 − 2014»), или почему это не утверждение (номер шага, артикул)."},
           "by": {"type": "string", "description": "Кто решил: заказчик или аналитик (роль или имя), а не агент."}
         }
@@ -170,7 +172,7 @@
           "type": "object",
           "additionalProperties": false,
           "patternProperties": {"^x-": {}},
-          "description": "Итоги проверок этого варианта (для сравнения вариантов до выбора; предложение I): claims и lint — как записи слота (пишет copydeck.py check --all-variants --update: каждый живой вариант сверен «как если бы выбран»), rubric — формат рубрики I (09-ai-generation-evaluation/copy-rubric.yaml).",
+          "description": "Итоги проверок этого варианта (для сравнения вариантов до выбора; предложение I): claims и lint — форма записей слота, rubric — формат рубрики I (09-ai-generation-evaluation/copy-rubric.yaml). copydeck.py это поле не пишет: check --all-variants сверяет каждый живой вариант «как если бы выбран» и отдаёт итоги отчётом, записи check --update — у выбранного текста слота; export-variants не выносит на лист вариант, у которого здесь записан error для его текста.",
           "properties": {
             "claims": {"$ref": "#/$defs/claims-record"},
             "lint": {"$ref": "#/$defs/lint-record"},
@@ -186,7 +188,7 @@
       "additionalProperties": false,
       "patternProperties": {"^x-": {}},
       "required": ["method"],
-      "description": "Как выбран chosen: единственный вариант, редактор, заказчик, попарный слепой выбор, судья (I).",
+      "description": "Как выбран chosen: единственный вариант, редактор, заказчик, попарный слепой выбор, судья (I). Запись ставят copydeck.py select и apply-selection.",
       "properties": {
         "method": {"enum": ["single", "editor", "customer", "pairwise", "judge", "ab-test", "human-pairwise", "judge-pairwise"]},
         "by": {"type": "string"},
@@ -226,7 +228,7 @@
       "description": "Поля слота, общие со слотом обещания.",
       "properties": {
         "variants": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/variant"}},
-        "chosen": {"$ref": "#/$defs/local-id", "description": "id выбранного варианта (v0). Обязателен при двух и больше вариантах и со статуса checked."},
+        "chosen": {"$ref": "#/$defs/local-id", "description": "id выбранного варианта (v0): ставит copydeck.py select (открытый выбор) или apply-selection (слепой выбор). Нужен при двух и больше вариантах, как только один из них вышел из draft, и со статуса checked; у черновика, все варианты которого draft, выбор ещё впереди."},
         "selection": {"$ref": "#/$defs/selection"},
         "fact_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/fact-ref"}, "description": "Факты, на которых стоит текст (v0). Каждое число, имя, дата, цитата, логотип, рейтинг, цена, гарантия — факт."},
         "missing_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/missing-ref"}, "description": "Пробелы facts.yaml, которые закрывают [PLACEHOLDER] этого слота."},
@@ -312,6 +314,7 @@
         },
         "test_plan": {"type": "string", "description": "План теста вариантов title (G: Вебмастер, Search Console, 4 недели, метрика CTR)."},
         "review_by": {"$ref": "#/$defs/date", "description": "Когда пересмотреть title и description (G: раз в 12–24 месяца, [мнение] G)."},
+        "claims_allow": {"$ref": "#/$defs/claims-allow", "description": "Обходы эвристик сверки для текстов мета (title, description, og_*): место обхода уже страницы — число в слотах страницы запись не снимает."},
         "notes": {"type": "string"}
       }
     },
@@ -386,7 +389,7 @@
         "status": {"$ref": "#/$defs/status", "description": "Статус страницы (по умолчанию draft)."},
         "approval": {"$ref": "#/$defs/review", "description": "Кто утвердил страницу целиком (обязательно при approved)."},
         "reason": {"type": "string", "description": "Почему страница отклонена (при rejected)."},
-        "hierarchy_ref": {"type": "string", "description": "Файл иерархии сообщений B1, по которой написана страница."},
+        "hierarchy_ref": {"type": "string", "description": "Файл иерархии сообщений B1, по которой написана страница, — одна на страницу. Вторая иерархия плана (refs.hierarchy) уместна у вариантной страницы (page.first_screen.variant_map плана); у страницы без вариантов план называет правило сведения уровней — page.awareness_basis.rule, иначе validate — warning COPY-D-HIERARCHY."},
         "awareness": {"enum": ["unaware", "problem-aware", "solution-aware", "product-aware", "most-aware"], "description": "Уровень осведомлённости трафика этой версии страницы (B1)."},
         "promise": {"$ref": "#/$defs/promise"},
         "cta_primary": {"$ref": "#/$defs/copy-path", "description": "Главная кнопка страницы (путь слота cta-label) → site.cta.label брифа холста; по умолчанию — первый cta-label секции hero."},
@@ -395,7 +398,7 @@
         "article": {"$ref": "#/$defs/article"},
         "og_template": {"$ref": "#/$defs/og-template"},
         "lint_allow": {"$ref": "#/$defs/lint-allow", "description": "Исключения для находок страницы (анализаторы ритма, плотности): законные формы — письмо, манифест."},
-        "claims_allow": {"$ref": "#/$defs/claims-allow", "description": "Обходы эвристик сверки для всех текстов страницы: слоты, обещание, мета, OG-шаблон («Зарплата и кадры» — название услуги в нескольких местах)."},
+        "claims_allow": {"$ref": "#/$defs/claims-allow", "description": "Обходы эвристик сверки для всех текстов страницы: слоты, обещание, мета, OG-шаблон («Зарплата и кадры» — название услуги в нескольких местах). Обход одного текста — claims_allow слота, текстов мета — meta.claims_allow; запись страницы без value и fragment снимает все находки правила на странице."},
         "notes": {"type": "string"},
         "sections": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/section"}}
       }
@@ -435,6 +438,7 @@
           "description": "Отраслевой режим правил H (как meaning.legal_category B1)."
         },
         "authors": {"type": "array", "items": {"type": "string"}, "description": "Кто пишет и ведёт deck: роли или имена."},
+        "projection": {"enum": ["meaning"], "description": "Файл — не тексты страницы, а проекция смысла и иерархий для сверки до текстов (chain_inputs.py meaning-claims). Формулировки сверяются с фактами и правом; места фактов (use — на каких страницах и в каких секциях факт уместен) copydeck.py claims на проекции не сверяет: проекция не страница."},
         "notes": {"type": "string"},
         "pages": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/page"}}
       }
@@ -455,20 +459,53 @@
   },
 
   "x-status-rules": {
-    "description": "Что обязано быть на каждом статусе (читает copydeck.py validate; процесс — 01-copy-deck-workflow.md). Статус слота = статус выбранного варианта; статус обещания — так же. assumed требует того же, что draft: это черновик «допущением», его проверяют claims_check.py и copy_lint.py (check --promote → checked).",
+    "description": "Что держит каждый статус (читает copydeck.py validate; процесс — 01-copy-deck-workflow.md). Статус слота = статус выбранного варианта; статус обещания — так же. assumed требует того же, что draft: это черновик «допущением», его проверяют claims_check.py и copy_lint.py (check --promote → checked). slot_requires, variant_requires, page_requires — поля, без которых статус даёт error COPY-D-STATUS (meta у страницы — ворота публикации: без --final её отсутствие — warning COPY-D-META). checks — находки validate уровня error, с которыми статус недействителен (id находки → что именно): check --promote такой статус не поставит, approve откажет. signals — находки уровня warning: статус они не держат. final — ворота публикации validate --final. Находки формата, словаря, стыка с планом и ссылок на факты (COPY-D-SCHEMA, COPY-D-ID-DUP, COPY-D-VOCAB, COPY-D-BLOCK, COPY-D-PLAN, COPY-D-FACT-REF, COPY-D-FACT-EXPIRED, COPY-D-MISSING-REF) — error на любом статусе.",
     "slot": {
-      "draft": {"slot_requires": ["slot_id", "slot_type", "variants"], "variant_requires": ["id", "text", "status"], "checks": ["chosen-if-many"]},
-      "assumed": {"slot_requires": ["slot_id", "slot_type", "variants"], "variant_requires": ["id", "text", "status"], "checks": ["chosen-if-many"]},
-      "checked": {"slot_requires": ["chosen", "fact_ids", "claim_flags", "lint", "claims"], "checks": ["lint-zero-errors", "claims-zero-errors", "hash-current", "facts-resolve"]},
-      "approved": {"slot_requires": ["chosen", "fact_ids", "claim_flags", "lint", "claims"], "checks": ["lint-zero-errors", "claims-zero-errors", "hash-current", "facts-resolve", "no-placeholder", "review-or-page-approval"]},
-      "rejected": {"variant_requires": ["reason"], "checks": ["not-chosen"]}
+      "draft": {"slot_requires": ["slot_id", "slot_type", "variants"], "variant_requires": ["id", "text", "status"], "checks": {}, "signals": {}},
+      "assumed": {"slot_requires": ["slot_id", "slot_type", "variants"], "variant_requires": ["id", "text", "status"], "checks": {},
+                  "signals": {"COPY-D-CHOSEN": "вариантов несколько, выбор не сделан (у слота, все живые варианты которого draft, — не находка)"}},
+      "checked": {"slot_requires": ["chosen", "fact_ids", "claim_flags", "lint", "claims"],
+                  "checks": {"COPY-D-STATUS": "нет поля из slot_requires; нет итога lint или claims либо в нём error",
+                             "COPY-D-HASH": "текст изменён после проверки: text_hash записи lint или claims не равен хэшу текста",
+                             "COPY-D-FACT-UNPUBLISHABLE": "факт текста не публикуется (не проверен, нет разрешения, вывод агента)",
+                             "COPY-D-FACT-REQUIRED": "тип слота требует факта (copy-slots.yaml fact_required: always), а fact_ids пуст"},
+                  "signals": {"COPY-D-HASH": "в записи lint или claims нет text_hash"}},
+      "approved": {"slot_requires": ["chosen", "fact_ids", "claim_flags", "lint", "claims"],
+                   "checks": {"COPY-D-STATUS": "нет поля из slot_requires; нет итога lint или claims либо в нём error; нет review (by, at) варианта и approval страницы",
+                              "COPY-D-HASH": "текст изменён после проверки: text_hash записи lint или claims не равен хэшу текста",
+                              "COPY-D-FACT-UNPUBLISHABLE": "факт текста не публикуется (не проверен, нет разрешения, вывод агента)",
+                              "COPY-D-FACT-REQUIRED": "тип слота требует факта (copy-slots.yaml fact_required: always), а fact_ids пуст",
+                              "COPY-D-PLACEHOLDER": "заглушка без пробела facts.yaml missing[] или о другом, чем пробел missing_ids слота"},
+                   "signals": {"COPY-D-PLACEHOLDER": "заглушка названного пробела facts.yaml missing[]: утверждению и макету не мешает, публикацию держит validate --final",
+                               "COPY-D-HASH": "в записи lint или claims нет text_hash"}},
+      "rejected": {"variant_requires": ["reason"],
+                   "checks": {"COPY-D-REJECTED": "отклонённый вариант без reason", "COPY-D-CHOSEN": "выбран отклонённый вариант"}, "signals": {}}
     },
     "page": {
-      "draft": {"page_requires": ["page_id", "page_type", "sections"]},
-      "assumed": {"page_requires": ["page_id", "page_type", "sections"]},
-      "checked": {"page_requires": ["meta"], "checks": ["all-chosen-at-least-checked", "promise-checked-if-present"]},
-      "approved": {"page_requires": ["meta", "approval"], "checks": ["all-chosen-approved", "meta-complete", "no-placeholder", "no-process-log"]},
-      "rejected": {"page_requires": ["reason"], "checks": []}
+      "draft": {"page_requires": ["page_id", "page_type", "sections"], "checks": {}, "signals": {}},
+      "assumed": {"page_requires": ["page_id", "page_type", "sections"], "checks": {}, "signals": {}},
+      "checked": {"page_requires": ["meta"],
+                  "checks": {"COPY-D-STATUS": "выбранный текст страницы (слот или своё обещание) ниже checked"},
+                  "signals": {"COPY-D-META": "нет блока meta или пусты OG-поля, заведённые слотами плана, — заполнить до публикации",
+                              "meta-x-og-missing": "пусты OG-поля, заведённые слотами плана (проверка meta-rules.yaml)"}},
+      "approved": {"page_requires": ["meta", "approval"],
+                   "checks": {"COPY-D-STATUS": "нет approval; выбранный текст страницы ниже approved",
+                              "COPY-D-PLAN": "страница утверждена, а её план — нет: закрытый файл не опирается на открытый"},
+                   "signals": {"COPY-D-META": "нет блока meta, пусты meta.title, meta.description или OG-поля плана: утверждению не мешает, публикацию держит validate --final",
+                               "meta-x-missing": "пусты meta.title или meta.description (проверка meta-rules.yaml): утверждению не мешает, публикацию держит validate --final",
+                               "meta-x-og-missing": "пусты OG-поля, заведённые слотами плана (проверка meta-rules.yaml)",
+                               "COPY-D-PLACEHOLDER": "заглушка в мета утверждённой страницы — закрыть до публикации",
+                               "COPY-D-PROCESS-LOG": "в утверждённой странице остался журнал процесса (edit_log, отклонённые варианты)"}},
+      "rejected": {"page_requires": ["reason"], "checks": {}, "signals": {}}
+    },
+    "final": {
+      "checks": {"COPY-D-FINAL": "страница не approved",
+                 "COPY-D-STATUS": "нет блока meta (поле page_requires)",
+                 "COPY-D-PLACEHOLDER": "любая заглушка в тексте или мета, и названного пробела тоже",
+                 "COPY-D-EXAMPLE": "текст стоит на демо-факте (example: true)",
+                 "COPY-D-META": "нет блока meta, пусты meta.title или meta.description",
+                 "meta-x-missing": "пусты meta.title или meta.description (проверка meta-rules.yaml)",
+                 "COPY-D-PLAN": "текстовый слот плана без текста в copy deck"}
     },
     "on_approve": "copydeck.py approve: журнал процесса уходит — edit_log слотов и обещания, отклонённые варианты (и их записи); остаются выбранные тексты с записями проверок, живые альтернативы (план теста title), selection с compared (id удалённых вариантов в нём — законная история выбора), review, approval; история — в git"
   },
@@ -492,7 +529,7 @@
       }
     },
     "drop": [
-      {"from": ["/copy_deck/version", "/copy_deck/date", "/copy_deck/site", "/copy_deck/authors", "/copy_deck/notes", "/copy_deck/pages/*/status", "/copy_deck/pages/*/approval", "/copy_deck/pages/*/reason", "/copy_deck/pages/*/notes"], "note": "служебные поля и подпись: статус, путь и отпечаток (text_hash) — в INPUT.md"},
+      {"from": ["/copy_deck/version", "/copy_deck/date", "/copy_deck/site", "/copy_deck/authors", "/copy_deck/projection", "/copy_deck/notes", "/copy_deck/pages/*/status", "/copy_deck/pages/*/approval", "/copy_deck/pages/*/reason", "/copy_deck/pages/*/notes"], "note": "служебные поля и подпись: статус, путь и отпечаток (text_hash) — в INPUT.md"},
       {"from": ["/copy_deck/product_name", "/copy_deck/lang", "/copy_deck/source_lang", "/copy_deck/source_ref", "/copy_deck/adaptation"], "note": "имя продукта и язык — в брифе холста из site-brief (product.name, product.locale); второй язык — свой copy deck и своя выгрузка"},
       {"from": ["/copy_deck/voice_ref", "/copy_deck/facts_ref", "/copy_deck/meaning_ref", "/copy_deck/copy_slots_ref", "/copy_deck/page_plan_ref", "/copy_deck/pages/*/hierarchy_ref"], "note": "ссылки на источники: голос, факты, смысл и план идут во вход своими картами"},
       {"from": ["/copy_deck/jurisdiction", "/copy_deck/legal_category", "/copy_deck/pages/*/lint_allow", "/copy_deck/pages/*/claims_allow"], "note": "режим сверки фактов и права, исключения линтера и обходы сверки — входы проверок текста, исполнителю не нужны"},
@@ -541,11 +578,14 @@
     "description": "Стык с планом страницы (page-plan site): каркас copy deck строится из плана (copydeck.py skeleton), copydeck.py validate сверяет стык по page_plan_ref; путь текста copy:<page>/<section>/<slot> один для всех языков.",
     "page_plan_ref": "файл плана страницы от папки copy deck",
     "page_id": "page.id плана",
+    "site_page_id": "у страницы-образца шаблона коллекции — page.id плана шаблона (page_id образца — свой): стык сверяется у каждой страницы copy deck, которая стоит на плане, — по site_page_id, затем по page_id",
+    "hierarchy_ref": "refs.hierarchy плана — файл уровня page.awareness; иерархий в плане больше одной — у вариантной страницы (page.first_screen.variant_map) или с правилом сведения уровней page.awareness_basis.rule",
     "section_id, site_section_id": "sections[].id плана; порядок секций — порядок плана",
     "section_role": "sections[].role плана",
     "block": "sections[].block плана (id blocks.yaml); блок не выбран — поля нет",
     "slot_id": "sections[].slots.text[].id плана; слоты уровня страницы (page_slots.text: meta-title, meta-description, og-*) — поля meta",
     "slot_type": "sections[].slots.text[].slot плана (слот словаря site вида text)",
+    "slot_type: messenger-prefill": "готовое сообщение мессенджера — текстовый слот секции, id которого называет sections[].slots.action[].target.prefill плана: текст сверяется, линтуется и утверждается как остальные; на странице он не виден — его несёт ссылка действия",
     "site_slot_id": "sections[].slots.text[].anatomy плана («группа.элемент»; по умолчанию — id слота)",
     "group": "sections[].slots.text[].group плана («группа-N»)",
     "fact_ids, missing_ids": "sections[].slots.data[] плана: fact:<id> и missing:<id> слотов, в binds которых стоит текстовый слот; page_slots.data[] — meta.fact_ids"

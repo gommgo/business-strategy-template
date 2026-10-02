@@ -219,6 +219,16 @@ sections:
       anatomy: stat.label
       group: stat-2
       intent: 'stat-label: по иерархии сообщений text'
+    - id: stat-3-value
+      slot: stat-value
+      anatomy: stat.value
+      group: stat-3
+      intent: 'stat-value: по иерархии сообщений text'
+    - id: stat-3-label
+      slot: stat-label
+      anatomy: stat.label
+      group: stat-3
+      intent: 'stat-label: по иерархии сообщений text'
     data:
     - id: stat-1-metric
       slot: metric-ref
@@ -232,6 +242,13 @@ sections:
       anatomy: stat.metric
       group: stat-2
       fact: fact:capacity-tons
+      binds:
+      - source
+    - id: stat-3-metric
+      slot: metric-ref
+      anatomy: stat.metric
+      group: stat-3
+      fact: fact:staff-count
       binds:
       - source
 - id: case-studies

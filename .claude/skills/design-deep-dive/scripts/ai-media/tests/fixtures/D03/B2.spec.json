@@ -5,7 +5,7 @@
  "id": "ab-b2-illustr",
  "task": "IMG-ILLUSTR",
  "role": {
-  "page_type": "saas",
+  "page_class": "saas",
   "section": "onboarding",
   "slot": "onboarding-step-2",
   "series_id": "onboarding-flat-v1",

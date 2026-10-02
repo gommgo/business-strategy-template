@@ -26,10 +26,17 @@ Blender и код (kb/blender/10-ai-3d-generation-assets/01-generators-landscape
   download ID --channel C           дожать готовый результат: скачать файлы, паспорт, закрыть запись журнала
   ledger [--sum] [--channel C] [--agent A] [--tail N] [--json]   общий журнал затрат (и события polza.py)
   show MODEL --channel C            что клиент знает о модели или сети: параметры, значения, цены, passthrough
-  snapshot [--channel routerai|genapi|all]   свежий публичный каталог (бесплатный GET без ключа) в $DDD_HOME/cache/ai-media/<канал>/
-  selftest                          самопроверка без сети
+  snapshot [--channel routerai|genapi|all]   свежий публичный каталог (бесплатный GET без ключа) в $DDD_HOME/cache/ai-media/<канал>/:
+                                    файл качается во временную папку и встаёт на место переименованием; оборванный
+                                    запрос повторяется; не удалось — папки снимка нет, последним остаётся снимок
+                                    до запуска, код 1
+  balance --channel C [--path P]    баланс и лимит ключа канала: чтение, не трата — идёт без --live; polza-chat и
+                                    polza-images — GET /v2/balance и /v1/key; адрес чтения у routerai и genapi называет
+                                    --path (GET); ответ канала и его числа — в stdout; адрес не назван — код 2
+  selftest                          самопроверка без сети: оценки сверяются с ценами, посчитанными из полей последних
+                                    снимков каталогов; снимка канала нет — его случаи пропускаются
 
-Задание: {"channel": "routerai", "method": "POST", "path": "/api/v1/images", "body": {...}, "tag": "...", "agent": "G",
+Задание: {"channel": "routerai", "method": "POST", "path": "/api/v1/images", "body": {...}, "tag": "...", "agent": "...",
   "variant": 1, "max_rub": 10, "price_rub": 8.74, "notes": "гипотеза", "meta": {...}}.
 Файлы: .json (объект или массив заданий), .jsonl (строка — генерация); channel можно не писать, если он в имени файла
 (*.routerai.json, *.genapi.jsonl …). Локальные пути в полях картинок (относительно файла задания) уходят data:URI base64.
@@ -37,8 +44,9 @@ Blender и код (kb/blender/10-ai-3d-generation-assets/01-generators-landscape
 отказывает, пока не подставлено: --set ИМЯ=значение, --set-file ИМЯ=путь.
 
 Окружение: ключи ROUTERAI_API_KEY | GENAPI_API_KEY | POLZA_API_KEY или файлы ~/.config/{routerai,genapi,polza}/api_key
-(права 600; другой путь — ROUTERAI_KEY_FILE | GENAPI_KEY_FILE | POLZA_KEY_FILE) — читаются только при --live и только
-для нужного канала; базы ROUTERAI_BASE_URL (https://routerai.ru/api), GENAPI_BASE_URL (https://api.gen-api.ru/api),
+(права 600; другой путь — ROUTERAI_KEY_FILE | GENAPI_KEY_FILE | POLZA_KEY_FILE) — читаются только при --live и при
+чтении баланса (balance) и только для нужного канала; базы ROUTERAI_BASE_URL (https://routerai.ru/api),
+GENAPI_BASE_URL (https://api.gen-api.ru/api),
 POLZA_BASE_URL (https://polza.ai/api, общий с polza.py); бюджеты ROUTERAI_BUDGET_TOTAL, GENAPI_BUDGET_TOTAL (по умолчанию
 0 — без явного лимита --live не тратит), POLZA_BUDGET_TOTAL (2000, общий с polza.py); MP_BUDGET_AGENT; MP_MAX_JOB (60 ₽
 на задание); журнал MP_LEDGER или POLZA_LEDGER ($DDD_HOME/out/ai-media/_ledger.jsonl); MP_OUT_ROOT
@@ -433,7 +441,7 @@ def _js_round(m: float) -> int:
 
 
 def gpt_image_tokens(family: str, w: int, h: int, q: str) -> int:
-    """Выходные токены GPT Image 2 / 2.5 (формула калькулятора OpenAI, C1/02 tokens.py)."""
+    """Выходные токены GPT Image 2 / 2.5 (формула калькулятора OpenAI)."""
     if family == "gpt-image-1":
         return math.ceil(GPT1_TOKENS[q] * (w * h) / (1024 * 1024))
     u, n = max(w, h), min(w, h)
@@ -460,8 +468,8 @@ def latest_file(sub: str, fname: str, ref: str | None = None) -> Path | None:
             return q
         raise SystemExit(f"снимок не найден: {ref}")
     d = CACHE / sub
-    if d.is_dir():
-        dirs = sorted(x for x in d.iterdir() if x.is_dir() and (x / fname).exists())
+    if d.is_dir():      # временная папка снимка, который ещё качается (имя с точки), снимком не считается
+        dirs = sorted(x for x in d.iterdir() if x.is_dir() and not x.name.startswith(".") and (x / fname).exists())
         if dirs:
             return dirs[-1] / fname
     return None
@@ -522,7 +530,8 @@ class RouterCatalog:
 
 
 def genapi_table(item: dict | None) -> list[dict]:
-    """Таблица прайса Gen-API (P/04): подписи в labels, значения по столбцам в rows → список вариантов."""
+    """Таблица прайса Gen-API (data/genapi_prices_*.json): подписи в labels, значения по столбцам в rows → список
+    вариантов."""
     if not item:
         return []
     labels, rows = item.get("labels") or [], item.get("rows") or []
@@ -547,8 +556,8 @@ class GenapiCatalog:
                        for s, n in self.nets.items()}
         self.path, self.fetched = path, snap_time(path)
         self.prices, self.prices_src = {}, None
-        pf = P04 / "genapi_prices_2026-09-23.json"
-        if pf.exists():
+        pf = max(P04.glob("genapi_prices_*.json"), default=None)      # последний по дате в имени
+        if pf is not None:
             for it in json.loads(pf.read_text(encoding="utf-8")):
                 if isinstance(it, dict) and it.get("id"):
                     self.prices[it["id"]] = it
@@ -907,9 +916,10 @@ class Ctx:
             return f"файл {kf} (права {oct(mode)}{', НЕ 600' if mode & 0o077 else ''})"
         return "не найден"
 
-    def key(self, ch: str) -> str | None:
-        """Ключ канала — только при --live и только по запросу к своему хосту. Значение нигде не печатается."""
-        if not self.live:
+    def key(self, ch: str, read: bool = False) -> str | None:
+        """Ключ канала — только при --live или для чтения без траты (read: баланс) и только по запросу к своему хосту.
+        Значение нигде не печатается."""
+        if not self.live and not read:
             return None
         c = CHANNELS[ch]
         scope = c["scope"]
@@ -928,8 +938,9 @@ class Ctx:
             self._keys[scope] = k or None
             return self._keys[scope]
 
-    def http(self, ch: str) -> Http:
-        return Http(ch, self.base(ch), lambda: self.key(ch), self.live, timeout=self.a.http_timeout,
+    def http(self, ch: str, read: bool = False) -> Http:
+        """Канал запросов; read — канал чтения без траты (баланс): запрос с ключом идёт и без --live."""
+        return Http(ch, self.base(ch), lambda: self.key(ch, read), self.live or read, timeout=self.a.http_timeout,
                     curl=getattr(self.a, "curl", False))
 
 
@@ -2849,31 +2860,120 @@ def cmd_show(ctx: Ctx, a):
     return EXIT_OK
 
 
-def cmd_snapshot(ctx: Ctx, a):
-    """Публичные каталоги без ключа (бесплатно): RouterAI /v1/models, Gen-API /v1/networks?include=parameters."""
-    todo = ["routerai", "genapi"] if a.channel == "all" else [a.channel]
-    stamp = dt.datetime.now(pc.MSK).strftime("%Y-%m-%d_%H%M")
-    root = Path(a.dest) if a.dest else CACHE
-    for ch in todo:
-        url = ctx.base(ch) + ("/v1/models" if ch == "routerai" else "/v1/networks?include=parameters")
-        fname = "api-v1-models.json" if ch == "routerai" else "networks-include-parameters.json"
-        d = root / ch / stamp
-        d.mkdir(parents=True, exist_ok=True)
-        req = urllib.request.Request(url, headers={"User-Agent": VERSION, "Accept": "application/json"})
+SNAPSHOT_FILES = {"routerai": ("/v1/models", "api-v1-models.json"),
+                  "genapi": ("/v1/networks?include=parameters", "networks-include-parameters.json")}
+
+
+def public_get(url: str, timeout: float = 90):
+    """Публичный GET без ключа → (статус, заголовки, тело)."""
+    req = urllib.request.Request(url, headers={"User-Agent": VERSION, "Accept": "application/json"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.status, dict(r.headers.items()), r.read()
+
+
+def take_snapshot(root: Path, ch: str, url: str, *, get=public_get, stamp: dt.datetime | None = None,
+                  tries: int = pc.SNAPSHOT_TRIES, retry_pause: float = 2.0) -> tuple[Path, int, int]:
+    """Снимок публичного каталога канала в root/<канал>/<дата_ЧЧММ>/ → (папка, байт, записей). Файл и метаданные
+    пишутся во временную папку рядом и встают на место одним переименованием: пустая или недописанная папка стала бы
+    «последним снимком» для оценок. Оборванный запрос повторяется (tries попыток). Попытки кончились, ответ не 200
+    или не каталог — pc.SnapshotError; временная папка убирается, папки снимка нет."""
+    stamp = stamp or dt.datetime.now(pc.MSK)
+    fname = SNAPSHOT_FILES[ch][1]
+    home = root / ch
+    d = home / stamp.strftime("%Y-%m-%d_%H%M")
+    if d.exists():
+        raise pc.SnapshotError(f"папка уже существует: {d} — повторите через минуту")
+    home.mkdir(parents=True, exist_ok=True)
+    tmp = home / f".snapshot-{stamp:%Y%m%d-%H%M%S}-{os.getpid()}.part"
+    tmp.mkdir()
+    try:
         t0 = time.time()
-        with urllib.request.urlopen(req, timeout=90) as r:
-            body = r.read()
-            hdr = {k.lower(): v for k, v in r.headers.items() if k.lower() != "set-cookie"}
-            status = r.status
-        data = json.loads(body)
-        (d / fname).write_bytes(body)
-        (d / "snapshot.meta.json").write_text(jdump({
-            "tool": VERSION, "fetched_at_msk": now_iso(),
+        status, headers, body = pc.get_retry(get, url, fname, tries, retry_pause)
+        try:
+            data = json.loads(body)
+        except ValueError:
+            data = None
+        items = data.get("data", data) if isinstance(data, dict) else data
+        if status != 200 or not isinstance(items, (list, dict)) or not items:
+            raise pc.SnapshotError(f"{fname}: ответ {status}, {len(body)} байт — не каталог ← {url}")
+        (tmp / fname).write_bytes(body)
+        hdr = {k.lower(): v for k, v in headers.items() if k.lower() != "set-cookie"}
+        (tmp / "snapshot.meta.json").write_text(jdump({
+            "tool": VERSION, "fetched_at_msk": stamp.isoformat(timespec="seconds"),
             "files": {fname: {"url": url, "status": status, "bytes": len(body), "sha256": sha256_hex(body),
                               "seconds": round(time.time() - t0, 2), "headers": hdr}},
             "note": "публичный GET без ключа; заголовки set-cookie не сохраняются"}), encoding="utf-8")
-        n = len(data.get("data", data) if isinstance(data, dict) else data)
-        say(f"{ch}: {url} → {rel(d / fname)} ({len(body)} байт, {n} записей)")
+        tmp.rename(d)
+    except BaseException:
+        shutil.rmtree(tmp, ignore_errors=True)
+        raise
+    return d, len(body), len(items)
+
+
+def cmd_snapshot(ctx: Ctx, a):
+    """Публичные каталоги без ключа (бесплатно): RouterAI /v1/models, Gen-API /v1/networks?include=parameters."""
+    todo = ["routerai", "genapi"] if a.channel == "all" else [a.channel]
+    stamp = dt.datetime.now(pc.MSK)
+    root = Path(a.dest) if a.dest else CACHE
+    code = EXIT_OK
+    for ch in todo:
+        url = ctx.base(ch) + SNAPSHOT_FILES[ch][0]
+        try:
+            d, size, n = take_snapshot(root, ch, url, stamp=stamp)
+        except pc.SnapshotError as e:
+            say(f"{ch}: снимок не снят: {e}; папки снимка нет, последним остаётся снимок до запуска — повторите позже",
+                err=True)
+            code = EXIT_JOB
+            continue
+        say(f"{ch}: {url} → {rel(d / SNAPSHOT_FILES[ch][1])} ({size} байт, {n} записей)")
+    return code
+
+
+# адреса чтения баланса и лимита ключа (GET с ключом, не трата); у канала без строки адрес называет ключ --path
+BALANCE_PATHS = {"polza-chat": ("/v2/balance", "/v1/key"), "polza-images": ("/v2/balance", "/v1/key")}
+
+
+def balance_fields(resp) -> dict:
+    """Числа ответа канала о балансе и лимитах: поля верхнего уровня и вложенного объекта data, значение — число или
+    строка с числом. Имена полей — как в ответе канала."""
+    out = {}
+
+    def take(obj: dict, prefix: str = ""):
+        for k, v in obj.items():
+            if isinstance(v, (int, float)) and not isinstance(v, bool):
+                out[prefix + k] = float(v)
+            elif isinstance(v, str) and num(v) is not None:
+                out[prefix + k] = float(num(v))
+
+    if isinstance(resp, dict):
+        take(resp)
+        if isinstance(resp.get("data"), dict):
+            take(resp["data"], "data.")
+    return out
+
+
+def read_balance(http, paths) -> list[tuple[str, object, dict]]:
+    """GET по каждому адресу → (адрес, ответ, числа ответа)."""
+    out = []
+    for p in paths:
+        j = http.request("GET", http.url(api_path(p))).json
+        out.append((api_path(p), j, balance_fields(j)))
+    return out
+
+
+def cmd_balance(ctx: Ctx, a):
+    """Баланс и лимит ключа канала — чтение, не трата: запрос с ключом идёт и без --live."""
+    ch = a.channel
+    paths = [a.path] if a.path else list(BALANCE_PATHS.get(ch) or ())
+    if not paths:
+        say(f"{ch}: адрес чтения баланса канала не задан — задайте его ключом --path (GET из документации кабинета "
+            f"канала, например --path /v1/…); у polza-chat и polza-images адреса известны", err=True)
+        return 2
+    for p, j, nums in read_balance(ctx.http(ch, read=True), paths):
+        say(f"# {ch} GET {p}")
+        say(jdump(redact_obj(shorten(j))))
+        if nums:
+            say("# числа ответа: " + ", ".join(f"{k} {v:g}" for k, v in nums.items()))
     return EXIT_OK
 
 
@@ -2895,10 +2995,24 @@ class _Reply:
 
 
 def cmd_selftest(ctx: Ctx, a):
-    res = []
+    global CACHE
+    res, skipped = [], []
 
     def ok(name, cond, got=""):
         res.append((name, bool(cond), got))
+
+    def skip(name, why):
+        skipped.append((name, why))
+
+    def missing(prop: str) -> str | None:
+        """Почему снимка каталога канала нет; None — снимок на месте."""
+        try:
+            getattr(ctx, prop)
+        except SystemExit as e:
+            return str(e)
+        return None
+
+    no_ra, no_ga, no_pz = missing("ra"), missing("ga"), missing("pz")
 
     # 1. формула токенов GPT Image = таблица опыта C1/02 (калькулятор OpenAI)
     for fam, w, h, q, exp in [("gpt-image-2.5", 1024, 1024, "medium", 439), ("gpt-image-2.5", 1024, 1024, "high", 1756),
@@ -2978,11 +3092,11 @@ def cmd_selftest(ctx: Ctx, a):
                        "input_references": [{"type": "image_url", "image_url": {"url": "a.png"}}]}}
         j2 = json.loads(json.dumps(j1))
         j2["body"]["input_references"][0]["image_url"]["url"] = "data:image/png;base64," + base64.b64encode(png).decode()
-        try:
+        if no_ra:
+            skip("хэш: локальный путь = тот же файл в base64", no_ra)
+        else:
             h1, h2 = prepare(ctx, j1).request_hash, prepare(ctx, j2).request_hash
             ok("хэш: локальный путь = тот же файл в base64", h1 == h2)
-        except SystemExit as e:
-            ok("хэш: локальный путь = тот же файл в base64", False, str(e))
     # 8. отказ канала: тело и заголовки ответа — в паспорте задания
     with tempfile.TemporaryDirectory() as td:
         saved = (ctx.ledger, ctx.out_root, ctx.a.budget_total)
@@ -3016,39 +3130,95 @@ def cmd_selftest(ctx: Ctx, a):
                and len(resp.get("sha256") or "") == 64, resp)
         finally:
             ctx.ledger, ctx.out_root, ctx.a.budget_total = saved
-    # 9. оценки по снимкам каталогов
+    # 9. оценки против цен, посчитанных из полей тех же снимков каталогов: случай не зависит от даты снимка; снимка
+    #    канала нет или каталог сменил устройство цены — случай пропускается
+    def ra_field(mid):
+        m = ctx.ra.models.get(mid)
+        if m is None:
+            raise LookupError("модели нет в каталоге RouterAI")
+        ip = (m.get("image_pricing") or [{}])[0]
+        return m, ip.get("unit"), num(ip.get("price"))
+
+    def want_ra_image(mid):
+        _, unit, price = ra_field(mid)
+        if unit != "image" or price is None:
+            raise LookupError(f"цена каталога RouterAI — не за картинку ({unit})")
+        return float(price), None
+
+    def want_ra_tokens(mid, ar, quality, prompt):
+        m, unit, price = ra_field(mid)
+        fam = gpt_family(mid)
+        if unit != "token" or price is None or fam != "gpt-image-2.5":
+            raise LookupError(f"цена каталога RouterAI — не за токен GPT Image 2.5 ({unit})")
+        w, h = GPT25_SIZES[ar]
+        return gpt_image_tokens(fam, w, h, quality) * float(price) + text_tokens(prompt) * ra_input_prices(ctx, m)[0], None
+
+    def want_ga(net, column, **row):
+        for r in genapi_table(ctx.ga.prices.get(net)):
+            if all(r.get(k) == v for k, v in row.items()) and rub_of(r.get(column)) is not None:
+                return rub_of(r.get(column)), None
+        raise LookupError(f"строки {row} нет в прайсе Gen-API")
+
+    def want_pz(mid, **eff):
+        m = ctx.pz.by_id.get(mid)
+        if m is None:
+            raise LookupError("модели нет в снимке polza")
+        rub, why = pc.price_by_fields(m, eff, None)
+        if why or rub is None:
+            raise LookupError(why or "цены нет")
+        fb = [float(t["cost_rub"]) for t in ((m.get("top_provider") or {}).get("pricing") or {}).get("tiers") or []
+              if not t.get("conditions")]
+        return rub, max([rub] + fb[:1])
+
     cases = [
-        ({"channel": "routerai", "path": "/api/v1/images", "body": {"model": "recraft/recraft-v4.1-vector", "prompt": "x",
-          "aspect_ratio": "1:1", "n": 1, "output_format": "svg"}}, 8.7428, None),
-        ({"channel": "routerai", "path": "/api/v1/images", "body": {"model": "openai/gpt-image-2.5-sunburst",
-          "prompt": "x", "aspect_ratio": "1:1", "quality": "medium", "n": 1}}, 1.44, None),
-        ({"channel": "genapi", "path": "/api/v1/networks/recraft-v4", "body": {"model": "vector", "pro": False,
-          "prompt": "x", "translate_input": False}}, 20.0, None),
-        ({"channel": "genapi", "path": "/api/v1/networks/flux-2", "body": {"prompt": "x", "width": 1328, "height": 736,
-          "model": "standard", "num_images": 1, "translate_input": False}}, 3.0, None),
-        ({"channel": "polza-images", "path": "/api/v2/images/generations", "body": {"model": "openai/gpt-image-2.5-sunburst",
-          "prompt": "x", "size": "1024x1024", "n": 1}}, 4.0, 11.0),
+        (no_ra, {"channel": "routerai", "path": "/api/v1/images", "body": {"model": "recraft/recraft-v4.1-vector",
+         "prompt": "x", "aspect_ratio": "1:1", "n": 1, "output_format": "svg"}},
+         lambda: want_ra_image("recraft/recraft-v4.1-vector")),
+        (no_ra, {"channel": "routerai", "path": "/api/v1/images", "body": {"model": "openai/gpt-image-2.5-sunburst",
+         "prompt": "x", "aspect_ratio": "1:1", "quality": "medium", "n": 1}},
+         lambda: want_ra_tokens("openai/gpt-image-2.5-sunburst", "1:1", "medium", "x")),
+        (no_ga, {"channel": "genapi", "path": "/api/v1/networks/recraft-v4", "body": {"model": "vector", "pro": False,
+         "prompt": "x", "translate_input": False}},
+         lambda: want_ga("recraft-v4", "Цена за изображение", **{"Модель": "vector", "Pro": "Выключен"})),
+        (no_ga, {"channel": "genapi", "path": "/api/v1/networks/flux-2", "body": {"prompt": "x", "width": 1328,
+         "height": 736, "model": "standard", "num_images": 1, "translate_input": False}},      # кадр меньше 1 Мп — цена 1 Мп
+         lambda: want_ga("flux-2", "Цена", **{"Модель": "standard", "Тип генерации": "По тексту"})),
+        (no_pz, {"channel": "polza-images", "path": "/api/v2/images/generations", "body": {
+         "model": "openai/gpt-image-2.5-sunburst", "prompt": "x", "size": "1024x1024", "n": 1}},
+         lambda: want_pz("openai/gpt-image-2.5-sunburst", image_resolution="1K", aspect_ratio="1:1")),
     ]
-    for job, exp, exp_hi in cases:
-        job.update(_dir=".", _file="selftest", _index=1, tag="st", max_rub=50)
+    for why_not, job, want in cases:
+        name = f"оценка {job['channel']} {job['body'].get('model') or job['path']}"
+        if why_not:
+            skip(name, why_not)
+            continue
         try:
-            p = prepare(ctx, job)
-            got = p.estimate.get("rub")
-            cond = got is not None and abs(got - exp) < 0.01 and not p.errors and \
-                (exp_hi is None or abs((p.estimate.get("rub_high") or 0) - exp_hi) < 0.01)
-            ok(f"оценка {job['channel']} {job['body'].get('model') or job['path']} = {exp}", cond,
-               f"{got} / {p.estimate.get('rub_high')} / ошибок {len(p.errors)}")
-        except SystemExit as e:
-            ok(f"оценка {job['channel']}", False, str(e))
+            exp, exp_hi = want()
+        except LookupError as e:
+            skip(name, str(e))
+            continue
+        job.update(_dir=".", _file="selftest", _index=1, tag="st", max_rub=50)
+        p = prepare(ctx, job)
+        got = p.estimate.get("rub")
+        cond = got is not None and abs(got - exp) < 0.01 and not p.errors and \
+            (exp_hi is None or abs((p.estimate.get("rub_high") or 0) - exp_hi) < 0.01)
+        ok(f"{name} = {fmt(exp)} ₽ — из полей снимка", cond,
+           f"{got} / {p.estimate.get('rub_high')} / ошибок {len(p.errors)}")
     # 10. ловушки
-    p = prepare(ctx, {"channel": "genapi", "path": "/api/v1/networks/recraft-v4", "_dir": ".", "_file": "st", "_index": 1,
-                      "tag": "st", "max_rub": 100, "body": {"prompt": "x"}})
-    ok("Gen-API recraft-v4 без model/pro — ошибка ценовых параметров", {"model", "pro"} <= {i["param"] for i in p.errors})
-    ok("Gen-API translate_input подставлен false", p.body.get("translate_input") is False)
-    p = prepare(ctx, {"channel": "routerai", "path": "/api/v1/images", "_dir": ".", "_file": "st", "_index": 1, "tag": "st",
-                      "max_rub": 10, "body": {"model": "openai/gpt-image-2", "prompt": "x",
-                                              "input_references": ["a.png"]}})
-    ok("RouterAI input_references строкой — ошибка формата", any(i["param"] == "input_references[0]" for i in p.errors))
+    if no_ga:
+        skip("Gen-API recraft-v4: ценовые параметры и translate_input", no_ga)
+    else:
+        p = prepare(ctx, {"channel": "genapi", "path": "/api/v1/networks/recraft-v4", "_dir": ".", "_file": "st",
+                          "_index": 1, "tag": "st", "max_rub": 100, "body": {"prompt": "x"}})
+        ok("Gen-API recraft-v4 без model/pro — ошибка ценовых параметров", {"model", "pro"} <= {i["param"] for i in p.errors})
+        ok("Gen-API translate_input подставлен false", p.body.get("translate_input") is False)
+    if no_ra:
+        skip("RouterAI input_references строкой — ошибка формата", no_ra)
+    else:
+        p = prepare(ctx, {"channel": "routerai", "path": "/api/v1/images", "_dir": ".", "_file": "st", "_index": 1,
+                          "tag": "st", "max_rub": 10, "body": {"model": "openai/gpt-image-2", "prompt": "x",
+                                                               "input_references": ["a.png"]}})
+        ok("RouterAI input_references строкой — ошибка формата", any(i["param"] == "input_references[0]" for i in p.errors))
     p = prepare(ctx, {"channel": "routerai", "path": "/api/v1/images", "_dir": ".", "_file": "st", "_index": 1, "tag": "st",
                       "max_rub": 10, "body": {"model": "recraft/recraft-v4.1", "prompt": "x", "n": 1}})
     saved = ctx.a.budget_total
@@ -3056,10 +3226,95 @@ def cmd_selftest(ctx: Ctx, a):
     b_ok, b_msg = budget_check(ctx, p) if not os.environ.get("ROUTERAI_BUDGET_TOTAL") else (False, "задан в окружении")
     ctx.a.budget_total = saved
     ok("бюджет RouterAI по умолчанию 0 — отказ", not b_ok, b_msg)
+    # 11. снимок каталога: обрыв и ответ не каталогом — папки снимка нет; оборванный запрос повторяется
+    with tempfile.TemporaryDirectory() as td:
+        root = Path(td)
+        stamp = dt.datetime(2030, 1, 31, 10, 0, tzinfo=pc.MSK)
+        catalog = json.dumps({"data": [{"id": "demo/image", "name": "Demo Image"}]}).encode()
+
+        def channel_get(fail=(), body=catalog):
+            calls = []
+
+            def get(url):
+                calls.append(url)
+                if len(calls) in fail:
+                    raise ConnectionResetError("selftest")
+                return 200, {"Content-Type": "application/json", "Set-Cookie": "sid=1"}, body
+            get.calls = calls
+            return get
+
+        def snap(get):
+            with contextlib.redirect_stdout(io.StringIO()):          # строки повтора — не итог самопроверки
+                return take_snapshot(root, "routerai", "https://channel.test/api/v1/models", get=get, stamp=stamp,
+                                     retry_pause=0)
+
+        def names():
+            return sorted(x.name for x in (root / "routerai").iterdir()) if (root / "routerai").is_dir() else []
+
+        for label, get in (("обрыв сети во всех попытках", channel_get(fail=(1, 2, 3))),
+                           ("ответ не каталогом", channel_get(body=b"<html>maintenance</html>"))):
+            try:
+                snap(get)
+                err = None
+            except pc.SnapshotError as e:
+                err = str(e)
+            ok(f"снимок каталога, {label}: отказ, папки снимка и временной папки нет", err is not None and names() == [],
+               (err, names()))
+        once = channel_get(fail=(1,))
+        d, size, n = snap(once)
+        meta = json.loads((d / "snapshot.meta.json").read_text(encoding="utf-8"))
+        ok("снимок каталога, обрыв один раз: запрос повторён, папка снимка с файлом и метаданными",
+           names() == ["2030-01-31_1000"] and len(once.calls) == 2 and (size, n) == (len(catalog), 1)
+           and (d / "api-v1-models.json").read_bytes() == catalog
+           and "set-cookie" not in meta["files"]["api-v1-models.json"]["headers"], (names(), once.calls))
+        part = root / "routerai" / ".snapshot-20300131-110000-1.part"
+        part.mkdir()
+        (part / "api-v1-models.json").write_bytes(catalog)
+        cache, CACHE = CACHE, root
+        try:
+            last = latest_file("routerai", "api-v1-models.json")
+        finally:
+            CACHE = cache
+        ok("временная папка идущего снимка — не «последний снимок»", last == d / "api-v1-models.json", last)
+    # 12. баланс: разбор ответа на записанных образцах; ключ для чтения баланса читается без --live
+    sample = {"amount": "500.00000000", "available": "480.00000000", "reservedAmount": "20.00000000",
+              "spentAmount": "145.00000000", "updatedAt": "2030-01-31T10:00:00.000Z"}
+    ok("баланс: числа ответа — строки с числом, дата не берётся",
+       balance_fields(sample) == {"amount": 500.0, "available": 480.0, "reservedAmount": 20.0, "spentAmount": 145.0},
+       balance_fields(sample))
+    nested = {"data": {"label": "demo", "usage": 12.5, "limit": None, "active": True}, "balance": 80}
+    ok("баланс: числа вложенного data, флаги и пустые поля не берутся",
+       balance_fields(nested) == {"balance": 80.0, "data.usage": 12.5}, balance_fields(nested))
+    got = read_balance(_Reply(200, {"Content-Type": "application/json"}, json.dumps(sample).encode()), ["/api/v2/balance"])
+    ok("баланс: чтение адреса канала — адрес, ответ, числа",
+       [(p, j, n.get("available")) for p, j, n in got] == [("/v2/balance", sample, 480.0)], got)
+    with contextlib.redirect_stderr(io.StringIO()) as said:
+        code = cmd_balance(ctx, argparse.Namespace(channel="routerai", path=None))
+    ok("баланс канала без известного адреса и без --path: код 2, запроса нет", code == 2 and "--path" in said.getvalue(),
+       (code, said.getvalue()))
+    with tempfile.TemporaryDirectory() as td:
+        kf = Path(td) / "api_key"
+        kf.write_text("sk-selftest-read-0123456789\n")
+        kf.chmod(0o600)
+        env = {k: os.environ.pop(k, None) for k in ("ROUTERAI_API_KEY", "ROUTERAI_KEY_FILE")}
+        os.environ["ROUTERAI_KEY_FILE"] = str(kf)
+        try:
+            fresh = Ctx(ctx.a)
+            for_jobs, for_read = fresh.key("routerai"), fresh.key("routerai", read=True)
+            ok("ключ без --live: заданиям не читается, чтению баланса — читается; канал чтения отправляет запрос",
+               (fresh.live or for_jobs is None) and for_read == "sk-selftest-read-0123456789"
+               and fresh.http("routerai", read=True).live and fresh.http("routerai").live == fresh.live)
+        finally:
+            os.environ.pop("ROUTERAI_KEY_FILE", None)
+            os.environ.update({k: v for k, v in env.items() if v is not None})
+            _SECRETS.discard("sk-selftest-read-0123456789")
     npass = sum(1 for _, c, _ in res if c)
     for name, c, got in res:
         say(f"{'PASS' if c else 'FAIL'}  {name}" + ("" if c else f"   ← {got}"))
-    say(f"# selftest: {npass}/{len(res)} PASS")
+    for name, why in skipped:
+        say(f"SKIP  {name}   ← {why}")
+    say(f"# selftest: {npass}/{len(res)} PASS" + (f", пропущено {len(skipped)} — нет снимка каталога или каталог сменил "
+                                                   f"устройство цены" if skipped else ""))
     return EXIT_OK if npass == len(res) else EXIT_JOB
 
 
@@ -3137,6 +3392,11 @@ def build_parser():
     s.add_argument("--channel", choices=("routerai", "genapi", "all"), default="all")
     s.add_argument("--dest", help="корень для снимков (по умолчанию $DDD_HOME/cache/ai-media)")
     s.set_defaults(fn=cmd_snapshot)
+    s = sp.add_parser("balance", parents=[common])
+    s.add_argument("--channel", required=True, choices=list(CHANNELS))
+    s.add_argument("--path", help="адрес чтения баланса у канала (GET), например /v1/…; у polza-chat и polza-images "
+                                  "по умолчанию /v2/balance и /v1/key")
+    s.set_defaults(fn=cmd_balance)
     s = sp.add_parser("selftest", parents=[common])
     s.set_defaults(fn=cmd_selftest)
     return ap

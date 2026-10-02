@@ -54,8 +54,7 @@ spec:
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
   - 13-routing-matrix/stand/briefs/S01-hero-interior.spec.json
-compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
-  <тест> --agent <агент> --out 99-raw/phase5/jobs/<файл>.jsonl
+compile: scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --out $DDD_HOME/out/ai-media/<ассет>.jsonl
 phase5:
   jobs:
   - 99-raw/phase5/jobs/M-01-hero-16x9-2k.jsonl
@@ -85,7 +84,7 @@ steps:
   status: checked
   evidence: 99-raw/experiments/M/02-hero-pair/make_hero.py
 - id: ladder
-  cmd: 99-raw/tools/avif_pick.sh <ширина>.png <имя>-<ширина>.avif 80 (+ cwebp по s2 ≥ 80); ширины 640/960/1280/1920/2560 и 480/720/1080
+  cmd: scripts/ai-media/avif_pick.sh <ширина>.png <имя>-<ширина>.avif 80 (+ cwebp по s2 ≥ 80); ширины 640/960/1280/1920/2560 и 480/720/1080
   status: checked
   evidence: 99-raw/experiments/M/02-hero-pair/results_hero.json
 - id: stamp
@@ -134,7 +133,7 @@ numbers:
   lcp_desktop: VIDEO 204 мс / H1 120 мс при reduce
   phase5_f04_composition_block: 'центр масс x 0,81–0,85 против 0,30–0,39 без блока; пестрота 25–31 против 51–53; 3 + 3 кадра — 99-raw/phase5/runs/2.5-stand/audit-F-04/audit.json'
   phase5_e08_blind_vote: 'хорошо — Sunburst, Flare, NB2; NB Pro «слишком ровно»; Seedream 5 Pro «сразу минус»; FLUX.2 Pro «так себе» (голос заказчика вслепую, 1 чел.) — 99-raw/phase5/runs/2.5-stand/E-08_blind_key.json'
-  phase5_ms02_reference_chain: 'проба 1K 4 ₽ → 2K с пробой-референсом 7 ₽ почти копирует кадр; без референса — другой кадр; n = 1 — 99-raw/phase5/runs/MS-marea/audit-MS-02/audit.md'
+  phase5_ms02_reference_chain: 'проба 1K 4 ₽ → 2K с пробой-референсом 7 ₽ почти копирует кадр; без референса — другой кадр; n = 1'
   phase5_outpaint_9x16: 'аутпейнт 16:9 → 9:16 перерисовывает центр (резкость 0,14 / 0,56 < 0,85) — телефону свой мастер — 99-raw/phase5/runs/4-edits/H-08-check/'
   phase5_n01_routerai_quality: 'Sunburst через RouterAI quality medium 0,93 ₽ и high 3,57 ₽ (оба 1536×864) не различимы, polza 1K того же класса; списание — только выходные токены (n = 2 брифа) — 99-raw/phase5/runs/S5-analysis/N-01_metrics.json'
 status:

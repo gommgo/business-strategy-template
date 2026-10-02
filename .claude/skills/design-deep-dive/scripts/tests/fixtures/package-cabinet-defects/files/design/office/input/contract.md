@@ -222,7 +222,7 @@
 
 Источник: `docs/projects/otves-office/object.md` § Объекты, Атрибуты · `docs/projects/otves-office/interface/office/data-items.md` § object · `docs/projects/otves-office/screens/office/blocks/requests-list/index.md` § collection.volume
 
-Набор: `demo-data.json` рядом с контрактом — производный (`scripts/project/demo_data.py`, зерно `otves-office`, «сегодня» — 2026-10-01); каждая запись и набор — `example: true`: макет на нём допустим, публикация — нет. Числа на экране — только из набора.
+Набор: `demo-data.json` рядом с контрактом — производный (`scripts/project/demo_data.py`, зерно `otves-office`, «сегодня» — 2026-09-29); каждая запись и набор — `example: true`: макет на нём допустим, публикация — нет. Числа на экране — только из набора.
 
 ЗАПРЕТ: числа без источника в наборе; «10k+ users»; «Welcome back, John»; выдуманные отзывы и логотипы.
 

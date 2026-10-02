@@ -358,7 +358,7 @@
     }, 400);
   }
 
-  window.MareaScrub = {
+  window.VelmoraScrub = {
     init: function (root) {
       var man = JSON.parse(document.getElementById(root.dataset.manifest || 'scrub-manifest').textContent);
       var s = new Scrub(root, man);
@@ -372,5 +372,5 @@
       return s;
     }
   };
-  document.querySelectorAll('[data-scrub]').forEach(function (el) { window.MareaScrub.init(el); });
+  document.querySelectorAll('[data-scrub]').forEach(function (el) { window.VelmoraScrub.init(el); });
 })();

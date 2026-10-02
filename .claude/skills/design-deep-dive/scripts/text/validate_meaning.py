@@ -12,16 +12,18 @@
   3. Смысловые проверки meaning: уникальность id; все внутренние ссылки (альтернативы, свойства, боли, выгоды,
      возражения, снятие риска, вопросы) разрешаются; допущения ведут в open_questions; ссылки fact:/missing: сверяются с
      facts.yaml из proof_ref (если файл есть рядом), неизвестные missing — предупреждение (кандидаты в missing этапа фактов);
-     обещания (core, offering, темы ценности) не задевают never_claim с lift: never (урок «Кварца»); вопросов
-     приоритета 1 не больше 7 (одно сообщение заказчику).
+     обещания (core, offering, темы ценности) не задевают запрет never_claim с lift: never; вопросов приоритета 1 не
+     больше 7 (одно сообщение заказчику).
      Обещание из допущения (предупреждения): свойство has-proof, а в proof_ids — missing:; обещание задевает
      never_claim с lift: with-fact, а снимающего проверенного факта того же класса нет; ядро ценностного предложения
      опирается на свойство без доказательства (сообщение сильнее своих доказательств).
   4. Смысловые проверки hierarchy: тип страницы и роли секций — id словаря site (перечень один — в словаре; id не для
-     страницы — ошибка); первая секция — hero; каждая опора несётся хотя бы одной секцией; hero несёт core;
-     порядок секций без повторов; ссылки на ценности и возражения разрешаются в meaning_ref; возражения-блокеры
-     основного сегмента закрыты до final-cta — кроме справочных и служебных страниц (x-blocker-optional схемы
-     иерархии); тип hero соответствует уровню осведомлённости (предупреждение);
+     страницы — ошибка); первая секция — hero у типов страниц, чей сюжет начинается с hero (у страницы контактов и
+     служебных страниц роль первой секции не задана — x-hero-first-optional схемы иерархии); первая секция несёт
+     core; каждая опора несётся хотя бы одной секцией; порядок секций без повторов; ссылки на ценности и возражения
+     разрешаются в meaning_ref; возражения-блокеры основного сегмента закрыты до final-cta — кроме справочных и
+     служебных страниц (x-blocker-optional схемы иерархии: контакты, филиал, документы и допуски, класс utility); тип
+     hero соответствует уровню осведомлённости (предупреждение);
      never_claim в главном сообщении, опорах и сообщениях секций; опора has-proof с missing: в proof_ids, главное
      сообщение на свойстве без доказательства или без proof_ids, never_claim с lift: with-fact без снимающего факта —
      предупреждения.
@@ -101,15 +103,27 @@ def vocab_check(h):
     return errors, warnings
 
 
-def blocker_optional(h):
-    """Справочная или служебная страница (x-blocker-optional схемы иерархии: класс типа страницы в словаре site или сам
-    тип): решение о покупке принимается не на ней, и закрывать возражение-блокер её иерархия не обязана."""
+def page_exempt(h, key):
+    """Тип страницы иерархии входит в перечень схемы иерархии `key` ({page_class, page_types}): сам тип или класс типа
+    в словаре site."""
     if "hs" not in _LOADED:
         _LOADED["hs"] = load(os.path.join(SM, "message-hierarchy.schema.yaml")) or {}
-    rule = _LOADED["hs"].get("x-blocker-optional") or {}
+    rule = _LOADED["hs"].get(key) or {}
     pt = (h.get("page") or {}).get("page_type")
     cls = (((site_vocab() or {}).get("page_type") or {}).get(pt) or {}).get("class")
     return pt in (rule.get("page_types") or []) or (cls is not None and cls in (rule.get("page_class") or []))
+
+
+def blocker_optional(h):
+    """Справочная или служебная страница (x-blocker-optional схемы иерархии): решение о покупке принимается не на ней,
+    и закрывать возражение-блокер её иерархия не обязана."""
+    return page_exempt(h, "x-blocker-optional")
+
+
+def hero_first_optional(h):
+    """Страница, чей сюжет не начинается с hero (x-hero-first-optional схемы иерархии): контакты открываются секцией
+    contacts, служебная страница — своей ролью."""
+    return page_exempt(h, "x-hero-first-optional")
 
 
 def collect_ids(obj, out, path=""):
@@ -367,8 +381,9 @@ def semantic_hierarchy(path, h, facts_data=None):
     orders = [s.get("order") for s in secs]
     if len(orders) != len(set(orders)):
         errors.append("повторяется order в sections")
-    if secs and secs[0].get("section_role") != "hero":
-        errors.append(f"первая секция — {secs[0].get('section_role')}, а должна быть hero")
+    first_role = secs[0].get("section_role") if secs else None
+    if secs and first_role != "hero" and not hero_first_optional(h):
+        errors.append(f"первая секция — {first_role}, а должна быть hero")
     pillars = {p["id"]: p for p in h.get("pillars", [])}
     carried = set()
     for s in secs:
@@ -380,7 +395,8 @@ def semantic_hierarchy(path, h, facts_data=None):
         if pid not in carried:
             errors.append(f"опора «{pid}» не несётся ни одной секцией")
     if secs and "core" not in (secs[0].get("carries") or []):
-        errors.append("hero не несёт главное сообщение (carries: [core, …])")
+        errors.append(("hero" if first_role == "hero" else f"первая секция ({first_role})")
+                      + " не несёт главное сообщение (carries: [core, …])")
     aw = (h.get("page") or {}).get("awareness")
     ha = (h.get("core_message") or {}).get("hero_approach")
     if aw and ha and HERO_BY_AWARENESS.get(aw) != ha:
@@ -492,7 +508,7 @@ def run_negative(vm, vh, meanings, hierarchies):
         d = copy.deepcopy(m)
         kv_case(d)
         errs = semantic_meaning(p, d)[0]
-        results.append(("«Кварц»: обещание про глаза в core (урок аудита)", bool(errs), errs[:1]))
+        results.append(("обещание в core задевает запрет never_claim (здоровье и зрение)", bool(errs), errs[:1]))
     if hierarchies:
         hpath, h = hierarchies[0]
 
@@ -537,8 +553,23 @@ def run_negative(vm, vh, meanings, hierarchies):
         for role in ("audience", "services", "legal", "not-found"):
             hok(f"роль секции словаря site {role} — без ошибок", mid_role(role))
         hok("справочная страница (contacts-page) без закрытого блокера — без ошибок", no_blockers_at("contacts-page"))
+        hok("справочная страница (location-page) без закрытого блокера — без ошибок", no_blockers_at("location-page"))
+        hok("справочная страница (documents-page) без закрытого блокера — без ошибок", no_blockers_at("documents-page"))
         hok("служебная страница (legal-page) без закрытого блокера — без ошибок", no_blockers_at("legal-page"))
         hcase("страница с решением о покупке (team-page) без закрытого блокера", no_blockers_at("team-page"))
+
+        def first_role_at(page_type, role, carries_core=True):
+            def mutate(d):
+                d["page"]["page_type"] = page_type
+                first = min(d["sections"], key=lambda s: s["order"])
+                first["section_role"] = role
+                if not carries_core:
+                    first["carries"] = [c for c in first.get("carries") or [] if c != "core"]
+            return mutate
+        hok("страница контактов с первой секцией contacts — без ошибок", first_role_at("contacts-page", "contacts"))
+        hok("служебная страница (not-found-page) с первой секцией not-found — без ошибок", first_role_at("not-found-page", "not-found"))
+        hcase("страница с hero в сюжете (about-page) с первой секцией about", first_role_at("about-page", "about"))
+        hcase("страница контактов: первая секция не несёт главное сообщение", first_role_at("contacts-page", "contacts", carries_core=False))
     results += run_assumption_cases(meanings, hierarchies)
     return results
 

@@ -1,53 +1,25 @@
-# blocks.yaml — каталог блоков сайта v0.9 (черновик к S1): анатомия, слоты, структурные варианты, телефон, разметка, ссылки
-# на правила владельцев. site-research · 04-blocks · агент E · волна 2 · 2026-09-24. Схема — blocks.schema.json.
+# blocks.yaml — каталог блоков сайта: анатомия, слоты, структурные варианты, телефон, разметка, ссылки на правила
+# владельцев. Схема — ../10-playbooks-contracts/schemas/blocks.schema.json.
 #
-# Как читать. Ключ — id блока словаря B (02-site-types/vocabulary.yaml, пространство block). Блок = назначение + набор слотов;
+# Как читать. Ключ — id блока словаря (02-site-types/vocabulary.yaml, пространство block). Блок = назначение + набор слотов;
 # раскладка той же анатомии — структурный вариант (variants); визуальные варианты и эффекты — creative по id блока
-# (block-treatments.yaml, после C1); правила текста слотов — text (copy-slots.yaml) по id слота (copy-rule:<slot>); медиа —
+# (block-treatments.yaml); правила текста слотов — text (copy-slots.yaml) по id слота (copy-rule:<slot>); медиа —
 # ai-media (план ассетов 01/01 §8, коды task:); 3D — blender (recipe:). Элемент анатомии: id — локальный в блоке (= site_slot_id
 # copy-deck и site_slot copy-slots.yaml text), slot — id словаря. required: true | false | if-fact (только при факте) |
 # if-available (при наличии у заказчика) | by-variant (задаёт вариант). Длина текстового слота — класс порядка величины
 # (length_classes), по умолчанию из text_slot_defaults (выведено скриптом из copy-slots.yaml).
-# Ссылки на правила (refs): site:<папка>-<файл>#§ (F — 05, G — 06, H — 07-01/02 и head-kit, P — 07-03/04 и events.yaml,
-# I — 08), соседи — <база>:<папка>-<файл>#§ (контракт §3 п.15). Файлы F, G, H, I, P пишутся в волне 2 параллельно — ссылка
-# на файл без § означает «правило будет там».
-# Проверка: 99-raw/tools/venv-E/bin/python 99-raw/experiments/E/01-validate/validate.py (схема + связи);
-# python3 ../../scripts/site/vocab_lint.py 04-blocks/blocks.yaml --keys-as-ids blocks=block.
-#
-# ЖУРНАЛ v0.9 → v1 (агент J, волна 3, 2026-09-24; разрешение оркестратора волн site на правку на месте ≈ 16:55)
-# Правила правки: только добавления и уточнения, адресованные J; id блоков, вариантов и слотов не переименованы и не удалены.
-#  1. + блок service-area (семейство contacts) — «зона обслуживания» выездных услуг. Почему: отдельное назначение («куда
-#     выезжаем», а не «где мы»); опыт E/04 — секция без блока. Источник: отчёт E §4 (J), 02-blocks-catalog-specialized.md
-#     откр. вопрос 5; словарь v1. Вариант location-map.service-area оставлен для совместимости, в новых планах — блок.
-#  2. app-download.qr: слот diagram → qr-code (новый слот словаря v1). Источник: заметка в карточке E («новый слот qr-code —
-#     Для J»), отчёт E §4. Элемент qr сохранил id.
-#  3. hero-input: + элемент cta-next-label (подпись призыва после результата отдельно от cta-label поля). Источник: E-notes
-#     стр. 215, отчёт E §4 «разделить подписи у hero-input».
-#  4. capture-popup: + вариант engaged-slide-in (немодальная карточка после вовлечения, выключена по умолчанию, только при
-#     policies.capture_popup: engaged брифа v1). Источник: F 05-…/01 §11 («Предложение E для blocks.yaml v1, решает J»).
-#  5. breadcrumbs.mobile: без переноса строк; длинный путь — parent-only. Источник: отчёт G §4 (J), NN/g правило 9 (G 06-02).
-#  6. footer.mobile: открытый список по умолчанию; аккордеон — только групп разделов при > 25 ссылках; служебные ссылки открыты.
-#     Источник: отчёт G §4 (J), NN/g «Footers 101» 2019 (G 06-02).
-#  7. header.variants.site-nav: архетип — из site-map.chrome.header.archetype (перечисление site-map.schema.json v1
-#     #/$defs/header-archetype). Источник: отчёт G §4 (J), заметки G «Для J (итог G2)».
-#  8. Шапка файла: blocks_version 1.0, status v1, схема — ../10-playbooks-contracts/schemas/blocks.schema.json (v1; формат
-#     совместим с v0.9), словарь v1. Проверка: ../../scripts/site/site_validate.py blocks; vocab_lint.py (опыт J/02).
-#  9. (S1, волна 4, 2026-09-25) hero-text и hero-media mobile.below_40rem: переносы длинных слов (hyphens: auto при lang=ru
-#     или дисплей на шаг меньше) и неразрывный пробел — правило text. Источник: пакет creative волны 1 п. 8; аудит X С-17.
+# Ссылки на правила (refs): site:<папка>-<файл>#§, соседи — <база>:<папка>-<файл>#§; ссылка без § — на файл целиком.
+# Буквы в заметках — разделы базы site: B — 02-site-types, C — 03-page-structure, E — 04-blocks, F — 05-conversion-funnels,
+# G — 06-multipage-ia, H — 07-seo-geo-performance-analytics (01, 02, head-kit.yaml), P — тот же раздел (03, 04,
+# events.yaml), I — 08-legal-trust-a11y.
+# Проверка (от корня скилла): scripts/site/site_validate.py --all — схема и связи каталога (коды BL-*);
+# scripts/site/vocab_lint.py kb/site/04-blocks/blocks.yaml --keys-as-ids blocks=block — id словаря.
 
 blocks_version: "1.0"
 checked: "2026-09-24"
 status: v1
-owner: "site-research · 04-blocks · E (v0.9, волна 2); J (v1, волна 3)"
 schema: ../10-playbooks-contracts/schemas/blocks.schema.json
 vocabulary: {ref: ../02-site-types/vocabulary.yaml, version: 1, revision: 1, checked: "2026-09-24"}
-sources:
-  - "Словарь B v0 r2 (02-site-types/vocabulary.yaml) — id, serves, detect"
-  - "C: 03-page-structure/01 §1.2 (роли, блоки, частоты C/01), 03 §3.1 (11 hero), §5.2 (телефон)"
-  - "Hallmark v1.1.0 (MIT) references/component-cookbook.md — 50 архетипов, ручки вариаций, схлопывание < 60rem и < 40rem [мнение вендора]"
-  - "ai-media 01-web-assets-landscape/01-asset-slots-by-page-type.md §2.1, §8 — медиа-слоты, план ассетов"
-  - "text copy-slots.yaml (2026-09-24, draft) — назначение и длины текстовых слотов"
-  - "ux-research: 02-ia-navigation/02, 04-components-patterns/01, 05, 07, 09; 08-accessibility; 09-mobile — каноны"
 
 conventions:
   - {id: dom-order, rule: "Визуальный порядок секций = порядок DOM на всех экранах; секции не переставлять CSS (order, row-reverse, grid-area); внутри ряда «текст ↔ медиа» сторона медиа меняется колонкой сетки при неизменном DOM «текст → медиа»", label: "[стандарт] WCAG 1.3.2, 2.4.3", ref: "site:03-03#5.1"}
@@ -58,7 +30,7 @@ conventions:
   - {id: cta-repeat, rule: "Одно главное действие на страницу, но его призыв повторяется: шапка, hero, после доказательств, финал, липкий на телефоне; второй путь — иным стилем (style: secondary)", label: "[консенсус]; поправка PLAN №1", ref: "site:05-01"}
   - {id: collapse-not-cut, rule: "На телефоне детали сворачиваются (accordion), сетки — в колонку (stack), ленты — с видимым краем (rail); смысловой текст, цены, условия, доказательства и призыв не убираются", label: "[документация] Google mobile-first; [исследование] ux 09-03 §7", ref: "site:03-03#5.2"}
   - {id: breakpoints, rule: "Две границы: 60rem (~960 px) — раскладка: сетки в колонку, наклоны и обрезки снимаются, липкие панели отлипают; 40rem (~640 px) — типографика и плотность: дисплей на шаг меньше, метки полей в строку, аннотации — легендой", label: "[мнение вендора] Hallmark component-cookbook"}
-  - {id: target-size, rule: "Цели касания ≥ 24 × 24 CSS px (WCAG 2.2 AA 2.5.8), для главных призывов и полей на телефоне — 44 × 44 (2.5.5 AAA, Apple HIG); Hallmark ошибочно называет 44 px уровнем AA", label: "[стандарт]", ref: "site:08-03"}
+  - {id: target-size, rule: "Цель ≥ 24 × 24 CSS px или с зазором (WCAG 2.2 AA 2.5.8); на таче каждая цель ≥ 44 × 44 зоной нажатия, видимый контрол может быть меньше (2.5.5 AAA, Apple HIG); Hallmark ошибочно называет 44 px уровнем AA", label: "[стандарт]", ref: "site:08-03"}
   - {id: html-first, rule: "Смысловой текст, цены, условия, ответы FAQ, призывы и ссылки — в исходном HTML до скриптов и эффектов; ИИ-краулеры JS не исполняют", label: "[документация]", ref: "site:07-02"}
   - {id: motion-pause, rule: "Автодвижение дольше 5 с (карусель, бегущая строка, видео-петля, шейдер) — с паузой; карусели не прокручиваются сами по умолчанию; prefers-reduced-motion — статичный кадр", label: "[стандарт] WCAG 2.2.2, 2.3.3", ref: "site:08-03"}
   - {id: lcp-eager, rule: "Кандидат LCP (H1 или главный визуал hero) не грузится лениво; медиа ниже первого экрана — loading=lazy; 3D и видео — после LCP с постером", label: "[документация] web.dev", ref: "site:07-03"}
@@ -185,6 +157,7 @@ blocks:
       - {id: cta-label, slot: cta-label, required: false}
       - {id: phone, slot: phone-link, required: if-available, note: "ЛУ: телефон — канал целевого действия, а не выход"}
       - {id: messenger, slot: messenger-link, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: login, slot: link, required: false, note: "«Войти» — action log-in (micro), не главный призыв"}
       - {id: lang-switch, slot: link, required: false, note: "переключатель языка — G; hreflang — H"}
     variants:
@@ -233,6 +206,7 @@ blocks:
     slots:
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: anchor, name: "Пункт", min: 3, max: 8, html: li, slots: [{id: label, slot: nav-label, required: true}, {id: link, slot: link, required: true}]}
     variants:
@@ -283,6 +257,7 @@ blocks:
       - {id: cta-label, slot: cta-label, required: by-variant, variants: [statement-cta]}
       - {id: cta-secondary, slot: cta-secondary, required: false}
       - {id: cta-secondary-label, slot: cta-secondary-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: cta-note, slot: cta-note, required: false}
       - {id: hero-proof, slot: hero-proof, required: if-fact, fact: always}
       - {id: proof, slot: fact-ref, required: if-fact, fact_kinds: [metric, rating, client, award]}
@@ -311,6 +286,7 @@ blocks:
       - {id: cta-label, slot: cta-label, required: by-variant}
       - {id: cta-secondary, slot: cta-secondary, required: false}
       - {id: cta-secondary-label, slot: cta-secondary-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: cta-note, slot: cta-note, required: false}
       - {id: hero-proof, slot: hero-proof, required: if-fact, fact: always}
       - {id: proof, slot: fact-ref, required: if-fact, fact_kinds: [metric, rating, client, award]}
@@ -321,10 +297,10 @@ blocks:
       - {id: alt, slot: image-alt, required: true, note: "у декоративного фона alt пустой — тогда слот не нужен"}
     variants:
       - {id: split, name: "Текст и визуал рядом", when: "по умолчанию для продукта и услуги", default: true, first_screen_policy: offer-cta, hallmark: [H2]}
-      - {id: background, name: "Визуал на всю ширину, текст поверх", when: "атмосфера места, кампания; текст — в спокойной зоне кадра с контрастом на реальном кадре", first_screen_policy: offer-cta, hallmark: [H6], note: "LCP — H1 (ai-media 01/01 §2.2)"}
+      - {id: background, name: "Визуал на всю ширину, текст поверх", when: "атмосфера места, кампания; текст — в спокойной зоне кадра с контрастом на реальном кадре", first_screen_policy: [offer-cta, offer-cta-header], hallmark: [H6], note: "LCP — H1 (ai-media 01/01 §2.2)"}
       - {id: poster-image, name: "Плакат-образ", when: "кампания L2, портфолио: образ + признак продолжения, призыв в шапке", first_screen_policy: poster, drops: [cta, cta-label], hallmark: [H6]}
       - {id: product-frame, name: "Продукт в рамке", when: "SaaS, приложение: настоящий скриншот или мокап", first_screen_policy: offer-cta, adds: [screenshot], hallmark: [H7, H8]}
-      - {id: video-loop, name: "Видео-петля", when: "процесс или настроение важнее кадра; есть вертикальный файл для телефона", adds: [video], first_screen_policy: offer-cta}
+      - {id: video-loop, name: "Видео-петля", when: "процесс или настроение важнее кадра; есть вертикальный файл для телефона", adds: [video], first_screen_policy: [offer-cta, offer-cta-header]}
       - {id: scene-3d, name: "3D-объект или сцена", when: "товар с неочевидной формой, кампания L2; LCP — H1 или постер, призыв работает до загрузки 3D (поправка PLAN №22)", adds: [model], first_screen_policy: offer-cta}
       - {id: illustration, name: "Иллюстрация-центр", when: "абстрактная услуга с сильным рисованным образом (по паспорту стиля)", hallmark: [H9]}
     mobile: {behavior: [reframe, stack], below_60rem: "одна колонка: текст над визуалом или визуал над текстом — одинаково на всех страницах проекта; обрезка «за край экрана» и наклон мокапа снимаются", below_40rem: "кадр 4:5 или 9:16; видео — постер при save-data; призыв выше черты первого экрана; длинные слова H1 — hyphens: auto при lang=ru или дисплей на шаг меньше; неразрывный пробел после предлогов и союзов — правило text (типографика)", never_hide: [headline, cta, hero-proof]}
@@ -355,7 +331,9 @@ blocks:
       - {id: cta-note, slot: cta-note, required: true, purpose: "что будет после отправки: кто и когда свяжется, сколько стоит"}
       - {id: phone, slot: phone-link, required: if-available, note: "канал того же действия"}
       - {id: messenger, slot: messenger-link, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: visual, slot: hero-visual, required: false, media_role: informational}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt визуала visual"}
     variants:
       - {id: form-side, name: "Текст и форма рядом", when: "десктоп: форма справа; по умолчанию", default: true, first_screen_policy: offer-cta}
       - {id: form-below, name: "Форма под текстом", when: "короткое обещание, 1–2 поля"}
@@ -387,6 +365,7 @@ blocks:
       - {id: proof, slot: fact-ref, required: if-fact, fact_kinds: [metric, rating, client]}
       - {id: cta-next, slot: cta-primary, required: true, note: "после результата: sign-up или start-trial"}
       - {id: cta-next-label, slot: cta-label, required: true, purpose: "подпись призыва после результата — отдельно от cta-label кнопки поля (v1)"}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: example, name: "Пример запроса", min: 0, max: 4, html: li, slots: [{id: text, slot: list-item, required: true, purpose: "подсказка-пример, заполняет поле по нажатию"}]}
     variants:
@@ -416,6 +395,7 @@ blocks:
       - {id: subheadline, slot: subheadline, required: false}
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: metric, slot: metric-ref, required: true, fact_kinds: [metric, rating, research]}
     variants:
       - {id: single-number, name: "Одно число", when: "по умолчанию", default: true, hallmark: [H4], first_screen_policy: offer-cta}
@@ -443,6 +423,7 @@ blocks:
       - {id: testimonial, slot: testimonial-ref, required: true, fact_kinds: [testimonial, expert-quote]}
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     variants:
       - {id: quote-first, name: "Цитата — главный элемент", when: "по умолчанию", default: true, hallmark: [H3], first_screen_policy: offer-cta}
       - {id: quote-with-media, name: "Цитата и фото автора", when: "есть настоящее фото с согласием"}
@@ -469,6 +450,7 @@ blocks:
       - {id: person, slot: person-ref, required: true, fact_kinds: [person]}
       - {id: cta, slot: cta-primary, required: true, note: "после письма; в первом экране — в шапке"}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     variants:
       - {id: letter, name: "Письмо", when: "по умолчанию", default: true, hallmark: [H5], first_screen_policy: poster}
     mobile: {behavior: [none], below_40rem: "обращение на шаг меньше; подпись компактнее", never_hide: [body, signature, cta]}
@@ -489,8 +471,9 @@ blocks:
       - {id: headline, slot: headline, required: true, heading: h1}
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
-      - {id: slide, name: "Слайд", min: 2, max: 4, html: li, slots: [{id: title, slot: card-title, required: true, heading: h2}, {id: text, slot: card-body, required: false}, {id: visual, slot: hero-visual, required: true, media_role: informational}, {id: link, slot: link, required: true}, {id: promo, slot: price-ref, required: if-fact, fact_kinds: [promo, price]}]}
+      - {id: slide, name: "Слайд", min: 2, max: 4, html: li, slots: [{id: title, slot: card-title, required: true, heading: h2}, {id: text, slot: card-body, required: false}, {id: visual, slot: hero-visual, required: true, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt визуала visual"}, {id: link, slot: link, required: true}, {id: promo, slot: price-ref, required: if-fact, fact_kinds: [promo, price]}]}
     variants:
       - {id: manual, name: "Листается вручную", when: "единственный допустимый вариант по умолчанию", default: true, first_screen_policy: offer-cta}
     mobile: {behavior: [rail], below_40rem: "лента с видимым краем следующего слайда и кнопками; первый слайд — главное предложение", never_hide: [headline, cta]}
@@ -515,7 +498,7 @@ blocks:
       - {id: title, slot: section-title, required: false, heading: h2, note: "если заголовка нет — визуально скрытый H2"}
       - {id: ad-marking, slot: ad-marking, required: false, note: "спонсоры и партнёрские блоки — решение I (38-ФЗ ст. 18.1)"}
     groups:
-      - {id: logo, name: "Логотип", min: 4, max: 24, html: li, slots: [{id: logo, slot: logo, required: true, authenticity: real-only, media_role: informational}, {id: client, slot: client-ref, required: true, fact_kinds: [client, partner]}, {id: link, slot: link, required: false, note: "на кейс клиента"}]}
+      - {id: logo, name: "Логотип", min: 4, max: 24, html: li, slots: [{id: logo, slot: logo, required: true, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt логотипа logo"}, {id: client, slot: client-ref, required: true, fact_kinds: [client, partner]}, {id: link, slot: link, required: false, note: "на кейс клиента"}]}
     variants:
       - {id: row, name: "Один ряд", when: "4–8 логотипов", default: true, hallmark: [T2]}
       - {id: grid, name: "Сетка", when: "9–24 логотипа, отраслевые группы"}
@@ -529,10 +512,10 @@ blocks:
     family: proof
     name: "Ряд цифр"
     status: active
-    purpose: "Результат и масштаб 2–5 числами из фактов, каждое с подписью и источником"
+    purpose: "Результат и масштаб 3–5 числами из фактов, каждое с подписью и источником"
     serves: [proof-stats]
-    use_when: ["в facts.yaml есть 2–5 чисел с датой и источником", "ответ на возражение «вы надёжны?» (obj-trust)"]
-    avoid_when: ["чисел меньше двух — hero-proof или key-facts", "параметры предложения (срок, формат, цена) — это key-facts, не доказательство"]
+    use_when: ["в facts.yaml есть 3–5 чисел-фактов с датой и источником; иначе ряд снять", "ответ на возражение «вы надёжны?» (obj-trust)"]
+    avoid_when: ["чисел меньше трёх — hero-proof или key-facts", "параметры предложения (срок, формат, цена) — это key-facts, не доказательство"]
     requires_facts: true
     fact_kinds: [metric, rating, research]
     html: {element: section, landmark: region, heading: h2, list: ul, item: li, note: "число и подпись — один <li>; источник — видимый текст или сноска со ссылкой; без анимации счётчика до конечного значения в HTML"}
@@ -540,7 +523,7 @@ blocks:
       - {id: title, slot: section-title, required: false, heading: h2}
       - {id: source, slot: stat-source, required: true, note: "общий источник ряда или у каждого числа"}
     groups:
-      - {id: stat, name: "Число", min: 2, max: 5, html: li, slots: [{id: value, slot: stat-value, required: true, fact: always}, {id: label, slot: stat-label, required: true}, {id: metric, slot: metric-ref, required: true, fact_kinds: [metric, rating, research]}]}
+      - {id: stat, name: "Число", min: 3, max: 5, html: li, slots: [{id: value, slot: stat-value, required: true, fact: always}, {id: label, slot: stat-label, required: true}, {id: metric, slot: metric-ref, required: true, fact_kinds: [metric, rating, research]}]}
     variants:
       - {id: row, name: "Ряд", when: "по умолчанию", default: true, hallmark: [T4]}
       - {id: stat-with-quote, name: "Число + цитата", when: "одно главное число и отзыв, который его объясняет (вариант доказательства Hallmark hum.md)"}
@@ -596,6 +579,7 @@ blocks:
       - {id: stat-label, slot: stat-label, required: by-variant, variants: [quote-with-stat]}
       - {id: metric, slot: metric-ref, required: by-variant, variants: [quote-with-stat], fact_kinds: [metric]}
       - {id: link, slot: link, required: false, purpose: "на кейс или источник"}
+      - {id: link-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки link — называет, что откроется: кейс или источник отзыва"}
     variants:
       - {id: pull-quote, name: "Цитата с полями", when: "по умолчанию", default: true, hallmark: [T1]}
       - {id: huge-quote, name: "Огромная цитата", when: "короткая цитата ≤ 160 знаков, смена ритма", hallmark: [T3]}
@@ -646,8 +630,9 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: all-cases, slot: link, required: false, purpose: "на список кейсов"}
+      - {id: all-cases-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all-cases — называет, что откроется: список кейсов"}
     groups:
-      - {id: case, name: "Кейс", min: 2, max: 6, html: li, slots: [{id: title, slot: case-title, required: true, heading: h3}, {id: result, slot: case-result, required: true, fact: always}, {id: cover, slot: cover-image, required: false, authenticity: real-only, media_role: informational}, {id: link, slot: link, required: false}, {id: case, slot: case-ref, required: true, fact_kinds: [case]}]}
+      - {id: case, name: "Кейс", min: 2, max: 6, html: li, slots: [{id: title, slot: case-title, required: true, heading: h3}, {id: result, slot: case-result, required: true, fact: always}, {id: cover, slot: cover-image, required: false, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}, {id: link, slot: link, required: false}, {id: case, slot: case-ref, required: true, fact_kinds: [case]}]}
     variants:
       - {id: grid, name: "Сетка", when: "по умолчанию", default: true}
       - {id: featured-plus-list, name: "Главный кейс + список", when: "один кейс сильнее остальных"}
@@ -678,8 +663,10 @@ blocks:
       - {id: testimonial, slot: testimonial-ref, required: if-fact, fact_kinds: [testimonial]}
       - {id: disclaimer, slot: disclaimer, required: false, purpose: "типичный результат рядом с лучшим (text B2 §5.4)"}
       - {id: link, slot: link, required: false, purpose: "на полный кейс"}
+      - {id: link-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки link — называет, что откроется: полный кейс"}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: stat, name: "Число результата", min: 0, max: 4, html: li, slots: [{id: value, slot: stat-value, required: true}, {id: label, slot: stat-label, required: true}, {id: metric, slot: metric-ref, required: true, fact_kinds: [metric, case]}]}
     variants:
@@ -704,7 +691,7 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
     groups:
-      - {id: pair, name: "Пара", min: 1, max: 6, html: figure, slots: [{id: before, slot: photo, required: true, authenticity: real-only, media_role: informational}, {id: after, slot: photo, required: true, authenticity: real-only, media_role: informational}, {id: caption, slot: image-caption, required: true, purpose: "что, где, когда, за какой срок"}, {id: result, slot: case-result, required: false}, {id: case, slot: case-ref, required: true, fact_kinds: [case, demo]}]}
+      - {id: pair, name: "Пара", min: 1, max: 6, html: figure, slots: [{id: before, slot: photo, required: true, authenticity: real-only, media_role: informational}, {id: before-alt, slot: image-alt, required: false, purpose: "alt кадра before"}, {id: after, slot: photo, required: true, authenticity: real-only, media_role: informational}, {id: after-alt, slot: image-alt, required: false, purpose: "alt кадра after"}, {id: caption, slot: image-caption, required: true, purpose: "что, где, когда, за какой срок"}, {id: result, slot: case-result, required: false}, {id: case, slot: case-ref, required: true, fact_kinds: [case, demo]}]}
     variants:
       - {id: side-by-side, name: "Рядом", when: "по умолчанию — проще и доступнее", default: true}
       - {id: slider-compare, name: "Слайдер-сравнение", when: "один выразительный кадр; управление с клавиатуры"}
@@ -773,8 +760,9 @@ blocks:
       - {id: lead, slot: section-lead, required: false}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
-      - {id: card, name: "Карточка", min: 3, max: 6, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true, purpose: "механизм или факт, который объясняет заголовок"}, {id: icon, slot: icon, required: false, media_role: decorative, authenticity: code}, {id: media, slot: illustration, required: false, media_role: informational}, {id: link, slot: link, required: false}, {id: fact, slot: fact-ref, required: if-fact}]}
+      - {id: card, name: "Карточка", min: 1, max: 6, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true, purpose: "механизм или факт, который объясняет заголовок"}, {id: icon, slot: icon, required: false, media_role: decorative, authenticity: code}, {id: media, slot: illustration, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt картинки media"}, {id: link, slot: link, required: false}, {id: fact, slot: fact-ref, required: if-fact}], note: "минимум — по роли objections (1–3 ответа карточками рядом с решением); у ролей выгод benefits, solution, audience — от 3 карточек"}
     variants:
       - {id: cards, name: "Карточки", when: "по умолчанию", default: true}
       - {id: icon-list, name: "Список с иконками", when: "короткие выгоды без пояснений в 2–3 строки"}
@@ -798,7 +786,7 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: lead, slot: section-lead, required: false}
     groups:
-      - {id: tile, name: "Плитка", min: 4, max: 9, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false}, {id: media, slot: screenshot, required: false, authenticity: real-only, media_role: informational}, {id: illustration, slot: illustration, required: false, media_role: informational}, {id: stat, slot: stat-value, required: false}, {id: quote, slot: testimonial-quote, required: false}, {id: fact, slot: fact-ref, required: if-fact}]}
+      - {id: tile, name: "Плитка", min: 4, max: 9, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false}, {id: media, slot: screenshot, required: false, authenticity: real-only, media_role: informational}, {id: illustration, slot: illustration, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt картинки плитки: media или illustration"}, {id: stat, slot: stat-value, required: false}, {id: quote, slot: testimonial-quote, required: false}, {id: fact, slot: fact-ref, required: if-fact}]}
     variants:
       - {id: features-only, name: "Только функции", when: "по умолчанию", default: true, hallmark: [F1]}
       - {id: mixed-proof, name: "Функции, числа и цитаты", when: "есть факты для 2+ плиток доказательств"}
@@ -842,6 +830,7 @@ blocks:
       - {id: lead, slot: section-lead, required: false}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: tab, name: "Вкладка или шаг", min: 2, max: 6, html: div, slots: [{id: label, slot: nav-label, required: true}, {id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true}, {id: media, slot: screenshot, required: true, media_role: informational}, {id: alt, slot: image-alt, required: true}]}
     variants:
@@ -870,6 +859,7 @@ blocks:
       - {id: model, slot: model-3d, required: by-variant, variants: [model-3d]}
       - {id: cta, slot: cta-secondary, required: false}
       - {id: cta-secondary-label, slot: cta-secondary-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     variants:
       - {id: media-full-bleed, name: "Медиа на всю ширину", when: "по умолчанию", default: true}
       - {id: media-contained, name: "Медиа в рамке", when: "скриншот интерфейса с мелкими деталями"}
@@ -892,8 +882,10 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: lead, slot: section-lead, required: false}
       - {id: media, slot: photo, required: false, media_role: informational}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt картинки media"}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: item, name: "Пункт", min: 3, max: 10, html: li, slots: [{id: text, slot: list-item, required: true}]}
     variants:
@@ -917,6 +909,7 @@ blocks:
       - {id: lead, slot: section-lead, required: false}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: cta-note, slot: cta-note, required: false, purpose: "что бесплатно, что по договору"}
     groups:
       - {id: step, name: "Шаг", min: 3, max: 7, html: li, slots: [{id: title, slot: step-title, required: true, heading: h3}, {id: body, slot: step-body, required: true, purpose: "что происходит, сколько длится, что получает клиент"}, {id: icon, slot: icon, required: false, media_role: decorative}, {id: fact, slot: fact-ref, required: if-fact, fact_kinds: [offer-terms, metric, date]}]}
@@ -946,6 +939,7 @@ blocks:
       - {id: demo, slot: fact-ref, required: false, fact_kinds: [demo]}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: callout, name: "Выноска", min: 0, max: 6, html: li, slots: [{id: title, slot: card-title, required: true}, {id: body, slot: card-body, required: false}]}
     variants:
@@ -971,9 +965,12 @@ blocks:
       - {id: lead, slot: section-lead, required: false, purpose: "о чём ролик и сколько длится"}
       - {id: video, slot: video, required: true, media_role: informational}
       - {id: poster, slot: cover-image, required: true, media_role: informational}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt постера poster"}
       - {id: transcript, slot: link, required: false, purpose: "расшифровка"}
+      - {id: transcript-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки transcript — называет, что откроется: расшифровка ролика"}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     variants:
       - {id: inline-player, name: "Плеер в секции", when: "по умолчанию", default: true}
       - {id: lightbox, name: "Плеер в окне по нажатию", when: "видео дополнительное; окно — диалог с фокусом"}
@@ -997,9 +994,11 @@ blocks:
       - {id: controls, slot: form, required: true, note: "action explore-product"}
       - {id: result, slot: result-summary, required: true}
       - {id: fallback, slot: screenshot, required: true, media_role: informational, note: "кадр или видео, если демо не загрузилось или JS выключен"}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt кадра fallback"}
       - {id: model, slot: model-3d, required: by-variant, variants: [configurator]}
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     variants:
       - {id: sandbox, name: "Песочница", when: "по умолчанию", default: true}
       - {id: configurator, name: "Конфигуратор", when: "товар с вариантами; 3D — по рецепту blender", adds: [model]}
@@ -1068,6 +1067,7 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: lead, slot: section-lead, required: false}
       - {id: all, slot: link, required: false, purpose: "на страницу всех интеграций"}
+      - {id: all-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all — называет, что откроется: страница всех интеграций"}
     groups:
       - {id: integration, name: "Интеграция", min: 3, max: 24, html: li, slots: [{id: logo, slot: logo, required: true, authenticity: real-only}, {id: name, slot: card-title, required: true}, {id: link, slot: link, required: false}, {id: partner, slot: client-ref, required: true, fact_kinds: [partner]}]}
     variants:
@@ -1116,6 +1116,7 @@ blocks:
       - {id: answer, slot: geo-answer, required: false, purpose: "самодостаточный ответ на вопрос для цитирования"}
       - {id: definition, slot: definition, required: false}
       - {id: media, slot: photo, required: false, media_role: informational}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt картинки media"}
       - {id: caption, slot: image-caption, required: false}
     variants:
       - {id: story, name: "История", when: "о компании, основатель, глава сюжета", default: true}
@@ -1162,8 +1163,9 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: lead, slot: section-lead, required: false}
       - {id: all, slot: link, required: false, purpose: "на список услуг"}
+      - {id: all-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all — называет, что откроется: список услуг"}
     groups:
-      - {id: service, name: "Услуга", min: 2, max: 12, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false}, {id: price, slot: pricing-price, required: if-fact, fact: always}, {id: price-note, slot: pricing-price-note, required: if-fact}, {id: cover, slot: cover-image, required: false, media_role: informational}, {id: link, slot: link, required: false}, {id: price-fact, slot: price-ref, required: if-fact, fact_kinds: [price]}]}
+      - {id: service, name: "Услуга", min: 2, max: 12, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false}, {id: price, slot: pricing-price, required: if-fact, fact: always}, {id: price-note, slot: pricing-price-note, required: if-fact}, {id: cover, slot: cover-image, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}, {id: link, slot: link, required: false}, {id: price-fact, slot: price-ref, required: if-fact, fact_kinds: [price]}]}
     variants:
       - {id: cards-with-price, name: "Карточки с ценой «от»", when: "по умолчанию", default: true}
       - {id: cards-plain, name: "Карточки без цены", when: "цены на сайте не публикуются — решение заказчика: название, суть и ссылка, без цены и обложки"}
@@ -1192,8 +1194,9 @@ blocks:
       - {id: guarantee, slot: guarantee-text, required: if-fact}
       - {id: disclaimer, slot: disclaimer, required: false}
       - {id: compare-link, slot: link, required: false, purpose: "к полному сравнению тарифов"}
+      - {id: compare-link-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки compare-link — называет, что откроется: полное сравнение тарифов"}
     groups:
-      - {id: plan, name: "Тариф", min: 2, max: 4, html: li, slots: [{id: name, slot: pricing-plan-name, required: true, heading: h3}, {id: summary, slot: pricing-plan-summary, required: true}, {id: price, slot: pricing-price, required: true, fact: always}, {id: price-note, slot: pricing-price-note, required: true}, {id: feature, slot: pricing-feature, required: true, min: 3, max: 10}, {id: badge, slot: badge, required: false, note: "«Популярный» — только с основанием (доля выбора — факт)"}, {id: cta, slot: cta-primary, required: true}, {id: cta-label, slot: cta-label, required: true}, {id: price-fact, slot: price-ref, required: true, fact_kinds: [price, offer-terms]}]}
+      - {id: plan, name: "Тариф", min: 2, max: 4, html: li, slots: [{id: name, slot: pricing-plan-name, required: true, heading: h3}, {id: summary, slot: pricing-plan-summary, required: true}, {id: price, slot: pricing-price, required: true, fact: always}, {id: price-note, slot: pricing-price-note, required: true}, {id: feature, slot: pricing-feature, required: true, min: 3, max: 10}, {id: badge, slot: badge, required: false, note: "«Популярный» — только с основанием (доля выбора — факт)"}, {id: cta, slot: cta-primary, required: true}, {id: cta-label, slot: cta-label, required: true}, {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}, {id: price-fact, slot: price-ref, required: true, fact_kinds: [price, offer-terms]}]}
     variants:
       - {id: tiers, name: "Карточки тарифов", when: "по умолчанию", default: true}
       - {id: with-period-toggle, name: "С переключателем периода", when: "месяц / год со скидкой; обе цены в HTML"}
@@ -1220,6 +1223,7 @@ blocks:
       - {id: disclaimer, slot: disclaimer, required: false, purpose: "«не является публичной офертой» — решение I"}
       - {id: cta, slot: cta-primary, required: false, purpose: "рассчитать точно, вызвать замерщика"}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: download, slot: download-link, required: false, purpose: "полный прайс; HTML-версия обязательна"}
     groups:
       - {id: row, name: "Строка прайса", min: 3, max: 60, html: tr, slots: [{id: service, slot: card-title, required: true}, {id: price, slot: pricing-price, required: true, fact: always}, {id: unit, slot: pricing-price-note, required: false}, {id: price-fact, slot: price-ref, required: true, fact_kinds: [price]}]}
@@ -1250,6 +1254,7 @@ blocks:
       - {id: badge, slot: badge, required: false}
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: cta-note, slot: cta-note, required: false}
       - {id: guarantee, slot: guarantee-text, required: if-fact}
       - {id: disclaimer, slot: disclaimer, required: false}
@@ -1283,6 +1288,7 @@ blocks:
       - {id: disclaimer, slot: disclaimer, required: false}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: column, name: "Альтернатива", min: 2, max: 4, html: th, slots: [{id: name, slot: card-title, required: true}]}
       - {id: row, name: "Признак", min: 3, max: 20, html: tr, slots: [{id: row, slot: comparison-row, required: true}, {id: fact, slot: fact-ref, required: if-fact}]}
@@ -1312,6 +1318,7 @@ blocks:
       - {id: price-fact, slot: price-ref, required: if-fact, fact_kinds: [price, offer-terms]}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: include, name: "Входит", min: 3, max: 12, html: li, slots: [{id: text, slot: list-item, required: true}]}
       - {id: exclude, name: "Не входит", min: 0, max: 8, html: li, slots: [{id: text, slot: list-item, required: true}]}
@@ -1362,6 +1369,7 @@ blocks:
       - {id: deadline, slot: pricing-price-note, required: true, purpose: "до какой даты или какого остатка"}
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: disclaimer, slot: disclaimer, required: false}
       - {id: ad-marking, slot: ad-marking, required: false, note: "если это реклама третьего лица — I"}
       - {id: promo, slot: price-ref, required: true, fact_kinds: [promo, price, availability]}
@@ -1393,6 +1401,7 @@ blocks:
       - {id: guarantee, slot: fact-ref, required: true, fact_kinds: [guarantee, offer-terms]}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     variants:
       - {id: statement, name: "Заявление с условиями", when: "по умолчанию", default: true}
       - {id: near-price, name: "Строка у цены", when: "короткая гарантия рядом с тарифом или формой"}
@@ -1424,6 +1433,7 @@ blocks:
       - {id: messenger, slot: messenger-link, required: false}
       - {id: secondary, slot: cta-secondary, required: false, purpose: "вторая цель для не готовых: пример сметы, материал, «сохранить расчёт» (C 02 §2.1)"}
       - {id: secondary-label, slot: cta-secondary-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: proof, slot: fact-ref, required: false, fact_kinds: [rating, metric, testimonial, offer-terms], note: "микродоказательство рядом с формой"}
     variants:
       - {id: short, name: "Короткая (≤ 3 поля)", when: "по умолчанию: имя, телефон, удобное время", default: true}
@@ -1454,7 +1464,7 @@ blocks:
       - {id: next-steps, slot: form-next-steps, required: true}
       - {id: price-fact, slot: price-ref, required: if-fact, fact_kinds: [price]}
     groups:
-      - {id: question, name: "Вопрос", min: 3, max: 8, html: fieldset, slots: [{id: question, slot: quiz-question, required: true}, {id: option, slot: quiz-option, required: true, min: 2, max: 8}, {id: image, slot: illustration, required: false, media_role: informational}]}
+      - {id: question, name: "Вопрос", min: 3, max: 8, html: fieldset, slots: [{id: question, slot: quiz-question, required: true}, {id: option, slot: quiz-option, required: true, min: 2, max: 8}, {id: image, slot: illustration, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt картинки image"}]}
     variants:
       - {id: section, name: "Секция страницы", when: "по умолчанию: второй-четвёртой секцией", default: true}
       - {id: in-hero, name: "Первый шаг в первом экране", when: "quiz-funnel: первый вопрос в hero"}
@@ -1482,6 +1492,7 @@ blocks:
       - {id: disclaimer, slot: disclaimer, required: true, purpose: "ориентировочный расчёт; точная цена — после замера или договора"}
       - {id: cta, slot: cta-primary, required: true, purpose: "получить точный расчёт, сохранить смету"}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: price-fact, slot: price-ref, required: true, fact_kinds: [price]}
     variants:
       - {id: estimate-only, name: "Только расчёт", when: "по умолчанию", default: true}
@@ -1576,6 +1587,7 @@ blocks:
       - {id: title, slot: form-title, required: true, heading: h2}
       - {id: lead, slot: form-lead, required: true}
       - {id: cover, slot: cover-image, required: true, media_role: informational, authenticity: code, note: "обложка — из самого материала, а не мокап выдуманного"}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}
       - {id: form, slot: form, required: by-variant, variants: [gated-email, send-by-messenger]}
       - {id: cta-label, slot: cta-label, required: true}
       - {id: consent, slot: form-consent, required: by-variant, variants: [gated-email, send-by-messenger]}
@@ -1605,7 +1617,7 @@ blocks:
       - {id: hours, slot: contact-info, required: true, purpose: "часы ответа"}
       - {id: next-steps, slot: form-next-steps, required: false, purpose: "как быстро ответят — по факту"}
     groups:
-      - {id: channel, name: "Канал", min: 1, max: 5, html: li, slots: [{id: phone, slot: phone-link, required: false}, {id: messenger, slot: messenger-link, required: false}, {id: email, slot: email-link, required: false}]}
+      - {id: channel, name: "Канал", min: 1, max: 5, html: li, slots: [{id: phone, slot: phone-link, required: false}, {id: messenger, slot: messenger-link, required: false}, {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}, {id: email, slot: email-link, required: false}]}
     variants:
       - {id: buttons-row, name: "Ряд кнопок", when: "по умолчанию", default: true}
       - {id: floating-cluster, name: "Плавающий кластер", when: "телефон: один кластер в углу, не перекрывает липкий призыв и поля формы (C 03 §4.3)"}
@@ -1659,6 +1671,7 @@ blocks:
       - {id: cta-note, slot: cta-note, required: false}
       - {id: phone, slot: phone-link, required: false, variants: [final-with-channels]}
       - {id: messenger, slot: messenger-link, required: false, variants: [final-with-channels]}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: proof, slot: fact-ref, required: false}
     variants:
       - {id: mid, name: "Промежуточная", when: "после доказательств или цены", default: true}
@@ -1682,6 +1695,7 @@ blocks:
     slots:
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: cta-note, slot: cta-note, required: false, length: phrase}
       - {id: phone, slot: phone-link, required: false}
     variants:
@@ -1730,7 +1744,9 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: more, slot: link, required: false, purpose: "на страницу вопросов (многостраничник)"}
+      - {id: more-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки more — называет, что откроется: страница вопросов"}
     groups:
       - {id: qa, name: "Вопрос — ответ", min: 1, max: 12, html: details, slots: [{id: q, slot: faq-q, required: true}, {id: a, slot: faq-a, required: true}, {id: fact, slot: fact-ref, required: if-fact}], note: "минимум — по варианту objections-near-cta (1–3 вопроса у призыва); аккордеон, открытый список и «по темам» — от 3 вопросов"}
     variants:
@@ -1760,6 +1776,7 @@ blocks:
       - {id: alt, slot: image-alt, required: false, purpose: "alt фото photo"}
       - {id: company, slot: fact-ref, required: true, fact_kinds: [company, metric]}
       - {id: link, slot: link, required: false, purpose: "на страницу «О компании»"}
+      - {id: link-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки link — называет, что откроется: страница «О компании»"}
     groups:
       - {id: stat, name: "Число о себе", min: 0, max: 4, html: li, slots: [{id: value, slot: stat-value, required: true}, {id: label, slot: stat-label, required: true}, {id: metric, slot: metric-ref, required: true, fact_kinds: [metric, company]}]}
     variants:
@@ -1787,7 +1804,7 @@ blocks:
       - {id: all, slot: link, required: false, purpose: "на страницу команды"}
       - {id: all-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all — называет, что откроется: страница команды"}
     groups:
-      - {id: person, name: "Человек", min: 1, max: 24, html: li, slots: [{id: photo, slot: photo, required: false, authenticity: real-only, media_role: informational}, {id: name, slot: card-title, required: true, heading: h3}, {id: role, slot: card-body, required: true, purpose: "роль, опыт, специализация — из факта"}, {id: link, slot: link, required: false}, {id: person, slot: person-ref, required: true, fact_kinds: [person]}]}
+      - {id: person, name: "Человек", min: 1, max: 24, html: li, slots: [{id: photo, slot: photo, required: false, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt фото photo"}, {id: name, slot: card-title, required: true, heading: h3}, {id: role, slot: card-body, required: true, purpose: "роль, опыт, специализация — из факта"}, {id: link, slot: link, required: false}, {id: person, slot: person-ref, required: true, fact_kinds: [person]}]}
     variants:
       - {id: cards, name: "Карточки", when: "по умолчанию", default: true}
       - {id: lead-person, name: "Главный человек + команда", when: "прораб, врач, автор курса — один главный исполнитель"}
@@ -1856,6 +1873,7 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: apply, slot: cta-primary, required: false, note: "action apply-job"}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: job, name: "Вакансия", min: 1, max: 30, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: true, purpose: "город, формат, зарплата «от» — факт"}, {id: link, slot: link, required: true}]}
     variants:
@@ -1883,8 +1901,10 @@ blocks:
       - {id: phone, slot: phone-link, required: if-available}
       - {id: email, slot: email-link, required: false}
       - {id: messenger, slot: messenger-link, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: legal, slot: footer-legal, required: false, note: "реквизиты: здесь или в подвале (I)"}
       - {id: route, slot: link, required: false, purpose: "проложить маршрут"}
+      - {id: route-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки route — называет действие и карты, которые откроются"}
       - {id: company, slot: fact-ref, required: true, fact_kinds: [company]}
     variants:
       - {id: compact, name: "Компактно", when: "лендинг: одна точка", default: true}
@@ -1912,6 +1932,7 @@ blocks:
       - {id: route, slot: link, required: true, purpose: "открыть в картах; action visit-location"}
       - {id: route-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки route — называет действие и карты, которые откроются"}
       - {id: photo, slot: photo, required: false, authenticity: real-only, purpose: "вход, фасад, зал площадки"}
+      - {id: photo-alt, slot: image-alt, required: false, purpose: "alt фото photo"}
     variants:
       - {id: static-image, name: "Статичная карта со ссылкой", when: "по умолчанию: лёгкая, без скриптов", default: true}
       - {id: embedded-widget, name: "Интерактивная карта", when: "несколько точек; загрузка по видимости или нажатию (P, I)"}
@@ -1937,9 +1958,11 @@ blocks:
       - {id: conditions, slot: body, required: false, purpose: "условия выезда: бесплатно в пределах города, доплата за область, срок приезда"}
       - {id: terms, slot: price-ref, required: if-fact, fact_kinds: [price, offer-terms]}
       - {id: map, slot: map, required: false, media_role: informational, note: "зона на карте — статичная картинка; виджет — фасадом по нажатию (P 03 §5.2)"}
+      - {id: map-alt, slot: image-alt, required: false, purpose: "alt картинки карты map"}
       - {id: check, slot: form, required: by-variant, note: "проверка адреса — набор lead-forms.yaml (F)"}
       - {id: cta, slot: cta-primary, required: false, note: "призыв страницы или «Проверить адрес»"}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: area, name: "Район или город", min: 1, max: 40, html: li, slots: [{id: name, slot: list-item, required: true}, {id: note, slot: body, required: false, purpose: "срок или доплата для района"}]}
     variants:
@@ -1970,6 +1993,7 @@ blocks:
     groups:
       - {id: project, name: "Проект", min: 4, max: 24, html: li, slots: [{id: cover, slot: cover-image, required: true, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}, {id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false, purpose: "клиент, задача, год"}, {id: link, slot: link, required: false}, {id: case, slot: case-ref, required: true, fact_kinds: [case, demo]}]}
       - {id: filter, name: "Фильтр", min: 0, max: 8, html: li, slots: [{id: label, slot: nav-label, required: true}]}
+      - {id: viewer, name: "Окно просмотра", min: 0, max: 1, html: dialog, slots: [{id: close-label, slot: nav-label, required: false, purpose: "подпись кнопки «закрыть»"}, {id: prev-label, slot: nav-label, required: false, purpose: "подпись кнопки «назад»"}, {id: next-label, slot: nav-label, required: false, purpose: "подпись кнопки «вперёд»"}], note: "наложение-просмотр работы по нажатию на карточку; кнопки «назад» и «вперёд» — при нескольких кадрах; поведение и доступность окна — effect:overlay-viewer"}
     variants:
       - {id: grid, name: "Сетка", when: "по умолчанию", default: true, hallmark: [F6]}
       - {id: list-with-thumbnails, name: "Список с превью", when: "много проектов, важны названия"}
@@ -1991,6 +2015,7 @@ blocks:
       - {id: title, slot: section-title, required: false, heading: h2}
     groups:
       - {id: photo, name: "Фото", min: 4, max: 30, html: li, slots: [{id: photo, slot: photo, required: true, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: true}, {id: caption, slot: image-caption, required: false}]}
+      - {id: viewer, name: "Окно просмотра", min: 0, max: 1, html: dialog, slots: [{id: close-label, slot: nav-label, required: false, purpose: "подпись кнопки «закрыть»"}, {id: prev-label, slot: nav-label, required: false, purpose: "подпись кнопки «назад»"}, {id: next-label, slot: nav-label, required: false, purpose: "подпись кнопки «вперёд»"}], note: "наложение-просмотр кадра (вариант lightbox-grid); поведение и доступность окна — effect:overlay-viewer"}
     variants:
       - {id: grid, name: "Сетка", when: "по умолчанию", default: true}
       - {id: rail, name: "Лента", when: "8+ фото, телефон"}
@@ -2015,6 +2040,7 @@ blocks:
       - {id: meta, slot: event-meta, required: true, purpose: "дата, часовой пояс, формат"}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: download, slot: download-link, required: false, purpose: "программа в календарь или PDF"}
     groups:
       - {id: slot, name: "Пункт программы", min: 2, max: 40, html: li, slots: [{id: time, slot: event-meta, required: true}, {id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false}, {id: speaker, slot: person-ref, required: if-fact, fact_kinds: [person]}]}
@@ -2041,7 +2067,7 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
     groups:
-      - {id: speaker, name: "Спикер", min: 1, max: 40, html: li, slots: [{id: photo, slot: photo, required: false, authenticity: real-only, media_role: informational}, {id: name, slot: card-title, required: true, heading: h3}, {id: role, slot: card-body, required: true, purpose: "должность и компания"}, {id: topic, slot: list-item, required: false, purpose: "тема выступления"}, {id: person, slot: person-ref, required: true, fact_kinds: [person]}]}
+      - {id: speaker, name: "Спикер", min: 1, max: 40, html: li, slots: [{id: photo, slot: photo, required: false, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt фото photo"}, {id: name, slot: card-title, required: true, heading: h3}, {id: role, slot: card-body, required: true, purpose: "должность и компания"}, {id: topic, slot: list-item, required: false, purpose: "тема выступления"}, {id: person, slot: person-ref, required: true, fact_kinds: [person]}]}
     variants:
       - {id: grid, name: "Сетка", when: "по умолчанию", default: true}
       - {id: keynote-plus-grid, name: "Главный спикер + остальные", when: "есть хедлайнер"}
@@ -2066,6 +2092,7 @@ blocks:
       - {id: download, slot: download-link, required: false, purpose: "полная программа; HTML-версия обязательна"}
       - {id: cta, slot: cta-primary, required: false}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
       - {id: module, name: "Модуль", min: 2, max: 20, html: li, slots: [{id: title, slot: card-title, required: true, heading: h3}, {id: body, slot: card-body, required: false}, {id: lesson, slot: list-item, required: false, max: 15}]}
     variants:
@@ -2089,9 +2116,10 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: all, slot: link, required: false}
+      - {id: all-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all — называет, что откроется: все статьи"}
       - {id: ad-marking, slot: ad-marking, required: false, note: "партнёрские материалы — I"}
     groups:
-      - {id: article, name: "Статья", min: 2, max: 12, html: li, slots: [{id: cover, slot: cover-image, required: false, media_role: informational}, {id: title, slot: card-title, required: true, heading: h3}, {id: excerpt, slot: card-body, required: false}, {id: date, slot: article-date, required: true}, {id: link, slot: link, required: true}]}
+      - {id: article, name: "Статья", min: 2, max: 12, html: li, slots: [{id: cover, slot: cover-image, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}, {id: title, slot: card-title, required: true, heading: h3}, {id: excerpt, slot: card-body, required: false}, {id: date, slot: article-date, required: true}, {id: link, slot: link, required: true}]}
     variants:
       - {id: grid, name: "Сетка", when: "по умолчанию", default: true}
       - {id: list, name: "Список", when: "без обложек"}
@@ -2119,10 +2147,12 @@ blocks:
       - {id: author, slot: article-author, required: true}
       - {id: sources, slot: article-sources, required: true}
       - {id: cover, slot: cover-image, required: false, media_role: informational}
+      - {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}
       - {id: cta, slot: cta-primary, required: false, purpose: "мост к услуге или продукту — переходный призыв"}
       - {id: cta-label, slot: cta-label, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
     groups:
-      - {id: part, name: "Раздел", min: 2, max: 20, html: section, slots: [{id: heading, slot: article-heading, required: true, heading: h2}, {id: paragraph, slot: article-paragraph, required: true, max: 20}, {id: answer, slot: geo-answer, required: false}, {id: definition, slot: definition, required: false}, {id: image, slot: illustration, required: false, media_role: informational}, {id: caption, slot: image-caption, required: false}]}
+      - {id: part, name: "Раздел", min: 2, max: 20, html: section, slots: [{id: heading, slot: article-heading, required: true, heading: h2}, {id: paragraph, slot: article-paragraph, required: true, max: 20}, {id: answer, slot: geo-answer, required: false}, {id: definition, slot: definition, required: false}, {id: image, slot: illustration, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt картинки image"}, {id: caption, slot: image-caption, required: false}]}
     variants:
       - {id: longread, name: "Лонгрид", when: "по умолчанию", default: true}
       - {id: how-to, name: "Инструкция", when: "шаги — <ol>"}
@@ -2147,6 +2177,7 @@ blocks:
       - {id: name, slot: article-author, required: true}
       - {id: bio, slot: card-body, required: true}
       - {id: link, slot: link, required: false}
+      - {id: link-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки link — называет, что откроется: профиль автора"}
       - {id: person, slot: person-ref, required: true, fact_kinds: [person]}
     variants:
       - {id: byline, name: "Строка автора", when: "в начале статьи", default: true}
@@ -2167,7 +2198,7 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
     groups:
-      - {id: resource, name: "Материал", min: 1, max: 20, html: li, slots: [{id: title, slot: card-title, required: true}, {id: meta, slot: card-body, required: true, purpose: "формат, размер, дата"}, {id: download, slot: download-link, required: true}, {id: cover, slot: cover-image, required: false, media_role: informational}]}
+      - {id: resource, name: "Материал", min: 1, max: 20, html: li, slots: [{id: title, slot: card-title, required: true}, {id: meta, slot: card-body, required: true, purpose: "формат, размер, дата"}, {id: download, slot: download-link, required: true}, {id: cover, slot: cover-image, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}]}
     variants:
       - {id: list, name: "Список", when: "по умолчанию", default: true}
       - {id: cards, name: "Карточки с обложкой", when: "презентации и отчёты"}
@@ -2181,7 +2212,7 @@ blocks:
     status: active
     purpose: "«Читайте также»: статьи, кейсы, услуги по теме — путь дальше по сайту"
     serves: [related]
-    use_when: ["хвост страницы многостраничника (после главного призыва)", "404: пути на главные разделы"]
+    use_when: ["хвост страницы многостраничника (после главного призыва)", "404: пути на главные разделы", "локальная навигация раздела: соседние страницы или подстраницы (вариант section-siblings)"]
     avoid_when: ["посадочная под платный трафик — выходы в момент решения (C 02 §2.2)"]
     html: {element: nav, landmark: navigation, list: ul, label: "aria-label «Связанные материалы»"}
     slots:
@@ -2191,6 +2222,7 @@ blocks:
     variants:
       - {id: list, name: "Список", when: "по умолчанию", default: true}
       - {id: next-step, name: "Следующий шаг", when: "одна ссылка «дальше» по сценарию"}
+      - {id: section-siblings, name: "Соседи раздела", when: "локальная навигация шаблона: ссылки на соседние страницы раздела или на подстраницы (site-map templates[].local_nav.kind: siblings | subpages; в плане — page.navigation.local_nav)", drops: [title], note: "текущая страница — aria-current=«page»; aria-label — название раздела; липкость — local_nav.sticky; оглавление по странице (kind: anchors) — block:anchor-nav"}
     mobile: {behavior: [stack], never_hide: [item.link]}
     refs: {ia: ["site:06-02"], seo: ["site:07-01"], creative: ["creative:block-treatments"]}
     errors: ["Ссылки «сюда» и «подробнее» без названия цели"]
@@ -2215,6 +2247,7 @@ blocks:
       - {id: email, slot: email-link, required: false}
       - {id: messenger, slot: messenger-link, required: false}
       - {id: messenger-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки messenger — называет мессенджер или действие в нём"}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: group-label, slot: nav-label, required: false, max: 6, purpose: "заголовок группы ссылок подвала сайта — по одному на группу site-map.chrome.footer.groups"}
       - {id: tagline, slot: footer-tagline, required: false}
       - {id: logo, slot: brand-logo, required: false}
@@ -2273,6 +2306,7 @@ blocks:
       - {id: secondary, slot: cta-secondary, required: false, purpose: "вторая цель: материал, подписка, канал"}
       - {id: secondary-label, slot: cta-secondary-label, required: false}
       - {id: channels, slot: messenger-link, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: summary, slot: result-summary, required: false, purpose: "что человек отправил (без ПД в URL)"}
     variants:
       - {id: page, name: "Отдельная страница", when: "по умолчанию", default: true}
@@ -2297,6 +2331,7 @@ blocks:
       - {id: body, slot: body, required: true, length: sentence}
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: search, slot: link, required: false, purpose: "поиск по сайту — G"}
       - {id: illustration, slot: illustration, required: false, media_role: decorative}
     groups:
@@ -2349,6 +2384,7 @@ blocks:
     slots:
       - {id: launcher, slot: cta-label, required: true, purpose: "подпись кнопки чата (доступное имя)"}
       - {id: messenger, slot: messenger-link, required: false}
+      - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: hours, slot: contact-info, required: false}
     variants:
       - {id: launcher-facade, name: "Кнопка-фасад", when: "по умолчанию: скрипт чата грузится по нажатию", default: true}

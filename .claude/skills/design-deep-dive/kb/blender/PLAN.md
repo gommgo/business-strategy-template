@@ -352,7 +352,7 @@ WebGPU (mrdoob/Bruno Simon против HolyJS 2025); AgX против PBR Neutr
 4. Дайджестеры W — по готовым транскриптам (`91-videos/transcripts/`), порядок — список V §4; общий промт
    `_common-W-digests.md`.
 5. Запускать волну 2 только по команде заказчика.
-- 2026-09-23 07:55 — заказчик дал GPU-сервер (`root@194.67.95.105`, ключ `~/.ssh/stit-infra`; RTX A5000 24 ГБ, Ubuntu 22.04):
+- 2026-09-23 07:55 — заказчик дал GPU-сервер (`<адрес сервера>`, ключ `<ключ сервера>`; видеокарта 24 ГБ, Ubuntu 22.04):
   в `/root/blender-asr/` поставлены faster-whisper 1.2.1 (CUDA) и yt-dlp, запущен `asr_server.py` (Whisper large-v3 float16,
   batched; копия — `99-raw/tools/asr_server.py`) по 96 оставшимся роликам P1 → P2 → P3; локальный конвертер
   `99-raw/tools/whisper2md.py`. По просьбе заказчика конвейер ведёт **агент T** (транскрипты): сбор результатов,

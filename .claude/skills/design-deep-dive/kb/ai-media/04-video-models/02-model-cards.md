@@ -635,7 +635,7 @@ cost the same as successful ones» [S29].
 | Wan2.2 (Alibaba) | Apache-2.0 | TI2V-5B 720P@24fps (1280×704) на 24 ГБ; A14B 480P/720P (80 ГБ на одной GPU); FLF — в Wan2.1-FLF2V-14B | 24 ГБ (5B) | AA T2V без звука 1116 (A14B), 950 (5B) | [S37][S40] |
 | HunyuanVideo-1.5 (Tencent, 8,3B) | Tencent Hunyuan Community | 480p/720p + SR до 1080p, 121 кадр, step-distilled 8–12 шагов | ≥14 ГБ с offload | AA T2V без звука 1020, LMArena 1169 | [S38][S40][S41] |
 
-Для RTX A5000 24 ГБ реалистичны Wan2.2-TI2V-5B, HunyuanVideo-1.5 и LTX-2.5 в fp8 `[не проверено]` — тема агента P и
+Для видеокарта 24 ГБ реалистичны Wan2.2-TI2V-5B, HunyuanVideo-1.5 и LTX-2.5 в fp8 `[не проверено]` — тема агента P и
 «после сигнала» по GPU. Исследовательский метод петель Loopy работает на Wan 2.1/2.2 и HunyuanVideo 1.5 [S44].
 
 ## 5. Диалекты промтов: сводка правил по моделям

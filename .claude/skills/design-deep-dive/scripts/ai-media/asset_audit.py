@@ -13,23 +13,30 @@ Markdown-сводка и контактный лист для человека. 
 --models`, `--groups svg`, `--bin`, `--ffmpeg`).
 
 Режимы (--mode; auto — по паспорту, коду задачи, альфе и расширению):
-  image       фото, иллюстрация, фон, 3D-объект: размеры, цвет-слоп, композиция, зона текста, палитра, текст (OCR), провенанс
+  image       фото, иллюстрация, фон, 3D-объект: размеры, цвет-слоп, композиция, зона текста, палитра, текст (OCR: число
+              вхождений строки — «строка{×N}», расхождение в мелких буквах — предупреждение), провенанс; с --master —
+              сжатие к мастеру без усечения глубины (AVIF → PNG 16 бит) и резкость источника отдельной метрикой
   cutout      вырез/нативная альфа: альфа есть и настоящая, ореол, поле, полупрозрачность, эталон (--ref-alpha)
   edit        правка на месте (--orig [--mask] [--protect]) или аутпейнт (другая пропорция) — edit_check.py; без маски —
               маска из разницы (ΔE00 > 5 после подгонки цвета + морфология) и композит с растушёвкой
   series      папка или список кадров: оттенок, ΔE палитр, светлота, pHash-дубли (+ --ref, --grid RxC)
   texture     бесшовность (tile_check)
-  video-loop  шов на мезонине, живость (+ --control), склейки, угасание, пинг-понг, камера, звук, мерцание яркости,
-              синемаграф (--mask → drift)
+  video-loop  шов по файлу как есть (порог — по стадии: мезонин и выход модели или файл после кодирования), живость
+              (+ --control), склейки и монтаж (--montage), угасание (--fade-event — объявленное затемнение), повторы
+              кадров, вспышки WCAG 2.3.1, пинг-понг, камера, звук, мерцание яркости, синемаграф (--mask → drift)
+  video-once  разовый ролик (вступление): без шва, угасания, длины петли и «ползущей камеры»; склейки, повторы кадров,
+              вспышки, звук и вес — как у петли
   video-alpha хромакей-исходник (chroma) или файл с альфой (pix_fmt)
-  svg-icon    линейная иконка (check_icons, пороги Lucide; шапка и штрих Lucide — брак только у набора Lucide, у другого
-              набора — предупреждение: --icon-set) или цветной SVG (фон, корень, <image>, <text>, подпись Recraft)
+  svg-icon    линейная иконка (check_icons, пороги Lucide; эталон шапки и штрих — --icon-stroke, --icon-viewbox или
+              --conventions SYSTEM.yaml; шапка не по эталону — брак только у набора Lucide, у другого набора —
+              предупреждение: --icon-set) или цветной SVG (фон, корень, <image>, <text>, подпись Recraft)
   og          OG-картинка 1200×630: размер, вес, текст (OCR), поля, + всё из image
 
 Команды:
   audit PATH… [--mode M] [--out DIR] [--dna DNA.json] [--spec SPEC.json] [--expect "строка"]… [--orig O] [--mask M]
         [--control C] [--ref-alpha GT] [--text-zone x0,y0,x1,y1] [--slot hero|section|product|icon|og] [--stage web]
-        [--mobile] [--icon-set НАБОР] [--strict]
+        [--plan PLAN.yaml --slot ID [--variant V]] [--montage] [--fade-event] [--css-width W]
+        [--mobile] [--icon-set НАБОР] [--icon-stroke ШТРИХ] [--icon-viewbox VIEWBOX] [--conventions SYSTEM.yaml] [--strict]
   ocr IMG… [--lang ru|en] [--expect …]      OCR под блокировкой heavy + сверка со строками
   thresholds [--check]                       пороги с источниками; --check — у каждого есть source
   judge-jobs (--items F | --from-stand-page DIR | --calibration [--pairs ID,…]) [--rubric R] [--mode M] [--runs 3]
@@ -74,14 +81,10 @@ TOOLS = kbpaths.scripts("ai-media")
 LOCKS = Path(kbpaths.lock_path("heavy", "ai-media")).parent  # $DDD_HOME/locks/ai-media/{heavy,browser,blender}.lock
 THRESHOLDS = ROOT / "11-evaluation-qa" / "thresholds.yaml"
 RUBRICS = ROOT / "11-evaluation-qa" / "rubrics"
-VENV_K = Path(kbpaths.python())  # Python окружения скилла: rapidocr для OCR
-VENV_G = Path(kbpaths.python())  # Python окружения скилла: cairosvg, svgelements
 OCR_MODELS = kbpaths.models("ocr")
 LUCIDE_REF = kbpaths.data("ai-media", "lucide-ref")
 ICON_SET = "lucide"             # набор иконок по умолчанию (--icon-set; у продукта — conventions.icons.set карты решений)
 INSTALL = "scripts/install.sh"  # установка окружения скилла (путь от корня скилла)
-EXIFTOOL = Path(kbpaths.which("exiftool"))
-C2PATOOL = Path(kbpaths.which("c2patool"))
 IMG_EXT = (".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif", ".bmp", ".tif", ".tiff")
 VID_EXT = (".mp4", ".webm", ".mov", ".m4v", ".mkv")
 SVG_EXT = (".svg",)
@@ -484,15 +487,13 @@ def ocr_worker(paths: list[str], lang: str = "ru", text_score: float = 0.3, reli
 
 def run_ocr(paths: list, lang: str = "ru", text_score: float = 0.3, timeout: int = 900) -> list[dict]:
     """OCR отдельным процессом Python окружения скилла под heavy.lock (одна загрузка моделей на пачку картинок)."""
-    if not VENV_K.exists():
-        return [{"file": str(p), "error": "нет Python окружения скилла с rapidocr — scripts/install.sh"} for p in paths]
     miss = ocr_missing(lang)
     if miss:   # до запуска: нет моделей — одна строка с командой установки, обработчик не стартует
         return [{"file": str(p), "error": miss, "env": True} for p in paths]
     fg = free_gb()
     if fg is not None and fg < 1.0:
         return [{"file": str(p), "error": f"мало памяти ({fg:.1f} ГБ available) — OCR не запущен"} for p in paths]
-    cmd = locked([str(VENV_K), str(Path(__file__).resolve()), "_ocr-worker", "--lang", lang, "--text-score", str(text_score)]
+    cmd = locked([kbpaths.python(), str(Path(__file__).resolve()), "_ocr-worker", "--lang", lang, "--text-score", str(text_score)]
                  + [str(Path(p).resolve()) for p in paths])
     r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
     try:
@@ -655,29 +656,81 @@ def gned(expected_words: list[str], got_words: list[str]) -> float | None:
     return round(float((matched + abs(m - n)) / max(m, n)), 4)
 
 
+EXPECT_COUNT = re.compile(r"\s*\{[×xх](\d+)\}\s*$")     # «строка{×2}» — строка стоит на картинке дважды
+
+
+def expect_counts(expected: list[str]) -> list[tuple[str, int]]:
+    """Ожидаемые строки с числом вхождений: суффикс «{×N}» или повтор одинаковой строки в списке."""
+    out: dict[str, int] = {}
+    for e in expected:
+        m = EXPECT_COUNT.search(e)
+        s, n = (e[:m.start()], int(m.group(1))) if m else (e, 1)
+        out[s] = out.get(s, 0) + max(1, n)
+    return list(out.items())
+
+
+def ocr_scale(o: dict) -> float:
+    """Во сколько раз OCR уменьшил кадр перед поиском строк (предел длинной стороны детектора): высота букв для порога
+    считается в масштабе распознавания, а не в пикселях файла."""
+    size, lim_ = o.get("size") or [], o.get("det_limit") or []
+    if size and len(lim_) == 2 and lim_[1] == "max" and max(size) > lim_[0]:
+        return lim_[0] / max(size)
+    return 1.0
+
+
 def text_verdict(expected: list[str], transcript: str, case_sensitive: bool = False, yo_required: bool = True,
                  extra_allowed: bool = False, lines_meta: list[dict] | None = None, th: Th | None = None,
-                 allowed: list[str] | None = None) -> dict:
+                 allowed: list[str] | None = None, h_scale: float = 1.0) -> dict:
     """Сверка ожидаемых строк брифа с транскриптом картинки (OCR, VLM или человек).
     Основа — stand_run.text_check (двойники, латинские недвойники, лишние слова, ё); сверху — классы ошибок
-    по выравниванию (пропуск, удвоение, похожая буква, цифра), точность и полнота слов, GNED, минимальная высота строки."""
+    по выравниванию (пропуск, удвоение, похожая буква, цифра), точность и полнота слов, GNED. Строка ищется столько раз,
+    сколько вхождений заказано (expect_counts): второе вхождение — не «лишний текст». Высота букв — в масштабе
+    распознавания (h_scale): расхождение в строке ниже text.fail_min_line_h_px — предупреждение (warn), искажение строки
+    в полном размере — брак или «покажи человеку»."""
     sr = mod("stand_run")
+    pairs = expect_counts(expected)
+    expected = [e for e, _ in pairs]
     base = sr.text_check(expected, transcript) if expected else {"lines": [], "fake_latin": [], "extra_words": []}
     pure_cyr = bool(expected) and not any(LAT.search(e) for e in expected)
     T = norm_text(transcript, all_homoglyphs=pure_cyr)
     Tc = T if case_sensitive else T.lower()
-    lines, covered = [], [False] * len(Tc)
-    for e in expected:
+    th = th or Th({"_flat": {}})
+    h_fail = th("text.fail_min_line_h_px", 16)
+    s_fail = th("text.fail_min_ocr_score", 0.9)
+    # строки OCR в транскрипте: участок строки → высота букв в масштабе распознавания
+    spans, cur = [], 0
+    for L in lines_meta or []:
+        nl = norm_text(L.get("text") or "", all_homoglyphs=pure_cyr)
+        nl = nl if case_sensitive else nl.lower()
+        pos = Tc.find(nl, cur) if nl else -1
+        if pos < 0 or not L.get("h_px"):
+            spans = None
+            break
+        spans.append((pos, pos + len(nl), L["h_px"] * h_scale))
+        cur = pos + len(nl)
+
+    def height_at(j0, j1):
+        mid = (j0 + j1) // 2
+        return next((h for a, b, h in spans or [] if a <= mid < b), None)
+    lines, covered, Tw = [], [False] * len(Tc), Tc
+    for e, cnt in pairs:
         E = norm_text(e, all_homoglyphs=pure_cyr)
         Ec = E if case_sensitive else E.lower()
-        dist, j0, j1, ops = fit_align(Ec, Tc)
-        cls = classify_ops(ops, Ec)
-        for j in range(j0, j1):
-            covered[j] = True
-        found = dist <= max(1, len(Ec)) * 0.5
-        lines.append({"expected": e, "found": found, "distance": dist, "cer": round(dist / max(1, len(Ec)), 4),
-                      "match": Tc[j0:j1], "errors": cls if found else [],
-                      "classes": sorted({c["class"] for c in cls}) if found else ["missing_line"]})
+        for k in range(cnt):
+            dist, j0, j1, ops = fit_align(Ec, Tw)
+            cls = classify_ops(ops, Ec)
+            found = dist <= max(1, len(Ec)) * 0.5
+            h = height_at(j0, j1) if found else None
+            if found or k == 0:
+                for j in range(j0, j1):
+                    covered[j] = True
+            if found:
+                Tw = Tw[:j0] + "\x00" * (j1 - j0) + Tw[j1:]      # найденное вхождение второй раз не засчитывается
+            lines.append({"expected": e, "found": found, "distance": dist, "cer": round(dist / max(1, len(Ec)), 4),
+                          "match": Tc[j0:j1], "errors": cls if found else [],
+                          "classes": sorted({c["class"] for c in cls}) if found else ["missing_line"],
+                          **({"occurrence": k + 1} if cnt > 1 else {}),
+                          **({"h_px": round(h, 1), "small": True} if h is not None and h < h_fail else {})})
     # лишний текст: слова транскрипта вне найденных окон (WeGenBench: точность — «нет лишнего»); считаются только буквы
     # и цифры вне окон — висящая точка или кавычка от JPEG-шума не «лишнее слово» («булок.» — ложный брак)
     extra, cur, start = [], "", 0
@@ -691,39 +744,45 @@ def text_verdict(expected: list[str], transcript: str, case_sensitive: bool = Fa
     if allowed:   # разрешённый текст (этикетка товара и т. п.) — не «лишний»
         allow_words = {w.strip('.,:;!?"«»()') for x in allowed for w in norm_text(x, all_homoglyphs=pure_cyr).lower().split()}
         extra = [w for w in extra if w.lower().strip('.,:;!?"«»()') not in allow_words]
-    exp_words = [w for e in expected for w in norm_text(e, all_homoglyphs=pure_cyr).lower().split()]
+    exp_words = [w for e, cnt in pairs for w in norm_text(e, all_homoglyphs=pure_cyr).lower().split() * cnt]
     got_words = Tc.split()
     counts: dict[str, int] = {}
+    full: dict[str, int] = {}
+    small: dict[str, int] = {}
     for L in lines:
         for c in L["classes"]:
             counts[c] = counts.get(c, 0) + 1
-    fails = sorted({c for c in counts if c in FAIL_CLASSES or c == "missing_line"})
+            tgt = small if L.get("small") else full
+            tgt[c] = tgt.get(c, 0) + 1
+    line_fails = {c for c in full if c in FAIL_CLASSES}
+    fails = sorted(line_fails | ({"missing_line"} if full.get("missing_line") else set()))
+    small_fails = sorted({c for c in small if c in FAIL_CLASSES} | ({"yo_lost"} if yo_required and small.get("yo_lost") else set()))
     if base.get("fake_latin") and not all(LAT.search(e) for e in expected):
         fails = sorted(set(fails) | {"latin_substitute"})
-    if yo_required and counts.get("yo_lost"):
+    if yo_required and full.get("yo_lost"):
         fails = sorted(set(fails) | {"yo_lost"})
     if extra and not extra_allowed:
         fails = sorted(set(fails) | {"extra_text"})
     min_h = None
     if lines_meta:
-        hs = [L.get("h_px") for L in lines_meta if L.get("h_px")]
-        min_h = min(hs) if hs else None
+        hs = [L.get("h_px") * h_scale for L in lines_meta if L.get("h_px")]
+        min_h = round(min(hs), 1) if hs else None
     sniff = latin_sniff(expected, lines_meta)
     scores = [L.get("score_line", L.get("score_min")) for L in (lines_meta or []) if L.get("score_min") is not None]
     score_min = min(scores) if scores else None
-    th = th or Th({"_flat": {}})
-    h_fail = th("text.fail_min_line_h_px", 16)
-    s_fail = th("text.fail_min_ocr_score", 0.9)
+    # высота для брака без человека: у расхождений строки она известна по строке (мелкие уже отделены); лишний текст,
+    # ненайденная строка и сверка без привязки к строкам OCR — по самой мелкой строке кадра
+    by_line = spans is not None and set(fails) <= line_fails
+    height_ok = by_line or min_h is None or min_h >= h_fail
     if not fails and not sniff:
-        verdict = "pass"
-    elif fails and set(fails) <= ROBUST_CLASSES and (score_min is None or score_min >= s_fail) and \
-            (min_h is None or min_h >= h_fail):
+        verdict = "warn" if small_fails else "pass"
+    elif fails and set(fails) <= ROBUST_CLASSES and (score_min is None or score_min >= s_fail) and height_ok:
         verdict = "fail"
     else:
         verdict = "needs_human"
     res = {"expected": expected, "transcript": transcript, "normalized": T, "lines": lines, "classes": counts,
            "fake_latin": base.get("fake_latin", []), "latin_suspect": sniff, "extra_text": extra, "ocr_score_min": score_min,
-           "verdict": verdict,
+           "verdict": verdict, "small_text": small_fails,
            "precision_words": round(1 - len(extra) / max(1, len(got_words)), 4) if got_words else (1.0 if not expected else 0.0),
            "recall_lines": round(sum(L["found"] and not (set(L["classes"]) & FAIL_CLASSES) for L in lines) / max(1, len(lines)), 4),
            "gned": gned(exp_words, got_words), "fail_classes": fails, "pass": verdict == "pass", "min_line_h_px": min_h}
@@ -796,6 +855,48 @@ def passport_facts(pp: dict, pp_path: Path, path: Path) -> dict:
         if k in meta:
             out.setdefault("meta", {})[k] = meta[k]
     return out
+
+
+SLOT_KINDS = ("hero", "section", "product", "icon", "og", "texture")
+# вид слота словаря site в строке плана ассетов → род слота порогов приёмки; прочие виды — общие пороги
+PLAN_SLOT_KIND = {"hero-visual": "hero", "og-image": "og", "favicon": "icon", "icon": "icon", "texture": "texture"}
+
+
+class AuditError(Exception):
+    """Ошибка входа приёмки (план ассетов, слот) — код выхода 2."""
+
+
+def plan_slot(plan_path: Path, slot_id: str | None, variant: str | None = None, mobile: bool = False) -> dict:
+    """Строка слота плана ассетов (asset-plan v1): бюджет веса `max_kb` варианта и род слота для порогов. Вариант —
+    --variant; без него — mobile при --mobile, иначе desktop, иначе первый вариант с числом `max_kb`. Заглушка или
+    пустой `max_kb` — бюджет по умолчанию."""
+    import yaml
+    if not slot_id:
+        raise AuditError("с --plan нужен --slot <id слота плана ассетов>")
+    if not plan_path.is_file():
+        raise AuditError(f"нет плана ассетов {plan_path}")
+    try:
+        doc = yaml.safe_load(plan_path.read_text(encoding="utf-8")) or {}
+    except yaml.YAMLError as e:
+        raise AuditError(f"план ассетов {plan_path} не разобран: {last_line(str(e))}")
+    rows = [s for s in (doc.get("slots") if isinstance(doc, dict) else None) or [] if isinstance(s, dict)]
+    row = next((s for s in rows if s.get("id") == slot_id), None)
+    if row is None:
+        raise AuditError(f"в плане {plan_path.name} нет слота {slot_id}; есть: "
+                         + (", ".join(str(s.get("id")) for s in rows[:12]) or "ни одного"))
+    vs = [v for v in row.get("variants") or [] if isinstance(v, dict)]
+
+    def num(v):
+        x = v.get("max_kb")
+        return x if isinstance(x, (int, float)) and not isinstance(x, bool) else None
+    pick = next((v for v in vs if v.get("id") == (variant or ("mobile" if mobile else "desktop"))), None)
+    if pick is None and variant:
+        raise AuditError(f"у слота {slot_id} нет варианта {variant}; есть: "
+                         + (", ".join(str(v.get("id")) for v in vs) or "ни одного"))
+    if pick is None:
+        pick = next((v for v in vs if num(v) is not None), vs[0] if vs else {})
+    return {"id": slot_id, "kind": PLAN_SLOT_KIND.get(str(row.get("slot") or "")), "variant": pick.get("id"),
+            "max_kb": num(pick), "plan": rel(plan_path)}
 
 
 def ratio_of(s) -> float | None:
@@ -897,10 +998,21 @@ def check_file_basics(R: Report, path: Path, facts: dict | None, a):
     return info
 
 
-def check_budget(R: Report, info: dict, slot: str | None, a, kind="image"):
-    """Бюджет веса — только для файлов на страницу (--stage web): ai-media 01/01 §7. Телефонный кадр (--mobile) — свой
-    ключ слота `<slot>_mobile_kb`, если он есть (hero ≤ 80 КБ), иначе ключ слота."""
-    if getattr(a, "stage", "master") != "web" or not slot:
+def check_budget(R: Report, info: dict, slot: str | None, a, kind="image", plan: dict | None = None):
+    """Бюджет веса — только для файлов на страницу (--stage web). Со строкой плана ассетов (--plan, --slot) — её `max_kb`;
+    без плана — умолчание рода слота: ai-media 01/01 §7. Телефонный кадр (--mobile) — свой ключ слота `<slot>_mobile_kb`,
+    если он есть (hero ≤ 80 КБ), иначе ключ слота."""
+    if getattr(a, "stage", "master") != "web":
+        return
+    if plan and plan.get("max_kb") is not None:
+        kb, lim = info["bytes"] / 1024, plan["max_kb"]
+        R.checks.setdefault("budget", {})[plan["id"]] = {"kb": round(kb, 1), "limit_kb": lim,
+                                                        "key": f"plan:{plan['id']}/{plan['variant']}"}
+        if kb > lim:
+            R.defect("QA-BUDGET", "warn", f"{kb:.0f} КБ > бюджета {lim} КБ слота {plan['id']} плана ассетов "
+                     f"(вариант {plan['variant']})", metric="file.bytes", value=round(kb, 1), threshold=lim)
+        return
+    if not slot:
         return
     key = f"budget.{kind}.{slot}_kb"
     if getattr(a, "mobile", False) and R.th(f"budget.{kind}.{slot}_mobile_kb") is not None:
@@ -967,7 +1079,7 @@ def check_slop_color(R: Report, path: Path, ref: dict | None, dna: dict | None):
                          metric=f"slop_color.{k}", value=v, th_key=key, marker="IMG-M03")
     wb_neutral = bool(dna and ((dna.get("palette") or {}).get("neutral_wb") or {}).get("target_b", 1) <= 0.004)
     if m.get("warm_b") is not None and m["warm_b"] > th("image.warm_b_max", 4.0):
-        R.defect("QA-COLOR-WARM", "warn" if wb_neutral or not dna else "info",
+        R.defect("QA-COLOR-WARM", "warn" if wb_neutral else "info",   # предупреждение — только при нейтральном белом в паспорте
                  f"b* нейтралей +{m['warm_b']} — жёлтый сдвиг белого (у 9 из 51 фото лидеров это стиль, A/04)",
                  metric="slop_color.warm_b", value=m["warm_b"], th_key="image.warm_b_max", marker="IMG-M04")
     purple_ok = False
@@ -1089,63 +1201,33 @@ def check_palette(R: Report, path: Path, dna: dict | None, spec: dict | None):
 
 
 def provenance(path: Path, out_dir: Path | None = None) -> dict:
-    lp = TOOLS / "provenance_check.py"
-    tool = lp if lp.exists() else None
-    if tool:   # `provenance_check.py scan PATH --json F` (C2PA, IPTC/XMP, AIGC, подпись Recraft, маркеры)
-        try:   # + `--corners` (ворота L 04 §5 п. 7): эвристика видимой метки в углах и лист углов для глаза / VLM
-            sheet = None
-            with tempfile.TemporaryDirectory() as td:
-                jf = Path(td) / "p.json"
-                cmd = [sys.executable, str(tool), "scan", str(path), "--json", str(jf)]
-                if out_dir is not None:
-                    cmd += ["--corners", "--out", str(Path(td) / "o")]
-                subprocess.run(cmd, capture_output=True, text=True, timeout=180)
-                d = json.loads(jf.read_text(encoding="utf-8"))
-                cs = Path(td) / "o" / "corners.jpg"
-                if out_dir is not None and cs.exists():
-                    sheet = Path(out_dir) / (path.stem + "_corners.jpg")
-                    shutil.copyfile(cs, sheet)
-            f = (d.get("files") or [{}])[0]
-            s = f.get("summary") or {}
-            # бинарники, которых provenance_check не нашёл: метки C2PA и XMP не прочитаны — сведения неполны
-            missing = [b for b, part in (("c2patool", "c2pa"), ("exiftool", "exif"))
-                       if "не найден" in str((f.get(part) or {}).get("error") or "")]
-            return {"tool": f"{rel(tool)} {d.get('version', '')}".strip(), "c2pa_present": (f.get("c2pa") or {}).get("present"),
-                    "c2pa": f.get("c2pa"), "digital_source_type": (f.get("exif") or {}).get("digital_source_type"),
-                    "markers": f.get("bytes_markers"), "summary": s, "visible_suspect": s.get("visible_suspect") or [],
-                    "corners_sheet": rel(sheet) if sheet else None, **({"missing": missing} if missing else {})}
-        except Exception as e:  # noqa: BLE001
-            return {"tool": rel(tool), "error": str(e)[:200]}
-    out: dict = {"tool": "exiftool + c2patool (сырые факты; юридическая оценка — L)"}
-    if EXIFTOOL.exists():
-        try:
-            r = subprocess.run(["perl", str(EXIFTOOL), "-j", "-a", "-G1", str(path)], capture_output=True, text=True, timeout=60)
-            d = (json.loads(r.stdout) or [{}])[0]
-            keep = {}
-            for k, v in d.items():
-                kl = k.lower()
-                if any(s in kl for s in ("digitalsourcetype", "software", "creatortool", "c2pa", "jumbf", "credit", "aigc",
-                                          "claim_generator", "make", "model", "description", "comment", "provenance")):
-                    keep[k] = str(v)[:160]
-            out["exif"] = keep
-            out["xmp_digital_source_type"] = next((v for k, v in keep.items() if "digitalsourcetype" in k.lower()), None)
-        except Exception as e:  # noqa: BLE001
-            out["exif_error"] = str(e)[:200]
-    if C2PATOOL.exists():
-        try:
-            r = subprocess.run([str(C2PATOOL), str(path)], capture_output=True, text=True, timeout=60)
-            txt = (r.stdout or "") + (r.stderr or "")
-            out["c2pa_present"] = r.returncode == 0 and '"manifests"' in txt
-            if out["c2pa_present"]:
-                j = json.loads(r.stdout)
-                act = j.get("active_manifest")
-                man = (j.get("manifests") or {}).get(act, {})
-                out["c2pa"] = {"claim_generator": str(man.get("claim_generator"))[:120], "title": man.get("title"),
-                               "issuer": ((man.get("signature_info") or {}).get("issuer")),
-                               "validation_status": [s.get("code") for s in (j.get("validation_status") or [])][:8]}
-        except Exception as e:  # noqa: BLE001
-            out["c2pa_error"] = str(e)[:200]
-    return out
+    """`provenance_check.py scan PATH --json F` (C2PA, IPTC/XMP, AIGC, подпись Recraft, маркеры) и `--corners`: эвристика
+    видимой метки в углах и лист углов для глаза (ворота 12-legal-provenance/04 §5 п. 7)."""
+    tool = TOOLS / "provenance_check.py"
+    try:
+        sheet = None
+        with tempfile.TemporaryDirectory() as td:
+            jf = Path(td) / "p.json"
+            cmd = [sys.executable, str(tool), "scan", str(path), "--json", str(jf)]
+            if out_dir is not None:
+                cmd += ["--corners", "--out", str(Path(td) / "o")]
+            subprocess.run(cmd, capture_output=True, text=True, timeout=180)
+            d = json.loads(jf.read_text(encoding="utf-8"))
+            cs = Path(td) / "o" / "corners.jpg"
+            if out_dir is not None and cs.exists():
+                sheet = Path(out_dir) / (path.stem + "_corners.jpg")
+                shutil.copyfile(cs, sheet)
+        f = (d.get("files") or [{}])[0]
+        s = f.get("summary") or {}
+        # бинарники, которых provenance_check не нашёл: метки C2PA и XMP не прочитаны — сведения неполны
+        missing = [b for b, part in (("c2patool", "c2pa"), ("exiftool", "exif"))
+                   if "не найден" in str((f.get(part) or {}).get("error") or "")]
+        return {"tool": f"{rel(tool)} {d.get('version', '')}".strip(), "c2pa_present": (f.get("c2pa") or {}).get("present"),
+                "c2pa": f.get("c2pa"), "digital_source_type": (f.get("exif") or {}).get("digital_source_type"),
+                "markers": f.get("bytes_markers"), "summary": s, "visible_suspect": s.get("visible_suspect") or [],
+                "corners_sheet": rel(sheet) if sheet else None, **({"missing": missing} if missing else {})}
+    except Exception as e:  # noqa: BLE001
+        return {"tool": rel(tool), "error": str(e)[:200]}
 
 
 # ================================================================ режимы
@@ -1159,7 +1241,7 @@ def audit_image(R: Report, path: Path, facts, a, ctx):
                  f"длинная сторона {max(info['w'], info['h'])} px < мастера hero {R.th('image.hero_master_min_px', 2560)} px "
                  "(ступень 2K/4K модели или апскейл Lanczos, H 08/02 §1)", metric="file.w", value=max(info["w"], info["h"]),
                  th_key="image.hero_master_min_px")
-    check_budget(R, info, slot, a)
+    check_budget(R, info, slot, a, plan=ctx.get("plan"))
     check_slop_color(R, path, ctx.get("ref_metrics"), ctx.get("dna"))
     rect, rect_src = text_zone_rect(a, facts, ctx.get("spec"), ctx.get("dna"))
     check_composition(R, path, rect, slot, ctx.get("dna"), ctx.get("spec"))
@@ -1167,13 +1249,36 @@ def audit_image(R: Report, path: Path, facts, a, ctx):
         tz = check_text_zone(R, path, rect, ctx.get("dna"), getattr(a, "text_color", None))
         tz["source"] = rect_src
     check_palette(R, path, ctx.get("dna"), ctx.get("spec"))
-    if getattr(a, "master", None):
-        check_ssimulacra(R, path, Path(a.master), slot)
+    master = Path(a.master) if getattr(a, "master", None) else None
+    if master:
+        check_ssimulacra(R, path, master, slot)
+    if master is None or master.suffix.lower() in IMG_EXT and master.exists():
+        check_sharpness(R, master or path)      # источник — мастер, без него — сам файл
     return R
 
 
+def depth_png(src: Path, dst: Path, size: tuple | None = None, via: tuple | None = None) -> bool:
+    """Картинка → PNG 16 бит на канал без усечения глубины (ffmpeg читает 16-битные PNG и TIFF). size — пересчёт Lanczos
+    к размеру; via — сначала к этому размеру, затем к size (проба резкости)."""
+    steps = [f"scale={wh[0]}:{wh[1]}:flags=lanczos" for wh in (via, size) if wh]
+    cmd = [kbpaths.ffmpeg(), "-v", "error", "-y", "-i", str(src)] + (["-vf", ",".join(steps)] if steps else [])
+    r = subprocess.run(cmd + ["-frames:v", "1", "-pix_fmt", "rgb48be", str(dst)], capture_output=True)
+    return r.returncode == 0 and dst.exists()
+
+
+def s2_score(s2: Path, ref: Path, dist: Path) -> float | None:
+    r = subprocess.run([str(s2), str(ref), str(dist)], capture_output=True, text=True)
+    try:
+        return float(r.stdout.strip().split()[-1])
+    except (ValueError, IndexError):
+        return None
+
+
 def check_ssimulacra(R: Report, path: Path, master: Path, slot: str | None):
-    """Производная для страницы против мастера: SSIMULACRA2 (H 08/04 §1.2: ≥ 80 hero, ≥ 70 прочее)."""
+    """Производная для страницы против мастера: SSIMULACRA2 (H 08/04 §1.2: ≥ 80 hero, ≥ 70 прочее). Глубина не усекается:
+    AVIF декодируется в PNG 16 бит (`avifdec -d 16`), мастер и производная приводятся к PNG 16 бит — оценка 10-битного
+    файла и 16-битного мастера не занижается сравнением через 8 бит."""
+    from PIL import Image
     s2 = kbpaths.bin_dir("libjxl", "tools", "ssimulacra2")
     if not master.exists():
         R.errors.append(f"SSIMULACRA2 не запущен: нет мастера {master}")
@@ -1186,27 +1291,25 @@ def check_ssimulacra(R: Report, path: Path, master: Path, slot: str | None):
             R.no_env(env_hint(f"{b.name} не найден", "--bin"), "SSIMULACRA2")
             return
     with tempfile.TemporaryDirectory() as td:
-        dec = Path(td) / "dec.png"
+        dec, ref = Path(td) / "dec.png", Path(td) / "ref.png"
         if ext == ".avif":
-            subprocess.run([str(kbpaths.bin_dir() / "libavif/avifdec"), str(path), str(dec)], capture_output=True)
+            subprocess.run([str(dec_bin), "-d", "16", str(path), str(dec)], capture_output=True)
         elif ext == ".webp":
-            subprocess.run([str(kbpaths.bin_dir() / "libwebp/dwebp"), "-quiet", str(path), "-o", str(dec)], capture_output=True)
+            subprocess.run([str(dec_bin), "-quiet", str(path), "-o", str(dec)], capture_output=True)
         elif ext == ".jxl":
-            subprocess.run([str(kbpaths.bin_dir() / "libjxl/tools/djxl"), str(path), str(dec)], capture_output=True)
+            subprocess.run([str(dec_bin), str(path), str(dec)], capture_output=True)
         else:
-            from PIL import Image
-            Image.open(path).convert("RGB").save(dec)
-        ref = Path(td) / "ref.png"
-        from PIL import Image
-        m = Image.open(master).convert("RGB")
-        d = Image.open(dec).convert("RGB")
-        if d.size != m.size:
-            m = m.resize(d.size, Image.LANCZOS)
-        m.save(ref)
-        r = subprocess.run([str(s2), str(ref), str(dec)], capture_output=True, text=True)
-    try:
-        score = float(r.stdout.strip().split()[-1])
-    except (ValueError, IndexError):
+            depth_png(path, dec)
+        if not dec.exists():
+            R.errors.append(f"SSIMULACRA2 не запущен: {path.name} не декодирован")
+            return
+        with Image.open(dec) as d, Image.open(master) as m:
+            dsize, msize = d.size, m.size
+        if not depth_png(master, ref, dsize if msize != dsize else None):
+            R.errors.append(f"SSIMULACRA2 не запущен: мастер {master.name} не приведён к PNG")
+            return
+        score = s2_score(s2, ref, dec)
+    if score is None:
         return
     key = "encoding.ssimulacra2_hero_min" if slot in ("hero", "product") else "encoding.ssimulacra2_min"
     lim = R.th(key, 80 if slot in ("hero", "product") else 70)
@@ -1216,11 +1319,42 @@ def check_ssimulacra(R: Report, path: Path, master: Path, slot: str | None):
                  metric="encoding.ssimulacra2", value=score, th_key=key)
 
 
+def check_sharpness(R: Report, src: Path):
+    """Резкость источника — отдельно от оценки сжатия: производная сверяется со своим мастером и мягкости мастера не видит.
+    Кадр сравнивается со своей копией, уменьшенной в image.soft_probe_scale раз и возвращённой к размеру (Lanczos): копия
+    неотличима (SSIMULACRA2 не ниже encoding.ssimulacra2_hero_min — «не видно при сравнении рядом») — деталей на свой размер
+    у кадра нет: источник увеличен или мягкий. Гладкий сюжет (фон, рендер) даёт то же число, поэтому находка — сведения."""
+    from PIL import Image
+    s2 = kbpaths.bin_dir("libjxl", "tools", "ssimulacra2")
+    scale, lim = R.th("image.soft_probe_scale"), R.th("encoding.ssimulacra2_hero_min")
+    if not scale or lim is None or src.suffix.lower() in (".avif", ".jxl", ".gif"):
+        return
+    if not s2.exists():
+        R.no_env(env_hint(f"{s2.name} не найден (резкость источника не измерена)", "--bin"))
+        return
+    with Image.open(src) as im:
+        w, h = im.size
+    small = (max(1, round(w / scale)), max(1, round(h / scale)))
+    with tempfile.TemporaryDirectory() as td:
+        full, probe = Path(td) / "full.png", Path(td) / "probe.png"
+        if not (depth_png(src, full) and depth_png(src, probe, (w, h), via=small)):
+            return
+        score = s2_score(s2, full, probe)
+    if score is None:
+        return
+    R.checks["sharpness"] = {"source": rel(src), "probe_scale": scale, "probe_ssimulacra2": round(score, 2), "soft_from": lim}
+    if score >= lim:
+        R.defect("QA-SOURCE-SOFT", "info", f"источник мягкий: копия в {scale} раза меньшего размера неотличима от кадра "
+                 f"(SSIMULACRA2 {score:.1f} ≥ {lim}) — деталей на свой размер нет: увеличенный источник или гладкий сюжет, "
+                 "посмотреть на 100 % [не откалибровано]", metric="sharpness.probe_ssimulacra2", value=score,
+                 th_key="image.soft_probe_scale")
+
+
 def audit_cutout(R: Report, path: Path, facts, a, ctx):
     import numpy as np
     from PIL import Image
     info = check_file_basics(R, path, facts, a)
-    check_budget(R, info, ctx["slot"], a)
+    check_budget(R, info, ctx["slot"], a, plan=ctx.get("plan"))
     ac = mod("alpha_check")
     _, fake = call_json(ac.cmd_fake, img=str(path))
     R.checks["alpha_fake"] = fake
@@ -1466,7 +1600,7 @@ def audit_edit(R: Report, path: Path, facts, a, ctx):
 
 def audit_texture(R: Report, path: Path, facts, a, ctx):
     info = check_file_basics(R, path, facts, a)
-    check_budget(R, info, "texture", a)
+    check_budget(R, info, "texture", a, plan=ctx.get("plan"))
     tc = mod("tile_check")
     rh, rv = tc.seam_ratio(tc.load(str(path)))
     mx = max(rh, rv)
@@ -1494,8 +1628,16 @@ def luma_flicker(frames) -> dict:
             "flicker_max": round(float(dev.max()), 3), "flicker_p95": round(float(np.percentile(dev, 95)), 3)}
 
 
-def audit_video(R: Report, path: Path, facts, a, ctx, alpha=False):
+def audit_video(R: Report, path: Path, facts, a, ctx, alpha=False, once=False):
+    """Видео: петля (шов, живость, концы), ролик с альфой (alpha) или разовый ролик (once — без шва, угасания, длины петли
+    и «ползущей камеры»). Числа приёмки — только группы video и video_alpha thresholds.yaml: нет ключа — режим не считается."""
     vl = mod("video_loop_check")
+    th = R.th
+    lims = {k: th(k) for k in set(th.flat) | set(th.over) if k.startswith(("video.", "video_alpha."))}
+
+    def need(key):
+        return vl.lim(lims, key)
+    montage, fade_event = bool(getattr(a, "montage", False)), bool(getattr(a, "fade_event", False))
     pr = vl.probe(str(path)) if path.is_file() else {}
     R.checks["probe"] = pr
     R.checks["file"] = {"bytes": path.stat().st_size if path.is_file() else None,
@@ -1506,109 +1648,152 @@ def audit_video(R: Report, path: Path, facts, a, ctx, alpha=False):
     if alpha and pr.get("pix_fmt") and "yuva" in str(pr.get("pix_fmt")):
         R.checks["alpha_video"] = {"pix_fmt": pr["pix_fmt"], "note": "альфа в потоке (VP9-alpha читает libvpx, не встроенный декодер)"}
     if alpha and not ("yuva" in str(pr.get("pix_fmt") or "")):
-        _, ch = call_json(vl.cmd_chroma, video=str(path), key=getattr(a, "key", None) or "auto", de=R.th("video_alpha.key_de", 5),
-                          width=320)
+        _, ch = call_json(vl.cmd_chroma, video=str(path), key=getattr(a, "key", None) or "auto", de=need("video_alpha.key_de"),
+                          width=320, thresholds=getattr(a, "thresholds", None))
         R.checks["chroma"] = ch
-        if ch.get("bg_ok_min", 1) < R.th("video_alpha.bg_ok_min", 0.95):
-            R.defect("QA-CHROMA-BG", "fail", f"фон-ключ неоднороден: доля фона в ΔE00 ≤ 5 — {ch.get('bg_ok_min')} (< 0,95)",
+        if ch.get("bg_ok_min", 1) < need("video_alpha.bg_ok_min"):
+            R.defect("QA-CHROMA-BG", "fail", f"фон-ключ неоднороден: доля фона в ΔE00 ≤ {need('video_alpha.key_de')} — "
+                     f"{ch.get('bg_ok_min')} (< {need('video_alpha.bg_ok_min')})",
                      metric="chroma.bg_ok_min", value=ch.get("bg_ok_min"), th_key="video_alpha.bg_ok_min")
-        if ch.get("obj_drift_max_pct_w", 0) > R.th("video_alpha.obj_drift_max_pct_w", 2.0):
-            R.defect("QA-CHROMA-DRIFT", "warn", f"объект уплывает на {ch.get('obj_drift_max_pct_w')} % ширины (> 2)",
+        if ch.get("obj_drift_max_pct_w", 0) > need("video_alpha.obj_drift_max_pct_w"):
+            R.defect("QA-CHROMA-DRIFT", "warn", f"объект уплывает на {ch.get('obj_drift_max_pct_w')} % ширины "
+                     f"(> {need('video_alpha.obj_drift_max_pct_w')})",
                      metric="chroma.obj_drift_max_pct_w", value=ch.get("obj_drift_max_pct_w"),
                      th_key="video_alpha.obj_drift_max_pct_w")
     fr = vl.load(str(path), 320)
     rgb = vl.load(str(path), 96, "rgb")
-    m = vl.loop_metrics(fr, 0.25, rgb, vl.src_width(str(path)) / 320)
+    m = vl.loop_metrics(fr, None, rgb, vl.src_width(str(path)) / 320, th=lims, montage=montage)
     ctrl = getattr(a, "control", None)
     if ctrl:
-        c = vl.loop_metrics(vl.load(ctrl, 320), 0.25)
+        c = vl.loop_metrics(vl.load(ctrl, 320), th=lims)
         m["control_motion_med"] = c["motion_med"]
         m["motion_vs_control"] = round(m["motion_med"] / max(c["motion_med"], 1e-6), 2)
     master = getattr(a, "master", None)
     if master and Path(master).suffix.lower() in VID_EXT and Path(master).resolve() != path.resolve():
         # сжатие «замораживает» тихую петлю: motion_keep = motion_med финала / мезонина (J 10-web-integration/02 §6.1)
-        mm = vl.loop_metrics(vl.load(str(master), 320), 0.25)
+        mm = vl.loop_metrics(vl.load(str(master), 320), th=lims)
         m["master_motion_med"] = mm["motion_med"]
         m["motion_keep"] = round(m["motion_med"] / max(mm["motion_med"], 1e-6), 2)
     m.pop("_curve", None)
-    m["verdict"] = vl.verdict(m)
-    m["flicker"] = luma_flicker(fr)
-    R.checks["loop"] = m
-    th = R.th
+    m["timing"] = vl.frame_timing(str(path))
+    m["flash"] = vl.flash_scan(str(path), lims, css_width=getattr(a, "css_width", None))
     lossless = "4:4:4" in str(pr.get("profile") or "") or str(pr.get("pix_fmt") or "").startswith(("yuv444", "rgb", "gbr"))
     lossy_final = (pr.get("codec") in ("h264", "hevc", "vp9", "av1") and not getattr(a, "mezzanine", False) and not lossless
-                   and (pr.get("kbps") or 0) < th("video.mezzanine_kbps_min", 15000))
-    quiet = m["motion_med"] < th("video.quiet_motion_med", 0.3)
-    seam = m["trim"]["seam_ratio_local_after"]
-    if not alpha:
-        if seam > th("video.seam_local_max", 1.5):
+                   and (pr.get("kbps") or 0) < need("video.mezzanine_kbps_min"))
+    # стадия файла: файл для страницы или сжатый финал — порог шва после кодирования; мезонин и выход модели — свой
+    encoded = (getattr(a, "stage", "master") == "web" or lossy_final) and not getattr(a, "mezzanine", False)
+    m["verdict"] = vl.verdict(m, lims, encoded=encoded, montage=montage, once=once, fade_event=fade_event)
+    m["flicker"] = luma_flicker(fr)
+    R.checks["loop"] = m
+    quiet = m["motion_med"] < need("video.quiet_motion_med")
+    loop_like = not alpha and not once
+    if loop_like:
+        sc = vl.seam_check(m, lims, encoded=encoded, montage=montage)
+        m["seam_check"] = sc
+        seam, seam_key = m["seam_ratio_local"], "video.seam_encoded_max" if encoded else "video.seam_local_max"
+        if not sc["ok"]:
             if lossy_final and quiet:
                 R.defect("QA-LOOP-SEAM", "needs_human", f"шов {seam} на сжатом файле тихой петли: пульс ключевого кадра даёт ложный шов "
-                         "(I/02: 0,98 → 3,4) — мерить мезонин или выход модели до перекодирования", metric="loop.trim.seam_ratio_local_after",
-                         value=seam, th_key="video.seam_local_max", marker="VID-M12")
+                         "— мерить мезонин или выход модели до перекодирования", metric="loop.seam_ratio_local",
+                         value=seam, th_key=seam_key, marker="VID-M12")
             else:
-                R.defect("QA-LOOP-SEAM", "fail", f"шов петли {seam} > 1,5 после среза — кроссфейд хвоста 12 кадров или мост (I 09/01 §3)",
-                         metric="loop.trim.seam_ratio_local_after", value=seam, th_key="video.seam_local_max", marker="VID-M12")
+                R.defect("QA-LOOP-SEAM", "fail", f"шов петли {seam} > {need(seam_key)} "
+                         f"({'файл после кодирования' if encoded else 'мезонин или выход модели'}, по файлу как есть) — мост "
+                         "loop_rife_bridge.py или кроссфейд хвоста (I 09/01 §3)",
+                         metric="loop.seam_ratio_local", value=seam, th_key=seam_key, marker="VID-M12")
         if m["trim"]["start"] or m["trim"]["end"]:
             R.defect("QA-LOOP-TRIM", "info", f"срезать кадры: начало {m['trim']['start']}, конец {m['trim']['end']} "
                      f"(дубль последнего — {m['dup_last']}) → video_loop_check.py trim --auto", metric="loop.trim",
                      value=m["trim"]["end"] + m["trim"]["start"])
-        if m["pingpong_suspect"]:
+        if m["pingpong_suspect"] and not montage:
             R.defect("QA-LOOP-PINGPONG", "warn", "похоже на пинг-понг (кадры зеркальны во времени): движение разворачивается",
                      metric="loop.mirror_ratio", value=m["mirror_ratio"], marker="VID-M12")
-    if (m.get("cut_ratio") or 0) >= th("video.cut_ratio_max", 10):
-        R.defect("QA-LOOP-CUT", "fail", f"склейка (локальный пик {m['cut_ratio']} ≥ 10 на кадре {m['cut_at']}) — мульти-шот выключить",
+    if montage:
+        m["shots"] = len(m["cuts"]) + 1      # склейки объявлены ключом --montage: находки нет, кадры склеек — в cuts
+    elif (m.get("cut_ratio") or 0) >= need("video.cut_ratio_max"):
+        R.defect("QA-LOOP-CUT", "fail", f"склейка (локальный пик {m['cut_ratio']} ≥ {need('video.cut_ratio_max')} на кадре "
+                 f"{m['cut_at']}) — мульти-шот выключить; ролик из нескольких планов принимается с ключом --montage",
                  metric="loop.cut_ratio", value=m["cut_ratio"], th_key="video.cut_ratio_max", marker="VID-M15")
-    elif (m.get("cut_ratio") or 0) >= th("video.event_ratio_warn", 4):
+    elif not once and (m.get("cut_ratio") or 0) >= need("video.event_ratio_warn"):
         R.defect("QA-LOOP-EVENT", "info", f"всплеск движения ×{m['cut_ratio']} на кадре {m['cut_at']}: событие в фоновой петле?",
                  metric="loop.cut_ratio", value=m["cut_ratio"], th_key="video.event_ratio_warn", marker="VID-M18")
-    if m["collapse_suspect"]:
-        R.defect("QA-LOOP-COLLAPSE", "fail", "движение угасает (длинный мёртвый конец) — браковать, перегенерировать",
-                 metric="loop.dead_end", value=m["dead_end"])
-    elif min(m["head_motion"], m["tail_motion"]) < th("video.head_tail_min", 0.5):
-        R.defect("QA-LOOP-FADE", "warn", f"движение слабеет к краю: голова {m['head_motion']}, хвост {m['tail_motion']} (< 0,5)",
-                 metric="loop.tail_motion", value=min(m["head_motion"], m["tail_motion"]), th_key="video.head_tail_min")
-    if (m.get("static_frac") or 0) > th("video.static_frac_max", 0.3):
-        R.defect("QA-LOOP-STATIC", "warn", f"«замёрзших» пар кадров {m['static_frac']} > 0,3 (заморозки, дубли кадров)",
-                 metric="loop.static_frac", value=m["static_frac"], th_key="video.static_frac_max")
+    if not once:
+        if m["collapse_suspect"]:
+            R.defect("QA-LOOP-COLLAPSE", "warn" if fade_event else "fail",
+                     f"движение угасает: мёртвых пар у концов — начало {m['dead_start']}, конец {m['dead_end']} "
+                     f"(> {need('video.dead_trim_max')})"
+                     + (" — объявлено событие-затемнение (--fade-event): посмотреть глазом" if fade_event else
+                        " — срезать `video_loop_check.py trim --auto` и проверить заново, иначе перегенерировать; "
+                        "событие-затемнение объявляет ключ --fade-event"),
+                     metric="loop.dead_end", value=max(m["dead_start"], m["dead_end"]), th_key="video.dead_trim_max")
+        elif min(m["head_motion"], m["tail_motion"]) < need("video.head_tail_min"):
+            R.defect("QA-LOOP-FADE", "warn", f"движение слабеет к краю: голова {m['head_motion']}, хвост {m['tail_motion']} "
+                     f"(< {need('video.head_tail_min')})",
+                     metric="loop.tail_motion", value=min(m["head_motion"], m["tail_motion"]), th_key="video.head_tail_min")
+        if (m.get("static_frac") or 0) > need("video.static_frac_max"):
+            R.defect("QA-LOOP-STATIC", "warn", f"«замёрзших» пар кадров {m['static_frac']} > {need('video.static_frac_max')} "
+                     "(заморозки, дубли кадров)",
+                     metric="loop.static_frac", value=m["static_frac"], th_key="video.static_frac_max")
+    held = (m.get("timing") or {}).get("held_frames") or 0
+    if m["dup_frames"] or held:
+        R.defect("QA-VIDEO-DUP-FRAMES", "warn", f"повторы кадров — рывок: пар без движения внутри ролика {m['dup_frames']}"
+                 + (f" (кадры {', '.join(map(str, m['dup_at']))})" if m["dup_at"] else "")
+                 + (f"; по таймкодам кадр держится дольше шага {held} раз (переменная частота)" if held else "")
+                 + " — кодировать с постоянной частотой без размножения кадров",
+                 metric="loop.dup_frames", value=m["dup_frames"] + held, th_key="video.dead_pair_frac")
     if "motion_vs_control" in m:
-        if m["motion_vs_control"] < th("video.motion_vs_control_min", 0.5):
-            R.defect("QA-LOOP-WEAK-MOTION", "fail", f"движения {m['motion_vs_control']} от i2v-контроля (< 0,5) — статичный коллапс",
+        if m["motion_vs_control"] < need("video.motion_vs_control_min"):
+            R.defect("QA-LOOP-WEAK-MOTION", "fail", f"движения {m['motion_vs_control']} от i2v-контроля "
+                     f"(< {need('video.motion_vs_control_min')}) — статичный коллапс",
                      metric="loop.motion_vs_control", value=m["motion_vs_control"], th_key="video.motion_vs_control_min")
-    elif not alpha:
+    elif loop_like:
         R.defect("QA-LOOP-NO-CONTROL", "info", "нет i2v-контроля (--control): равномерно слабое движение метрикой не видно (I/02)")
-    if "motion_keep" in m and m["motion_keep"] < th("video.motion_keep_min", 0.75):
-        R.defect("QA-ENCODE-MOTION", "warn", f"сжатие съело движение: motion_keep {m['motion_keep']} к мастеру (< 0,75) — CRF ниже "
+    if "motion_keep" in m and m["motion_keep"] < need("video.motion_keep_min"):
+        R.defect("QA-ENCODE-MOTION", "warn", f"сжатие съело движение: motion_keep {m['motion_keep']} к мастеру "
+                 f"(< {need('video.motion_keep_min')}) — CRF ниже "
                  "(J/05: AV1 CRF 36 тихих петель 0,24–0,77; AV1 24–28, H.264 18–20)", metric="loop.motion_keep", value=m["motion_keep"],
                  th_key="video.motion_keep_min")
-    if not alpha and m["cam_shift_max_px"] >= th("video.cam_shift_max_px", 1.0) and not getattr(a, "camera_move", False):
+    if loop_like and not montage and m["cam_shift_max_px"] >= need("video.cam_shift_max_px") and not getattr(a, "camera_move", False):
         R.defect("QA-VIDEO-CAM-CREEP", "warn", f"кадр ползёт на {m['cam_shift_max_px']} px — «ползущая камера» ломает шов",
                  metric="loop.cam_shift_max_px", value=m["cam_shift_max_px"], th_key="video.cam_shift_max_px", marker="VID-M07")
-    for k in ("seam_dE00", "color_drift_dE00"):
-        if m.get(k) is not None and m[k] >= th("video.color_de_max", 2.0):
-            R.defect("QA-LOOP-COLOR", "warn", f"{k} {m[k]} ≥ 2 — цвет плывёт", metric=f"loop.{k}", value=m[k],
-                     th_key="video.color_de_max", marker="VID-M14")
+    if not once and not montage:
+        for k in ("seam_dE00", "color_drift_dE00"):
+            if m.get(k) is not None and m[k] >= need("video.color_de_max"):
+                R.defect("QA-LOOP-COLOR", "warn", f"{k} {m[k]} ≥ {need('video.color_de_max')} — цвет плывёт", metric=f"loop.{k}",
+                         value=m[k], th_key="video.color_de_max", marker="VID-M14")
     fl = m["flicker"]
-    if fl.get("flicker_max") is not None and fl["flicker_max"] > th("video.flicker_max", 2.0):
+    if fl.get("flicker_max") is not None and fl["flicker_max"] > need("video.flicker_max"):
         R.defect("QA-VIDEO-FLICKER", "info", f"яркость кадра «дышит»: отклонение до {fl['flicker_max']} из 255 [не откалибровано]",
                  metric="loop.flicker.flicker_max", value=fl["flicker_max"], th_key="video.flicker_max", marker="VID-M14")
+    if m["flash"].get("fail"):
+        R.defect("QA-VIDEO-FLASH", "warn", f"вспышки: больше {need('video.flash_per_s_max')} в секунду на "
+                 f"{m['flash']['max_area_frac']:.0%} поля 10° (t ≈ {m['flash']['worst_t_s']} с, ширина на странице "
+                 f"{m['flash']['css_width']:.0f} CSS px) — WCAG 2.3.1; на странице останавливают ворота эффектов EG-A11Y-04",
+                 metric="loop.flash.max_area_frac", value=m["flash"]["max_area_frac"], th_key="video.flash_area_frac_min")
     if getattr(a, "mask", None):
         _, dr = call_json(vl.cmd_drift, video=str(path), mask=a.mask, width=320)
         R.checks["cinemagraph_drift"] = dr
-        if dr.get("drift_max", 0) >= th("video.cinemagraph_drift_max", 1.0) or dr.get("dE00_max", 0) >= th("video.color_de_max", 2.0) \
-                or dr.get("cam_shift_max_px", 0) >= th("video.cam_shift_max_px", 1.0):
+        if dr.get("drift_max", 0) >= need("video.cinemagraph_drift_max") or dr.get("dE00_max", 0) >= need("video.color_de_max") \
+                or dr.get("cam_shift_max_px", 0) >= need("video.cam_shift_max_px"):
             R.defect("QA-CINEMAGRAPH-DRIFT", "warn", f"неподвижные зоны плывут: drift {dr.get('drift_max')}, ΔE00 {dr.get('dE00_max')}, "
                      f"камера {dr.get('cam_shift_max_px')} px", metric="cinemagraph_drift.drift_max", value=dr.get("drift_max"),
                      th_key="video.cinemagraph_drift_max")
     dur = pr.get("duration_s") or 0
-    if dur and not (th("video.loop_len_min_s", 4) <= dur <= th("video.loop_len_max_s", 10)) and not alpha:
-        R.defect("QA-LOOP-LENGTH", "info", f"длительность {dur:.1f} с вне 4–10 с для фоновой петли", metric="probe.duration_s", value=dur)
+    if dur and loop_like and not (need("video.loop_len_min_s") <= dur <= need("video.loop_len_max_s")):
+        R.defect("QA-LOOP-LENGTH", "info", f"длительность {dur:.1f} с вне {need('video.loop_len_min_s')}–"
+                 f"{need('video.loop_len_max_s')} с для фоновой петли", metric="probe.duration_s", value=dur)
     if getattr(a, "stage", "master") == "web" and path.is_file():
         kb = path.stat().st_size / 1024
-        key = "budget.video.hero_1080_kb" if (pr.get("h") or 0) >= 1000 else "budget.video.hero_720_kb"
-        lim = th(key)
-        if lim and kb > lim:
-            R.defect("QA-BUDGET", "warn", f"{kb:.0f} КБ > бюджета {lim} КБ", metric="file.bytes", value=round(kb), th_key=key)
+        plan = ctx.get("plan") or {}
+        if plan.get("max_kb") is not None:      # бюджет строки плана ассетов
+            key, lim_kb, label = None, plan["max_kb"], f"слота {plan['id']} плана ассетов (вариант {plan['variant']})"
+        else:                                   # без плана — умолчание по высоте кадра
+            key = "budget.video.hero_1080_kb" if (pr.get("h") or 0) >= 1000 else "budget.video.hero_720_kb"
+            lim_kb, label = th(key), "по умолчанию"
+        R.checks["budget"] = {"kb": round(kb, 1), "limit_kb": lim_kb, "key": key or f"plan:{plan['id']}/{plan['variant']}"}
+        if lim_kb and kb > lim_kb:
+            R.defect("QA-BUDGET", "warn", f"{kb:.0f} КБ > бюджета {lim_kb} КБ {label}", metric="file.bytes", value=round(kb),
+                     th_key=key, threshold=lim_kb)
     sheet = Path(ctx["out"]) / (path.stem + "_sheet.jpg")
     call_json(vl.cmd_sheet, video=str(path), out=str(sheet), n=12, cols=4)
     R.checks["sheet"] = rel(sheet)
@@ -1660,7 +1845,9 @@ def audit_svg(R: Report, path: Path, facts, a, ctx):
         R.defect("QA-SVG-HEAVY", "warn", f"{kb:.1f} КБ > {lim} КБ — svgo (−57…−65 % у Recraft) или растр AVIF", metric="file.bytes",
                  value=round(kb, 1), threshold=lim)
     if si["style"] == "line":
-        check_icons(R, path, getattr(a, "icon_set", None) or ICON_SET)
+        etalon = [x for k, v in (("--stroke", getattr(a, "icon_stroke", None)), ("--viewbox", getattr(a, "icon_viewbox", None)),
+                                 ("--conventions", getattr(a, "conventions", None))) if v is not None for x in (k, str(v))]
+        check_icons(R, path, getattr(a, "icon_set", None), tuple(etalon))
     R.ask_human("Узнаётся ли метафора иконки за 5 секунд без подписи?", "новые метафоры узнаются 2 из 5 (G/01); геометрию код "
                 "проверяет, смысл — человек или VLM с контролем (G-06)")
     return R
@@ -1671,18 +1858,16 @@ def is_lucide(icon_set: str | None) -> bool:
     return str(icon_set or ICON_SET).strip().lower().startswith("lucide")
 
 
-def check_icons(R: Report, path: Path, icon_set: str = ICON_SET):
-    """check_icons.py (пороги по Lucide 1.47) — в Python окружения скилла; иконка копируется во временную папку. Уровень
-    флага — поле levels ответа: жёсткий цвет — брак у любого набора; шапка и штрих Lucide (24×24, stroke 2, round) — брак
-    только у набора Lucide, у другого набора — предупреждение с советом; остальные флаги — предупреждения."""
-    if not VENV_G.exists():
-        R.errors.append("нет Python окружения скилла — check_icons не запущен")
-        return
+def check_icons(R: Report, path: Path, icon_set: str | None = None, etalon: tuple = ()):
+    """check_icons.py (пороги по Lucide 1.47) — в Python окружения скилла; иконка копируется во временную папку. Эталон
+    шапки и штрих — ключи etalon (`--stroke`, `--viewbox`, `--conventions`), без них — Lucide 24×24, stroke 2. Уровень
+    флага — поле levels ответа: жёсткий цвет — брак у любого набора; шапка и штрих не по эталону — брак только у набора
+    Lucide, у другого набора — предупреждение с советом; остальные флаги — предупреждения."""
     with tempfile.TemporaryDirectory() as td:
         shutil.copy(path, Path(td) / path.name)
         out = Path(td) / "r.json"
-        r = subprocess.run([str(VENV_G), str(TOOLS / "check_icons.py"), td, "--ref", str(LUCIDE_REF), "--set", icon_set,
-                            "--json", str(out)], capture_output=True, text=True, timeout=300)
+        r = subprocess.run([kbpaths.python(), str(TOOLS / "check_icons.py"), td, "--ref", str(LUCIDE_REF), "--json", str(out),
+                            *(["--set", icon_set] if icon_set else []), *etalon], capture_output=True, text=True, timeout=300)
         if not out.exists():
             line = last_line(r.stderr or r.stdout) or f"код {r.returncode}"
             if r.returncode == 2 and INSTALL in line:   # нет пакетов группы svg — одна строка с командой установки
@@ -1692,6 +1877,7 @@ def check_icons(R: Report, path: Path, icon_set: str = ICON_SET):
             return
         res = json.loads(out.read_text(encoding="utf-8")).get(path.stem, {})
     R.checks["icon"] = res
+    icon_set = res.get("set") or icon_set or ICON_SET      # набор без ключа — из карты решений (--conventions) или Lucide
     levels = res.get("levels") or {}
     for f in res.get("flags", []):
         key = f.split()[0]
@@ -1700,8 +1886,10 @@ def check_icons(R: Report, path: Path, icon_set: str = ICON_SET):
         lvl = levels.get(key) or ("fail" if key == "цвет" or (key == "шапка" and is_lucide(icon_set)) else "warn")
         msg = f"check_icons: {f} (пороги по Lucide 1.47, G/01)"
         if key == "шапка":
+            hr = res.get("header_rules") or {}
             msg = (f"check_icons: шапка не по спецификации Lucide ({', '.join(res.get('header_bad') or [])}; правило — "
-                   "viewBox 0 0 24 24, 24×24, fill none, stroke currentColor, stroke-width 2, round cap/join)")
+                   f"viewBox {hr.get('viewBox', '0 0 24 24')}, {hr.get('width', '24')}×{hr.get('height', '24')}, fill none, "
+                   f"stroke currentColor, stroke-width {hr.get('stroke-width', '2')}, round cap/join)")
             if lvl != "fail":
                 msg += (f" — у набора «{icon_set}» это предупреждение: сверить шапку и штрих со спецификацией набора, "
                         "иконки под Lucide не подгонять")
@@ -1727,6 +1915,7 @@ def audit_og(R: Report, path: Path, facts, a, ctx):
 MODES = {"image": audit_image, "cutout": audit_cutout, "edit": audit_edit, "texture": audit_texture,
          "video-loop": lambda R, p, f, a, c: audit_video(R, p, f, a, c, alpha=False),
          "video-alpha": lambda R, p, f, a, c: audit_video(R, p, f, a, c, alpha=True),
+         "video-once": lambda R, p, f, a, c: audit_video(R, p, f, a, c, once=True),
          "svg-icon": audit_svg, "og": audit_og}
 
 
@@ -1750,13 +1939,21 @@ def apply_text(reports: list[Report], ocr_res: dict, a):
                            "lang": o.get("lang"), "elapsed_s": o.get("elapsed_s")}
         if exp:
             tv = text_verdict(exp, "\n".join(L["text"] for L in lines), lines_meta=lines, th=R.th,
-                              yo_required=not getattr(a, "yo_optional", False), allowed=getattr(a, "allow_text", None))
-            R.checks["text"] = {k: tv[k] for k in ("verdict", "fail_classes", "classes", "extra_text", "latin_suspect", "fake_latin",
-                                                   "precision_words", "recall_lines", "gned", "ocr_score_min", "min_line_h_px")}
-            R.checks["text"]["lines"] = [{k: L[k] for k in ("expected", "found", "cer", "match", "classes")} for L in tv["lines"]]
+                              yo_required=not getattr(a, "yo_optional", False), allowed=getattr(a, "allow_text", None),
+                              h_scale=ocr_scale(o))
+            R.checks["text"] = {k: tv[k] for k in ("verdict", "fail_classes", "small_text", "classes", "extra_text", "latin_suspect",
+                                                   "fake_latin", "precision_words", "recall_lines", "gned", "ocr_score_min",
+                                                   "min_line_h_px")}
+            R.checks["text"]["lines"] = [{k: L[k] for k in ("expected", "found", "cer", "match", "classes", "occurrence", "small")
+                                          if k in L} for L in tv["lines"]]
             if tv["verdict"] == "fail":
                 R.defect("QA-TEXT-MISMATCH", "fail", f"текст не совпал с брифом: {', '.join(tv['fail_classes'])}", metric="text.fail_classes",
                          value=",".join(tv["fail_classes"]), th_key="text.fail_min_ocr_score", marker="IMG-M12")
+            elif tv["verdict"] == "warn":
+                R.defect("QA-TEXT-SMALL", "warn", f"мелкие буквы (строка ниже {R.th('text.fail_min_line_h_px', 16)} px в масштабе "
+                         f"распознавания): расхождение распознавания ({', '.join(tv['small_text'])}) — прочитать глазами на 200 %",
+                         metric="text.small_text", value=",".join(tv["small_text"]), th_key="text.fail_min_line_h_px",
+                         marker="IMG-M12")
             elif tv["verdict"] == "needs_human":
                 why = ", ".join(tv["fail_classes"] + (["latin_suspect"] if tv["latin_suspect"] else [])) or "неуверенный OCR"
                 R.defect("QA-TEXT-CHECK", "needs_human", f"текст прочитать глазами по буквам на 200 %: {why}", metric="text.fail_classes",
@@ -1782,6 +1979,8 @@ HUMAN_DEFAULT = {
     "edit": ["Лист «оригинал | правка | карта | композит»: правка выполнена? остальное не испорчено? (раздельно, GEditBench v2)"],
     "texture": [],
     "video-loop": ["Три повтора подряд на полном размере и на телефоне: пауза, «вспышка» кадра 0, разворот, застывший фон",
+                   "Покадрово 0 / 25 / 50 / 75 / 100 %: морфинг, «кипение» фактур, плывущий текст (VID-M01…M03, M11)"],
+    "video-once": ["Ролик целиком на полном размере и на телефоне: первый и последний кадр, склейки, вспышки",
                    "Покадрово 0 / 25 / 50 / 75 / 100 %: морфинг, «кипение» фактур, плывущий текст (VID-M01…M03, M11)"],
     "video-alpha": ["Альфа на двух контрастных фонах, край объекта во движении: «кипение», зелёный отсвет на металле"],
     "svg-icon": ["Иконки набора рядом в 24 px и на тёмном фоне: вес линий, узнаваемость, «дырки» цветом фона"],
@@ -1992,6 +2191,13 @@ def audit_paths(a) -> dict:
             if k in mapping:
                 over[mapping[k]] = v + 1 if k == "markers_max" else v
     th = Th(th_doc, over)
+    slot_arg = getattr(a, "slot", None)
+    plan = plan_slot(Path(a.plan), slot_arg, getattr(a, "variant", None), getattr(a, "mobile", False)) \
+        if getattr(a, "plan", None) else None
+    if slot_arg and plan is None and slot_arg not in SLOT_KINDS:
+        raise AuditError(f"--slot {slot_arg}: без --plan это род слота ({', '.join(SLOT_KINDS)}); id слота плана ассетов "
+                         "задаётся вместе с --plan")
+    slot_kind = plan["kind"] if plan else slot_arg
     out_dir = Path(a.out or (kbpaths.out("ai-media", "audit") / dt.date.today().isoformat()))
     out_dir.mkdir(parents=True, exist_ok=True)
     items = collect_inputs(a.paths)
@@ -2002,14 +2208,16 @@ def audit_paths(a) -> dict:
         facts = passport_facts(pj, ppath, path) if pj else None
         mode = a.mode if a.mode != "auto" else infer_mode(path, facts, a)
         R = Report(path, mode, th)
-        slot = getattr(a, "slot", None) or SLOT_OF_TASK.get((facts or {}).get("task_code") or getattr(a, "task", None) or "")
+        slot = slot_kind or SLOT_OF_TASK.get((facts or {}).get("task_code") or getattr(a, "task", None) or "")
         if mode == "og":
             slot = "og"
         R.meta.update({"slot": slot, "stage": getattr(a, "stage", "master")})
+        if plan:
+            R.meta["plan_slot"] = {k: plan[k] for k in ("plan", "id", "variant", "max_kb")}
         if facts:
             R.meta["generation"] = {k: facts.get(k) for k in ("passport", "passport_schema", "channel", "model", "provider_actual",
                                                               "tag", "test", "task_code", "cost_rub", "requested")}
-        ctx = {"slot": slot, "dna": dna, "spec": spec, "out": str(out_dir), "ref_metrics": ref_metrics}
+        ctx = {"slot": slot, "dna": dna, "spec": spec, "out": str(out_dir), "ref_metrics": ref_metrics, "plan": plan}
         try:
             MODES[mode](R, path, facts, a, ctx)
         except Exception as e:  # noqa: BLE001
@@ -2047,9 +2255,9 @@ def audit_paths(a) -> dict:
                 for b in P.get("missing") or []:   # метки не прочитаны целиком — сведения, вердикт не меняют
                     what = {"c2patool": "C2PA", "exiftool": "XMP и EXIF"}.get(b, b)
                     R.no_env(env_hint(f"{b} не найден (провенанс: метки {what} не прочитаны)", "--bin"))
-                if P.get("visible_suspect"):   # эвристика углов шумная (срабатывает и на фото без метки) → предупреждение с листом углов
+                if P.get("visible_suspect"):   # эвристика углов шумная (срабатывает и на фото без метки) → сведения с листом углов
                     sheet = P.get("corners_sheet") or "лист углов"
-                    R.defect("QA-PROV-VISIBLE-MARK", "warn",
+                    R.defect("QA-PROV-VISIBLE-MARK", "info",
                              f"подозрение на видимую метку в углу ({', '.join(P['visible_suspect'][:4])}) — посмотреть {sheet}; "
                              "метку вендора не вырезать кропом без решения заказчика (12-legal-provenance/04 §5 п. 7)",
                              evidence=P.get("corners_sheet"))
@@ -2106,7 +2314,7 @@ def audit_md(s: dict) -> str:
 TH_KEYS_USED = [
     "image.ratio_tolerance", "image.hero_master_min_px", "image.colorfulness_q3", "image.sat_share_q3", "image.hdr_index_q3",
     "image.clip_hi_q3", "image.colorfulness_max_rel", "image.hdr_index_max_delta", "image.filter_colorfulness_rel",
-    "image.warm_b_max", "image.purple_share_max", "composition.center_offset_min", "composition.centroid_x_min",
+    "image.warm_b_max", "image.purple_share_max", "image.soft_probe_scale", "composition.center_offset_min", "composition.centroid_x_min",
     "composition.blobs_max", "text_zone.edge_density_max", "text_zone.scrim_percentile", "text_zone.contrast_min",
     "text_zone.scrim_alpha_warn", "palette.de_ok", "palette.min_matched", "cutout.transparent_frac_min", "cutout.halo_px_max",
     "cutout.margin_min_frac", "cutout.glass_partial_min", "cutout.fiber_partial_min", "cutout.iou_min_solid",
@@ -2114,7 +2322,9 @@ TH_KEYS_USED = [
     "edit.target_changed_min", "edit.edges_iou_min", "edit.protect_ssim_min", "edit.outpaint_edge_sharpness_min",
     "edit.noedit_changed_min", "edit.maskless_changed_max", "edit.extra_regions_tolerance", "edit.derived_mask_dilate_frac",
     "edit.feather_frac", "edit.local_shift_de", "edit.local_shift_min_frac", "texture.seam_ratio_max", "texture.seam_ratio_fail", "video.seam_local_max", "video.cut_ratio_max",
-    "video.event_ratio_warn", "video.head_tail_min", "video.static_frac_max", "video.motion_vs_control_min",
+    "video.seam_encoded_max", "video.dead_pair_frac", "video.dead_trim_max", "video.pingpong_mirror_max",
+    "video.flash_luma_delta_min", "video.flash_dark_max", "video.flash_per_s_max", "video.flash_area_frac_min",
+    "video.flash_field_css_px", "video.event_ratio_warn", "video.head_tail_min", "video.static_frac_max", "video.motion_vs_control_min",
     "video.cam_shift_max_px", "video.color_de_max", "video.flicker_max", "video.cinemagraph_drift_max", "video.quiet_motion_med",
     "video.mezzanine_kbps_min", "video.loop_len_min_s", "video.loop_len_max_s", "video.motion_keep_min", "video_alpha.bg_ok_min", "video_alpha.key_de",
     "video_alpha.obj_drift_max_pct_w", "series.hue_spread_max_deg", "series.hue_break_deg", "series.pal_de_mean_max",
@@ -3202,7 +3412,7 @@ def cmd_ocr(a):
     for r in res:
         if a.expect and "lines" in r:
             tr = "\n".join(L["text"] for L in r["lines"])
-            r["text_check"] = text_verdict(a.expect, tr, lines_meta=r["lines"], th=th)
+            r["text_check"] = text_verdict(a.expect, tr, lines_meta=r["lines"], th=th, h_scale=ocr_scale(r))
     if a.transcripts_out:   # формат stand_run.py metrics --transcripts: {путь от корня: транскрипт}
         tr = {rel(r["file"]): "\n".join(L["text"] for L in r.get("lines", [])) for r in res if "lines" in r}
         Path(a.transcripts_out).write_text(jdump(tr), encoding="utf-8")
@@ -3247,15 +3457,27 @@ def build_parser():
     u.add_argument("--dna", help="паспорт визуала (06-art-direction-consistency): палитра, приёмка, эталоны, зона текста")
     u.add_argument("--spec", help="спецификация ассета (05-prompting/asset-spec.schema.json): зона текста, палитра, строки")
     u.add_argument("--task", help="код задачи (IMG-HERO-PHOTO …), если нет паспорта")
-    u.add_argument("--slot", choices=["hero", "section", "product", "icon", "og", "texture"])
-    u.add_argument("--icon-set", default=ICON_SET, metavar="НАБОР",
-                   help="набор иконок продукта (conventions.icons.set карты решений), по умолчанию lucide: шапка и штрих Lucide "
-                        "(24×24, stroke 2, round) — брак только у набора Lucide, у другого набора — предупреждение")
-    u.add_argument("--stage", default="master", choices=["master", "web"], help="web — файл на страницу: бюджеты веса")
+    u.add_argument("--slot", metavar="СЛОТ",
+                   help=f"род слота для порогов ({', '.join(SLOT_KINDS)}); с --plan — id слота плана ассетов")
+    u.add_argument("--plan", help="план ассетов страницы (asset-plan v1): бюджет веса — `max_kb` варианта слота --slot, "
+                                  "род слота — по его виду; без плана — бюджеты по умолчанию")
+    u.add_argument("--variant", help="вариант слота плана (desktop, mobile …); без ключа — mobile при --mobile, иначе desktop")
+    u.add_argument("--icon-set", metavar="НАБОР",
+                   help="набор иконок продукта (conventions.icons.set карты решений), по умолчанию lucide или набор из "
+                        "--conventions: шапка и штрих не по эталону — брак только у набора Lucide, у другого набора — "
+                        "предупреждение")
+    u.add_argument("--icon-stroke", type=float, metavar="ШТРИХ", help="штрих иконок продукта (эталон шапки; по умолчанию 2)")
+    u.add_argument("--icon-viewbox", metavar="VIEWBOX", help="viewBox иконок продукта (эталон шапки; по умолчанию «0 0 24 24»)")
+    u.add_argument("--conventions", metavar="SYSTEM.yaml",
+                   help="карта решений дизайн-системы: набор и штрих иконок — conventions.icons (set, stroke)")
+    u.add_argument("--stage", default="master", choices=["master", "web"],
+                   help="web — файл на страницу: бюджеты веса, у видео — порог шва после кодирования")
     u.add_argument("--mobile", action="store_true",
                    help="телефонный кадр слота: бюджет <слот>_mobile_kb (hero ≤ 80 КБ), без проверки размера мастера hero")
     u.add_argument("--ratio", help="заказанная пропорция 16:9, если нет паспорта")
-    u.add_argument("--expect", action="append", help="строка, которая должна быть на картинке дословно (повторять)")
+    u.add_argument("--expect", action="append",
+                   help="строка, которая должна быть на картинке дословно (повторять); число вхождений — суффикс {×N} "
+                        "(«Скидка{×2}») или повтор той же строки")
     u.add_argument("--allow-text", action="append", help="текст, который может быть на картинке (этикетка товара)")
     u.add_argument("--yo-optional", action="store_true", help="ё → е не считать ошибкой")
     u.add_argument("--ocr", default="auto", choices=["auto", "on", "off"])
@@ -3276,8 +3498,16 @@ def build_parser():
     u.add_argument("--ref-alpha", help="эталонная альфа (рендер Blender)")
     u.add_argument("--control", help="i2v-контроль того же кадра (живость петли)")
     u.add_argument("--key", help="#hex ключа хромакея или auto")
-    u.add_argument("--mezzanine", action="store_true", help="файл — мезонин или выход модели до перекодирования")
+    u.add_argument("--mezzanine", action="store_true",
+                   help="файл — мезонин или выход модели до перекодирования: порог шва мезонина")
     u.add_argument("--camera-move", action="store_true", help="движение камеры заказано (не считать «ползущей»)")
+    u.add_argument("--montage", action="store_true",
+                   help="видео из нескольких планов: склейки не находка, движение считается по планам, стык петли — шов "
+                        "или ещё одна склейка")
+    u.add_argument("--fade-event", action="store_true",
+                   help="в петле объявлено событие-затемнение: угасание движения — предупреждение, не брак")
+    u.add_argument("--css-width", type=float,
+                   help="ширина видео на странице, CSS px, — для поля вспышек WCAG 2.3.1 (по умолчанию — ширина файла)")
     u.add_argument("--series", action="store_true", help="считать ещё и серию по всем картинкам")
     u.add_argument("--grid", help="RxC: разрезать сетку одной генерации и считать серию по ячейкам")
     u.add_argument("--ref", action="append", help="эталоны серии (ΔE палитры к эталону)")
@@ -3340,7 +3570,7 @@ def main(argv=None):
           "selftest": cmd_selftest}[a.cmd]
     try:
         return fn(a)
-    except JudgeError as e:
+    except (JudgeError, AuditError) as e:
         print(f"asset_audit.py {a.cmd}: {e}", file=sys.stderr)
         return 2
 

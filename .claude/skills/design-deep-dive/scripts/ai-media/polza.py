@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""polza.py — клиент Media API polza.ai для ai-media-research: сухой прогон по умолчанию, трата только с --live.
+"""polza.py — клиент Media API polza.ai: сухой прогон по умолчанию, трата только с --live.
 
-Агент B, волна 1, 2026-09-23. Python 3.13, только стандартная библиотека (+ polza_catalog.py рядом).
-Проверен на локальном макете сервера (99-raw/experiments/B/01-mock-server), НЕ на настоящем polza (ключа нет).
+Python 3.13, только стандартная библиотека (+ polza_catalog.py рядом).
 
 Подкоманды:
   models [--type image|video] [--search S] [--fresh]   модели из снимка каталога (или свежий бесплатный GET)
   show MODEL [--provider P] [--json]                   параметры, цены, операции, провайдеры, заметки
-  estimate JOB.json|JOBS.jsonl                         проверка по каталогу + цена + бюджет, без сети
+  estimate JOB.json|JOBS.jsonl [--ops OP[,OP…]]        проверка по каталогу + цена + бюджет, без сети; --ops —
+                                                       операции над готовым результатом (extend, upscale_1080p,
+                                                       upscale_4k): строка сметы на операцию, цена — в сумме
   run JOB.json                                         одно задание (сухой прогон; --live — отправить)
   batch JOBS.jsonl [--parallel 2]                      серия (не больше 3 параллельно)
   status ID                                            статус генерации (GET /v1/media/{id})
@@ -17,18 +18,30 @@
                                                        с исходником: тот же id и тот же файл — операция не выполнена
   ledger [--sum] [--agent X] [--tail N]                журнал затрат
   ledger --ops                                         сверка записей операций с сохранёнными ответами, без сети
-  balance                                              GET /v2/balance и /v1/key (предполётная проверка)
+  ledger --balance [--baseline RUB]                    сверка журнала с балансом канала: spentAmount из /v2/balance
+                                                       против суммы журнала; --baseline — траты ключа вне журнала;
+                                                       чтение, не трата — идёт без --live; расхождение — код 1
+  balance                                              GET /v2/balance и /v1/key: баланс и лимит ключа; чтение, не
+                                                       трата — идёт без --live
   history ID                                           GET /v1/history/generations/{id} (провайдер, clientCost)
-  selftest                                             самопроверка операций на подменном канале: без сети и без ключа
+  selftest                                             самопроверка на подменном канале: операции, смета с операцией,
+                                                       баланс и сверка журнала, один файл — одна загрузка, размер
+                                                       результата в паспорте; без сети и без ключа
 
-Задание (JSON): {"model": "...", "input": {...}, "provider": {...}?, "tag": "...", "agent": "B", "notes": "...",
+Задание (JSON): {"model": "...", "input": {...}, "provider": {...}?, "tag": "...", "agent": "...", "notes": "...",
   "variant": 1?, "max_rub": 10?, "out_dir": "..."?, "meta": {"ref_video_seconds": 7.5}?, "user": "..."?}
 Файлы в input.images / input.videos: URL, data:URI, локальный путь (≤ 4 МБ — base64, больше — загрузка в хранилище)
-или объект {"type": "url"|"base64", "data": ...} (OpenAPI MediaFileDto).
+или объект {"type": "url"|"base64", "data": ...} (OpenAPI MediaFileDto). Один локальный файл в нескольких местах
+задания (петля: первый кадр = последний) загружается в хранилище один раз, во все места встаёт одна ссылка.
+Паспорт результата (<тег>__<модель>__<id>.passport.json) несёт поле size: заказанную ступень размера и фактические
+ширину и высоту файла — ступень каталога (1K, 2K, 720p) называет цену, кадр внутри неё выбирает модель.
 
 Окружение: POLZA_API_KEY или файл ~/.config/polza/api_key (права 600); POLZA_BASE_URL (по умолчанию
-https://polza.ai/api); POLZA_CATALOG (снимок); POLZA_LEDGER; POLZA_OUT_ROOT; POLZA_BUDGET_TOTAL (2000);
-POLZA_BUDGET_AGENT; POLZA_MAX_JOB (60). Ключ никогда не печатается и не пишется в журнал и паспорта.
+https://polza.ai/api); POLZA_CATALOG (снимок каталога: имя папки в $DDD_HOME/cache/ai-media/polza или путь, по
+умолчанию — последний); POLZA_LEDGER (журнал затрат, по умолчанию $DDD_HOME/out/ai-media/_ledger.jsonl);
+POLZA_OUT_ROOT (корень результатов, по умолчанию $DDD_HOME/out/ai-media/_polza; файлы — в <корень>/<агент>/<дата>/);
+POLZA_BUDGET_TOTAL (2000); POLZA_BUDGET_AGENT; POLZA_MAX_JOB (60). Ключ никогда не печатается и не пишется в журнал
+и паспорта.
 
 Коды выхода: 0 — успех; 1 — ошибка задания/проверки; 2 — отказ по бюджету или цене; 3 — таймаут опроса (генерацию
 можно дожать: download ID --live); 4 — генерация failed/cancelled или операция не выполнена (канал вернул исходник);
@@ -60,14 +73,14 @@ from pathlib import Path
 
 TOOLS = Path(__file__).resolve().parent
 sys.path.insert(0, str(TOOLS))
-sys.path.insert(0, str(TOOLS.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(TOOLS.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 import polza_catalog as pc  # noqa: E402
 
 VERSION = "polza.py 1.0 (2026-09-23)"
 ROOT = pc.ROOT
 DEFAULT_BASE = "https://polza.ai/api"
-DEFAULT_LEDGER = kbpaths.out("ai-media") / "_ledger.jsonl"  # перенос: журнал затрат — общий с mp_client
+DEFAULT_LEDGER = kbpaths.out("ai-media") / "_ledger.jsonl"  # журнал затрат — общий с mp_client.py
 DEFAULT_OUT_ROOT = kbpaths.out("ai-media", "_polza")
 KEY_FILE = Path(os.environ.get("POLZA_KEY_FILE", str(Path.home() / ".config" / "polza" / "api_key")))
 INLINE_MAX = 4 * 1024 * 1024          # до 4 МБ — base64 в теле, больше — загрузка в хранилище (media-input.mdx: «больше нескольких МБ — через хранилище»)
@@ -450,14 +463,67 @@ def ffprobe(path: Path) -> dict | None:
             "codec": v.get("codec_name"), "fps": fps, "has_audio": a_ is not None}
 
 
+def image_size(path: Path) -> tuple[int, int] | None:
+    """Ширина и высота PNG, GIF, WebP, JPEG по заголовку файла — без Pillow."""
+    try:
+        with open(path, "rb") as f:
+            head = f.read(1 << 18)
+    except OSError:
+        return None
+    if head[:8] == b"\x89PNG\r\n\x1a\n" and len(head) >= 24:
+        return int.from_bytes(head[16:20], "big"), int.from_bytes(head[20:24], "big")
+    if head[:6] in (b"GIF87a", b"GIF89a") and len(head) >= 10:
+        return int.from_bytes(head[6:8], "little"), int.from_bytes(head[8:10], "little")
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP" and len(head) >= 30:
+        if head[12:16] == b"VP8X":
+            return int.from_bytes(head[24:27], "little") + 1, int.from_bytes(head[27:30], "little") + 1
+        if head[12:16] == b"VP8L":
+            bits = int.from_bytes(head[21:25], "little")
+            return (bits & 0x3FFF) + 1, ((bits >> 14) & 0x3FFF) + 1
+        if head[12:16] == b"VP8 ":
+            return int.from_bytes(head[26:28], "little") & 0x3FFF, int.from_bytes(head[28:30], "little") & 0x3FFF
+    if head[:2] == b"\xff\xd8":
+        i = 2
+        while i + 9 <= len(head):
+            if head[i] != 0xFF:
+                i += 1
+                continue
+            marker = head[i + 1]
+            if 0xC0 <= marker <= 0xCF and marker not in (0xC4, 0xC8, 0xCC):      # кадр SOF: высота, затем ширина
+                return int.from_bytes(head[i + 7:i + 9], "big"), int.from_bytes(head[i + 5:i + 7], "big")
+            if marker in (0x01, 0xD8, 0xFF) or 0xD0 <= marker <= 0xD7:           # маркер без длины
+                i += 1 if marker == 0xFF else 2
+                continue
+            i += 2 + int.from_bytes(head[i + 2:i + 4], "big")
+    return None
+
+
 def image_info(path: Path) -> dict | None:
     try:
-        from PIL import Image  # системный Pillow 11.3 (необязателен)
+        from PIL import Image  # Pillow необязателен: без него — размер по заголовку файла
         with Image.open(path) as im:
             return {"width": im.width, "height": im.height, "mode": im.mode, "format": im.format,
                     "has_alpha": im.mode in ("RGBA", "LA", "PA") or "transparency" in im.info}
     except Exception:  # noqa: BLE001
-        return None
+        wh = image_size(path)
+        return {"width": wh[0], "height": wh[1]} if wh else None
+
+
+SIZE_KEYS = ("image_resolution", "resolution", "aspect_ratio", "quality", "mode", "upscale_factor")
+
+
+def result_size(inp: dict, files: list[dict]) -> dict:
+    """Поле size паспорта: заказанная ступень размера (параметры input) и фактические ширина и высота каждого файла
+    результата. Ступень каталога — имя ступени цены: кадр внутри неё выбирает модель, и от вызова к вызову он
+    меняется; размер, с которым работает вёрстка, — фактический."""
+    return {"requested": {k: inp[k] for k in SIZE_KEYS if k in (inp or {})},
+            "actual": [{"path": f.get("path"), "width": (f.get("media") or {}).get("width"),
+                        "height": (f.get("media") or {}).get("height")} for f in files]}
+
+
+def size_note(size: dict) -> str:
+    dims = [f"{s['width']}×{s['height']}" for s in size["actual"] if s.get("width") and s.get("height")]
+    return ("; размер " + ", ".join(dims)) if dims else ""
 
 
 class Prepared:
@@ -474,6 +540,8 @@ class Prepared:
         self.filled = []
         self.missing = []
         self.uploads = []          # (json-путь в input, локальный путь) — загрузить в хранилище перед отправкой
+        self.digests = {}          # локальный путь → sha256 содержимого: один файл — одна загрузка
+        self.repeated = set()      # sha256 файлов, стоящих в задании больше одного раза
         self.request_hash = ""
         self.ref_seconds = None
         self.uid = uuid.uuid4().hex[:12]
@@ -483,6 +551,30 @@ class Prepared:
     @property
     def errors(self):
         return [i for i in self.issues if i["level"] == "error"]
+
+
+def local_file(item, job: dict) -> Path | None:
+    """Локальный файл поля задания (путь — от папки файла задания) или None: URL, data:URI, объект, файла нет."""
+    if not isinstance(item, str) or item.startswith(("http://", "https://", "data:")):
+        return None
+    p = Path(item).expanduser()
+    if not p.is_absolute():
+        base = Path(job.get("_dir", "."))
+        p = (base / p) if (base / p).exists() else p
+    return p if p.is_file() else None
+
+
+def repeated_files(inp: dict, job: dict) -> set:
+    """sha256 локальных файлов, которые стоят в input больше одного раза (в images, videos и полях-ссылках)."""
+    places = {}
+    for key in ("images", "videos") + URL_FILE_KEYS:
+        v = inp.get(key)
+        for it in (v if isinstance(v, list) else [v]):
+            p = local_file(it, job)
+            if p is not None:
+                d = file_sha256(p)
+                places[d] = places.get(d, 0) + 1
+    return {d for d, n in places.items() if n > 1}
 
 
 def resolve_file_item(item, key: str, idx: int, prep: Prepared, allow_upload=True):
@@ -510,12 +602,13 @@ def resolve_file_item(item, key: str, idx: int, prep: Prepared, allow_upload=Tru
         info = ffprobe(p)
         if info and info.get("duration_s"):
             prep.ref_seconds = (prep.ref_seconds or 0) + info["duration_s"]
-    if len(data) <= INLINE_MAX:
+    if len(data) <= INLINE_MAX and digest not in prep.repeated:
         b64 = base64.b64encode(data).decode()
         return {"type": "base64", "data": f"data:{mime};base64,{b64}"}, {"type": "file", "sha256": digest}
     if not allow_upload:
         prep.issues.append({"level": "error", "param": f"{key}[{idx}]", "msg": "файл > 4 МБ и загрузка недоступна"})
     prep.uploads.append((key, idx, str(p)))
+    prep.digests[str(p)] = digest
     return {"type": "url", "data": f"<будет загружен в хранилище polza: {p.name}, {len(data)} байт>"}, \
         {"type": "file", "sha256": digest}
 
@@ -550,8 +643,11 @@ def prepare(ctx: Ctx, job: dict, *, fill=True, allow_unknown=False, raw=False) -
     prep.provider = name
     if pname and name != (m.get("top_provider") or {}).get("name"):
         prep.notes.append(f"провайдер {name}: параметры и цена этого провайдера (не top_provider)")
-    # файлы
+    # файлы; один файл в нескольких местах задания (петля [A, A]) идёт загрузкой в хранилище — одной на все места:
+    # встроенный base64 занял бы тело запроса столько раз, сколько мест
     hash_files = {}
+    if not raw:
+        prep.repeated = repeated_files(inp, job)
     for key in ("images", "videos"):
         if key in inp and isinstance(inp[key], list) and not raw:
             conv, hv = [], []
@@ -562,8 +658,6 @@ def prepare(ctx: Ctx, job: dict, *, fill=True, allow_unknown=False, raw=False) -
             inp[key] = conv
             hash_files[key] = hv
     # поля-ссылки (строка URL): локальный файл → /v1/storage/upload → URL; путь — относительно файла задания, как у images
-    # (оркестратор, 23.09.2026 19:10: раньше mask_url искался от текущей папки — из корня проекта путь уходил в API строкой;
-    # first_frame_url / last_frame_url — поля GA google/gemini-omni-1.1-flash, снимок 2026-09-23_1745)
     for ukey in URL_FILE_KEYS:
         v = inp.get(ukey)
         if not isinstance(v, str) or raw or v.startswith(("http://", "https://", "data:")):
@@ -574,7 +668,8 @@ def prepare(ctx: Ctx, job: dict, *, fill=True, allow_unknown=False, raw=False) -
             p = (base / p) if (base / p).exists() else p
         if p.exists():
             prep.uploads.append((ukey, None, str(p)))
-            hash_files[ukey] = {"type": "file", "sha256": hashlib.sha256(p.read_bytes()).hexdigest()}
+            prep.digests[str(p)] = hashlib.sha256(p.read_bytes()).hexdigest()
+            hash_files[ukey] = {"type": "file", "sha256": prep.digests[str(p)]}
             inp[ukey] = f"<будет загружен в хранилище polza: {p.name}>"
         else:
             prep.issues.append({"level": "error", "param": ukey,
@@ -987,11 +1082,12 @@ def run_prepared(ctx: Ctx, prep: Prepared, *, force=False, batch_reserved=None) 
                            "provider": prep.provider, "provider_req": prep.job.get("provider"), "base_url": ctx.base,
                            "request_hash": prep.request_hash, "estimate_rub": rub, "notes": prep.job.get("notes")})
     # загрузка крупных локальных файлов в хранилище (TEMP_UPLOAD, 24 ч)
-    uploaded = {}              # один файл в нескольких полях (петля [A,A]: first_frame_url = last_frame_url) — одна загрузка
+    uploaded = {}              # sha256 → ответ хранилища: один файл в нескольких местах задания — одна загрузка
     for key, idx, path in prep.uploads:
-        up = uploaded.get(path)
+        same = prep.digests.get(path, path)
+        up = uploaded.get(same)
         if up is None:
-            up = uploaded[path] = upload_file(ctx, path)
+            up = uploaded[same] = upload_file(ctx, path)
             ctx.ledger.append({"event": "upload", "uid": "upl_" + uuid.uuid4().hex[:10], "agent": prep.agent,
                                "base_url": ctx.base, "file_id": up.get("id"), "url": up.get("url"), "src": path})
         if key in URL_FILE_KEYS:
@@ -1062,7 +1158,7 @@ def run_prepared(ctx: Ctx, prep: Prepared, *, force=False, batch_reserved=None) 
         "cost": {"usage_cost_rub": cost, "estimate_rub": prep.estimate.get("rub"),
                  "delta_rub": (round(cost - prep.estimate["rub"], 4) if cost is not None and prep.estimate.get("rub")
                                is not None else None)},
-        "files": files, "base_url": ctx.base,
+        "files": files, "size": result_size(prep.body["input"], files), "base_url": ctx.base,
     }
     pp = write_passport(files, passport)
     ctx.ledger.append({"event": "completed", "uid": prep.uid, "id": gen_id, "cost_rub": cost,
@@ -1070,7 +1166,7 @@ def run_prepared(ctx: Ctx, prep: Prepared, *, force=False, batch_reserved=None) 
                        "provider_actual": passport["provider_actual"], "wall_s": passport["timing"]["wall_s"]})
     delta = passport["cost"]["delta_rub"]
     say(f"  [{label}] ГОТОВО за {passport['timing']['wall_s']} с; цена {cost} ₽ (оценка {prep.estimate.get('rub')}"
-        + (f", разница {delta:+}" if delta else "") + f"); паспорт {pp}")
+        + (f", разница {delta:+}" if delta else "") + f"){size_note(passport['size'])}; паспорт {pp}")
     return EXIT_OK
 
 
@@ -1092,8 +1188,12 @@ def print_plan(ctx: Ctx, prep: Prepared, show_request=True):
     say(f"# ── {prep.tag} · {m['id']} · провайдер {prep.provider} · агент {prep.agent}")
     if show_request:
         ctx.http.show("POST", "/v1/media", prep.body)
+        once = {}
         for key, idx, path in prep.uploads:
-            say(f"# перед отправкой: POST {ctx.http.url('/v1/storage/upload')} (multipart, TEMP_UPLOAD) ← {path}")
+            once.setdefault(prep.digests.get(path, path), []).append(path)
+        for paths in once.values():
+            say(f"# перед отправкой: POST {ctx.http.url('/v1/storage/upload')} (multipart, TEMP_UPLOAD) ← {paths[0]}"
+                + (f" — одна загрузка, мест в задании — {len(paths)}" if len(paths) > 1 else ""))
     rng = ""
     if e.get("rub_low") is not None and e.get("rub_high") is not None and e["rub_low"] != e["rub_high"]:
         rng = f" (диапазон {pc.fmt_rub(e['rub_low'])}–{pc.fmt_rub(e['rub_high'])} ₽)"
@@ -1176,7 +1276,8 @@ def cmd_show(ctx: Ctx, a):
 
 def cmd_estimate(ctx: Ctx, a):
     jobs = load_jobs(a.job)
-    total, bad = 0.0, 0
+    ops = [x.strip() for x in (getattr(a, "ops", None) or "").split(",") if x.strip()]
+    total, ops_total, bad = 0.0, 0.0, 0
     say_catalog(ctx)
     for j in jobs:
         j.setdefault("_dir", str(Path(a.job).resolve().parent))
@@ -1186,11 +1287,26 @@ def cmd_estimate(ctx: Ctx, a):
             bad += 1
             continue
         print_plan(ctx, prep, show_request=a.verbose)
-        bad += bool(prep.errors)
+        failed = bool(prep.errors)
         total += price_for_limits(prep) or 0
+        for op in ops:              # операция над готовым результатом — отдельный запрос и отдельная цена каталога
+            try:
+                oe = pc.operation_estimate(prep.model, op)
+            except KeyError as e:
+                say(f"#   ✗ операция {op}: {e.args[0]}")
+                failed = True
+                continue
+            if oe["rub"] is None:
+                say(f"#   ✗ операция {op}: цены операции в каталоге нет")
+                failed = True
+                continue
+            say(f"# Операция {op} над результатом: {oe['formula']} (polza.py ops ID {op})")
+            ops_total += oe["rub"]
+        bad += failed
         say("")
-    say(f"# ИТОГО: заданий {len(jobs)}, с ошибками {bad}, оценка суммы {pc.fmt_rub(total)} ₽ "
-        f"(потрачено {pc.fmt_rub(ctx.ledger.spent(ctx.base))} из {pc.fmt_rub(ctx.budget_total)} ₽)")
+    say(f"# ИТОГО: заданий {len(jobs)}, с ошибками {bad}, оценка суммы {pc.fmt_rub(total + ops_total)} ₽ "
+        + (f"(задания {pc.fmt_rub(total)} ₽ + операции {pc.fmt_rub(ops_total)} ₽) " if ops else "")
+        + f"(потрачено {pc.fmt_rub(ctx.ledger.spent(ctx.base))} из {pc.fmt_rub(ctx.budget_total)} ₽)")
     return EXIT_JOB if bad else EXIT_OK
 
 
@@ -1301,7 +1417,8 @@ def cmd_download(ctx: Ctx, a):
     pp = write_passport(files, {"schema": "polza-passport/1", "client": VERSION, "uid": j.get("uid"),
                                 "request_hash": j.get("request_hash"), "job": job, "response_final": st,
                                 "history": hist, "cost": {"usage_cost_rub": cost, "estimate_rub": j.get("estimate_rub")},
-                                "files": files, "base_url": ctx.base, "downloaded_at": now_iso(),
+                                "files": files, "size": result_size({}, files), "base_url": ctx.base,
+                                "downloaded_at": now_iso(),
                                 "note": "скачано командой download (запрос см. в журнале по uid)"})
     ev = {"event": "completed", "uid": j.get("uid") or ("dl_" + uuid.uuid4().hex[:10]), "id": a.id, "cost_rub": cost,
           "files": [f["path"] for f in files], "passport": pp, "base_url": ctx.base, "model": model_id,
@@ -1435,7 +1552,57 @@ def cmd_ops(ctx: Ctx, a):
     return EXIT_OK
 
 
+def read_http(ctx: Ctx):
+    """Канал для чтения без траты (баланс, лимит ключа): запрос с ключом идёт и без --live."""
+    h = ctx.http
+    return h if getattr(h, "live", True) else Http(h.base, h.key, True, timeout=h.timeout, curl=h.curl)
+
+
+def reconcile(ledger: Ledger, base: str, balance: dict, baseline: float | None) -> dict:
+    """Сверка журнала с балансом канала. balance — ответ GET /v2/balance: spentAmount — всё, что списано с ключа.
+    Журнал — сумма по base без резерва незавершённых заданий (reserved — отдельно: их исход неизвестен). outside =
+    spentAmount − журнал — траты вне журнала; baseline называет, сколько их должно быть: ok — сошлось до копейки,
+    diff — расхождение. Без baseline ok = None: сверять не с чем, outside — в отчёт. Без spentAmount в ответе (у ключа
+    участника с личным лимитом поля нет) — ok = None и reason."""
+    jobs = [j for j in ledger.jobs().values() if j.get("base_url") == base]
+    reserved = round(sum(j["spent"] for j in jobs if j.get("state") in ("submit", "created", "timeout", "unknown")), 6)
+    fact = round(sum(j["spent"] for j in jobs) - reserved, 6)
+    res = {"ok": None, "ledger": fact, "reserved": reserved, "channel_spent": None, "outside": None,
+           "baseline": baseline, "diff": None, "reason": None}
+    spent = pc.to_num((balance or {}).get("spentAmount"))
+    if spent is None:
+        res["reason"] = "в ответе /v2/balance нет spentAmount"
+        return res
+    res["channel_spent"] = float(spent)
+    res["outside"] = round(float(spent) - fact, 2)
+    if baseline is not None:
+        res["diff"] = round(res["outside"] - float(baseline), 2)
+        res["ok"] = abs(res["diff"]) < 0.005
+    return res
+
+
 def cmd_ledger(ctx: Ctx, a):
+    if getattr(a, "balance", False):
+        try:
+            bal = read_http(ctx).request("GET", "/v2/balance").json or {}
+        except ApiError as e:
+            say(f"/v2/balance: {e}", err=True)
+            return EXIT_HTTP
+        r = reconcile(ctx.ledger, ctx.base, bal, a.baseline)
+        say(f"# журнал {ctx.ledger.path}: по {ctx.base} потрачено {pc.fmt_rub(r['ledger'])} ₽"
+            + (f", в резерве незавершённых {pc.fmt_rub(r['reserved'])} ₽" if r["reserved"] else ""))
+        if r["reason"]:
+            say(f"# канал: {r['reason']} — сверить не с чем", err=True)
+            return EXIT_JOB
+        say(f"# канал: spentAmount {pc.fmt_rub(r['channel_spent'])} ₽, available {bal.get('available')} ₽, резерв "
+            f"{bal.get('reservedAmount')}; вне журнала {pc.fmt_rub(r['outside'])} ₽")
+        if r["ok"] is None:
+            say("# сверка: траты вне журнала назвать ключом --baseline RUB — тогда расхождение даст код 1")
+            return EXIT_OK
+        say("# сверка: сходится до копейки" if r["ok"] else
+            f"# сверка: РАСХОЖДЕНИЕ {r['diff']:+.2f} ₽ (вне журнала {pc.fmt_rub(r['outside'])} ₽ против "
+            f"{pc.fmt_rub(r['baseline'])} ₽) — незавершённые и оборванные задания: polza.py ledger, history ID")
+        return EXIT_OK if r["ok"] else EXIT_JOB
     if a.ops:
         rows = check_operations(ctx.ledger)
         words = {True: "выполнена", False: "не выполнена — канал вернул исходник (тот же id и тот же файл)",
@@ -1467,8 +1634,8 @@ def cmd_ledger(ctx: Ctx, a):
         for (bu, ag), b in sorted(by.items(), key=lambda x: (str(x[0][0]), str(x[0][1]))):
             say(f"{str(bu):34} {str(ag):10} {b['jobs']:>7} {b['completed']:>6} {b['failed']:>6} "
                 f"{pc.fmt_rub(b['spent']):>10} {pc.fmt_rub(b['reserved']):>12}")
-        say(f"# журнал {ctx.ledger.path}; бюджет {pc.fmt_rub(ctx.budget_total)} ₽ для {ctx.base}: потрачено "
-            f"{pc.fmt_rub(ctx.ledger.spent(ctx.base))} ₽")
+        say(f"# журнал {ctx.ledger.path}; потрачено по {ctx.base}: {pc.fmt_rub(ctx.ledger.spent(ctx.base))} ₽"
+            + (f" из бюджета {pc.fmt_rub(ctx.budget_total)} ₽" if ctx.budget_total > 0 else ""))
         return EXIT_OK
     evs = ctx.ledger.events()
     if a.agent:
@@ -1487,14 +1654,11 @@ def cmd_ledger(ctx: Ctx, a):
 
 
 def cmd_balance(ctx: Ctx, a):
-    if not ctx.live:
-        say("# СУХОЙ ПРОГОН")
-        ctx.http.show("GET", "/v2/balance")
-        ctx.http.show("GET", "/v1/key")
-        return EXIT_OK
+    """Баланс и лимит ключа — чтение, не трата: запрос идёт и без --live."""
+    http = read_http(ctx)
     for path in ("/v2/balance", "/v1/key"):
         try:
-            say(path, jdump(redact_obj(ctx.http.request("GET", path).json)))
+            say(path, jdump(redact_obj(http.request("GET", path).json)))
         except ApiError as e:
             say(f"{path}: {e}", err=True)
     return EXIT_OK
@@ -1517,7 +1681,7 @@ class _FakeHttp:
     """Канал самопроверки: ответы и байты результата — из сценария, сети нет."""
 
     def __init__(self, base: str, replies: dict, blobs: dict):
-        self.base, self.replies, self.blobs, self.calls = base, replies, blobs, []
+        self.base, self.replies, self.blobs, self.calls, self.sent = base, replies, blobs, [], []
 
     def url(self, path: str) -> str:
         return self.base + path
@@ -1527,6 +1691,7 @@ class _FakeHttp:
 
     def request(self, method: str, path: str, **kw) -> Resp:
         self.calls.append((method, path))
+        self.sent.append((method, path, kw.get("body")))
         queue = self.replies[(method, path)]
         reply = queue.pop(0) if len(queue) > 1 else queue[0]
         return Resp(200, {}, json.dumps(reply).encode())
@@ -1539,7 +1704,8 @@ class _FakeHttp:
 
 
 def selftest() -> int:
-    """Операции над готовой генерацией на вымышленных данных: каталог, журнал, исходник и ответы канала — во временной
+    """Операции над готовой генерацией, смета с операцией, баланс и сверка журнала с ним, один файл — одна загрузка,
+    размер результата в паспорте — на вымышленных данных: каталог, журнал, исходник и ответы канала — во временной
     папке."""
     import contextlib
     import io
@@ -1549,7 +1715,10 @@ def selftest() -> int:
     src_bytes, up_bytes, ext_bytes = b"source 720p", b"upscaled 1080p", b"extended"
     cdn = "https://cdn.test/"
     blobs = {cdn + "source.bin": src_bytes, cdn + "up.bin": up_bytes, cdn + "ext.bin": ext_bytes}
-    catalog = {"data": [{"id": model, "type": "video", "name": "Demo Video Fast", "top_provider": {"name": "demo"},
+    catalog = {"data": [{"id": model, "type": "video", "name": "Demo Video Fast",
+                         "top_provider": {"name": "demo", "pricing": {"per_request": src_cost}},
+                         "parameters": {"prompt": {"max_length": 500}, "images": {"min": 0, "max": 2},
+                                        "resolution": {"default": "720p", "values": ["720p", "1080p"]}},
                          "operations": [
                              {"id": "upscale_1080p", "async": False, "pricing": {"per_request": op_rub},
                               "parameters": {"index": {"type": "number", "min": 0}}},
@@ -1666,6 +1835,123 @@ def selftest() -> int:
                 op_path: [{"id": src_id, "status": "processing"}],
                 poll_src: [{**src_record, "status": "failed", "error": {"code": "BAD_GATEWAY"}}]})
             ok("отказ операции: код 4, цена 0", code == EXIT_FAILED and job.get("spent") == 0.0, (code, job))
+
+            def ctx_for(name: str, argv: list[str], replies: dict, budget: str = "200") -> tuple:
+                """Свежие журнал и папка результатов, подменный канал → (ctx, разобранные ключи)."""
+                root = tmp / name
+                (root / "out").mkdir(parents=True)
+                a = build_parser().parse_args(argv + ["--catalog", str(tmp / "catalog"), "--ledger",
+                                                      str(root / "ledger.jsonl"), "--out", str(root / "out"),
+                                                      "--base-url", base, "--agent", "selftest", "--budget-total",
+                                                      budget, "--max-job", "60", "--no-history", "--no-preflight"])
+                ctx = Ctx(a)
+                ctx.http = _FakeHttp(base, replies, blobs)
+                return ctx, a
+
+            def quiet(fn, *args) -> tuple:
+                out = io.StringIO()
+                with contextlib.redirect_stdout(out), contextlib.redirect_stderr(out):
+                    code = fn(*args)
+                return code, out.getvalue()
+
+            # смета с операцией над готовым результатом
+            job_file = tmp / "clip.job.json"
+            job_file.write_text(json.dumps({"model": model, "tag": "clip", "input": {"prompt": "demo clip"}}))
+            ctx, a = ctx_for("estimate-ops", ["estimate", str(job_file), "--ops", "upscale_1080p"], {})
+            code, text = quiet(cmd_estimate, ctx, a)
+            ok("смета с операцией: строка операции, сумма — задание и операция",
+               code == EXIT_OK and "Операция upscale_1080p над результатом" in text
+               and f"оценка суммы {pc.fmt_rub(src_cost + op_rub)} ₽" in text
+               and f"операции {pc.fmt_rub(op_rub)} ₽" in text, text)
+            ctx, a = ctx_for("estimate-plain", ["estimate", str(job_file)], {})
+            code, text = quiet(cmd_estimate, ctx, a)
+            ok("смета без --ops: сумма — только задание", code == EXIT_OK and "Операция" not in text
+               and f"оценка суммы {pc.fmt_rub(src_cost)} ₽" in text, text)
+            ctx, a = ctx_for("estimate-bad-op", ["estimate", str(job_file), "--ops", "no_such_op"], {})
+            code, text = quiet(cmd_estimate, ctx, a)
+            ok("смета с операцией, которой нет у модели: ошибка задания, код 1",
+               code == EXIT_JOB and "✗ операция no_such_op" in text, (code, text))
+
+            # баланс — чтение без --live; сверка журнала с балансом на записанном образце ответа
+            balance = {"amount": "500.00000000", "available": "480.00000000", "reservedAmount": "20.00000000",
+                       "spentAmount": "145.00000000", "updatedAt": "2030-01-31T10:00:00.000Z"}
+            key_info = {"label": "demo", "limit": 300, "limit_remaining": 155, "limit_reset": "never", "usage": 145}
+            channel = {("GET", "/v2/balance"): [balance], ("GET", "/v1/key"): [key_info]}
+            ctx, a = ctx_for("balance", ["balance"], channel)
+            code, text = quiet(cmd_balance, ctx, a)
+            ok("баланс без --live: оба чтения сделаны, ответ канала напечатан",
+               code == EXIT_OK and not ctx.live and ctx.http.calls == [("GET", "/v2/balance"), ("GET", "/v1/key")]
+               and "480.00000000" in text and "limit_remaining" in text, (code, ctx.http.calls, text))
+            dry = Http(base, None, False)
+            reader = read_http(type("Dry", (), {"http": dry})())
+            ok("баланс без --live: канал чтения — тот же адрес и ключ, отправка разрешена только ему",
+               reader.live and not dry.live and reader.base == dry.base and reader.key == dry.key)
+            ctx, a = ctx_for("reconcile", ["ledger", "--balance", "--baseline", "100"], channel)
+            ctx.ledger.append({"event": "completed", "uid": "done", "base_url": base, "cost_rub": src_cost})
+            ctx.ledger.append({"event": "submit", "uid": "running", "base_url": base, "estimate_rub": op_rub})
+            code, text = quiet(cmd_ledger, ctx, a)
+            ok("сверка с балансом: spentAmount − траты вне журнала = журнал — сходится, код 0",
+               code == EXIT_OK and "сходится до копейки" in text and not ctx.live, (code, text))
+            a.baseline = 90.0
+            code, text = quiet(cmd_ledger, ctx, a)
+            ok("сверка с балансом: расхождение — код 1 и разница", code == EXIT_JOB and "РАСХОЖДЕНИЕ +10.00 ₽" in text,
+               (code, text))
+            r = reconcile(ctx.ledger, base, balance, None)
+            ok("сверка с балансом без --baseline: траты вне журнала — в отчёт, резерв незавершённых — отдельно",
+               r["ok"] is None and r["ledger"] == src_cost and r["reserved"] == op_rub
+               and r["outside"] == 145.0 - src_cost, r)
+            r = reconcile(ctx.ledger, base, {"amount": "500.00000000"}, 100.0)
+            ok("сверка с балансом: в ответе нет spentAmount — сверить не с чем", r["ok"] is None and bool(r["reason"]), r)
+
+            # сумма журнала: без бюджета — без строки бюджета
+            ctx, a = ctx_for("sum-no-budget", ["ledger", "--sum"], {}, budget="0")
+            code, text = quiet(cmd_ledger, ctx, a)
+            ok("ledger --sum без бюджета: строки бюджета нет", code == EXIT_OK and "потрачено" in text
+               and "бюджет" not in text, text)
+            ctx, a = ctx_for("sum-budget", ["ledger", "--sum"], {}, budget="300")
+            code, text = quiet(cmd_ledger, ctx, a)
+            ok("ledger --sum с бюджетом: сумма против бюджета", f"из бюджета {pc.fmt_rub(300)} ₽" in text, text)
+
+            # один файл в двух местах задания — одна загрузка; размер результата — в паспорте
+            png = (b"\x89PNG\r\n\x1a\n" + b"\0\0\0\rIHDR" + (16).to_bytes(4, "big") + (9).to_bytes(4, "big")
+                   + b"\x08\x02\0\0\0" + b"\0" * 4)
+            (tmp / "frame.png").write_bytes(png)
+            blobs[cdn + "result.png"] = png
+            loop = {"model": model, "tag": "loop", "_dir": str(tmp),
+                    "input": {"prompt": "demo loop", "resolution": "1080p", "images": ["frame.png", "frame.png"]}}
+            ctx, a = ctx_for("one-upload", ["run", str(job_file), "--live"], {
+                ("POST", "/v1/storage/upload"): [{"id": "file_demo", "url": cdn + "stored.png"}],
+                ("POST", "/v1/media"): [{"id": "gen_loop", "status": "completed", "data": {"url": cdn + "result.png"},
+                                         "usage": {"cost_rub": src_cost}}]})
+            prep = prepare(ctx, loop)
+            ok("один файл в двух местах: в теле запроса нет base64, оба места ждут загрузки",
+               not prep.errors and len(prep.uploads) == 2 and "base64" not in json.dumps(prep.body), prep.issues)
+            single = prepare(ctx, {**loop, "input": {**loop["input"], "images": ["frame.png"]}})
+            ok("один файл в одном месте: уходит в теле запроса, загрузки нет",
+               not single.uploads and single.body["input"]["images"][0]["type"] == "base64", single.uploads)
+            code, text = quiet(run_prepared, ctx, prep)
+            media = [b for _, p, b in ctx.http.sent if p == "/v1/media"]
+            ok("один файл — одна загрузка: хранилище вызвано один раз, оба места — одна ссылка",
+               code == EXIT_OK and ctx.http.calls.count(("POST", "/v1/storage/upload")) == 1 and len(media) == 1
+               and media[0]["input"]["images"] == [{"type": "url", "data": cdn + "stored.png"}] * 2,
+               (code, ctx.http.calls, text))
+            done = next((j for j in ctx.ledger.jobs().values() if j.get("id") == "gen_loop"), {})
+            pas = json.loads(absp(done["passport"]).read_text(encoding="utf-8")) if done.get("passport") else {}
+            size = pas.get("size") or {}
+            ok("паспорт: поле size — заказанная ступень и фактический размер файла",
+               size.get("requested") == {"resolution": "1080p"}
+               and [(s["width"], s["height"]) for s in size.get("actual") or []] == [(16, 9)] and "размер 16×9" in text,
+               (size, text))
+            jpg = (b"\xff\xd8\xff\xe0\x00\x04\x00\x00\xff\xc0\x00\x11\x08" + (9).to_bytes(2, "big")
+                   + (16).to_bytes(2, "big") + b"\0" * 12)
+            webp = (b"RIFF\0\0\0\0WEBPVP8X\x0a\0\0\0\0\0\0\0" + (15).to_bytes(3, "little")
+                    + (8).to_bytes(3, "little"))
+            got = []
+            for name, data in (("size.png", png), ("size.jpg", jpg), ("size.webp", webp), ("size.bin", b"not an image")):
+                (tmp / name).write_bytes(data)
+                got.append(image_size(tmp / name))
+            ok("размер по заголовку файла без Pillow: PNG, JPEG, WebP; не картинка — None",
+               got == [(16, 9), (16, 9), (16, 9), None], got)
     finally:
         KEY_FILE = key_file
         if env_key is not None:
@@ -1678,12 +1964,16 @@ def build_parser():
     common = argparse.ArgumentParser(add_help=False)
     g = common.add_argument_group("общие")
     g.add_argument("--live", action="store_true", help="реально отправлять запросы (иначе сухой прогон)")
-    g.add_argument("--catalog", help="снимок каталога (имя папки в 99-raw/cache/polza, путь); по умолчанию последний")
+    g.add_argument("--catalog", help="снимок каталога: имя папки в $DDD_HOME/cache/ai-media/polza или путь (по "
+                                     "умолчанию POLZA_CATALOG, иначе последний снимок)")
     g.add_argument("--base-url", help="база API (по умолчанию POLZA_BASE_URL или https://polza.ai/api)")
-    g.add_argument("--ledger", help="журнал затрат (по умолчанию 99-raw/experiments/_ledger.jsonl)")
-    g.add_argument("--out", help="корень для результатов (по умолчанию 99-raw/experiments/_polza/<агент>/<дата>)")
+    g.add_argument("--ledger", help="журнал затрат (по умолчанию POLZA_LEDGER, иначе "
+                                    "$DDD_HOME/out/ai-media/_ledger.jsonl)")
+    g.add_argument("--out", help="корень результатов (по умолчанию POLZA_OUT_ROOT, иначе $DDD_HOME/out/ai-media/_polza); "
+                                 "файлы и паспорта — в <корень>/<агент>/<дата>/")
     g.add_argument("--agent", help="агент по умолчанию для заданий без поля agent")
-    g.add_argument("--budget-total", type=float, help="общий лимит ₽ по журналу (по умолчанию 2000)")
+    g.add_argument("--budget-total", type=float, help="общий лимит ₽ по журналу (по умолчанию POLZA_BUDGET_TOTAL, "
+                                                      "иначе 2000)")
     g.add_argument("--budget-agent", type=float, help="лимит ₽ на агента по журналу")
     g.add_argument("--max-job", type=float, help="лимит ₽ на одно задание (по умолчанию 60)")
     g.add_argument("--force", action="store_true", help="не брать результат из кэша")
@@ -1714,9 +2004,15 @@ def build_parser():
     s.set_defaults(fn=cmd_show)
     for name, fn in (("estimate", cmd_estimate), ("run", cmd_run), ("batch", cmd_batch)):
         s = sp.add_parser(name, parents=[common])
-        s.add_argument("job")
+        s.add_argument("job", help="файл задания: .json (объект или массив заданий) или .jsonl (строка — задание); "
+                                   "пути файлов в input — от папки этого файла")
+        if name == "estimate":
+            s.add_argument("--ops", metavar="OP[,OP…]",
+                           help="операции над готовым результатом каждого задания (extend, upscale_1080p, upscale_4k): "
+                                "строка сметы на операцию, цена операции по каталогу — в сумме")
         if name == "batch":
-            s.add_argument("--parallel", type=int, default=2)
+            s.add_argument("--parallel", type=int, default=2,
+                           help="сколько заданий идёт одновременно (по умолчанию 2, не больше 3)")
         s.set_defaults(fn=fn)
     for name, fn in (("status", cmd_status), ("download", cmd_download), ("history", cmd_history)):
         s = sp.add_parser(name, parents=[common])
@@ -1737,6 +2033,11 @@ def build_parser():
     s.add_argument("--sum", action="store_true")
     s.add_argument("--ops", action="store_true", help="сверить записи операций с их сохранёнными ответами: деньги за "
                                                       "операцию, вернувшую исходник, — код выхода 1")
+    s.add_argument("--balance", action="store_true",
+                   help="сверить журнал с балансом канала (GET /v2/balance: чтение, не трата — без --live): "
+                        "spentAmount против суммы журнала")
+    s.add_argument("--baseline", type=float, metavar="RUB",
+                   help="с --balance: траты ключа вне журнала; расхождение с ними — код выхода 1")
     s.add_argument("--tail", type=int, default=30)
     s.add_argument("--json", action="store_true")
     s.set_defaults(fn=cmd_ledger)

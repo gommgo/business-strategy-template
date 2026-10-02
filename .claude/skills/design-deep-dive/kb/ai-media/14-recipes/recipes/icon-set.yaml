@@ -33,7 +33,7 @@ phase5:
   estimate: python3 ../../scripts/ai-media/mp_client.py estimate 99-raw/phase5/jobs/G-0*.polza-chat.json --summary
 steps:
 - id: check
-  cmd: 99-raw/tools/venv-G/bin/python ../../scripts/ai-media/check_icons.py new-icons/ --json check.json
+  cmd: scripts/ai-media/check_icons.py new-icons/ --json check.json
   status: checked
   evidence: 99-raw/experiments/M/08-svg-favicons/check_icons.json
 - id: sheet

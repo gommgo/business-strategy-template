@@ -29,11 +29,11 @@ phase5:
   estimate: не нужно (0 ₽)
 steps:
 - id: layout
-  cmd: flock -w 900 99-raw/tools/.locks/browser.lock python3 ../../scripts/ai-media/layout_check.py
+  cmd: flock -w 900 $DDD_HOME/locks/browser.lock python3 ../../scripts/ai-media/layout_check.py
   status: checked
   evidence: 99-raw/experiments/M/06-og-marketplace/results_layout.json
 - id: render
-  cmd: flock -w 900 99-raw/tools/.locks/browser.lock python3 99-raw/experiments/M/06-og-marketplace/render.py
+  cmd: flock -w 900 $DDD_HOME/locks/browser.lock python3 99-raw/experiments/M/06-og-marketplace/render.py
   status: checked
   evidence: 99-raw/experiments/M/06-og-marketplace/results_og_mp.json
 - id: ocr-textlayer

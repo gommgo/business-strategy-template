@@ -11,23 +11,35 @@
          SB-B01…B02 бренд продукта по ссылке brand.ref: файл есть и проходит схему kb/common/brand.schema.yaml;
          SB-C01…C03 темы: при двух темах — переключатель и умолчание по системе (ui 11/03 §6.4); одна тёмная тема —
          с причиной themes.dark.why (без причины — warning), «по системе» без второй темы — error.
+         Файл фактов или смысла по ссылке брифа, которого ещё нет (SB-F01, SB-M00): у брифа draft — info «этап не
+         начат», со статуса proposed — error. SB-D01 — система аналитики не yandex-metrica и не none. SB-L03 об
+         уведомлении РКН — у сайта с формой (канал-форма в conversion.channels брифа или action-слот с формой в планах
+         папки слоя) или с необязательными cookie.
   plan   (page-plan)   PL-S01 схема; PL-V01 id словаря; PL-B01…B03 блок и вариант; PL-A01…A05 слоты и анатомия
-         (группа.элемент, экземпляр группа-N); PL-F00…F07 факты: есть, вид, допуск, use.page_types, срок valid.until,
-         «популярный», минимумы доказательств; PL-H01 один H1; PL-R01 ссылки «секция.слот»; PL-L01 длина; PL-N01 id секций
-         из роли или блока; PL-N02 навигация = карта; PL-O01…O02 overlays и политики брифа; PL-E01…E02 события events.yaml
-         и цели; PL-P01…P03 профиль бюджета и уровень (умолчания по типу — ambition-levels.yaml#defaults_by_page_type);
+         (группа.элемент, экземпляр группа-N; target.prefill — текстовый слот messenger-prefill своей секции или overlay,
+         у page.cta_target — «секция.слот»); PL-F00…F07 факты: есть (и факт цели-мессенджера messenger:<fact-id>), вид,
+         допуск, use.page_types (у факта шапки и подвала с ролью секции в use.section_roles не сверяется), срок
+         valid.until, «популярный», минимумы доказательств (секция с пробелом и on_missing: omit-block — info);
+         PL-H01 один H1; PL-R01 ссылки «секция.слот»; PL-L01 длина; PL-N01 id секций из роли или блока; PL-N02
+         навигация = карта (шаблон, архетип шапки, крошки, local_nav); PL-O01…O02 overlays и политики брифа;
+         PL-E01…E02 события events.yaml и цели; PL-P01…P03 профиль бюджета и уровень (умолчания по типу —
+         ambition-levels.yaml#defaults_by_page_type);
          PL-G01…G04 право (согласие ПД в ru, req:, оператор, cookie); PL-C01 подача — находки spec_check.py plan с их
          тяжестью (creative, владелец норм подачи; нормы облика — warning); PL-C02 переходы страниц по уровню
          (x-effect-levels подсхемы treatment, library_level_min каталога эффектов); PL-K01…K03 бриф ↔ план; PL-W01
-         виджеты фасадом; PL-X01 x-gate-exception;
+         виджеты фасадом; PL-X01 x-gate-exception: id ворот страницы (page-gates.yaml) или ворот эффектов
+         (effect-gates.yaml); PL-U01 план approved без записи утверждения approval — warning;
          PL-D01 3D: постер, призыв до 3D; PL-D02 recipe: — рецепт blender 12-recipes есть; PL-D03 загрузка 3D по месту
-         секции (ниже первого экрана — on-interaction); PL-T01…T02 формы lead-forms.yaml; PL-SEO01 разметка по head-kit.
+         секции (ниже первого экрана — on-interaction); PL-T01…T02 формы lead-forms.yaml; PL-SEO01 разметка по head-kit:
+         типы страницы и подтипы её structured_data_subtypes.
   map    (site-map)    SM-S01 схема; SM-01…SM-18 перекрёстные ссылки карты; SM-19 входящие ссылки (граф); SM-20 крошки по
          глубине; SM-21 уровень шаблона ≤ сайта; SM-22 планы шаблонов; SM-23 «спасибо» у страниц с формой.
          SM-22 в папке слоя: файл плана есть, а его page.template_id — не этот шаблон — error; служебный шаблон
          (thank-you-page, legal-page, not-found-page) без плана, когда планы уже пишутся, — warning; остальные шаблоны
          без плана — info: планы — выход этапа page-plan, шаблоны идут по build_order.
-  blocks (blocks.yaml)       BL-* — каталог блоков.
+         SM-01 — и цель призыва шапки: страница карты, #якорь формы или messenger:<fact-id> — факт есть в facts.yaml.
+  blocks (blocks.yaml)       BL-* — каталог блоков; BL-14 — информационные картинки без парного элемента image-alt
+                             (warning одной строкой каталога).
   forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля.
   project DIR                бриф + facts + site-map + plans/*.yaml одной папки со всеми связями (PJ-*); страница брифа
                              без плана и без строки карты — PJ-03: error, у служебной (thank-you-page, legal-page,
@@ -94,6 +106,7 @@ P = {
     'events': ROOT / '07-seo-geo-performance-analytics' / 'events.yaml',
     'budgets': ROOT / '07-seo-geo-performance-analytics' / 'budgets.yaml',
     'gates': ROOT / '07-seo-geo-performance-analytics' / 'page-gates.yaml',
+    'effect_gates': kbpaths.kb('creative') / '09-ai-execution-evaluation' / 'effect-gates.yaml',
     'headkit': ROOT / '07-seo-geo-performance-analytics' / 'head-kit.yaml',
     'legal': ROOT / '08-legal-trust-a11y' / 'legal-requirements.yaml',
     'levels': kbpaths.kb('creative') / '01-creative-direction' / 'ambition-levels.yaml',
@@ -113,13 +126,17 @@ SCHEMA = {
 LEVEL = {'L0': 0, 'L1': 1, 'L2': 2}
 PD_FIELDS = {'name', 'phone', 'email', 'address', 'contact-channel', 'company', 'role'}
 CHROME_ROLES = {'header', 'footer', 'utility', 'legal'}
-PROOF_MIN = {'logo-wall': 4, 'stat-strip': 2, 'hero-stat': 1, 'testimonial-cards': 2, 'testimonial-single': 1, 'hero-quote': 1,
+PROOF_MIN = {'logo-wall': 4, 'stat-strip': 3, 'hero-stat': 1, 'testimonial-cards': 2, 'testimonial-single': 1, 'hero-quote': 1,
              'case-cards': 2, 'case-study': 1, 'before-after': 1, 'review-aggregate': 1, 'awards-press': 1, 'credentials': 1,
              'guarantee': 1, 'founder-note': 1, 'team-grid': 1}           # site 05/02 §1.6
 WIDGET_MEDIA = {'map', 'video'}
 WIDGET_BLOCKS = {'booking-widget', 'chat-widget', 'location-map', 'interactive-demo'}
 # служебные страницы: план у них короткий и строится по плейбуку перед их сборкой — без плана PJ-03 и SM-22 warning
 SERVICE_PAGE_TYPES = {'thank-you-page', 'legal-page', 'not-found-page'}
+# каналы брифа (conversion_channel словаря), где действие принимает форма на самом сайте: с ними сайт собирает ПД формой
+FORM_CHANNELS = {'form', 'quiz', 'calculator', 'callback', 'chat', 'booking-widget', 'checkout'}
+# текстовый слот готового первого сообщения мессенджера: на него ссылается target.prefill цели-мессенджера
+PREFILL_SLOT = 'messenger-prefill'
 # дата примеров базы 10-playbooks-contracts/examples: сроки их фактов (valid.until) считаются от неё в --all и самопроверке
 EXAMPLES_TODAY = dt.date(2026, 9, 29)
 
@@ -171,14 +188,14 @@ class Ctx:
         ev = load_yaml(P['events'])
         self.events = {e['id']: e for e in ev.get('events') or []}
         self.budgets = load_yaml(P['budgets']) if P['budgets'].exists() else {}
-        g = load_yaml(P['gates']) if P['gates'].exists() else {}
+        # ворота страницы (site, SG-…) и ворота эффектов (creative, EG-…): исключение x-gate-exception называет id любого файла
         self.gate_ids = set()
-        for k in ('gates', 'rows', 'items'):
-            for x in (g.get(k) or []):
-                if isinstance(x, dict) and x.get('id'):
-                    self.gate_ids.add(x['id'])
-        if not self.gate_ids:
-            self.gate_ids = set(re.findall(r'\bSG-[A-Z0-9]+-\d{2}\b', P['gates'].read_text(encoding='utf-8'))) if P['gates'].exists() else set()
+        for key, rx in (('gates', r'\bSG-[A-Z0-9]+-\d{2}\b'), ('effect_gates', r'\bEG-[A-Z0-9]+-\d{2}\b')):
+            if not P[key].exists():
+                continue
+            g = load_yaml(P[key]) or {}
+            ids = {x['id'] for k in ('gates', 'rows', 'items') for x in (g.get(k) or []) if isinstance(x, dict) and x.get('id')}
+            self.gate_ids |= ids or set(re.findall(rx, P[key].read_text(encoding='utf-8')))
         hk = load_yaml(P['headkit']) if P['headkit'].exists() else {}
         self.headkit = hk.get('page_types') or {}
         lg = load_yaml(P['legal']) if P['legal'].exists() else {}
@@ -298,7 +315,9 @@ def load_facts(path):
 
 
 # ─────────────────────────────────────────── бриф ───────────────────────────────────────────
-def check_brief(path, ctx, facts_override=None):
+def check_brief(path, ctx, facts_override=None, plan_forms=False):
+    """plan_forms — в планах папки слоя есть action-слот с формой: вместе с каналами-формами брифа (FORM_CHANNELS)
+    это признак «у сайта есть формы» для вопроса об уведомлении РКН (SB-L03)."""
     w0 = rel(path)
     b = load_yaml(path)
     ver = str(b.get('version', ''))
@@ -309,6 +328,9 @@ def check_brief(path, ctx, facts_override=None):
     bdir = Path(path).resolve().parent
     slug = (b.get('project') or {}).get('slug')
     proof = b.get('proof') or {}
+    # бриф выходит из своего этапа черновиком раньше файлов фактов и смысла: у draft ссылка на файл, которого ещё нет, —
+    # ход работы; со статуса proposed — разрыв
+    draft = (b.get('project') or {}).get('status') == 'draft'
     facts_doc = facts = missing = None
     if facts_override is not None:
         facts_doc = facts_override
@@ -317,7 +339,8 @@ def check_brief(path, ctx, facts_override=None):
     elif proof.get('facts_ref'):
         fp = (bdir / proof['facts_ref']).resolve()
         if not fp.exists():
-            R.add('error', 'SB-F01', w0, f'proof.facts_ref не найден: {proof["facts_ref"]}')
+            R.add('info' if draft else 'error', 'SB-F01', w0, f'proof.facts_ref не найден: {proof["facts_ref"]}'
+                                                             + (' — этап фактов не начат (бриф draft)' if draft else ''))
         else:
             facts_doc, facts, missing = load_facts(fp)
     if facts_doc is not None:
@@ -379,7 +402,8 @@ def check_brief(path, ctx, facts_override=None):
     if mean is None and b.get('meaning_ref'):
         mp = (bdir / b['meaning_ref']).resolve()
         if not mp.exists():
-            R.add('error', 'SB-M00', w0, f'meaning_ref не найден: {b["meaning_ref"]}')
+            R.add('info' if draft else 'error', 'SB-M00', w0, f'meaning_ref не найден: {b["meaning_ref"]}'
+                                                             + (' — этап смысла не начат (бриф draft)' if draft else ''))
         else:
             mean = load_yaml(mp)
     if mean is not None:
@@ -427,7 +451,7 @@ def check_brief(path, ctx, facts_override=None):
     pol = b.get('policies') or {}
     amb = b.get('ambition') or {}
     lvl = amb.get('level')
-    if (b.get('analytics') or {}).get('system') not in (None, 'yandex-metrica'):
+    if (b.get('analytics') or {}).get('system') not in (None, 'yandex-metrica', 'none'):   # none — аналитики нет вовсе
         R.add('warning', 'SB-D01', w0, 'аналитика не Яндекс Метрика: причина — в брифе; зарубежный сервис при юрисдикции ru — '
                                        'уведомление РКН о трансграничной передаче и согласие на cookie (req:LR-RU-08, LR-RU-10)')
     if pol.get('preloader') == 'on' and not (lvl == 'L2' and (b.get('site_type') == 'campaign-site' or b.get('primary_page_type') == 'landing-campaign')):
@@ -502,8 +526,11 @@ def check_brief(path, ctx, facts_override=None):
             R.add('error', 'SB-L01', w0, 'заявки хранятся за рубежом, а юрисдикция ru: первичная запись ПД — в РФ (req:LR-RU-07)')
         if li.get('optional_cookies') and pol.get('cookie_banner') == 'none':
             R.add('error', 'SB-L02', w0, 'есть необязательные cookie, а policies.cookie_banner: none (req:LR-RU-10, LR-EU-01)')
-        if li.get('rkn_registry') in ('no', 'unknown'):
-            R.add('warning', 'SB-L03', w0, f'уведомление РКН: {li.get("rkn_registry")} — до запуска формы (req:LR-RU-09); вопрос заказчику')
+        # уведомление РКН — вопрос сайта, который собирает данные: формой или необязательными cookie; без них предмета нет
+        forms = plan_forms or bool(set((b.get('conversion') or {}).get('channels') or []) & FORM_CHANNELS)
+        if li.get('rkn_registry') in ('no', 'unknown') and (forms or li.get('optional_cookies')):
+            R.add('warning', 'SB-L03', w0, f'уведомление РКН: {li.get("rkn_registry")} — до запуска '
+                                           f'{"формы" if forms else "необязательных cookie"} (req:LR-RU-09); вопрос заказчику')
         abroad = [t['service'] for t in li.get('third_party') or [] if t.get('location') == 'abroad']
         if abroad and 'ru' in jur:
             R.add('info', 'SB-L03', w0, f'сервисы за рубежом {abroad}: трансграничная передача (req:LR-RU-08) — page.legal.cross_border планов')
@@ -537,6 +564,7 @@ def check_blocks(ctx, path=P['blocks']):
         if r.get('status', 'active') not in ('measurement-only', 'deprecated', 'out-of-scope') and bid not in B:
             R.add('error', 'BL-01', w, f'блок словаря {bid} нет в каталоге')
     complete = 0
+    no_alt = []
     for bid, b in B.items():
         wb = f'{w}#{bid}'
         if bid not in ctx.vids['block']:
@@ -583,10 +611,18 @@ def check_blocks(ctx, path=P['blocks']):
                     R.add('error', 'BL-11', wb, f'элемент {ref}: вариант {vv} не объявлен')
         if b.get('requires_facts') and not has_data:
             R.add('error', 'BL-12', wb, 'requires_facts, но нет data-элемента')
+        # информационная картинка (media_role: informational; видео — не картинка) и её alt: парный элемент image-alt —
+        # в той же группе, у элемента блока — на уровне блока
+        alt_scopes = {s['_group'] for s in idx.values() if s['slot'] == 'image-alt'}
+        no_alt += [f'{bid}.{ref}' for ref, s in idx.items() if s.get('media_role') == 'informational' and s['slot'] != 'video'
+                   and ctx.vrows['slot'].get(s['slot'], {}).get('kind') == 'media' and s['_group'] not in alt_scopes]
         if all(b.get(k) for k in ('slots', 'variants', 'mobile', 'html', 'refs')):
             complete += 1
     n = max(len(B), 1)
     R.add('ok' if complete / n >= 0.8 else 'error', 'BL-13', w, f'полнота анатомии: {complete} из {len(B)} блоков')
+    if no_alt:
+        R.add('warning', 'BL-14', w, f'информационные картинки без парного элемента image-alt ({len(no_alt)}): '
+                                     f'{", ".join(no_alt)} — тексту alt в плане нет места')
     return B
 
 
@@ -657,6 +693,21 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
     def vcheck(ns, val, where):
         if val is not None and not ctx.vok(ns, val):
             R.add('error', 'PL-V01', where, f'{ns} {val} нет в словаре')
+
+    def tcheck(where, tgt, texts, scope):
+        """Цель-мессенджер: value messenger:<fact-id> — факт или названный пробел есть в facts.yaml (PL-F01); prefill —
+        текстовый слот готового сообщения (PREFILL_SLOT) среди texts {ссылка: слот} своей секции, overlay или страницы."""
+        if not isinstance(tgt, dict):
+            return
+        val = str(tgt.get('value') or '')
+        if tgt.get('kind') == 'messenger' and val.startswith('messenger:') and facts is not None \
+                and val[10:] not in facts and val[10:] not in (missing or {}):
+            R.add('error', 'PL-F01', where, f'target {val}: факта {val[10:]} нет в facts.yaml')
+        pf = tgt.get('prefill')
+        if pf is not None and pf not in texts:
+            R.add('error', 'PL-A03', where, f'target.prefill → {pf}: текстового слота нет {scope}')
+        elif pf is not None and texts[pf].get('slot') != PREFILL_SLOT:
+            R.add('error', 'PL-A03', where, f"target.prefill → {pf}: слот {texts[pf].get('slot')}, нужен {PREFILL_SLOT}")
     vcheck('page_type', pt, w0 + ':page')
     if pt in ctx.vrows['page_type'] and ctx.vrows['page_type'][pt].get('status') == 'proposed':
         R.add('info', 'PL-V01', w0 + ':page', f'page_type {pt} — proposed (словарь v1)')
@@ -714,6 +765,13 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                 R.add('error', 'PL-P03', w0 + ':page', f"уровень {lvl} выше уровня шаблона {tpl['level']}")
             if nav.get('breadcrumbs') is not None and bool(nav['breadcrumbs']) != bool(tpl.get('breadcrumbs')):
                 R.add('warning', 'PL-N02', w0 + ':page', f"navigation.breadcrumbs {nav['breadcrumbs']} ≠ шаблона {tpl.get('breadcrumbs')}")
+            # локальная навигация раздела — копия шаблона: вид и липкость; без поля в плане она не дойдёт до макета
+            ln, tn = ((x.get('kind'), bool(x.get('sticky'))) if isinstance(x, dict) and x else None
+                      for x in (nav.get('local_nav'), tpl.get('local_nav')))
+            if ln != tn:
+                show = ['нет' if x is None else f"{x[0]}{', sticky' if x[1] else ''}" for x in (ln, tn)]
+                R.add('warning', 'PL-N02', w0 + ':page', f'navigation.local_nav ({show[0]}) ≠ шаблона ({show[1]}) — '
+                                                         'site-map.templates[].local_nav')
     # секции
     h1 = 0
     sec_ids, sec_slot_ids = set(), {}
@@ -843,7 +901,10 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                     if not ok:
                         R.add('error', 'PL-F03', w, f'{lid}: fact:{fid} не допущен на страницу — {"; ".join(why)} (site 08/02 §1.2)')
                     use = f.get('use') or {}
-                    if use.get('page_types') and pt not in use['page_types']:
+                    # факт общей шапки или подвала стоит на каждой странице сайта: когда роль секции названа в его
+                    # use.section_roles, use.page_types со страницей не сверяется
+                    chrome = role in ('header', 'footer') and role in (use.get('section_roles') or [])
+                    if use.get('page_types') and pt not in use['page_types'] and not chrome:
                         R.add('warning', 'PL-F04', w, f'{lid}: fact:{fid}.use.page_types {use["page_types"]} без {pt}')
                     for bnd in sl.get('binds') or []:
                         if bnd in ids and ids[bnd][0] == 'text' and use.get('slot_types') and ids[bnd][1].get('slot') not in use['slot_types']:
@@ -859,6 +920,8 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                         R.add('info', 'PL-F02', w, f'{lid}: блокирующий пробел missing:{fid} — страница не публикуется до ответа')
             if kind == 'action' and sl.get('label') and sl['label'] not in ids:
                 R.add('error', 'PL-A03', w, f"{lid}: label → {sl['label']} нет в секции")
+            if kind == 'action':
+                tcheck(w + '.' + lid, sl.get('target'), {i: x for i, (k, x) in ids.items() if k == 'text'}, 'в секции')
             if kind == 'media' and sl.get('alt') and sl['alt'] != 'decorative' and sl['alt'] not in ids:
                 R.add('error', 'PL-A03', w, f"{lid}: alt → {sl['alt']} нет в секции")
             if kind == '3d':
@@ -882,7 +945,14 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                                                'after-lcp')
         mn = PROOF_MIN.get(bid)
         if mn and facts is not None and nfacts < mn:
-            R.add('warning', 'PL-F07', w, f'блок {bid}: допущенных фактов {nfacts} < минимума {mn} (site 05/02 §1.6) — снять блок или сменить вариант')
+            # пробел missing: с on_missing: omit-block — секция по плану снимается, пока факта нет: минимум ей не в упрёк
+            omit = [lid for lid, (k, sl) in ids.items() if k == 'data' and str(sl.get('fact', '')).startswith('missing:')
+                    and sl.get('on_missing') == 'omit-block']
+            if omit:
+                R.add('info', 'PL-F07', w, f'блок {bid}: допущенных фактов {nfacts} < минимума {mn} (site 05/02 §1.6) — секция '
+                                           f'снимается до факта (on_missing: omit-block у {", ".join(omit)})')
+            else:
+                R.add('warning', 'PL-F07', w, f'блок {bid}: допущенных фактов {nfacts} < минимума {mn} (site 05/02 §1.6) — снять блок или сменить вариант')
         if bid == 'pricing-cards':
             badges = [lid for lid, (k, sl) in ids.items() if k == 'text' and sl.get('slot') == 'badge']
             share_facts = [lid for lid, (k, sl) in ids.items() if k == 'data' and facts and sl.get('fact', '').startswith('fact:')
@@ -908,6 +978,9 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
             if e.get('event'):
                 used_events.add(e['event'])
     check_treatment(path, p, ctx, w0)
+    tcheck(w0 + ':page.cta_target', pg.get('cta_target'),
+           {f'{sid}.{i}': x for sid, ids in sec_slot_ids.items() for i, (k, x) in ids.items() if k == 'text'},
+           'на странице («секция.слот»)')
     if h1 != 1:
         R.add('error', 'PL-H01', w0, f'H1 на странице: {h1} (нужен ровно 1)')
     ln = pg.get('length') or {}
@@ -927,6 +1000,9 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
     for ov in p.get('overlays') or []:
         if ov.get('block') not in ctx.B:
             R.add('error', 'PL-O01', w0 + ':overlays', f"блока {ov.get('block')} нет")
+        otexts = {x.get('id'): x for x in (ov.get('slots') or {}).get('text') or []}
+        for a in (ov.get('slots') or {}).get('action') or []:
+            tcheck(f"{w0}:overlays.{ov.get('id')}.{a.get('id')}", a.get('target'), otexts, 'в overlay')
         if brief is not None and ov.get('state') == 'on':
             if ov.get('block') == 'capture-popup' and pol.get('capture_popup', 'off') == 'off':
                 R.add('error', 'PL-O02', w0 + ':overlays', 'окно захвата включено, а в брифе policies.capture_popup: off — '
@@ -969,14 +1045,19 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
     # x-gate-exception
     for x in pg.get('x-gate-exception') or []:
         if ctx.gate_ids and x.get('id') not in ctx.gate_ids:
-            R.add('error', 'PL-X01', w0, f"x-gate-exception {x.get('id')} нет в page-gates.yaml")
+            R.add('error', 'PL-X01', w0, f"x-gate-exception {x.get('id')} нет ни в page-gates.yaml (ворота страницы), "
+                                         'ни в effect-gates.yaml (ворота эффектов)')
     # SEO
     hk = ctx.headkit.get(pt) or {}
     sd = (pg.get('seo') or {}).get('structured_data') or []
     if hk and sd:
-        extra = [x for x in sd if x not in (hk.get('structured_data') or []) and x not in ('Organization', 'WebSite', 'BreadcrumbList')]
+        # подтипы, допустимые вместо типа страницы, — structured_data_subtypes head-kit {тип: [подтипы]}
+        sub = {x for v in (hk.get('structured_data_subtypes') or {}).values() for x in v or []}
+        extra = [x for x in sd if x not in (hk.get('structured_data') or []) and x not in sub
+                 and x not in ('Organization', 'WebSite', 'BreadcrumbList')]
         if extra:
-            R.add('warning', 'PL-SEO01', w0, f'структурированные данные {extra} вне head-kit для {pt} {hk.get("structured_data")}')
+            R.add('warning', 'PL-SEO01', w0, f'структурированные данные {extra} вне head-kit для {pt} {hk.get("structured_data")}'
+                                             + (f', подтипы {sorted(sub)}' if sub else ''))
     if hk and (pg.get('seo') or {}).get('indexable') is not None and (pg['seo']['indexable'] != hk.get('indexable')):
         R.add('info', 'PL-SEO01', w0, f"indexable {pg['seo']['indexable']} ≠ умолчания head-kit {hk.get('indexable')} для {pt}")
     # бриф ↔ план
@@ -1000,6 +1081,9 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
         levels = {ml} | {x.get('level') for x in (((brief.get('meaning') or {}).get('awareness') or {}).get('by_source') or [])}
         if ml and pg.get('awareness') and pg['awareness'] not in levels:
             R.add('warning', 'PL-K01', w0, f"awareness {pg['awareness']} нет среди уровней meaning.awareness {sorted(x for x in levels if x)}")
+    if p.get('status') == 'approved' and not p.get('approval'):
+        R.add('warning', 'PL-U01', w0, 'план approved без записи утверждения approval {by, date}: кто и когда утвердил'
+                                       + (' (запись лежит расширением x-approval — её место в approval)' if p.get('x-approval') else ''))
     R.add('info', 'PL-00', w0, f"секций {len(p.get('sections') or [])}, потока {nflow}; версия плана {ver}")
     return p
 
@@ -1071,9 +1155,10 @@ def check_form_slot(ctx, where, sl, fm, pg):
 
 
 # ─────────────────────────────────────────── карта сайта ───────────────────────────────────────────
-def check_map(path, ctx, brief=None, plans=None, plan_tpl=None):
+def check_map(path, ctx, brief=None, plans=None, plan_tpl=None, facts_pack=None):
     """plans и plan_tpl — планы папки слоя: шаблон → файл плана и файл плана → его page.template_id; без них карта
-    проверяется одна (пример карты без планов)."""
+    проверяется одна (пример карты без планов). facts_pack — факты брифа (документ, факты, пробелы): по ним сверяется
+    цель-мессенджер призыва шапки; без фактов цель не сверяется."""
     w0 = rel(path)
     m = load_yaml(path)
     ver = str(m.get('site_map_version', ''))
@@ -1101,8 +1186,13 @@ def check_map(path, ctx, brief=None, plans=None, plan_tpl=None):
             if g.get('from_collection') and g['from_collection'] not in colls:
                 R.add('error', 'SM-01', f'{w0}:chrome.header.groups', f"коллекции {g['from_collection']} нет")
     cta = (hdr.get('utilities') or {}).get('cta') or {}
-    if cta.get('target'):
-        need_page(cta['target'], 'chrome.header.utilities.cta', 'SM-01')
+    tgt = str(cta.get('target') or '')
+    # цель призыва шапки: страница карты, #якорь формы или канал-мессенджер messenger:<fact-id> — факт или названный пробел
+    if tgt.startswith('messenger:'):
+        if facts_pack is not None and tgt[10:] not in facts_pack[1] and tgt[10:] not in (facts_pack[2] or {}):
+            R.add('error', 'SM-01', f'{w0}:chrome.header.utilities.cta', f'target {tgt}: факта {tgt[10:]} нет в facts.yaml')
+    elif tgt and not tgt.startswith('#'):
+        need_page(tgt, 'chrome.header.utilities.cta', 'SM-01')
     if cta.get('action') and not ctx.vok('action', cta['action']):
         R.add('error', 'SM-01', f'{w0}:chrome.header.utilities.cta', f"action {cta['action']} нет в словаре")
     ftr = chrome.get('footer') or {}
@@ -1224,8 +1314,8 @@ def check_map(path, ctx, brief=None, plans=None, plan_tpl=None):
             inbound[pid].add(f'listed:{x}')
     for x in util.get('thank_you') or []:
         inbound[x.get('page')].add(f"form:{x.get('after')}")
-    if cta.get('target'):
-        inbound[cta['target']].add('header-cta')
+    if tgt in pages:
+        inbound[tgt].add('header-cta')
     need = link.get('min_inbound_links', 1)
     for pid, p in pages.items():
         t = tmpl.get(p.get('template')) or {}
@@ -1284,18 +1374,33 @@ def check_map(path, ctx, brief=None, plans=None, plan_tpl=None):
 
 
 # ─────────────────────────────────────────── проект ───────────────────────────────────────────
+def plan_has_form(p):
+    """В плане есть action-слот с формой — в секции или в элементе вне потока."""
+    holders = (p.get('sections') or []) + (p.get('overlays') or []) if isinstance(p, dict) else []
+    return any(isinstance(a, dict) and a.get('form') for h in holders if isinstance(h, dict)
+               for a in (h.get('slots') or {}).get('action') or [])
+
+
+def brief_facts(brief_path, brief):
+    """Факты брифа по proof.facts_ref — (документ, факты, пробелы); None — ссылки или файла нет."""
+    ref = ((brief or {}).get('proof') or {}).get('facts_ref')
+    fp = (Path(brief_path).resolve().parent / ref).resolve() if ref else None
+    return load_facts(fp) if fp is not None and fp.is_file() else None
+
+
 def check_project(d, ctx):
     d = Path(d)
     briefs = sorted(d.glob('site-brief*.yaml'))
+    plan_files = sorted((d / 'plans').glob('*.yaml')) if (d / 'plans').exists() else sorted(d.glob('page-plan*.yaml'))
     brief = facts_pack = None
     if briefs:
-        brief, fdoc, facts, missing = check_brief(briefs[0], ctx)
+        brief, fdoc, facts, missing = check_brief(briefs[0], ctx,
+                                                  plan_forms=any(plan_has_form(load_yaml(pf)) for pf in plan_files))
         if fdoc is not None:
             facts_pack = (fdoc, facts, missing)
     else:
         R.add('error', 'PJ-01', rel(d), 'в папке проекта нет site-brief*.yaml')
     maps = sorted(d.glob('site-map*.yaml'))
-    plan_files = sorted((d / 'plans').glob('*.yaml')) if (d / 'plans').exists() else sorted(d.glob('page-plan*.yaml'))
     plans_by_tpl, tpl_by_plan = {}, {}
     sitemap = load_yaml(maps[0]) if maps else None
     for pf in plan_files:
@@ -1305,7 +1410,7 @@ def check_project(d, ctx):
         if pg.get('template_id'):
             plans_by_tpl[pg['template_id']] = pf
     if maps:
-        check_map(maps[0], ctx, brief=brief, plans=plans_by_tpl, plan_tpl=tpl_by_plan)
+        check_map(maps[0], ctx, brief=brief, plans=plans_by_tpl, plan_tpl=tpl_by_plan, facts_pack=facts_pack)
     for pf in plan_files:
         pl = check_plan(pf, ctx, brief=brief, facts_pack=facts_pack, sitemap=sitemap)
         if brief is not None and pl.get('site') != (brief.get('project') or {}).get('slug'):
@@ -1375,7 +1480,7 @@ def run_path(path, ctx):
                 br = cand
             else:
                 R.add('info', 'SM-18', rel(path), f"refs.brief другого проекта ({(cand.get('project') or {}).get('slug')}) — сверка с брифом пропущена")
-        check_map(path, ctx, brief=br)
+        check_map(path, ctx, brief=br, facts_pack=brief_facts(Path(path).resolve().parent / rb, br) if br else None)
     elif k == 'brief':
         check_brief(path, ctx)
     else:
@@ -1453,6 +1558,28 @@ def selftest(ctx):
                       + [{'id': f'card-{n}-{k}', 'slot': f'card-{k}', 'anatomy': f'card.{k}', 'group': f'card-{n}'}
                          for n in (1, 2, 3) for k in ('title', 'body')]}
 
+    def one_card(p):
+        # возражения одной карточкой: у роли objections хватает одной
+        s = sec(p, 'faq')
+        s.update({'id': 'objections', 'role': 'objections', 'block': 'feature-grid', 'variant': 'cards'})
+        s['slots'] = {'text': [{'id': 'title', 'slot': 'section-title', 'heading': 'h2'},
+                               {'id': 'card-1-title', 'slot': 'card-title', 'anatomy': 'card.title', 'group': 'card-1'},
+                               {'id': 'card-1-body', 'slot': 'card-body', 'anatomy': 'card.body', 'group': 'card-1'}]}
+
+    def siblings(p):
+        # соседи раздела: вариант связанных ссылок без заголовка секции
+        s = sec(p, 'related')
+        s['variant'] = 'section-siblings'
+        s['slots']['text'] = [x for x in s['slots']['text'] if x['id'] != 'title']
+
+    def viewer(p):
+        # окно просмотра у сетки работ: подписи его кнопок — экземпляр группы viewer
+        s = sec(p, 'case-studies')
+        s.update({'id': 'portfolio', 'role': 'portfolio', 'block': 'portfolio-grid', 'variant': 'grid'})
+        s['slots'] = {'text': [{'id': 'title', 'slot': 'section-title', 'heading': 'h2'}]
+                      + [{'id': f'viewer-{k}', 'slot': 'nav-label', 'anatomy': f'viewer.{k}-label', 'group': 'viewer-1'}
+                         for k in ('close', 'prev', 'next')]}
+
     def one_question(p):
         s = sec(p, 'faq')
         s['variant'] = 'objections-near-cta'
@@ -1475,6 +1602,47 @@ def selftest(ctx):
         sec(p, sid).setdefault('treatment', {}).setdefault('effects', []).append({'ref': ref})
         if transitions:
             p['page']['treatment']['motion_system']['page_transitions'] = transitions
+
+    def header_cta(m, target):
+        m['chrome']['header']['utilities']['cta'] = {'action': 'message', 'target': target}
+
+    def add_prefill(p, slot='messenger-message', fact=None, page='footer.messenger-message'):
+        # канал-мессенджер из фактов и готовое первое сообщение: ссылка подвала и главный призыв страницы
+        add_labels(p)
+        foot = sec(p, 'footer')['slots']
+        foot['text'].append({'id': 'messenger-message', 'slot': PREFILL_SLOT, 'anatomy': prefill_el})
+        target = {'kind': 'messenger', 'value': f'messenger:{fact or plan_fact}'}
+        next(a for a in foot['action'] if a['id'] == 'messenger')['target'] = dict(target, prefill=slot)
+        p['page']['cta_target'] = dict(target, prefill=page)
+
+    def later(b, status, facts=False):
+        # бриф со ссылкой на файл следующего этапа, которого ещё нет
+        b['project']['status'] = status
+        if facts:
+            b['proof']['facts_ref'] = 'facts-later.yaml'
+        else:
+            b.pop('meaning', None)
+            b['meaning_ref'] = 'meaning-later.yaml'
+
+    def proof_gap(p, on_missing):
+        # секция доказательств, у которой вместо фактов — названный пробел
+        for d in sec(p, 'team')['slots']['data']:
+            d.update({'fact': 'missing:foreman-per-object', 'on_missing': on_missing})
+
+    def gate_exception(p, gid):
+        p['page']['x-gate-exception'] = [{'id': gid, 'why': 'проверка самопроверки', 'who': 'самопроверка'}]
+
+    def edit(f, fn):
+        doc = load_yaml(f)
+        fn(doc)
+        f.write_text(yaml.safe_dump(doc, allow_unicode=True, sort_keys=False), encoding='utf-8')
+
+    # id фактов примеров — для целей-мессенджеров messenger:<fact-id>
+    plan_fact = next(iter(brief_facts(ex / 'site-brief.yaml', load_yaml(ex / 'site-brief.yaml'))[1]))
+    map_fact = next(iter(brief_facts(ex.parent / site / 'site-brief.yaml', load_yaml(ex.parent / site / 'site-brief.yaml'))[1]))
+    # элемент готового сообщения у подвала каталога (слот PREFILL_SLOT уровня блока)
+    prefill_el = next((r for r, el in anatomy_index(ctx.B['footer'])[0].items()
+                       if el['slot'] == PREFILL_SLOT and el['_group'] is None), PREFILL_SLOT)
 
     drop = object()                     # вместо правки — снять файл из копии примера
 
@@ -1528,6 +1696,35 @@ def selftest(ctx):
         ('N41 план: один вопрос у призыва', ('none', 'PL-A05'), plan_name, one_question),
         ('N42 план: фото в ряду «текст ↔ картинка»', ('none', 'PL-A03'), plan_name, lambda p: sec(p, 'product-demo')['slots']['media'][0].update({'slot': 'photo', 'anatomy': 'row.photo'}), 'saas-okoshko'),
         ('N43 план: телефон и мессенджер в полосе призыва', ('none', 'PL-A03'), plan_name, band_channels, 'saas-okoshko'),
+        ('N47 бриф: аналитики нет — система none', ('none', 'SB-D01'), 'site-brief.yaml', lambda b: b['analytics'].__setitem__('system', 'none')),
+        ('N48 бриф: аналитика без Метрики', ('warning', 'SB-D01'), 'site-brief.yaml', lambda b: b['analytics'].__setitem__('system', 'ga4')),
+        ('N49 карта: цель призыва шапки — канал-мессенджер из фактов', ('none', 'SM-01'), 'site-map.yaml', lambda m: header_cta(m, f'messenger:{map_fact}'), site),
+        ('N50 карта: цель-мессенджер без факта', 'SM-01', 'site-map.yaml', lambda m: header_cta(m, 'messenger:no-such-channel'), site),
+        ('N51 карта: цель призыва шапки — якорь формы', ('none', 'SM-01'), 'site-map.yaml', lambda m: header_cta(m, '#lead-form'), site),
+        ('N52 план: цель-мессенджер из фактов и готовое сообщение — в подвале и у призыва страницы', ('none', 'PL-A03'), plan_name, add_prefill),
+        ('N53 план: prefill в пустоту', 'PL-A03', plan_name, lambda p: add_prefill(p, slot='no-such-slot')),
+        ('N54 план: prefill на слот другого типа', 'PL-A03', plan_name, lambda p: add_prefill(p, slot='messenger-label')),
+        ('N55 план: prefill страницы без «секция.слот»', 'PL-A03', plan_name, lambda p: add_prefill(p, page='messenger-message')),
+        ('N56 план: цель-мессенджер без факта', 'PL-F01', plan_name, lambda p: add_prefill(p, fact='no-such-channel')),
+        ('N57 план: prefill у цели не мессенджера', 'PL-S01', plan_name, lambda p: p['page']['cta_target'].__setitem__('prefill', 'footer.legal')),
+        ('N60 x-gate-exception: ворота эффектов', ('none', 'PL-X01'), plan_name, lambda p: gate_exception(p, 'EG-PERF-01')),
+        ('N61 x-gate-exception: ворот эффектов с таким id нет', 'PL-X01', plan_name, lambda p: gate_exception(p, 'EG-PERF-99')),
+        ('N62 бриф draft: файла фактов ещё нет', ('info', 'SB-F01'), 'site-brief.yaml', lambda b: later(b, 'draft', facts=True)),
+        ('N63 бриф proposed: файла фактов нет', 'SB-F01', 'site-brief.yaml', lambda b: later(b, 'proposed', facts=True)),
+        ('N64 бриф draft: файла смысла ещё нет', ('info', 'SB-M00'), 'site-brief.yaml', lambda b: later(b, 'draft')),
+        ('N65 бриф proposed: файла смысла нет', 'SB-M00', 'site-brief.yaml', lambda b: later(b, 'proposed')),
+        ('N66 план: минимум фактов у секции, которая снимается до факта', ('info', 'PL-F07'), plan_name, lambda p: proof_gap(p, 'omit-block')),
+        ('N67 план: минимум фактов у секции с заглушкой', ('warning', 'PL-F07'), plan_name, lambda p: proof_gap(p, 'placeholder')),
+        ('N68 план главной: подтип разметки по head-kit', ('none', 'PL-SEO01'), plan_name, lambda p: p['page']['seo'].__setitem__('structured_data', ['LocalBusiness', 'WebSite']), site),
+        ('N69 план главной: тип разметки вне head-kit', ('warning', 'PL-SEO01'), plan_name, lambda p: p['page']['seo'].__setitem__('structured_data', ['Product', 'WebSite']), site),
+        ('N70 план шаблона: локальная навигация как у карты', ('none', 'PL-N02'), 'plans/direction.yaml', lambda p: p['page']['navigation'].__setitem__('local_nav', {'kind': 'siblings'}), site),
+        ('N71 план шаблона: локальная навигация не как у карты', ('warning', 'PL-N02'), 'plans/direction.yaml', lambda p: p['page']['navigation'].__setitem__('local_nav', {'kind': 'anchors', 'sticky': True}), site),
+        ('N72 план шаблона без локальной навигации карты', ('warning', 'PL-N02'), 'plans/direction.yaml', lambda p: p['page']['navigation'].pop('local_nav', None), site),
+        ('N73 план approved с записью утверждения', ('none', 'PL-U01'), plan_name, lambda p: p.update({'status': 'approved', 'approval': {'by': 'владелец продукта', 'date': EXAMPLES_TODAY.isoformat()}})),
+        ('N74 план approved без записи утверждения', ('warning', 'PL-U01'), plan_name, lambda p: p.__setitem__('status', 'approved')),
+        ('N76 план: возражения одной карточкой', ('none', 'PL-A05'), plan_name, one_card),
+        ('N77 план: соседи раздела без заголовка секции', ('none', 'PL-A05'), 'plans/news-item.yaml', siblings, site),
+        ('N78 план: окно просмотра у сетки работ', ('none', 'PL-A03'), 'plans/projects.yaml', viewer, site),
     ]
     for name, want, fname, fn, *other in cases:
         if fname is None:
@@ -1581,12 +1778,19 @@ def selftest(ctx):
     # подписи ссылок, alt информационных картинок, ссылка секции и каналы полосы призыва — необязательные элементы:
     # обязательный дал бы находку каждому плану, где его нет, а утверждённый план от правки каталога меняться не должен
     optional = {'portfolio-grid': ('all-label', 'project.alt'), 'team-grid': ('all', 'all-label'),
-                'location-map': ('route-label', 'map-alt'), 'footer': ('messenger-label', 'group-label'),
-                'audience-grid': ('segment.link-label', 'segment.alt'), 'about-story': ('alt',),
-                'cta-band': ('phone', 'messenger'), 'feature-alternating': ('row.photo', 'row.illustration', 'row.video')}
+                'location-map': ('route-label', 'map-alt', 'photo-alt'),
+                'footer': ('messenger-label', 'group-label', PREFILL_SLOT),
+                'audience-grid': ('segment.link-label', 'segment.alt'), 'about-story': ('alt', 'link-label'),
+                'cta-band': ('phone', 'messenger'), 'feature-alternating': ('row.photo', 'row.illustration', 'row.video'),
+                'service-cards': ('all-label', 'service.alt'), 'article-cards': ('all-label',),
+                'integrations-grid': ('all-label',), 'case-cards': ('all-cases-label',), 'faq': ('more-label',),
+                'contact-details': ('route-label',), 'case-study': ('link-label',), 'testimonial-single': ('link-label',),
+                'pricing-cards': ('compare-link-label',), 'video-showcase': ('transcript-label',),
+                'author-bio': ('link-label',), 'feature-grid': ('card.alt',), 'feature-bento': ('tile.alt',)}
     bad = [f'{b}.{e}' for b, els in optional.items() for e in els
            if (anatomy_index(ctx.B.get(b) or {})[0].get(e) or {}).get('required', True) is not False]
-    print(f"N45 каталог: подписи ссылок, alt картинок и каналы есть и необязательны: {'OK' if not bad else 'FAIL ' + ', '.join(bad)}")
+    print(f"N45 каталог: подписи ссылок, alt картинок, каналы и готовое сообщение есть и необязательны: "
+          f"{'OK' if not bad else 'FAIL ' + ', '.join(bad)}")
     ok &= not bad
     # --json: значение — файл вывода; ключ, папка и YAML после него — вход, JSON тогда идёт в stdout
     got = [json_target(a) for a in (['p.yaml', '--json'], ['--json', '--quiet', 'p.yaml'], ['--json', str(ex), '--quiet'],
@@ -1605,6 +1809,56 @@ def selftest(ctx):
     r = subprocess.run([sys.executable, str(Path(__file__).resolve()), '--json'], capture_output=True, text=True)
     good = good and r.returncode == 2 and 'Traceback' not in r.stderr and not r.stdout.strip()
     print(f"N46 --json без файла — JSON в stdout, итог в stderr; без путей — код 2 без трассировки: {'OK' if good else 'FAIL'}")
+    ok &= good
+    # уведомление РКН — вопрос сайта с формой (канал брифа или action-слот плана) или с необязательными cookie
+    def intake(b, channels, cookies):
+        b['conversion']['channels'] = channels
+        b['constraints']['legal_intake'].update({'rkn_registry': 'unknown', 'optional_cookies': cookies})
+
+    def rkn(run):
+        R.items.clear()
+        run()
+        return [i[3] for i in R.items if i[0] == 'warning' and i[1] == 'SB-L03' and 'уведомление РКН' in i[3]]
+    dst = Path(tempfile.mkdtemp(dir=ex.parent, prefix='.selftest-'))
+    shutil.copytree(ex, dst, dirs_exist_ok=True)
+    bf = dst / 'site-brief.yaml'
+    edit(bf, lambda b: intake(b, ['messenger', 'phone'], False))
+    good = not rkn(lambda: check_brief(bf, ctx)) and bool(rkn(lambda: check_brief(bf, ctx, plan_forms=True))) \
+        and bool(rkn(lambda: check_project(dst, ctx)))            # форма — в планах примера
+    edit(bf, lambda b: intake(b, ['form'], False))
+    good = good and bool(rkn(lambda: check_brief(bf, ctx)))
+    edit(bf, lambda b: intake(b, ['messenger'], True))
+    good = good and any('cookie' in m for m in rkn(lambda: check_brief(bf, ctx)))
+    shutil.rmtree(dst, ignore_errors=True)
+    print(f"N58 уведомление РКН: без форм и cookie — нет; с формой брифа или плана и с cookie — есть: {'OK' if good else 'FAIL'}")
+    ok &= good
+    # факт общего подвала: роль секции названа в use.section_roles — use.page_types со страницей не сверяется; в секции
+    # другой роли тот же факт сверяется
+    dst = Path(tempfile.mkdtemp(dir=ex.parent, prefix='.selftest-'))
+    shutil.copytree(ex.parent / site, dst, dirs_exist_ok=True)
+    edit(dst / 'facts.yaml', lambda d: next(f for f in d['facts'] if f['id'] == map_fact).__setitem__(
+        'use', {'page_types': ['legal-page'], 'section_roles': ['footer']}))
+    R.items.clear()
+    check_project(dst, ctx)
+    shutil.rmtree(dst, ignore_errors=True)
+    f04 = [i[2] for i in R.items if i[0] == 'warning' and i[1] == 'PL-F04' and f'fact:{map_fact}' in i[3]]
+    good = bool(f04) and not [w for w in f04 if w.endswith('#footer')]
+    print(f"N59 факт подвала вне use.page_types: в подвале — без находки, в секции другой роли — warning PL-F04: "
+          f"{'OK' if good else 'FAIL'} (находок {len(f04)})")
+    ok &= good
+    # каталог: информационная картинка без парного элемента alt — доклад BL-14 с адресом «блок.элемент»
+    cat = load_yaml(P['blocks'])
+    cat['blocks']['about-story']['slots'] = [s for s in cat['blocks']['about-story']['slots'] if s['slot'] != 'image-alt']
+    tmp = Path(tempfile.mkdtemp(prefix='site-validate-')) / 'blocks.yaml'
+    tmp.write_text(yaml.safe_dump(cat, allow_unicode=True, sort_keys=False), encoding='utf-8')
+
+    def bl14(path):
+        R.items.clear()
+        check_blocks(ctx, path)
+        return ' '.join(i[3] for i in R.items if i[0] == 'warning' and i[1] == 'BL-14')
+    good = 'about-story.photo' in bl14(tmp) and 'about-story.photo' not in bl14(P['blocks'])
+    shutil.rmtree(tmp.parent, ignore_errors=True)
+    print(f"N75 каталог: информационная картинка без элемента alt — warning BL-14, с элементом — нет: {'OK' if good else 'FAIL'}")
     ok &= good
     print('SELFTEST', 'OK' if ok else 'FAIL')
     return 0 if ok else 1

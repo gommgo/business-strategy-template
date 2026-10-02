@@ -37,7 +37,7 @@ spec:
   - composition.safe_zones
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
-compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py ratios <spec>
+compile: scripts/ai-media/prompt_compile.py ratios <spec>
 phase5:
   jobs:
   - 99-raw/phase5/jobs/H-08-outpaint.jsonl

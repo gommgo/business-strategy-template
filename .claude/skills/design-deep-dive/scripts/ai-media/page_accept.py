@@ -34,11 +34,12 @@ conditions; UA — как у браузера (HeadlessChrome), автомати
 Запуск (код-репо — соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/ai-media/page_accept.py):
   page_accept.py PAGE.html|URL --out DIR [--budget-profile landing-saas@L1] [--mobile] [--throttle] [--no-rm] [--root DIR]
       [--contrast SELECTOR …] [--dark] [--click SELECTOR …] [--wait MS] [--first-screen-only] [--loops 3] [--acceptance]
-      [--width W --height H --dpr D] [--no-lock]
+      [--width W --height H --dpr D] [--no-lock] [--strict]
   page_accept.py --selftest
   PAGE.html — локальный файл: корень раздачи — --root или подъём по ссылкам ../ в HTML (как у motion_check.py); сервер с Range
   для видео закрывается после прогона.
-Код выхода 0 — провалов (FAIL) нет, 1 — есть провалы (verdict.fail), 2 — ошибка вызова или запуска.
+Код выхода: 0 — замер выполнен (находки — в отчёте и в выводе; вердикт страницы решает page_gates.py по отчёту), 2 — ошибка
+вызова или запуска, прочий ненулевой — сбой замера. С --strict — выход по находкам: 1 — есть провалы (verdict.fail).
 Зависимости: Playwright (Chromium), numpy, Pillow, PyYAML."""
 import argparse, contextlib, http.server, io, json, math, os, re, socketserver, sys, threading, time, urllib.parse
 import numpy as np
@@ -627,6 +628,12 @@ def verdict(no, rm, th, acc_rows=None):
     return {'pass': not fail, 'fail': fail, 'warn': warn, 'ok': ok}
 
 
+def exit_code(v, strict=False):
+    """Код выхода по вердикту замера: замер выполнен — 0, находки остаются в отчёте (вердикт страницы решает page_gates.py);
+    с --strict — 1 при провалах."""
+    return 1 if strict and not v['pass'] else 0
+
+
 def run(a):
     budgets = PG.load_budgets()
     cond = PG.conditions(budgets)
@@ -729,6 +736,9 @@ def selftest():
     v4 = verdict(no, None, th1, [{'width': 360, 'overflow_px': ov, 'over': [], 'no_wh': []}, {'width': 320, 'overflow_px': ov + 1}])
     check(f'ширины приёмки: вылет {ov} px — норма, {ov + 1} px — WARN (limits.overflow_px строки SG-MOB-01)',
           [x for x in v4['warn'] if 'вылет' in x] == [f'ширина 320: горизонтальный вылет {ov + 1} px > {ov} (SG-MOB-01)'])
+    check('код выхода: замер с провалом — 0, с --strict — 1; без провалов — 0 и со --strict',
+          (exit_code(v2), exit_code(v2, True), exit_code(v1), exit_code(v1, True)) == (0, 1, 0, 0)
+          and ap.parse_args(['x.html', '--out', 'o', '--strict']).strict and not ap.parse_args(['x.html', '--out', 'o']).strict)
     check('подписи механизма паузы — page_gates.PAUSE_LABELS: выражение подставлено в PAUSE',
           PG.pause_label_re_js() in PAUSE and '__PAUSE_RE__' not in PAUSE)
     from types import SimpleNamespace
@@ -762,8 +772,9 @@ def selftest():
                            capture_output=True, text=True, timeout=300, env=kbpaths.playwright_env())
         js = [f for f in os.listdir(out) if f.startswith('accept_') and f.endswith('.json')] if os.path.isdir(out) else []
         rep = json.load(open(os.path.join(out, js[0]), encoding='utf-8')) if js else {}
-        check(f'прогон на локальной странице: отчёт есть, код 1 (петля без паузы) ({r.returncode}) {r.stderr[-200:] if not js else ""}',
-              bool(rep) and r.returncode == 1)
+        check(f'прогон на локальной странице: отчёт есть, провал в отчёте (петля без паузы), код замера 0 ({r.returncode}) '
+              f'{r.stderr[-200:] if not js else ""}',
+              bool(rep) and r.returncode == 0 and rep['verdict']['pass'] is False)
         if rep:
             npf = rep['no_preference']
             check('контракт: device, throttle, profile, window_after_load_s, no_preference, reduce',
@@ -827,6 +838,7 @@ def parser():
     ap.add_argument('--loops', type=int, default=3, help='сколько найденных петель проверить через 6 с после показа')
     ap.add_argument('--acceptance', action='store_true', help='картинки и вылет на ширинах приёмки (kb/common/acceptance-widths.yaml)')
     ap.add_argument('--no-lock', action='store_true', help='не брать замки тишины (обёртка их уже держит)')
+    ap.add_argument('--strict', action='store_true', help='выход по находкам: код 1 при провалах (без ключа замер возвращает 0)')
     return ap
 
 
@@ -839,7 +851,7 @@ def main():
     except (ValueError, KeyError) as e:
         print(f'page_accept.py: {e}', file=sys.stderr)
         sys.exit(2)
-    sys.exit(0 if out['verdict']['pass'] else 1)
+    sys.exit(exit_code(out['verdict'], a.strict))
 
 
 if __name__ == '__main__':

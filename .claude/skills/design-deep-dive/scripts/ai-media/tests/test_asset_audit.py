@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
-"""Тесты asset_audit.py без сети и платных вызовов: пороги, сверка строк, проверки картинок на синтетике, пакет судьи на
-заглушках ответов (пары, рубрика, калибровочный набор, страница голосования), доверие по порогам группы judge; набор
-иконок (шапка Lucide — брак только у Lucide), строки окружения вместо трассировки, командная строка palette.py.
+"""Тесты asset_audit.py без сети и платных вызовов: пороги, сверка строк, проверки картинок, правок, видео, иконок и
+серий на синтетике (Pillow, numpy, ffmpeg — входы строятся во временной папке), пакет судьи на заглушках ответов (пары,
+рубрика, калибровочный набор, страница голосования), доверие по порогам группы judge; набор и эталон иконок, кодирование
+без усечения глубины и резкость источника, подбор качества под бюджет веса, строки окружения вместо трассировки,
+командная строка palette.py.
 Запуск: python3 scripts/ai-media/tests/test_asset_audit.py [--ocr] [--keep] [-v]
   --ocr  — ещё и OCR кириллицы (под блокировкой heavy; ≈ 10 с);  --keep — не удалять временную папку.
-Входы, которых нет в скилле (фото и ролики журнала опытов, exiftool), — пропуск с пометкой, не провал."""
+Программы окружения, которых нет на машине (exiftool, avifenc, ssimulacra2), — пропуск с пометкой, не провал."""
 import argparse, hashlib, io, json, re, shutil, sys, tempfile
 from pathlib import Path
 
@@ -77,7 +79,24 @@ def t_text():
     meta = [{"text": "Весення", "score_min": 0.95, "h_px": 40}]
     check("текст: уверенный пропуск в крупной строке → fail", tv(["Весенняя"], "Весення", lines_meta=meta)["verdict"] == "fail")
     meta = [{"text": "Весення", "score_min": 0.95, "h_px": 10}]
-    check("текст: пропуск в мелкой строке (10 px) → needs_human", tv(["Весенняя"], "Весення", lines_meta=meta)["verdict"] == "needs_human")
+    r = tv(["Весенняя"], "Весення", lines_meta=meta)
+    check("текст: пропуск в мелкой строке (10 px) → warn, не брак и не «покажи человеку»",
+          r["verdict"] == "warn" and r["small_text"] == ["omission"] and not r["fail_classes"], (r["verdict"], r["small_text"]))
+    meta = [{"text": "Весенняя распродажа", "score_min": 0.97, "h_px": 60}, {"text": "товары до конца месяца", "score_min": 0.93, "h_px": 36}]
+    exp = ["Весенняя распродажа", "товаров до конца месяца"]
+    r1 = tv(exp, "Весенняя распродажа\nтовары до конца месяца", lines_meta=meta)
+    r2 = tv(exp, "Весенняя распродажа\nтовары до конца месяца", lines_meta=meta, h_scale=0.4)
+    check("текст: высота букв — в масштабе распознавания: строка 36 px при уменьшении кадра до 0,4 — мелкая (warn), без него — нет",
+          r1["verdict"] != "warn" and r2["verdict"] == "warn" and r2["min_line_h_px"] == 14.4, (r1["verdict"], r2["verdict"], r2["min_line_h_px"]))
+    two = "Скидка 20 %\nСкидка 20 %"
+    check("текст: две одинаковые ожидаемые надписи (повтор строки и суффикс {×2}) — чисто",
+          tv(["Скидка 20 %", "Скидка 20 %"], two)["verdict"] == "pass" and tv(["Скидка 20 %{×2}"], two)["verdict"] == "pass"
+          and not tv(["Скидка 20 %{×2}"], two)["extra_text"])
+    r = tv(["Скидка 20 %"], two)
+    check("текст: вторая надпись без заказа числа вхождений — extra_text", "extra_text" in r["fail_classes"], r["fail_classes"])
+    r = tv(["Скидка 20 %{×2}"], "Скидка 20 %")
+    check("текст: заказано два вхождения, на картинке одно — missing_line", "missing_line" in r["fail_classes"]
+          and [L["found"] for L in r["lines"]] == [True, False], r["fail_classes"])
 
 
 def calm_photo(size=(1024, 640), seed=3):
@@ -149,74 +168,342 @@ def t_image_cutout_texture(tmp):
     check("texture: градиент поперёк → QA-TILE-SEAM fail", "QA-TILE-SEAM" in codes(A["tile_bad.png"], ("fail",)), A["tile_bad.png"]["checks"].get("tile"))
 
 
+def edit_scene(size=(512, 512), obj=True, seed=5):
+    """Сцена для правки: небо, земля, мягкий шум и крупный предмет (эллипс ≈ 20 % кадра); obj=False — та же сцена без
+    предмета: «идеальное удаление». Возвращает (кадр float32, маска предмета с запасом)."""
+    import numpy as np
+    from scipy import ndimage as ndi
+    W, H = size
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float32)
+    sky = np.stack([150 + 30 * yy / H, 175 + 20 * yy / H, 200 + 10 * yy / H], -1)
+    ground = np.stack([95 + 20 * xx / W, 105 + 10 * xx / W, 70 + 5 * xx / W], -1)
+    img = np.where((yy > H * 0.6)[..., None], ground, sky)
+    img = img + (ndi.gaussian_filter(np.random.default_rng(seed).normal(0, 1, (H, W)), 2) * 18)[..., None]
+    r = ((yy - H * 0.5) / (H * 0.24)) ** 2 + ((xx - W * 0.55) / (W * 0.27)) ** 2
+    if obj:
+        img[r < 1] = img[r < 1] * 0.35 + np.array([170, 60, 40]) * 0.65
+    return np.clip(img, 0, 255).astype(np.float32), r < 1.25
+
+
 def t_edit(tmp):
-    I = ROOT / "99-raw/phase5/inputs/H"
-    C = ROOT / "99-raw/experiments/H/03-edit-check/cases"
-    if not (C / "e_leak.png").exists():
-        check("edit: нет кейсов журнала опытов — пропуск", True)
-        return
-    s = audit([C / "e_leak.png", C / "e_ideal.png"], tmp / "o_edit", ocr="off", orig=I / "product_1024.png", mask=I / "mask_product_white.png")
+    """Правка на месте и аутпейнт на синтетической сцене: утечка вне маски, идеальное удаление, перерисованный и честный
+    аутпейнт, маска из разницы у безмасочной правки."""
+    import numpy as np
+    from PIL import Image
+    from scipy import ndimage as ndi
+    d = tmp / "edit"
+    d.mkdir()
+    src, mask = edit_scene()
+    clean, _ = edit_scene(obj=False)
+
+    def save(arr, name):
+        Image.fromarray(np.clip(arr, 0, 255).round().astype(np.uint8)).save(d / name)
+        return d / name
+    orig = save(src, "scene.png")
+    Image.fromarray((mask * 255).astype(np.uint8)).save(d / "mask_object_white.png")
+    ideal = np.where(mask[..., None], clean, src)
+    save(ideal, "e_ideal.png")
+    leak = ideal.copy()
+    leak[:200, :200] += np.array([7.0, 5.0, -7.0])             # угол вне маски сдвинут по цвету слабее порога утечки
+    save(leak, "e_leak.png")
+    s = audit([d / "e_leak.png", d / "e_ideal.png"], tmp / "o_edit", ocr="off", orig=orig, mask=d / "mask_object_white.png")
     A = {Path(x["file"]).name: x for x in s["assets"]}
-    check("edit: утечка-угол H/03 видна (QA-EDIT-LOCAL-SHIFT при --match-color)", "QA-EDIT-LOCAL-SHIFT" in codes(A["e_leak.png"]), codes(A["e_leak.png"]))
+    check("edit: сдвиг цвета в углу вне маски виден (QA-EDIT-LOCAL-SHIFT или QA-EDIT-LEAK)",
+          {"QA-EDIT-LOCAL-SHIFT", "QA-EDIT-LEAK"} & codes(A["e_leak.png"]), (codes(A["e_leak.png"]), A["e_leak.png"]["checks"].get("edit")))
     check("edit: идеальное удаление без warn/fail", not codes(A["e_ideal.png"]), codes(A["e_ideal.png"]))
     check("edit: композит записан", (tmp / "o_edit" / "e_leak_edit" / "composite.png").exists())
-    s = audit([C / "e_outpaint_regen.png", C / "e_outpaint_9x16.png"], tmp / "o_out", ocr="off", orig=I / "hero_16x9.png")
+    # аутпейнт 16:9 → выше кадра: исходник в середине, сверху небо, снизу земля
+    wide, _ = edit_scene((640, 360))
+    yy = np.linspace(0, 1, 200, dtype=np.float32)[:, None, None]
+    rng = np.random.default_rng(11)
+    top = np.array([150.0, 175.0, 200.0]) * np.ones((200, 640, 1), np.float32) - 25 * (1 - yy) + rng.normal(0, 3, (200, 640, 1))
+    bottom = np.array([100.0, 108.0, 72.0]) * np.ones((200, 640, 1), np.float32) - 20 * yy + rng.normal(0, 3, (200, 640, 1))
+    save(wide, "wide.png")
+    save(np.concatenate([top, wide, bottom]), "e_outpaint_tall.png")
+    regen = np.stack([ndi.gaussian_filter(wide[..., c], 2.5) for c in range(3)], -1) + np.array([10.0, 0.0, -10.0])
+    save(np.concatenate([top, regen, bottom]), "e_outpaint_regen.png")
+    s = audit([d / "e_outpaint_regen.png", d / "e_outpaint_tall.png"], tmp / "o_out", ocr="off", orig=d / "wide.png")
     A = {Path(x["file"]).name: x for x in s["assets"]}
-    check("outpaint: перерисованный исходник → QA-OUTPAINT-REGEN fail", "QA-OUTPAINT-REGEN" in codes(A["e_outpaint_regen.png"], ("fail",)))
-    check("outpaint: честное расширение → pass", A["e_outpaint_9x16.png"]["verdict"] == "pass", codes(A["e_outpaint_9x16.png"]))
-    s = audit([C / "e_modellike.png"], tmp / "o_nomask", ocr="off", orig=I / "product_1024.png")
+    check("outpaint: перерисованный исходник → QA-OUTPAINT-REGEN fail", "QA-OUTPAINT-REGEN" in codes(A["e_outpaint_regen.png"], ("fail",)),
+          A["e_outpaint_regen.png"]["checks"].get("outpaint"))
+    check("outpaint: честное расширение → pass", A["e_outpaint_tall.png"]["verdict"] == "pass",
+          (codes(A["e_outpaint_tall.png"]), A["e_outpaint_tall.png"]["checks"].get("outpaint")))
+    # безмасочная правка «как у модели»: предмет убран, весь кадр слегка сдвинут и зашумлён
+    save(ideal + np.random.default_rng(12).normal(0, 1.2, ideal.shape) + np.array([2.0, 1.0, 0.0]), "e_modellike.png")
+    s = audit([d / "e_modellike.png"], tmp / "o_nomask", ocr="off", orig=orig)
     dm = s["assets"][0]["checks"].get("diff_mask") or {}
     check("edit без маски: маска из разницы построена, изменено 10–60 % кадра", 0.1 < dm.get("changed_frac", 0) < 0.6, dm.get("changed_frac"))
 
 
-def t_video(tmp):
-    K = ROOT / "99-raw/experiments/K/03-video-negatives/clips"
-    if not (K / "c00_clean.mp4").exists():
-        check("video: нет роликов журнала опытов — пропуск", True)
-        return
-    s = audit([K / "c00_clean.mp4", K / "c01_gap8.mp4", K / "c09_weak.mp4", K / "c10_h264_crf23.mp4", K / "c11_audio.mp4"], tmp / "o_vid",
-              control=K / "c00_clean.mp4")
-    A = {Path(x["file"]).name: x for x in s["assets"]}
-    check("video: чистая петля → pass", A["c00_clean.mp4"]["verdict"] == "pass", codes(A["c00_clean.mp4"]))
-    check("video: петля не замкнулась → QA-LOOP-SEAM fail", "QA-LOOP-SEAM" in codes(A["c01_gap8.mp4"], ("fail",)))
-    check("video: слабое движение к контролю → QA-LOOP-WEAK-MOTION", "QA-LOOP-WEAK-MOTION" in codes(A["c09_weak.mp4"], ("fail",)))
-    check("video: H.264 тихой петли → шов needs_human (пульс ключевого кадра)", "QA-LOOP-SEAM" in codes(A["c10_h264_crf23.mp4"], ("needs_human",)),
-          codes(A["c10_h264_crf23.mp4"]))
-    check("video: звуковая дорожка → QA-VIDEO-AUDIO", "QA-VIDEO-AUDIO" in codes(A["c11_audio.mp4"]))
-    # motion_keep (J): финал к мастеру-мезонину; H.264 CRF 23 движение сохраняет, CRF 38 «замораживает» рябь
+def loop_frames(n=48, h=180, w=320, amp=60.0, seed=1, gap=0.0, warp=None, level=120.0, blobs=60, sigma=9.0):
+    """Синтетическая петля без движения кадра: пятна на своих местах «дышат» по синусу, пары пятен — в противофазе
+    (средняя яркость кадра постоянна). gap — на сколько шагов стык длиннее обычного шага (0 — петля замкнута);
+    warp(u) — неравномерная скорость по циклу."""
+    import numpy as np
+    from scipy import ndimage as ndi
+    rng = np.random.default_rng(seed)
+    base = ndi.gaussian_filter(rng.random((h, w)), 1.5)        # мелкая неподвижная фактура держит кадр на месте
+    base = (base - base.mean()) / base.std() * 50 + level
+    yy, xx = np.mgrid[0:h, 0:w]
+    cy, cx = rng.random(blobs) * h, rng.random(blobs) * w
+    ph = rng.random(blobs // 2) * 2 * np.pi
+    ph = np.concatenate([ph, ph + np.pi])
+    g = np.stack([np.exp(-((yy - y) ** 2 + (xx - x) ** 2) / (2 * sigma ** 2)) for y, x in zip(cy, cx)])
+    u = [(warp(i / (n + gap)) if warp else i / (n + gap)) for i in range(n)]
+    return np.clip(np.stack([base + amp * np.tensordot(np.sin(2 * np.pi * x + ph), g, axes=1) for x in u]), 0, 255).round().astype(np.uint8)
+
+
+LOSSLESS = ("-c:v", "libx264", "-qp", "0", "-pix_fmt", "yuv444p")
+
+
+def h264(crf):
+    return ("-c:v", "libx264", "-crf", str(crf), "-pix_fmt", "yuv420p")
+
+
+def write_clip(frames, path, fps=24, args=LOSSLESS, audio=False):
+    """Кадры (n, h, w) uint8 → видеофайл через ffmpeg; по умолчанию — мезонин без потерь."""
     import subprocess
-    low = tmp / "c00_h264_crf38.mp4"
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(K / "c00_clean.mp4"), "-an", "-threads", "4", "-c:v", "libx264", "-crf", "38",
-                    "-pix_fmt", "yuv420p", str(low)], check=True)
-    s = audit([K / "c10_h264_crf23.mp4", low], tmp / "o_keep", master=K / "c00_clean.mp4", control=K / "c00_clean.mp4")
-    A = {Path(x["file"]).name: x for x in s["assets"]}
-    k23 = A["c10_h264_crf23.mp4"]["checks"]["loop"].get("motion_keep")
-    k38 = A["c00_h264_crf38.mp4"]["checks"]["loop"].get("motion_keep")
-    check("video: motion_keep — CRF 23 без QA-ENCODE-MOTION, CRF 38 → warn", k23 is not None and k23 >= 0.75
-          and "QA-ENCODE-MOTION" not in codes(A["c10_h264_crf23.mp4"]) and "QA-ENCODE-MOTION" in codes(A["c00_h264_crf38.mp4"], ("warn",)),
-          (k23, k38))
+    h, w = frames.shape[1:3]
+    cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "gray", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-"]
+    if audio:
+        cmd += ["-f", "lavfi", "-i", "sine=frequency=440", "-shortest", "-c:a", "aac"]
+    subprocess.run(cmd + ["-threads", "2", *args, str(path)], input=frames.tobytes(), check=True)
+    return path
+
+
+def t_video(tmp):
+    """Видео на синтетических клипах (кадры numpy → ffmpeg): шов по стадии файла, бюджет строки плана, разовый ролик,
+    монтаж, событие-затемнение, почти неподвижные концы, повторы кадров и переменная частота, вспышки."""
+    import subprocess
+    import numpy as np
+    if kbpaths.find("ffmpeg") is None:
+        check("video: нет ffmpeg (install.sh --ffmpeg) — проверки видео не выполнены", False)
+        return
+    d = tmp / "clips"
+    d.mkdir()
+    s = loop_frames()
+    clean = write_clip(s, d / "clean.mp4")
+    write_clip(loop_frames(gap=8), d / "gap.mp4")
+    write_clip(loop_frames(amp=12.0), d / "weak.mp4")
+    write_clip(s, d / "audio.mp4", audio=True)
+    A = {Path(x["file"]).name: x for x in audit([clean, d / "gap.mp4", d / "weak.mp4", d / "audio.mp4"], tmp / "o_vid",
+                                                 control=clean)["assets"]}
+    check("video: чистая петля → pass", A["clean.mp4"]["verdict"] == "pass", codes(A["clean.mp4"]))
+    check("video: петля не замкнулась → QA-LOOP-SEAM fail", "QA-LOOP-SEAM" in codes(A["gap.mp4"], ("fail",)))
+    check("video: слабое движение к контролю → QA-LOOP-WEAK-MOTION", "QA-LOOP-WEAK-MOTION" in codes(A["weak.mp4"], ("fail",)))
+    check("video: звуковая дорожка → QA-VIDEO-AUDIO", "QA-VIDEO-AUDIO" in codes(A["audio.mp4"]))
+    # шов по стадии файла: стык длиннее шага в 1,7 раза — брак у мезонина, норма у файла после кодирования
+    th = aa.Th(aa.load_thresholds())
+    between = loop_frames(gap=0.7)
+    write_clip(between, d / "between.mp4")
+    write_clip(between, d / "between_web.mp4", args=h264(14))
+    A = {Path(x["file"]).name: x for x in audit([d / "between.mp4", d / "between_web.mp4"], tmp / "o_stage")["assets"]}
+    sc = A["between_web.mp4"]["checks"]["loop"]["seam_check"]
+    check("video: шов между порогами у мезонина → QA-LOOP-SEAM fail (порог мезонина)",
+          "QA-LOOP-SEAM" in codes(A["between.mp4"], ("fail",)) and A["between.mp4"]["checks"]["loop"]["seam_check"]["stage"] == "mezzanine",
+          A["between.mp4"]["checks"]["loop"]["seam_check"])
+    check("video: тот же шов у сжатого файла — между порогами и не fail (порог после кодирования)",
+          sc["stage"] == "encoded" and th("video.seam_local_max") < sc["value"] <= th("video.seam_encoded_max")
+          and "QA-LOOP-SEAM" not in codes(A["between_web.mp4"]), sc)
+    # тихая петля после H.264: пульс ключевого кадра → шов needs_human; motion_keep к мезонину
+    q = loop_frames(amp=4.0)
+    quiet = write_clip(q, d / "quiet.mp4")
+    write_clip(q, d / "quiet_crf12.mp4", args=h264(12))
+    write_clip(q, d / "quiet_crf30.mp4", args=h264(30))
+    A = {Path(x["file"]).name: x for x in audit([d / "quiet_crf12.mp4", d / "quiet_crf30.mp4"], tmp / "o_keep", master=quiet)["assets"]}
+    check("video: H.264 тихой петли → шов needs_human (пульс ключевого кадра)", "QA-LOOP-SEAM" in codes(A["quiet_crf12.mp4"], ("needs_human",)),
+          codes(A["quiet_crf12.mp4"]))
+    k12 = A["quiet_crf12.mp4"]["checks"]["loop"].get("motion_keep")
+    k30 = A["quiet_crf30.mp4"]["checks"]["loop"].get("motion_keep")
+    check("video: motion_keep — CRF 12 без QA-ENCODE-MOTION, CRF 30 → warn", k12 is not None and k12 >= th("video.motion_keep_min")
+          and "QA-ENCODE-MOTION" not in codes(A["quiet_crf12.mp4"]) and "QA-ENCODE-MOTION" in codes(A["quiet_crf30.mp4"], ("warn",)),
+          (k12, k30))
+    # бюджет веса: строка плана ассетов раньше умолчания
+    plan = tmp / "plan-home.yaml"
+    plan.write_text("plan_version: 1\nstatus: draft\npage: {id: home}\nslots:\n"
+                    "  - id: hero-loop\n    slot: hero-visual\n    variants:\n"
+                    "      - {id: desktop, max_kb: 4}\n      - {id: mobile, max_kb: 100000}\n"
+                    "  - id: about-photo\n    slot: photo\n    variants: [{id: default, max_kb: TODO}]\n", encoding="utf-8")
+    kb = (d / "between_web.mp4").stat().st_size / 1024
+    a1 = audit([d / "between_web.mp4"], tmp / "o_plan1", stage="web", plan=plan, slot="hero-loop")["assets"][0]
+    a2 = audit([d / "between_web.mp4"], tmp / "o_plan2", stage="web", plan=plan, slot="hero-loop", variant="mobile")["assets"][0]
+    a3 = audit([d / "between_web.mp4"], tmp / "o_plan3", stage="web")["assets"][0]
+    bd = [x for x in a1["defects"] if x["code"] == "QA-BUDGET"]
+    check("video: бюджет — max_kb слота плана (desktop 4 КБ) → QA-BUDGET со ссылкой на слот; вариант mobile — в норме",
+          kb > 4 and bd and "hero-loop" in bd[0]["msg"] and bd[0]["threshold"] == 4 and a1["slot"] == "hero"
+          and "QA-BUDGET" not in codes(a2) and a2["checks"]["budget"]["key"] == "plan:hero-loop/mobile", (kb, bd, a2["checks"].get("budget")))
+    check("video: без плана — бюджет по умолчанию (ключ budget.video.*)",
+          a3["checks"]["budget"]["key"].startswith("budget.video.") and "QA-BUDGET" not in codes(a3), a3["checks"].get("budget"))
+    rc, _ = _run(["audit", str(d / "between_web.mp4"), "--out", str(tmp / "o_plan4"), "--no-provenance", "--plan", str(plan),
+                  "--slot", "нет-такого"])
+    rc2, _ = _run(["audit", str(d / "between_web.mp4"), "--out", str(tmp / "o_plan5"), "--no-provenance", "--slot", "hero-loop"])
+    check("video: слота нет в плане или id слота без --plan — ошибка вызова (код 2)", rc == 2 and rc2 == 2, (rc, rc2))
+    # разовый ролик: пятно едет и останавливается
+    yy, xx = np.mgrid[0:180, 0:320]
+    once = np.stack([(40 + 180 * np.exp(-((yy - 90) ** 2 + (xx - 40 - 6.5 * min(i, 36)) ** 2) / (2 * 14.0 ** 2))) for i in range(48)])
+    write_clip(once.round().astype(np.uint8), d / "intro.mp4")
+    o1 = audit([d / "intro.mp4"], tmp / "o_once", mode="video-once")["assets"][0]
+    o2 = audit([d / "intro.mp4"], tmp / "o_once_loop")["assets"][0]
+    check("video-once: разовый ролик — без находок петли (ни одного QA-LOOP-*)",
+          o1["mode"] == "video-once" and not [x["code"] for x in o1["defects"] if x["code"].startswith("QA-LOOP-")]
+          and "QA-VIDEO-CAM-CREEP" not in codes(o1), [x["code"] for x in o1["defects"]])
+    check("video-once: тот же ролик как петля — QA-LOOP-SEAM fail", "QA-LOOP-SEAM" in codes(o2, ("fail",)), codes(o2))
+    # петля с равными концами: шов по файлу как есть — 0
+    write_clip(np.concatenate([s, s[:1]]), d / "equal_ends.mp4")
+    e = audit([d / "equal_ends.mp4"], tmp / "o_equal")["assets"][0]
+    check("video: петля с равными концами — шов 0, QA-LOOP-SEAM нет, срез дубля — info",
+          e["checks"]["loop"]["seam_ratio_local"] == 0 and "QA-LOOP-SEAM" not in codes(e)
+          and "QA-LOOP-TRIM" in codes(e, ("info",)), (e["checks"]["loop"]["seam_ratio_local"], codes(e)))
+    # вспышки: 10 Гц на весь кадр, 25 кадров/с
+    fl = np.stack([np.full((180, 320), 235 if int(i * 20 / 25) % 2 else 20, np.uint8) for i in range(50)])
+    write_clip(fl, d / "flash.mp4", fps=25)
+    f = audit([d / "flash.mp4"], tmp / "o_flash", mode="video-once")["assets"][0]
+    check("video: клип со вспышками → QA-VIDEO-FLASH; чистая петля — без неё",
+          "QA-VIDEO-FLASH" in codes(f) and f["checks"]["loop"]["flash"]["fail"] and not A["quiet_crf12.mp4"]["checks"]["loop"]["flash"]["fail"],
+          f["checks"]["loop"].get("flash"))
+    # монтаж трёх планов: два живых и тихий
+    mont = np.concatenate([loop_frames(n=24, seed=1), loop_frames(n=24, seed=2, level=190.0), loop_frames(n=24, seed=3, amp=12.0, level=60.0)])
+    write_clip(mont, d / "montage.mp4")
+    m1 = audit([d / "montage.mp4"], tmp / "o_mont1")["assets"][0]
+    m2 = audit([d / "montage.mp4"], tmp / "o_mont2", montage=True)["assets"][0]
+    L2 = m2["checks"]["loop"]
+    check("montage: без ключа склейка планов — QA-LOOP-CUT fail", "QA-LOOP-CUT" in codes(m1, ("fail",)), codes(m1))
+    check("montage: с ключом --montage — три плана, без QA-LOOP-CUT, QA-LOOP-SEAM и QA-LOOP-COLLAPSE; стык петли — склейка",
+          L2.get("shots") == 3 and L2["cuts"] == [24, 48] and not ({"QA-LOOP-CUT", "QA-LOOP-SEAM", "QA-LOOP-COLLAPSE"} & codes(m2))
+          and L2["seam_check"]["basis"] == "cut", (L2.get("cuts"), codes(m2), L2.get("seam_check")))
+    # событие-затемнение: петля уходит в чёрное и выходит из него
+    ramp = np.linspace(0, 1, 7)[:6]
+    fade = np.concatenate([s[:6] * ramp[:, None, None], s[6:34], s[34:40] * ramp[::-1][:, None, None], np.zeros_like(s[:8])])
+    write_clip(fade.round().astype(np.uint8), d / "fade.mp4")
+    f1 = audit([d / "fade.mp4"], tmp / "o_fade1")["assets"][0]
+    f2 = audit([d / "fade.mp4"], tmp / "o_fade2", fade_event=True)["assets"][0]
+    check("fade-event: без ключа — QA-LOOP-COLLAPSE fail; с ключом события-затемнения — warn",
+          "QA-LOOP-COLLAPSE" in codes(f1, ("fail",)) and "QA-LOOP-COLLAPSE" in codes(f2, ("warn",))
+          and "QA-LOOP-COLLAPSE" not in codes(f2, ("fail",)), (codes(f1), codes(f2)))
+    # почти неподвижные концы: шов на уровне соседних кадров
+    slow = loop_frames(amp=4.0, gap=1.0, warp=lambda u: u - 0.5 * np.sin(2 * np.pi * u) / (2 * np.pi))
+    write_clip(slow, d / "static_ends.mp4")
+    se = audit([d / "static_ends.mp4"], tmp / "o_static")["assets"][0]
+    sc = se["checks"]["loop"]["seam_check"]
+    check("video: почти неподвижные концы — отношение выше порога, шов в норме по абсолютной разнице",
+          se["checks"]["loop"]["seam_ratio_local"] > th("video.seam_local_max") and sc["ok"] and sc["basis"] == "abs"
+          and "QA-LOOP-SEAM" not in codes(se), (se["checks"]["loop"]["seam_ratio_local"], sc))
+    # повторы кадров: каждый пятый кадр дважды; переменная частота — пропуски по таймкодам
+    dup = np.concatenate([np.repeat(s[i:i + 1], 2 if i % 5 == 4 else 1, 0) for i in range(len(s))])
+    write_clip(dup, d / "dups.mp4")
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(clean), "-vf", "select='not(eq(mod(n\\,5)\\,4))'", "-fps_mode", "vfr",
+                    "-threads", "2", *LOSSLESS, str(d / "vfr.mkv")], check=True)
+    D = {Path(x["file"]).name: x for x in audit([d / "dups.mp4", d / "vfr.mkv"], tmp / "o_dups")["assets"]}
+    tm = D["vfr.mkv"]["checks"]["loop"].get("timing") or {}
+    check("video: клип с повторёнными кадрами → QA-VIDEO-DUP-FRAMES; чистая петля — без неё",
+          "QA-VIDEO-DUP-FRAMES" in codes(D["dups.mp4"]) and D["dups.mp4"]["checks"]["loop"]["dup_frames"] >= 8
+          and "QA-VIDEO-DUP-FRAMES" not in codes(e), D["dups.mp4"]["checks"]["loop"].get("dup_frames"))
+    check("video: переменная частота — кадры, которые держатся дольше шага, считаются по таймкодам",
+          tm.get("vfr") and tm.get("held_frames", 0) >= 8 and "QA-VIDEO-DUP-FRAMES" in codes(D["vfr.mkv"]), tm)
+
+
+# вымышленная «наивная» иконка: свой viewBox, жёсткий цвет, толстый штрих
+NAIVE_HEART = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="none" stroke="#e11d48" stroke-width="6" '
+               'd="M50 82 L18 46 A19 19 0 0 1 50 28 A19 19 0 0 1 82 46 Z"/></svg>')
 
 
 def t_svg_series(tmp):
+    """Иконка набора против «наивной» и серия: одна сцена в четырёх дублях против четырёх сцен разного цвета."""
+    import numpy as np
+    from PIL import Image
     ref = kbpaths.data("ai-media", "lucide-ref", "search.svg")
-    naive = ROOT / "99-raw/experiments/G/01-llm-svg-icons/icons-naive/heart.svg"
-    if aa.VENV_G.exists() and ref.exists():
-        s = audit([ref] + ([naive] if naive.exists() else []), tmp / "o_svg")
+    if svg_ready() and ref.exists():
+        (tmp / "heart.svg").write_text(NAIVE_HEART, encoding="utf-8")
+        s = audit([ref, tmp / "heart.svg"], tmp / "o_svg")
         A = {Path(x["file"]).name: x for x in s["assets"]}
         check("svg: иконка Lucide без fail", A["search.svg"]["verdict"] != "fail", codes(A["search.svg"]))
-        if naive.exists():
-            check("svg: «наивная» иконка LLM → fail (цвет/шапка)", A["heart.svg"]["verdict"] == "fail", codes(A["heart.svg"]))
-        else:
-            check("svg: нет «наивной» иконки журнала опытов — пропуск", True)
-    cc0 = ROOT / "99-raw/experiments/F/01-materials/cc0"
-    same = sorted(cc0.glob("autumn_park__*.jpg"))
-    diff = [cc0 / "autumn_park__DSC_0088.jpg", cc0 / "comfy_cafe__DSC_6776.jpg", cc0 / "fish_hoek_beach__IMG_0016.jpg",
-            cc0 / "piazza_san_marco__DSC07156.jpg"]
-    if len(same) >= 3:
-        s = audit(same, tmp / "o_ser1", ocr="off", mode="series")
-        check("series: одна съёмка → не fail", s["series"]["verdict"] != "fail", s["series"]["metrics"])
-        s = audit(diff, tmp / "o_ser2", ocr="off", mode="series")
-        check("series: четыре локации → QA-SERIES-BREAK", any(d["code"] == "QA-SERIES-BREAK" for d in s["series"]["defects"]), s["series"]["metrics"])
+        check("svg: «наивная» иконка → fail (цвет и шапка)", A["heart.svg"]["verdict"] == "fail"
+              and {"QA-SVG-COLOR", "QA-SVG-HEADER"} <= codes(A["heart.svg"], ("fail",)), codes(A["heart.svg"]))
+    else:
+        check("svg: нет пакетов группы svg (install.sh --groups svg) — пропуск", True)
+    d = tmp / "series"
+    d.mkdir()
+    same, diff = [], []
+    for i in range(4):
+        p = d / f"shoot_{i}.png"
+        calm_photo((640, 400), seed=20 + i).save(p)
+        same.append(p)
+    base = np.asarray(calm_photo((640, 400), seed=31))
+    for i, perm in enumerate(((0, 1, 2), (2, 1, 0), (1, 0, 2), (0, 2, 1))):      # те же формы, другая гамма: четыре «локации»
+        p = d / f"place_{i}.png"
+        Image.fromarray(np.ascontiguousarray(base[..., perm])).save(p)
+        diff.append(p)
+    s = audit(same, tmp / "o_ser1", ocr="off", mode="series")
+    check("series: одна съёмка → не fail", s["series"]["verdict"] != "fail", s["series"]["metrics"])
+    s = audit(diff, tmp / "o_ser2", ocr="off", mode="series")
+    check("series: четыре сцены разной гаммы → QA-SERIES-BREAK", any(x["code"] == "QA-SERIES-BREAK" for x in s["series"]["defects"]),
+          s["series"]["metrics"])
+
+
+def t_encoding(tmp):
+    """Сжатие к мастеру без усечения глубины, резкость источника отдельно от оценки сжатия, подбор качества под бюджет."""
+    import subprocess
+    import numpy as np
+    from PIL import Image
+    from scipy import ndimage as ndi
+    avifenc, s2 = kbpaths.bin_dir("libavif", "avifenc"), kbpaths.bin_dir("libjxl", "tools", "ssimulacra2")
+    if not (avifenc.exists() and s2.exists() and kbpaths.find("ffmpeg")):
+        check("encoding: нет avifenc, ssimulacra2 или ffmpeg (install.sh --bin, --ffmpeg) — пропуск", True)
+        return
+    d = tmp / "enc"
+    d.mkdir()
+    # мастер 16 бит: плавный градиент — ступени 8 бит на нём видны, 10 бит ближе к мастеру
+    W, H = 640, 400
+    yy, xx = np.mgrid[0:H, 0:W].astype(np.float64)
+    g = np.stack([0.20 + 0.10 * xx / W, 0.22 + 0.08 * yy / H, 0.30 + 0.06 * (xx + yy) / (W + H)], -1)
+    raw = np.clip(g * 65535, 0, 65535).astype("<u2").tobytes()
+    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb48le", "-s", f"{W}x{H}", "-i", "-",
+                    "-frames:v", "1", "-pix_fmt", "rgb48be", str(d / "master16.png")], input=raw, check=True)
+    for depth in (8, 10):
+        subprocess.run([str(avifenc), "-q", "70", "-s", "8", "-y", "444", "-d", str(depth), str(d / "master16.png"),
+                        str(d / f"grad_{depth}bit.avif")], capture_output=True, check=True)
+    A = {Path(x["file"]).name: x for x in audit([d / "grad_8bit.avif", d / "grad_10bit.avif"], tmp / "o_enc", ocr="off",
+                                                 master=d / "master16.png", stage="web")["assets"]}
+    e8 = (A["grad_8bit.avif"]["checks"].get("encoding") or {}).get("ssimulacra2")
+    e10 = (A["grad_10bit.avif"]["checks"].get("encoding") or {}).get("ssimulacra2")
+    check("encoding: оценка 10-битного файла не ниже 8-битного того же кадра (декод и мастер без усечения до 8 бит)",
+          e8 is not None and e10 is not None and e10 >= e8, (e8, e10))
+    # резкость источника: мягкий мастер (увеличен втрое) — сжатие к нему оценивается высоко, резкость — находка
+    rng = np.random.default_rng(4)
+    tex = ndi.gaussian_filter(rng.random((500, 800, 3)), (0.7, 0.7, 0))
+    tex = np.clip((tex - tex.mean()) / tex.std() * 55 + 128, 0, 255).astype(np.uint8)
+    sharp = Image.fromarray(tex)
+    sharp.save(d / "sharp.png")
+    sharp.resize((267, 167), Image.LANCZOS).resize((800, 500), Image.LANCZOS).save(d / "soft.png")
+    subprocess.run([str(avifenc), "-q", "85", "-s", "8", "-y", "444", str(d / "soft.png"), str(d / "soft_web.avif")],
+                   capture_output=True, check=True)
+    w = audit([d / "soft_web.avif"], tmp / "o_soft", ocr="off", master=d / "soft.png", stage="web", slot="section")["assets"][0]
+    k = audit([d / "sharp.png"], tmp / "o_sharp", ocr="off")["assets"][0]
+    enc = w["checks"].get("encoding") or {}
+    check("резкость: мягкий источник — находка QA-SOURCE-SOFT при высокой оценке сжатия к нему",
+          enc.get("ssimulacra2", 0) >= enc.get("min", 100) and "QA-ENCODE-QUALITY" not in codes(w)
+          and "QA-SOURCE-SOFT" in codes(w, ("info",)) and w["checks"]["sharpness"]["source"].endswith("soft.png"),
+          (enc, w["checks"].get("sharpness")))
+    check("резкость: детальный кадр — без QA-SOURCE-SOFT", "QA-SOURCE-SOFT" not in codes(k, ("info", "warn")),
+          k["checks"].get("sharpness"))
+    # подбор качества под бюджет веса: файл не тяжелее бюджета
+    pick = str(aa.TOOLS / "avif_pick.sh")
+    calm_photo((480, 300)).save(d / "frame.png")
+    r0 = subprocess.run(["bash", pick, "-s", "8", str(d / "frame.png"), str(d / "free.avif"), "80"], capture_output=True, text=True)
+    size0 = (d / "free.avif").stat().st_size if (d / "free.avif").exists() else 0
+    budget_kb = max(1, size0 // 1024 - 1)                      # бюджет ниже файла, прошедшего порог
+    r1 = subprocess.run(["bash", pick, "-s", "8", "-b", str(budget_kb), str(d / "frame.png"), str(d / "fit.avif"), "80"],
+                        capture_output=True, text=True)
+    size1 = (d / "fit.avif").stat().st_size if (d / "fit.avif").exists() else None
+    check("avif_pick: без бюджета — код 0 и строка PICK; двоичный поиск — не больше 8 проб на границы 35–85",
+          r0.returncode == 0 and "PICK q=" in r0.stdout and len([x for x in r0.stdout.splitlines() if x.startswith("q=")]) <= 8,
+          (r0.returncode, r0.stdout[-200:], r0.stderr[-200:]))
+    check("avif_pick: бюджет ниже файла порога — вес не выше бюджета, код 3 (порог в бюджете не достигнут)",
+          size1 is not None and size1 <= budget_kb * 1024 < size0 and r1.returncode == 3, (size0, budget_kb, size1, r1.returncode))
+    r2 = subprocess.run(["bash", pick, "-s", "8", "-b", "0.2", str(d / "frame.png"), str(d / "none.avif"), "80"],
+                        capture_output=True, text=True)
+    check("avif_pick: в бюджет не укладывается и наименьшее качество — файла нет, код 1",
+          r2.returncode == 1 and not (d / "none.avif").exists(), (r2.returncode, r2.stderr[-200:]))
 
 
 def _run(argv):
@@ -558,7 +845,7 @@ def t_stand_page(tmp):
 
 
 def t_provenance(tmp):
-    """Провенанс через provenance_check.py (+ --corners): надпись в углу → QA-PROV-VISIBLE-MARK (warn) и лист углов для глаза."""
+    """Провенанс через provenance_check.py (+ --corners): надпись в углу → QA-PROV-VISIBLE-MARK (info) и лист углов для глаза."""
     if not (aa.TOOLS / "provenance_check.py").exists():
         check("provenance: нет provenance_check.py — пропуск", True)
         return
@@ -578,12 +865,13 @@ def t_provenance(tmp):
     A = {Path(x["file"]).name: x for x in s["assets"]}
     pm = A["p_marked.png"]["checks"].get("provenance") or {}
     check("provenance: надпись в углу → QA-PROV-VISIBLE-MARK + лист углов",
-          "QA-PROV-VISIBLE-MARK" in codes(A["p_marked.png"]) and (tmp / "o_prov" / "p_marked_corners.jpg").exists(), pm)
+          "QA-PROV-VISIBLE-MARK" in codes(A["p_marked.png"], ("info",)) and (tmp / "o_prov" / "p_marked_corners.jpg").exists(), pm)
     vm = [d for d in A["p_marked.png"]["defects"] if d["code"] == "QA-PROV-VISIBLE-MARK"]
-    check("provenance: метка в углу — warn с листом углов, не needs_human; лист — в списке «человеку»",
-          vm and all(d["level"] == "warn" and "corners" in str(d.get("evidence")) for d in vm)
+    check("provenance: метка в углу — info с листом углов, вердикт не роняет; лист — в списке «человеку»",
+          vm and all(d["level"] == "info" and "corners" in str(d.get("evidence")) for d in vm)
+          and "QA-PROV-VISIBLE-MARK" not in codes(A["p_marked.png"])
           and any("QA-PROV-VISIBLE-MARK" in (h.get("codes") or []) for h in A["p_marked.png"]["human"]), vm)
-    check("provenance: чистый кадр без подозрения на метку", "QA-PROV-VISIBLE-MARK" not in codes(A["p_clean.png"]),
+    check("provenance: чистый кадр без подозрения на метку", "QA-PROV-VISIBLE-MARK" not in codes(A["p_clean.png"], ("info", "warn")),
           (A["p_clean.png"]["checks"].get("provenance") or {}).get("visible_suspect"))
     # ворота 12-legal-provenance/04 §5 п. 8: файл ИИ-ассета (есть паспорт) для страницы без машиночитаемой метки →
     # QA-PROV-NO-MARK; после stamp — нет. Штамп пишет exiftool окружения скилла.
@@ -616,7 +904,7 @@ HEROICONS_HOME = ('<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="
 def svg_ready() -> bool:
     """Пакеты группы svg в Python окружения скилла (им check_icons рисует иконку)."""
     import subprocess
-    r = subprocess.run([str(aa.VENV_G), "-c", "import cairosvg, svgelements, skimage, scipy"], capture_output=True, text=True)
+    r = subprocess.run([kbpaths.python(), "-c", "import cairosvg, svgelements, skimage, scipy"], capture_output=True, text=True)
     return r.returncode == 0
 
 
@@ -650,6 +938,19 @@ def t_icon_set(tmp):
         s = audit([ref], tmp / "o_set_ref")
         check("icon-set: иконка Lucide при наборе Lucide — без флагов шапки", "QA-SVG-HEADER" not in codes(s["assets"][0]),
               codes(s["assets"][0]))
+    # эталон шапки параметрами: иконка набора Lucide со штрихом 1,5 из норм дизайн-системы
+    thin = d / "thin"
+    thin.mkdir()
+    (thin / "mark.svg").write_text('<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" '
+                                   'stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">'
+                                   '<circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>', encoding="utf-8")
+    (d / "system.yaml").write_text("conventions:\n  icons: {set: lucide, sizes: [16, 20], stroke: 1.5}\n", encoding="utf-8")
+    a0 = audit([thin / "mark.svg"], tmp / "o_thin0")["assets"][0]
+    a1 = audit([thin / "mark.svg"], tmp / "o_thin1", icon_stroke=1.5)["assets"][0]
+    a2 = audit([thin / "mark.svg"], tmp / "o_thin2", conventions=d / "system.yaml")["assets"][0]
+    check("icon-stroke: штрих 1,5 при эталоне Lucide (2) — QA-SVG-HEADER fail; при --icon-stroke 1.5 и при --conventions — чисто",
+          "QA-SVG-HEADER" in codes(a0, ("fail",)) and not codes(a1) and not codes(a2)
+          and (a2["checks"].get("icon") or {}).get("header_rules", {}).get("stroke-width") == "1.5", (codes(a0), codes(a1), codes(a2)))
 
 
 def t_env(tmp):
@@ -682,7 +983,7 @@ def t_env(tmp):
     old = os.environ.get("PYTHONPATH")
     os.environ["PYTHONPATH"] = str(stub) + (os.pathsep + old if old else "")
     try:
-        r = subprocess.run([str(aa.VENV_G), str(aa.TOOLS / "check_icons.py"), str(tmp / "env_icon")], capture_output=True, text=True)
+        r = subprocess.run([kbpaths.python(), str(aa.TOOLS / "check_icons.py"), str(tmp / "env_icon")], capture_output=True, text=True)
         s = audit([tmp / "env_icon" / "home.svg"], tmp / "o_env_svg")
     finally:
         if old is None:
@@ -765,6 +1066,24 @@ def t_ocr(tmp):
     # буквы — 60 fail и 12 needs_human);
     # главное — ошибка не проходит как pass и названа классом
     check("ocr: пропуск буквы → не pass, класс omission", t_miss in ("fail", "needs_human") and "omission" in tm.get("fail_classes", []), tm)
+    # две одинаковые надписи и мелкая строка с расхождением
+    small = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 9)     # рамка строки OCR ≈ 12 px
+    im = Image.new("RGB", (760, 240), (245, 242, 236))
+    dr = ImageDraw.Draw(im)
+    dr.text((24, 30), "Скидка 20 %", font=f, fill=(20, 20, 20))
+    dr.text((24, 130), "Скидка 20 %", font=f, fill=(20, 20, 20))
+    im.save(tmp / "twice.png")
+    im = Image.new("RGB", (760, 200), (245, 242, 236))
+    dr = ImageDraw.Draw(im)
+    dr.text((24, 30), "Весенняя распродажа", font=f, fill=(20, 20, 20))
+    dr.text((24, 140), "товары до конца месяца", font=small, fill=(20, 20, 20))
+    im.save(tmp / "small.png")
+    s2 = audit([tmp / "twice.png"], tmp / "o_ocr2", expect=["Скидка 20 %{×2}"])["assets"][0]
+    s3 = audit([tmp / "small.png"], tmp / "o_ocr3", expect=["Весенняя распродажа", "товаров до конца месяца"])["assets"][0]
+    check("ocr: две одинаковые надписи при --expect «…{×2}» — чисто", (s2["checks"].get("text") or {}).get("verdict") == "pass"
+          and "QA-TEXT-MISMATCH" not in codes(s2), s2["checks"].get("text"))
+    check("ocr: расхождение в мелкой строке → QA-TEXT-SMALL warn, не fail", "QA-TEXT-SMALL" in codes(s3, ("warn",))
+          and not ({"QA-TEXT-MISMATCH", "QA-TEXT-CHECK"} & codes(s3)), (s3["checks"].get("text"), s3["checks"].get("ocr")))
 
 
 def run(keep=False, ocr=False, verbose=False):
@@ -772,7 +1091,7 @@ def run(keep=False, ocr=False, verbose=False):
     tmp = Path(tempfile.mkdtemp(prefix="asset_audit_test_"))
     try:
         for t in (t_thresholds, t_text, lambda: t_image_cutout_texture(tmp), lambda: t_edit(tmp), lambda: t_video(tmp),
-                  lambda: t_svg_series(tmp), lambda: t_judge_package(tmp), lambda: t_judge_rubric(tmp),
+                  lambda: t_svg_series(tmp), lambda: t_encoding(tmp), lambda: t_judge_package(tmp), lambda: t_judge_rubric(tmp),
                   lambda: t_judge_trust(tmp), lambda: t_judge_calibration(tmp), lambda: t_stand_page(tmp),
                   lambda: t_provenance(tmp), lambda: t_icon_set(tmp), lambda: t_env(tmp),
                   lambda: t_palette_cli(tmp)) + ((lambda: t_ocr(tmp),) if ocr else ()):

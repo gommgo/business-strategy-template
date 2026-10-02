@@ -71,6 +71,7 @@ effects:
     attention_cost: 0
     duration_ms: [600, 1000]
     props: [transform]
+    properties: [transform]
     rules_ref: 05-motion/01-motion-principles-and-access.md §4.2; 05-motion/03-micro-motion-and-performance.md
   implementation:
     type: js
@@ -225,6 +226,7 @@ effects:
     attention_cost: 0
     scroll_vh: [50, 100]
     props: [font-stretch, font-weight]
+    properties: [font-variation-settings]
   implementation:
     type: css
     libs: []
@@ -295,6 +297,7 @@ effects:
     trigger: [hover]
     attention_cost: 0
     props: [font-variation-settings]
+    properties: [font-variation-settings]
   implementation:
     type: js
     libs: []
@@ -426,6 +429,7 @@ effects:
     attention_cost: 1
     duration_ms: [15000, 30000]
     props: [transform]
+    properties: [transform]
   implementation:
     type: css
     libs: []
@@ -490,6 +494,7 @@ effects:
     trigger: [scroll]
     attention_cost: 0
     props: [color]
+    properties: [color]
   implementation:
     type: css
     libs: []
@@ -628,6 +633,7 @@ effects:
     trigger: [idle-loop]
     attention_cost: 1
     props: [transform]
+    properties: [transform]
   implementation:
     type: css
     libs: []
@@ -696,6 +702,7 @@ effects:
     trigger: [idle-loop, scroll]
     attention_cost: 1
     props: [transform]
+    properties: [transform]
   implementation:
     type: js
     libs: []
@@ -770,6 +777,7 @@ effects:
     attention_cost: 0
     duration_ms: [480, 900]
     props: [transform, opacity]
+    properties: [transform, opacity]
   implementation:
     type: css
     libs: []
@@ -844,6 +852,7 @@ effects:
     attention_cost: 0
     duration_ms: [500, 800]
     props: [transform, opacity, clip-path]
+    properties: [transform, opacity, clip-path]
   implementation:
     type: js
     libs: []
@@ -919,6 +928,7 @@ effects:
     trigger: [scroll]
     attention_cost: 0
     props: [transform]
+    properties: [transform]
   implementation:
     type: css
     libs: []
@@ -989,6 +999,7 @@ effects:
     trigger: [scroll]
     attention_cost: 0
     props: [transform]
+    properties: [transform]
   implementation:
     type: css
     libs: []
@@ -1063,6 +1074,7 @@ effects:
     trigger: [scroll]
     attention_cost: 0
     props: [stroke-dashoffset]
+    properties: [stroke-dashoffset]
   implementation:
     type: css
     libs: []
@@ -1126,15 +1138,16 @@ effects:
   level_min: L1
   limits:
     per_page_L1: 1
-    scroll_vh_L1: 150
+    scroll_vh_L1: 04-visual-language/marketing-tokens.json#motion.marketing.scroll.pin-l1-max-vh
     per_page_L2: 2
-    scroll_vh_step_L2: [100, 150]
+    scroll_vh_L2: 04-visual-language/marketing-tokens.json#motion.marketing.scroll.pin-l2-max-vh
   motion:
     kind: scroll-linked
     trigger: [pin-scroll]
     attention_cost: 0
     scroll_vh: [100, 150]
     props: [transform, opacity, stroke-dashoffset]
+    properties: [transform, opacity, stroke-dashoffset]
   implementation:
     type: js
     libs:
@@ -1163,7 +1176,8 @@ effects:
     flashes: none
     note: 'клавиатура и якоря не ломаются: нативная прокрутка'
   cliche: {risk: low, status: 'норма жанра L1–L2 (watchlist H: scroll-film)', registry_id: null}
-  rules: [L1 — одна сцена ≤ 150vh; L2 — 100–150vh на шаг, 'GSAP грузить только при ≥ 768 px и без reduce: 45,7 КБ br десктоп, 3,9 КБ телефон', 'scrub 0,5–1;
+  rules: ['длина закрепления — одно число на уровень, токены motion.marketing.scroll: pin-l1-max-vh — одна сцена L1, pin-l2-max-vh — одна секция
+      L2 (сверяет spec_check.py); шаги делят длину сцены: число шагов × длина шага — не больше предела уровня', 'GSAP грузить только при ≥ 768 px и без reduce: 45,7 КБ br десктоп, 3,9 КБ телефон', 'scrub 0,5–1;
       не закреплять форму и тарифы', 'вариант CSS (sticky + view-timeline) — 0 КБ JS, но без поддержки Firefox — остаётся стопка']
   evidence: ['[проверено: 99-raw/experiments/F/03-batch-A]', '[данные: C 03/01 §4 — ScrollTrigger 19 из 49, закрепление 5]']
   checked_at: '2026-09-24'
@@ -1208,6 +1222,7 @@ effects:
     trigger: [scroll]
     attention_cost: 0
     props: [transform, filter]
+    properties: [transform, filter]
   implementation:
     type: css
     libs: []
@@ -1311,6 +1326,7 @@ effects:
     trigger: [pin-scroll]
     attention_cost: 0
     props: [transform]
+    properties: [transform]
   implementation:
     type: js
     libs:
@@ -1437,13 +1453,14 @@ effects:
   purpose: Открыть главный кадр страницы из «окна» до полного экрана — переход от текста к миру.
   effect_role: [signature]
   level_min: L1
-  limits: {scroll_vh: 150, per_page_L1: 1}
+  limits: {scroll_vh: 04-visual-language/marketing-tokens.json#motion.marketing.scroll.pin-l1-max-vh, per_page_L1: 1}
   motion:
     kind: scroll-linked
     trigger: [pin-scroll]
     attention_cost: 0
     scroll_vh: [120, 160]
     props: [clip-path, transform, opacity]
+    properties: [clip-path, transform, opacity]
   implementation:
     type: css
     libs: []
@@ -1512,6 +1529,7 @@ effects:
     attention_cost: 0
     duration_ms: [250, 450]
     props: [view-transition (снимки)]
+    properties: [view-transition]
   implementation:
     type: js
     libs: []
@@ -1577,6 +1595,7 @@ effects:
     trigger: [page-transition]
     attention_cost: 0
     duration_ms: [220, 450]
+    properties: [view-transition]
   implementation:
     type: css
     libs: []
@@ -1642,6 +1661,7 @@ effects:
     trigger: [hover]
     attention_cost: 0
     props: [transform]
+    properties: [transform]
   implementation:
     type: js
     libs: []
@@ -1705,6 +1725,7 @@ effects:
     trigger: [hover]
     attention_cost: 0
     props: [background (custom properties)]
+    properties: ['--*']
   implementation:
     type: js
     libs: []
@@ -1774,6 +1795,7 @@ effects:
     trigger: [hover]
     attention_cost: 0
     props: [transform]
+    properties: [transform]
   implementation:
     type: js
     libs: []
@@ -1838,6 +1860,7 @@ effects:
     trigger: [hover]
     attention_cost: 0
     props: [transform]
+    properties: [transform]
   implementation:
     type: js
     libs: []
@@ -1901,6 +1924,7 @@ effects:
     attention_cost: 0
     duration_ms: [350, 450]
     props: [filter (feDisplacementMap scale)]
+    properties: [filter]
   implementation:
     type: svg
     libs: []
@@ -1965,6 +1989,7 @@ effects:
     trigger: [idle-loop]
     attention_cost: 1
     props: [uniform uTime]
+    properties: ['uniform:uTime']
   implementation:
     type: webgl
     libs: []
@@ -2041,6 +2066,7 @@ effects:
     attention_cost: 1
     duration_ms: [29000, 43000]
     props: [custom properties (@property)]
+    properties: ['--*']
   implementation:
     type: css
     libs: []
@@ -2113,6 +2139,7 @@ effects:
     attention_cost: 1
     duration_ms: [31000, 53000]
     props: [transform]
+    properties: [transform]
   implementation:
     type: css
     libs: []
@@ -2184,6 +2211,7 @@ effects:
     trigger: [idle-loop, hover, scroll]
     attention_cost: 1
     props: ['uniform uTime, uTilt']
+    properties: ['uniform:uTime', 'uniform:uTilt']
   implementation:
     type: webgl
     libs: []
@@ -2456,6 +2484,7 @@ effects:
     attention_cost: 1
     duration_ms: [3000, 4000]
     props: [opacity, transform]
+    properties: [opacity, transform]
   implementation:
     type: css
     libs: []
@@ -2523,11 +2552,12 @@ effects:
   effect_role: [support, signature]
   level_min: L0
   motion:
-    kind: one-shot
-    trigger: [in-view]
+    kind: [one-shot, scroll-linked]
+    trigger: [in-view, scroll]
     attention_cost: 0
     duration_ms: [800, 1200]
     props: [clip-path, transform]
+    properties: [clip-path, transform]
   implementation:
     type: js
     libs: []
@@ -2551,7 +2581,8 @@ effects:
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: ['clip-path: inset(100% 0 0 0) → inset(0) 900 мс + обратный масштаб 1,06 → 1; скрытие только при html.js', 'кадр под маской — без
       loading="lazy" или с предзагрузкой за экран до входа в окно: кадр под clip-path: inset(100%) браузер считает невидимым и лениво не грузит — он
-      появился бы в уже открытой маске']
+      появился бы в уже открытой маске', 'два класса движения: one-shot — раскрытие по времени при входе кадра в окно; scroll-linked — раскрытие по
+      шкале view() самого кадра (animation-timeline) на тех же clip-path и transform, без JS; без поддержки шкал прокрутки кадр стоит раскрытым']
   evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]', '[V:xQnJLYTVl_E 24:06] окно в форме логотипа — кандидат W2']
   checked_at: '2026-09-25'
   cost:
@@ -2594,8 +2625,8 @@ effects:
   effect_role: [signature]
   level_min: L1
   motion:
-    kind: scroll-linked
-    trigger: [scroll]
+    kind: [scroll-linked, one-shot]
+    trigger: [scroll, load, in-view]
     attention_cost: 0
     props: [background-position]
   implementation:
@@ -2618,7 +2649,9 @@ effects:
     flashes: none
     note: настоящий текст; контраст — тёмная часть кадра + обводка 1 px
   cliche: {risk: mid, status: saturated (гигантский дисплей без задачи), registry_id: 'cliche:giant-display-type'}
-  rules: ['background-position по прокрутке — перерисовка на главном потоке: одно слово на экран']
+  rules: ['background-position по прокрутке — перерисовка на главном потоке: одно слово на экран', 'два класса движения: scroll-linked — кадр
+      внутри букв едет по прокрутке; one-shot — слово-окно раскрывается в кадр по времени, один раз: при открытии первого экрана или при входе секции
+      в окно']
   evidence: ['[проверено: 99-raw/experiments/F/05-batch-BG]']
   checked_at: '2026-09-25'
   cost:
@@ -2661,7 +2694,7 @@ effects:
   limits:
     bytes_mobile_kb_L1: 600
     bytes_desktop_kb_L1: 1500
-    loop_s: [6, 12]
+    loop_s: ai-media/11-evaluation-qa/thresholds.yaml#thresholds.video (loop_len_min_s, loop_len_max_s)
   motion:
     kind: loop
     trigger: [idle-loop]
@@ -3184,6 +3217,7 @@ effects:
     attention_cost: 0
     duration_ms: [250, 300]
     props: [opacity, transform, overlay (discrete), display (discrete)]
+    properties: [opacity, transform]
     rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
   implementation:
     type: css
@@ -3260,6 +3294,7 @@ effects:
     attention_cost: 0
     duration_ms: [200, 300]
     props: [block-size (раскладка), content-visibility (discrete), transform (значок)]
+    properties: [block-size, transform]
     rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
   implementation:
     type: css
@@ -3337,6 +3372,7 @@ effects:
     attention_cost: 0
     duration_ms: [250, 300]
     props: [clip-path]
+    properties: [clip-path]
     rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
   implementation:
     type: css
@@ -3414,6 +3450,7 @@ effects:
     attention_cost: 0
     duration_ms: [450, 550]
     props: [transform (rotateY), opacity (reduce)]
+    properties: [transform, opacity]
     rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
   implementation:
     type: css
@@ -3484,6 +3521,7 @@ effects:
     attention_cost: 0
     scroll_vh: null
     props: [transform, opacity]
+    properties: [transform, opacity]
     rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
   implementation:
     type: css
@@ -3625,7 +3663,7 @@ effects:
     pause_required: false
     flashes: none
     note: canvas aria-hidden; управление — настоящий элемент HTML, его состояние передаётся во вход машины состояний
-  cliche: {risk: mid, status: 'маскот, следящий глазами за вводом, — cliche:cursor-watching-eyes', registry_id: null, turn: 'состояния объясняют процесс
+  cliche: {risk: mid, status: 'маскот, следящий глазами за вводом; статус — запись реестра', registry_id: 'cliche:cursor-watching-eyes', turn: 'состояния объясняют процесс
       (загрузка, прогресс), а не украшают'}
   rules: ['state machine: входы Boolean (нажата), Trigger (событие), Number (прогресс); на 100 % — переход «готово» и колбэк в код [V:iqtCk5cY5Xs 19:29]',
     canvas-lite без Text и Audio — 272 против 613 КБ br wasm; RuntimeLoader.setWasmUrl на свой домен (по умолчанию jsDelivr/unpkg), 'делать в редакторе
@@ -3634,3 +3672,117 @@ effects:
   evidence: ['[проверено у G: 99-raw/experiments/G/01-lib-cost; 07-stack-implementation/stack.yaml#rive]', '[V:iqtCk5cY5Xs 14:24–31:31] Rive: состояния,
       входы, где выигрывает (W2)']
   checked_at: '2026-09-25'
+- id: light-sweep
+  name_ru: Блик по кадру
+  name_en: light sweep
+  family: image
+  status: draft
+  purpose: 'Проход света по кадру: под указателем или фокусом по кадру карточки один раз проходит наклонная полоса света — отклик, при котором коробка
+    карточки, кадр и текст стоят.'
+  effect_role: [feedback, support]
+  level_min: L0
+  motion:
+    kind: one-shot
+    trigger: [hover]
+    attention_cost: 0
+    props: [transform, opacity]
+    properties: [transform, opacity]
+  implementation:
+    type: css
+    libs: []
+    demo: null
+  cost: {gpu: compositor (transform/opacity), note: лабораторной страницы и замера effect_bench нет}
+  fallback:
+    no_js: работает (CSS)
+    reduce: {strategy: final-state, note: блика нет — полоса остаётся прозрачной за краем кадра}
+  mobile: {behavior: hidden-decor, touch_alt: null, note: 'на сенсорном экране наведения нет — блика нет; фокус с клавиатуры даёт блик на любой ширине'}
+  a11y:
+    wcag: [2.3.3]
+    pause_required: false
+    flashes: none
+    note: 'полоса — декоративный слой без содержимого: aria-hidden, указатель не ловит; один проход на наведение — не петля'
+  cliche: {risk: low, status: н/д, registry_id: null}
+  rules: ['полоса — отдельный слой поверх кадра внутри его рамки (overflow: hidden): движется только она (transform), проявляется и гаснет прозрачностью;
+      коробка карточки, кадр и текст стоят', 'один проход на каждое наведение или фокус с клавиатуры (:hover, :focus-visible), без петли; в покое полоса
+      прозрачна и стоит за краем кадра', 'наведение — внутри @media (hover: hover) and (pointer: fine); на сенсорном экране блика нет', 'длительность
+      и задержка — из шкалы motion.marketing.duration (спецификация движения); reduce — блика нет']
+  evidence: ['[практика: приём собран в макете сайта на transform и opacity; лабораторного замера нет]']
+  checked_at: '2026-10-02'
+- id: expanding-columns
+  name_ru: Раздвижные колонки
+  name_en: expanding columns
+  family: micro
+  status: draft
+  purpose: 'Ряд колонок-кадров, где колонка под указателем или фокусом раскрывается шире соседних: показать несколько направлений одним рядом и дать
+    рассмотреть выбранное.'
+  effect_role: [signature, support]
+  level_min: L0
+  motion:
+    kind: pointer
+    trigger: [hover]
+    attention_cost: 0
+    props: [clip-path, transform]
+    properties: [clip-path, transform]
+  implementation:
+    type: css
+    libs: []
+    demo: null
+  cost: {gpu: compositor (transform) + paint (clip-path), note: лабораторной страницы и замера effect_bench нет}
+  fallback:
+    no_js: работает (CSS)
+    reduce: {strategy: final-state, note: колонка раскрывается без перехода}
+  mobile: {behavior: static, touch_alt: 'колонки стоят раскрытыми: одна под другой или равным рядом', note: 'на сенсорном экране наведения нет; фокус
+      с клавиатуры раскрывает колонку на любой ширине'}
+  a11y:
+    wcag: [2.3.3, 2.4.7, 1.4.13]
+    pause_required: false
+    flashes: none
+    note: 'колонка — ссылка или кнопка в порядке чтения; раскрывается и по :focus-visible; содержимое закрытой колонки остаётся в DOM'
+  cliche: {risk: low, status: н/д, registry_id: null}
+  rules: ['раскрытие — clip-path окна колонки и сдвиг соседних transform: раскладка ряда стоит, свойства раскладки (flex-grow, width, grid-template-columns)
+      не анимируются', 'без указателя и фокуса раскрыта одна колонка — первая: ряд читается и там, где наведения нет', 'фокус с клавиатуры (:focus-visible)
+      раскрывает колонку так же, как наведение; наведение — внутри @media (hover: hover) and (pointer: fine)', 'reduce — раскрытие без перехода; длительность
+      — из шкалы motion.marketing.duration (спецификация движения)']
+  evidence: ['[практика: приём собран в макете сайта на clip-path и transform без анимации раскладки; лабораторного замера нет]']
+  checked_at: '2026-10-02'
+- id: overlay-viewer
+  name_ru: Наложение-просмотр (окно кадра, окно работы)
+  name_en: overlay viewer (lightbox dialog)
+  family: micro
+  status: draft
+  purpose: 'Открыть кадр или работу крупно поверх страницы, не уходя с неё: окно кадра у галереи, окно работы у сетки работ, с переходом к соседним.'
+  effect_role: [feedback]
+  level_min: L0
+  motion:
+    kind: transition
+    trigger: [click]
+    attention_cost: 0
+    props: [opacity, transform, overlay (discrete), display (discrete)]
+    properties: [opacity, transform]
+    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
+  implementation:
+    type: js
+    libs: []
+    demo: null
+  cost: {gpu: compositor (transform/opacity), note: лабораторной страницы и замера effect_bench нет; вход и выход окна — как у effect:dialog-entry-exit}
+  fallback:
+    no_js: окно открывает showModal() — без JS миниатюра остаётся ссылкой на кадр или страницу работы
+    no_support: окно появляется и исчезает мгновенно
+    reduce: {strategy: crossfade, note: 'вход и выход окна — как у effect:dialog-entry-exit при reduce; смена кадра — без перехода'}
+  mobile: {behavior: same, note: 'окно во всю ширину экрана; кнопки управления — цели касания, как у effect:dialog-entry-exit'}
+  a11y:
+    wcag: [2.4.3, 2.1.2, 2.1.1, 4.1.2, 1.1.1, 2.3.3]
+    pause_required: false
+    flashes: none
+    note: 'нативный <dialog> + showModal: фокус внутри окна, Esc закрывает, после закрытия фокус — на миниатюру, которая открыла окно; у окна — доступное
+      имя, у кнопок «закрыть», «вперёд», «назад» — подписи из текстов страницы'
+  cliche: {risk: low, status: норма интерфейса, registry_id: null}
+  rules: ['окно — нативный <dialog>, открытый showModal(): фокус в окне, Esc и кнопка «закрыть» закрывают, страница под окном не прокручивается; после
+      закрытия фокус возвращается на миниатюру, которая открыла окно', 'кнопки «закрыть», «вперёд», «назад» — настоящие <button> с подписями (видимыми
+      или aria-label) из текстов страницы — слоты подписей управления блока', 'у окна — доступное имя (aria-label или aria-labelledby на подпись кадра
+      или название работы); у кадра в окне — alt миниатюры', 'окно открывает только действие посетителя; без JS миниатюра — ссылка на кадр или страницу
+      работы, содержимое доступно без окна', 'вход и выход окна — effect:dialog-entry-exit (движение и reduce — оттуда); смена кадра внутри окна — без
+      движения или проявлением']
+  evidence: ['[практика: окно кадра и окно работы собраны в макете сайта на нативном <dialog>; лабораторного замера нет]', '[стандарт: WCAG 2.2 SC 2.1.2,
+      2.4.3, 4.1.2 — модальное окно]']
+  checked_at: '2026-10-02'

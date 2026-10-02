@@ -126,10 +126,12 @@ layers:
                 fact_ids: []
                 claim_flags: []
       to: |
-        # copy deck — страница spasibo утверждена: владелец продукта (демо), 2026-09-29 (copydeck.py approve)
+        # copy deck — записи lint и claims (text_hash проверенного текста) пишет copydeck.py check --update;
+        # checked ставит --promote при 0 error проверки, approved — только человек (copydeck.py approve)
+        # утверждённые страницы: spasibo (copydeck.py approve; кто и когда — approval страницы)
         copy_deck:
           version: 1
-          date: '2026-09-24'
+          date: '2026-09-29'
           site: otves-remont-nn
           product_name: Отвес
           lang: ru

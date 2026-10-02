@@ -26,6 +26,7 @@
         "sections[].treatment.visual_variant": {"rule": "derive", "from": ["/sections/*/treatment/visual_variant", "block-treatments#/blocks/*/visual_variants"], "stages": ["mockup"], "note": "id визуального варианта блока и его описание из block-treatments.yaml"},
         "sections[].treatment.mobile": {"rule": "copy", "from": ["/sections/*/treatment/mobile"], "stages": ["mockup"], "note": "стратегия телефона: артборд 390 рисуется по ней — стопка станций, постер, скрытый декор"},
         "sections[].treatment.lcp_note": {"rule": "copy", "from": ["/sections/*/treatment/lcp_note"], "stages": ["mockup"], "note": "кандидат LCP первого экрана — текст или постер, а не холст 3D"},
+        "sections[].treatment.viewer": {"rule": "copy", "from": ["/sections/*/treatment/viewer"], "stages": ["mockup"], "note": "наложение-просмотр секции: эффект каталога, что его открывает и заметка — окно рисуется состоянием секции"},
         "sections[].treatment.notes": {"rule": "copy", "from": ["/sections/*/treatment/notes"], "stages": ["mockup"], "note": "заметки подачи секции: как собран приём, запасной вид, что на телефоне — исполнитель макета читает их во входе, а не в плане"},
         "treatment.theme": {"rule": "copy", "from": ["/page/treatment/theme"], "stages": ["mockup"], "note": "тема страницы"},
         "treatment.notes": {"rule": "copy", "from": ["/page/treatment/notes"], "stages": ["mockup"], "note": "заметки подачи страницы"}
@@ -118,7 +119,18 @@
     "flash_check": {"$ref": "#/$defs/flash-check"},
     "lcp_note": {
       "type": "string",
-      "description": "Для первого экрана: какой элемент — кандидат LCP и как он появляется (без анимации или только transform ≤ 24 px; не из opacity: 0, не маской строк — E 05-motion/02 §10)."
+      "description": "Для первого экрана: какой элемент — кандидат LCP и как он появляется (без анимации или вход по норме CRV-AL-09: transform со сдвигом ≤ 24 px, clip-path или opacity от 0,01; не из opacity: 0, не маской строк — E 05-motion/02 §10)."
+    },
+    "viewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["effect"],
+      "description": "Наложение-просмотр секции: окно кадра или работы поверх страницы (диалог) — у сетки работ и галереи. Правила доступности диалога, reduce и телефон — у эффекта каталога; подписи управления окна — слоты блока site.",
+      "properties": {
+        "effect": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Эффект наложения-просмотра из effects.yaml (effect:overlay-viewer); наличие в каталоге и уровень — spec_check.py."},
+        "target": {"$ref": "#/$defs/target", "description": "Что открывает окно: слот или группа секции."},
+        "note": {"type": "string", "description": "Что показывает окно и как из него выйти."}
+      }
     },
     "budget": {"$ref": "#/$defs/budget"},
     "status": {"enum": ["draft", "proposed", "approved"], "default": "draft"},
@@ -374,9 +386,9 @@
         },
         "theme": {"enum": ["light", "dark", "mixed"]},
         "tokens_ref": {"type": "string"},
-        "peaks": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "id секций-пиков — = множеству секций с visual_role peak (site_validate PL-C01)."},
-        "accents": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "id секций-акцентов — сверка spec_check.py; предел — section_distribution.accents_max уровня."},
-        "signature_sections": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Секции с signature-эффектом; предел — signature_moves_max уровня (сверка spec_check.py)."},
+        "peaks": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Необязательная сводка: id секций-пиков. Пики выводятся из секций (visual_role peak) — список можно не вести; записанный и разошедшийся с секциями — предупреждение spec_check.py (TR-07)."},
+        "accents": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Необязательная сводка: id секций-акцентов. Акценты выводятся из секций (visual_role accent); записанный и разошедшийся с секциями список — предупреждение spec_check.py (TR-08); предел — section_distribution.accents_max уровня."},
+        "signature_sections": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "Необязательная сводка: секции с signature-эффектом. Выводятся из секций (effects[].purpose: signature); записанный и разошедшийся с секциями список — предупреждение spec_check.py (TR-08); предел — signature_moves_max уровня."},
         "budget_overrides": {
           "type": "array",
           "items": {

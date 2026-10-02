@@ -11,11 +11,11 @@
 
 | утилита | что делает | вызов | выход |
 |---|---|---|---|
-| `copydeck.py` | copy deck: каркас из плана страницы, проверки формата и стыка с планом, сверка с фактами и правом, линтер, статусы, слепой выбор вариантов, утверждение, выгрузка во вход холста, приём правок с холста | `skeleton PLAN -o DECK`; `check DECK [--update OUT --promote] [--final]`; `validate`, `claims`, `lint`; `approve DECK --page ID --by КТО -o OUT`; `export DECK --page ID --stage directions\|wireframe\|mockup`; `import-copy`; `export-variants`, `apply-selection`, `export-assets`; `before-after [--write\|--check]`; `--selftest` | терминал, `--json`, `--md`; код 0 — нет error, 2 — есть, 1 — ошибка входа; `export` — `$DDD_HOME/out/text/export` или `--out` |
+| `copydeck.py` | copy deck: каркас из плана страницы, проверки формата и стыка с планом, сверка с фактами и правом, линтер, статусы, слепой выбор вариантов, утверждение, выгрузка во вход холста, приём правок с холста | `skeleton PLAN -o DECK`; `check DECK [--update OUT --promote] [--final] [--all-variants]`; `validate`, `claims`, `lint`; `select DECK --page ID --slot СЕКЦИЯ/СЛОТ --variant ID --by КТО -o OUT`; `approve DECK --page ID --by КТО -o OUT`; `export DECK --page ID --stage directions\|wireframe\|mockup`; `import-copy`; `export-variants`, `apply-selection`, `export-assets`; `before-after [--write\|--check]`; `--selftest` | терминал, `--json`, `--md`; код 0 — нет error, 2 — есть, 1 — ошибка входа; `export` — `$DDD_HOME/out/text/export` или `--out` |
 | `claims_check.py` | сверка текстов с белым списком фактов `facts.yaml` и право формулировок — ядро контура честности | `check ВХОД --facts ФАКТЫ [--final]` (copy deck, `copy.md`, Markdown, текст, HTML); `lint-facts ФАКТЫ [--final]`; `inventory`, `rules-schema`; `--selftest` | терминал, `--json`, `--md`; код 0 · 2 · 1 |
 | `copy_lint.py` | линтер по жанру и роли строки: тексты сайта, строки интерфейса, реестр `texts.md` | `ВХОД --genre …`; `- --genre interface --role …`; `--selftest` | терминал, `--json`, `--md`; код 0 · 2 · 1 |
 | `ux_dict_to_yaml.py` | производный словарь ux 07/06 и длины по ролям для линтера | без ключей — собрать; `--check`; `--selftest` | `kb/text/06-anti-slop/lexicon/ux-07-06.yaml` |
-| `chain_inputs.py` | сверка смысла до текстов и вход судьи текстов | `meaning-claims --meaning M [--hierarchy H …] -o OUT`; `judge-input`, `judge-score`; `--selftest` | YAML; `meaning-claims` — число несверенных возражений и секций в stderr |
+| `chain_inputs.py` | сверка смысла до текстов и вход судьи текстов | `meaning-claims --meaning M [--hierarchy H …] [--brief B] -o OUT`; `judge-input`, `judge-score`; `--selftest` | YAML; `meaning-claims` — число несверенных возражений и секций в stderr |
 | `validate_any.py` | смысл или иерархия проекта: схема, смысловые проверки, счётчики `basis_kinds` | `<файл>.yaml …` | терминал; код 0 · 1 |
 | `validate_voice.py` | профили голоса бренда и продукта проекта | `<профиль>.yaml …`; без файлов — схема и примеры базы; `--selftest` | терминал и `$DDD_HOME/out/text/validate_voice.last-run.txt`; код 0 · 1 |
 | `validate_meaning.py` | схемы смысла и иерархии сообщений, примеры базы | `[--quiet]` | терминал; код 0 · 1 |
@@ -37,8 +37,9 @@
 ## Обход эвристик сверки — `claims_allow`
 
 Ложную находку эвристик сверки снимает решение человека с записанной причиной, а не подгонка текста под корень слова:
-`claims_allow` слота или страницы — записи `{rule, reason, by}`, `rule` — `COPY-F-CLASS` (маркер класса утверждения без
-факта) или `COPY-F-NUM` (число без факта и число, не совпавшее с фактом). Обойдённая находка не считается в error;
+`claims_allow` слота, мета (`meta.claims_allow`) или страницы — записи `{rule, reason, by}`, `rule` — семейство или id
+находки: `COPY-F-CLASS` (маркер класса утверждения без факта) или `COPY-F-NUM` (число без факта и число, не совпавшее с
+фактом); `value` (число) или `fragment` называют, что именно снято. Обойдённая находка не считается в error;
 `claims`, `check`, `approve` и `validate --final` перечисляют обходы отдельным списком (`--json` — поле `allowed`), чтобы
 заказчик видел их на публикации. Право, `never_claim` и «утверждение шире факта» не обходятся. Форма и правила записи —
 схема `kb/text/10-templates-recipes/copy-deck.schema.json` (`claims-allow`) и `copydeck.py --help`. `claims_check.py`,
@@ -56,5 +57,7 @@
   findings[{tool, level, rule, where, message, fix, fragment, …}], allowed[{rule, where, reason, by, …}], notes}`; у
   `check` ещё `slots` (итоги по путям), у `export` — `export`. Правила: свои `COPY-D-…`; `COPY-F-…` и `COPY-L-…` — из
   `claims_check.py`; id линтера — из `copy_lint.py`; `meta-x-…` — проверки мета вне линтера.
-- **Правила права** — `kb/text/08-russian-legal-typography/claims-rules.yaml` (формат — `claims_check.py rules-schema`);
-  правила линтера — `kb/text/06-anti-slop/lexicon/`, профили жанров — `kb/text/06-anti-slop/profiles.yaml`.
+- **Правила права** — `kb/text/08-russian-legal-typography/claims-rules.yaml` (формат — `claims_check.py rules-schema`):
+  их читает только `claims_check.py`. Собранная страница и статичная копия артборда сверяются с привязкой:
+  `claims_check.py page.html --facts facts.yaml --deck <copy deck страницы> --allow <вывод copydeck.py validate --final
+  --json>` — текст слота сверяется как слот, находка под обходом `claims_allow` — `info` с причиной. Правила линтера — `kb/text/06-anti-slop/lexicon/`, профили жанров — `kb/text/06-anti-slop/profiles.yaml`.

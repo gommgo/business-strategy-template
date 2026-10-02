@@ -5,7 +5,7 @@
  "id": "promo-banner-cyr",
  "task": "IMG-TEXT-CYR",
  "role": {
-  "page_type": "ecommerce",
+  "page_class": "ecommerce",
   "section": "promo",
   "slot": "promo-banner",
   "purpose": "баннер весенней распродажи; надпись — в картинке (декоративная), запасной путь — HTML"

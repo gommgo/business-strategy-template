@@ -5,7 +5,6 @@ checked: '2026-09-24'
 intake:
   received: '2026-09-10'
   channel: почта + созвон с записью
-  raw_ref: ../../text-research/99-raw/experiments/B1/01-briefs-to-meaning/README.md#вход
   what_ordered: landing
   notes: Сайта нет; заявки сейчас — с Яндекс Карт и по рекомендациям; планируется Яндекс Директ.
 project:

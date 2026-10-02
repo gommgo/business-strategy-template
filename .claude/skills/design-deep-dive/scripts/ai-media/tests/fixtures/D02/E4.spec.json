@@ -5,7 +5,7 @@
  "id": "hero-loop-steam",
  "task": "VID-HERO-LOOP",
  "role": {
-  "page_type": "landing",
+  "page_class": "landing",
   "section": "hero",
   "slot": "hero-video",
   "priority": "above-fold",

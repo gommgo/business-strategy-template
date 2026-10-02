@@ -34,7 +34,8 @@ plan_fields:
              Course, SoftwareApplication, WebApplication, MobileApplication, Product, Offer, AggregateOffer, VideoObject,
              ContactPage, AboutPage, CollectionPage, JobPosting, FAQPage]
     rule: >-
-      только типы из page_types этой страницы; каждое значение в разметке видно на странице и совпадает с канонической
+      только типы из page_types этой страницы и подтипы её structured_data_subtypes; каждое значение в разметке видно
+      на странице и совпадает с канонической
       формулировкой факта (fact:<id>, ../../text/02-strategy-messaging/facts.schema.yaml); лишние типы «на всякий
       случай» не добавлять (раздувают HTML, не дают эффекта)
   ssr_required:
@@ -270,6 +271,8 @@ jsonld_policy:
 
 page_types:
   # Умолчания для page.seo по page_type (../02-site-types/vocabulary.yaml). sitemap: включать ли в sitemap.xml.
+  # structured_data_subtypes: {тип: [подтипы]} — подтипы, допустимые в плане вместо типа из structured_data
+  # (site_validate.py, PL-SEO01, принимает их наравне с типами страницы).
   landing-lead-services: {indexable: true, canonical: self, structured_data: [LocalBusiness, WebSite, Service], ssr_required: true, sitemap: true,
     notes: 'лендинг — главная сайта-лендинга: организация здесь; варианты под Директ и Ads — один URL с параметрами, canonical без них; AdsBot и YaDirectFetcher не закрывать'}
   landing-saas: {indexable: true, canonical: self, structured_data: [Organization, WebSite, SoftwareApplication], ssr_required: true, sitemap: true,
@@ -289,7 +292,8 @@ page_types:
   landing-lead-magnet: {indexable: true, canonical: self, structured_data: [Organization], ssr_required: true, sitemap: true,
     notes: 'сам материал за формой не индексируется; описание материала — текстом'}
   home-multipage: {indexable: true, canonical: self, structured_data: [Organization, WebSite], ssr_required: true, sitemap: true,
-    notes: 'для сайта услуг — подтип LocalBusiness вместо Organization'}
+    structured_data_subtypes: {Organization: [LocalBusiness]},
+    notes: 'для сайта услуг — подтип из structured_data_subtypes (LocalBusiness) вместо Organization'}
   services-index-page: {indexable: true, canonical: self, structured_data: [BreadcrumbList, CollectionPage], ssr_required: true, sitemap: true}
   service-page: {indexable: true, canonical: self, structured_data: [Service, BreadcrumbList], ssr_required: true, sitemap: true,
     notes: 'Service.provider → @id организации; цена «от» — если видна'}
