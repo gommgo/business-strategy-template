@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""asset_inventory.py — инвентарь визуальных ассетов живой страницы.
+"""Обслуживание базы: этапы не зовут. asset_inventory.py — инвентарь визуальных ассетов живой страницы.
 
 Что собирает (Playwright + Chromium, один браузер на прогон):
   * <img> и <picture>: currentSrc, srcset (число кандидатов, w/x), sizes, <source> с type/media (арт-дирекшн),

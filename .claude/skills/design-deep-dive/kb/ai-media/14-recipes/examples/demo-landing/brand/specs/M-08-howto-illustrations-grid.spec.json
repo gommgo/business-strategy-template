@@ -5,7 +5,7 @@
   "brief_language": "ru",
   "task": "IMG-SERIES",
   "role": {
-    "page_type": "ecommerce",
+    "page_class": "ecommerce",
     "section": "how-it-works",
     "slot": "howto-illustrations",
     "purpose": "four step illustrations in one generation for consistency; sliced and vectorised",

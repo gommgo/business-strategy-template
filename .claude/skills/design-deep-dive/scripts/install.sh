@@ -3,8 +3,9 @@
 # ${XDG_CACHE_HOME:-~/.cache}/design-deep-dive — одно на машину для всех клонов шаблона. В репозиторий ничего не пишет.
 #
 #   scripts/install.sh --dry-run                     # план и что уже стоит; ничего не меняет, в сеть не ходит
-#   scripts/install.sh                               # venv + pip (группа core), npm-зависимости, каталоги out/cache/locks
-#   scripts/install.sh --groups all --bin --models --browsers --ffmpeg
+#   scripts/install.sh                               # venv + pip (группа core), npm (группа page), каталоги out/cache/locks
+#   scripts/install.sh --groups core,media --npm-groups page,3d    # группы pip и npm по задаче
+#   scripts/install.sh --groups all --npm-groups all --bin --models --browsers --ffmpeg    # то же одним ключом: --all
 #   scripts/install.sh --bin --from DIR [--from DIR2]  # бинарники из локальных папок (или --from DIR:DIR2)
 #   scripts/install.sh --models --models-from DIR    # модели ONNX из локальных папок (то же правило поиска)
 #   scripts/install.sh --ffmpeg                      # ffmpeg и ffprobe: статическая сборка в $DDD_HOME/bin, если системных нет
@@ -13,8 +14,14 @@
 #   scripts/install.sh --check                       # сверить установленное (версии, sha256), ничего не ставить
 #
 # Python — 3.12–3.13: закрепления numpy, scipy, networkx, tifffile требуют ≥ 3.12. Без --python (и переменной PYTHON)
-# установка берёт python3.13, python3.12 или python3 не ниже 3.12; ниже — отказ с причиной, venv на старом Python — тоже.
-# Группы pip — секции «# [группа]» в requirements.txt: core, net, morph, svg, ocr, media (all — все).
+# установка берёт python3.13, python3.12 или python3 не ниже 3.12; ниже — отказ с причиной: какая версия найдена, какая
+# нужна и что сделать; venv на старом Python — тоже отказ. Python новее 3.13 — предупреждение: закрепления на нём не
+# проверены. Шаги без pip (npm, бинарники, модели) при отказе идут дальше, код выхода — 1.
+# Группы pip — секции «# [группа]» в requirements.txt: core, net, morph, svg, ocr, media (all — все). scipy стоит в
+# media и svg: утилитам ai-media, которые считают метрики картинок и видео, нужна группа media.
+# Группы npm — поле x-ddd-groups в package.json: page — замеры страницы и доступности (по умолчанию), media — SVG,
+# иконки и плееры Lottie, 3d — проверка glTF и эталонные 3D-сборки базы (all — все). Группа ставится ключом
+# --npm-groups; пакеты групп, поставленных раньше, остаются на месте — повторный запуск без ключа их не снимает.
 # Идемпотентно: повторный запуск ставит только недостающее. Бинарник или модель с другим sha256 — ошибка, а не молчание;
 # sha256 — установленного файла, в адресе — версия релиза или коммит. Архив не сошёлся с sha256 — поставьте файл вручную
 # (раскладка — таблица ниже) или укажите --from. --from и --models-from ищут файл строки таблицы сначала по её пути, затем
@@ -38,6 +45,7 @@ SCRIPTS="$SKILL/scripts"
 DDD_HOME="${DDD_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/design-deep-dive}"
 PYTHON_BASE="${PYTHON:-}"
 DRY=0; CHECK=0; PIP_GROUPS="core"; DO_NPM=1; DO_BIN=0; DO_MODELS=0; DO_BROWSERS=0; DO_CATALOGS=0; DO_FFMPEG=0; PW_MATCH=0
+NPM_GROUPS="page"
 FROM=(); MODELS_FROM=()
 
 usage() { awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "${BASH_SOURCE[0]}"; }
@@ -46,6 +54,7 @@ while [ $# -gt 0 ]; do
     --dry-run) DRY=1 ;;
     --check) CHECK=1; DRY=1 ;;
     --groups) PIP_GROUPS="$2"; shift ;;
+    --npm-groups) NPM_GROUPS="$2"; shift ;;
     --python) PYTHON_BASE="$2"; shift ;;
     --no-npm) DO_NPM=0 ;;
     --bin) DO_BIN=1 ;;
@@ -56,13 +65,19 @@ while [ $# -gt 0 ]; do
     --ffmpeg) DO_FFMPEG=1 ;;
     --playwright-match) PW_MATCH=1 ;;
     --catalogs) DO_CATALOGS=1 ;;
-    --all) PIP_GROUPS="all"; DO_BIN=1; DO_MODELS=1; DO_BROWSERS=1; DO_FFMPEG=1 ;;
+    --all) PIP_GROUPS="all"; NPM_GROUPS="all"; DO_BIN=1; DO_MODELS=1; DO_BROWSERS=1; DO_FFMPEG=1 ;;
     -h|--help) usage; exit 0 ;;
     *) echo "install.sh: неизвестный ключ $1 (см. --help)" >&2; exit 2 ;;
   esac
   shift
 done
 [ "$PIP_GROUPS" = "all" ] && PIP_GROUPS="core,net,morph,svg,ocr,media"
+NPM_ALL="page,media,3d"
+[ "$NPM_GROUPS" = "all" ] && NPM_GROUPS="$NPM_ALL"
+IFS=',' read -r -a _groups <<< "$NPM_GROUPS"
+for g in ${_groups[@]+"${_groups[@]}"}; do
+  case ",$NPM_ALL," in *",$g,"*) ;; *) echo "install.sh: неизвестная группа npm «$g» (есть: $NPM_ALL, all)" >&2; exit 2 ;; esac
+done
 [ "$CHECK" = 1 ] && { DO_BIN=1; DO_MODELS=1; }
 
 say()  { printf '%s\n' "$*"; }
@@ -74,6 +89,7 @@ fail() { printf '  ОШИБКА: %s\n' "$*" >&2; ERR=1; }
 warn() { printf '  ПРЕДУПРЕЖДЕНИЕ: %s\n' "$*" >&2; WARN=1; }   # установку не останавливает
 py_ver() { "$1" -c 'import sys; print("%d.%d" % sys.version_info[:2])' 2>/dev/null || true; }
 py_ok()  { "$1" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)' 2>/dev/null; }
+py_new() { "$1" -c 'import sys; sys.exit(0 if sys.version_info >= (3, 14) else 1)' 2>/dev/null; }   # новее проверенных
 pick_python() {  # явный --python или PYTHON; иначе python3.13, python3.12, python3 не ниже 3.12
   if [ -n "$PYTHON_BASE" ]; then printf '%s\n' "$PYTHON_BASE"; return 0; fi
   local c
@@ -149,6 +165,8 @@ if [ -x "$PY" ]; then
   if ! py_ok "$PY"; then
     fail "venv на Python $(py_ver "$PY"): закрепления требуют 3.12–3.13 — удалите $VENV и запустите install.sh снова (--python python3.13)"
     PY_READY=0
+  elif py_new "$PY"; then
+    warn "venv на Python $(py_ver "$PY"): закрепления проверены на 3.12–3.13 — при сбое pip пересоздайте venv (--python python3.13)"
   fi
 else
   BASE="$(pick_python)"
@@ -163,15 +181,18 @@ else
     PY_READY=0
   else
     say "  Python для venv: $BASE ($(py_ver "$BASE"))"
+    if py_new "$BASE"; then
+      warn "$BASE — Python $(py_ver "$BASE"): закрепления проверены на 3.12–3.13 — при сбое pip укажите --python python3.13"
+    fi
     run "$BASE" -m venv "$VENV"
   fi
 fi
 PYU="$PY"; [ -x "$PYU" ] || PYU="$(pick_python)"; [ -n "$PYU" ] || PYU=python3   # Python служебных шагов (распаковка, kbpaths)
-REQ_TMP="$(mktemp)"; trap 'rm -f "$REQ_TMP"' EXIT
+REQ_TMP="$(mktemp)"; NPM_TMP="$(mktemp)"; trap 'rm -f "$REQ_TMP" "$NPM_TMP"' EXIT   # вне $DDD_HOME: сухой прогон туда не пишет
 awk -v groups=",$PIP_GROUPS," '
   /^# \[[a-z]+\]/ { g = $2; gsub(/[\[\]]/, "", g); take = index(groups, "," g ",") > 0; next }
   /^[[:space:]]*(#|$)/ { next }
-  take { print }' "$SCRIPTS/requirements.txt" > "$REQ_TMP"
+  take && !seen[$0]++ { print }' "$SCRIPTS/requirements.txt" > "$REQ_TMP"   # пакет двух групп берётся один раз
 if [ -n "$PW_NOTE" ]; then say "  $PW_NOTE"; fi
 if [ -n "$PW_WANT" ] && grep -q '^playwright==' "$REQ_TMP"; then     # версия под браузеры; pyee и greenlet — по её требованиям
   grep -vE '^(playwright|pyee|greenlet)==' "$REQ_TMP" > "$REQ_TMP.pw" || true
@@ -210,8 +231,37 @@ if [ -x "$PY" ] && "$PY" -c 'import playwright' >/dev/null 2>&1; then
 fi
 
 # ------------------------------------------------------------------ npm
-npm_plan() {  # --dry-run и --check: что npm install поменяет в прямых зависимостях $NODE_HOME против scripts/package.json
-  "$PYU" - "$SCRIPTS/package.json" "$NODE_HOME" <<'PYEOF' || say "  план npm не посчитан ($PYU)"
+npm_manifest() {  # манифест npm → $NPM_TMP: пакеты выбранных групп (x-ddd-groups) и пакеты, которые уже стоят в $NODE_HOME
+  "$PYU" - "$SCRIPTS/package.json" "$NODE_HOME" "$NPM_GROUPS" "$NPM_TMP" <<'PYEOF'
+import json, os, sys
+src, home, asked, out = sys.argv[1:5]
+pkg = json.load(open(src, encoding="utf-8"))
+groups, deps = pkg.get("x-ddd-groups", {}), pkg.get("dependencies", {})
+names = [g for g in asked.split(",") if g]
+unknown = [g for g in names if g not in groups]
+if unknown or not names:
+    sys.exit(f"  группы npm: нет «{', '.join(unknown)}» в x-ddd-groups (есть: {', '.join(groups)})")
+loose = sorted(set(deps) ^ {n for g in groups.values() for n in g})
+if loose:
+    sys.exit(f"  scripts/package.json: dependencies и x-ddd-groups расходятся: {', '.join(loose)}")
+try:
+    had = json.load(open(os.path.join(home, "package.json"), encoding="utf-8")).get("dependencies", {})
+except (OSError, ValueError):
+    had = {}
+take = {n for g in names for n in groups[g]} | {n for n in had if n in deps}
+kept = [g for g in groups if g not in names and any(n in had for n in groups[g])]
+pkg["dependencies"] = {n: v for n, v in deps.items() if n in take}
+if "allowScripts" in pkg:                                # разрешения скриптов установки — только взятым пакетам
+    pkg["allowScripts"] = {k: v for k, v in pkg["allowScripts"].items() if k.rsplit("@", 1)[0] in take}
+    if not pkg["allowScripts"]:
+        del pkg["allowScripts"]
+with open(out, "w", encoding="utf-8") as f:
+    f.write(json.dumps(pkg, indent=2, ensure_ascii=False) + "\n")
+print(f"  группы: {', '.join(names)}" + (f"; стоят с прошлых запусков и остаются: {', '.join(kept)}" if kept else ""))
+PYEOF
+}
+npm_plan() {  # --dry-run и --check: что npm install поменяет в прямых зависимостях $NODE_HOME против манифеста групп
+  "$PYU" - "$NPM_TMP" "$NODE_HOME" <<'PYEOF' || say "  план npm не посчитан ($PYU)"
 import json, os, sys
 want = json.load(open(sys.argv[1], encoding="utf-8")).get("dependencies", {})
 home = sys.argv[2]
@@ -226,7 +276,7 @@ def version(name):
         return None
 miss = [f"{n} {version(n)} → {v}" if version(n) else f"{n}@{v} (нет)" for n, v in want.items() if version(n) != v]
 gone = sorted(set(had) - set(want))
-print(f"  пакетов в scripts/package.json: {len(want)}")
+print(f"  пакетов в манифесте групп: {len(want)}")
 if miss:
     print("  не хватает или другая версия: " + ", ".join(miss))
 if gone:
@@ -236,38 +286,45 @@ if not miss and not gone:
 PYEOF
 }
 if [ "$DO_NPM" = 1 ]; then
-  step "npm: зависимости утилит в $NODE_HOME"
+  step "npm: зависимости утилит в $NODE_HOME (группы: $NPM_GROUPS)"
   NODE="${DDD_NODE:-$(command -v node || true)}"; NPM="${DDD_NPM:-$(command -v npm || true)}"
   if [ -z "$NODE" ] || [ -z "$NPM" ]; then
     say "  нет node/npm в PATH (DDD_NODE, DDD_NPM) — пропуск; нужен Node 24"
+  elif ! npm_manifest; then
+    fail "манифест npm не собран ($PYU, scripts/package.json) — пакеты npm не ставятся"
   else
     say "  node $("$NODE" --version) ($NODE), npm $("$NPM" --version 2>/dev/null || echo '?')"
-    want="$(sha "$SCRIPTS/package.json")"
+    want="$(sha "$NPM_TMP")"
     have="$(cat "$NODE_HOME/.package.sha256" 2>/dev/null || true)"
     if [ "$want" = "$have" ] && [ -d "$NODE_HOME/node_modules" ]; then
-      say "  node_modules соответствует scripts/package.json"
+      say "  node_modules соответствует манифесту групп"
     else
       if [ "$DRY" = 1 ]; then npm_plan; fi
-      run cp "$SCRIPTS/package.json" "$NODE_HOME/package.json"
+      run cp "$NPM_TMP" "$NODE_HOME/package.json"
       run "$NPM" install --prefix "$NODE_HOME" --no-audit --no-fund
       if [ "$DRY" = 0 ]; then printf '%s\n' "$want" > "$NODE_HOME/.package.sha256"; fi
     fi
-    # esbuild нужен только эталонным 3D-сборкам базы (сборки и постеры примеров kb/blender), утилитам скилла — нет:
-    # его сбой — предупреждение, установка идёт дальше. Скрипт установки esbuild разрешён полем allowScripts в
-    # package.json (npm ≥ 12 без разрешения его пропускает); на дереве, поставленном без разрешения, его запускает
-    # npm rebuild
-    ESB="$NODE_HOME/node_modules/esbuild/bin/esbuild"
-    ESB_WHY="эталонные 3D-сборки базы (примеры kb/blender) без него не соберутся, утилитам скилла он не нужен"
-    if [ -f "$ESB" ] && [ "$(head -c 2 "$ESB")" = '#!' ]; then
-      if ! run "$NPM" rebuild esbuild --prefix "$NODE_HOME"; then warn "npm rebuild esbuild не прошёл — $ESB_WHY"; fi
+    if grep -q '^    "esbuild":' "$NPM_TMP"; then
+      # esbuild (группа 3d) нужен только эталонным 3D-сборкам базы (сборки и постеры примеров kb/blender), утилитам
+      # скилла — нет: его сбой — предупреждение, установка идёт дальше. Скрипт установки esbuild разрешён полем
+      # allowScripts в package.json (npm ≥ 12 без разрешения его пропускает); на дереве, поставленном без разрешения,
+      # его запускает npm rebuild
+      ESB="$NODE_HOME/node_modules/esbuild/bin/esbuild"
+      ESB_WHY="эталонные 3D-сборки базы (примеры kb/blender) без него не соберутся, утилитам скилла он не нужен"
+      if [ -f "$ESB" ] && [ "$(head -c 2 "$ESB")" = '#!' ]; then
+        if ! run "$NPM" rebuild esbuild --prefix "$NODE_HOME"; then warn "npm rebuild esbuild не прошёл — $ESB_WHY"; fi
+      fi
+      if [ -x "$NODE_HOME/node_modules/.bin/esbuild" ]; then
+        if v="$("$NODE_HOME/node_modules/.bin/esbuild" --version 2>/dev/null)"; then say "  esbuild $v";
+        else warn "esbuild не запускается — $ESB_WHY: $NPM rebuild esbuild --prefix $NODE_HOME"; fi
+      elif [ "$DRY" = 0 ]; then warn "нет esbuild в $NODE_HOME/node_modules — $ESB_WHY: $NPM install --prefix $NODE_HOME"; fi
     fi
-    if [ -x "$NODE_HOME/node_modules/.bin/esbuild" ]; then
-      if v="$("$NODE_HOME/node_modules/.bin/esbuild" --version 2>/dev/null)"; then say "  esbuild $v";
-      else warn "esbuild не запускается — $ESB_WHY: $NPM rebuild esbuild --prefix $NODE_HOME"; fi
-    elif [ "$DRY" = 0 ]; then warn "нет esbuild в $NODE_HOME/node_modules — $ESB_WHY: $NPM install --prefix $NODE_HOME"; fi
-    # validate.mjs (gltf_check.py) ищет gltf-validator рядом с собой: копия в $DDD_HOME/node, не симлинк (ESM идёт по realpath)
-    if cmp -s "$SCRIPTS/blender/node/validate.mjs" "$NODE_HOME/validate.mjs"; then say "  validate.mjs на месте";
-    else run cp "$SCRIPTS/blender/node/validate.mjs" "$NODE_HOME/validate.mjs"; fi
+    if grep -q '^    "gltf-validator":' "$NPM_TMP"; then
+      # validate.mjs (gltf_check.py, группа 3d) ищет gltf-validator рядом с собой: копия в $DDD_HOME/node, не симлинк
+      # (ESM идёт по realpath)
+      if cmp -s "$SCRIPTS/blender/node/validate.mjs" "$NODE_HOME/validate.mjs"; then say "  validate.mjs на месте";
+      else run cp "$SCRIPTS/blender/node/validate.mjs" "$NODE_HOME/validate.mjs"; fi
+    fi
   fi
 fi
 

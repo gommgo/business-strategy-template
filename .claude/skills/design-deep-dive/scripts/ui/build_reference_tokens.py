@@ -8,12 +8,23 @@
   * блок `@theme inline` для Tailwind CSS v4 (+ мост совместимости с shadcn/ui).
 Плюс отчёт проверок: контраст семантических пар в обеих темах, коридор APCA отключённого текста, палитра графиков
 при симуляции дальтонизма, арифметика интерлиньяжа, светлота слоёв поверхностей.
+Интерлиньяж в CSS — шестизначное отношение, которое в браузере даёт целый px (правило сборки ДС `project/ds_build.py`):
+в JSON остаётся отношение, округлённое к ближайшему.
 
 Запуск:
     python3 build_reference_tokens.py [--out <каталог>]
+    python3 build_reference_tokens.py --check
+    python3 build_reference_tokens.py --selftest
 Пишет tokens.json, tokens.css, theme.css, report.txt в каталог --out (по умолчанию `$DDD_HOME/out/ui/reference-tokens`)
 и печатает отчёт; строка «<<<» в отчёте — непройденный порог контраста. `tokens.css` — эталонные токены
 `kb/ui/14-recipes/examples/tokens.css`, по ним `ui_audit.py` проверяет экран, когда токенов ДС проекта нет.
+
+`--check` ничего не пишет: сверяет с выводом генератора копии в базе — файл `kb/ui/14-recipes/examples/tokens.css` и
+листинги `kb/ui/09-design-tokens/04-reference-token-schema.md` (§4 tokens.json, §5 tokens.css, §6 theme.css) — и
+печатает строку на копию: `OK` или `DIFF` с числом мест отличий и первым из них. `--selftest` — самопроверка без сети
+и записи: разбор листингов и сверка на коротких текстах, файл эталонных токенов против вывода.
+Код выхода: 0 — запись прошла, копии равны выводу или самопроверка прошла; 1 — у `--check` есть расхождение или
+самопроверка не прошла; 2 — ошибка вызова или окружения.
 
 Правила применения (`$extensions.org.design-deep-dive.llm`) пишутся на английском: их читают модель и код. `size.control.*` —
 высота видимого контрола; зона нажатия на таче — не меньше 44×44 у каждой цели (правило `size.control.lg`), режимы
@@ -22,11 +33,14 @@
 from __future__ import annotations
 
 import argparse
+import difflib
 import itertools
 import json
 import os
+import re
 import sys
 from collections import OrderedDict
+from decimal import ROUND_CEILING, ROUND_FLOOR, Decimal
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
@@ -35,6 +49,18 @@ from color import hex2oklch, wcag, apca, composite, sim_cvd, dE_oklab  # noqa: E
 
 EXT = "org.design-deep-dive.llm"
 EXT_MODES = "org.design-deep-dive.modes"
+RATIO_DIGITS = 6            # знаков у отношения интерлиньяжа — как у значения DTCG и у сборки ДС (project/ds_build.py)
+LAYOUT_STEP = 64            # браузер считает высоту строки шагами 1/64 px и усекает её до шага
+
+
+def leading_ratio(lh, size):
+    """Отношение интерлиньяжа для CSS: шестизначное отношение значения DTCG, а когда оно недотягивает до целого px
+    (браузер усекает высоту строки до шага раскладки), — наименьшее шестизначное, которое этот px даёт. Точная дробь
+    `calc(lh / size)` не годится: множитель хранится с одинарной точностью и на части пар теряет шаг (20 / 15)."""
+    ratio = Decimal(str(round(lh / size, RATIO_DIGITS)))
+    if (ratio * size * LAYOUT_STEP).to_integral_value(rounding=ROUND_FLOOR) != lh * LAYOUT_STEP:
+        ratio = (Decimal(lh) / Decimal(size)).quantize(Decimal(1).scaleb(-RATIO_DIGITS), rounding=ROUND_CEILING)
+    return format(ratio.normalize(), "f")
 
 # --------------------------------------------------------------------------------------
 # 1. Примитивы: цветовые шкалы (значения Tailwind v4 theme.css, OKLCH -> hex, см. F-notes S23)
@@ -933,7 +959,7 @@ def build_json_tree():
     root = OrderedDict()
     root["$schema"] = "https://www.designtokens.org/schemas/2025.10/format.json"
     root["$description"] = (
-        "ui-research reference token set. Preset: dense back-office admin, light theme is the "
+        "ui reference token set. Preset: dense back-office admin, light theme is the "
         "default, dark theme and two density modes ship as in-token overrides under "
         "$extensions." + EXT_MODES + ". Rules of use for a language model live under "
         "$extensions." + EXT + " on every semantic token.")
@@ -1108,8 +1134,8 @@ def mode_block(mode):
 def build_css():
     L = []
     L.append("/* ------------------------------------------------------------------")
-    L.append("   Эталонный набор токенов ui-research, пресет «плотная админка».")
-    L.append("   Сгенерировано из tokens.json (99-raw/tools/build_reference_tokens.py).")
+    L.append("   Эталонный набор токенов ui, пресет «плотная админка».")
+    L.append("   Сгенерировано из tokens.json (scripts/ui/build_reference_tokens.py).")
     L.append("   Слой 1 — примитивы, слой 2 — семантика. Компоненты используют")
     L.append("   ТОЛЬКО переменные слоя 2.")
     L.append("   ------------------------------------------------------------------ */")
@@ -1145,7 +1171,7 @@ def build_css():
         tr = round(tracking_em * size, 3)
         L.append(f"  --type-{role}-family: var(--font-family-{family});")
         L.append(f"  --type-{role}-size: var(--font-size-{size});")
-        L.append(f"  --type-{role}-leading: calc({lh} / {size});")
+        L.append(f"  --type-{role}-leading: {leading_ratio(lh, size)};")
         L.append(f"  --type-{role}-weight: var(--font-weight-{weight});")
         L.append(f"  --type-{role}-tracking: {tr}px;")
     L.append("}")
@@ -1555,10 +1581,103 @@ def check():
 
 
 # --------------------------------------------------------------------------------------
+# 11. Сверка копий в базе с выводом генератора (--check)
+# --------------------------------------------------------------------------------------
+EXAMPLE_CSS = ("ui", "14-recipes", "examples", "tokens.css")
+LISTINGS_MD = ("ui", "09-design-tokens", "04-reference-token-schema.md")
+LISTINGS = (("tokens.json", "4", "json"), ("tokens.css", "5", "css"), ("theme.css", "6", "css"))
+
+
+def listing(md, section, lang):
+    """Листинг раздела `## <section>.` текста базы — самый длинный блок кода языка lang; нет такого блока — None."""
+    m = re.search(rf"^## {section}\..*?(?=^## |\Z)", md, re.S | re.M)
+    blocks = re.findall(rf"^```{lang}[ \t]*\n(.*?)^```[ \t]*$", m.group(0), re.S | re.M) if m else []
+    return max(blocks, key=len) if blocks else None
+
+
+def copy_diff(copy, built):
+    """Расхождение копии с выводом: None — равны, иначе «мест отличий — N, первое — строка …» (место — подряд идущие
+    строки, которые в копии другие, лишние или пропущены)."""
+    if copy == built:
+        return None
+    a, b = copy.splitlines(), built.splitlines()
+    ops = [op for op in difflib.SequenceMatcher(None, a, b, autojunk=False).get_opcodes() if op[0] != "equal"]
+    if not ops:
+        return "различаются концы строк"
+    _, i1, i2, j1, j2 = ops[0]
+    x, y = (a[i1] if i1 < i2 else "∅"), (b[j1] if j1 < j2 else "∅")
+    return f"мест отличий — {len(ops)}, первое — строка {i1 + 1}: в копии «{x[:70]}», в выводе «{y[:70]}»"
+
+
+def compare_copies(texts):
+    """Копии вывода в базе против вывода генератора: [(копия, расхождение или None)]. Файл сверяется байт в байт,
+    листинг текста — без пустых строк в конце блока."""
+    css, md = kbpaths.kb(*EXAMPLE_CSS), kbpaths.kb(*LISTINGS_MD)
+    out = [("/".join(("kb",) + EXAMPLE_CSS), copy_diff(css.read_text(encoding="utf-8"), texts["tokens.css"]))]
+    text = md.read_text(encoding="utf-8")
+    for name, section, lang in LISTINGS:
+        block = listing(text, section, lang)
+        where = f"kb/{'/'.join(LISTINGS_MD)} §{section} ({name})"
+        out.append((where, "листинга нет: в разделе нет блока кода " + lang if block is None
+                    else copy_diff(block.rstrip("\n") + "\n", texts[name].rstrip("\n") + "\n")))
+    return out
+
+
+def _selftest(texts):
+    ok = True
+
+    def check_(msg, cond):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(("OK   " if cond else "FAIL ") + msg)
+
+    md = ("# Т\n\n## 4. Листинг\n\n```json\n{}\n```\n\n```json\n{\n  \"a\": 1\n}\n```\n\n## 5. CSS\n\n"
+          "```css\n:root {\n  --a: 1;\n}\n```\n")
+    check_("листинг — самый длинный блок языка в разделе; нет раздела или блока этого языка — None",
+           listing(md, "4", "json") == '{\n  "a": 1\n}\n' and listing(md, "5", "css") == ":root {\n  --a: 1;\n}\n"
+           and listing(md, "5", "json") is None and listing(md, "6", "css") is None)
+    two = copy_diff("a\nb\nc\nd\n", "a\nB\nc\nd\ne\n") or ""
+    check_("сверка копии: равные тексты — None; замена строки и добавленная строка — два места, первое названо",
+           copy_diff("a\nb\n", "a\nb\n") is None and two.startswith("мест отличий — 2, первое — строка 2: ")
+           and "«b»" in two and "«B»" in two)
+    one = copy_diff("a\nb\nc\n", "a\nx\nb\nc\n") or ""
+    check_("сверка копии: лишняя строка вывода в середине сдвигом остальных мест не множит",
+           one.startswith("мест отличий — 1, первое — строка 2: в копии «∅»"))
+    head = texts["tokens.css"].split("\n")[:4]
+    check_("шапка CSS называет генератор путём от папки скилла, описание JSON — набор базы ui",
+           head[2].strip() == "Сгенерировано из tokens.json (scripts/ui/build_reference_tokens.py)."
+           and json.loads(texts["tokens.json"])["$description"].startswith("ui reference token set. "))
+    kbpaths.use("project")
+    import ds_build
+    css = dict(re.findall(r"--type-([a-z0-9-]+)-leading: ([^;]+);", texts["tokens.css"]))
+    check_("интерлиньяж CSS: шестизначное отношение, округлённое вверх, когда округлённое к ближайшему теряет шаг "
+           "(20 / 15 → 1.333334, 20 / 14 → 1.428572); точное — как есть (24 / 16 → 1.5); без calc()",
+           (leading_ratio(20, 15), leading_ratio(20, 14), leading_ratio(24, 16), leading_ratio(25, 15))
+           == ("1.333334", "1.428572", "1.5", "1.666667") and "leading: calc(" not in texts["tokens.css"])
+    check_(f"интерлиньяж ролей эталона ({len(TYPE_ROLES)}): в браузере — целый px значения; отношение — то же, что у "
+           "сборки ДС project/ds_build.py",
+           len(css) == len(TYPE_ROLES) and all(
+               ds_build.leading_px(css[role], size) == lh == ds_build.leading_px(leading_ratio(lh, size), size)
+               and css[role] == ds_build.leading_css({"lineHeight": round(lh / size, RATIO_DIGITS),
+                                                      "fontSize": {"value": size, "unit": "px"}})
+               for role, size, lh, *_ in TYPE_ROLES))
+    rows = compare_copies(texts)
+    check_("файл эталонных токенов kb/ui/14-recipes/examples/tokens.css равен выводу генератора"
+           + ("" if rows[0][1] is None else f" ({rows[0][1]})"), rows[0][1] is None)
+    check_("сверка называет файл эталона и три листинга текста базы", len(rows) == 1 + len(LISTINGS))
+    print("build_reference_tokens selftest:", "OK" if ok else "FAIL")
+    return 0 if ok else 1
+
+
 def main():
     ap = argparse.ArgumentParser(description="Эталонная схема токенов ui: tokens.json, tokens.css, theme.css и отчёт")
     ap.add_argument("--out", default=str(kbpaths.out("ui", "reference-tokens", create=False)),
                     help="каталог вывода (по умолчанию $DDD_HOME/out/ui/reference-tokens)")
+    ap.add_argument("--check", action="store_true",
+                    help="ничего не писать: сверить с выводом kb/ui/14-recipes/examples/tokens.css и листинги "
+                         "kb/ui/09-design-tokens/04-reference-token-schema.md; код 1 — есть расхождение")
+    ap.add_argument("--selftest", action="store_true",
+                    help="самопроверка без сети и записи: разбор листингов, сверка копий, файл эталона против вывода")
     args = ap.parse_args()
     build_primitives()
     build_semantic_color()
@@ -1566,19 +1685,29 @@ def main():
     build_typography()
     for t in TOKENS:
         BY_PATH[t.dotted] = t
+    texts = OrderedDict([("tokens.json", dumps_compact(build_json_tree()) + "\n"), ("tokens.css", build_css() + "\n"),
+                         ("theme.css", build_tailwind() + "\n")])
+    if args.selftest:
+        return _selftest(texts)
+    if args.check:
+        try:
+            rows = compare_copies(texts)
+        except OSError as e:
+            print(f"build_reference_tokens: копия не читается: {e}", file=sys.stderr)
+            return 2
+        for where, diff in rows:
+            print(("OK   " if diff is None else "DIFF ") + where + ("" if diff is None else " — " + diff))
+        return 1 if any(diff for _, diff in rows) else 0
     os.makedirs(args.out, exist_ok=True)
-    tree = build_json_tree()
-    with open(os.path.join(args.out, "tokens.json"), "w", encoding="utf-8") as f:
-        f.write(dumps_compact(tree) + "\n")
-    with open(os.path.join(args.out, "tokens.css"), "w", encoding="utf-8") as f:
-        f.write(build_css() + "\n")
-    with open(os.path.join(args.out, "theme.css"), "w", encoding="utf-8") as f:
-        f.write(build_tailwind() + "\n")
+    for name, text in texts.items():
+        with open(os.path.join(args.out, name), "w", encoding="utf-8") as f:
+            f.write(text)
     report = check()
     with open(os.path.join(args.out, "report.txt"), "w", encoding="utf-8") as f:
         f.write(report + "\n")
     print(report)
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

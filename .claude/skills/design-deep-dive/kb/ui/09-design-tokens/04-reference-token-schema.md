@@ -639,7 +639,7 @@ CSS-переменной из пути токена. В нашей схеме с
 ```json
 {
   "$schema": "https://www.designtokens.org/schemas/2025.10/format.json",
-  "$description": "ui-research reference token set. Preset: dense back-office admin, light theme is the default, dark theme and two density modes ship as in-token overrides under $extensions.org.design-deep-dive.modes. Rules of use for a language model live under $extensions.org.design-deep-dive.llm on every semantic token.",
+  "$description": "ui reference token set. Preset: dense back-office admin, light theme is the default, dark theme and two density modes ship as in-token overrides under $extensions.org.design-deep-dive.modes. Rules of use for a language model live under $extensions.org.design-deep-dive.llm on every semantic token.",
   "primitive": {
     "color": {
       "$type": "color",
@@ -1879,7 +1879,7 @@ CSS-переменной из пути токена. В нашей схеме с
           "org.design-deep-dive.modes": {"compact": "{primitive.size.36}", "comfortable": "{primitive.size.48}"},
           "org.design-deep-dive.llm": {
             "usage": ["primary-cta", "search-field", "mobile-control"],
-            "rules": "Use for the main call to action, for search fields and for every control on touch screens."
+            "rules": "Use for the main call to action and for search fields. On touch screens every target MUST have a hit area of at least 44x44px: extend the control with padding or a pseudo-element, the visible control may stay smaller. Density modes do not shrink the hit area."
           }
         }
       }
@@ -2399,7 +2399,9 @@ CSS-переменной из пути токена. В нашей схеме с
     "drawer": {
       "$value": 1200,
       "$description": "Slide-over drawer.",
-      "$extensions": {"org.design-deep-dive.llm": {"usage": ["drawer", "slide-over"], "rules": "Use for drawers and their scrim."}}
+      "$extensions": {
+        "org.design-deep-dive.llm": {"usage": ["drawer", "slide-over"], "rules": "Use for drawers and their scrim."}
+      }
     },
     "modal": {
       "$value": 1300,
@@ -3064,7 +3066,9 @@ CSS-переменной из пути токена. В нашей схеме с
         "lineHeight": 1.4
       },
       "$description": "Page title. 20/28px, weight 600, tracking -0.010em.",
-      "$extensions": {"org.design-deep-dive.llm": {"usage": ["page-title", "h1"], "rules": "Use once per page, in the page header."}}
+      "$extensions": {
+        "org.design-deep-dive.llm": {"usage": ["page-title", "h1"], "rules": "Use once per page, in the page header."}
+      }
     },
     "page-title-lg": {
       "$value": {
@@ -3077,7 +3081,7 @@ CSS-переменной из пути токена. В нашей схеме с
       "$description": "Large page title. 24/32px, weight 600, tracking -0.015em.",
       "$extensions": {
         "org.design-deep-dive.llm": {
-          "usage": ["page-title-large", "landing-h1"],
+          "usage": ["page-title-large"],
           "rules": "Use on overview and dashboard pages that need a stronger opening."
         }
       }
@@ -3187,8 +3191,8 @@ override не имеют, но их цветовые слои изменилис
 
 ```css
 /* ------------------------------------------------------------------
-   Эталонный набор токенов ui-research, пресет «плотная админка».
-   Сгенерировано из tokens.json (../../scripts/ui/build_reference_tokens.py).
+   Эталонный набор токенов ui, пресет «плотная админка».
+   Сгенерировано из tokens.json (scripts/ui/build_reference_tokens.py).
    Слой 1 — примитивы, слой 2 — семантика. Компоненты используют
    ТОЛЬКО переменные слоя 2.
    ------------------------------------------------------------------ */
@@ -3503,77 +3507,77 @@ override не имеют, но их цветовые слои изменилис
   /* семантика: типографика (составные роли разложены по свойствам) */
   --type-caption-family: var(--font-family-sans);
   --type-caption-size: var(--font-size-11);
-  --type-caption-leading: calc(16 / 11);
+  --type-caption-leading: 1.454546;
   --type-caption-weight: var(--font-weight-regular);
   --type-caption-tracking: 0.11px;
   --type-caption-strong-family: var(--font-family-sans);
   --type-caption-strong-size: var(--font-size-11);
-  --type-caption-strong-leading: calc(16 / 11);
+  --type-caption-strong-leading: 1.454546;
   --type-caption-strong-weight: var(--font-weight-semibold);
   --type-caption-strong-tracking: 0.22px;
   --type-helper-family: var(--font-family-sans);
   --type-helper-size: var(--font-size-12);
-  --type-helper-leading: calc(16 / 12);
+  --type-helper-leading: 1.333334;
   --type-helper-weight: var(--font-weight-regular);
   --type-helper-tracking: 0.12px;
   --type-label-family: var(--font-family-sans);
   --type-label-size: var(--font-size-12);
-  --type-label-leading: calc(16 / 12);
+  --type-label-leading: 1.333334;
   --type-label-weight: var(--font-weight-medium);
   --type-label-tracking: 0.12px;
   --type-code-family: var(--font-family-mono);
   --type-code-size: var(--font-size-12);
-  --type-code-leading: calc(16 / 12);
+  --type-code-leading: 1.333334;
   --type-code-weight: var(--font-weight-regular);
   --type-code-tracking: 0.0px;
   --type-body-compact-family: var(--font-family-sans);
   --type-body-compact-size: var(--font-size-14);
-  --type-body-compact-leading: calc(18 / 14);
+  --type-body-compact-leading: 1.285715;
   --type-body-compact-weight: var(--font-weight-regular);
   --type-body-compact-tracking: 0.0px;
   --type-body-family: var(--font-family-sans);
   --type-body-size: var(--font-size-14);
-  --type-body-leading: calc(20 / 14);
+  --type-body-leading: 1.428572;
   --type-body-weight: var(--font-weight-regular);
   --type-body-tracking: 0.0px;
   --type-body-strong-family: var(--font-family-sans);
   --type-body-strong-size: var(--font-size-14);
-  --type-body-strong-leading: calc(20 / 14);
+  --type-body-strong-leading: 1.428572;
   --type-body-strong-weight: var(--font-weight-semibold);
   --type-body-strong-tracking: 0.0px;
   --type-button-family: var(--font-family-sans);
   --type-button-size: var(--font-size-14);
-  --type-button-leading: calc(20 / 14);
+  --type-button-leading: 1.428572;
   --type-button-weight: var(--font-weight-medium);
   --type-button-tracking: 0.0px;
   --type-card-title-family: var(--font-family-sans);
   --type-card-title-size: var(--font-size-14);
-  --type-card-title-leading: calc(20 / 14);
+  --type-card-title-leading: 1.428572;
   --type-card-title-weight: var(--font-weight-semibold);
   --type-card-title-tracking: 0.0px;
   --type-section-family: var(--font-family-sans);
   --type-section-size: var(--font-size-16);
-  --type-section-leading: calc(24 / 16);
+  --type-section-leading: 1.5;
   --type-section-weight: var(--font-weight-semibold);
   --type-section-tracking: -0.08px;
   --type-page-title-family: var(--font-family-sans);
   --type-page-title-size: var(--font-size-20);
-  --type-page-title-leading: calc(28 / 20);
+  --type-page-title-leading: 1.4;
   --type-page-title-weight: var(--font-weight-semibold);
   --type-page-title-tracking: -0.2px;
   --type-page-title-lg-family: var(--font-family-sans);
   --type-page-title-lg-size: var(--font-size-24);
-  --type-page-title-lg-leading: calc(32 / 24);
+  --type-page-title-lg-leading: 1.333334;
   --type-page-title-lg-weight: var(--font-weight-semibold);
   --type-page-title-lg-tracking: -0.36px;
   --type-metric-family: var(--font-family-sans);
   --type-metric-size: var(--font-size-28);
-  --type-metric-leading: calc(32 / 28);
+  --type-metric-leading: 1.142858;
   --type-metric-weight: var(--font-weight-semibold);
   --type-metric-tracking: -0.56px;
   --type-metric-lg-family: var(--font-family-sans);
   --type-metric-lg-size: var(--font-size-32);
-  --type-metric-lg-leading: calc(36 / 32);
+  --type-metric-lg-leading: 1.125;
   --type-metric-lg-weight: var(--font-weight-semibold);
   --type-metric-lg-tracking: -0.64px;
 }

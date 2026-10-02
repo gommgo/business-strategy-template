@@ -10,7 +10,8 @@ ambition-levels.yaml` (`defaults_by_page_type`, `levels[L0].appropriate_for.lead
                      текст без JS, мета, формы и согласия, баннер cookie, призывы первого экрана, телефон, показ H1 во времени
   page_accept.py   → accept_<режим>.json (--accept DIR): LCP с троттлингом телефона, lazy и fetchpriority LCP-картинки,
                      постер видео первого экрана, размеры картинок, движение на 6-й секунде и петли всей страницы, reduce,
-                     консоль
+                     консоль; с --acceptance — вылет на телефонных ширинах приёмки (SG-MOB-01 ставится по нему, без
+                     него — по анатомии телефона лаборатории с пометкой)
   motion_check.py  → results.json и gates.json (--motion DIR): петли всей страницы (2.2.2), вспышки (2.3.1), reduce записью
                      всей страницы; ворота эффектов — слоем; LCP, TBT, CLS и вес — зеркалом
   gate_check.py    → JSON ключа --json (--gate3d FILE …): ворота 3D — слоем, их провал — SG-WEIGHT-08 (D), ошибки консоли —
@@ -58,6 +59,7 @@ BUDGETS = os.path.join(DIR07, 'budgets.yaml')
 GATES = os.path.join(DIR07, 'page-gates.yaml')
 CHECKLIST = os.path.join(ROOT, '09-ai-generation-evaluation', 'site-checklist.yaml')
 AMBITION = str(kbpaths.kb('creative', '01-creative-direction', 'ambition-levels.yaml'))
+WIDTHS = str(kbpaths.kb(None, 'common', 'acceptance-widths.yaml'))
 LEVELS = ('L0', 'L1', 'L2')
 FOREIGN_VENDORS = {'ga4', 'gtm', 'meta-pixel', 'youtube', 'google-fonts', 'recaptcha', 'google-ads', 'google-maps',
                    'microsoft-ads', 'hotjar', 'intercom', 'onetrust'}   # SG-LEGAL-07 (I): зарубежные сервисы
@@ -461,6 +463,57 @@ def mirror_gate(gid, dev, value, limit, source, note=''):
                 'D' if bad else '-', note, source, mirror=True)
 
 
+def acceptance_overflow(accept, widths_path=None):
+    """Вылет на телефоне по строкам acceptance[] отчётов page_accept (--acceptance) → ({ширина приёмки: px}, {прочая
+    ширина: px}); на ширину — худший вылет из отчётов. Телефонная строка — device: mobile. Ширины приёмки — список widths
+    файла kb/common/acceptance-widths.yaml; телефонная строка другой ширины (overflow_only — там меряют только вылет) идёт
+    во второй словарь. Строк нет — два пустых словаря, файл ширин не читается."""
+    rows = [r for rep in (accept or {}).values() for r in ((rep or {}).get('acceptance') or [])
+            if isinstance(r, dict) and r.get('device') == 'mobile' and isinstance(r.get('width'), int)]
+    if not rows:
+        return {}, {}
+    widths = set(load_yaml(widths_path or WIDTHS).get('widths') or [])
+    main, extra = {}, {}
+    for r in rows:
+        tgt = main if r['width'] in widths else extra
+        tgt[r['width']] = max(tgt.get(r['width'], 0), r.get('overflow_px') or 0)
+    return main, extra
+
+
+def mob01_gate(s, accept=None):
+    """SG-MOB-01 — горизонтальный вылет на телефоне. Есть телефонные строки acceptance[] на ширинах приёмки — строка
+    ставится по ним: вылет больше limits.overflow_px на любой ширине — B; D — когда анатомия телефона показала, что
+    переполнение скрыто overflow-x (область не расширена). Таких строк нет — по анатомии телефона лаборатории, с
+    пометкой: её ширина — не ширина приёмки."""
+    s = s or {}
+    ov, zoomed = s.get('overflow_x_px'), s.get('layout_zoomed')
+    ov_max = gate_limit('SG-MOB-01', 'overflow_px')
+    rows, extra = acceptance_overflow(accept)
+    if rows:
+        val = ', '.join(f'{w}: {px} px' for w, px in sorted(rows.items(), reverse=True))
+        thr = f'≤ {ov_max} px на ширинах приёмки'
+        notes = [f'ширина {w} (только вылет): {px} px — вне ширин строки' for w, px in sorted(extra.items()) if px > ov_max]
+        if not any(px > ov_max for px in rows.values()):
+            if zoomed or (ov or 0) > ov_max:
+                notes.append(f'анатомия телефона лаборатории: {ov} px, zoomed={zoomed} — не ширина приёмки')
+            return Gate('SG-MOB-01', 'mobile', 'PASS', val, thr, '-', '; '.join(notes), 'page_accept')
+        hidden = zoomed is False and (ov or 0) > ov_max
+        if hidden:
+            notes.insert(0, 'переполнение скрыто overflow-x (анатомия: область не расширена) — проверить свайпом на iOS')
+        return Gate('SG-MOB-01', 'mobile', 'FAIL', val, thr, 'D' if hidden else 'B', '; '.join(notes), 'page_accept')
+    mark = 'анатомия — телефон лаборатории, не ширины приёмки (их меряет page_accept --acceptance)'
+    if ov is None and zoomed is None:
+        return Gate('SG-MOB-01', 'mobile', 'SKIP', None, 'нет переполнения', '-')
+    if zoomed or ((ov or 0) > ov_max and zoomed is None):
+        return Gate('SG-MOB-01', 'mobile', 'FAIL', f'{ov} px, zoomed={zoomed}', 'область телефона не расширена', 'B', mark)
+    if (ov or 0) > ov_max:
+        # scrollWidth больше экрана, но область не расширена — переполнение скрыто overflow-x (дорожка карусели под
+        # html, body {overflow-x: hidden}); прокрутки у человека нет
+        return Gate('SG-MOB-01', 'mobile', 'FAIL', f'{ov} px, zoomed=False', 'область телефона не расширена', 'D',
+                    'переполнение скрыто overflow-x — проверить свайпом на iOS; ' + mark)
+    return Gate('SG-MOB-01', 'mobile', 'PASS', f'{ov} px, zoomed={zoomed}', f'≤ {ov_max} px', '-', mark)
+
+
 def accept_weight(acc):
     """Вес первого экрана из прогона page_accept без замедления сети: (КБ, источник) или (None, None)."""
     a = accept_main(acc)
@@ -826,20 +879,7 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
                           f'H1 — B; CTA, цены, < {r_s} — S; < {r_d} — D', sev, f"цены: {s.get('nojs_prices')}"))
         # SG-MOB-01, 02
         if dev == 'mobile':
-            ov = s.get('overflow_x_px')
-            zoomed = s.get('layout_zoomed')
-            ov_max = gate_limit('SG-MOB-01', 'overflow_px')
-            if ov is None and zoomed is None:
-                R.append(Gate('SG-MOB-01', dev, 'SKIP', None, 'нет переполнения', '-'))
-            elif zoomed or ((ov or 0) > ov_max and zoomed is None):
-                R.append(Gate('SG-MOB-01', dev, 'FAIL', f'{ov} px, zoomed={zoomed}', 'область телефона не расширена', 'B'))
-            elif (ov or 0) > ov_max:
-                # scrollWidth больше экрана, но область не расширена — переполнение скрыто overflow-x (опыт K/03:
-                # en-headspace — дорожка карусели 1 307 px под html,body{overflow-x:hidden}); прокрутки у человека нет
-                R.append(Gate('SG-MOB-01', dev, 'FAIL', f'{ov} px, zoomed=False', 'область телефона не расширена', 'D',
-                              'переполнение скрыто overflow-x — проверить свайпом на iOS'))
-            else:
-                R.append(Gate('SG-MOB-01', dev, 'PASS', f'{ov} px, zoomed={zoomed}', f'≤ {ov_max} px', '-'))
+            R.append(mob01_gate(s, accept))
             if s.get('burger') is None and s.get('header_nav_links') is None:
                 R.append(Gate('SG-MOB-02', dev, 'SKIP', None, 'меню или ≥ 2 ссылки', '-'))
             else:
@@ -909,6 +949,9 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
             R.append(lcp_element_gate(dev, (lcp.get('tag') or '').upper(), bool(lcp), acc, ('-', '')))
         kb, src = accept_weight(accept.get((dev, False)))
         R.append(cmp_weight('SG-WEIGHT-01', dev, kb, dev_val(wt['first_screen_kb'], dev), source=src))
+    # SG-MOB-01 без анатомии телефона — по телефонным строкам acceptance[] отчёта page_accept, когда они есть
+    if 'mobile' not in anatomy and acceptance_overflow(accept)[0]:
+        R.append(mob01_gate(None, accept))
     # SG-PERF-14, SG-PERF-16: размеры картинок и постер видео первого экрана (page_accept)
     R.extend(eval_media(accept))
     # SG-A11Y-03, -04, -07: движение и reduce — методы page_accept и motion_check
@@ -1616,6 +1659,47 @@ def selftest_sources(check, budgets, gates, prof, clean):
     check('вес из прогона с замедлением сети не сравнивается → SKIP', r4 and r4[0].status == 'SKIP')
     lk = {('mobile', True), ('mobile', False)}
     check('load_accept: устройство и троттлинг — поля отчёта или имя режима', lk == set(_selftest_accept_dir(load_accept)))
+    # SG-MOB-01 по строкам acceptance[] отчёта page_accept: телефонные ширины приёмки; без строк — анатомия с пометкой
+    wd = load_yaml(WIDTHS)
+    w_hi, w_lo, w_ov, ovm = sorted(wd['widths'])[1], sorted(wd['widths'])[0], wd['overflow_only'], gate_limit('SG-MOB-01', 'overflow_px')
+
+    def acc_rows(lo=0, hi=0, only=0, desk=0):
+        rows = [{'width': max(wd['widths']), 'device': 'desktop', 'dpr': 1, 'overflow_px': desk, 'over': [], 'no_wh': []},
+                {'width': w_hi, 'device': 'mobile', 'dpr': 2, 'overflow_px': hi, 'over': [], 'no_wh': []},
+                {'width': w_lo, 'device': 'mobile', 'dpr': 2, 'overflow_px': lo, 'over': [], 'no_wh': []},
+                {'width': w_ov, 'device': 'mobile', 'dpr': 2, 'overflow_px': only}]
+        return {('mobile', True): dict(copy.deepcopy(acc[('mobile', True)]), acceptance=rows)}
+
+    def mob01(anatomy, accept):
+        return {r.id: r for r in evaluate(prof, anatomy, accept=accept)}.get('SG-MOB-01')
+    hid, zoom = copy.deepcopy(clean), copy.deepcopy(clean)
+    hid['mobile']['summary'].update({'overflow_x_px': 1307, 'layout_zoomed': False})
+    zoom['mobile']['summary'].update({'overflow_x_px': 45, 'layout_zoomed': True})
+    m = mob01(clean, acc_rows())
+    check('SG-MOB-01: строки acceptance[] чисты на телефонных ширинах приёмки → PASS по page_accept, ширины в значении',
+          m.status == 'PASS' and m.source == 'page_accept' and str(m.value) == f'{w_hi}: 0 px, {w_lo}: 0 px')
+    m = mob01(clean, acc_rows(lo=ovm + 12))
+    check('SG-MOB-01: вылет на узкой ширине приёмки, анатомия чиста → B', m.status == 'FAIL' and m.severity == 'B'
+          and f'{w_lo}: {ovm + 12} px' in str(m.value))
+    check('SG-MOB-01: вылет ровно в лимит строки → PASS', mob01(clean, acc_rows(lo=ovm, hi=ovm)).status == 'PASS')
+    m = mob01(zoom, acc_rows())
+    check('SG-MOB-01: ширины приёмки чисты, область телефона лаборатории расширена → PASS, анатомия — в пометке',
+          m.status == 'PASS' and 'анатомия телефона лаборатории' in m.note)
+    m = mob01(hid, acc_rows(lo=900, hi=900))
+    check('SG-MOB-01: вылет на ширинах приёмки, анатомия — переполнение скрыто overflow-x → D', m.status == 'FAIL' and m.severity == 'D')
+    m = mob01(clean, acc_rows(only=ovm + 5, desk=40))
+    check('SG-MOB-01: вылет только на ширине overflow_only и на десктопе → PASS, ширина только вылета — в пометке',
+          m.status == 'PASS' and f'ширина {w_ov} (только вылет): {ovm + 5} px' in m.note)
+    two = acc_rows(lo=ovm + 1)
+    two[('desktop', False)] = {'device': 'desktop', 'throttle': False, 'acceptance': acc_rows(lo=ovm + 30)[('mobile', True)]['acceptance']}
+    check('SG-MOB-01: строки двух отчётов — на ширину худший вылет', f'{w_lo}: {ovm + 30} px' in str(mob01(clean, two).value))
+    m = mob01({}, acc_rows(hi=ovm + 7))
+    check('SG-MOB-01: анатомии телефона нет, строки acceptance[] есть → строка ставится (B)', m is not None and m.severity == 'B')
+    check('SG-MOB-01: анатомии и строк acceptance[] нет → строки нет', mob01({}, acc) is None)
+    m, mh, mz = mob01(clean, acc), mob01(hid, acc), mob01(zoom, None)
+    check('SG-MOB-01: строк acceptance[] нет → по анатомии, как прежде (PASS, D, B), с пометкой о ширине',
+          (m.status, mh.severity, mz.severity) == ('PASS', 'D', 'B') and m.source is None
+          and all('не ширины приёмки' in x.note for x in (m, mh, mz)))
     # motion_check (results.json + gates.json)
     mot = {'results': {'desk': {'vitals': {'lcp_ms': 3100, 'tbt_ms': 90}, 'cls': {'window_max': 0.02}, 'net': {'first_kb': 1200.0, 'session_kb': 2000.0, 'font_kb': 90.0},
                                 'derived': {'moving_6s_without_pause': False, 'loops_without_pause': ['div.marquee'], 'flash_fail': True, 'flash_area_frac': 0.4}},
@@ -1677,7 +1761,8 @@ def main(argv=None):
     ap.add_argument('--resolve', help='показать профиль (JSON: id, level, page_type, outcome, weight, all_levels, log)')
     ap.add_argument('--conditions', action='store_true', help='условия замера budgets.yaml (JSON)')
     ap.add_argument('--anatomy', help='папка anatomy_<устройство>.json page_anatomy.py')
-    ap.add_argument('--accept', help='папка accept_<режим>.json page_accept.py')
+    ap.add_argument('--accept', help='папка accept_<режим>.json page_accept.py (строки acceptance[] ключа --acceptance — '
+                                     'вылет на ширинах приёмки, SG-MOB-01)')
     ap.add_argument('--motion', help='папка --out motion_check.py (results.json, gates.json)')
     ap.add_argument('--gate3d', nargs='*', help='JSON gate_check.py --json (файл на прогон зонда 3D)')
     ap.add_argument('--geo', help='JSON geo_probe.py (файл или папка с одним JSON)')

@@ -19,9 +19,11 @@
 
 Запуск (код-репо — соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/site/ia_probe.py):
   ia_probe.py https://example.ru [--out DIR] [--sample 14]    # по умолчанию DIR — $DDD_HOME/out/site/ia_probe
-  ia_probe.py --batch sites.tsv --out DIR [--skip-done]        # TSV: id, url, site_type, market, note
   ia_probe.py --summary DIR > summary.tsv                      # сводная таблица по ia.json
   ia_probe.py --selftest                                       # локальный сервер с фикстурами
+Обслуживание базы — обход корпуса сайтов базы знаний (группа «обслуживание базы» в справке ключей); разбору сайта
+проекта эти ключи не нужны:
+  ia_probe.py --batch sites.tsv --out DIR [--skip-done]        # TSV: id, url, site_type, market, note
 
 Выход: DIR/<id>/ia.json (всё), DIR/<id>/ia.md (коротко); ia.json читает page_gates.py --ia (строки scope: site).
 """
@@ -1823,12 +1825,14 @@ def main():
     ap.add_argument("--budget", type=int, default=MAX_REQUESTS_DEFAULT, help="запросов на сайт (не больше 200)")
     ap.add_argument("--max-sitemaps", type=int, default=12)
     ap.add_argument("--timeout", type=int, default=20)
-    ap.add_argument("--batch")
-    ap.add_argument("--skip-done", action="store_true")
     ap.add_argument("--summary")
     ap.add_argument("--selftest", action="store_true")
     ap.add_argument("--reanalyse", help="пересчитать разбор по сохранённому HTML в DIR без сети")
     ap.add_argument("--no-save-html", action="store_true")
+    kbg = ap.add_argument_group("обслуживание базы", "обход корпуса сайтов базы знаний; разбору сайта проекта эти ключи "
+                                                     "не нужны")
+    kbg.add_argument("--batch", metavar="TSV", help="сайты списка (колонки id, url, site_type, market, note) — в папку --out")
+    kbg.add_argument("--skip-done", action="store_true", help="с --batch: пропустить сайты с готовым ia.json")
     a = ap.parse_args()
     if a.selftest:
         sys.exit(selftest())

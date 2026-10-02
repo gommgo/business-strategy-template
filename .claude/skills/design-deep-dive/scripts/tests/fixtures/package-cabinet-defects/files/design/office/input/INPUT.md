@@ -11,6 +11,13 @@ units:
 - request-new
 - requests-list
 built_by: canvas_input
+acceptance_widths:
+- 1440
+- 1280
+- 1024
+- 768
+- 390
+- 360
 demo_anchor: '2026-09-29'
 check:
   error: 0
@@ -19,11 +26,11 @@ check:
 files:
   ACCEPTANCE.md: sha256:47e828cf4ce6cc63c3bc5da36f502966275a56de8cdee88eae2d0aeddcec11ab
   assets.md: sha256:a639c884bedb7f5b4700e4bd3596e31300b46c0c2907362cd7c79aaf88149206
-  brief.yaml: sha256:a9f03843d8f3610c6f464aaa0831d5df7b1c351cc7f7e0b5f236d2b2ea7907f2
+  brief.yaml: sha256:9c293891fdc9e7dcf6b31005ab98f8f7e53cb5cf225539b6d02c42ee52d8ee46
   contract.md: sha256:0dbacd12e0d58c123db1d6fb714556763b9374dd870947d9b0bbc6a9ee582fb7
   copy.md: sha256:456134aab65cafd47882c90ebe6414b6e9284975c2257a982e503b0a4e5f637c
   demo-data.json: sha256:8ad5dbea9e6ed789b5dac16dea5b10a576c3f9e175371612108095d6c7042315
-manifest: sha256:138f919c12abc793e8d6199af7a06f4a739049a277e9678ff77d4b20aa008026
+manifest: sha256:3c618424d36b53cb72b7edce585e0de23b32f9c325ba677378a52679a31a53d0
 ---
 # Вход холста — `office` (web · app), этап `mockup`
 
@@ -37,7 +44,7 @@ manifest: sha256:138f919c12abc793e8d6199af7a06f4a739049a277e9678ff77d4b20aa00802
 |---|---|---|---|
 | action | `docs/projects/otves-office/action.md` | — | `sha256:42b81e17beec1f006327da6d298c8d8908f5c0d42a3c675f0c1a57b651985da0` |
 | capability | `docs/projects/otves-office/capability/office.md` | — | `sha256:5d0868c88cd752e22a40af5505ec4d1d6172a1e4a287f05013318b3cfc1ea654` |
-| artifacts | `docs/projects/otves-office/design/ARTIFACTS.md` | — | `sha256:d911d55426326653f1a55eb9eecd867ed1555e14f222d4846b9f4331b3b240d1` |
+| artifacts | `docs/projects/otves-office/design/ARTIFACTS.md` | — | `sha256:0235540e7eee25558895bc618d85132faa27cf40dec7d95a62472c97d20b566a` |
 | design-md | `docs/projects/otves-office/design/DESIGN.md` | — | `sha256:980e7fe3f24016bce4ab20e8f587a60960c55f1e0740930686e9f77133b2ddbe` |
 | ds-project | `docs/projects/otves-office/design/_design-system/project` | — | `sha256:93c9fd471cdb7d3ecf400a3c53999e842144114d1bc0617d2699af0ca89d1433` |
 | app-brief | `docs/projects/otves-office/design/app-brief.yaml` | approved | `sha256:d3c25364ef2a51ab12af4ad6e014b10dc3f75210a147497a1f7a05bcba142808` |
@@ -66,7 +73,7 @@ manifest: sha256:138f919c12abc793e8d6199af7a06f4a739049a277e9678ff77d4b20aa00802
 | vision | `docs/projects/otves-office/vision.md` | draft | `sha256:fe81774f1e9ad71dfff632bd52ef7afab2f2b37a1cf93d00e0b42c56ee930a5d` |
 | acceptance-criteria | `kb/common/acceptance-criteria.yaml` | база | `sha256:3b1a196a765688d42b23b296188ac43acb90f88989637fa24a2e323278804bbf` |
 | acceptance-widths | `kb/common/acceptance-widths.yaml` | база | `sha256:d4526b119a7da5391670c82cbd16e7458455c5fd7b84cf72c11bb0add78a2d7c` |
-| components | `kb/common/components.yaml` | база | `sha256:303205c9eacc3da0dc23ec2eed9fb36fc5282c47b874a3dea4df82c47d28d7e6` |
+| components | `kb/common/components.yaml` | база | `sha256:f343a9a53a00a0c05bea833c9b90d4ab4e582a08a6d80ecbfc3e4a710cac6e66` |
 | tells | `kb/common/tells.yaml` | база | `sha256:d91a66d002b618398844833bc6d1eeae835cb2e4e0b54261219db83458ca5a8e` |
 | 04-dark-patterns-and-ethics | `kb/ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md` | база | `sha256:5f7a47bffe9d873b2c5d80f721af6a87d199ea306b193e8f37a0938cd82747f4` |
 | screen-states | `kb/ux/06-feedback-states-motion/screen-states.yaml` | база | `sha256:9410eac88fa3489e8fda4ff3c9626819d360bede542567c1e24107c0d11ec0da` |
@@ -86,7 +93,7 @@ manifest: sha256:138f919c12abc793e8d6199af7a06f4a739049a277e9678ff77d4b20aa00802
 
 ## Going with
 
-Решений исполнения во входе нет: у каждого поля холста есть источник.
+- Приёмы вне холста — умолчание формы ARTIFACTS.md: запись и живая страница (в строке поверхности «Условий холста» колонки «приёмы вне холста» нет или она пуста)
 
 ## Пробелы
 

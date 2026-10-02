@@ -122,6 +122,7 @@ decisions:
   iterations_max: 3
   form: прототип
   prototype_paths: список заявок → карточка заявки → назначить замер
+  outside_canvas: запись и живая страница
 build:
   viewports:
     artboards:

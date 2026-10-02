@@ -9,14 +9,16 @@
 без профиля — только значение. Вердикт страницы ставит page_gates.py (--gate3d FILE): провал ворот 3D там — SG-WEIGHT-08 (D).
 
   gate_check.py probe_quick.json [mobile|desktop] [--reduced] [--baseline probe_no3d.json] [--profile landing-product@L1]
-      [--gates FILE] [--json]
+      [--gates FILE] [--json] [--strict]
   gate_check.py --selftest
   from gate_check import gate_check, evaluate
   rows = gate_check("probe_quick.json", mode="desktop", reduced=False)   # [(проверка, значение, порог, прошла ли)] — ворота 3D
   rep = evaluate("probe_quick.json", "desktop", baseline="probe_no3d.json", profile="landing-product@L1")   # полный отчёт
 
-Код выхода: 1 — провалена строка B ворот 3D (summary.blocked), 0 — провалов B нет, 2 — ошибка вызова. Провал S (вызовы,
-DPR, первый кадр, вклад в TBT) и зеркала D код не меняют: они в отчёте — S исправить или записать исключением плана.
+Код выхода: 0 — замер выполнен (находки — в отчёте: строки со status FAIL и итог summary; обёртка читает отчёт ключа --json,
+вердикт страницы решает page_gates.py), 2 — ошибка вызова. С --strict — выход по находкам: 1 — провалена строка B ворот 3D
+(summary.blocked). Провал S (вызовы, DPR, первый кадр, вклад в TBT) и зеркала D код не меняют и со --strict: они в отчёте —
+S исправить или записать исключением плана.
 Код репозитория запускает утилиту соседним чекаутом: ../strategy/.claude/skills/design-deep-dive/scripts/blender/gate_check.py.
 """
 import json
@@ -150,9 +152,10 @@ def gate_check(probe_path, mode="mobile", reduced=False, baseline=None):
     return [(r["check"], r["value"], r["limit"], r["status"] != "FAIL") for r in rep["rows"] if not r.get("mirror")]
 
 
-def exit_code(rep):
-    """Код выхода по отчёту evaluate(): 1 — провалена строка B ворот 3D, иначе 0 (S и зеркала D — только в отчёте)."""
-    return 1 if rep["summary"]["blocked"] else 0
+def exit_code(rep, strict=False):
+    """Код выхода по отчёту evaluate(): замер выполнен — 0, находки остаются в отчёте (вердикт страницы решает page_gates.py);
+    с --strict — 1 при проваленной строке B ворот 3D (S и зеркала D — только в отчёте)."""
+    return 1 if strict and rep["summary"]["blocked"] else 0
 
 
 def selftest():
@@ -196,9 +199,12 @@ def selftest():
     p3["idle"]["dc_median"] = 75
     p3["vitals_pre_scroll"]["first_draw_ms"] = 2600
     rep3 = evaluate(p3, "desktop", baseline=base)
-    check("только S (75 вызовов > 60, первый кадр 2 600 > 2 000) → в отчёте S 2, не блокировано, код 0",
-          rep3["summary"]["S"] == 2 and rep3["summary"]["B"] == 0 and not rep3["summary"]["blocked"] and exit_code(rep3) == 0)
-    check("провал B (LCP-элемент canvas, 3D-ассеты сверх предела) → код 1", exit_code(evaluate(p2, "desktop")) == 1)
+    check("только S (75 вызовов > 60, первый кадр 2 600 > 2 000) → в отчёте S 2, не блокировано, код 0 и со --strict",
+          rep3["summary"]["S"] == 2 and rep3["summary"]["B"] == 0 and not rep3["summary"]["blocked"] and exit_code(rep3) == 0
+          and exit_code(rep3, strict=True) == 0)
+    rep2 = evaluate(p2, "desktop")
+    check("провал B (LCP-элемент canvas, 3D-ассеты сверх предела): замер — код 0, находки в отчёте (B 2, blocked); со --strict — код 1",
+          exit_code(rep2) == 0 and rep2["summary"]["B"] == 2 and rep2["summary"]["blocked"] and exit_code(rep2, strict=True) == 1)
     legacy = gate_check(probe, "desktop", baseline=base)
     check("gate_check(): кортежи (проверка, значение, порог, прошла ли) — только ворота 3D", legacy and all(len(t) == 4 for t in legacy)
           and not any("страницы" in t[0] for t in legacy))
@@ -212,13 +218,21 @@ def selftest():
         r3 = {r["key"]: r for r in evaluate(probe, "desktop", gates=pth)["rows"]}
         check("порог читается из YAML, а не из кода (правленая копия: 900 → FAIL)", r3["kb3d"]["limit"] == 900 and r3["kb3d"]["status"] == "FAIL")
         import subprocess
-        rc = {}
+        rc, blocked = {}, None
         for name, pr in (("only_s", p3), ("b", p2)):
             pp = os.path.join(td, name + ".json")
             with open(pp, "w", encoding="utf-8") as f:
                 json.dump(pr, f)
-            rc[name] = subprocess.run([sys.executable, os.path.abspath(__file__), pp, "desktop"], capture_output=True).returncode
-        check("вызов из командной строки: только S — код 0, провал B — код 1", rc == {"only_s": 0, "b": 1})
+            for key, extra in ((name, []), (name + "_strict", ["--strict"])):
+                r = subprocess.run([sys.executable, os.path.abspath(__file__), pp, "desktop", "--json"] + extra,
+                                   capture_output=True, text=True)
+                rc[key] = r.returncode
+                if key == "b":
+                    blocked = json.loads(r.stdout)["summary"]["blocked"]
+        check("вызов из командной строки: только S — код 0 и со --strict; провал B — код 0 с blocked в JSON, со --strict — код 1",
+              rc == {"only_s": 0, "only_s_strict": 0, "b": 0, "b_strict": 1} and blocked is True)
+        check("нет файла отчёта зонда — код 2", subprocess.run([sys.executable, os.path.abspath(__file__), os.path.join(td, "none.json")],
+                                                               capture_output=True).returncode == 2)
     src = open(os.path.abspath(__file__), encoding="utf-8").read().split("\ndef selftest")[0]
     check("в коде нет чисел порогов ворот 3D", "LIMITS" not in src and "820" not in src and "1536" not in src and "3072" not in src)
     print("gate_check selftest:", "OK" if ok else "FAIL")
@@ -246,8 +260,8 @@ def main():
         for r in rep["rows"]:
             print(f"{r['status']:4} {r['severity']} {r['id']:10} {r['check']}: {r['value']} (порог {r['limit']})"
                   + (f" — {r['note']}" if r.get("note") else ""))
-        print("итог:", rep["summary"], "— код 1 только при провале B; S — исправить или записать исключением плана")
-    sys.exit(exit_code(rep))
+        print("итог:", rep["summary"], "— провал B блокирует ворота 3D (код 1 — с --strict); S — исправить или записать исключением плана")
+    sys.exit(exit_code(rep, "--strict" in a))
 
 
 if __name__ == "__main__":

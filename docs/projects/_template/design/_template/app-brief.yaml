@@ -37,7 +37,7 @@ constraints:
                                       # dietary-supplements · alcohol · education · real-estate · other
   legal_note: <текст>                 # только при other
   accessibility: <цель>               # projection — vision, «Devices and accessibility»: wcag22-aa · wcag21-aa ·
-                                      # not-specified
+                                      # not-specified; копия необязательна: вход холста читает источник
 
 # customer — решение о темах; то же имя — у брифа сайта. Светлая — по умолчанию; тёмная — только с причиной. Две темы —
 # переключатель обязателен, умолчание — по системе: default: system (ui 11/03 §6.4).
@@ -62,7 +62,8 @@ questions: []
 # Ядро — первый вход дизайна кабинета: после сценариев слоя проекта, до экранов.
 core:
   app_type: <тип>                     # projection — vision, «Name»: admin · client · mixed
-  postures:                           # projection — таблица постур user.md; surface: — — на всех его поверхностях
+  postures:                           # projection — таблица постур user.md; surface: — — на всех его поверхностях;
+                                      # копия необязательна: вход холста читает источник
     - {user: <user-slug>, surface: <surface или —>, posture: <постура>}
   pointer: {<surface>: both}          # projection — type поверхности: both — указатель и касание; touch — только касание
   ai_layer: {present: false, where: []}   # projection — vision «Name» и паспорта ai возможностей

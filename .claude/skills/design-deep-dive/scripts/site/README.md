@@ -102,7 +102,7 @@ ai-media `page.media_class` — проекция по строке §8 `../../kb
 | `plan_to_assets.py PAGE_PLAN [--out F]` | каркас из файла плана страницы: строка на медиа- и 3D-слот (`<секция>-<id>`) и на медиа-слот уровня страницы — его источник и подлинность читаются из плана страницы, `source` (постер 3D-слота — `render`; `edit-real` при подлинности `real-only` — строкой `real` с заметкой: кадр доводится без генерации), `key` у визуала и фона первого экрана и постера 3D, `alt_ref`, `three_d`, бюджеты профиля; размер, форматы, вес, предмет и дорога 3D — заглушки `TODO` |
 | `plan_to_assets.py --check FILE … [--plan PAGE_PLAN] [--json]` | проверка плана ассетов — находки контракта `../project/findings.py`: форма по схеме и id словаря (R-STRUCT-005), поля утверждённого плана (R-MAT-002), покрытие слотов плана страницы, подлинность и постеры (R-COV-004), ссылки (R-REF-001) |
 | `plan_to_assets.py build <slug> [<surface>] [--page ID] [--out DIR] [--write]` | каркасы страниц поверхности со слоем страницы: в `$DDD_HOME/out/site/plan_to_assets/<slug>/` или `--out`; `--write` — в проект, только на пустое место |
-| `plan_to_assets.py check <slug> [<surface>] [--page ID …] [--json]` | планы ассетов проекта: всё из `--check`, план ассетов у страницы с медиа- и 3D-слотами (нет плана — `error` у страницы партии входа холста, поле `units` манифеста `INPUT.md`; у остальных страниц и до входа — `hint`), `refs.asset_plan` плана страницы, утверждённое на неутверждённом (R-MAT-001); `--page` — находки и код выхода только по этим страницам |
+| `plan_to_assets.py check <slug> [<surface>] [--page ID …] [--json]` | планы ассетов проекта: всё из `--check`, план ассетов у страницы с медиа- и 3D-слотами (нет плана — `error` у страницы партии входа холста, поле `units` манифеста `INPUT.md`; у остальных страниц и до входа — `hint`), `refs.asset_plan` плана страницы, утверждённое на неутверждённом (R-MAT-001), форма манифеста ассетов поверхности по схеме `asset-manifest.schema.json` (предупреждение); `--page` — находки и код выхода только по этим страницам, у манифеста — строки этих страниц |
 | `plan_to_assets.py --spec-role FILE SLOT` | блок `role` спецификации ассета (`asset-spec.schema.json`): `page_type` словаря и проекция `page_class` |
 | `plan_to_assets.py --types [new\|all]` | каркас на каждый тип страницы словаря из плана-образца и его проверка |
 
@@ -111,13 +111,14 @@ ai-media `page.media_class` — проекция по строке §8 `../../kb
 
 ## `page_anatomy.py` — анатомия страницы
 
-`page_anatomy.py URL OUT_DIR [--mobile] [--inp] [--quick] [--label PAGE_TYPE] [--market ru|intl] [--crux] [--net
-[auto|метка]]` — один прогон «страница × устройство»: секции с ролью (`section_role`) и блоком (`block`) по словарю site,
-призывы, формы и согласия, шапка и подвал, заголовки, мета, Open Graph, JSON-LD, платформа, сторонние домены по
-категориям, cookie-баннер и трекинг до выбора, LCP, CLS, TBT, FCP, TTFB, показ H1 во времени (`h1_paint`), лабораторный
-INP по сценарию, текст без JS, контактный лист секций. Условия лаборатории — `budgets.yaml` `conditions` через
-`page_gates.py`: окно первого экрана, телефон — дескриптор Pixel 7 и CPU ×4, десктоп 1440×900; UA — как у браузера
-(HeadlessChrome), признак автоматизации не выключается. web-vitals — из npm-зависимостей окружения (`$DDD_HOME/node`).
+`page_anatomy.py URL OUT_DIR [--mobile] [--inp] [--quick] [--label PAGE_TYPE] [--crux] [--net [auto|метка]]
+[--exit-country CC] [--timezone TZ]` — один прогон «страница × устройство»: секции с ролью (`section_role`) и блоком
+(`block`) по словарю site, призывы, формы и согласия, шапка и подвал, заголовки, мета, Open Graph, JSON-LD, платформа,
+сторонние домены по категориям, cookie-баннер и трекинг до выбора, LCP, CLS, TBT, FCP, TTFB, показ H1 во времени
+(`h1_paint`), лабораторный INP по сценарию, текст без JS, контактный лист секций. Условия лаборатории — `budgets.yaml`
+`conditions` через `page_gates.py`: окно первого экрана, телефон — дескриптор Pixel 7 и CPU ×4, десктоп 1440×900; UA —
+как у браузера (HeadlessChrome), признак автоматизации не выключается. web-vitals — из npm-зависимостей окружения
+(`$DDD_HOME/node`).
 
 - **Выход.** `OUT_DIR/anatomy_<desktop|mobile>.json` (сырые признаки `dom`, классы секций `classes` с top-3 и
   причинами, строка сводки `summary`, `network`, `cmp`, `inp`, `nojs`, `first_screen`, `h1_paint`, `ua`, `webdriver`),
@@ -127,13 +128,17 @@ INP по сценарию, текст без JS, контактный лист �
 - **Сеть** — только ключом `--net`: без него замер к сторонним сервисам не обращается (поле `net: unknown`); `--net` или
   `--net auto` — страна и организация сервера (ipinfo.io, IP не сохраняется) и проверка раздельной маршрутизации VPN до
   и после замера; `--net <метка>` — своя метка сети и та же проверка маршрута. `--crux` — поле CrUX через PageSpeed
-  Insights (ключ только из `PSI_API_KEY`).
+  Insights (ключ только из `PSI_API_KEY`). Поле `route_ok` — адреса обеих проб маршрута разошлись; `--exit-country CC`
+  добавляет сверку страны выхода (без ключа она не сверяется). Часовой пояс браузера — `--timezone` (имя IANA); без
+  ключа — `Europe/Moscow` для рынка `ru`, `UTC` для остальных.
 - **Классы секций** — эвристики с баллами: для выводов брать роли с `conf` не ниже 0,5, остальные — подсказка; надёжнее
   всего `hero`, `footer`, `faq`, `pricing`, `testimonials`.
 - **Ограничения.** Лаборатория — не поле (сеть без замедления, телефон — эмуляция); INP — до четырёх взаимодействий
   после загрузки; антибот и заглушки — `blocked`; сегментация срывается, когда подвал или общая обёртка проглатывают
   страницу (`seg_flag=fail`); «умная» шапка, появляющаяся при прокрутке вверх, не ловится.
-- Ключи замера корпуса страниц (`--batch`, `--csv`, `--reclassify`, `--net-of`, `--crux-batch`) — `--help`.
+- Ключи обслуживания базы — замер и пересчёт корпуса страниц: `--batch` (с `--devices`, `--only`, `--skip-done`,
+  `--page-timeout`), `--crux-batch`, метки `--market` и `--industry`, `--reclassify`, `--csv` с `--pages`, `--net-of` —
+  отдельной группой в `--help`; замеру страницы проекта они не нужны.
 
 ## `page_gates.py` — ворота собранной страницы
 
@@ -155,8 +160,8 @@ INP по сценарию, текст без JS, контактный лист �
 
 | ключ | что читает | какие ворота |
 |---|---|---|
-| `--anatomy DIR` | `anatomy_<устройство>.json` `page_anatomy.py` | SG-PERF-01…06 (LCP-элемент, H1 в LCP с признаком показа H1), 09; SG-WEIGHT-01…07, 09 (видео — только D); SG-SEO-02, 03; SG-GEO-01; SG-MOB-01, 02; SG-CONTENT-07; SG-LEGAL-01…05, 07 |
-| `--accept DIR` | `accept_<режим>.json` `page_accept.py`: поля `device`, `throttle`, `no_preference` (`lcp`, `first_screen_total_kb`, `weight_measured`, `dom.imgs`, `media_first`, `motion_6s`, `loops`, `console`), `reduce` (`media_kb`, `motion.fail`) | SG-PERF-01/02 (LCP с троттлингом), SG-PERF-06 (lazy, fetchpriority), SG-PERF-14, SG-PERF-16 (энтропия и площадь постера), SG-WEIGHT-01 без анатомии (прогон без замедления), SG-A11Y-03, SG-A11Y-07, SG-CONTENT-04 |
+| `--anatomy DIR` | `anatomy_<устройство>.json` `page_anatomy.py` | SG-PERF-01…06 (LCP-элемент, H1 в LCP с признаком показа H1), 09; SG-WEIGHT-01…07, 09 (видео — только D); SG-SEO-02, 03; SG-GEO-01; SG-MOB-01 (когда строк `acceptance[]` нет — с пометкой), 02; SG-CONTENT-07; SG-LEGAL-01…05, 07 |
+| `--accept DIR` | `accept_<режим>.json` `page_accept.py`: поля `device`, `throttle`, `no_preference` (`lcp`, `first_screen_total_kb`, `weight_measured`, `dom.imgs`, `media_first`, `motion_6s`, `loops`, `console`), `reduce` (`media_kb`, `motion.fail`), `acceptance[]` (`width`, `device`, `overflow_px`; ключ `--acceptance`) | SG-PERF-01/02 (LCP с троттлингом), SG-PERF-06 (lazy, fetchpriority), SG-PERF-14, SG-PERF-16 (энтропия и площадь постера), SG-WEIGHT-01 без анатомии (прогон без замедления), SG-MOB-01 (вылет на телефонных ширинах приёмки), SG-A11Y-03, SG-A11Y-07, SG-CONTENT-04 |
 | `--motion DIR` | `<DIR>/results.json` (`<режим>.derived`, `vitals`, `cls`, `net`) и `<DIR>/gates.json` (`rows`) `motion_check.py` | SG-A11Y-03 (петли всей страницы), SG-A11Y-04 (вспышки), SG-A11Y-07 (EG-A11Y-05…07); зеркала LCP, TBT, CLS, веса и шрифтов; слой эффектов |
 | `--gate3d FILE …` | JSON `gate_check.py --json` (`rows`: `id`, `check`, `value`, `limit`, `severity`, `status`, `mirror`) | SG-WEIGHT-08 (D), SG-CONTENT-04 (зонд), зеркала LCP, CLS, TBT и веса; слой 3D |
 | `--geo FILE` | JSON `geo_probe.py` (флаги `head-kit.yaml checks`) | SG-SEO-01…05, SG-GEO-01…02 (строка `device: raw`) |
@@ -201,8 +206,9 @@ head (title, description, robots, canonical, hreflang, lang, OG), текст б�
 canonical, контекстные ссылки → ответ на несуществующий адрес (честная 404, мягкая 404, редирект на главную). Выход —
 `DIR/<id>/ia.json` и `DIR/<id>/ia.md` (по умолчанию `$DDD_HOME/out/site/ia_probe/`); JSON читает `page_gates.py --ia`.
 Вежливость: не больше одного запроса в секунду на хост и 200 запросов на сайт, robots.txt соблюдается, антибот-заглушка
-— отметка `blocked` и остановка. Без браузера не видит меню, панели и телефон, которые вставляет скрипт. Партия, сводная
-таблица и пересчёт по сохранённому HTML — `--help`.
+— отметка `blocked` и остановка. Без браузера не видит меню, панели и телефон, которые вставляет скрипт. Обход корпуса
+сайтов базы — `--batch` с `--skip-done`: группа «обслуживание базы» в `--help`; сводная таблица и пересчёт по
+сохранённому HTML — там же.
 
 ## `ab_plan.py` — A/B-тест
 
@@ -219,7 +225,8 @@ Pocock. Вывод — текстом, `--json` — JSON; код 2 — SRM ил�
   совпадает с Markdown (код 1 — нет, ничего не пишет); правки — только в Markdown.
 - `build_profile.py` собирает `../../kb/site/09-ai-generation-evaluation/ux-marketing-profile.tsv` — решение по каждому
   пункту `UX-*` сводного чек-листа ux для страниц сайта (`keep`, `modify`, `off`, `replaced` с заменой, причиной и
-  основанием), таблицу наследования автопроверок `AC-*` и сводку в `$DDD_HOME/out/site/build_profile/`; решения — в коде
-  утилиты (по блокам с точечными исключениями), профиль правится решением и пересборкой. `--check` — профиль на диске
-  совпадает с решениями и сверенной версией чек-листа ux; новая версия чек-листа — отказ записи со списком новых,
-  снятых и изменённых пунктов.
+  основанием), таблицу наследования автопроверок `AC-*` (`../../kb/site/09-ai-generation-evaluation/ac-profile.tsv`,
+  рядом с профилем) и сводку в `$DDD_HOME/out/site/build_profile/`; решения — в коде утилиты (по блокам с точечными
+  исключениями), профиль правится решением и пересборкой. `--check` — профиль и `ac-profile.tsv` на диске совпадают со
+  сборкой и сверенной версией чек-листа ux; новая версия чек-листа — отказ записи со списком новых, снятых и
+  изменённых пунктов.

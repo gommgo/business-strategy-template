@@ -5,7 +5,7 @@
  "id": "stand-s02-hero-people",
  "task": "IMG-HERO-PHOTO",
  "role": {
-  "page_type": "saas",
+  "page_class": "saas",
   "section": "hero",
   "slot": "hero-bg",
   "priority": "lcp",

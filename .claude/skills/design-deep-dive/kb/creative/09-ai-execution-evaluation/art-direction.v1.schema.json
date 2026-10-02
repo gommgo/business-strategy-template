@@ -10,6 +10,7 @@
   "source": "art-direction",
   "stages": [
    "directions",
+   "treatment",
    "wireframe",
    "mockup"
   ],
@@ -23,7 +24,7 @@
      "stages": [
       "directions"
      ],
-     "note": "направления до выбора — артборд на направление: имя, тезис, оси (бумага, стиль заголовков, тон акцента, макроструктура, язык картинок), палитра, шрифты, главный приём, первый экран, риск и цена, рекомендация, заметка (notes); референсы направления — роль, брать, не брать, значения; запреты направления — поле bans направления или расширение документа x-direction-bans ({id направления: [запрет]}): каждый список — только артборду своего направления"
+     "note": "направления до выбора — артборд на направление: имя, тезис, оси (бумага, стиль заголовков, тон акцента, макроструктура, язык картинок), палитра, шрифты, главный приём, первый экран, риск и цена, рекомендация, заметка (notes); референсы направления — роль, брать, не брать, значения; запреты направления — поле bans направления: каждый список — только артборду своего направления"
     },
     "direction.name": {
      "rule": "map",
@@ -32,6 +33,7 @@
       "/directions/*/name"
      ],
      "stages": [
+      "treatment",
       "wireframe",
       "mockup"
      ],
@@ -44,6 +46,7 @@
       "/directions/*/axes/macrostructure"
      ],
      "stages": [
+      "treatment",
       "wireframe",
       "mockup"
      ],
@@ -56,6 +59,7 @@
       "/directions/*/thesis"
      ],
      "stages": [
+      "treatment",
       "mockup"
      ],
      "note": "тезис выбранного направления"
@@ -68,6 +72,7 @@
       "/directions/*/axes/paper_temperature"
      ],
      "stages": [
+      "treatment",
       "mockup"
      ],
      "note": "светлота и тонировка бумаги выбранного направления; цвет — токен ДС"
@@ -79,6 +84,7 @@
       "/directions/*/axes/display_style"
      ],
      "stages": [
+      "treatment",
       "mockup"
      ],
      "note": "стиль заголовков выбранного направления; гарнитура — токен ДС"
@@ -91,6 +97,7 @@
       "/directions/*/axes/accent_hue"
      ],
      "stages": [
+      "treatment",
       "mockup"
      ],
      "note": "где живёт акцент и его тон"
@@ -104,9 +111,36 @@
       "/directions/*/axes/imagery"
      ],
      "stages": [
+      "treatment",
       "mockup"
      ],
      "note": "язык картинок: что настоящее, что генерируется, что кодом"
+    },
+    "treatment_variants[]": {
+     "rule": "map",
+     "from": [
+      "/treatment_variants/*/id",
+      "/treatment_variants/*/name",
+      "/treatment_variants/*/shows",
+      "/treatment_variants/*/effects",
+      "/treatment_variants/*/chosen"
+     ],
+     "stages": [
+      "treatment"
+     ],
+     "note": "варианты подачи выбранного направления — артборд на вариант (страница холста «Подача»): id, имя, что показывает, эффекты (id каталога эффектов), выбран ли"
+    },
+    "prototypes": {
+     "rule": "map",
+     "from": [
+      "/treatment_variants/*/lab_path",
+      "/treatment_variants/*/recording",
+      "/prototype"
+     ],
+     "stages": [
+      "treatment"
+     ],
+     "note": "прототипы вне холста — отдельно от вариантов: prototypes.variants[] — лабораторная страница (lab_path) и её запись (recording) по id варианта, у варианта с приёмом, которого холст не исполняет; prototypes.main_effect — прототип главного эффекта (объект prototype: статус, эффект, страница, запись, заметка); на вайрфрейм и макет прототипы не идут"
     },
     "references[]": {
      "rule": "derive",
@@ -127,6 +161,7 @@
       "/exclusions/lifted_markers"
      ],
      "stages": [
+      "treatment",
       "wireframe",
       "mockup"
      ],
@@ -247,9 +282,12 @@
      "/choice/why",
      "/choice/merged_from",
      "/choice/rejected",
-     "/treatment_variants"
+     "/treatment_variants/*/chosen_by",
+     "/treatment_variants/*/date",
+     "/treatment_variants/*/why",
+     "/treatment_variants/*/notes"
     ],
-    "note": "выбор доходит до исполнителя выбранным направлением; варианты подачи — подачей секций плана"
+    "note": "выбор доходит до исполнителя выбранным направлением и пометкой выбранного варианта подачи (chosen); кто, когда и почему выбрал, заметки варианта — запись арт-дирекции"
    },
    {
     "from": [
@@ -267,10 +305,9 @@
    {
     "from": [
      "/motion_system",
-     "/effects_by_section",
-     "/prototype"
+     "/effects_by_section"
     ],
-    "note": "движение — спецификация движения на этапе motion; эффекты секций — подача плана; прототип главного эффекта на макет не идёт"
+    "note": "движение — спецификация движения на этапе motion; эффекты секций — подача плана"
    },
    {
     "from": [

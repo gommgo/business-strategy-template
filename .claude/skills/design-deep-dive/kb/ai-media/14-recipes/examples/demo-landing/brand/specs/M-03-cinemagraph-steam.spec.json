@@ -5,7 +5,7 @@
   "brief_language": "ru",
   "task": "VID-CINEMAGRAPH",
   "role": {
-    "page_type": "ecommerce",
+    "page_class": "ecommerce",
     "section": "hero",
     "slot": "hero-video-layer",
     "purpose": "steam over the cup as the only motion of the hero; video layer over the M-01 poster",

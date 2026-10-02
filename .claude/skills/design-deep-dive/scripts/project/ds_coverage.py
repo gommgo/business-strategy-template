@@ -666,6 +666,25 @@ def _selftest():
     msgs = " ".join(m for _, m in form_errors("system", bad, reg))
     check_("схема system: approved без approval и conventions, расширение без keyboard и text_roles — ошибки",
            "approval" in msgs and "conventions" in msgs and "keyboard" in msgs and "text_roles" in msgs)
+    ext_dict = (_yaml().safe_load(L.components().path.read_text(encoding="utf-8")).get("project_extension")
+                or {}).get("fields") or {}
+    ext_schema = schema("system")["properties"]["extensions"]["items"]
+    ext_form = _yaml().safe_load(docpaths.template("design", "_template", "system.yaml").read_text(encoding="utf-8"))[
+        "extensions"][0]
+    check_("поля расширения словаря (components.yaml#project_extension.fields) = свойства записи extensions схемы "
+           f"system = ключи записи формы _template/system.yaml ({', '.join(ext_dict)})",
+           set(ext_dict) == set(ext_schema["properties"]) == set(ext_form)
+           and set(ext_schema["required"]) <= set(ext_dict) and {"keyboard", "text_roles"} <= set(ext_dict))
+    def icons(conv):
+        return form_errors("system", {"system_version": 1, "status": "draft", "conventions": {"icons": conv}}, reg)
+
+    check_("схема system: набор иконок с заливкой (style: fill без stroke) и контурный (style: line и без style, со "
+           "stroke) — чисто; fill со stroke и style вне списка — ошибки",
+           not icons({"set": "glyphs", "style": "fill", "sizes": [16, 24]})
+           and not icons({"set": "glyphs", "style": "line", "sizes": [16, 20], "stroke": 1.5})
+           and not icons({"set": "glyphs", "sizes": [16, 20], "stroke": 1.5})
+           and len(icons({"set": "glyphs", "style": "fill", "stroke": 1.5})) == 1
+           and len(icons({"set": "glyphs", "style": "duotone"})) == 1)
     check_("схема brand: verified без approval, роль цвета вне списка — ошибки",
            len(form_errors("brand", {"name": "Б", "status": "verified", "colors": {"roles": {"primary": "#000"}}},
                            reg)) == 2)

@@ -79,8 +79,8 @@ RouterAI, Gen-API) с сухим прогоном и оценкой цены, п
 | `video_loop_check.py` | петля и видео: шов, живость, склейки, мёртвые концы, дрейф неподвижных зон, хромакей, стык клипов, лист | `loop VIDEO [--control V]`; `trim VIDEO OUT --auto`; `drift VIDEO --mask M`; `chroma`; `join A B`; `sheet`; `colormatch`; `selftest` | JSON; мезонин без потерь у `trim` |
 | `loop_rife_bridge.py` | мост петли кадрами RIFE от последнего кадра к первому | `IN.mp4 OUT.mp4 [k=8]` | мезонин x264 `-qp 0`; нужен `rife-ncnn-vulkan` в `$DDD_HOME/bin` |
 | `avif_pick.sh` | минимальный AVIF, проходящий порог SSIMULACRA2 | `<вход.png> <выход.avif> [порог=80]` | файл, строки q · байты · s2; нужны `avifenc`, `ssimulacra2` в `$DDD_HOME/bin` |
-| `svg_sheet.py` | SVG (Recraft, LLM → SVG): метрики, гигиена с сохранением подписи, перекраска в палитру, листы на светлом и тёмном | `sheet SVG… --out DIR [--palette …] [--mode icons\|illustration]`; `recolor SVG --palette … --out F`; `render SVG --png 1024 --out F` | листы, JSON; нужны группа svg и `svgo` (`$DDD_HOME/node`) |
-| `split_recraft.py` | нарезка сетки иконок Recraft на отдельные SVG | `<сетка.svg> <папка>` | SVG на иконку, мастер — в `<папка>/_source/` |
+| `svg_sheet.py` | SVG (Recraft, LLM → SVG): метрики, гигиена с сохранением подписи, перекраска в палитру, листы на светлом и тёмном; `--current-color` — одноцветные иконки с `currentColor` цветом темы: без ключа на тёмном фоне они не видны | `sheet SVG… --out DIR [--palette …] [--mode icons\|illustration] [--current-color]`; `recolor SVG --palette … --out F`; `render SVG --png 1024 --out F`; `--selftest` | листы, JSON; нужны группа svg и `svgo` (`$DDD_HOME/node`) |
+| `split_recraft.py` | нарезка листа иконок Recraft на отдельные SVG по ячейкам сетки | `<лист.svg> <папка> --grid 4x2 --names a,b,-,… [--prefix P] [--on-exists refuse\|suffix] [--no-svgo]`; `--selftest` | SVG на названную ячейку, мастер — в `<папка>/_source/`; код 0 · 1 лист не сошёлся с заданием · 2 вызов · 3 имя занято |
 | `page_accept.py` | приёмка страницы с ассетами в Chromium: вес первого экрана, LCP, CLS, картинки, видео и постер, движение, reduce, F83, ширины приёмки | `PAGE.html\|URL --out DIR [--budget-profile P] [--mobile] [--throttle] [--acceptance]`; `--selftest` | `<DIR>/accept_<режим>.json` (его читает `page_gates.py --accept`), снимки; код 0 · 1 FAIL · 2 вызов |
 | `layout_check.py` | вёрстка текстового шаблона по DOM до OCR: строки за холстом, переполнения, nowrap-флекс | `page ФАЙЛ.html [1440x900 412x915]` | `$DDD_HOME/out/ai-media/layout_check/` |
 
@@ -100,9 +100,10 @@ RouterAI, Gen-API) с сухим прогоном и оценкой цены, п
 | `page` | `ВХОД --out СТРАНИЦА [--tests ГРУППА,…] [--repeat 0.1] [--seed 7]`; тексты — `--text ЛИСТ.md [--text-key КЛЮЧ.yaml]` (лист `copydeck.py export-variants`) | `<СТРАНИЦА>/index.html` и картинки пар, ключ рядом; повторы со сменой сторон, контрольные и одинаковые пары |
 | `tally` | `VOTES.json… --key СТРАНИЦА.key.json [--out tally.md] [--selection OUT.yaml]` | доли побед с интервалом Уилсона, Брэдли–Терри, согласованность повторов, позиция A; `--selection` — победы меток для `copydeck.py apply-selection` |
 | `collect` | `[--root DIR] [--agent A] [--out results.jsonl]`; корень по умолчанию — выходы `polza.py` (`POLZA_OUT_ROOT`, иначе `$DDD_HOME/out/ai-media/_polza`) | строка на файл результата; путь паспорта — от корня |
-| `selftest` | — | 15 проверок: нормализация строк, Уилсон, Брэдли–Терри, страницы текстов и картинок, сбор паспортов вне базы |
+| `selftest` | — | 24 проверки: нормализация строк, Уилсон, Брэдли–Терри, страницы текстов и картинок, сбор паспортов вне базы |
 
-Судья видит те же пары, что заказчик: `asset_audit.py judge-jobs --from-stand-page СТРАНИЦА`.
+Пары на чёткость и мелкую деталь — `page ВХОД --out СТРАНИЦА --maxside 0 --lossless`: картинки страницы — PNG без
+уменьшения и без потерь. Судья видит те же пары, что заказчик: `asset_audit.py judge-jobs --from-stand-page СТРАНИЦА`.
 
 ## Деньги и ключи
 
@@ -118,10 +119,11 @@ RouterAI, Gen-API) с сухим прогоном и оценкой цены, п
 
 Стенд моделей и сверка каталогов — для обновления матрицы маршрутов и базы, этапы скилла их не зовут:
 `stand_run.py build | estimate | run | metrics | sheet | ministand` (задания стенда
-`kb/ai-media/13-routing-matrix/stand/tasks.yaml` → `$DDD_HOME/out/ai-media/phase5/jobs`), `routing_check.py` после
-нового снимка каталогов (процедура — `kb/ai-media/13-routing-matrix/04-update-procedure.md`), `polza_catalog.py
-diff A B` и `channel_diff.py [--ra A B] [--ga A B]` (что изменилось между снимками), `asset_inventory.py URL OUT_DIR
-[--mobile] [--quick]` (инвентарь визуальных ассетов живой страницы; `--selftest`).
+`kb/ai-media/13-routing-matrix/stand/tasks.yaml` → `$DDD_HOME/out/ai-media/stand` или `--jobs-dir DIR`; имя агента в
+заданиях — ключ `--agent`), `routing_check.py` после нового снимка каталогов (процедура —
+`kb/ai-media/13-routing-matrix/04-update-procedure.md`), `polza_catalog.py diff A B` и `channel_diff.py [--ra A B]
+[--ga A B]` (что изменилось между снимками), `asset_inventory.py URL OUT_DIR [--mobile] [--quick]` (инвентарь
+визуальных ассетов живой страницы; `--selftest`).
 
 ## Тесты и данные
 

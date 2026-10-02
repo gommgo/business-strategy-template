@@ -5,11 +5,14 @@
   • ссылки markdown `[..](путь)` — от папки файла;
   • пути в обратных кавычках (`kb/…`, `common/…`, `ux/03-…/01-….md`, `scripts/…`, `assets/…`, `docs/…`) — от папки файла,
     от `kb/`, от корня скилла, от корня репозитория; `*` — шаблон (нужно ≥ 1 совпадение); `…`, `<…>`, `{…}` — образец, не ссылка;
+    не ссылка и расширение файла (`.glb`), а когда файла по такому пути нет — домен с путём (`cdn.example.net/npm/`)
+    и тип содержимого (`text/plain`, `model/gltf-binary`);
   • короткие адреса «<база> NN/MM § X.Y» (база: ux, ui, site, text, creative, ai-media, blender, claude-design, cd) —
     файл `kb/<база>/NN-*/MM-*` и раздел по заголовкам (§ X.Y — заголовок, начинающийся с «X.Y»; § имя — заголовок или
     строка с этим именем);
   • следы журнала (forward-only): Р-номера, пути в журнал сборки, имена фаз сборки, даты, слова сравнения с прошлым,
-    имя снятого генератора — шаблоны `forward-only` в `scripts/maint/data/traces.tsv`.
+    имя снятого генератора, пути машины — шаблоны `forward-only` в `scripts/maint/data/traces.tsv`. Дата в строке,
+    которая начинается со слова «Снимок:», — не след: статья со скоропортящимся знанием называет день своего снимка.
 
 Корень скилла и репозитория — через `scripts/lib/kbpaths.py`: утилита работает в любом клоне и из соседнего чекаута.
 Находки выводятся с путём от корня репозитория.
@@ -61,6 +64,8 @@ def load_traces(kind: str) -> list[tuple[str, re.Pattern]]:
 
 
 FWD = load_traces("forward-only")
+DATE = "дата"            # имя следа в данных: в строке снимка статьи он не ищется
+SNAPSHOT = "Снимок:"     # начало строки, которой статья называет день своего снимка
 
 
 def headings(path: Path) -> list[str]:
@@ -113,7 +118,28 @@ def looks_like_path(tok: str) -> bool:
         return False
     if re.match(r"\d{2}/", tok):
         return False  # адрес папки без базы («04/*», «11/») — база названа в тексте рядом
+    if tok.startswith(".") and "/" not in tok:
+        return False  # расширение файла («.glb», «.glb.json»), а не имя файла
     return "/" in tok or tok.lower().endswith(EXT)
+
+
+HOST = re.compile(r"(?:[a-z0-9-]+\.)+[a-z]{2,}", re.I)
+MEDIA_TYPES = ("application", "audio", "font", "image", "message", "model", "multipart", "text", "video")
+MEDIA_SUBTYPE = re.compile(r"(?!\d{2}-)[a-z0-9][a-z0-9.+-]*", re.I)   # «NN-имя» — папка базы, а не подтип
+
+
+def not_a_file(tok: str) -> bool:
+    """Спан с «/», который называет не файл скилла: домен с путём без схемы (`cdn.example.net/npm/`) или тип
+    содержимого из двух слов без расширения файла (`text/plain`, `model/gltf-binary`). Спрашивается, когда файла по
+    такому пути нет: существующий путь остаётся ссылкой."""
+    tok = tok.rstrip(".,;")
+    head, sep, rest = tok.partition("/")
+    if not sep:
+        return False
+    if HOST.fullmatch(head) and not head.lower().endswith(EXT):   # «notes.md/json» — имя файла, а не домен
+        return True
+    return (head.lower() in MEDIA_TYPES and "/" not in rest and bool(MEDIA_SUBTYPE.fullmatch(rest))
+            and not rest.lower().endswith(EXT))
 
 
 _NAMES: dict[str, bool] = {}
@@ -174,8 +200,11 @@ def check_file(path: Path) -> tuple[list[str], list[str], int]:
                 first = first.split()[0]
             if not looks_like_path(first):
                 continue
+            found = resolve_path(first, path)
+            if not found and not_a_file(first):
+                continue
             n += 1
-            if not resolve_path(first, path):
+            if not found:
                 broken.append(f"{i}: путь `{tok}`")
                 continue
             msec = re.search(r"§\s*([0-9]+(?:\.[0-9]+)*|[^\s,;:)`]+)", tok)
@@ -203,7 +232,10 @@ def check_file(path: Path) -> tuple[list[str], list[str], int]:
                 for s in secs:
                     if not section_ok(p, s):
                         broken.append(f"{i}: адрес «{base} {nn}/{mm} § {s}» — нет раздела в {p.relative_to(KB)}")
+        snapshot = line.lstrip().startswith(SNAPSHOT)
         for label, rx in FWD:
+            if snapshot and label == DATE:
+                continue
             for m in rx.finditer(line):
                 fwd.append(f"{i}: {label}: «{m.group(0)}»")
     return broken, fwd, n
@@ -239,6 +271,10 @@ def selftest() -> int:
             f"`kb/в/блоке/кода.md` {samples[0]} — не проверяется",
             "```",
             "Следы: " + "; ".join(samples) + ".",
+            "Не файлы: `.glb`, `.glb.json`, `cdn.example.net/npm/`, `text/plain`, `model/gltf-binary`.",
+            "Битые пути: `sub/nope`, `text/09-nope`, `sub/nope.glb`, `nope.md/json`.",
+            "Снимок: 01.02.2030 · среда и версия.",
+            "- Проба: прогон 01.02.2030.",
         ]) + "\n", encoding="utf-8")
         broken, fwd, n = check_file(probe)
         text = "\n".join(broken)
@@ -251,9 +287,17 @@ def selftest() -> int:
         check("образец `<…>`, `{…}` — не ссылка", "<база>" not in text and "{домен}" not in text)
         check("короткий адрес: нет файла и нет раздела — битые", "ux 06/99" in text and "§ 99.9" in text)
         check("блок кода не проверяется", "в/блоке" not in text and not any(f.startswith("8:") for f in fwd))
-        labels = [f.split(": ")[1] for f in fwd]
+        labels = [f.split(": ")[1] for f in fwd if f.startswith("10:")]
         check("следы: каждый вид на строке следов — по одному", sorted(labels) == sorted(lbl for lbl, _ in FWD))
-        check("битых ссылок — 7", len(broken) == 7)
+        check("расширение, домен с путём и тип содержимого — не ссылки",
+              not any(f.startswith("11:") for f in broken) and n == 17)
+        check("битый путь без расширения, папка базы под именем типа, файл с расширением и имя файла перед «/» — "
+              "находки как прежде",
+              all(s in text for s in ("`sub/nope`", "`text/09-nope`", "`sub/nope.glb`", "`nope.md/json`")))
+        check("дата в строке «Снимок:» — не след, в обычной строке — след",
+              not any(f.startswith("13:") for f in fwd) and [f for f in fwd if f.startswith("14:")] == [
+                  f"14: {DATE}: «01.02.2030»"])
+        check("битых ссылок — 11", len(broken) == 11)
         rc_plain = main([str(probe), "--quiet"])
         (d / "clean.md").write_text(f"# Чисто\n\nтекст и `kb/common/canon.tsv`; {samples[0]}\n", encoding="utf-8")
         rc_soft = main([str(d / "clean.md"), "--quiet"])

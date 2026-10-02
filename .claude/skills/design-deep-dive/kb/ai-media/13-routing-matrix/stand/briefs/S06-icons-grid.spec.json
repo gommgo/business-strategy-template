@@ -4,7 +4,7 @@
  "brief_language": "ru",
  "task": "IMG-ICON3D",
  "role": {
-  "page_type": "saas",
+  "page_class": "saas",
   "section": "features",
   "slot": "feature-icons",
   "priority": "below-fold",

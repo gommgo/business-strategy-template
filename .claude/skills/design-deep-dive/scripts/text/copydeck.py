@@ -26,18 +26,22 @@
         ли, не пробел ли, не истекли ли, публикуемы ли, демо-данные), [PLACEHOLDER], обещание и ядро первого экрана
         (секция hero, без неё — первая после шапки), строки в картинках, второй язык; правила copy-slots.yaml,
         voice.yaml, meta-rules.yaml, claims-rules.yaml: есть — проверка работает, нет — предупреждение
-        «правила не загружены»; copy_slots_ref, который не разрешается от папки copy deck, — предупреждение
-        COPY-D-RULES-REF и правила copy-slots.yaml базы; нет voice_ref — предупреждение COPY-D-VOICE (голос не
-        проверяется); OG-поля мета ждутся те, что заведены слотами плана; записи claims_allow; --final — ворота
-        публикации: страница approved, 0 [PLACEHOLDER], 0 демо-фактов, мета заполнена (без --final пустая мета —
-        warning), обходы claims_allow — списком
+        «правила не загружены»; заголовок, равный имени сущности фактов (entities[].names), короче нормы длины
+        copy-slots.yaml — не находка COPY-D-LEN; copy_slots_ref, который не разрешается от папки copy deck, —
+        предупреждение COPY-D-RULES-REF и правила copy-slots.yaml базы; нет voice_ref — предупреждение COPY-D-VOICE
+        (голос не проверяется); OG-поля мета ждутся те, что заведены слотами плана; записи claims_allow; --final —
+        ворота публикации: страница approved, 0 [PLACEHOLDER], 0 демо-фактов, мета заполнена (без --final пустая
+        мета — warning), обходы claims_allow — списком
   claims DECK [--facts F] [--today …] [--strict] [--all-variants] [--final]
         claims_check.py (факты и право) процессом на плоской копии: обещание, мета, OG-шаблон — тоже текст страницы;
         находки, обойдённые claims_allow, в error не идут — списком обходов
   lint DECK [--final] [--all-variants] [--no-page-pass]
-        copy_lint.py через API lint_text: каждый слот со своим slot_type и жанром + проход страницы
+        copy_lint.py через API lint_text: каждый слот со своим slot_type и жанром + проход страницы; линтер получает
+        файл фактов copy deck (facts_ref): адреса и названия мест из его сущностей вида place правило о слове на
+        «-ая,» не трогает
   check DECK [--facts F] [--today …] [--final] [--strict] [--all-variants] [--update OUT [--promote]]
-        claims → lint → validate; --update пишет копию deck с записями lint и claims (text_hash, дата, версия),
+        claims → lint → validate (линтер получает тот же файл фактов, что и сверка: --facts, без него — facts_ref);
+        --update пишет копию deck с записями lint и claims (text_hash, дата, версия),
         --promote — draft и assumed → checked у текстов без error проверки (claims, lint, validate — и на статусе
         checked тоже), страница — checked, когда проверены все её выбранные тексты и error нет; --all-variants —
         альтернативы «как выбранные», только отчёт: записи --update — у выбранных текстов
@@ -1728,6 +1732,18 @@ def _validate_facts(deck, ctx, rep, refs_and_publish=True):
                             'Заглушка на странице здесь не нужна: скажите то, что подтверждено фактами.')
 
 
+def name_key(s):
+    """Имя для сравнения: один пробел, без регистра, «ё» = «е»."""
+    return norm_ws(s).lower().replace('ё', 'е')
+
+
+def entity_names(facts):
+    """Имена сущностей facts.yaml (entities[].names) ключами name_key; фактов или сущностей нет — пусто."""
+    ents = (getattr(facts, 'data', None) or {}).get('entities')
+    return {name_key(n) for e in (ents if isinstance(ents, list) else []) if isinstance(e, dict)
+            for n in (e.get('names') if isinstance(e.get('names'), list) else [])} - {''}
+
+
 def _validate_wave2(deck, ctx, rep):
     """Файлы правил текста: есть — проверка работает; нет — предупреждение «правила не загружены», без падения."""
     T = 'validate'
@@ -1753,6 +1769,7 @@ def _validate_wave2(deck, ctx, rep):
             meta_cs = specs.pop('__meta__', {}) or {}
             rep.tools.setdefault('validate', {})['copy_slots'] = os.path.relpath(cs_path, ROOT) if cs_path.startswith(ROOT) else cs_path
             lang = (deck.get('lang') or 'ru').split('-')[0]
+            names = entity_names(ctx.facts)
             for page in pages_of(deck):
                 pid = str(page.get('page_id'))
                 targets = [(f"{pid}/{s.get('section_id')}/{sl.get('slot_id')}", s, sl, sl.get('slot_type')) for s in sections_of(page) for sl in slots_of(s)]
@@ -1773,6 +1790,9 @@ def _validate_wave2(deck, ctx, rep):
                         continue
                     body = PLACEHOLDER_RX.sub('', text)
                     vals = {'words': len(words(body)), 'chars': len(norm_ws(body))}
+                    # заголовок — имя сущности фактов (модель, услуга, марка): его длину задаёт имя, нижняя граница
+                    # длины к нему не применяется; верхняя — остаётся, она о месте в макете
+                    named = st in HEADING_LEVEL and name_key(body) in names
                     ls = (spec.get('lang') or {}).get(lang)
                     exc = (' Исключения copy-slots.yaml: ' + one_line(spec['exceptions'][0])[:160]) if spec.get('exceptions') else ''
                     if ls:  # формат copy-slots: основная единица (RU — знаки, EN — слова), p10–p90 → info, грубые границы замера → warning
@@ -1785,7 +1805,7 @@ def _validate_wave2(deck, ctx, rep):
                                 rep.add(T, 'warning', 'COPY-D-LEN', path, f'{val} {un} > {hard[1]} — за грубой границей замера корпуса ({st}, {lang}){prov}', 'Длины — copy-slots.yaml.' + exc)
                             elif unit == prim and rng and rng[1] is not None and val > rng[1]:
                                 rep.add(T, 'info', 'COPY-D-LEN', path, f'{val} {un} > p90 лидеров {rng[1]} ({st}, {lang}){prov}', 'Сигнал, не ворота: у 10 % лидеров длиннее.' + exc)
-                            if not PLACEHOLDER_RX.search(text):
+                            if not PLACEHOLDER_RX.search(text) and not named:
                                 if hard and hard[0] is not None and val < hard[0]:
                                     rep.add(T, 'warning', 'COPY-D-LEN', path, f'{val} {un} < {hard[0]} — за грубой границей замера D ({st}, {lang})', '')
                                 elif unit == prim and rng and rng[0] is not None and val < rng[0]:
@@ -1797,7 +1817,7 @@ def _validate_wave2(deck, ctx, rep):
                             val = vals[unit]
                             if mx is not None and val > mx:
                                 rep.add(T, 'warning', 'COPY-D-LEN', path, f'{val} {"слов" if unit == "words" else "знаков"} > max {mx} ({st}, {lg})', 'Длины — copy-slots.yaml; законные исключения — notes.')
-                            if mn is not None and val < mn and not PLACEHOLDER_RX.search(text):
+                            if mn is not None and val < mn and not PLACEHOLDER_RX.search(text) and not named:
                                 rep.add(T, 'info', 'COPY-D-LEN', path, f'{val} {"слов" if unit == "words" else "знаков"} < min {mn} ({st}, {lg})', '')
                     need = spec.get('fact_required')
                     refs = variant_fact_ids(sl, v)
@@ -2446,12 +2466,15 @@ def page_markdown(deck, page):
     return '\n'.join(lines).strip() + '\n'
 
 
-def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pages=None):
-    """copy_lint.lint_text по каждому тексту (свой slot_type и жанр) + проход страницы. → {путь: итоги}; None — нет линтера."""
+def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pages=None, facts_path=None):
+    """copy_lint.lint_text по каждому тексту (свой slot_type и жанр) + проход страницы. Линтер получает файл фактов
+    (facts_path, без него — файл фактов ctx): адреса и названия мест из его сущностей вида place правило о слове на
+    «-ая,» не трогает. → {путь: итоги}; None — нет линтера."""
     C = lint_module()
     if C is None:
         rep.add('lint', 'error', 'COPY-D-TOOL', '—', f'copy_lint.py не импортируется: {_CL.get("err")}', '')
         return None
+    facts_path = str(facts_path or getattr(ctx.facts, 'path', None) or '')
     vocab = ctx.vocab
     lang = (deck.get('lang') or 'auto').split('-')[0] if deck.get('lang') else 'auto'
     try:
@@ -2482,7 +2505,7 @@ def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pa
             key = (text, genre, u['slot_type'] or '', prof, lang)
             if key not in cache:
                 try:
-                    cache[key] = C.lint_text(text, genre=genre, lang=lang, slot_type=u['slot_type'] or '', profile=prof)
+                    cache[key] = C.lint_text(text, genre=genre, lang=lang, slot_type=u['slot_type'] or '', profile=prof, facts=facts_path)
                     n_calls += 1
                 except (Exception, SystemExit) as e:  # noqa: BLE001
                     rep.add('lint', 'error', 'COPY-D-TOOL', u['path'], f'lint_text: {type(e).__name__}: {e}', 'Проверьте жанр и профиль слота.')
@@ -2532,7 +2555,7 @@ def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pa
             if pg == 'meta':
                 pg = 'landing'
             try:
-                res = C.lint_text(md, genre=pg, lang=lang, fmt='md')
+                res = C.lint_text(md, genre=pg, lang=lang, fmt='md', facts=facts_path)
                 n_calls += 1
             except (Exception, SystemExit) as e:  # noqa: BLE001
                 rep.add('lint', 'error', 'COPY-D-TOOL', pid, f'lint_text (страница): {type(e).__name__}: {e}', '')
@@ -2562,7 +2585,7 @@ def run_lint(deck, ctx, rep, final=False, all_variants=False, page_pass=True, pa
                               'concreteness_per_100w': (m.get('prose') or {}).get('concreteness_per_100w') if m.get('prose') else None}
             per_path[pid + PAGE_PASS] = agg
     rep.tools['lint'] = {'tool': f'copy_lint {getattr(C, "VERSION", "?")} (lint_text)', 'calls': n_calls, 'texts': len(cache),
-                         'rules_cache': bool(_CL.get('cache')), 'notes': notes}
+                         'rules_cache': bool(_CL.get('cache')), 'facts': facts_path or None, 'notes': notes}
     if parity['meta_fact_ids']:
         # два пути линтера: copy_lint.py на copy deck не читает meta.fact_ids, copydeck — читает
         rep.tools['lint']['parity_copy_lint'] = parity
@@ -2711,7 +2734,7 @@ def cmd_lint(a):
     ctx = Ctx(a.deck, None, today_iso(getattr(a, 'today', None)))
     a.today = ctx.today
     rep = Report()
-    per = run_lint(deck, ctx, rep, a.final, a.all_variants, not a.no_page_pass)
+    per = run_lint(deck, ctx, rep, a.final, a.all_variants, not a.no_page_pass, facts_path=resolve_facts_path(a, deck))
     write_outputs(a, rep, 'lint', {'slots': per})
     if not a.quiet:
         print(render_text(rep, f'copydeck lint · {a.deck} · {ctx.today}', a.verbose))
@@ -4548,6 +4571,30 @@ def selftest():
         check('copy-slots: fact_required always', ('COPY-D-FACT-REQUIRED', 'warning') in r0)
         check('copy-slots: переименованный тип', ('COPY-D-SLOT-RENAMED', 'warning') in r0)
         check('ядро первого экрана: секция hero > max_words → COPY-D-HERO-CORE', any(f['rule'] == 'COPY-D-HERO-CORE' and f['where'] == 'home/hero' for f in rr))
+        # заголовок — имя сущности фактов: нижняя граница длины к нему не применяется, верхняя остаётся
+        f_names = Facts(dict(_st_facts(), entities=[{'id': 'lamp', 'type': 'product', 'names': ['Кварц', 'Кварц Про Макс Плюс']}]),
+                        os.path.join(td, 'facts.yaml'))
+        cs3 = os.path.join(td, 'cs3.yaml')
+        with open(cs3, 'w', encoding='utf-8') as f:
+            yaml.safe_dump({'slots': {'headline': {'lengths': {'min_words': 2, 'max_words': 3}}}}, f)   # границы без языка
+        no_meta = os.path.join(td, 'нет-meta.yaml')
+        ctx_b, ctx_nb = (Ctx(os.path.join(td, 'deck.yaml'), x, '2026-09-24', meta_rules_path=no_meta) for x in (facts, f_names))   # нормы базы
+        ctx_3, ctx_n3 = (Ctx(os.path.join(td, 'deck.yaml'), x, '2026-09-24', copy_slots_path=cs3, meta_rules_path=no_meta) for x in (facts, f_names))
+
+        def h1_len(text, c, side):
+            """Находки COPY-D-LEN заголовка первого экрана с текстом text: side — «<» (короче нормы) или «>» (длиннее)."""
+            d_ = _st_deck(); d_['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants'][0]['text'] = text
+            return [f['message'] for f in validate(d_, c).findings
+                    if f['rule'] == 'COPY-D-LEN' and f['where'] == 'home/hero/h1' and f' {side} ' in f['message']]
+        check('COPY-D-LEN: заголовок, равный имени сущности фактов (без регистра), короче нормы — не находка; без сущностей — находка',
+              not h1_len('Кварц', ctx_nb, '<') and not h1_len('КВАРЦ', ctx_nb, '<') and h1_len('Кварц', ctx_b, '<')
+              and not h1_len('Кварц', ctx_n3, '<') and h1_len('Кварц', ctx_3, '<'),
+              (h1_len('Кварц', ctx_nb, '<'), h1_len('Кварц', ctx_b, '<'), h1_len('Кварц', ctx_n3, '<'), h1_len('Кварц', ctx_3, '<')))
+        check('COPY-D-LEN: короткий заголовок не из имён сущностей — находка, с сущностями в фактах и без них',
+              h1_len('Лампа', ctx_nb, '<') == h1_len('Лампа', ctx_b, '<') != [] and h1_len('Лампа', ctx_n3, '<') == h1_len('Лампа', ctx_3, '<') != [],
+              (h1_len('Лампа', ctx_nb, '<'), h1_len('Лампа', ctx_n3, '<')))
+        check('COPY-D-LEN: верхняя граница длины у заголовка-имени остаётся', bool(h1_len('Кварц Про Макс Плюс', ctx_n3, '>')),
+              h1_len('Кварц Про Макс Плюс', ctx_n3, '>'))
         d = _st_deck(); pg = d['copy_deck']['pages'][0]; pg['page_type'] = 'case-page'
         hero = pg['sections'][0]; hero['section_id'], hero['section_role'], hero['block'] = 'case', 'case-studies', 'case-study'
         pg['sections'].insert(0, {'section_id': 'header', 'section_role': 'header', 'block': 'header', 'slots': [
@@ -5400,6 +5447,26 @@ def selftest():
             par = (rep_l5.tools.get('lint') or {}).get('parity_copy_lint') or {}
             check('lint: meta.fact_ids снимают число в мета — заметка паритета с copy_lint.py',
                   par.get('meta_fact_ids', 0) >= 1 and any('meta.fact_ids' in n for n in rep_l5.notes), (par, rep_l5.notes[:2]))
+            # --- факты идут линтеру: адрес из сущности вида place — вне правила о слове на «-ая,»; copy deck линтер не меняет
+            fp_place = os.path.join(td, 'facts-place.yaml')
+            with open(fp_place, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(dict(_st_facts(), entities=[{'id': 'office', 'type': 'place', 'names': ['улица Лесная']}]), f, allow_unicode=True)
+            d = _st_deck(); pg_ = d['copy_deck']['pages'][0]
+            _st_checked(pg_['sections'][0]['slots'][1], 'Приезжайте: улица Лесная, дом 3, вход со двора.', status='approved')
+            pg_['status'], pg_['approval'] = 'approved', {'by': 'заказчик', 'at': '2026-09-24'}
+            was = _copy.deepcopy(d)
+            ctx_place = Ctx(os.path.join(td, 'deck.yaml'), load_facts(fp_place), '2026-09-24')
+            place_hits = lambda rep_: [f['where'] for f in rep_.findings if f['rule'] == 'ux-6-4-10']
+            rep_p0, rep_p1, rep_p2 = Report(), Report(), Report()
+            run_lint(deck_root(d), ctx, rep_p0)                                    # факты без сущностей мест
+            run_lint(deck_root(d), ctx_place, rep_p1)                              # факты — из окружения проверки (check)
+            run_lint(deck_root(d), Ctx(os.path.join(td, 'deck.yaml'), None, '2026-09-24'), rep_p2, facts_path=fp_place)   # путь — ключом (lint)
+            check('lint: адрес из сущности вида place файла фактов — без находки правила о слове на «-ая,»; без такой сущности — находка',
+                  place_hits(rep_p0) == ['home/hero/lead'] and not place_hits(rep_p1) and not place_hits(rep_p2)
+                  and rep_p1.tools['lint']['facts'] == fp_place and rep_p0.tools['lint']['facts'] == os.path.join(td, 'facts.yaml'),
+                  (place_hits(rep_p0), place_hits(rep_p1), place_hits(rep_p2), rep_p1.tools['lint'].get('facts')))
+            check('lint с фактами не меняет copy deck: тексты, статусы, text_hash и запись утверждения остаются на месте', d == was,
+                  [k for k in deck_root(d) if deck_root(d)[k] != deck_root(was).get(k)])
             # --- обход страницы (lint_allow) на мета: copydeck lint и линтер на copy deck дают один итог
             short = 'meta-title-too-short'
 

@@ -5,7 +5,7 @@
  "id": "stand-s09-product-tea-count",
  "task": "IMG-PRODUCT",
  "role": {
-  "page_type": "ecommerce",
+  "page_class": "ecommerce",
   "section": "product",
   "slot": "product-still",
   "purpose": "проверка счёта и связей"

@@ -1,6 +1,10 @@
 path	kind	smoke	xfail
 scripts/claude-design/dc_texts.py	utility	help; run: --selftest	
 scripts/claude-design/dc_to_html.py	utility	help; run: --selftest	
+scripts/claude-design/fixtures/artboard-parts/ARTIFACTS.md	data	data	
+scripts/claude-design/fixtures/artboard-parts/Stub-390-1.html	data	data	
+scripts/claude-design/fixtures/artboard-parts/Stub-390-2.html	data	data	
+scripts/claude-design/fixtures/artboard-parts/assets.md	data	data	
 scripts/claude-design/kit/canvas.html	kit	data	
 scripts/claude-design/kit/diffshots.py	kit	help	
 scripts/claude-design/kit/example/booking.html	kit	data	

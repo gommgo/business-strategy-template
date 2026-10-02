@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:ai-media:asset-plan:1",
   "title": "asset-plan v1 — план ассетов страницы-шаблона: слот → решение «код / генерация / Blender», варианты, доставка, утверждение",
-  "description": "Формат плана ассетов — канон ../01-web-assets-landscape/01-asset-slots-by-page-type.md §8, второго формата нет. Файл проекта — docs/projects/<slug>/design/<surface>/assets/plans/<page-id>.yaml, один на страницу-шаблон; план страницы ссылается на него refs.asset_plan. Каркас из медиа- и 3D-слотов плана страницы и проверка — ../../../scripts/site/plan_to_assets.py (--check, check <slug>). Id — словарь site (../../site/02-site-types/vocabulary.yaml): page.page_type — тип страницы, slots[].slot — вид слота, slots[].section — id секции плана страницы; класс анатомии ai-media page.media_class — проекция page_type по строкам §8 ../../site/02-site-types/crosswalk.tsv. План пишется до ДС и у страниц без генерации: кодовые и реальные слоты тоже. Генерация картинок, видео и 3D — только после утверждения плана заказчиком: status approved и approval.",
+  "description": "Формат плана ассетов — канон ../01-web-assets-landscape/01-asset-slots-by-page-type.md §8, второго формата нет. Файл проекта — docs/projects/<slug>/design/<surface>/assets/plans/<page-id>.yaml, один на страницу-шаблон; план страницы ссылается на него refs.asset_plan. Каркас из медиа- и 3D-слотов плана страницы и проверка — ../../../scripts/site/plan_to_assets.py (--check, check <slug>). Id — словарь site (../../site/02-site-types/vocabulary.yaml): page.page_type — тип страницы, slots[].slot — вид слота, slots[].section — id секции плана страницы; класс анатомии ai-media page.media_class — проекция по строкам §8 ../../site/02-site-types/crosswalk.tsv (тип сайта брифа, затем page_type). План пишется до ДС и у страниц без генерации: кодовые и реальные слоты тоже. Генерация картинок, видео и 3D — только после утверждения плана заказчиком: status approved и approval.",
   "type": "object",
   "additionalProperties": false,
   "patternProperties": {"^x-": {}},
@@ -10,7 +10,7 @@
   "properties": {
     "plan_version": {"enum": [1, "1"], "description": "Версия формата плана ассетов."},
     "checked": {"$ref": "#/$defs/date", "description": "Дата сверки норм плана (бюджеты, размеры, форматы) — у каркаса дата сверки плана страницы."},
-    "status": {"enum": ["draft", "approved"], "description": "draft — план пишется; approved — утвердил заказчик (траты — вместе с владельцем денег): генерация разрешена только по утверждённому плану."},
+    "status": {"enum": ["draft", "proposed", "approved"], "description": "draft — план пишется; proposed — план предложен заказчику и ждёт решения; approved — утвердил заказчик (траты — вместе с владельцем денег): генерация разрешена только по утверждённому плану."},
     "approval": {"$ref": "#/$defs/approval", "description": "Кто и когда утвердил план; обязательно при approved."},
     "example": {"type": "boolean", "description": "true — учебный пример формата (вымышленные данные)."},
     "refs": {
@@ -27,6 +27,11 @@
       }
     },
     "page": {"$ref": "#/$defs/page"},
+    "instances": {
+      "type": "array",
+      "description": "Экземпляры шаблона коллекции (page.template: true) — записи, чьи кадры стоят в слотах плана; слот называет свой экземпляр полем instance.",
+      "items": {"$ref": "#/$defs/instance"}
+    },
     "brand": {
       "type": "object",
       "additionalProperties": false,
@@ -108,6 +113,41 @@
         "note": {"type": "string", "description": "Что утверждено вместе с планом: траты и лимит с владельцем денег, ключевые ассеты."}
       }
     },
+    "instance": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "required": ["id"],
+      "description": "Экземпляр шаблона коллекции: запись, по которой собирается страница шаблона.",
+      "properties": {
+        "id": {"$ref": "#/$defs/id", "description": "id экземпляра в пределах плана: id страницы-образца шаблона (page_id образца в copy deck) или свой id записи."},
+        "title": {"type": "string", "description": "Запись коллекции словами: работа, услуга, статья."},
+        "note": {"type": "string"}
+      }
+    },
+    "real-source": {
+      "type": "object",
+      "additionalProperties": false,
+      "patternProperties": {"^x-": {}},
+      "description": "Источник настоящего кадра: откуда исходник и где он лежит. Готовый файл, его лицензия и происхождение — строка манифеста ассетов.",
+      "properties": {
+        "origin": {"type": "string", "description": "Откуда кадр: съёмка, архив заказчика, публикация студии."},
+        "file": {"type": "string", "description": "Исходник: путь вне git или имя файла у владельца."},
+        "date": {"$ref": "#/$defs/date", "description": "Дата кадра или публикации."},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$", "description": "Отпечаток исходника."},
+        "note": {"type": "string"}
+      }
+    },
+    "demo": {
+      "type": "object",
+      "anyOf": [{"required": ["file"]}, {"required": ["files"]}],
+      "description": "Демо-картинка макета: стоит на макете, пока настоящего файла нет или его ещё нельзя показать. В манифест ассетов, в git и в публикацию не идёт; вход холста ставит её отдельной строкой с пометкой «демо». Остальные ключи объекта — заметки проекта.",
+      "properties": {
+        "file": {"type": "string", "minLength": 1, "description": "Путь файла вне git — одна картинка на слот."},
+        "files": {"type": "object", "minProperties": 1, "additionalProperties": {"type": "string", "minLength": 1}, "description": "{<id варианта>: <путь вне git>} — картинка на вариант."},
+        "what": {"type": "string", "minLength": 1, "description": "Что это за картинка и почему она демо."}
+      }
+    },
     "page": {
       "type": "object",
       "additionalProperties": false,
@@ -116,7 +156,7 @@
       "properties": {
         "id": {"$ref": "#/$defs/id", "description": "= page.id плана страницы = имя файла плана ассетов."},
         "page_type": {"$ref": "#/$defs/id", "description": "page_type словаря site v1 — тот же, что в плане страницы."},
-        "media_class": {"enum": ["saas-landing", "product", "ecom-home", "ecom-pdp", "campaign", "studio", "corporate", "blog", "web-app-inserts"], "description": "Класс анатомии и бюджетов ai-media (01-asset-slots-by-page-type.md §3) — проекция page_type по строке §8 crosswalk.tsv; руками не выбирается."},
+        "media_class": {"enum": ["saas-landing", "product", "ecom-home", "ecom-pdp", "campaign", "studio", "corporate", "blog", "web-app-inserts"], "description": "Класс анатомии и бюджетов ai-media (01-asset-slots-by-page-type.md §3) — проекция по строкам §8 crosswalk.tsv: сначала по типу сайта брифа (site_type), у типа сайта без строки — по page_type; руками не выбирается."},
         "template": {"type": "boolean", "description": "true — план шаблона коллекции (как в плане страницы)."},
         "locale": {"type": "string", "pattern": "^[a-z]{2,3}(-[A-Z]{2})?$"},
         "goal": {"type": "string", "description": "Цель страницы — из плана страницы."},
@@ -139,7 +179,11 @@
         "goal": {"type": "string", "description": "Что ассет показывает за 3 секунды."},
         "key": {"type": "boolean", "description": "Ключевой ассет: визуал первого экрана, атмосфера, ключевой кадр Blender (постер 3D-слота, key visual кампании). Делается до ДС, ДС берёт у принятого палитру, свет и материал (references/phases.md § Порядок ассетов и ДС)."},
         "ladder": {"enum": ["text", "svg", "css", "shader", "image", "video", "3d"], "description": "Ступень лестницы дешевизны (01/01 §1): первая, которая решает задачу слота."},
-        "source": {"enum": ["generate", "edit-real", "real", "code", "template", "render"], "description": "Откуда файл: generate — генерация моделью; edit-real — правка настоящего снимка; real — материал заказчика; code — страница рисует сама (SVG, CSS, шейдер, three.js); template — HTML-шаблон с текстом → рендер в картинку (OG, инфографика); render — свой рендер сцены Blender или кода: кадр, секвенция, постер."},
+        "source": {"enum": ["generate", "edit-real", "real", "code", "template", "render"], "description": "Откуда файл: generate — генерация моделью; edit-real — правка настоящего снимка моделью; real — материал заказчика; code — страница рисует сама (SVG, CSS, шейдер, three.js); template — HTML-шаблон с текстом → рендер в картинку (OG, инфографика); render — свой рендер сцены Blender или кода: кадр, секвенция, постер. Источник слота действует у каждого варианта без своего source."},
+        "local_edit": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "description": "Доводка настоящего кадра без генерации — операции словами: кадрирование, цвет, апскейл, склейка. Источник остаётся real; правка моделью — source: edit-real."},
+        "real_source": {"$ref": "#/$defs/real-source"},
+        "instance": {"$ref": "#/$defs/id", "description": "id экземпляра шаблона коллекции (instances[].id), чей кадр стоит в слоте."},
+        "x-demo": {"$ref": "#/$defs/demo"},
         "task_codes": {"type": "array", "items": {"type": "string", "pattern": "^[A-Z0-9]+(-[A-Z0-9]+)*$"}, "description": "Коды задач ../13-routing-matrix/routing.yaml (IMG-HERO-PHOTO …) — маршрут генерации и правки; у real и code — пусто."},
         "recipe": {"type": "string", "pattern": "^recipe:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Рецепт blender 12-recipes (blender 12/00 §1) — вместо кодов задач у рендера и 3D."},
         "three_d": {"$ref": "#/$defs/three-d"},
@@ -181,6 +225,7 @@
       "required": ["id"],
       "properties": {
         "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*$", "description": "desktop, mobile, card, og, set …"},
+        "source": {"enum": ["generate", "edit-real", "real", "code", "template", "render"], "description": "Источник этого варианта — перечень тот же, что у source слота; без поля действует источник слота. Пишется, когда варианты слота берутся из разного: телефон — настоящий кадр, десктоп — генерация."},
         "ratio": {"anyOf": [{"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?:[0-9]+(\\.[0-9]+)?$"}, {"$ref": "#/$defs/todo"}]},
         "size": {"anyOf": [{"type": "array", "items": {"type": "integer", "minimum": 1}, "minItems": 2, "maxItems": 2}, {"$ref": "#/$defs/todo"}], "description": "[ширина, высота] мастера, px."},
         "formats": {"anyOf": [{"type": "array", "items": {"type": "string", "pattern": "^[a-z0-9]+$"}, "minItems": 1}, {"$ref": "#/$defs/todo"}]},
@@ -254,8 +299,8 @@
         "фокус": {"rule": "copy", "from": ["/slots/*/variants/*/focal"], "stages": ["mockup"]},
         "варианты": {"rule": "derive", "from": ["/slots/*/variants", "/slots/*/poster", "/slots/*/poster_for"], "note": "варианты кадра: id, соотношение, размер, зона текста; постер 3D- и видео-слота — его строка"},
         "источник и лицензия": {"rule": "derive", "from": ["/slots/*/source", "/slots/*/ai_fit", "/slots/*/note"], "note": "источник слота и пометка ИИ; лицензия и происхождение — строка манифеста ассетов поверхности"},
-        "файл": {"rule": "derive", "from": ["/slots/*/id"], "note": "файл — строка манифеста assets/manifest.yaml по слоту; файла нет — заглушка placeholder и TODO"},
-        "id загрузки": {"rule": "derive", "from": ["/slots/*/id"], "stages": ["mockup"], "note": "id загрузки холста — таблица «Загрузки» ARTIFACTS.md по файлу слота"}
+        "файл": {"rule": "derive", "from": ["/slots/*/id", "/slots/*/x-demo"], "note": "файл — принятые (status: accepted) строки манифеста assets/manifest.yaml по странице и слоту: строки с page этой страницы, без них — строки без page; у каждого варианта — файлы первого формата по format_order; слот без принятого файла — заглушка placeholder и TODO; на макете — ещё строка демо-картинки слота (x-demo) с пометкой «демо»"},
+        "id загрузки": {"rule": "derive", "from": ["/slots/*/id"], "stages": ["mockup"], "note": "id загрузки холста — таблица «Загрузки» ARTIFACTS.md по пути файла: строка холста этой поверхности (canvas:<surface>), строка артефакта ДС — когда файл загружен только туда"}
       },
       "brief.yaml": {
         "decisions.assets_mode": {"rule": "derive", "from": ["/slots/*/source", "/slots/*/ladder"], "stages": ["mockup"], "note": "provided — все источники real; generated — генерация, правка и рендер; typographic — только текст и код; mixed — прочее (cd 06/01 §6)"},
@@ -268,6 +313,8 @@
       {"from": ["/brand", "/policy"], "note": "язык изображений и правила генерации — задание генерации, не холст"},
       {"from": ["/budgets"], "note": "бюджеты веса — ворота после сборки; build.perf — профиль плана страницы"},
       {"from": ["/slots/*/goal", "/slots/*/subject", "/slots/*/must_include", "/slots/*/must_avoid", "/slots/*/series", "/slots/*/frames", "/slots/*/task_codes", "/slots/*/recipe", "/slots/*/text", "/slots/*/acceptance"], "note": "задание генерации и приёмки ассета; на холст идёт готовый файл"},
+      {"from": ["/slots/*/local_edit", "/slots/*/real_source"], "note": "доводка и исходник настоящего кадра — подготовка ассета; на холст идёт готовый файл"},
+      {"from": ["/instances", "/slots/*/instance"], "note": "экземпляры шаблона коллекции — чей кадр в слоте: подготовка ассета; на холст идёт готовый файл"},
       {"from": ["/slots/*/key"], "note": "ключевой ли ассет — порядок ассетов и ДС, не холст"},
       {"from": ["/slots/*/motion", "/slots/*/delivery"], "note": "вид движения и доставка ассета — спецификация движения и код"}
     ]

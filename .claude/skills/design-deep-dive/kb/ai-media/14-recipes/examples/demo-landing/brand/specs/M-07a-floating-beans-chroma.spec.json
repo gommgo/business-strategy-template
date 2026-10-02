@@ -5,7 +5,7 @@
   "brief_language": "ru",
   "task": "IMG-CUTOUT",
   "role": {
-    "page_type": "ecommerce",
+    "page_class": "ecommerce",
     "section": "hero",
     "slot": "hero-floating-object",
     "purpose": "three roasted beans on a flat chroma key for i2v and keying (floating object layer)",

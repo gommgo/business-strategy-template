@@ -7,23 +7,33 @@ Python окружения скилла: PyYAML, numpy, scipy, Pillow. Сеть �
 --live (ключ — переменная окружения владельца). Описание стенда — kb/ai-media/13-routing-matrix/; метод голосования —
 13/01 §4.3.
 
+Папка заданий стенда — $DDD_HOME/out/ai-media/stand или общий ключ --jobs-dir DIR (до подкоманды, как --tasks): в неё
+пишут build и ministand, из неё читает estimate. Входные картинки и маска рецепта уходят в задание как записаны: URL,
+абсолютный путь или путь от папки файла заданий — так их читает polza.py.
+
 Подкоманды:
-  build     [--only E-02,E-08]         рецепты tasks.yaml → задания polza.py в $DDD_HOME/out/ai-media/phase5/jobs (E-*.jsonl,
+  build     [--only E-02,E-08] [--agent ИМЯ]   рецепты tasks.yaml → задания polza.py в папке заданий (E-*.jsonl,
                                        + .routerai.json); промт — компилятор prompt_compile.py (диалект семейства по
-                                       умолчанию) или буквальная строка
-  estimate  [--only …]                 polza.py estimate по заданиям E-* → таблица «тест · заданий · ошибок · ₽»
+                                       умолчанию) или буквальная строка; --agent — имя в поле agent заданий (по нему
+                                       polza.py раскладывает выходы и ведёт журнал затрат), без ключа поля нет
+  estimate  [--only …]                 polza.py estimate по заданиям E-* папки заданий → таблица «тест · заданий ·
+                                       ошибок · ₽»
   run       JOBS.jsonl [--live] [--parallel 2]   прогон через polza.py batch (без --live — сухой прогон)
   collect   [--root DIR] [--agent A] [--out results.jsonl]   паспорта polza.py под DIR → таблица результатов (строка на
                                        файл); DIR по умолчанию — выходы polza.py (POLZA_OUT_ROOT, иначе
                                        $DDD_HOME/out/ai-media/_polza); путь паспорта — от DIR; --agent — только его задания
   metrics   RESULTS.jsonl [--transcripts T.json] [--out metrics.jsonl]   автометрики по задачам (см. METRICS)
   sheet     RESULTS.jsonl --out DIR [--blind]      контактные листы по тестам (подписи моделей или буквы)
-  page      ВХОД --out DIR [--tests E-08,E-10] [--repeat 0.1] [--seed 7]   страница слепых пар картинок (DIR/index.html +
-            DIR/img/; ключ «картинка → вариант» — рядом, в DIR.key.json, в папку страницы не кладётся). ВХОД — папка
-            выходов polza.py (паспорта), таблица collect или папка картинок без паспортов. Задания стенда — пары между
-            моделями группы голосования; задания плана (prompt_compile.py jobs) — группа на спецификацию, пары между
-            всеми её вариантами (вариант — «модель#номер»); папка картинок (кадры 3D, снимки сборок) — группа на
-            подпапку, вариант — имя файла; --tests — только эти группы
+  page      ВХОД --out DIR [--tests E-08,E-10] [--repeat 0.1] [--seed 7] [--maxside 1600] [--lossless]
+            страница слепых пар картинок (DIR/index.html + DIR/img/; ключ «картинка → вариант» — рядом, в
+            DIR.key.json, в папку страницы не кладётся). ВХОД — папка выходов polza.py (паспорта), таблица collect
+            или папка картинок без паспортов. Задания стенда — пары между моделями группы голосования; задания
+            плана (prompt_compile.py jobs) — группа на спецификацию, пары между всеми её вариантами (вариант —
+            «модель#номер»); папка картинок (кадры 3D, снимки сборок) — группа на подпапку, вариант — имя файла;
+            --tests — только эти группы. Картинки страницы: сторона не больше --maxside (0 — без уменьшения),
+            JPEG q90, с прозрачностью — PNG; --lossless — всегда PNG, пиксели без потерь. Пары на чёткость и
+            мелкую деталь — `--maxside 0 --lossless`. Файл перекодируется, а не копируется: метаданные исходника
+            (модель, промт) на слепую страницу не попадают; кодирование записано в ключ страницы (поле encoding)
   page      --text SHEET.md [--text-key KEY.yaml] --out DIR [--repeat 0.1] [--seed 7]
                                        те же слепые пары для текстовых вариантов: карточки текста из листа
                                        copydeck.py export-variants, пары — между вариантами одного слота
@@ -31,9 +41,12 @@ Python окружения скилла: PyYAML, numpy, scipy, Pillow. Сеть �
                                        доли побед с интервалом Уилсона, Брэдли–Терри, согласованность повторов,
                                        позиционный сдвиг, контрольные пары; у текстовой страницы --selection — победы
                                        меток по слоту для copydeck.py apply-selection --votes (--method human-pairwise)
-  ministand --model ID [--params '{"image_resolution":"1K"}'] [--vs PRESET]   регрессионный набор для новой модели
+  ministand --model ID [--params '{"image_resolution":"1K"}'] [--vs PRESET] [--agent ИМЯ] [--out FILE]
+                                       регрессионный набор для новой модели → E-MS-<модель>.jsonl в папке заданий или
+                                       --out; --agent — как у build
   selftest                             офлайн-проверки (нормализация кириллицы, Уилсон, Брэдли–Терри, страницы картинок и
-                                       текстов, сбор паспортов вне базы)
+                                       текстов, сбор паспортов вне базы, кодирование картинок страницы, папка заданий
+                                       и имя агента)
 """
 from __future__ import annotations
 
@@ -59,7 +72,6 @@ ROOT = kbpaths.kb("ai-media")
 TOOLS = kbpaths.scripts("ai-media")
 STAND = ROOT / "13-routing-matrix/stand"
 TASKS = STAND / "tasks.yaml"
-JOBS = kbpaths.out("ai-media", "phase5", "jobs")  # задания стенда — выход, не kb
 IMAGE_EXT = (".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif")   # что страница пар показывает картинкой
 sys.path.insert(0, str(TOOLS))
 
@@ -81,6 +93,18 @@ def slug(s):
     return re.sub(r"[^A-Za-z0-9.-]+", "-", str(s)).strip("-")
 
 
+def jobs_dir(a):
+    """Папка заданий стенда — выход, не kb: ключ --jobs-dir, иначе $DDD_HOME/out/ai-media/stand; создаётся."""
+    d = Path(a.jobs_dir) if getattr(a, "jobs_dir", None) else kbpaths.out("ai-media", "stand", create=False)
+    d.mkdir(parents=True, exist_ok=True)
+    return d
+
+
+def agent_field(a):
+    """Поле agent задания — только с ключа --agent: без ключа поля нет, и polza.py берёт своё умолчание."""
+    return {"agent": a.agent} if getattr(a, "agent", None) else {}
+
+
 # ================================================================ build: рецепты → задания polza.py
 
 def cmd_build(a):
@@ -89,7 +113,7 @@ def cmd_build(a):
     import prompt_compile as pc
     snap, dialects, catalog = pcat.Snapshot(), pc.load_dialects(), pc.load_catalog()
     only = set(a.only.split(",")) if a.only else None
-    JOBS.mkdir(parents=True, exist_ok=True)
+    jobs, agent = jobs_dir(a), agent_field(a)
     report = []
     for grp in cfg["phase5"]:
         if only and grp["test"] not in only:
@@ -119,10 +143,9 @@ def cmd_build(a):
                         prompt += cfg["literals"][jd["suffix"]]
                 inp = {"prompt": prompt, **cparams, **params, **(jd.get("params") or {})}
                 if jd.get("images"):
-                    inp["images"] = [str(Path("../..") / p.replace("99-raw/", "", 1)) if p.startswith("99-raw/") else p
-                                     for p in jd["images"]]
+                    inp["images"] = list(jd["images"])          # путь — как в рецепте: его разбирает polza.py
                 if jd.get("mask"):
-                    inp["mask_url"] = str(Path("../..") / jd["mask"].replace("99-raw/", "", 1))
+                    inp["mask_url"] = jd["mask"]
                 model = snap.by_id[mid]
                 mpar = model.get("parameters") or {}
                 for k in [k for k in inp if k not in mpar and k != "prompt"]:
@@ -158,10 +181,10 @@ def cmd_build(a):
                     if grp.get("depends"):
                         meta["depends"] = grp["depends"]
                     rows.append({"model": mid, "input": x, "provider": cfg["provider_default"],
-                                 "tag": f"{grp['test']}-{tid}-{arm}-{preset}-{variant}", "agent": "E", "variant": variant,
+                                 "tag": f"{grp['test']}-{tid}-{arm}-{preset}-{variant}", **agent, "variant": variant,
                                  "max_rub": math.ceil(rub * 1.25 * 10) / 10 if rub else None,
                                  "notes": grp["hypothesis"][:240], "meta": meta})
-        out = JOBS / grp["file"]
+        out = jobs / grp["file"]
         jl_write(out, rows)
         report.append((grp["test"], out.name, len(rows), skipped))
     for ext in cfg.get("external", []):
@@ -169,12 +192,12 @@ def cmd_build(a):
             continue
         body = {"model": ext["model"], "prompt": cfg["literals"][ext["prompt"]], "aspect_ratio": "16:9", "n": 1}
         job = {"channel": ext["channel"], "method": "POST", "path": "/api/v1/images", "body": body, "tag": f"{ext['test']}-recraft",
-               "agent": "E", "variant": 1, "max_rub": round(ext["price_rub"] * 1.5, 1), "price_rub": ext["price_rub"],
+               **agent, "variant": 1, "max_rub": round(ext["price_rub"] * 1.5, 1), "price_rub": ext["price_rub"],
                "price_source": ext["price_source"], "docs": ext["docs"], "notes": ext["note"],
                "meta": {"test": ext["test"], "task": "S08", "code": "IMG-TEXT-CYR", "judge": "metric", "value": ext["value"],
                         "expect": cfg["tasks"]["S08"]["expect"], "overlaps": ext["overlaps"],
                         "success": "3 строки дословны по кодовым точкам (как E-02)"}}
-        (JOBS / ext["file"]).write_text(json.dumps(job, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        (jobs / ext["file"]).write_text(json.dumps(job, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         report.append((ext["test"], ext["file"], 1, []))
     for t, f, n, sk in report:
         print(f"{t}: {f} — заданий {n}" + (f"; пропуски/снятые параметры: {sk}" if sk else ""))
@@ -183,15 +206,15 @@ def cmd_build(a):
 
 # ================================================================ estimate / run: обёртки над polza.py
 
-def e_files(only=None):
-    fs = sorted(JOBS.glob("E-*.jsonl"))
+def e_files(jobs, only=None):
+    fs = sorted(Path(jobs).glob("E-*.jsonl"))
     return [f for f in fs if not only or f.name[:4] in only]
 
 
 def cmd_estimate(a):
     only = set(a.only.split(",")) if a.only else None
     total, rows = 0.0, []
-    for f in e_files(only):
+    for f in e_files(jobs_dir(a), only):
         r = subprocess.run([sys.executable, str(TOOLS / "polza.py"), "estimate", str(f)], capture_output=True, text=True,
                            env={**__import__("os").environ, "POLZA_BASE_URL": "http://127.0.0.1:9"})
         m = re.search(r"ИТОГО: заданий (\d+), с ошибками (\d+), оценка суммы ([\d  ,]+) ₽", r.stdout)
@@ -534,23 +557,28 @@ def parse_variants_sheet(text):
     return [x for x in slots if len(x["variants"]) >= 2]
 
 
-def _encode(im, maxside=1600):
-    """Картинка → JPEG (без альфы) или PNG (с альфой) в байтах; размер ≤ maxside."""
+def _encode(im, maxside=1600, lossless=False):
+    """Картинка → байты и расширение: JPEG (без альфы) или PNG (с альфой), сторона ≤ maxside (0 или None — без
+    уменьшения). lossless — всегда PNG: пиксели без потерь, альфа остаётся, если она есть хоть в одной точке."""
     im = im.copy()
-    im.thumbnail((maxside, maxside))
+    if maxside:
+        im.thumbnail((maxside, maxside))
     buf = io.BytesIO()
-    if im.mode == "RGBA" and (min(im.getchannel("A").getextrema()) < 250):
-        im.save(buf, "PNG", optimize=True)
+    alpha = im.mode == "RGBA" and min(im.getchannel("A").getextrema()) < (255 if lossless else 250)
+    if alpha or lossless:
+        (im if alpha else im.convert("RGB")).save(buf, "PNG", optimize=True)
         return buf.getvalue(), "png"
     im.convert("RGB").save(buf, "JPEG", quality=90, optimize=True)
     return buf.getvalue(), "jpg"
 
 
-def build_page(items, out, title="Стенд моделей — слепое сравнение", repeat=0.1, seed=7, gold=True, kind="image"):
+def build_page(items, out, title="Стенд моделей — слепое сравнение", repeat=0.1, seed=7, gold=True, kind="image",
+               maxside=1600, lossless=False):
     """items: [{"group": ключ сравнения, "brief": текст, "text_zone": [x0,y0,x1,y1] | None, "copy": [...],
     "ref": путь эталона | None, "model": …, "files": [пути] , "test": …}] — пары строятся внутри group между разными моделями.
     kind="text": у элемента вместо files — "text" (карточка текста), model — метка варианта листа; контрольных пар с
-    размытием нет, одинаковая пара — та же карточка с обеих сторон."""
+    размытием нет, одинаковая пара — та же карточка с обеих сторон. maxside и lossless — кодирование картинок страницы
+    (см. _encode); оно записано в ключ страницы, поле encoding."""
     from PIL import Image, ImageFilter
     rnd = random.Random(seed)
     out = Path(out)
@@ -566,7 +594,7 @@ def build_page(items, out, title="Стенд моделей — слепое с�
         im = im.convert("RGBA")
         if degrade:
             im = im.filter(ImageFilter.GaussianBlur(6)).convert("RGB")
-        data, ext = _encode(im)
+        data, ext = _encode(im, maxside, lossless)
         iid = f"{rnd.getrandbits(40):010x}"
         (out / "img" / f"{iid}.{ext}").write_bytes(data)
         img_ids[k] = f"img/{iid}.{ext}"
@@ -607,6 +635,8 @@ def build_page(items, out, title="Стенд моделей — слепое с�
     questions = TEXT_QUESTIONS if kind == "text" else QUESTIONS
     data = {"title": title, "kind": kind, "questions": questions, "hint": HINTS[kind], "pairs": []}
     key["kind"] = kind
+    if kind == "image":
+        key["encoding"] = {"maxside": maxside or None, "lossless": bool(lossless)}
     key["questions"] = [q["id"] for q in questions]
     for p in seq:
         pid = pid_of[id(p)]
@@ -650,6 +680,10 @@ def cmd_page(a):
         print(f"нет входа страницы {a.results or ''}: нужна папка выходов polza.py, таблица collect, папка картинок "
               f"или --text SHEET.md", file=sys.stderr)
         return 2
+    maxside, lossless = getattr(a, "maxside", 1600), getattr(a, "lossless", False)
+    if maxside is not None and maxside < 0:
+        print(f"--maxside {maxside}: нужна сторона в пикселях или 0 (без уменьшения)", file=sys.stderr)
+        return 2
     src = Path(a.results)
     rows = page_rows(src)
     tests = set(a.tests.split(",")) if a.tests else None
@@ -692,7 +726,7 @@ def cmd_page(a):
     if not items:
         print(f"в {src} нет картинок для пар", file=sys.stderr)
         return 2
-    st = build_page(items, a.out, repeat=a.repeat, seed=a.seed)
+    st = build_page(items, a.out, repeat=a.repeat, seed=a.seed, maxside=maxside, lossless=lossless)
     print(json.dumps(st, ensure_ascii=False))
     return 0
 
@@ -991,16 +1025,16 @@ def cmd_ministand(a):
                 if "images" not in mpar:
                     print(f"{tid}: пропуск (модель без images)", file=sys.stderr)
                     continue
-                inp["images"] = [str(Path("../..") / x.replace("99-raw/", "", 1)) for x in imgs]
+                inp["images"] = list(imgs)                      # путь — как в рецепте: его разбирает polza.py
             est = pcat.estimate(m, inp, providers=snap.providers.get(a.model))
             total += est.get("rub") or 0
-            rows.append({"model": a.model, "input": inp, "tag": f"MS-{slug(a.model)}-{tid}-{k}", "agent": "E", "variant": 1,
+            rows.append({"model": a.model, "input": inp, "tag": f"MS-{slug(a.model)}-{tid}-{k}", **agent_field(a), "variant": 1,
                          "max_rub": math.ceil((est.get("rub") or 0) * 1.25 * 10) / 10 or None,
                          "meta": {"test": "ministand", "task": tid, "code": t["code"], "dialect": dialect, "expect": t.get("expect"),
                                   "brief": t.get("brief"), "source": t.get("source"), "target": t.get("target"),
                                   "target_hex": t.get("target_hex"),
                                   "compare_with": f"результаты стенда по {tid} (тот же бриф, те же метрики и голоса)"}})
-    out = Path(a.out) if a.out else JOBS / f"E-MS-{slug(a.model)}.jsonl"
+    out = Path(a.out) if a.out else jobs_dir(a) / f"E-MS-{slug(a.model)}.jsonl"
     jl_write(out, rows)
     print(f"мини-стенд: {len(rows)} заданий, ≈ {total:.2f} ₽ → {out}")
     return 0
@@ -1115,7 +1149,89 @@ def cmd_selftest(a):
         check("картинки: папка кадров без паспортов — группа по подпапке, вариант — имя файла",
               len(main_pairs) == 3 and {kp["group"] for kp in main_pairs} == {"hero-3d"}
               and {kp[s]["model"] for kp in main_pairs for s in "AB"} == {"kadr-1", "kadr-2", "kadr-3"})
+        # кодирование картинок страницы: без ключей — JPEG с уменьшением; --maxside 0 --lossless — пиксели исходника
+        detail = tmp / "detail" / "kadr"
+        detail.mkdir(parents=True)
+        cells = (np.indices((64, 96)).sum(0) % 2 * 255).astype("uint8")            # шахматка в 1 px — мелкая деталь
+        for n in range(2):
+            Image.fromarray(np.stack([cells, np.roll(cells, n, 1), 255 - cells], -1)).save(detail / f"kadr-{n + 1}.png")
+
+        def page_files(out, *keys):
+            with contextlib.redirect_stdout(io.StringIO()):
+                rc = main(["page", str(tmp / "detail"), "--out", str(out), "--seed", "3", *keys])
+            K = json.loads(Path(str(out) + ".key.json").read_text(encoding="utf-8"))
+            return rc, K, [(out / iid, v["file"]) for iid, v in K["images"].items() if not v["degraded"]]
+
+        def same(f, src):
+            return np.array_equal(np.asarray(Image.open(f).convert("RGB")), np.asarray(Image.open(src).convert("RGB")))
+        rc, K, fs = page_files(tmp / "p-default")
+        check("страница: без ключей — JPEG, шахматка в 1 px пережата с потерями",
+              rc == 0 and len(fs) == 2 and all(f.suffix == ".jpg" and not same(f, s) for f, s in fs)
+              and K["encoding"] == {"maxside": 1600, "lossless": False})
+        rc, K, fs = page_files(tmp / "p-small", "--maxside", "48")
+        check("страница: --maxside 48 — наибольшая сторона картинок 48",
+              rc == 0 and len(fs) == 2 and all(max(Image.open(f).size) == 48 for f, _ in fs))
+        rc, K, fs = page_files(tmp / "p-lossless", "--maxside", "0", "--lossless")
+        check("страница: --maxside 0 --lossless — PNG с размером и пикселями исходника, кодирование — в ключе страницы",
+              rc == 0 and len(fs) == 2 and all(f.suffix == ".png" and same(f, s) for f, s in fs)
+              and K["encoding"] == {"maxside": None, "lossless": True})
+        soft = Image.new("RGBA", (8, 8), (10, 20, 30, 252))
+        check("кодирование: почти непрозрачная картинка — JPEG, без потерь — PNG с той же альфой",
+              _encode(soft)[1] == "jpg" and _encode(soft, 0, True)[1] == "png"
+              and Image.open(io.BytesIO(_encode(soft, 0, True)[0])).getpixel((0, 0)) == (10, 20, 30, 252))
+        with contextlib.redirect_stderr(io.StringIO()):
+            rc = main(["page", str(tmp / "detail"), "--out", str(tmp / "p-bad"), "--maxside", "-5"])
+        check("страница: отрицательный --maxside — ошибка вызова (код 2), страницы нет",
+              rc == 2 and not (tmp / "p-bad").exists())
     finally:
+        shutil.rmtree(tmp, ignore_errors=True)
+    # задания: папка — ключом или $DDD_HOME/out/ai-media/stand, поле agent — только с ключа, пути входов — как в рецепте
+    import types
+    tmp = Path(tempfile.mkdtemp(prefix="stand_jobs_"))
+    mods = {k: sys.modules.get(k) for k in ("polza_catalog", "prompt_compile")}
+    home = os.environ.get(kbpaths.ENV_HOME)
+    try:
+        model = {"id": "m/a", "parameters": {"images": {}, "mask_url": {}, "aspect_ratio": {"values": ["16:9"]}}}
+        snap = types.SimpleNamespace(by_id={"m/a": model}, providers={})     # каталог и компилятор — заглушки без сети
+        sys.modules["polza_catalog"] = types.SimpleNamespace(Snapshot=lambda: snap, estimate=lambda *x, **k: {"rub": 2.0})
+        sys.modules["prompt_compile"] = types.SimpleNamespace(load_dialects=dict, load_catalog=dict)
+        recipe = {"compiler": "prompt_compile.py", "catalog_snapshot": "снимок", "provider_default": {"only": ["x"]},
+                  "seeds": [1], "models": {"a-1k": {"model": "m/a"}}, "literals": {"edit_wall": "Перекрась стену в зелёный"},
+                  "tasks": {"S08": {"code": "IMG-TEXT-CYR", "title": "надпись", "expect": ["Привет"]},
+                            "S14": {"code": "IMG-EDIT", "title": "правка стены", "reg": True, "source": "inputs/scene.png"}},
+                  "phase5": [{"test": "E-01", "file": "E-01-edit.jsonl", "judge": ["metric"], "success": "стена перекрашена",
+                              "value": 1, "hypothesis": "правка по маске",
+                              "jobs": [{"task": "S14", "prompt": "edit_wall", "use": ["a-1k"], "images": ["inputs/scene.png"],
+                                        "mask": "/stand/inputs/mask.png"}]}],
+                  "external": [{"test": "E-09", "file": "E-09.routerai.json", "model": "v/x", "prompt": "edit_wall",
+                                "channel": "канал", "price_rub": 2.0, "price_source": "прайс", "docs": "документация",
+                                "note": "заметка", "value": 1, "overlaps": []}]}
+        (tmp / "tasks.yaml").write_text(yaml.safe_dump(recipe, allow_unicode=True), encoding="utf-8")
+        base = ["--tasks", str(tmp / "tasks.yaml"), "--jobs-dir", str(tmp / "jobs")]
+
+        def built():
+            return [jl_read(tmp / "jobs" / "E-01-edit.jsonl")[0], jl_read(tmp / "jobs" / "E-MS-m-a.jsonl")[0],
+                    json.loads((tmp / "jobs" / "E-09.routerai.json").read_text(encoding="utf-8"))]
+        with contextlib.redirect_stdout(io.StringIO()):
+            rc = main(base + ["build"]), main(base + ["ministand", "--model", "m/a"])
+        job, ms, ext = built()
+        check("задания: --jobs-dir — папка заданий build и ministand; без --agent поля agent нет",
+              rc == (0, 0) and not any("agent" in j for j in (job, ms, ext)))
+        check("задания: входные картинки и маска — как в рецепте, без пересчёта пути",
+              job["input"]["images"] == ["inputs/scene.png"] and job["input"]["mask_url"] == "/stand/inputs/mask.png"
+              and ms["input"]["images"] == ["inputs/scene.png"])
+        with contextlib.redirect_stdout(io.StringIO()):
+            main(base + ["build", "--agent", "стенд"]), main(base + ["ministand", "--model", "m/a", "--agent", "стенд"])
+        check("задания: --agent — имя в поле agent заданий build, ministand и внешнего канала",
+              all(j.get("agent") == "стенд" for j in built()))
+        os.environ[kbpaths.ENV_HOME] = str(tmp / "home")
+        check("задания: без --jobs-dir — $DDD_HOME/out/ai-media/stand, папка создаётся",
+              jobs_dir(argparse.Namespace(jobs_dir=None)) == tmp / "home" / "out" / "ai-media" / "stand"
+              and (tmp / "home" / "out" / "ai-media" / "stand").is_dir())
+    finally:
+        for k, v in mods.items():
+            sys.modules.pop(k, None) if v is None else sys.modules.__setitem__(k, v)
+        os.environ.pop(kbpaths.ENV_HOME, None) if home is None else os.environ.__setitem__(kbpaths.ENV_HOME, home)
         shutil.rmtree(tmp, ignore_errors=True)
     return 0 if ok else 1
 
@@ -1125,8 +1241,10 @@ def cmd_selftest(a):
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--tasks", default=str(TASKS))
+    ap.add_argument("--jobs-dir", help="папка заданий стенда (по умолчанию $DDD_HOME/out/ai-media/stand)")
+    agent_help = "имя в поле agent заданий (выходы и журнал затрат polza.py); без ключа поля нет"
     sub = ap.add_subparsers(dest="cmd", required=True)
-    b = sub.add_parser("build"); b.add_argument("--only")
+    b = sub.add_parser("build"); b.add_argument("--only"); b.add_argument("--agent", help=agent_help)
     e = sub.add_parser("estimate"); e.add_argument("--only")
     r = sub.add_parser("run"); r.add_argument("jobs"); r.add_argument("--live", action="store_true"); r.add_argument("--parallel", type=int, default=2)
     c = sub.add_parser("collect"); c.add_argument("--out", default="results.jsonl")
@@ -1141,9 +1259,12 @@ def main(argv=None):
     p.add_argument("--text", help="лист copydeck.py export-variants: страница текстовых карточек")
     p.add_argument("--text-key", help="ключ меток export-variants (id вариантов — в ключ страницы)")
     p.add_argument("--repeat", type=float, default=0.1); p.add_argument("--seed", type=int, default=7)
+    p.add_argument("--maxside", type=int, default=1600, help="наибольшая сторона картинок страницы; 0 — без уменьшения")
+    p.add_argument("--lossless", action="store_true", help="картинки страницы — PNG, пиксели без потерь")
     t = sub.add_parser("tally"); t.add_argument("votes", nargs="+"); t.add_argument("--key", required=True); t.add_argument("--out")
     t.add_argument("--selection", help="текстовая страница: YAML побед меток по слоту для copydeck.py apply-selection --votes")
     ms = sub.add_parser("ministand"); ms.add_argument("--model", required=True); ms.add_argument("--params"); ms.add_argument("--vs"); ms.add_argument("--out")
+    ms.add_argument("--agent", help=agent_help)
     sub.add_parser("selftest")
     a = ap.parse_args(argv)
     return {"build": cmd_build, "estimate": cmd_estimate, "run": cmd_run, "collect": cmd_collect, "metrics": cmd_metrics,

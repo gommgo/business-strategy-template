@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """kit/export.py — экспорт холста без интерфейса Claude Design: PDF по артбордам, PNG 2×, standalone.html, zip.
 
-Холст — рамки манифеста: `kit.json` статичных копий артбордов (`kit_manifest.py build`, папка `canvas/html/`) или
-`canvas.json` kit; рамка — копия на ширине своей рамки, standalone раскладывает их рядами по ширинам (`canvas.html`).
-Использует сервер, блокировку и проверку памяти из shot.py (тот же каталог).
+Холст — рамки манифеста: `kit.json` статичных копий артбордов или `canvas.json` kit; рамка — копия на ширине своей
+рамки, standalone раскладывает их рядами по ширинам (`canvas.html`). Манифест читается как при съёмке (`shot.py`):
+`--manifest kit.json` без такого файла в папке копий — манифест считается из статичных копий (подписи и порядок — из
+исходников холста, ключ --canvas). Использует сервер, блокировку и проверку памяти из shot.py (тот же каталог).
 
 Использование:
   python3 export.py <pdf|png2x|standalone|zip|all> <папка проекта> <outdir> [--manifest canvas.json] [--only landing.html]
-          [--lock /path/to/browser.lock] [--min-free-gb 2]
+          [--canvas ПАПКА] [--lock /path/to/browser.lock] [--min-free-gb 2]
 Что получается:
   pdf        <файл>-<W>-<тема>.pdf — артборд одной страницей во всю высоту (вектор: текст выделяется, шрифты встроены),
              плюс canvas.pdf — все рамки подряд (pypdf). Экранные стили (emulate_media screen), фоны печатаются.
@@ -207,12 +208,13 @@ def main():
     ap.add_argument('what', choices=['pdf', 'png2x', 'standalone', 'zip', 'all'])
     ap.add_argument('project'); ap.add_argument('outdir')
     ap.add_argument('--manifest', default='canvas.json')
+    ap.add_argument('--canvas', default='', help='папка исходников холста с canvas.json — для манифеста копий, который считается')
     ap.add_argument('--only', default='')
     ap.add_argument('--lock', default=os.environ.get('KIT_BROWSER_LOCK', ''))
     ap.add_argument('--min-free-gb', type=float, default=float(os.environ.get('KIT_MIN_FREE_GB', '0') or 0))
     a = ap.parse_args()
     project = os.path.abspath(a.project)
-    manifest = json.load(open(os.path.join(project, a.manifest), encoding='utf-8'))
+    manifest = shot.read_manifest(project, a.manifest, a.canvas)[0]
     only = [x.strip() for x in a.only.split(',') if x.strip()]
     os.makedirs(a.outdir, exist_ok=True)
     outdir = os.path.abspath(a.outdir)

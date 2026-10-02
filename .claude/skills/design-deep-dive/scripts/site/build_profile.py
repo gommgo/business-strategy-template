@@ -12,7 +12,9 @@ site_action:
                 деструктив) или правило — визуальный слой creative; причина — в reason;
     replaced  — заменён пунктом SITE-* (или CRV-*, COPY-* — нормы creative и text) с нормой сайта; замена обязательна.
 Решения — по блокам (BLOCK_DEFAULT) с точечными исключениями (DECISIONS); основание решения — колонка source (пути —
-от kb/site/). Рядом — наследование для автопроверок AC-* ux (ac-profile.tsv) и сводка в $DDD_HOME/out/site/build_profile/.
+от kb/site/). Рядом с профилем — ac-profile.tsv: действие для каждой автопроверки AC-* ux по наследству от пункта UX,
+который она закрывает (колонки ac_id, closes, site_action, site_replacement, line); сводка — в
+$DDD_HOME/out/site/build_profile/.
 
 Сверка с версией чек-листа ux: решения сверены с версией CHECKLIST_REVIEWED (поле source_sha256_16 файла чек-листа).
 Новая версия чек-листа — отказ записи и находка --check со списком новых, снятых и изменённых пунктов (сравнение с
@@ -21,7 +23,8 @@ site_action:
 
 Запуск (от корня скилла):
     python3 scripts/site/build_profile.py              # записать профиль, ac-profile.tsv и сводку
-    python3 scripts/site/build_profile.py --check      # профиль совпадает с решениями и версией чек-листа? (код 1 — нет)
+    python3 scripts/site/build_profile.py --check      # профиль и ac-profile.tsv совпадают со сборкой и версией чек-листа?
+                                                       # ничего не пишет (код 1 — нет)
     python3 scripts/site/build_profile.py --selftest   # сверка версии, замены, ссылки источников — на подложенных данных
 Проверки: строк — столько, сколько пунктов в чек-листе (items_count); действие из четырёх; у replaced непустая замена;
 каждый SITE-* есть в site-checklist.yaml, COPY-* — в copy-checklist.yaml или copy-rubric.yaml text, CRV-* — в
@@ -50,7 +53,7 @@ COPY_YAMLS = [os.path.join(APP, 'text', '09-ai-generation-evaluation', f) for f 
 CRV_YAML = os.path.join(APP, 'creative', '01-creative-direction', 'ambition-levels.yaml')
 CRV_DIR = os.path.join(APP, 'creative')
 OUT_TSV = os.path.join(ROOT, '09-ai-generation-evaluation', 'ux-marketing-profile.tsv')
-OUT_AC = str(kbpaths.kb('site', '99-raw', 'experiments', 'K', '02-ux-profile', 'ac-profile.tsv'))
+OUT_AC = os.path.join(ROOT, '09-ai-generation-evaluation', 'ac-profile.tsv')
 ACTIONS = ('keep', 'modify', 'off', 'replaced')
 COLS = ('ux_id', 'block', 'ux_text_short', 'site_action', 'site_replacement', 'reason', 'source')
 ID_RX = re.compile(r'\b(?:SITE-[A-Z0-9]{2,5}-\d{2}|COPY-[A-Z]-\d{2}|CRV-[A-Z]+-\d{2})\b')
@@ -420,8 +423,7 @@ def known_ids():
         t = io.open(p, encoding='utf-8').read()
         copy |= set(re.findall(r'\bCOPY-[A-Z]-\d{2}\b', t))
     crv = set(CRV_DEF_RX.findall(io.open(CRV_YAML, encoding='utf-8').read()))
-    for dirpath, dirs, files in os.walk(CRV_DIR):   # чек-листы разделов creative: строки «- CRV-XX-NN …»
-        dirs[:] = [d for d in dirs if d != '99-raw']
+    for dirpath, _dirs, files in os.walk(CRV_DIR):   # чек-листы разделов creative: строки «- CRV-XX-NN …»
         for f in files:
             if f.endswith('.md'):
                 crv |= set(CRV_DEF_RX.findall(io.open(os.path.join(dirpath, f), encoding='utf-8').read()))
@@ -550,6 +552,12 @@ def ac_profile(rows):
     return '\n'.join(out) + '\n', n
 
 
+def drift(disk, built):
+    """Производные файлы против сборки: {имя: текст на диске} и {имя: собранный текст} → имена устаревших; файла на
+    диске нет (пустой текст) — тоже устарел."""
+    return [name for name in built if disk.get(name) != built[name]]
+
+
 def summary_md(rows, n_ac):
     blocks = list(collections.OrderedDict((r['block'], 1) for r in rows))
     t = ['| Блок | Пунктов | keep | modify | off | replaced | точечных решений |', '|---|---|---|---|---|---|---|']
@@ -607,7 +615,7 @@ def selftest():
     known = ({'SITE-OUT-10'}, {'COPY-C-05'}, {'CRV-MO-04'})
     fake = [dict(rows[0], ux_id='UX-T-01', site_action='replaced', site_replacement='', source='PLAN №1'),
             dict(rows[0], ux_id='UX-T-02', site_action='replaced', site_replacement='CRV-MO-99', source='PLAN №1'),
-            dict(rows[0], ux_id='UX-T-03', site_action='keep', site_replacement='', source='99-raw/tools/nope.py'),
+            dict(rows[0], ux_id='UX-T-03', site_action='keep', site_replacement='', source='09-ai-generation-evaluation/nope.py'),
             dict(rows[0], ux_id='UX-T-04', site_action='modify', site_replacement='CRV-MO-04',
                  source='../../scripts/site/ia_probe.py; PLAN №3')]
     errs = validate(fake, [], {'items': fake}, known=known)
@@ -617,6 +625,12 @@ def selftest():
     check('основание — утилита скилла от kb/site/ — проходит', not any(e.startswith('UX-T-04') for e in errs))
     crv = known_ids()[2]
     check(f'определения CRV creative: {len(crv)} id, среди них CRV-MO-04, CRV-MO-06', {'CRV-AL-01', 'CRV-MO-04', 'CRV-MO-06'} <= crv)
+    ac = ac_profile(rows)[0]
+    built = {'TSV': tsv, 'ac': ac}
+    check('производные на диске равны сборке — устаревших нет', drift(dict(built), built) == [])
+    check('ac-profile.tsv с лишней строкой — устарел, профиль — нет',
+          drift(dict(built, ac=ac + 'AC-T-01\tUX-T-01\tkeep\t\t1\n'), built) == ['ac'])
+    check('ac-profile.tsv нет на диске — устарел', drift({'TSV': tsv, 'ac': ''}, built) == ['ac'])
     print('SELFTEST', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 
@@ -624,7 +638,8 @@ def selftest():
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('--check', action='store_true',
-                    help='сверить профиль на диске с решениями и версией чек-листа ux; ничего не пишет (код 1 — расходится)')
+                    help='сверить профиль и ac-profile.tsv на диске со сборкой и версией чек-листа ux; ничего не пишет '
+                         '(код 1 — расходится)')
     ap.add_argument('--selftest', action='store_true', help='самопроверка без записи')
     a = ap.parse_args(argv)
     if a.selftest:
@@ -634,21 +649,25 @@ def main(argv=None):
     old = io.open(OUT_TSV, encoding='utf-8').read() if os.path.exists(OUT_TSV) else ''
     notes, reviewed = reconcile(rows, old, str(ux.get('source_sha256_16') or ''))
     tsv = render_tsv(rows)
+    ac, n_ac = ac_profile(rows)
     if a.check:
-        same = old == tsv
-        print('TSV совпадает с решениями' if same else 'TSV УСТАРЕЛ: пересобрать (build_profile.py без ключей)')
+        old_ac = io.open(OUT_AC, encoding='utf-8').read() if os.path.exists(OUT_AC) else ''
+        ac_name = os.path.basename(OUT_AC)
+        stale = drift({'TSV': old, ac_name: old_ac}, {'TSV': tsv, ac_name: ac})
+        print('TSV УСТАРЕЛ: пересобрать (build_profile.py без ключей)' if 'TSV' in stale else 'TSV совпадает с решениями')
+        print(f'{ac_name} УСТАРЕЛ: пересобрать (build_profile.py без ключей)' if ac_name in stale
+              else f'{ac_name} совпадает со сборкой')
         for line in notes:
             print(line)
         for e in errors:
             print('ОШИБКА', e)
-        return 0 if same and reviewed and not errors else 1
+        return 0 if not stale and reviewed and not errors else 1
     for line in notes:
         print(line)
     for e in errors:
         print('ОШИБКА', e)
     if errors or not reviewed:
         return 1
-    ac, n_ac = ac_profile(rows)
     summ = summary_md(rows, n_ac)
     out_sum = kbpaths.out('site', 'build_profile') / 'summary.md'
     io.open(OUT_TSV, 'w', encoding='utf-8').write(tsv)

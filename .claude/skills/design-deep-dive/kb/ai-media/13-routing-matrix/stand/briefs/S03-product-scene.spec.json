@@ -4,7 +4,7 @@
  "brief_language": "ru",
  "task": "IMG-PRODUCT",
  "role": {
-  "page_type": "ecommerce",
+  "page_class": "ecommerce",
   "section": "product-gallery",
   "slot": "pdp-lifestyle",
   "priority": "above-fold",

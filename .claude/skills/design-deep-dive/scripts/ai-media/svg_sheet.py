@@ -1,18 +1,23 @@
 #!/usr/bin/env python3
 """svg_sheet.py — разбор SVG (Recraft, LLM → SVG): метрики, гигиена с сохранением подписи, листы на светлом и тёмном фоне.
 
-Агент A, сессия 4, 25.09.2026 (этап 2: CM-01, CM-03, CM-11, G-01…G-18). Запуск — `99-raw/tools/venv-G/bin/python`
-(cairosvg, numpy, Pillow); svgo 4.1.0 — `99-raw/tools/node/node_modules/.bin/svgo` с конфигом G/02 `keep-signature`.
+Python окружения скилла: cairosvg, numpy, Pillow; svgo — из `$DDD_HOME/node` с конфигом
+`scripts/ai-media/data/svgo.keep-signature.config.mjs`.
 
-  venv-G/bin/python svg_sheet.py sheet SVG… --out DIR [--palette "#0E1417,#F1E5DB,…"] [--mode icons|illustration]
-        [--light "#F1E5DB"] [--dark "#0E1417"] [--sizes 16,24,48] [--cells 4] [--blind]
-  venv-G/bin/python svg_sheet.py render SVG --png 1024 --out FILE.png      # растр для референса (CM-03)
+  svg_sheet.py sheet SVG… --out DIR [--palette "#0E1417,#F1E5DB,…"] [--mode icons|illustration]
+        [--light "#F1E5DB"] [--dark "#0E1417"] [--sizes 16,24,48] [--cells 4] [--blind] [--current-color]
+  svg_sheet.py recolor SVG --palette "#0E1417,#F1E5DB,…" [--swap "#0E1417=#F1E5DB,…"] --out FILE.svg
+  svg_sheet.py render SVG --png 1024 [--bg "#F1E5DB"] --out FILE.png       # растр для референса
+  svg_sheet.py --selftest                                                  # самопроверка без сети
 
 Метрики (на файл): байты исходника; `<path>`; узлы (команды в `d`); уникальные заливки; ΔE00 каждой заливки к ближайшему цвету
-палитры (медиана, максимум) и доля **площади** (растр 512 px, без фона) с ΔE00 ≤ 3; подпись `<recraft-signature>` до и после;
-гигиена G/02: корень (без `preserveAspectRatio="none"`, пиксельных размеров), фон-прямоугольник первым путём → svgo
-`multipass` + `floatPrecision: 1` с сохранением подписи → байты после. Листы: `--mode icons` — весь набор в ширинах, при которых
+палитры (медиана, максимум) и доля **площади** (растр 256 px, без фона) с ΔE00 ≤ 3; подпись `<recraft-signature>` до и после;
+число `currentColor`; гигиена: корень (без `preserveAspectRatio="none"`, пиксельных размеров), фон-прямоугольник первым путём →
+svgo `multipass` + `floatPrecision: 1` с сохранением подписи → байты после. Листы: `--mode icons` — весь набор в ширинах, при которых
 одна иконка ≈ 16/24/48 px (`--cells` — иконок в ряду), на светлом и тёмном; `--mode illustration` — 1440 px на светлом и тёмном.
+`--current-color` — режим одноцветных иконок: `currentColor` рисуется на светлом фоне цветом `--dark`, на тёмном — цветом
+`--light`, как на странице, где цвет иконки задаёт тема. Без ключа `currentColor` рисуется чёрным и на тёмном фоне не виден —
+лист сообщает об этом в stderr.
 """
 from __future__ import annotations
 
@@ -38,6 +43,7 @@ from edit_check import de2000, srgb_to_lab  # noqa: E402
 SVGO = kbpaths.node_modules(".bin", "svgo")
 SVGO_CFG = kbpaths.data("ai-media", "svgo.keep-signature.config.mjs")
 NODE_BIN = os.path.dirname(kbpaths.node())
+CURRENT_RE = re.compile(r"currentColor", re.I)
 
 
 def hex_rgb(h: str) -> tuple[int, int, int]:
@@ -89,7 +95,7 @@ def drop_bg(txt: str) -> tuple[str, bool]:
         col = re.search(r'fill="rgb\((\d+),\s*(\d+),\s*(\d+)\)"', el) or re.search(r'fill="(#[0-9a-fA-F]{3,6})"', el)
         rgb = tuple(int(c) for c in col.groups()) if col and len(col.groups()) == 3 else (hex_rgb(col.group(1)) if col else None)
         if full and rgb:
-            return txt.replace(el, "", 1), True       # фон — первый путь на весь холст (любого цвета: у «Перламутра» фон тёплый)
+            return txt.replace(el, "", 1), True       # фон — первый путь на весь холст, любого цвета
         break
     return txt, False
 
@@ -114,7 +120,8 @@ def analyze(path: Path, palette: list[str], clean_dir: Path) -> dict:
     r = {"file": path.name, "bytes_raw": len(txt.encode()), "signature_raw": "recraft-signature" in txt,
          "paths": len(re.findall(r"<path\b", txt)), "shapes": len(re.findall(r"<(path|circle|rect|ellipse|polygon|polyline|line)\b", txt)),
          "nodes": sum(len(re.findall(r"[MLHVCSQTAZmlhvcsqtaz]", d)) for d in re.findall(r'\sd="([^"]+)"', txt)),
-         "strokes": len(re.findall(r'stroke="(?!none)', txt)), "gradients": len(re.findall(r"<(linear|radial)Gradient", txt))}
+         "strokes": len(re.findall(r'stroke="(?!none)', txt)), "gradients": len(re.findall(r"<(linear|radial)Gradient", txt)),
+         "current_color": len(CURRENT_RE.findall(txt))}
     fl = fills(txt)
     r["fills_unique"] = len(fl)
     if palette and fl:
@@ -160,6 +167,28 @@ def font(sz):
     return ImageFont.load_default()
 
 
+def tint(txt: str, ink: str | None) -> str:
+    """`currentColor` в SVG → цвет ink: растеризатор не знает цвета темы и рисует `currentColor` чёрным."""
+    return CURRENT_RE.sub(ink, txt) if ink else txt
+
+
+def current_inks(a) -> dict:
+    """Режим `--current-color` → {фон: цвет вместо `currentColor`}: на светлом фоне — цвет тёмного, на тёмном — цвет
+    светлого. Без режима — пусто."""
+    return {a.light: a.dark, a.dark: a.light} if a.current_color else {}
+
+
+def tiles_for(txt: str, a, inks: dict) -> list:
+    """Плитки одного SVG для листа: в режиме icons — набор в ширинах под размеры `--sizes` и крупно, на светлом и
+    тёмном фоне; иначе — 1440 px на светлом и тёмном. inks — цвет вместо `currentColor` на каждом фоне."""
+    def shot(w, bg):
+        return raster(tint(txt, inks.get(bg)), w, bg)
+    if a.mode == "icons":
+        ws = [int(s * a.cells * 1.5) for s in a.sizes]          # ширина рендера, при которой иконка ≈ s px
+        return [shot(w, bg) for bg in (a.light, a.dark) for w in ws] + [shot(960, a.light), shot(960, a.dark)]
+    return [shot(1440, a.light), shot(1440, a.dark)]
+
+
 def cmd_sheet(a):
     out = Path(a.out)
     out.mkdir(parents=True, exist_ok=True)
@@ -174,18 +203,15 @@ def cmd_sheet(a):
         m["code"] = code
         rows.append((m, f))
         key[str(code)] = str(f)
+    inks = current_inks(a)
+    if not inks and any(m["current_color"] for m, _ in rows):
+        print("в SVG есть currentColor, а режим --current-color не включён: иконки нарисованы чёрным и на тёмном фоне "
+              "не видны", file=sys.stderr)
     tiles = []
     for m, f in rows:
         clean = out / "clean" / (f.stem + ".clean.svg")
         txt = (clean if clean.exists() else f).read_text(encoding="utf-8", errors="replace")
-        if a.mode == "icons":
-            ws = [int(s * a.cells * 1.5) for s in a.sizes]          # ширина рендера, при которой иконка ≈ s px
-            parts = [raster(txt, w, bg) for bg in (a.light, a.dark) for w in ws]
-            big = [raster(txt, 960, a.light), raster(txt, 960, a.dark)]
-            parts = parts + big
-        else:
-            parts = [raster(txt, 1440, a.light), raster(txt, 1440, a.dark)]
-        tiles.append((m, parts))
+        tiles.append((m, tiles_for(txt, a, inks)))
     pad, lab_h = 16, 40
     W = max(sum(p.width for p in parts) + pad * (len(parts) + 1) if a.mode == "icons" else max(p.width for p in parts) + 2 * pad
             for _, parts in tiles)
@@ -262,8 +288,59 @@ def cmd_render(a):
     print(a.out, im.size)
 
 
-def main():
-    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
+SELFTEST_ICON = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">'
+                 '<path d="M4 4h16v16H4z" fill="currentColor"/></svg>')
+
+
+def selftest():
+    import contextlib
+    import tempfile
+    ok = True
+
+    def check(msg, cond):
+        nonlocal ok
+        ok = ok and bool(cond)
+        print(("OK   " if cond else "FAIL ") + msg)
+
+    def centre(im):
+        return im.getpixel((im.width // 2, im.height // 2))
+
+    light, dark = "#F4F1EA", "#101418"
+    mixed = SELFTEST_ICON.replace("</svg>", '<path d="M0 0h2v2H0z" style="fill:CURRENTCOLOR"/></svg>')
+    check("tint: currentColor в атрибуте и в style, в любом регистре → цвет; без цвета текст не меняется",
+          not CURRENT_RE.search(tint(mixed, dark)) and tint(mixed, dark).count(dark) == 2 and tint(mixed, None) == mixed)
+    a = argparse.Namespace(mode="illustration", light=light, dark=dark, sizes=[16], cells=1, current_color=False)
+    plain = tiles_for(SELFTEST_ICON, a, current_inks(a))
+    check("без режима currentColor рисуется чёрным на обоих фонах: на тёмном иконка сливается с фоном",
+          centre(plain[0]) == (0, 0, 0) and centre(plain[1]) == (0, 0, 0))
+    a.current_color = True
+    inked = tiles_for(SELFTEST_ICON, a, current_inks(a))
+    check("режим currentColor: на светлом фоне иконка цвета тёмного, на тёмном — цвета светлого",
+          centre(inked[0]) == hex_rgb(dark) and centre(inked[1]) == hex_rgb(light))
+    with tempfile.TemporaryDirectory(prefix="svg_sheet_") as td:
+        t, errs = Path(td), {}
+        (t / "icon.svg").write_text(SELFTEST_ICON, encoding="utf-8")
+        for name, keys in (("plain", []), ("inked", ["--current-color"])):
+            errs[name] = io.StringIO()
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(errs[name]):
+                main(["sheet", str(t / "icon.svg"), "--out", str(t / name), "--mode", "icons", "--sizes", "16",
+                      "--cells", "1", "--light", light, "--dark", dark, *keys])
+        sheets = [np.asarray(Image.open(t / n / "sheet.png")) for n in ("plain", "inked")]
+        metrics = json.loads((t / "inked" / "metrics.json").read_text(encoding="utf-8"))
+        check("лист с ключом --current-color отличается от листа без ключа; число currentColor — в метриках",
+              sheets[0].shape == sheets[1].shape and not np.array_equal(sheets[0], sheets[1])
+              and metrics[0]["current_color"] == 1)
+        check("лист без ключа сообщает в stderr о currentColor, с ключом — молчит",
+              "--current-color" in errs["plain"].getvalue() and "--current-color" not in errs["inked"].getvalue())
+    print("svg_sheet selftest:", "OK" if ok else "FAIL")
+    return 0 if ok else 1
+
+
+def main(argv=None):
+    argv = sys.argv[1:] if argv is None else argv
+    if "--selftest" in argv:
+        sys.exit(selftest())
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sp = ap.add_subparsers(dest="cmd", required=True)
     s = sp.add_parser("sheet")
     s.add_argument("svgs", nargs="+")
@@ -275,6 +352,8 @@ def main():
     s.add_argument("--sizes", type=lambda v: [int(x) for x in v.split(",")], default=[16, 24, 48])
     s.add_argument("--cells", type=int, default=4, help="иконок в ряду набора")
     s.add_argument("--blind", action="store_true")
+    s.add_argument("--current-color", action="store_true",
+                   help="currentColor рисовать цветом --dark на светлом фоне и цветом --light на тёмном")
     s.set_defaults(fn=cmd_sheet)
     s = sp.add_parser("recolor")
     s.add_argument("svg")
@@ -288,7 +367,7 @@ def main():
     s.add_argument("--bg")
     s.add_argument("--out", required=True)
     s.set_defaults(fn=cmd_render)
-    a = ap.parse_args()
+    a = ap.parse_args(argv)
     a.fn(a)
 
 

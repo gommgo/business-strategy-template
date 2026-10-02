@@ -33,9 +33,11 @@
 Типографика в CSS считается от того, что покажет браузер. Интерлиньяж: число DTCG — отношение, округлённое до шести
 знаков; когда оно недотягивает до целого px (14 px × 1.428571 = 19,999994), браузер усекает высоту строки до шага
 раскладки 1/64 px и строка выходит 19,98 px — в CSS идёт наименьшее шестизначное отношение, которое даёт целый px
-(1.428572); в передней части и артефакте остаётся число DTCG. Трекинг: у стиля с резиновым кеглем (расширение
-`org.design-deep-dive.fluid` или готовый CSS кегля) px значения верен только на наибольшем кегле, поэтому в CSS и в
-передней части он идёт в em — `letter_spacing_em` расширения, иначе px значения / кегль значения.
+(1.428572); в передней части и артефакте остаётся число DTCG. У стиля с готовым интерлиньяжем — `line_height_css`
+расширения `org.design-deep-dive.fluid`, выражение от кегля вроде `calc(0.925em + 0.5625rem)` — в CSS идёт это
+выражение: число значения верно только на кегле значения, с ним выражение не сверяется. Трекинг: у стиля с резиновым
+кеглем (расширение `org.design-deep-dive.fluid` или готовый CSS кегля) px значения верен только на наибольшем кегле,
+поэтому в CSS и в передней части он идёт в em — `letter_spacing_em` расширения, иначе px значения / кегль значения.
 
 Что не идёт в артефакт: примитивы (`primitive.*` — холст и компоненты берут значения ролей) и движение (группы
 `motion*`, типы duration, cubicBezier, transition — у формата токенов артефакта нет семейства движения, длительности и
@@ -45,17 +47,40 @@
 `$description`
 токена DTCG. `example: true` в корне токенов — пометка иллюстрации (фикстуры), она переходит в производный tokens.json.
 
+Расширения токенов — ключи `$extensions` пространства `org.design-deep-dive.`: `modes`, `reduce`, `fluid`, `css` и
+`artifact` читает сборка; `llm` (правила применения), `meta` и `limits` — пометки, в производные они не идут. Ключ вне
+этого списка сборка не читает и называет предупреждением: опечатка в имени и расширение под именем другого
+инструмента иначе теряют значение молча. Режим токена с именем темы значений — тоже предупреждение: тема значений
+живёт в `$value`.
+
     ds_build build <slug> [--repo DIR] [--out DIR] [--json]    собрать производные; --out DIR → DIR/docs/projects/…
     ds_build check <slug> [--repo DIR] [--json]                формат DTCG и свежесть производных; ничего не пишет
     ds_build show  <slug> [--repo DIR] [--json]                токены: путь, имя переменной, тип, значения по режимам
+    ds_build artifact <slug> --bind-assets FILE --out DIR [--repo DIR] [--json]
+                                                               копия исходников артефакта с id загрузок; проект не
+                                                               меняется
     ds_build --selftest                                        без сети: разбор, сборка, фикстура cabinet-ds
+
+Загрузки артефакта. Картинки артефакта Design System — загрузки: страница адресует их `/_blob/<id>`, индекс
+`design-system.json` — полем `blob` записи `assetGroups.<группа>.files.<имя>`. id у каждого артефакта свой, поэтому
+исходники `design/_design-system/project/` называют файл ассета репозитория путём от своего файла
+(`../../../../_assets/icons/play.svg` в превью компонента), а id подставляет команда `artifact` по ответу загрузки
+`--bind-assets FILE`. Ответ — JSON: список записей с именем файла (`file`, `path` или `name`) и id (`id` или адрес `url`
+вида `/_blob/<id>`) либо словарь `{файл: id}`; запись находит файл по имени и концу пути. В копии `--out DIR/docs/
+projects/<slug>/design/_design-system/project/`: ссылка `src`, `href`, `poster` или `url(…)` на файл `design/` вне папки
+артефакта → `/_blob/<id>`; `/_blob/<id>` с id из индекса исходников → id того же имени файла; `blob` записи индекса —
+по имени файла. Публикуется копия. Ссылка или запись без id в ответе остаётся как в исходнике — R-REF-008 `warning`.
 
 Правила (`.claude/skills/design-audit/references/rules.md`):
   R-STRUCT-006  формат DTCG схемой (группы, `$type`, форма `$value` по типу, алиасы `{…}` ведут в токен того же типа,
                 без циклов; значения режимов; тема значений `base`; одна шкала space.*)                    error;
-                warning — вторая шкала, лимит семейств, px типографики из CSS расходится с px значения DTCG
+                warning — вторая шкала, лимит семейств, px типографики из CSS расходится с px значения DTCG,
+                ключ `$extensions` вне известных сборке, режим токена с именем темы значений
   R-FRESH-001   system.tokens.css, передняя часть DESIGN.md, tokens.json и README артефакта равны сборке байт в байт
-                (хвост README, который дописывает страница артефакта, — не расхождение)   error; нет прозы — warning
+                (README сверяется по началу файла: хвост, который дописывает страница артефакта, — не расхождение)
+                error; нет прозы — warning
+  R-REF-008     команда artifact: у файла ассета, на который ссылается исходник артефакта, или у записи индекса нет
+                id в ответе загрузки                                                                          warning
 Код выхода: 0 — нет error, 1 — есть error, 2 — ошибка вызова или окружения.
 """
 from __future__ import annotations
@@ -82,6 +107,9 @@ EXT_REDUCE = "org.design-deep-dive.reduce"                 # сокращённ�
 EXT_FLUID = "org.design-deep-dive.fluid"                   # fluid-значение clamp() расширения страниц
 EXT_CSS = "org.design-deep-dive.css"                       # готовое CSS-значение расширения страниц
 EXT_ART = "org.design-deep-dive.artifact"                   # поля артефакта Design System, которых нет в DTCG
+EXT_SPACE = "org.design-deep-dive."                         # пространство ключей `$extensions`, которые знает сборка
+EXT_NOTES = (EXT_SPACE + "meta", EXT_SPACE + "limits")      # пометки токенов страниц: в производные не идут
+EXT_KNOWN = (EXT_MODES, EXT_LLM, EXT_REDUCE, EXT_FLUID, EXT_CSS, EXT_ART) + EXT_NOTES
 
 NARROW_BODY_MIN_PX = 16     # ux/09-mobile/03-mobile-content-tables-forms-dashboards.md §7.1 (canon.tsv, NU-15)
 REM_PX = 16
@@ -107,7 +135,6 @@ FONT_WEIGHTS = {"thin": 100, "hairline": 100, "extra-light": 200, "ultra-light":
                 "ultra-black": 950}
 ALIAS = re.compile(r"^\{([^{}]+)\}$")
 NAME = re.compile(r"^[^$.{}][^.{}]*$")
-PAGE_TAIL = "Consuming this system"                         # хвост README, который дописывает страница артефакта
 FM = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|\Z)", re.S)
 KIND = "design-system"
 
@@ -247,6 +274,7 @@ class Issue:
     pointer: str
     message: str
     severity: str = "error"
+    fix: str = ""                                            # что сделать; пусто — правка токена по сообщению
 
 
 @dataclass
@@ -447,7 +475,48 @@ def validate(data):
         if second in tops and "space" in tops:
             issues.append(Issue(pointer((second,)), f"вторая шкала отступов `{second}.*` рядом с `space.*`: шкала одна",
                                 "warning"))
+    issues += _extension_issues(data) + _base_mode_issues(toks)
     return issues
+
+
+def _extension_keys(node, path=()):
+    """[(ключ `$extensions`, указатель)] корня, групп и токенов — по порядку документа."""
+    ext = node.get("$extensions")
+    out = [(k, pointer(path, "$extensions", k)) for k in ext] if isinstance(ext, dict) else []
+    if "$value" not in node:
+        for key, val in node.items():
+            if isinstance(val, dict) and not key.startswith("$"):
+                out += _extension_keys(val, path + (key,))
+    return out
+
+
+def _extension_issues(data):
+    """Ключ `$extensions` вне известных сборке — предупреждение на ключ: его значения в производные не идут, и
+    опечатка в имени или расширение под именем другого инструмента иначе проходит молча."""
+    places = {}
+    for key, ptr in _extension_keys(data):
+        if key not in EXT_KNOWN:
+            places.setdefault(key, []).append(ptr)
+    known = " · ".join(k[len(EXT_SPACE):] for k in EXT_KNOWN)
+    return [Issue(ptrs[0], f"расширение `{key}` — вне известных сборке (`{EXT_SPACE}` + {known}): его значения в "
+                           f"производные не идут; мест — {len(ptrs)}", "warning",
+                  f"расширение сборки — ключом `{EXT_SPACE}<имя>`; данные другого инструмента сборке не мешают")
+            for key, ptrs in places.items()]
+
+
+def _base_mode_issues(toks):
+    """Режим токена с именем темы значений: CSS кладёт его в блок этой темы, артефакт берёт `$value` — одно
+    предупреждение на файл."""
+    first = base_theme(toks.data)
+    same = [t for t in toks.list if first in t.modes()]
+    if not same:
+        return []
+    names = ", ".join(".".join(t.path) for t in same[:3]) + (" …" if len(same) > 3 else "")
+    return [Issue(same[0].pointer + f"/$extensions/{EXT_MODES}/{first}",
+                  f"режим `{first}` совпадает с темой значений `$value`: токенов — {len(same)} ({names}); CSS кладёт "
+                  f"значение режима в блок `[data-theme=\"{first}\"]`, артефакт берёт `$value`", "warning",
+                  f"значение темы `{first}` — в `$value`, режим `{first}` снять; значения другой темы — режимом "
+                  f"`{THEME_PAIR[first]}` или сменой `base` в корне")]
 
 
 def _schema_message(e):
@@ -640,10 +709,21 @@ def leading_px(ratio, size):
     return (_dec(ratio) * _dec(size) * LAYOUT_STEP).to_integral_value(rounding=ROUND_FLOOR) / LAYOUT_STEP
 
 
-def leading_css(v):
-    """Интерлиньяж CSS: число DTCG; если оно недотягивает до целого px, который записывает (отношение округлено
-    вниз), — наименьшее отношение той же точности, которое этот px даёт. Округление вверх, а не точная дробь: браузер
-    хранит множитель с одинарной точностью, и после усечения до шага точная дробь тоже теряет px (20 / 15)."""
+def ready_leading(t):
+    """Готовый интерлиньяж CSS токена — `line_height_css` расширения резинового кегля (выражение от кегля) или None."""
+    fl = t.ext(EXT_FLUID)
+    css = fl.get("line_height_css") if isinstance(fl, dict) else None
+    return css.strip() if isinstance(css, str) and css.strip() else None
+
+
+def leading_css(v, t=None):
+    """Интерлиньяж CSS: у токена t с готовым выражением `line_height_css` — оно; иначе число DTCG, а если оно
+    недотягивает до целого px, который записывает (отношение округлено вниз), — наименьшее отношение той же точности,
+    которое этот px даёт. Округление вверх, а не точная дробь: браузер хранит множитель с одинарной точностью, и после
+    усечения до шага точная дробь тоже теряет px (20 / 15)."""
+    ready = ready_leading(t) if t is not None else None
+    if ready:
+        return ready
     ratio, size = v["lineHeight"], px_of(v["fontSize"])
     if not size or isinstance(ratio, bool) or not isinstance(ratio, (int, float)):
         return num(ratio)
@@ -688,7 +768,7 @@ def token_vars(toks, t, mode=None):
             if key == "fontSize" and fluid:
                 val = fluid
             elif key == "lineHeight":
-                val = leading_css(v)
+                val = leading_css(v, t if own else None)
             elif key == "letterSpacing" and own:
                 val = tracking_css(t, v)
             else:
@@ -704,7 +784,8 @@ def token_vars(toks, t, mode=None):
 
 def typography_issues(toks):
     """Типографика CSS против значения DTCG при кегле значения: высота строки в браузере — целый px интерлиньяжа,
-    трекинг в em × кегль — px трекинга. Расхождение — замечание: в CSS уходит не то, что записано в `$value`."""
+    трекинг в em × кегль — px трекинга. Расхождение — замечание: в CSS уходит не то, что записано в `$value`.
+    Готовый интерлиньяж `line_height_css` — выражение от кегля, с числом значения он не сверяется."""
     out = []
     for t in toks.list:
         if t.type != "typography":
@@ -713,7 +794,7 @@ def typography_issues(toks):
             v = toks.value(t)
             size, track, em = px_of(v["fontSize"]), px_of(v["letterSpacing"]), tracking_em(t, v)
             lead = dict(token_vars(toks, t))[f"{t.name}-leading"]
-            whole = whole_leading(v["lineHeight"], size) if size else None
+            whole = whole_leading(v["lineHeight"], size) if size and ready_leading(t) is None else None
             shown = leading_px(lead, size) if whole is not None else None
         except (ValueError, KeyError, TypeError, ArithmeticError):
             continue                                         # значение не по форме — замечание формата уже есть
@@ -1086,11 +1167,12 @@ def readme(design_md_text, slug):
 
 
 def readme_fresh(disk, built):
-    """README на диске равен сборке; хвост, который дописывает страница артефакта, — не расхождение."""
+    """README на диске равен сборке или продолжает её с новой строки: собранная часть сверяется по началу файла, а
+    хвост, который дописывает страница артефакта, не сверяется — его текст меняется вместе с типом артефакта."""
     if disk == built:
         return True
     head = built.rstrip("\n")
-    return disk.startswith(head) and PAGE_TAIL in disk[len(head):]
+    return disk.startswith(head) and disk[len(head):].startswith("\n")
 
 
 # ------------------------------------------------------------------ сборка проекта
@@ -1185,8 +1267,8 @@ def check(prj):
     issues = validate(data)
     for i in issues:
         rep.add("R-STRUCT-006", i.severity, surface=None, kind=KIND, ref="tokens#" + i.pointer, path=rel_tokens,
-                message=i.message, fix="" if i.severity != "error" else "правка токена в system.tokens.json, затем "
-                                                                         f"ds_build build {prj.slug}")
+                message=i.message, fix=i.fix or ("" if i.severity != "error" else "правка токена в system.tokens.json, "
+                                                 f"затем ds_build build {prj.slug}"))
     if any(i.severity == "error" for i in issues):
         rep.add("R-FRESH-001", "hint", surface=None, kind=KIND, ref="tokens", path=rel_tokens,
                 message="свежесть производных не сверялась: токены не собираются, пока есть ошибки формата")
@@ -1264,6 +1346,130 @@ def build(prj, out=None):
             target.write_text(text, encoding="utf-8")
         done.append((target, not same))
     return done
+
+
+# ------------------------------------------------------------------ загрузки артефакта Design System
+
+ASSET_ID = r"[0-9a-f]{32}"                                  # id загрузки артефакта
+BLOB_URL = re.compile(rf"/_blob/({ASSET_ID})")
+ASSET_REF = re.compile(r"""\b(src|href|poster)(\s*=\s*)(["'])([^"'<>]+)\3|url\(\s*(["']?)([^"'()]+)\5\s*\)""")
+BIND_TEXT = (".html", ".css", ".js", ".json", ".md", ".svg", ".ts")
+INDEX = "design-system.json"                                 # индекс артефакта: загрузки — assetGroups.<группа>.files
+
+
+def upload_answer(path):
+    """Ответ загрузки → [(файл как в ответе, id)]. JSON: список записей с именем файла (`file`, `path` или `name`) и
+    id (`id` или адрес `url` вида `/_blob/<id>`) либо словарь `{файл: id или адрес}`."""
+    try:
+        data = json.loads(Path(path).read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, ValueError) as e:
+        raise F.ToolError(f"ответ загрузки {path} не читается как JSON: {e}") from e
+    if isinstance(data, dict):
+        pairs = list(data.items())
+    elif isinstance(data, list) and all(isinstance(r, dict) for r in data):
+        pairs = [(next((r[k] for k in ("file", "path", "name") if isinstance(r.get(k), str)), None),
+                  r.get("id") or r.get("url")) for r in data]
+    else:
+        raise F.ToolError(f"ответ загрузки {path}: нужен список записей {{file, id}} или словарь {{файл: id}}")
+    rows = []
+    for name, value in pairs:
+        m = re.search(rf"(?:^|/)({ASSET_ID})(?:$|[/?#])", value) if isinstance(value, str) else None
+        if not isinstance(name, str) or not name or m is None:
+            raise F.ToolError(f"ответ загрузки {path}: запись без имени файла или id загрузки ({name!r})")
+        rows.append((re.sub(r"^(?:\./|/)+", "", name.replace("\\", "/")), m.group(1)))
+    return rows
+
+
+def answer_id(rows, rel):
+    """id загрузки файла репозитория (путь от `design/` или имя файла): запись ответа с тем же именем и тем же
+    концом пути. Записей с разными id несколько или ни одной — None."""
+    name = rel.rsplit("/", 1)[-1]
+    ids = {i for n, i in rows if n.rsplit("/", 1)[-1] == name
+           and (n == rel or n.endswith("/" + rel) or rel.endswith("/" + n))}
+    return next(iter(ids)) if len(ids) == 1 else None
+
+
+def bind_assets(prj, answer, out):
+    """Копия исходников артефакта ДС с id загрузок из ответа загрузки → ([(путь, записан ли)], находки); исходники
+    не меняются. Ссылка `src`, `href`, `poster` или `url(…)` на файл `design/` вне папки артефакта → `/_blob/<id>`;
+    `/_blob/<id>` с id из индекса исходников → id того же имени файла; `blob` записи индекса — по имени файла."""
+    rows = upload_answer(answer)
+    src, design = prj.art_dir.resolve(), prj.tokens_path.parent.resolve()
+    if not src.is_dir():
+        raise F.ToolError(f"нет исходников артефакта ДС: {prj.rel(prj.art_dir)}")
+    copy = (Path(out) / Path(prj.rel(prj.art_dir))).resolve()
+    if copy == src or src in copy.parents:
+        raise F.ToolError("artifact: --out ведёт в исходники артефакта — копия с id загрузок пишется вне проекта")
+    rep = F.Report()
+    index = None
+    if (src / INDEX).is_file():
+        try:
+            index = json.loads((src / INDEX).read_text(encoding="utf-8"))
+        except ValueError as e:
+            raise F.ToolError(f"{prj.rel(prj.art_dir / INDEX)} — не JSON: {e}") from e
+    groups = index.get("assetGroups") if isinstance(index, dict) else None
+    records = [(name, rec) for g in (groups.values() if isinstance(groups, dict) else ())
+               for name, rec in (g["files"].items() if isinstance(g, dict) and isinstance(g.get("files"), dict)
+                                 else ()) if isinstance(rec, dict)]
+    was = {rec["blob"]: name for name, rec in records
+           if isinstance(rec.get("blob"), str) and re.fullmatch(ASSET_ID, rec["blob"])}
+    now = {i for _, i in rows}
+    path = src
+
+    def miss(what, ref):
+        rep.add("R-REF-008", "warning", surface=None, kind=KIND, ref="artifact#" + ref,
+                path=prj.rel(prj.art_dir / path.relative_to(src)),
+                message=f"{what}: id загрузки в ответе загрузки нет — ссылка осталась как в исходнике",
+                fix="загрузить файл в артефакт и повторить привязку с новым ответом загрузки")
+
+    def blob(m):
+        old = m.group(1)
+        new = answer_id(rows, was[old]) if old in was else None
+        if new is None and old not in now:
+            miss(f"`/_blob/{old}`" + (f" (файл {was[old]})" if old in was else " — id нет в индексе исходников"), old)
+        return f"/_blob/{new}" if new else m.group(0)
+
+    def ref(m):
+        attr = m.group(1) is not None
+        target = (m.group(4) if attr else m.group(6)).split("#", 1)[0].split("?", 1)[0].strip()
+        if not target or re.match(r"(?:[a-z][a-z0-9+.-]*:|/)", target, re.I):
+            return m.group(0)
+        file = (path.parent / target).resolve()
+        if not file.is_file() or design not in file.parents or src in file.parents:
+            return m.group(0)
+        rel = file.relative_to(design).as_posix()
+        new = answer_id(rows, rel)
+        if new is None:
+            miss(f"файл ассета `{rel}`", rel)
+            return m.group(0)
+        q = m.group(3) if attr else m.group(5)
+        return f"{m.group(1)}{m.group(2)}{q}/_blob/{new}{q}" if attr else f"url({q}/_blob/{new}{q})"
+
+    done = []
+    for path in sorted(p for p in src.rglob("*") if p.is_file()):
+        raw = path.read_bytes()
+        if path.suffix.lower() in BIND_TEXT:
+            try:
+                text = raw.decode("utf-8")
+            except UnicodeDecodeError:
+                text = None
+            if text is not None and path == src / INDEX:
+                for name, rec in records:
+                    new = answer_id(rows, name)
+                    if new:
+                        rec["blob"] = new
+                    elif rec.get("blob") not in now:
+                        miss(f"запись индекса `{name}`", "assetGroups/" + name)
+                raw = (json.dumps(index, ensure_ascii=False, indent=2) + "\n").encode("utf-8")
+            elif text is not None:
+                raw = ASSET_REF.sub(ref, BLOB_URL.sub(blob, text)).encode("utf-8")
+        target = copy / path.relative_to(src)
+        same = target.is_file() and target.read_bytes() == raw
+        if not same:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(raw)
+        done.append((target, not same))
+    return done, rep.items
 
 
 def show(prj, as_json=False, out=None):
@@ -1426,6 +1632,23 @@ def _selftest():
     check_("сверка px: согласованная типографика — 0 замечаний; трекинг em × кегль ≠ px значения — предупреждение",
            clean == [] and len(got) == 1 and got[0].severity == "warning"
            and "трекинг" in got[0].message and "0.84" in got[0].message and "0.9" in got[0].message)
+    grow = "calc(0.925em + 0.5625rem)"
+    lead = copy.deepcopy(doc)
+    lead["type"].update({"poster": style(56, 1.04, 0.84, {"css": clamp, "letter_spacing_em": 0.015,
+                                                          "line_height_css": grow}),
+                         "note": style(15, 1.333333, 0.12, {"line_height_css": " "})})
+    lt = Tokens(lead)
+    lcss, lfm, lart = build_css(lt), front_matter(lt, "Проба", "описание"), artifact_tokens(lt, "Проба")
+    clean = typography_issues(lt)
+    lead["type"]["poster"]["$value"]["letterSpacing"]["value"] = 0.9
+    got = typography_issues(Tokens(lead))
+    check_("готовый интерлиньяж: line_height_css расширения резинового кегля идёт в CSS как есть, пустое поле — число "
+           "значения; в передней части и артефакте — число значения; с числом значения выражение не сверяется, "
+           "трекинг того же стиля сверяется",
+           f"--type-poster-leading: {grow};" in lcss and "--type-note-leading: 1.333334;" in lcss
+           and "lineHeight: 1.04" in lfm and grow not in lfm
+           and [s["lineHeight"] for g in lart["type"]["groups"] for s in g["styles"] if s["name"] == "poster"] == [1.04]
+           and clean == [] and len(got) == 1 and "трекинг" in got[0].message and "poster" in got[0].message)
     # 2. дефекты формата
     bad = copy.deepcopy(doc)
     bad["color"]["bg"]["$value"] = "#fff"
@@ -1458,6 +1681,35 @@ def _selftest():
     bad["spacing"] = {"$type": "dimension", "a": {"$value": {"value": 4, "unit": "px"}}}
     bad["space"] = {"$type": "dimension", "b": {"$value": {"value": 4, "unit": "px"}}}
     check_("вторая шкала отступов — предупреждение", any(i.severity == "warning" for i in validate(bad)))
+    # 2а. расширения вне известных сборке и режим с именем темы значений
+    bad = copy.deepcopy(doc)
+    bad["$extensions"] = {"org.sample-tool.meta": {"v": 1}}
+    bad["motion"]["fast"]["$extensions"]["org.sample-tool.fluid"] = {"css": "0ms"}
+    bad["type"]["body"]["$extensions"] = {"org.sample-tool.fluid": {"css": clamp}, EXT_FLUID + "e": {"css": clamp}}
+    got = validate(bad)
+    check_("ключ $extensions вне известных сборке (другое пространство, опечатка в имени) — предупреждение на ключ с "
+           "числом мест и первым местом, ошибок нет",
+           [(i.severity, i.pointer) for i in got] == [
+               ("warning", "/$extensions/org.sample-tool.meta"),
+               ("warning", "/motion/fast/$extensions/org.sample-tool.fluid"),
+               ("warning", f"/type/body/$extensions/{EXT_FLUID}e")]
+           and "`org.sample-tool.fluid`" in got[1].message and "мест — 2" in got[1].message and got[1].fix)
+    known = copy.deepcopy(doc)
+    known["$extensions"] = {EXT_NOTES[0]: {"version": "1"}}
+    known["color"]["text"]["$extensions"][EXT_LLM] = {"usage": ["body"]}
+    known["motion"]["fast"]["$extensions"][EXT_NOTES[1]] = "motion.yaml#fast"
+    known["type"]["body"]["$extensions"] = {EXT_FLUID: {"css": clamp}, EXT_ART: {"sample": "Аа"}}
+    check_("известные ключи расширений (modes, llm, reduce, fluid, css, artifact, meta, limits) — 0 замечаний",
+           validate(known) == [] and set(EXT_KNOWN) >= {EXT_MODES, EXT_REDUCE, EXT_CSS})
+    bad = copy.deepcopy(doc)
+    bad["color"]["bg"]["$extensions"][EXT_MODES]["light"] = "{primitive.color.ink}"
+    bad["color"]["text"]["$extensions"][EXT_MODES]["light"] = "{primitive.color.paper}"
+    got = validate(bad)
+    check_("режим токена с именем темы значений — одно предупреждение с числом токенов; у темы значений dark режим "
+           "light — чисто",
+           len(got) == 1 and got[0].severity == "warning" and "токенов — 2" in got[0].message
+           and got[0].pointer == f"/color/bg/$extensions/{EXT_MODES}/light" and "`dark`" in got[0].fix
+           and validate(both) == [])
     # 3. эталоны баз проходят формат
     ref = reference_tokens()
     check_("эталон ui 09/04 §4 проходит формат DTCG (0 ошибок)",
@@ -1472,9 +1724,13 @@ def _selftest():
            '[data-density="compact"]' in rcss and ':root[data-theme="dark"]' in rcss
            and "prefers-reduced-motion" in rcss
            and "--space-md: 16px;" in rcss and "@media (width < 640px)" in rcss)
-    check_("README: хвост страницы артефакта — не расхождение",
+    check_("README: собранная часть сверяется по началу файла — хвост с новой строки, какой бы ни был, не расхождение; "
+           "правка прозы и продолжение последней строки — расхождение",
            readme_fresh("# A\n\nтекст\n\n## Consuming this system\n…\n", "# A\n\nтекст\n")
-           and not readme_fresh("# A\n\nдругой\n", "# A\n\nтекст\n"))
+           and readme_fresh("# A\n\nтекст\n\n## Как подключить систему\n…\n", "# A\n\nтекст\n")
+           and readme_fresh("# A\n\nтекст\n", "# A\n\nтекст\n")
+           and not readme_fresh("# A\n\nдругой\n", "# A\n\nтекст\n")
+           and not readme_fresh("# A\n\nтекст и ещё слово\n", "# A\n\nтекст\n"))
     # 4. фикстура cabinet-ds
     kbpaths.use("tests")
     import fixture_project
@@ -1518,6 +1774,14 @@ def _selftest():
         got = [f for f in check(prj) if f.rule == "R-STRUCT-006" and f.severity == "warning"]
         check_("трекинг в em расходится с px значения в токенах фикстуры → R-STRUCT-006 warning",
                got and "трекинг" in got[0].message)
+        alien = json.loads(raw)
+        alien["type"]["title"].setdefault("$extensions", {})["org.sample-tool.fluid"] = {"css": clamp}
+        prj.tokens_path.write_text(json.dumps(alien, ensure_ascii=False, indent=2), encoding="utf-8")
+        got = [f for f in check(prj) if f.rule == "R-STRUCT-006"]
+        check_("ключ расширения вне известных в токенах фикстуры → одна находка R-STRUCT-006 warning с именем ключа и "
+               "подсказкой",
+               len(got) == 1 and got[0].severity == "warning" and "org.sample-tool.fluid" in got[0].message
+               and got[0].fix and got[0].ref.endswith("/type/title/$extensions/org.sample-tool.fluid"))
         prj.tokens_path.write_text(raw.replace('"$value": "{primitive.color.accent.700}"',
                                                '"$value": "{primitive.color.nope}"', 1), encoding="utf-8")
         got = [f for f in check(prj) if f.rule == "R-STRUCT-006" and f.severity == "error"]
@@ -1529,6 +1793,69 @@ def _selftest():
         prj.tokens_path.write_text(raw, encoding="utf-8")
         got = [f for f in check(prj) if f.rule == "R-FRESH-001" and f.ref == "tokens-css"]
         check_("нет производного CSS → R-FRESH-001", got and "производного нет" in got[0].message)
+        # 5. загрузки артефакта: привязка по ответу загрузки
+        icons = prj.tokens_path.parent / "_assets" / "icons"
+        icons.mkdir(parents=True, exist_ok=True)
+        for name in ("play.svg", "stop.svg"):
+            (icons / name).write_text("<svg/>", encoding="utf-8")
+        card = prj.art_dir / "components" / "MediaCard"
+        card.mkdir(parents=True, exist_ok=True)
+        was_id, play_id, cover_id = "a" * 32, "b" * 32, "c" * 32
+        source = ('<img src="../../../../_assets/icons/play.svg" alt="">\n'
+                  f'<img src="/_blob/{was_id}" alt="">\n'
+                  '<img src="../../../../_assets/icons/stop.svg" alt="">\n'
+                  '<i style="background: url(../../../../_assets/icons/play.svg)"></i>\n'
+                  '<a href="https://example.org/">ссылка</a> <a href="../Button/preview.html">сосед</a>\n')
+        (card / "preview.html").write_text(source, encoding="utf-8")
+        files = {"cover.webp": {"name": "cover.webp", "blob": was_id, "size": 1, "type": "image/webp"},
+                 "play.svg": {"name": "play.svg", "size": 6, "type": "image/svg+xml"}}
+        (prj.art_dir / INDEX).write_text(json.dumps({"v": 3, "assetGroups": {"Media": {"name": "Media",
+                                                                                      "files": files}}}),
+                                         encoding="utf-8")
+        with tempfile.TemporaryDirectory(prefix="ddd-ds-bind-") as od:
+            answer = Path(od) / "answer.json"
+            answer.write_text(json.dumps([{"file": "design/_assets/icons/play.svg", "id": play_id},
+                                          {"name": "cover.webp", "url": f"/_blob/{cover_id}"}]), encoding="utf-8")
+            done, items = bind_assets(prj, answer, Path(od) / "copy")
+            copy_dir = Path(od) / "copy" / prj.rel(prj.art_dir)
+            html = (copy_dir / "components" / "MediaCard" / "preview.html").read_text(encoding="utf-8")
+            idx = json.loads((copy_dir / INDEX).read_text(encoding="utf-8"))["assetGroups"]["Media"]["files"]
+            check_("привязка загрузок: ссылка на файл репозитория и url(…) → /_blob/<id>, id из индекса исходников → "
+                   "id того же файла, blob записей индекса — по имени; чужие ссылки не тронуты",
+                   html.count(f'/_blob/{play_id}') == 2 and f'src="/_blob/{cover_id}"' in html and was_id not in html
+                   and 'href="https://example.org/"' in html and 'href="../Button/preview.html"' in html
+                   and idx["cover.webp"]["blob"] == cover_id and idx["play.svg"]["blob"] == play_id)
+            check_("файл без id в ответе загрузки: ссылка остаётся, находка R-REF-008 warning с путём файла; "
+                   "исходники не меняются, копия полная",
+                   'src="../../../../_assets/icons/stop.svg"' in html and len(items) == 1
+                   and (items[0].rule, items[0].severity) == ("R-REF-008", "warning")
+                   and "_assets/icons/stop.svg" in items[0].message
+                   and (card / "preview.html").read_text(encoding="utf-8") == source
+                   and (copy_dir / "tokens.json").is_file() and all(w for _, w in done))
+            r = subprocess.run([sys.executable, str(Path(__file__).resolve()), "artifact", fx.slug, "--repo",
+                                str(fx.root), "--bind-assets", str(answer), "--out", str(Path(od) / "copy"), "--json"],
+                               capture_output=True, text=True)
+            r2 = subprocess.run([sys.executable, str(Path(__file__).resolve()), "artifact", fx.slug, "--repo",
+                                 str(fx.root)], capture_output=True, text=True)
+            check_("artifact --bind-assets --out --json — код 0 и строка находки; без ответа загрузки — код 2",
+                   r.returncode == 0 and len(F.parse_lines(r.stdout)) == 1 and r2.returncode == F.EXIT_USAGE)
+            bad, flat = Path(od) / "bad.json", Path(od) / "flat.json"
+            bad.write_text(json.dumps([{"file": "play.svg"}]), encoding="utf-8")
+            flat.write_text(json.dumps({"./icons/play.svg": play_id}), encoding="utf-8")
+            refused = []
+            for call_ in (lambda: upload_answer(bad), lambda: bind_assets(prj, answer, fx.root)):
+                try:
+                    call_()
+                    refused.append(False)
+                except F.ToolError:
+                    refused.append(True)
+            check_("ответ загрузки: словарь {файл: id} читается; запись без id — отказ; два разных id одного имени и "
+                   "другой путь — файл не привязан; --out в исходники артефакта — отказ",
+                   refused == [True, True] and upload_answer(flat) == [("icons/play.svg", play_id)]
+                   and answer_id([("play.svg", play_id), ("x/play.svg", cover_id)], "play.svg") is None
+                   and answer_id([("icons/play.svg", play_id)], "_assets/icons/play.svg") == play_id
+                   and answer_id([("web/assets/play.svg", play_id)], "_assets/icons/play.svg") is None
+                   and (card / "preview.html").read_text(encoding="utf-8") == source)
     print("ds_build selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 
@@ -1544,10 +1871,21 @@ def main(argv=None):
         except F.ToolError as e:
             print(f"ds_build: {e}", file=sys.stderr)
             return F.EXIT_USAGE
-    ap = docpaths.parser("ds_build", __doc__, commands=("build", "check", "show"), surface="none")
+    ap = docpaths.parser("ds_build", __doc__, commands=("build", "check", "show", "artifact"), surface="none")
+    ap.add_argument("--bind-assets", metavar="FILE",
+                    help="команда artifact: ответ загрузки — JSON, список записей {file, id} или словарь {файл: id}")
     call = docpaths.parse(ap, argv)
     prj = Project.of(call.slug, call.repo)
     try:
+        if call.command == "artifact":
+            if not call.args.bind_assets or call.out is None:
+                raise F.ToolError("artifact: нужны --bind-assets FILE (ответ загрузки) и --out DIR (куда писать копию)")
+            done, items = bind_assets(prj, call.args.bind_assets, call.out)
+            if not call.json:
+                for p, w in done:
+                    print(f"{'записан' if w else 'без изменений':<15} {p}")
+            F.print_findings(items, as_json=call.json)
+            return F.exit_code(items)
         if call.command == "check":
             items = check(prj)
             F.print_findings(items, as_json=call.json)

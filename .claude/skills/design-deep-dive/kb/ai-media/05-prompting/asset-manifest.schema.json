@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:app-design:ai-media:asset-manifest:1",
+  "title": "asset-manifest v1 — манифест готовых ассетов папки: строка на файл — слот, страница, статус, лицензия, происхождение, пометка ИИ",
+  "description": "Манифест ассетов папки проекта: docs/projects/<slug>/design/<surface>/assets/manifest.yaml — поверхности, docs/projects/<slug>/design/_assets/manifest.yaml — продукта. Канон — docs/projects/_template/design/README.md § Ассеты. Строка манифеста — файл: у слота столько строк, сколько у него файлов (форматы, варианты кадра, версии знака). Ключ ассета — страница и слот: id слотов у страниц совпадают, строка без page — общая для страниц с таким слотом. На холст идут строки status: accepted. Файл — объект с ключом assets или список строк. Поля строки сверх описанных — заметки проекта. Проверка манифеста поверхности — ../../../scripts/site/plan_to_assets.py check <slug>.",
+  "anyOf": [
+    {"$ref": "#/$defs/rows"},
+    {
+      "type": "object",
+      "required": ["assets"],
+      "properties": {
+        "manifest_version": {"enum": [1, "1"], "description": "Версия формата манифеста."},
+        "surface": {"$ref": "#/$defs/id", "description": "Поверхность, чьи ассеты описывает манифест; у манифеста продукта поля нет."},
+        "checked": {"$ref": "#/$defs/date", "description": "Дата сверки строк с файлами."},
+        "example": {"type": "boolean", "description": "true — учебный пример формата (вымышленные данные)."},
+        "plans": {"type": "array", "items": {"type": "string"}, "description": "Планы ассетов, по которым сделаны файлы: пути от манифеста или id страниц."},
+        "assets": {"$ref": "#/$defs/rows"}
+      }
+    }
+  ],
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "date": {"type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$", "description": "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ строкой."},
+    "rows": {"type": "array", "items": {"$ref": "#/$defs/row"}, "description": "Строка на файл."},
+    "row": {
+      "type": "object",
+      "required": ["slot", "file"],
+      "properties": {
+        "slot": {"$ref": "#/$defs/id", "description": "id слота плана ассетов (slots[].id: <секция>-<id> слота плана страницы) — не вид слота словаря site."},
+        "page": {"$ref": "#/$defs/id", "description": "id страницы плана ассетов. Без поля строка общая: её берёт каждая страница с таким слотом, у которой нет своих строк."},
+        "file": {"type": "string", "minLength": 1, "description": "Путь файла от папки манифеста."},
+        "status": {"enum": ["draft", "accepted"], "description": "draft — файл в работе; accepted — принят: на холст и в код идёт только принятое."},
+        "variant": {"type": "string", "pattern": "^[a-z0-9][a-z0-9_-]*(\\+[a-z0-9][a-z0-9_-]*)*$", "description": "id варианта плана ассетов (variants[].id); один файл на несколько вариантов — через «+»: desktop+mobile."},
+        "format": {"type": "string", "pattern": "^[a-z0-9]+$", "description": "Формат файла: avif, webp, svg, mp4 …; без поля — расширение файла."},
+        "codec": {"type": "string", "description": "Кодек ролика: у роликов одного формата на холст первым идёт H.264."},
+        "role": {"enum": ["informational", "decorative"], "description": "Роль ассета — как role слота плана ассетов."},
+        "license": {"type": "string", "description": "Лицензия или права на файл."},
+        "origin": {"type": "string", "description": "Происхождение: кто и как сделал файл; где лежит мастер-файл."},
+        "provenance": {"type": "string", "description": "Происхождение — второе имя поля origin."},
+        "sha256": {"type": "string", "pattern": "^(sha256:)?[0-9a-f]{64}$", "description": "Отпечаток файла."},
+        "ai": {"type": "boolean", "description": "Пометка ИИ: true — файл сгенерирован или правлен моделью."},
+        "ai_mark": {"type": ["boolean", "string"], "description": "Пометка ИИ — второе имя поля ai или текст пометки."},
+        "ai_label": {"type": ["boolean", "string"], "description": "Подпись раскрытия ИИ у файла."}
+      }
+    }
+  }
+}

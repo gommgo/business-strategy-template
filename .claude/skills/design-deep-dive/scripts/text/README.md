@@ -38,12 +38,15 @@
 
 Ложную находку эвристик сверки снимает решение человека с записанной причиной, а не подгонка текста под корень слова:
 `claims_allow` слота, мета (`meta.claims_allow`) или страницы — записи `{rule, reason, by}`, `rule` — семейство или id
-находки: `COPY-F-CLASS` (маркер класса утверждения без факта) или `COPY-F-NUM` (число без факта и число, не совпавшее с
-фактом); `value` (число) или `fragment` называют, что именно снято. Обойдённая находка не считается в error;
-`claims`, `check`, `approve` и `validate --final` перечисляют обходы отдельным списком (`--json` — поле `allowed`), чтобы
-заказчик видел их на публикации. Право, `never_claim` и «утверждение шире факта» не обходятся. Форма и правила записи —
-схема `kb/text/10-templates-recipes/copy-deck.schema.json` (`claims-allow`) и `copydeck.py --help`. `claims_check.py`,
-запущенный сам по себе (в том числе на собранном HTML), записей copy deck не знает: обходы применяет `copydeck.py`.
+находки: `COPY-F-CLASS` (маркер класса утверждения без факта), `COPY-F-NUM` (число без факта и число, не совпавшее с
+фактом) или `COPY-F-NUM-MISMATCH` (только несовпавшее число); `value` (число) или `fragment` (слово или фраза находки)
+называют, что именно снято, запись без них снимает все находки правила на своём месте. Обойдённая находка не
+считается в error; `claims`, `check`, `approve` и `validate --final` перечисляют обходы отдельным списком (`--json` —
+поле `allowed`), чтобы заказчик видел их на публикации. Право, `never_claim` и «утверждение шире факта» не обходятся.
+Форма и правила записи — схема `kb/text/10-templates-recipes/copy-deck.schema.json` (`claims-allow`) и
+`copydeck.py --help`. `claims_check.py`, запущенный сам по себе (в том числе на собранном HTML), записей copy deck не
+знает: обходы применяет `copydeck.py`; с ключом `--allow` он читает те же записи из вывода
+`copydeck.py validate --final --json` — место записи: слот, мета (`<page>/meta`, только тексты мета) или страница.
 
 ## Форматы
 
@@ -55,8 +58,9 @@
   секции.
 - **JSON находок `copydeck.py`**: `{tool, version, date, command, input, today, summary{error, warning, info}, tools,
   findings[{tool, level, rule, where, message, fix, fragment, …}], allowed[{rule, where, reason, by, …}], notes}`; у
-  `check` ещё `slots` (итоги по путям), у `export` — `export`. Правила: свои `COPY-D-…`; `COPY-F-…` и `COPY-L-…` — из
-  `claims_check.py`; id линтера — из `copy_lint.py`; `meta-x-…` — проверки мета вне линтера.
+  `check` ещё `slots` (итоги по путям), у `export` — `export`; `tools.lint.facts` — файл фактов, который получил
+  линтер. Правила: свои `COPY-D-…`; `COPY-F-…` и `COPY-L-…` — из `claims_check.py`; id линтера — из `copy_lint.py`;
+  `meta-x-…` — проверки мета вне линтера.
 - **Правила права** — `kb/text/08-russian-legal-typography/claims-rules.yaml` (формат — `claims_check.py rules-schema`):
   их читает только `claims_check.py`. Собранная страница и статичная копия артборда сверяются с привязкой:
   `claims_check.py page.html --facts facts.yaml --deck <copy deck страницы> --allow <вывод copydeck.py validate --final

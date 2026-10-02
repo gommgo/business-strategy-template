@@ -1,7 +1,7 @@
 {
   "name": "design-deep-dive-tools",
   "private": true,
-  "description": "npm-зависимости утилит и эталонного кода скилла design-deep-dive. Ставит scripts/install.sh в $DDD_HOME/node (вне репозитория); версии закреплены — на них проверены утилиты и эталоны.",
+  "description": "npm-зависимости утилит и эталонного кода скилла design-deep-dive. Ставит scripts/install.sh в $DDD_HOME/node (вне репозитория) по группам x-ddd-groups: page — по умолчанию, media и 3d — ключом --npm-groups; версии закреплены — на них проверены утилиты и эталоны.",
   "allowScripts": {
     "esbuild@0.28.2": true
   },
@@ -26,6 +26,34 @@
     "react-dom": "19.3.0",
     "@react-three/fiber": "9.8.0",
     "@react-three/drei": "10.7.8"
+  },
+  "x-ddd-groups": {
+    "page": [
+      "web-vitals",
+      "axe-core"
+    ],
+    "media": [
+      "svgo",
+      "@resvg/resvg-js",
+      "lucide-static",
+      "lottie-web",
+      "@lottiefiles/dotlottie-web"
+    ],
+    "3d": [
+      "@gltf-transform/cli",
+      "draco3dgltf",
+      "gltf-validator",
+      "gltfpack",
+      "meshoptimizer",
+      "esbuild",
+      "three",
+      "postprocessing",
+      "n8ao",
+      "react",
+      "react-dom",
+      "@react-three/fiber",
+      "@react-three/drei"
+    ]
   },
   "x-ddd-used-by": {
     "@gltf-transform/cli, gltf-validator, gltfpack, meshoptimizer, draco3dgltf": "blender: gltf_check.py (+ validate.mjs, install.sh копирует его в $DDD_HOME/node), rk.py, d1exp.py, presets.py (npx gltf-transform)",

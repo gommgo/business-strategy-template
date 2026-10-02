@@ -5,7 +5,7 @@
   "brief_language": "ru",
   "task": "VID-ALPHA",
   "role": {
-    "page_type": "ecommerce",
+    "page_class": "ecommerce",
     "section": "hero",
     "slot": "hero-floating-object",
     "purpose": "slow floating loop of the beans on chroma for keying to stacked alpha",

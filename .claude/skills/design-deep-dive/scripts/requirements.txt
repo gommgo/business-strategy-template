@@ -3,6 +3,7 @@
 # Ставит scripts/install.sh по группам (# [группа]); вручную — всё сразу:
 #   "$DDD_HOME/venv/bin/pip" install -r scripts/requirements.txt
 # Группа core нужна всем утилитам; остальные — по задаче (install.sh --groups core,net,svg или --groups all).
+# Пакет, нужный двум группам, записан в обеих (scipy — в svg и media); install.sh берёт его один раз.
 
 # [core] схемы и YAML, картинки и числа, браузер Playwright (браузеры — install.sh --browsers), PDF, brotli
 PyYAML==6.0.3
@@ -13,7 +14,6 @@ rpds-py==2026.6.3
 attrs==26.1.0
 typing_extensions==4.16.0
 numpy==2.5.3
-scipy==1.18.1
 pillow==12.3.0
 brotli==1.2.0
 pypdf==6.19.0
@@ -33,7 +33,8 @@ pymorphy3==2.0.6
 pymorphy3-dicts-ru==2.4.417150.4580142
 dawg2-python==0.9.0
 
-# [svg] иконки и векторизация: check_icons, svg_sheet, split_recraft (cairosvg требует системную libcairo2)
+# [svg] иконки и векторизация: check_icons, svg_sheet, split_recraft (cairosvg требует системную libcairo2);
+# scipy — зависимость scikit-image
 svgelements==1.9.6
 cairosvg==2.9.1
 cairocffi==1.7.1
@@ -44,6 +45,7 @@ tinycss2==1.5.1
 webencodings==0.6.1
 defusedxml==0.7.1
 scikit-image==0.26.0
+scipy==1.18.1
 imageio==2.37.4
 lazy_loader==0.6
 networkx==3.7
@@ -66,7 +68,9 @@ protobuf==7.36.2
 flatbuffers==25.12.19
 six==1.17.0
 
-# [media] обработка картинок моделями (удаление фона rembg: u2netp, isnet); модели — install.sh --models
+# [media] метрики картинок и видео (scipy: утилиты ai-media и blender/d1lib.py) и обработка картинок моделями
+# (удаление фона rembg: u2netp, isnet); модели — install.sh --models
+scipy==1.18.1
 rembg==2.0.85
 pymatting==1.1.16
 numba==0.67.0

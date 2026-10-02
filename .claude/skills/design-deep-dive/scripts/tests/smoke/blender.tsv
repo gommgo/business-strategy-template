@@ -24,11 +24,11 @@ scripts/blender/node/validate.mjs	utility	compile
 scripts/blender/passport_asserts.py	module	compile	
 scripts/blender/preflight_block.py	module	compile	
 scripts/blender/presets.py	module	compile	
-scripts/blender/qa_pipeline.py	utility	help rc=3; run: --selftest	
+scripts/blender/qa_pipeline.py	utility	help; run: --selftest	
 scripts/blender/render_views.py	utility	compile	
 scripts/blender/rk.py	module	compile	
-scripts/blender/run_doc_blocks.py	utility	import-only	
-scripts/blender/run_recipes.py	step	import-only	
+scripts/blender/run_doc_blocks.py	utility	help; run: --selftest	
+scripts/blender/run_recipes.py	step	help; run: --selftest	
 scripts/blender/scene_audit.py	module	compile	
 scripts/blender/scene_check.py	utility	compile	
 scripts/blender/serve_br.py	module	import-only	

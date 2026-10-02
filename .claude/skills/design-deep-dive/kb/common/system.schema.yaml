@@ -67,7 +67,7 @@ properties:
           description: "Когда какой вариант компонента."
   extensions:
     type: array
-    description: "Расширения словаря проекта: тип, которого в словаре нет; поля — components.yaml#project_extension и ещё keyboard и text_roles."
+    description: "Расширения словаря проекта: тип, которого в словаре нет; поля — components.yaml#project_extension."
     items:
       type: object
       additionalProperties: false
@@ -139,8 +139,13 @@ properties:
         description: "Набор иконок (ui 07/01); файлы — design/_assets/icons/."
         properties:
           set: {type: string, minLength: 1}
+          style:
+            enum: [line, fill]
+            description: "Начертание набора: line — контурный, толщину задаёт stroke; fill — с заливкой, stroke не задаётся."
           sizes: {type: array, uniqueItems: true, items: {type: number, exclusiveMinimum: 0}}
           stroke: {type: number, exclusiveMinimum: 0}
+        if: {required: [style], properties: {style: {const: fill}}}
+        then: {not: {required: [stroke]}}
       status_colors:
         type: object
         description: "Статус объекта (object.md) → роль цвета токенов."

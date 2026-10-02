@@ -512,12 +512,12 @@
 
   "x-canvas-map": {
     "source": "copy-deck",
-    "stages": ["directions", "wireframe", "mockup"],
+    "stages": ["directions", "treatment", "wireframe", "mockup"],
     "files": {
       "pages/<page-id>/copy.md": {
         "## <section_id>": {"rule": "copy", "from": ["/copy_deck/pages/*/page_id", "/copy_deck/pages/*/sections/*/section_id"], "note": "страница — папка pages/<page-id>/, секции — в порядке copy deck (он же порядок плана)"},
         "[<slot_id>]": {"rule": "copy", "from": ["/copy_deck/pages/*/sections/*/slots/*/slot_id"]},
-        "текст": {"rule": "derive", "from": ["/copy_deck/pages/*/sections/*/slots/*/variants", "/copy_deck/pages/*/sections/*/slots/*/chosen", "/copy_deck/pages/*/sections/*/slots/*/slot_type"], "note": "текст выбранного варианта, если его статус разрешён этапом (copy_md.stage_statuses); на этапе directions — только типы copy_md.directions_slot_types; alt, подписи и строки в картинках (copy_md.not_exported) сюда не идут"},
+        "текст": {"rule": "derive", "from": ["/copy_deck/pages/*/sections/*/slots/*/variants", "/copy_deck/pages/*/sections/*/slots/*/chosen", "/copy_deck/pages/*/sections/*/slots/*/slot_type"], "note": "текст выбранного варианта, если его статус разрешён этапом (copy_md.stage_statuses); на этапах directions и treatment — только типы copy_md.directions_slot_types; alt, подписи и строки в картинках (copy_md.not_exported) сюда не идут"},
         "статус": {"rule": "derive", "from": ["/copy_deck/pages/*/sections/*/slots/*/variants", "/copy_deck/pages/*/sections/*/slots/*/chosen"], "note": "статус выбранного варианта: assumed · checked · approved"}
       },
       "brief.yaml": {
@@ -549,7 +549,7 @@
         "«[?]: <текст>» или «[? <подпись>]: <текст>» — текст холста без слота плана (разбор агентом: вопрос «перенести в план?»)",
         "текст — всё после первого «: » до конца строки, дословно; абзацы — строками продолжения, начатыми двумя пробелами; пустая строка между строками продолжения — граница абзаца внутри значения; значение тянется до следующей строки слота или секции"
       ],
-      "stage_statuses": {"directions": ["assumed", "checked", "approved"], "wireframe": ["assumed", "checked", "approved"], "mockup": ["approved"]},
+      "stage_statuses": {"directions": ["assumed", "checked", "approved"], "treatment": ["assumed", "checked", "approved"], "wireframe": ["assumed", "checked", "approved"], "mockup": ["approved"]},
       "directions_slot_types": ["headline", "cta-label"],
       "not_exported": ["image-alt", "image-caption", "in-image-text"],
       "gap": "слот без текста статуса этапа в copy.md не пишется: находка COPY-D-STAGE и строка пробелов INPUT.md; [PLACEHOLDER] в тексте — только из missing фактов"

@@ -7,7 +7,10 @@ kb/creative/01-creative-direction/ambition-levels.yaml (--levels — друго�
 первого экрана — токены motion.marketing (04-visual-language/marketing-tokens.json). Работает на примерах базы и на файлах
 проекта: путь — аргументом; план находит спецификацию движения по page.treatment.motion_spec_ref и арт-дирекцию по
 page.treatment.art_direction_ref, спецификация — план по refs.page_plan (пути от файла), если их не назвали ключом, и
-арт-дирекцию по refs.art_direction.
+арт-дирекцию по refs.art_direction. Шкала длительностей спецификации — токены motion.marketing базы и токены движения
+проекта: ветка motion файла refs.tokens (путь от файла спецификации). Ссылка на токен проекта и длительность, равная
+токену времени проекта, — не находка (MS-06, MS-07); у токена, который есть и в проекте, и в базе, в суммы и проекции
+идёт значение проекта. Пределы первого экрана — токены базы.
 
 Команды:
   blocks [--yaml F]                              block-treatments.yaml ↔ blocks.yaml site, effects.yaml, cliche-registry.yaml
@@ -23,7 +26,9 @@ page.treatment.art_direction_ref, спецификация — план по ref
                                                  x-effect-levels и условиями L0, L1 treatment.schema.json (LV-01, LV-02)
                                                  и свойств приёмов каталога с их минимальным уровнем (LV-03)
   canvas-map [ФАЙЛ …]                            форма ключа x-canvas-map и покрытие полей источника правилами (без
-                                                 файлов — все файлы kb с этим ключом)
+                                                 файлов — все файлы kb с этим ключом); этапы входа холста в stages
+                                                 карт — directions, treatment (страница «Подача»), wireframe,
+                                                 mockup, motion
   --levels FILE                                  файл уровней той же формы, что ambition-levels.yaml
   --selftest                                     самопроверка на файлах базы, фикстуре проекта и подброшенных ошибках
 Тяжесть находок plan: error — схема плана (TR-S), ссылка в пустоту (TR-09, TR-10, TR-13, TR-15), уровень эффекта
@@ -90,7 +95,7 @@ PLAN_LIFTABLE = ('TR-01', 'TR-02', 'TR-03', 'TR-04', 'TR-05', 'TR-06', 'TR-12', 
 LCP_PROPS = ('transform', 'translate', 'clip-path', 'opacity')
 LCP_OPACITY_MIN = 0.01
 LCP_MIN_RU = f'{LCP_OPACITY_MIN:g}'.replace('.', ',')
-STAGES = ('directions', 'wireframe', 'mockup', 'motion')                      # этапы входа холста
+STAGES = ('directions', 'treatment', 'wireframe', 'mockup', 'motion')         # этапы входа холста
 RULES = ('copy', 'map', 'derive', 'drop', 'claude_fills')                      # правила проекции x-canvas-map
 POINTER = re.compile(r'^(?:[a-z][a-z0-9-]*#)?(?:/[^/]*)*$')                     # [<документ>#]<JSON Pointer>; * — любой элемент
 CANVAS_TOP = {'source', 'stages', 'files', 'drop', 'base'}
@@ -544,13 +549,51 @@ def cmd_plan(ctx, R, plan_path, overlay_path=None, out=None, spec=None):
 
 
 # ── spec ───────────────────────────────────────────────────────────────────────────────────────────────────
-def dur_ms(ctx, d, base):
+def time_ms(v):
+    """Значение токена времени в мс: размерность {value, unit: ms | s}; другое значение — None."""
+    if not isinstance(v, dict) or isinstance(v.get('value'), bool) or not isinstance(v.get('value'), (int, float)):
+        return None
+    return {'ms': 1.0, 's': 1000.0}[v['unit']] * v['value'] if v.get('unit') in ('ms', 's') else None
+
+
+def project_motion(spec_path, spec):
+    """Токены движения проекта: ветка motion файла refs.tokens спецификации (путь от её папки) → {путь токена: значение}.
+    Ссылки нет, файл не читается или это marketing-tokens.json базы — пусто: действует только шкала базы."""
+    path = ref_file(spec_path, (spec.get('refs') or {}).get('tokens')) if isinstance(spec, dict) else None
+    if not path or os.path.samefile(path, P['tokens']):
+        return {}
+    try:
+        doc = load(path)
+    except (OSError, ValueError, yaml.YAMLError):
+        return {}
+    out = {}
+
+    def walk(node, p):
+        if isinstance(node, dict):
+            if '$value' in node:
+                out[p] = node['$value']
+                return
+            for k, v in node.items():
+                if not str(k).startswith('$'):
+                    walk(v, f'{p}.{k}')
+    walk(doc.get('motion') if isinstance(doc, dict) else None, 'motion')
+    return out
+
+
+def project_scale(ptok):
+    """Шкала движения проекта: длительности в мс всех токенов времени ветки motion проекта."""
+    return {ms for ms in (time_ms(v) for v in (ptok or {}).values()) if ms is not None}
+
+
+def dur_ms(ctx, d, base, ptok=None):
+    """Длительность в мс: число, токен (токен проекта ptok, иначе токен базы) или доля базовой длительности."""
     if not d:
         return None
     if 'ms' in d:
         return float(d['ms'])
     if 'token' in d:
-        return ctx.token_ms(d['token'])
+        own = time_ms((ptok or {}).get(d['token']))
+        return ctx.token_ms(d['token']) if own is None else own
     if 'share' in d and base:
         return float(d['share']) * base
     return None
@@ -679,7 +722,10 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
     if plan and (plan.get('page') or {}).get('ambition_level') not in (None, lvl):
         R.add('error', 'MS-01', 'level', f'уровень спецификации {lvl} ≠ уровню плана {plan["page"]["ambition_level"]}')
     psec = {s['id']: s for s in (plan or {}).get('sections') or []}
-    scale = ctx.scale_ms()
+    # шкала длительностей: токены базы и токены движения проекта (refs.tokens) — дизайн-система проекта ведёт свою шкалу
+    ptok = project_motion(spec_path, spec)
+    scale = ctx.scale_ms() | project_scale(ptok)
+    own = ' и токенов движения проекта (refs.tokens)' if ptok else ''
     for key in ('lcp',):
         t = page[key]['target']
         if plan and not any(target_ok(t, section_targets(s)) for s in psec.values()):
@@ -739,11 +785,12 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
                         R.add('error', 'MS-12', wm, f'скорость {sp} px/с вне {lim.get("speed_px_s_min")}–{lim["speed_px_s_max"]}')
             for fld in ('duration', 'easing'):
                 d = m.get(fld) or {}
-                if 'token' in d and d['token'] not in ctx.tokens:
-                    R.add('error', 'MS-06', wm, f'токена {d["token"]} нет в marketing-tokens.json')
-            d_ms = dur_ms(ctx, m.get('duration'), base)
+                if 'token' in d and d['token'] not in ctx.tokens and d['token'] not in ptok:
+                    R.add('error', 'MS-06', wm, f'токена {d["token"]} нет в marketing-tokens.json'
+                                                + (' и в токенах движения проекта (refs.tokens)' if ptok else ''))
+            d_ms = dur_ms(ctx, m.get('duration'), base, ptok)
             if 'ms' in (m.get('duration') or {}) and d_ms not in scale:
-                R.add('warning', 'MS-07', wm, f'{d_ms:g} мс вне шкалы motion.marketing (CRV-MO-14): возьмите токен или долю базы')
+                R.add('warning', 'MS-07', wm, f'{d_ms:g} мс вне шкалы motion.marketing{own} (CRV-MO-14): возьмите токен или долю базы')
             for tk in m['tracks']:
                 prop = tk['property']
                 if not ctx.prop_ok(slvl, prop, m.get('effect')):
@@ -775,13 +822,13 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
                         norm('MS-09', wm, f'LCP-элемент: сдвиг {px:g} px > {shift_max:g} (токен distance.shift-hero)', sid)
             if m['class'] == 'one-shot' and m['trigger']['type'] == 'load' and sid == first_flow:
                 st = m.get('stagger') or {}
-                each = dur_ms(ctx, st.get('each'), base) or 0
+                each = dur_ms(ctx, st.get('each'), base, ptok) or 0
                 n = 1 + len(m.get('stagger_targets') or [])
                 end = (m['trigger'].get('delay_ms') or 0) + (d_ms or 0) + each * (n - 1)
                 t_end = max(t_end, end)
             st = m.get('stagger') or {}
             if st.get('each'):
-                each = dur_ms(ctx, st['each'], base) or 0
+                each = dur_ms(ctx, st['each'], base, ptok) or 0
                 if not 40 <= each <= 80:
                     R.add('warning', 'MS-11', wm, f'стаггер {each:g} мс вне 40–80 (creative 05-motion/01 §7.4)')
                 if st.get('max_items') and group_max is not None and each * (st['max_items'] - 1) > group_max:
@@ -819,19 +866,19 @@ def cmd_spec(ctx, R, spec_path, plan_path=None, overlay_path=None):
 
 
 # ── проекции ───────────────────────────────────────────────────────────────────────────────────────────────
-def fmt_dur(ctx, d, base):
-    ms = dur_ms(ctx, d, base)
+def fmt_dur(ctx, d, base, ptok=None):
+    ms = dur_ms(ctx, d, base, ptok)
     return f'{ms:g} ms' if ms is not None else '?'
 
 
-def fmt_ease(ctx, e):
+def fmt_ease(ctx, e, ptok=None):
     if not e:
         return 'no easing'
     if e.get('none'):
         return 'no easing (scrub)'
     if 'css' in e:
         return e['css']
-    v = ctx.tokens.get(e.get('token'))
+    v = (ptok or {}).get(e.get('token'), ctx.tokens.get(e.get('token')))
     return f'cubic-bezier({", ".join(f"{x:g}" for x in v)})' if isinstance(v, list) else e.get('token', '?')
 
 
@@ -857,7 +904,8 @@ def fmt_trigger(m, sec):
     return ty + (f' ({", ".join(extra)})' if extra else '')
 
 
-def moment_line(ctx, m, sec, base):
+def moment_line(ctx, m, sec, base, ptok=None):
+    """Строка момента для брифа холста; ptok — токены движения проекта (project_motion): их значения идут первыми."""
     el = ', '.join([m['target']] + list(m.get('stagger_targets') or [])) + f' [data-moment={m["id"]}]' + (f' `{m["selector_hint"]}`' if m.get('selector_hint') else '')
     props = ', '.join(f'{tk["property"]} {tk["from"]} -> {tk["to"]}' if 'from' in tk else
                       f'{tk["property"]} ' + ' / '.join(f'{k["at"]:g}:{k["value"]}' for k in tk['keyframes']) for tk in m['tracks'])
@@ -867,11 +915,11 @@ def moment_line(ctx, m, sec, base):
         lp = m.get('loop') or {}
         timing = (f'{lp["speed_px_s"]:g} px/s' if lp.get('speed_px_s') else f'period {lp.get("period_ms", 0):g} ms') + ', infinite'
     else:
-        timing = fmt_dur(ctx, m.get('duration'), base)
-    parts = [f'{fmt_trigger(m, sec)} -> {el} -> {props}', timing, fmt_ease(ctx, m.get('easing'))]
+        timing = fmt_dur(ctx, m.get('duration'), base, ptok)
+    parts = [f'{fmt_trigger(m, sec)} -> {el} -> {props}', timing, fmt_ease(ctx, m.get('easing'), ptok)]
     st = m.get('stagger') or {}
     if st.get('each'):
-        parts.append(f'stagger {fmt_dur(ctx, st["each"], base)} ({st.get("order", "dom")})')
+        parts.append(f'stagger {fmt_dur(ctx, st["each"], base, ptok)} ({st.get("order", "dom")})')
     red = m['reduce']
     parts.append(f'reduced motion: {red["strategy"]}' + (f' — {red["describe"]}' if red.get('describe') else ''))
     if m.get('mobile'):
@@ -883,20 +931,20 @@ def moment_line(ctx, m, sec, base):
     return '; '.join(parts)
 
 
-def cmd_moments(ctx, spec, section=None):
+def cmd_moments(ctx, spec, section=None, ptok=None):
     base = (spec['page'].get('base') or {}).get('duration_ms')
     lines = []
     for sec in spec['sections']:
         if section and sec['id'] != section:
             continue
         for m in sec['moments']:
-            lines.append(moment_line(ctx, m, sec, base))
+            lines.append(moment_line(ctx, m, sec, base, ptok))
     for i, l in enumerate(lines, 1):
         print(f'{i}. {l}')
     return lines
 
 
-def cmd_motion_md(ctx, spec, out=None):
+def cmd_motion_md(ctx, spec, out=None, ptok=None):
     pg = spec['page']
     base = (pg.get('base') or {}).get('duration_ms')
     L = [f'# MOTION — {spec["id"]}', '',
@@ -937,8 +985,8 @@ def cmd_motion_md(ctx, spec, out=None):
             L += ['', '| # | moment | class | trigger → element → property | time / range | easing | reduced motion | phone |', '|---|---|---|---|---|---|---|---|']
             for i, m in enumerate(sec['moments'], 1):
                 props = '; '.join(f'{tk["property"]} {tk.get("from", "")} → {tk.get("to", "")}' for tk in m['tracks'])
-                timing = moment_line(ctx, m, sec, base).split('; ')[1]
-                L.append(f'| {i} | {m["id"]} | {m["class"]} | {fmt_trigger(m, sec)} → `{m["target"]}` → {props} | {timing} | {fmt_ease(ctx, m.get("easing"))} | '
+                timing = moment_line(ctx, m, sec, base, ptok).split('; ')[1]
+                L.append(f'| {i} | {m["id"]} | {m["class"]} | {fmt_trigger(m, sec)} → `{m["target"]}` → {props} | {timing} | {fmt_ease(ctx, m.get("easing"), ptok)} | '
                          f'{m["reduce"]["strategy"]} | {(m.get("mobile") or {}).get("strategy", "same")} |')
         L.append('')
         L.append(f'Reduced motion for the section: {sec["reduce"]["strategy"]} — {sec["reduce"]["describe"]}')
@@ -963,7 +1011,7 @@ def cmd_motion_md(ctx, spec, out=None):
     return txt
 
 
-def cmd_values(ctx, spec, out):
+def cmd_values(ctx, spec, out, ptok=None):
     os.makedirs(out, exist_ok=True)
     base = (spec['page'].get('base') or {}).get('duration_ms')
     files = []
@@ -971,9 +1019,9 @@ def cmd_values(ctx, spec, out):
         d = {'spec': spec['id'], 'checked_at': spec['checked_at'], 'section': sec['id'], 'scene': sec.get('scene') or {}, 'moments': {}}
         for m in sec['moments']:
             e = m.get('easing') or {}
-            ez = ctx.tokens.get(e.get('token')) if e.get('token') else e.get('css')
-            mv = {'class': m['class'], 'duration_ms': dur_ms(ctx, m.get('duration'), base), 'easing': ez,
-                  'stagger_ms': dur_ms(ctx, (m.get('stagger') or {}).get('each'), base), 'trigger': m['trigger'],
+            ez = (ptok or {}).get(e['token'], ctx.tokens.get(e['token'])) if e.get('token') else e.get('css')
+            mv = {'class': m['class'], 'duration_ms': dur_ms(ctx, m.get('duration'), base, ptok), 'easing': ez,
+                  'stagger_ms': dur_ms(ctx, (m.get('stagger') or {}).get('each'), base, ptok), 'trigger': m['trigger'],
                   'tracks': m['tracks'], 'reduce': m['reduce']['strategy']}
             for k in ('loop', 'scrub', 'spring', 'params'):
                 if m.get(k):
@@ -1548,6 +1596,45 @@ def selftest(ctx):
                'MS-09' in lcp_run([{'property': 'opacity', 'from': '0.005', 'to': 1}], declared=False))
         expect('вход LCP: mask — MS-09',
                'MS-09' in lcp_run([{'property': 'mask', 'from': 'linear-gradient(#000 0 0)', 'to': 'none'}], declared=False))
+    # шкала движения проекта: токены ветки motion файла refs.tokens — в шкале; чужое значение и чужой токен — находки
+    with tempfile.TemporaryDirectory() as tmp:
+        p_own = os.path.join(tmp, 'home.motion-spec.yaml')
+        with open(os.path.join(tmp, 'system.tokens.json'), 'w', encoding='utf-8') as f:
+            json.dump({'motion': {'duration': {'base': {'$value': {'value': 0.24, 'unit': 's'}}},
+                                  'marketing': {'duration': {'sweep': {'$value': {'value': 730, 'unit': 'ms'}}},
+                                                'easing': {'settle': {'$value': [0.2, 0.8, 0.2, 1]}},
+                                                'distance': {'step': {'$value': {'value': 515, 'unit': 'px'}}}}}}, f)
+
+        def own_run(duration, easing=None, tokens='system.tokens.json'):
+            """Находки MS-06 и MS-07 момента hero-copy-rise у копии примера с длительностью duration; tokens —
+            refs.tokens копии (None — ссылка примера, от папки копии она не разрешается: шкала только базы)."""
+            d = load(sp)
+            if tokens:
+                d['refs']['tokens'] = tokens
+            mm = next(m_ for s_ in d['sections'] if s_['id'] == 'hero' for m_ in s_['moments'] if m_['id'] == 'hero-copy-rise')
+            mm['duration'] = duration
+            if easing:
+                mm['easing'] = easing
+            with open(p_own, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(d, f, allow_unicode=True, sort_keys=False)
+            R_ = Report()
+            cmd_spec(ctx, R_, p_own, plan, ov)
+            return sorted(i[1] for i in R_.items if i[2] == 'hero.hero-copy-rise' and i[1] in ('MS-06', 'MS-07')), mm
+        t_sweep, t_settle = {'token': 'motion.marketing.duration.sweep'}, {'token': 'motion.marketing.easing.settle'}
+        expect('шкала проекта: длительность, равная токену времени проекта (мс и секунды), — без MS-07; без токенов проекта — MS-07',
+               own_run({'ms': 730})[0] == [] and own_run({'ms': 240})[0] == [] and own_run({'ms': 730}, tokens=None)[0] == ['MS-07'])
+        got, mm_own = own_run(t_sweep, t_settle)
+        ptok = project_motion(p_own, load(p_own))
+        expect('шкала проекта: ссылка на токен проекта (длительность, кривая) — без MS-06; без токенов проекта — MS-06',
+               got == [] and own_run(t_sweep, t_settle, tokens=None)[0] == ['MS-06', 'MS-06'])
+        expect('шкала проекта: значение токена проекта идёт в длительность момента и в строку момента',
+               dur_ms(ctx, t_sweep, None, ptok) == 730 and dur_ms(ctx, t_sweep, None) is None
+               and '730 ms; cubic-bezier(0.2, 0.8, 0.2, 1)' in moment_line(ctx, mm_own, {'id': 'hero'}, None, ptok))
+        expect('шкала проекта: чужое значение — MS-07, чужой токен — MS-06, токен расстояния в шкалу времени не идёт',
+               own_run({'ms': 745})[0] == ['MS-07'] and own_run({'token': 'motion.marketing.duration.nope'})[0] == ['MS-06']
+               and own_run({'ms': 515})[0] == ['MS-07'])
+        expect('шкала проекта: refs.tokens на marketing-tokens.json базы — шкала только базы',
+               project_motion(sp, load(sp)) == {} and project_scale(ptok) == {240.0, 730.0})
     # файлы проекта: план с подачей и спецификация движения находят друг друга по ссылкам
     try:
         kbpaths.use('tests')
@@ -1593,6 +1680,16 @@ def selftest(ctx):
     R = Report()
     canvas_check(P['t_schema'], m, R, t)
     expect('x-canvas-map: неизвестное правило и указатель в пустоту → CM-02, CM-03', {'CM-02', 'CM-03'} <= codes(R))
+    a = load(P['ad_schema'])
+    am = a['x-canvas-map']
+    expect('x-canvas-map: этап treatment (страница «Подача») — варианты подачи арт-дирекции идут правилом своего этапа, а не drop',
+           'treatment' in STAGES and am['files']['brief.yaml'].get('treatment_variants[]', {}).get('stages') == ['treatment']
+           and not any('/treatment_variants' in (d.get('from') or []) for d in am.get('drop') or []))
+    m = copy.deepcopy(am)
+    m['stages'] = m['stages'] + ['layout']
+    R = Report()
+    canvas_check(P['ad_schema'], m, R, a)
+    expect('x-canvas-map: этап вне этапов входа холста → CM-01', 'CM-01' in codes(R))
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 
@@ -1627,14 +1724,15 @@ def main():
         R = Report()
         cmd_spec(ctx, R, a.spec, a.plan, a.overlay)
         return R.dump(f'motion-spec {os.path.basename(a.spec)}')
-    if a.cmd == 'moments':
-        cmd_moments(ctx, load(a.spec), a.section)
-        return 0
-    if a.cmd == 'motion-md':
-        cmd_motion_md(ctx, load(a.spec), a.out)
-        return 0
-    if a.cmd == 'values':
-        cmd_values(ctx, load(a.spec), a.out)
+    if a.cmd in ('moments', 'motion-md', 'values'):
+        spec = load(a.spec)
+        ptok = project_motion(a.spec, spec)
+        if a.cmd == 'moments':
+            cmd_moments(ctx, spec, a.section, ptok)
+        elif a.cmd == 'motion-md':
+            cmd_motion_md(ctx, spec, a.out, ptok)
+        else:
+            cmd_values(ctx, spec, a.out, ptok)
         return 0
     if a.cmd == 'levels':
         if a.check:

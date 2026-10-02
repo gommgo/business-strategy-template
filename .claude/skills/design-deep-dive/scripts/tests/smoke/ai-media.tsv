@@ -4,7 +4,7 @@ scripts/ai-media/alpha_check.py	utility	help
 scripts/ai-media/asset_audit.py	utility	help; run: selftest	
 scripts/ai-media/asset_inventory.py	utility	help; run: --selftest	
 scripts/ai-media/avif_pick.sh	utility	compile	
-scripts/ai-media/channel_diff.py	step	compile	
+scripts/ai-media/channel_diff.py	step	help	
 scripts/ai-media/check_icons.py	utility	help; run: --selftest	
 scripts/ai-media/composition_metrics.py	module	import-only	
 scripts/ai-media/data/svgo.keep-signature.config.mjs	data	compile	
@@ -22,9 +22,9 @@ scripts/ai-media/provenance_check.py	utility	help; run: selftest	run: нужны
 scripts/ai-media/routing_check.py	utility	help; run: --selftest	
 scripts/ai-media/series_metrics.py	module	import-only	
 scripts/ai-media/split_grid.py	module	import-only	
-scripts/ai-media/split_recraft.py	step	compile	
+scripts/ai-media/split_recraft.py	step	help; run: --selftest	
 scripts/ai-media/stand_run.py	utility	help; run: selftest	
-scripts/ai-media/svg_sheet.py	step	help	help: нужны cairosvg (cairocffi, cffi, системная libcairo) — ставит install.sh (группа svg)
+scripts/ai-media/svg_sheet.py	step	help; run: --selftest	нужны cairosvg (cairocffi, cffi, системная libcairo) — ставит install.sh (группа svg)
 scripts/ai-media/tests/fixtures/D02/E1.spec.json	data	data	
 scripts/ai-media/tests/fixtures/D02/E2.spec.json	data	data	
 scripts/ai-media/tests/fixtures/D02/E3.spec.json	data	data	

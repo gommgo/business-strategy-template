@@ -20,6 +20,13 @@
     kbpaths.out("creative", "audit")                            # каталог выходов (создаётся)
     with kbpaths.lock("browser"): ...                           # общая блокировка браузера, с ожиданием
 
+Блокировка реентерабельна по дереву процессов: пока замок взят, его файл назван в переменной окружения DDD_LOCKS_HELD,
+и вложенный `lock()` — в том же процессе или в утилите, запущенной из него, — замок не берёт и не ждёт. Внешний `flock`
+на файл замка утилитам не нужен: под ним утилита ждёт обёртку до таймаута.
+
+Байт-код в папку скилла не пишется: импорт модуля ставит запрет этому процессу и переменной PYTHONDONTWRITEBYTECODE —
+дочерним, а кэш модулей скилла, импортированных до запрета (и этого файла), снимает сам.
+
 Диагностика: `python3 kbpaths.py` — где что лежит; `python3 kbpaths.py --bins` — внешние программы (путь, переменная
 окружения, версия); `python3 kbpaths.py --selftest` — самопроверка без сети, с запуском из соседнего чекаута во
 временной папке.
@@ -42,6 +49,7 @@ BASES = ("ux", "ui", "site", "text", "creative", "ai-media", "blender", "claude-
 DOMAINS = BASES + ("lib", "maint", "tests", "project")  # папки scripts/; project — утилиты по файлам docs/projects/
 
 ENV_HOME = "DDD_HOME"
+ENV_LOCKS = "DDD_LOCKS_HELD"                            # файлы замков, взятых этим процессом или его предком
 ENV_BIN = {                                             # переопределение пути к бинарнику (иначе $DDD_HOME/bin, затем PATH)
     "blender": "DDD_BLENDER",
     "node": "DDD_NODE",
@@ -195,10 +203,30 @@ def lock_path(name="browser", domain=None):
     return str(d / f"{name}.lock")
 
 
+def locks_held():
+    """Файлы замков, которые уже держит этот процесс или его предок: абсолютные пути из переменной DDD_LOCKS_HELD."""
+    return [p for p in os.environ.get(ENV_LOCKS, "").split(os.pathsep) if p]
+
+
+def lock_held(name="browser", domain=None):
+    """Взят ли замок этим процессом или его предком. Утилита со своим `flock` на файл замка спрашивает здесь, прежде
+    чем брать его: повторная блокировка того же файла ждала бы держателя до таймаута."""
+    return os.path.abspath(lock_path(name, domain)) in locks_held()
+
+
 @contextlib.contextmanager
 def lock(name="browser", domain=None, timeout=900.0, poll=0.5):
-    """Исключительная блокировка flock с ожиданием (до timeout секунд, затем TimeoutError); None — ждать без предела."""
+    """Исключительная блокировка flock с ожиданием (до timeout секунд, затем TimeoutError); None — ждать без предела.
+
+    Реентерабельна по дереву процессов: пока замок взят, его файл назван в переменной окружения DDD_LOCKS_HELD, и
+    вложенный вызов — в этом процессе или в утилите, запущенной из него с этим окружением, — замок не берёт и не
+    ждёт; процесс без переменной ждёт держателя. Внешний `flock` на файл замка утилитам не нужен: под ним утилита
+    ждёт обёртку до таймаута. Обёртка, которая держит замок сама, называет его файл в DDD_LOCKS_HELD."""
     path = lock_path(name, domain)
+    mark = os.path.abspath(path)
+    if mark in locks_held():
+        yield path
+        return
     f = open(path, "a")
     t0 = time.monotonic()
     try:
@@ -210,7 +238,15 @@ def lock(name="browser", domain=None, timeout=900.0, poll=0.5):
                 if timeout is not None and time.monotonic() - t0 > timeout:
                     raise TimeoutError(f"{path} занят дольше {timeout:.0f} с")
                 time.sleep(poll)
-        yield path
+        os.environ[ENV_LOCKS] = os.pathsep.join(locks_held() + [mark])
+        try:
+            yield path
+        finally:
+            rest = [p for p in locks_held() if p != mark]
+            if rest:
+                os.environ[ENV_LOCKS] = os.pathsep.join(rest)
+            else:
+                os.environ.pop(ENV_LOCKS, None)
     finally:
         try:
             fcntl.flock(f, fcntl.LOCK_UN)
@@ -323,7 +359,44 @@ def _init_env():
         os.environ["PATH"] = os.pathsep.join([str(ff), path]) if path else str(ff)
 
 
+def _no_bytecode():
+    """Байт-код в папку скилла не пишется: запрет — этому процессу, переменная PYTHONDONTWRITEBYTECODE — дочерним.
+    Кэш модуля пишется до исполнения его кода, поэтому запрет не застаёт этот файл и модули скилла, импортированные
+    раньше него: их кэш в `scripts/**/__pycache__/` снимается здесь, пустая папка кэша — тоже. Порядок импорта в
+    утилите значения не имеет."""
+    os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+    if sys.dont_write_bytecode:
+        return
+    sys.dont_write_bytecode = True
+    import importlib.util
+    sources = {str(Path(__file__).resolve())}
+    for mod in list(sys.modules.values()):
+        src = getattr(mod, "__file__", None)
+        if isinstance(src, str) and src.endswith(".py"):
+            sources.add(src)
+    frame = sys._getframe()
+    while frame is not None:                            # загруженного по пути файла модуля в sys.modules может не быть
+        src = frame.f_globals.get("__file__")
+        if isinstance(src, str) and src.endswith(".py"):
+            sources.add(src)
+        frame = frame.f_back
+    root = str(SCRIPTS) + os.sep
+    for src in sources:
+        try:
+            if not os.path.realpath(src).startswith(root):
+                continue
+            pyc = importlib.util.cache_from_source(src)
+            folder = os.path.dirname(pyc)
+            if os.path.basename(folder) != "__pycache__" or not os.path.realpath(pyc).startswith(root):
+                continue                                # кэш вынесен из папки скилла (PYTHONPYCACHEPREFIX) — не наш
+            os.unlink(pyc)
+            os.rmdir(folder)                            # снимается только пустая папка
+        except (OSError, ValueError, NotImplementedError):
+            continue
+
+
 _init_env()
+_no_bytecode()
 
 
 # ------------------------------------------------------------------ диагностика
@@ -399,6 +472,76 @@ def _sibling_check(check):
         check("соседний чекаут: без файла базы в копии утилита падает — чужая база не подхватывается", r.returncode != 0)
 
 
+LOCK_PROBE = ("import sys\nsys.path.insert(0, sys.argv[1])\nimport kbpaths\n"
+              "try:\n    with kbpaths.lock('browser', timeout=float(sys.argv[2]), poll=0.05):\n        pass\n"
+              "except TimeoutError:\n    sys.exit(3)\n")       # проба: взял замок — 0, не дождался — 3
+
+
+def _lock_check(check):
+    """Реентерабельность замка в `$DDD_HOME` самопроверки: вложенный вызов в том же процессе и в дочернем процессе
+    не ждёт, независимый процесс (без переменной держателя) ждёт до таймаута."""
+    import subprocess
+
+    def probe(env, timeout):
+        t0 = time.monotonic()
+        r = subprocess.run([sys.executable, "-c", LOCK_PROBE, str(LIB), str(timeout)], env=env, capture_output=True,
+                           text=True, timeout=120)
+        return r.returncode, time.monotonic() - t0
+
+    free = {k: v for k, v in os.environ.items() if k != ENV_LOCKS}
+    with lock("browser", timeout=5) as p:
+        check("lock() берёт блокировку", os.path.exists(p))
+        check("lock(): взятый замок назван в DDD_LOCKS_HELD, соседний — нет",
+              lock_held("browser") and not lock_held("browser", "site"))
+        t0 = time.monotonic()
+        with lock("browser", timeout=5):
+            nested = time.monotonic() - t0
+        check("lock(): вложенный вызов в том же процессе не ждёт, замок остаётся за держателем",
+              nested < 1 and lock_held("browser"))
+        rc, spent = probe(dict(os.environ), 5)
+        check("lock(): дочерний процесс с переменной держателя замок не берёт и не ждёт", rc == 0 and spent < 4)
+        rc, spent = probe(free, 1)
+        check("lock(): независимый процесс ждёт держателя до таймаута", rc == 3 and spent >= 1)
+    check("lock(): после выхода замок свободен и из переменной убран",
+          not lock_held("browser") and ENV_LOCKS not in os.environ and probe(free, 5)[0] == 0)
+
+
+def _bytecode_check(check):
+    """Запрет байт-кода при любом порядке импорта: копия lib и модули-пробы во временной папке, запуск без запрета в
+    окружении. Модуль до kbpaths, сам kbpaths, модуль после него и дочерний процесс папок `__pycache__` не оставляют."""
+    import subprocess
+    import tempfile
+    env = {k: v for k, v in os.environ.items() if k not in ("PYTHONDONTWRITEBYTECODE", "PYTHONPYCACHEPREFIX")}
+    with tempfile.TemporaryDirectory(prefix="ddd-bytecode-") as td:
+        root = Path(td).resolve() / "skill" / "scripts"
+        shutil.copytree(LIB, root / "lib", ignore=shutil.ignore_patterns("__pycache__"))
+        dom = root / "ui"
+        dom.mkdir()
+        for n in ("early", "late", "child"):
+            (dom / f"probe_{n}.py").write_text("X = 1\n", encoding="utf-8")
+        head = "import os, subprocess, sys\nsys.path[:0] = [os.path.dirname(os.path.abspath(__file__)), sys.argv[1]]\n"
+        (dom / "control.py").write_text(head + "import probe_early\n", encoding="utf-8")
+        (dom / "probe.py").write_text(
+            head + "import probe_early\nimport kbpaths\nimport probe_late\n"
+            "subprocess.run([sys.executable, '-c', 'import sys; sys.path.insert(0, sys.argv[1]); import probe_child',\n"
+            "                sys.path[0]], check=True)\n", encoding="utf-8")
+
+        def run(name):
+            r = subprocess.run([sys.executable, str(dom / name), str(root / "lib")], env=env, capture_output=True,
+                               text=True, timeout=120)
+            return r.returncode, sorted(root.rglob("__pycache__"))
+
+        rc, cached = run("control.py")
+        if rc != 0 or not cached:
+            print("SKIP байт-код: этот Python не пишет кэш и без запрета")
+            return
+        for d in cached:
+            shutil.rmtree(d)
+        rc, cached = run("probe.py")
+        check("байт-код: модуль до kbpaths, kbpaths, модуль после и дочерний процесс не оставляют __pycache__",
+              rc == 0 and not cached)
+
+
 def _selftest():
     import tempfile
     ok = True
@@ -430,8 +573,7 @@ def _selftest():
             check("cache() создаёт каталог", cache("ai-media", "polza").is_dir())
             check("lock_path общая", lock_path() == str(Path(td) / "locks" / "browser.lock"))
             check("lock_path домена", lock_path("browser", "site") == str(Path(td) / "locks" / "site" / "browser.lock"))
-            with lock("browser", timeout=5) as p:
-                check("lock() берёт блокировку", os.path.exists(p))
+            _lock_check(check)
             os.environ["DDD_BLENDER"] = "/nonexistent/blender"
             check("DDD_BLENDER переопределяет поиск", blender() == "/nonexistent/blender")
             del os.environ["DDD_BLENDER"]
@@ -461,6 +603,7 @@ def _selftest():
     check("use('ui') добавляет scripts/ui в sys.path", str(SCRIPTS / "ui") in sys.path)
     sys.path[:] = before
     _sibling_check(check)
+    _bytecode_check(check)
     print("kbpaths selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

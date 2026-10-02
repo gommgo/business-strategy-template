@@ -5,32 +5,41 @@
 схема — `kb/ai-media/05-prompting/asset-plan.schema.json`; файл проекта —
 `docs/projects/<slug>/design/<surface>/assets/plans/<page-id>.yaml` (пути — `lib/docpaths.py`). Id — словарь site
 (`kb/site/02-site-types/vocabulary.yaml`): page.page_type — тип страницы, slots[].slot — вид слота, slots[].section — id
-секции плана страницы; класс ai-media page.media_class — проекция page_type по строке §8
-`kb/site/02-site-types/crosswalk.tsv`. Канон слоя — `docs/projects/_template/design/README.md § Ассеты`.
+секции плана страницы; класс ai-media page.media_class — проекция по строкам §8 `kb/site/02-site-types/crosswalk.tsv`:
+строка типа сайта брифа («§8 (page.media_class)», site_type файла site-brief.yaml), у типа сайта без строки — строка
+page_type («§8 (page.page_type)»). Бриф — site-brief.yaml поверхности, у файла плана страницы — ссылка refs.brief.
+Канон слоя — `docs/projects/_template/design/README.md § Ассеты`; манифест готовых ассетов — схема
+`kb/ai-media/05-prompting/asset-manifest.schema.json`.
 
 Каркас: строка на медиа- и 3D-слот секций и на медиа-слот уровня страницы; id строки — <секция>-<id> слота плана
 страницы (у слота уровня страницы — его id), он же asset_ref строк copy deck. Из плана страницы: section, slot, role
-(media_role), goal, source (customer-tbd → real и заметка; edit-real при подлинности real-only → real и заметка: кадр
-доводится без генерации; постер 3D-слота без source — render; слот уровня страницы без source — template, фавикон —
-code), task_codes (task:), recipe, соотношения и зона текста → variants, lcp_candidate и loading → delivery, load
+(media_role), goal, source (customer-tbd → real и заметка; edit-real при подлинности real-only → real, заглушка
+local_edit и заметка: кадр доводится без генерации; постер 3D-слота без source — render; слот уровня страницы без
+source — template, фавикон — code), task_codes (task:), recipe, соотношения и зона текста → variants, lcp_candidate и loading → delivery, load
 3D-слота (без load — умолчание схемы плана страницы), alt и caption → alt_ref и caption_ref (сам текст — строки copy
 deck, copydeck.py export-assets), authenticity → ai_fit и policy.no_ai_subjects, poster и poster_for, cta_before_3d →
 three_d. Каркас проходит свою проверку: строки, которую она бракует, он не пишет. key — визуал и фон
 первого экрана не кодом и постер 3D-слота: ключевые ассеты делаются до ДС (`references/phases.md § Порядок ассетов и
 ДС`); агент уточняет. Бюджеты — профиль плана страницы (`kb/site/07-seo-geo-performance-analytics/budgets.yaml`).
-Размер, форматы, вес, предмет и дорога 3D — заглушки TODO и пустые поля: их дописывает агент. Статус — draft;
-утверждает заказчик до генерации (status: approved и approval).
+Размер, форматы, вес, предмет и дорога 3D — заглушки TODO и пустые поля: их дописывает агент. Статус каркаса — draft;
+план, предложенный заказчику, — proposed; утверждает заказчик до генерации (status: approved и approval).
+Источник слота действует у каждого варианта; вариант из другого источника называет его сам (variants[].source:
+телефон — настоящий кадр, десктоп — генерация) — подлинность и маршрут генерации сверяются по каждому варианту.
 
 Проверка — находки контракта `scripts/project/findings.py` (rule, severity, surface, kind, ref, path, message, fix),
 правила `.claude/skills/design-audit/references/rules.md`:
   R-STRUCT-005  форма по схеме; page_type и slot — id словаря site (out-of-scope и measurement-only — ошибка,
-                deprecated — предупреждение); media_class — проекция crosswalk.tsv; повтор id строки; generate или
-                edit-real при ai_fit: forbidden; poster_for на строку, которой нет
+                deprecated — предупреждение); media_class — проекция crosswalk.tsv (проходит проекция типа сайта и
+                проекция page_type); повтор id строки; generate или edit-real у слота или варианта при ai_fit:
+                forbidden; poster_for на строку, которой нет; warning — форма демо-картинки макета x-demo {file |
+                files, what} (есть ли файл, не сверяется: путь вне git), local_edit у строки без настоящего кадра
+                (источник не real и не edit-real), instance без записи в instances; в проекте — форма манифеста ассетов поверхности
+                (design/<surface>/assets/manifest.yaml) по схеме asset-manifest.schema.json (warning)
   R-MAT-002     поля утверждённого плана: approval, дорога 3D у 3D-слота, нет заглушек TODO, у generate и
-                edit-real — коды задач routing.yaml
+                edit-real слота или варианта — коды задач routing.yaml
   R-COV-004     3D-слот без постера; с планом страницы — строка на каждый медиа- и 3D-слот (нет строки: error у
-                утверждённого плана, иначе warning), строка без слота плана страницы, real-only не на generate (error)
-                и с ai_fit: forbidden, постер 3D-слота как в плане страницы; в проекте — план страницы ведёт в план
+                утверждённого плана, иначе warning), строка без слота плана страницы, real-only не на generate ни у
+                слота, ни у варианта (error) и с ai_fit: forbidden, постер 3D-слота как в плане страницы; в проекте — план страницы ведёт в план
                 ассетов (refs.asset_plan), план ассетов есть у страницы с медиа- и 3D-слотами (error — у страницы
                 партии входа холста: поле units манифеста INPUT.md; у остальных страниц и до входа — hint)
   R-REF-001     refs.* плана ассетов и refs.asset_plan плана страницы ведут в пустоту или в другой файл
@@ -54,8 +63,9 @@ three_d. Каркас проходит свою проверку: строки, 
                                                         в проект, только для страниц без плана ассетов (план ассетов
                                                         правит агент, существующий файл не перезаписывается)
   plan_to_assets.py check <slug> [<surface>] [--page ID …] [--repo DIR] [--json]
-                                                        планы ассетов поверхностей со слоем страницы и покрытие;
-                                                        --page — только эти страницы (находки и код выхода — по ним)
+                                                        планы ассетов поверхностей со слоем страницы, покрытие и
+                                                        форма манифеста ассетов; --page — только эти страницы
+                                                        (находки и код выхода — по ним; из манифеста — их строки)
   plan_to_assets.py --selftest                          примеры баз, 10 типов v1, фикстура asset-plan, без сети
 Без <surface> — все поверхности проекта со слоем страницы (web рода landing и site). Корень данных — --repo,
 переменная DDD_REPO или репозиторий скилла. --json — строки JSON находок (check) или один документ JSON (build,
@@ -97,8 +107,10 @@ EXAMPLES = SITE / "10-playbooks-contracts" / "examples"
 BASE_PLAN = EXAMPLES / "saas-okoshko" / "plans" / "home.yaml"
 SCHEMA = kbpaths.kb("ai-media", "05-prompting", "asset-plan.schema.json")
 SPEC_SCHEMA = kbpaths.kb("ai-media", "05-prompting", "asset-spec.schema.json")
+MANIFEST_SCHEMA = kbpaths.kb("ai-media", "05-prompting", "asset-manifest.schema.json")
 PLAN_FILE = "01-asset-slots-by-page-type.md"
 KIND = "asset-plan"
+MANIFEST_KIND = "asset-manifest"
 FIXTURE = "asset-plan"
 CHROME_ROLES = {"header", "footer", "utility", "legal"}          # не первый экран (как site_validate.py)
 SVG_SLOTS = {"diagram", "qr-code", "logo", "brand-logo", "favicon", "icon"}
@@ -108,6 +120,8 @@ NO_AI = {"avatar": "testimonials", "logo": "logos", "brand-logo": "logos", "scre
          "product-photo": "product_as_is", "document-image": "documents"}   # прочее real-only — real_people_or_work
 KEY_SLOTS = {"hero-visual", "background"}                        # визуал и атмосфера первого экрана
 KEY_SOURCES = {"generate", "edit-real", "render", "real"}        # герой кодом строится после ДС по её токенам
+AI_SOURCES = ("generate", "edit-real")                           # источники, где кадр делает или правит модель
+DEMO = "x-demo"                                                  # демо-картинка макета: имя ключа читает вход холста
 TODO = "TODO"
 # типы страниц, добавленные в словарь v1: у каждого — строка проекции §8 в crosswalk.tsv
 NEW_TYPES = ("specialist-page", "location-page", "program-catalog-page", "search-results-page", "documents-page",
@@ -134,17 +148,23 @@ class Kb:
             import jsonschema
         except ImportError as e:
             raise F.ToolError("нет jsonschema — окружение скилла: scripts/install.sh") from e
-        for p in (VOCAB, CROSSWALK, SCHEMA, PAGE_PLAN_SCHEMA):
+        for p in (VOCAB, CROSSWALK, SCHEMA, MANIFEST_SCHEMA, PAGE_PLAN_SCHEMA):
             if not p.is_file():
                 raise F.ToolError(f"нет файла базы: {p}")
         self.vocab = vocab_lint.Vocab.load(VOCAB)
         ns = self.vocab.data["namespaces"]
         self.page_types = {str(v["id"]): v for v in ns["page_type"]["values"]}
         self.slot_kind = {str(v["id"]): v.get("kind") for v in ns["slot"]["values"]}
-        self.plan_proj, self.spec_proj = {}, {}
+        self.plan_proj, self.spec_proj, self.site_proj = {}, {}, {}
         with open(CROSSWALK, encoding="utf-8") as fh:
             for r in csv.DictReader(fh, delimiter="\t"):
-                if r["source_base"] != "ai-media-research" or r["namespace"] != "page_type" or not r["our_id"]:
+                if r["source_base"] != "ai-media" or not r["our_id"]:
+                    continue
+                if r["namespace"] == "site_type":
+                    if r["source_file"].endswith(PLAN_FILE) and r["source_section"].startswith("§8 (page.media_class)"):
+                        self.site_proj.setdefault(r["our_id"], (r["source_term"], r["relation"]))
+                    continue
+                if r["namespace"] != "page_type":
                     continue
                 if r["source_file"].endswith(PLAN_FILE) and r["source_section"].startswith("§8 (page.page_type)"):
                     self.plan_proj.setdefault(r["our_id"], (r["source_term"], r["relation"]))
@@ -152,6 +172,7 @@ class Kb:
                     self.spec_proj.setdefault(r["our_id"], (r["source_term"], r["relation"]))
         self.schema = json.loads(SCHEMA.read_text(encoding="utf-8"))
         self.validator = jsonschema.Draft202012Validator(self.schema)
+        self.manifest_validator = jsonschema.Draft202012Validator(json.loads(MANIFEST_SCHEMA.read_text(encoding="utf-8")))
         spec = json.loads(SPEC_SCHEMA.read_text(encoding="utf-8"))
         self.role_validator = jsonschema.Draft202012Validator(spec["properties"]["role"])
         pp = json.loads(PAGE_PLAN_SCHEMA.read_text(encoding="utf-8"))["$defs"]["slot-3d"]["properties"]
@@ -160,9 +181,10 @@ class Kb:
         self.budgets = load_yaml(BUDGETS) if BUDGETS.is_file() else {}
         self.levels = load_yaml(LEVELS) if LEVELS.is_file() else {}
 
-    def media_class(self, page_type):
-        """Класс ai-media по строке §8 crosswalk.tsv → (класс, отношение) или (None, None)."""
-        return self.plan_proj.get(page_type, (None, None))
+    def media_class(self, page_type, site_type=None):
+        """Класс ai-media по строкам §8 crosswalk.tsv → (класс, отношение) или (None, None): строка типа сайта брифа
+        («§8 (page.media_class)», пространство site_type), у типа сайта без строки — строка page_type."""
+        return self.site_proj.get(site_type) or self.plan_proj.get(page_type, (None, None))
 
     def page_class(self, page_type):
         """Класс спецификации ассета по строкам «role.page_type» crosswalk.tsv → (класс, отношение) или (None, None)."""
@@ -246,17 +268,19 @@ def variants(sl, kind):
 def source_of(sl, default):
     """Источник строки плана ассетов и заметки к нему по слоту плана страницы. customer-tbd — real: ждём материалы
     заказчика. edit-real при подлинности real-only — тоже real: правка моделью изменила бы то, что обязано остаться
-    настоящим, а доводка без генерации источник не меняет; строку edit-real при ai_fit: forbidden проверка плана
-    бракует, поэтому каркас её не пишет."""
-    src, note = sl.get("source"), []
+    настоящим, а доводка без генерации источник не меняет — её операции называет поле local_edit (каркас ставит
+    заглушку); строку edit-real при ai_fit: forbidden проверка плана бракует, поэтому каркас её не пишет.
+    → (источник, заметки, заглушка local_edit или None)."""
+    src, note, local = sl.get("source"), [], None
     if src == "customer-tbd":
         src = "real"
         note.append("ждём материалы заказчика (source: customer-tbd в плане страницы)")
     elif src == "edit-real" and sl.get("authenticity") == "real-only":
         src = "real"
-        note.append("edit-real при подлинности real-only в плане страницы: настоящий кадр доводится без генерации "
-                    "(кадрирование, цвет, апскейл), правка моделью — только при real-or-generated")
-    return src or default, note
+        local = [f"{TODO}: что делается с кадром без генерации (кадрирование, цвет, апскейл)"]
+        note.append("edit-real при подлинности real-only в плане страницы: настоящий кадр доводится без генерации — "
+                    "операции в local_edit; правка моделью — только при real-or-generated")
+    return src or default, note, local
 
 
 def text_ref(sec_id, value):
@@ -269,7 +293,7 @@ def slot_entry(K, sec, sl, kind, posters, fs):
     """Строка плана ассетов для медиа- или 3D-слота секции sec; posters — (секция, id) → 3d | video и постеры видео."""
     sid = f"{sec['id']}-{sl['id']}"
     target_kind = posters["kind"].get((sec["id"], sl.get("poster_for")))
-    src, note = source_of(sl, "code" if kind == "3d" else ("render" if target_kind == "3d" else "real"))
+    src, note, local = source_of(sl, "code" if kind == "3d" else ("render" if target_kind == "3d" else "real"))
     auth = sl.get("authenticity") or ("code" if kind == "3d" else None)
     e = {"id": sid, "section": sec["id"], "slot": sl["slot"], "role": sl.get("media_role", "informational")}
     e["goal"] = sl.get("goal") or "TODO: что ассет показывает за 3 секунды"
@@ -277,6 +301,8 @@ def slot_entry(K, sec, sl, kind, posters, fs):
         e["key"] = True
     e["ladder"] = ladder(sl, kind)
     e["source"] = src
+    if local:
+        e["local_edit"] = local
     e["task_codes"] = [t.replace("task:", "", 1) for t in sl.get("task") or []]
     if sl.get("recipe"):
         e["recipe"] = sl["recipe"]
@@ -319,10 +345,12 @@ def page_slot_entry(sl):
     страницы, как у слота секции; без них — шаблон с уместным ИИ у картинки и код без ИИ у фавикона."""
     kind = sl.get("slot")
     fav = kind == "favicon"
-    src, note = source_of(sl, "code" if fav else "template")
+    src, note, local = source_of(sl, "code" if fav else "template")
     e = {"id": sl["id"], "section": "meta", "slot": kind, "role": sl.get("media_role", "informational"),
-         "goal": sl.get("goal") or kind, "ladder": "svg" if fav else "image", "source": src,
-         "task_codes": [t.replace("task:", "", 1) for t in sl.get("task") or []]}
+         "goal": sl.get("goal") or kind, "ladder": "svg" if fav else "image", "source": src}
+    if local:
+        e["local_edit"] = local
+    e["task_codes"] = [t.replace("task:", "", 1) for t in sl.get("task") or []]
     if src in ("generate", "edit-real", "render"):
         e["subject"] = "TODO: предмет словами паспорта визуала"
     e.update({"variants": [{"id": kind, "ratio": "1.91:1" if kind == "og-image" else "1:1"}],
@@ -336,12 +364,29 @@ def page_slot_entry(sl):
     return e
 
 
-def build(plan, page_plan_ref=None, K=None):
-    """План страницы (dict) → каркас плана ассетов (dict)."""
+def site_type_of(brief):
+    """Тип сайта брифа (site_type файла site-brief.yaml) или None: брифа нет или он не читается."""
+    try:
+        d = load_yaml(brief) if brief and Path(brief).is_file() else None
+    except (OSError, yaml.YAMLError):
+        return None
+    st = d.get("site_type") if isinstance(d, dict) else None
+    return st if isinstance(st, str) else None
+
+
+def plan_site_type(plan, plan_path):
+    """Тип сайта для плана страницы из файла plan_path — бриф по ссылке refs.brief плана; ссылки нет — None."""
+    refs = plan.get("refs") if isinstance(plan, dict) and isinstance(plan.get("refs"), dict) else {}
+    ref = refs.get("brief")
+    return site_type_of(Path(plan_path).parent / ref) if isinstance(ref, str) and ref else None
+
+
+def build(plan, page_plan_ref=None, K=None, site_type=None):
+    """План страницы (dict) → каркас плана ассетов (dict); site_type — тип сайта брифа для класса media_class."""
     K = K or kb()
     pg = plan.get("page") or {}
     pt = pg.get("page_type")
-    mc, _ = K.media_class(pt)
+    mc, _ = K.media_class(pt, site_type)
     fs = first_screen(plan)
     # кто чей постер: id слотов — в пределах секции, ключ — (секция, id)
     posters = {"kind": {}, "video": {}}
@@ -434,10 +479,11 @@ class Ctx:
     fix: str = ""
     approved: bool = False
     todo: int = 0
+    kind: str = KIND
 
     def add(self, rule, severity, where, message, fix=None):
         ref = self.ref + (f"#{where}" if where else "")
-        self.rep.add(rule, severity, surface=self.surface, kind=KIND, ref=ref, path=self.path, message=message,
+        self.rep.add(rule, severity, surface=self.surface, kind=self.kind, ref=ref, path=self.path, message=message,
                      fix=self.fix if fix is None else fix)
 
 
@@ -452,8 +498,45 @@ def todos(x, ptr=""):
     return []
 
 
+def row_sources(s):
+    """Источники строки плана по вариантам: [(указатель от строки, подпись, источник)] — первым источник слота, дальше
+    варианты со своим source; у варианта без поля действует источник слота."""
+    out = [("", "", s.get("source"))]
+    for j, v in enumerate(s.get("variants") or []):
+        if isinstance(v, dict) and v.get("source"):
+            out.append((f"/variants/{j}/source", f"вариант {v.get('id')} — ", v["source"]))
+    return out
+
+
+def demo_problems(s):
+    """Форма демо-картинки слота — расширение x-demo {file | files, what}: [(указатель от x-demo, сообщение)].
+    Есть ли файл на диске, не сверяется: путь машинный, вне git."""
+    d = s[DEMO]
+    if not isinstance(d, dict):
+        return [("", "x-demo — объект {file | files, what}")]
+    out = []
+    f, fs = d.get("file"), d.get("files")
+    if f is None and fs is None:
+        out.append(("", "в x-demo нет пути: file — путь файла или files — {<id варианта>: путь}"))
+    if f is not None and not (isinstance(f, str) and f.strip()):
+        out.append(("/file", "x-demo.file — непустая строка пути"))
+    if fs is not None:
+        if not (isinstance(fs, dict) and fs and all(isinstance(v, str) and v.strip() for v in fs.values())):
+            out.append(("/files", "x-demo.files — непустой объект {<id варианта>: путь}"))
+        else:
+            ids = {str(v.get("id")) for v in s.get("variants") or [] if isinstance(v, dict)}
+            extra = [str(k) for k in fs if str(k) not in ids]
+            if extra:
+                out.append(("/files", f"x-demo.files: вариантов {', '.join(extra)} нет среди variants строки"))
+    if not (isinstance(d.get("what"), str) and d["what"].strip()):
+        out.append(("/what", "в x-demo нет what — что это за картинка"))
+    return out
+
+
 def schema_findings(K, ap, c):
     for e in sorted(K.validator.iter_errors(ap), key=lambda e: [str(x) for x in e.absolute_path]):
+        if DEMO in e.absolute_path:                      # форму x-demo называет demo_problems — предупреждением
+            continue
         ptr = "/" + "/".join(str(x) for x in e.absolute_path) if e.absolute_path else ""
         m = re.search(r"'([^']+)' is a required property", e.message) if e.validator == "required" else None
         miss = m.group(1) if m else None
@@ -468,8 +551,9 @@ def schema_findings(K, ap, c):
             c.add("R-STRUCT-005", "error", ptr, f"форма плана ассетов: {e.message[:300]}")
 
 
-def check_plan(K, ap, c, page_plan=None, file_dir=None):
-    """Находки одного плана ассетов (dict) в Ctx c; page_plan — план страницы (dict) для покрытия."""
+def check_plan(K, ap, c, page_plan=None, file_dir=None, site_type=None):
+    """Находки одного плана ассетов (dict) в Ctx c; page_plan — план страницы (dict) для покрытия; site_type — тип
+    сайта брифа: media_class сверяется с проекцией типа сайта и с проекцией page_type, проходит любая из двух."""
     if not isinstance(ap, dict):
         c.add("R-STRUCT-005", "error", "", "план ассетов — не объект YAML")
         return
@@ -490,15 +574,18 @@ def check_plan(K, ap, c, page_plan=None, file_dir=None):
             c.add("R-STRUCT-005", "warning", "/page/page_type", f"page_type {pt!r} устарел" + (f": замена — {rb}" if rb else ""))
         if st is not None:
             proj, _ = K.media_class(pt)
+            by_site = K.site_proj.get(site_type, (None, None))[0]
+            site_note = f"типа сайта {site_type}: {by_site!r}" if by_site else ""
             mc = page.get("media_class")
             if proj is None:
                 c.add("R-STRUCT-005", "error", "/page/page_type", f"у page_type {pt!r} нет строки проекции §8 в crosswalk.tsv: "
                       "новый id — сначала словарь, затем строка таблицы", fix="строка kb/site/02-site-types/crosswalk.tsv")
             elif mc is None:
                 c.add("R-STRUCT-005", "error" if c.approved else "warning", "/page",
-                      f"нет media_class — проекция crosswalk.tsv для {pt}: {proj}")
-            elif mc != proj:
-                c.add("R-STRUCT-005", "error", "/page/media_class", f"media_class {mc!r} ≠ проекции crosswalk.tsv для {pt}: {proj!r}")
+                      "нет media_class — проекция crosswalk.tsv для " + (site_note or f"{pt}: {proj}"))
+            elif mc not in (proj, by_site):
+                c.add("R-STRUCT-005", "error", "/page/media_class", f"media_class {mc!r} ≠ проекции crosswalk.tsv для {pt}: {proj!r}"
+                      + (f" и для {site_note}" if by_site else ""))
     refs = ap.get("refs") if isinstance(ap.get("refs"), dict) else {}
     if file_dir is not None:
         for k, v in refs.items():
@@ -506,6 +593,7 @@ def check_plan(K, ap, c, page_plan=None, file_dir=None):
                 c.add("R-REF-001", "error", f"/refs/{k}", f"refs.{k} ведёт в пустоту: {v}")
     slots = ap.get("slots") if isinstance(ap.get("slots"), list) else []
     ids = [s.get("id") for s in slots if isinstance(s, dict)]
+    inst = {x.get("id") for x in ap.get("instances") or [] if isinstance(x, dict)} if isinstance(ap.get("instances"), list) else set()
     seen = set()
     for i, s in enumerate(slots):
         if not isinstance(s, dict):
@@ -528,11 +616,23 @@ def check_plan(K, ap, c, page_plan=None, file_dir=None):
             c.add("R-COV-004", "error", w + "/poster", f"постер {s['poster']!r} — строки с таким id в плане нет")
         if s.get("poster_for") and s["poster_for"] not in ids:
             c.add("R-STRUCT-005", "warning", w + "/poster_for", f"poster_for {s['poster_for']!r} — строки с таким id в плане нет")
-        if s.get("source") in ("generate", "edit-real") and s.get("ai_fit") == "forbidden":
-            c.add("R-STRUCT-005", "error", w, f"{sid}: source {s['source']} при ai_fit: forbidden — слот только для настоящего")
-        if c.approved:
-            if s.get("source") in ("generate", "edit-real") and not s.get("task_codes"):
-                c.add("R-MAT-002", "error", w + "/task_codes", f"{sid}: у {s['source']} нет кодов задач routing.yaml — маршрут генерации")
+        srcs = row_sources(s)
+        for ptr, who, src in srcs:
+            if src in AI_SOURCES and s.get("ai_fit") == "forbidden":
+                c.add("R-STRUCT-005", "error", w + ptr, f"{sid}: {who}source {src} при ai_fit: forbidden — слот только для настоящего")
+        if s.get("local_edit") and not {"real", "edit-real"} & {src for _, _, src in srcs}:
+            c.add("R-STRUCT-005", "warning", w + "/local_edit", f"{sid}: local_edit — доводка настоящего кадра без генерации, "
+                  f"а настоящего кадра у строки нет (source: {s.get('source')})")
+        if isinstance(s.get("instance"), str) and s["instance"] not in inst:
+            c.add("R-STRUCT-005", "warning", w + "/instance", f"{sid}: instance {s['instance']!r} — экземпляра с таким id в "
+                  "instances плана нет")
+        if DEMO in s:
+            for ptr, msg in demo_problems(s):
+                c.add("R-STRUCT-005", "warning", f"{w}/{DEMO}{ptr}", f"{sid}: {msg}")
+        if c.approved and not s.get("task_codes"):
+            gen = next(((who, src) for _, who, src in srcs if src in AI_SOURCES), None)
+            if gen:
+                c.add("R-MAT-002", "error", w + "/task_codes", f"{sid}: {gen[0]}у {gen[1]} нет кодов задач routing.yaml — маршрут генерации")
     c.todo = len(todos(ap))
     if c.approved:
         for i, s in enumerate(slots):
@@ -563,10 +663,11 @@ def coverage(ap, plan, c):
         if x["slot"] and s.get("slot") != x["slot"]:
             c.add("R-COV-004", "warning", w + "/slot", f"{rid}: вид слота {s.get('slot')!r}, в плане страницы — {x['slot']!r}")
         if x["auth"] == "real-only":
-            if s.get("source") == "generate":
-                c.add("R-COV-004", "error", w + "/source", f"{rid}: подлинность real-only — люди-доказательства, товар «как есть», "
-                      "чужие знаки только настоящие, не generate")
-            elif s.get("ai_fit") != "forbidden":
+            gen = [(ptr, who) for ptr, who, src in row_sources(s) if src == "generate"]
+            for ptr, who in gen:
+                c.add("R-COV-004", "error", w + (ptr or "/source"), f"{rid}: {who}подлинность real-only — люди-доказательства, "
+                      "товар «как есть», чужие знаки только настоящие, не generate")
+            if not gen and s.get("ai_fit") != "forbidden":
                 c.add("R-COV-004", "warning", w + "/ai_fit", f"{rid}: подлинность real-only — ai_fit: forbidden")
         if x["kind"] == "3d" and x["poster"] and s.get("poster") and s["poster"] != x["poster"]:
             c.add("R-COV-004", "warning", w + "/poster", f"{rid}: постер {s['poster']!r}, в плане страницы — {x['poster']!r}")
@@ -574,6 +675,34 @@ def coverage(ap, plan, c):
         if rid not in exp:
             c.add("R-COV-004", "warning", f"/slots/{i}", f"строка {rid!r} без медиа- или 3D-слота плана страницы: слот снят "
                   "или переименован")
+
+
+def check_manifest(K, path, c, pages=None):
+    """Форма манифеста ассетов по схеме asset-manifest.schema.json — находки в Ctx c. pages — только строки этих
+    страниц (поле page строки); находки вне строк тогда не называются."""
+    try:
+        data = load_yaml(path)
+    except (OSError, yaml.YAMLError) as e:
+        c.add("R-STRUCT-005", "warning", "", f"манифест ассетов не читается как YAML: {str(e)[:200]}")
+        return
+    if not isinstance(data, (dict, list)):
+        c.add("R-STRUCT-005", "warning", "", "манифест ассетов — объект с ключом assets или список строк")
+        return
+    rows = data if isinstance(data, list) else data.get("assets")
+    branch = 0 if isinstance(data, list) else 1          # ветка anyOf схемы: список строк или объект с assets
+    errs = []
+    for e in K.manifest_validator.iter_errors(data):
+        sub = [x for x in e.context or [] if x.relative_schema_path and x.relative_schema_path[0] == branch]
+        errs += sub or [e]
+    for e in sorted(errs, key=lambda e: [str(x) for x in e.absolute_path]):
+        ap_ = list(e.absolute_path)
+        i = next((x for x in ap_ if isinstance(x, int)), None)
+        row = rows[i] if isinstance(rows, list) and i is not None and i < len(rows) else None
+        if pages is not None and not (isinstance(row, dict) and str(row.get("page") or "") in pages):
+            continue
+        who = f"{row.get('slot')}: " if isinstance(row, dict) and row.get("slot") else ""
+        c.add("R-STRUCT-005", "warning", "/" + "/".join(str(x) for x in ap_) if ap_ else "",
+              f"форма манифеста ассетов: {who}{e.message[:300]}")
 
 
 def has_media(plan):
@@ -611,11 +740,12 @@ def cmd_skeleton(a):
         print(f"plan_to_assets: {src} — не план страницы (нет page)", file=sys.stderr)
         return 2
     dest_dir = Path(a.out).resolve().parent if a.out else Path.cwd()
-    ap = build(plan, relpath(src, dest_dir), K)
+    st = plan_site_type(plan, src)
+    ap = build(plan, relpath(src, dest_dir), K, st)
     text = dump_plan(ap, head_for(src.name, ap["page"]["id"]))
     rep = F.Report()
     c = Ctx(rep, str(a.out or "-"), str(ap["page"]["id"]))
-    check_plan(K, ap, c, plan, dest_dir if a.out else None)
+    check_plan(K, ap, c, plan, dest_dir if a.out else None, st)
     if a.out:
         Path(a.out).write_text(text, encoding="utf-8")
     else:
@@ -655,7 +785,8 @@ def check_file(K, path, plan_path=None, repo=None, rep=None):
             pp = load_yaml(pp_path)
         except yaml.YAMLError as e:
             c.add("R-STRUCT-005", "warning", "", f"план страницы {pp_path.name} не читается: {str(e)[:120]}")
-    check_plan(K, ap, c, pp, p.parent)
+    st = site_type_of(docpaths.site(where[0], where[1], "brief", repo=repo)) if where else plan_site_type(pp, pp_path)
+    check_plan(K, ap, c, pp, p.parent, st)
     return rep, c
 
 
@@ -788,6 +919,7 @@ def cmd_build(call):
     for s in page_surfaces(call, need_page=True):
         home = docpaths.design(call.slug, "asset-plans", surface=s.slug, repo=call.repo)   # место файла в проекте
         dst_dir = home if a.write else Path(out_root) / s.slug
+        st = site_type_of(docpaths.site(call.slug, s.slug, "brief", repo=call.repo))
         for pp in plans_of(call, s):
             try:
                 plan = load_yaml(pp)
@@ -809,7 +941,7 @@ def cmd_build(call):
                 res.append({"surface": s.slug, "page": pid, "path": docpaths.rel(dest, call.repo),
                             "result": "план ассетов есть — не перезаписан (правит агент; сверка — check)"})
                 continue
-            ap = build(plan, relpath(pp, home), K)          # ссылки — от места файла в проекте
+            ap = build(plan, relpath(pp, home), K, st)      # ссылки — от места файла в проекте
             dest.parent.mkdir(parents=True, exist_ok=True)
             dest.write_text(dump_plan(ap, head_for(pp.name, pid)), encoding="utf-8")
             res.append({"surface": s.slug, "page": pid, "path": docpaths.rel(dest, call.repo), "slots": len(ap["slots"]),
@@ -869,6 +1001,11 @@ def cmd_check(call):
         ad_status = docpaths.status(docpaths.design(call.slug, "art-direction", surface=s.slug, repo=call.repo))
         has_input, batch = input_batch(docpaths.design(call.slug, "input", surface=s.slug, repo=call.repo))
         fix = f"/design-deep-dive {call.slug} {s.slug} asset-plan:"
+        st = site_type_of(docpaths.site(call.slug, s.slug, "brief", repo=call.repo)) if s.page else None
+        man = docpaths.design(call.slug, "assets", surface=s.slug, repo=call.repo) / "manifest.yaml"
+        if man.is_file():
+            check_manifest(K, man, Ctx(rep, docpaths.rel(man, call.repo), "manifest", s.slug,
+                                       f"/design-deep-dive {call.slug} {s.slug} assets", kind=MANIFEST_KIND), wanted or None)
         if wanted:
             plans = {pid: v for pid, v in plans.items() if pid in wanted}
             aps = {pid: v for pid, v in aps.items() if pid in wanted}
@@ -906,7 +1043,7 @@ def cmd_check(call):
             pp, plan = plans.get(pid, (None, None))
             if s.page and plan is None:
                 c.add("R-STRUCT-001", "warning", "", f"план ассетов страницы {pid}, которой нет среди планов site/{s.slug}/plans/")
-            check_plan(K, ap, c, plan, p.parent)
+            check_plan(K, ap, c, plan, p.parent, st)
             todo += c.todo
             refs = ap.get("refs") if isinstance(ap, dict) and isinstance(ap.get("refs"), dict) else {}
             if pp is not None and isinstance(refs.get("page_plan"), str) and (p.parent / refs["page_plan"]).exists() \
@@ -1032,6 +1169,8 @@ def _selftest():
           (he["source"], he["ai_fit"]) == ("real", "forbidden") and "без генерации" in he.get("note", ""))
     check("слот уровня страницы: источник и подлинность плана страницы — real, forbidden, заметка",
           (og["source"], og["ai_fit"]) == ("real", "forbidden") and "без генерации" in og.get("note", ""))
+    check("… доводку без генерации называет поле local_edit — заглушка у обеих строк",
+          all(str((x.get("local_edit") or [""])[0]).startswith(TODO) for x in (he, og)))
     po = copy.deepcopy(pe)
     for sec in po["sections"]:
         for sl in (sec.get("slots") or {}).get("media") or []:
@@ -1091,6 +1230,97 @@ def _selftest():
     check("--spec-role: page_type словаря, page_class проекции, role по схеме asset-spec",
           role["page_type"] == "landing-lead-services" and role["page_class"] == "landing" and role["priority"] == "lcp"
           and not list(K.role_validator.iter_errors(role)))
+    # источник по варианту: перечень тот же, что у слота; подлинность и маршрут сверяются по каждому варианту
+    sp = K.schema["$defs"]
+    check("variants[].source — перечень тот же, что у source слота",
+          sp["variant"]["properties"]["source"]["enum"] == sp["slot"]["properties"]["source"]["enum"])
+    ap = copy.deepcopy(base)
+    hv = next(s for s in ap["slots"] if s["id"] == "hero-visual")
+    hv["ai_fit"] = "conditional"
+    hv["variants"][0]["source"] = "generate"
+    check("телефон — настоящий кадр, десктоп — генерация: источник варианта проходит схему и сверку",
+          hv["variants"][0]["id"] == "desktop" and not [f for f in rules(ap) if f.severity == "error"])
+    hv["ai_fit"] = "forbidden"
+    it = rules(ap, otv)
+    check("generate у варианта при ai_fit: forbidden → R-STRUCT-005, при real-only → R-COV-004: находки называют вариант",
+          any(f.rule == "R-STRUCT-005" and f.severity == "error" and "вариант desktop" in f.message for f in it)
+          and any(f.rule == "R-COV-004" and f.severity == "error" and "вариант desktop" in f.message
+                  and f.ref.endswith("/variants/0/source") for f in it))
+    hv["ai_fit"], hv["task_codes"] = "conditional", []
+    ap["status"], ap["approval"] = "approved", {"by": "владелец продукта", "date": "2026-09-29"}
+    check("утверждённый план: генерация у варианта без кодов задач → R-MAT-002",
+          any(f.rule == "R-MAT-002" and "вариант desktop" in f.message and "кодов задач" in f.message for f in rules(ap)))
+    hv["variants"][0]["source"] = "photo"
+    check("источник варианта вне перечня → R-STRUCT-005", any(f.rule == "R-STRUCT-005" and f.ref.endswith("/variants/0/source")
+                                                               for f in rules(ap)))
+    # класс по типу сайта брифа: строка «§8 (page.media_class)» таблицы, у типа сайта без строки — проекция page_type
+    stk = load_yaml(EXAMPLES / "corporate-b2b-stalkon" / "plans" / "home.yaml")
+    folio = build(stk, None, K, "portfolio-site")
+    check("главная сайта-портфолио: media_class studio — проекция типа сайта; тип сайта без строки — проекция page_type",
+          folio["page"]["media_class"] == "studio" and build(stk, None, K, "corporate-site")["page"]["media_class"] == "corporate")
+
+    def class_findings(ap_, st_):
+        rep_ = F.Report()
+        check_plan(K, ap_, Ctx(rep_, "selftest", "home"), None, None, st_)
+        return [f for f in rep_.items if "media_class" in f.message]
+
+    ap = copy.deepcopy(folio)
+    by_site = class_findings(ap, "portfolio-site")
+    ap["page"]["media_class"] = "corporate"
+    by_type = class_findings(ap, "portfolio-site")
+    ap["page"]["media_class"] = "blog"
+    check("сверка media_class при типе сайта: проходят проекция типа сайта и проекция page_type, прочее → R-STRUCT-005",
+          not by_site and not by_type and any(f.severity == "error" and "portfolio-site" in f.message
+                                              for f in class_findings(ap, "portfolio-site")))
+    with tempfile.TemporaryDirectory() as td:
+        (Path(td) / "plans").mkdir()
+        (Path(td) / "site-brief.yaml").write_text("site_type: portfolio-site\n", encoding="utf-8")
+        check("тип сайта для файла плана страницы — бриф по refs.brief; ссылки нет — None",
+              plan_site_type({"refs": {"brief": "../site-brief.yaml"}}, Path(td) / "plans" / "home.yaml") == "portfolio-site"
+              and plan_site_type({}, Path(td) / "plans" / "home.yaml") is None)
+
+    # демо-картинка макета: форма x-demo {file | files, what}; путь машинный — файл на диске не сверяется
+    def demo(value):
+        ap_ = copy.deepcopy(base)
+        next(s for s in ap_["slots"] if s["id"] == "hero-visual")[DEMO] = value
+        return [(f.rule, f.severity) for f in rules(ap_) if DEMO in f.ref]
+
+    check("x-demo: file и what, files по вариантам и ключи-заметки проекта — 0 находок",
+          not demo({"file": "/nowhere/demo.png", "what": "кадр-заглушка до съёмки"})
+          and not demo({"files": {"desktop": "/nowhere/d.png", "mobile": "/nowhere/m.png"}, "what": "кадр-заглушка",
+                        "route": "заметка проекта"}))
+    bad = [demo("demo.png"), demo({"what": "кадр-заглушка"}), demo({"file": "", "what": "кадр-заглушка"}),
+           demo({"files": {"tablet": "/nowhere/t.png"}, "what": "кадр-заглушка"}), demo({"file": "/nowhere/demo.png"})]
+    check("x-demo неверной формы (не объект, нет пути, пустой file, вариант вне variants, нет what) → R-STRUCT-005 warning",
+          all(b and set(b) == {("R-STRUCT-005", "warning")} for b in bad))
+    # статус proposed, доводка без генерации, экземпляры шаблона коллекции, источник настоящего кадра
+    ap = copy.deepcopy(base)
+    ap["status"] = "proposed"
+    ap["instances"] = [{"id": "sample-one", "title": "первая запись коллекции"}]
+    hv = next(s for s in ap["slots"] if s["id"] == "hero-visual")
+    hv.update({"local_edit": ["кадрирование", "цвет"], "instance": "sample-one",
+               "real_source": {"origin": "архив заказчика", "file": "frame-01.tif"}})
+    check("status proposed, local_edit, instances и instance, real_source — по схеме, 0 находок", not rules(ap))
+    hv["source"], hv["ai_fit"] = "edit-real", "conditional"
+    check("local_edit при источнике edit-real — настоящий кадр есть, находки нет",
+          not [f for f in rules(ap) if f.ref.endswith("/local_edit")])
+    hv["source"], hv["ai_fit"] = "real", "forbidden"
+    hv["instance"] = "sample-two"
+    next(s for s in ap["slots"] if s["id"] == "og-image")["local_edit"] = ["кадрирование"]
+    it = rules(ap)
+    check("instance без записи в instances и local_edit у строки без настоящего кадра → R-STRUCT-005 warning",
+          {f.ref.rpartition("/")[2] for f in it if f.rule == "R-STRUCT-005" and f.severity == "warning"} == {"instance", "local_edit"}
+          and not [f for f in it if f.severity == "error"])
+
+    def meta_ok(schema):
+        try:
+            type(K.validator).check_schema(schema)
+        except Exception:                                # noqa: BLE001 — любой отказ метасхемы — провал случая
+            return False
+        return True
+
+    check("схемы плана ассетов и манифеста ассетов проходят метасхему Draft 2020-12",
+          meta_ok(K.schema) and meta_ok(K.manifest_validator.schema))
     # проект: фикстура asset-plan (лендинг promo с планом ассетов главной)
     kbpaths.use("tests")
     import fixture_project
@@ -1099,6 +1329,40 @@ def _selftest():
         r = subprocess.run(tool + ["check", fx.slug, "promo", "--repo", str(fx.root), "--json"], capture_output=True, text=True)
         items = F.parse_lines(r.stdout)
         check(f"фикстура: check — 0 находок, код 0 ({len(items)} находок, код {r.returncode})", r.returncode == 0 and not items)
+        # манифест ассетов поверхности: форма по схеме — предупреждением, код выхода не меняется
+        man = fx.project / "design" / "promo" / "assets" / "manifest.yaml"
+        man_src = fixture_project.FIXTURES / "package-landing-defects" / "files" / "design" / "promo" / "assets" / "manifest.yaml"
+
+        def man_check(text, *more):
+            man.write_text(text, encoding="utf-8")
+            r_ = subprocess.run(tool + ["check", fx.slug, "promo", *more, "--repo", str(fx.root), "--json"],
+                                capture_output=True, text=True)
+            return r_.returncode, [(f.rule, f.severity, f.kind) for f in F.parse_lines(r_.stdout)]
+
+        check("фикстура: манифест ассетов фикстуры package-landing-defects проходит схему — check 0 находок",
+              man_src.is_file() and man_check(man_src.read_text(encoding="utf-8")) == (0, []))
+        row = ("slot: hero-visual\n  page: home\n  file: hero-visual-desktop.webp\n  variant: desktop\n  format: webp\n"
+               "  status: accepted\n  license: права у заказчика (демо)\n  origin: съёмка заказчика (демо)\n  ai: false\n"
+               "  sha256: " + "a1" * 32 + "\n")
+        check("фикстура: манифест списком строк — 0 находок", man_check("- " + row) == (0, []))
+        broken = ("manifest_version: 1\nassets:\n- " + row.replace("status: accepted", "status: done")
+                  + "- slot: header-logo\n  role: informational\n")
+        check("фикстура: статус строки вне перечня и строка без file → R-STRUCT-005 warning вида asset-manifest, код 0",
+              man_check(broken) == (0, [("R-STRUCT-005", "warning", MANIFEST_KIND)] * 2))
+        check("фикстура: check --page — из манифеста только строки этой страницы",
+              man_check(broken, "--page", "home") == (0, [("R-STRUCT-005", "warning", MANIFEST_KIND)]))
+        man.unlink()
+        # тип сайта брифа: каркас берёт класс по строке типа сайта, план с классом по page_type проверку проходит
+        brief = fx.project / "site" / "promo" / "site-brief.yaml"
+        brief_text = brief.read_text(encoding="utf-8")
+        brief.write_text(re.sub(r"(?m)^site_type: .*$", "site_type: portfolio-site", brief_text), encoding="utf-8")
+        with tempfile.TemporaryDirectory() as td:
+            subprocess.run(tool + ["build", fx.slug, "promo", "--repo", str(fx.root), "--out", td], capture_output=True, text=True)
+            built_class = (load_yaml(Path(td) / "promo" / "home.yaml").get("page") or {}).get("media_class")
+        r = subprocess.run(tool + ["check", fx.slug, "promo", "--repo", str(fx.root), "--json"], capture_output=True, text=True)
+        check("фикстура: бриф сайта-портфолио — build даёт media_class studio, план с классом по page_type проходит check",
+              built_class == "studio" and r.returncode == 0 and not F.parse_lines(r.stdout))
+        brief.write_text(brief_text, encoding="utf-8")
         r = subprocess.run(tool + ["check", fx.slug, "cabinet", "--repo", str(fx.root)], capture_output=True, text=True)
         check("фикстура: поверхность кабинета без планов ассетов — код 0", r.returncode == 0)
         r = subprocess.run(tool + ["check", fx.slug, "nope", "--repo", str(fx.root)], capture_output=True, text=True)

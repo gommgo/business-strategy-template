@@ -11,6 +11,7 @@
     "source": "site-brief",
     "stages": [
       "directions",
+      "treatment",
       "wireframe",
       "mockup",
       "motion"

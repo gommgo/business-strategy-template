@@ -42,17 +42,23 @@
 --no-lock — обёртка их уже держит; не дольше 5 мин на страницу). Код репозитория — соседним чекаутом
 ../strategy/.claude/skills/design-deep-dive/scripts/site/page_anatomy.py:
   page_anatomy.py URL OUT_DIR [--mobile] [--inp] [--quick] [--no-cmp-close] [--label PAGE_TYPE]
-          [--id ID] [--market ru|intl] [--industry X] [--net [auto|ru-direct|vpn-lt|unknown]] [--site-type X]
+          [--id ID] [--net [auto|ru-direct|vpn-lt|unknown]] [--exit-country CC] [--timezone TZ] [--site-type X]
           [--text-id X] [--template X] [--site-id X] [--timeout 60] [--wait МС] [--cpu N] [--crux] [--no-lock]
-  page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b]
-          [--skip-done]                      # замки тишины — на каждую страницу × устройство, free ≥ 3 ГБ
+  page_anatomy.py --selftest          # локальная тестовая страница во временной папке, без сети
+Обслуживание базы — замер и пересчёт корпуса страниц базы знаний (группа «обслуживание базы» в --help); замеру страницы
+проекта эти ключи не нужны:
+  page_anatomy.py URL OUT_DIR … [--market ru|intl] [--industry X]   # метки корпуса: рынок (он же язык браузера), отрасль
+  page_anatomy.py --batch pages.tsv --out DIR [--devices desktop,mobile] [--inp] [--only a,b] [--skip-done]
+          [--page-timeout 270]               # замки тишины — на каждую страницу × устройство, free ≥ 3 ГБ
+  page_anatomy.py --crux-batch pages.tsv --out DIR [--only a,b]   # поле CrUX страниц списка (PageSpeed Insights API)
   page_anatomy.py --reclassify DIR   # пересчитать классы секций в готовых JSON без браузера
   page_anatomy.py --csv DIR --pages pages.tsv > pages.csv
   page_anatomy.py --net-of HOST [HOST…]   # страна и организация IP сервера (IP не печатается)
-  page_anatomy.py --selftest          # локальная тестовая страница во временной папке, без сети
 Сеть — только ключом --net: без него замер к сторонним сервисам не обращается (поле net: unknown); --net или --net auto —
 страна и организация сервера (ipinfo.io, IP не сохраняется) и проверка раздельной маршрутизации VPN (yandex.ru и
-ipinfo.io до и после замера); --net <метка> — своя метка сети и та же проверка маршрута.
+ipinfo.io до и после замера); --net <метка> — своя метка сети и та же проверка маршрута. Поле route_ok — адреса обеих
+проб разошлись; с --exit-country CC — ещё и страна выхода каждой пробы равна CC (без ключа страна выхода не сверяется).
+Часовой пояс браузера — --timezone (имя IANA); без ключа — Europe/Moscow для рынка ru, UTC для остальных.
 Выход: OUT_DIR/anatomy_<desktop|mobile>.json, sheet_<устройство>.jpg (контактный лист секций с подписями),
 cmp_<устройство>.jpg (кадр с cookie-баннером, если найден), краткая сводка в stdout.
 Ограничения: лаборатория ≠ поле; одна сеть (поле net — метка или проверка с --net); Chromium headless; эмуляция
@@ -1168,6 +1174,18 @@ def route_probe():
     return res
 
 
+def route_is_ok(probes, exit_country=None):
+    """Маршрут в порядке: у каждой пробы route_probe адреса разошлись; с ожидаемой страной выхода (код из двух букв) —
+    ещё и страна выхода каждой пробы равна ей. Без ожидаемой страны страна выхода не сверяется."""
+    want = (exit_country or '').strip().upper() or None
+    return all((r or {}).get('split') is True and (want is None or (r or {}).get('exit_country') == want) for r in probes)
+
+
+def browser_timezone(market, timezone=None):
+    """Часовой пояс контекста браузера: заданный ключом --timezone, иначе Europe/Moscow для рынка ru и UTC для остальных."""
+    return timezone or ('Europe/Moscow' if market == 'ru' else 'UTC')
+
+
 def lighten(u):
     """URL без query-строки для журнала (не хранить идентификаторы визита)."""
     try:
@@ -1235,7 +1253,7 @@ def run_page(a):
     market = a.market or ('ru' if re.search(r'\.(ru|xn--p1ai|su|рф)$', host0) else 'intl')
     locale = 'ru-RU' if market == 'ru' else 'en-US'
     al = 'ru-RU,ru;q=0.9,en;q=0.8' if market == 'ru' else 'en-US,en;q=0.9'
-    tz = 'Europe/Moscow' if market == 'ru' else 'Europe/Vilnius'
+    tz = browser_timezone(market, getattr(a, 'timezone', None))
     cpu = a.cpu if a.cpu is not None else (4 if mobile else 1)
     st = {'tool': TOOL, 'date': time.strftime('%Y-%m-%d %H:%M'), 'url': a.url, 'id': a.id, 'device': device, 'market': market,
           'locale': locale, 'accept_language': al, 'timezone': tz, 'cpu_throttle': cpu, 'page_type': a.label, 'site_type': a.site_type,
@@ -1551,7 +1569,7 @@ def run_page(a):
         b.close()
     if probe:
         st['route_after'] = route_probe()
-        st['route_ok'] = all((r or {}).get('split') is True and (r or {}).get('exit_country') == 'LT' for r in (st['route_before'], st['route_after']))
+        st['route_ok'] = route_is_ok((st['route_before'], st['route_after']), getattr(a, 'exit_country', None))
     st['dom'] = dom
     st['nojs'] = nojs_compare(raw_html, dom) if raw_html and not dom.get('error') else {'error': 'нет тела ответа или разбора'}
     st['network'] = net_summary(creq, st.get('final_url') or a.url, cmp.get('t_action'), cmp.get('action'))
@@ -2292,6 +2310,9 @@ def run_batch(a):
                             ('text_id', '--text-id'), ('template', '--template'), ('site_id', '--site-id'), ('source', '--source')):
                 if row.get(k):
                     cmd += [opt_, row[k]]
+            for opt_, v in (('--exit-country', a.exit_country), ('--timezone', a.timezone)):   # настройки сети — всем страницам пакета
+                if v:
+                    cmd += [opt_, v]
             if dev == 'mobile':
                 cmd.append('--mobile')
             if a.inp:
@@ -2559,6 +2580,16 @@ def selftest(a):
     nets = {k: net_probe(argparse.Namespace(net=v, selftest=False)) for k, v in (('без ключа', None), ('auto', 'auto'), ('метка', 'vpn-lt'))}
     ck('сеть — только ключом --net: без ключа замер не ходит в ipinfo.io и yandex.ru', nets == {'без ключа': False, 'auto': True, 'метка': True}
        and all(d.get('net') == 'local' and d.get('route_before') is None for d in (*results.values(), rv)), nets)
+    split, same = {'split': True, 'exit_country': 'AA'}, {'split': False, 'exit_country': 'AA'}
+    routes = {'без страны': route_is_ok((split, split)), 'страна совпала': route_is_ok((split, split), 'aa'),
+              'страна другая': route_is_ok((split, split), 'BB'), 'адреса не разошлись': route_is_ok((split, same)),
+              'нет пробы': route_is_ok((split, None))}
+    ck('маршрут: страна выхода сверяется только с --exit-country; адреса обеих проб должны разойтись',
+       routes == {'без страны': True, 'страна совпала': True, 'страна другая': False, 'адреса не разошлись': False, 'нет пробы': False}, routes)
+    tzs = {'ru': browser_timezone('ru'), 'intl': browser_timezone('intl'), 'ключ': browser_timezone('intl', 'Asia/Tokyo'),
+           'замер': sorted({d.get('timezone') for d in (*results.values(), rv)})}
+    ck('часовой пояс браузера: Europe/Moscow для рынка ru, UTC для остальных, --timezone — как задан',
+       tzs == {'ru': 'Europe/Moscow', 'intl': 'UTC', 'ключ': 'Asia/Tokyo', 'замер': ['Europe/Moscow']}, tzs)
     ok = sum(1 for c in checks if c[1])
     rep = [f'# Самопроверка page_anatomy.py', '', 'Страница: временная папка (локальный сервер, «Метрика» подменена без сети).',
            f'Итог: {ok} из {len(checks)} проверок прошли.', '', '| Проверка | Итог | Получено |', '|---|---|---|']
@@ -2572,19 +2603,37 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
     ap.add_argument('url', nargs='?'); ap.add_argument('out', nargs='?')
     ap.add_argument('--mobile', action='store_true'); ap.add_argument('--inp', action='store_true'); ap.add_argument('--quick', action='store_true')
-    ap.add_argument('--no-cmp-close', action='store_true'); ap.add_argument('--label'); ap.add_argument('--id'); ap.add_argument('--market')
-    ap.add_argument('--industry'); ap.add_argument('--site-type'); ap.add_argument('--text-id')
+    ap.add_argument('--no-cmp-close', action='store_true'); ap.add_argument('--label'); ap.add_argument('--id')
+    ap.add_argument('--site-type'); ap.add_argument('--text-id')
     ap.add_argument('--net', nargs='?', const='auto', default=None,
                     help='сеть: без ключа не проверяется; auto (или без значения) — страна и организация сервера (ipinfo.io) и '
                          'проверка раздельной маршрутизации VPN; ru-direct | vpn-lt | unknown — своя метка и проверка маршрута')
+    ap.add_argument('--exit-country', metavar='CC', default=None,
+                    help='с --net: ожидаемая страна выхода VPN (код из двух букв, как у ipinfo.io); route_ok требует её у обеих '
+                         'проб маршрута; без ключа страна выхода не сверяется')
+    ap.add_argument('--timezone', metavar='TZ', default=None,
+                    help='часовой пояс браузера (имя IANA); без ключа — Europe/Moscow для рынка ru, UTC для остальных')
     ap.add_argument('--template'); ap.add_argument('--site-id'); ap.add_argument('--source'); ap.add_argument('--timeout', type=int, default=60)
     ap.add_argument('--wait', type=int, default=None, help='окно первого экрана после load, мс (по умолчанию — budgets.yaml)')
     ap.add_argument('--cpu', type=int, default=None); ap.add_argument('--crux', action='store_true')
     ap.add_argument('--no-lock', action='store_true', help='не брать замки тишины (обёртка их уже держит)')
-    ap.add_argument('--selftest', action='store_true'); ap.add_argument('--batch'); ap.add_argument('--devices', default='desktop,mobile')
-    ap.add_argument('--only'); ap.add_argument('--skip-done', action='store_true'); ap.add_argument('--page-timeout', type=int, default=270)
-    ap.add_argument('--reclassify'); ap.add_argument('--csv'); ap.add_argument('--pages'); ap.add_argument('--net-of', nargs='*')
-    ap.add_argument('--crux-batch'); ap.add_argument('--out', dest='out_opt')
+    ap.add_argument('--selftest', action='store_true'); ap.add_argument('--out', dest='out_opt')
+    kbg = ap.add_argument_group('обслуживание базы', 'замер и пересчёт корпуса страниц базы знаний; замеру страницы проекта '
+                                                     'эти ключи не нужны')
+    kbg.add_argument('--batch', metavar='TSV', help='пакетный замер страниц списка (колонки id, url и метки корпуса) в папку --out')
+    kbg.add_argument('--devices', default='desktop,mobile', help='с --batch: устройства через запятую (по умолчанию desktop,mobile)')
+    kbg.add_argument('--only', metavar='ID,ID', help='с --batch и --crux-batch: только страницы с этими id')
+    kbg.add_argument('--skip-done', action='store_true', help='с --batch: пропустить страницу × устройство с готовым JSON')
+    kbg.add_argument('--page-timeout', type=int, default=270, help='с --batch: предел на страницу × устройство, с (по умолчанию 270)')
+    kbg.add_argument('--crux-batch', metavar='TSV',
+                     help='поле CrUX страниц списка через PageSpeed Insights API (ключ — PSI_API_KEY окружения) в папку --out')
+    kbg.add_argument('--market', help='метка рынка страницы: ru | intl (без ключа — по домену); от неё — язык браузера и '
+                                      'умолчание часового пояса')
+    kbg.add_argument('--industry', help='метка отрасли страницы в JSON замера и таблице корпуса')
+    kbg.add_argument('--reclassify', metavar='DIR', help='пересчитать классы секций в готовых JSON папки без браузера')
+    kbg.add_argument('--csv', metavar='DIR', help='таблица корпуса по готовым JSON папки — в stdout')
+    kbg.add_argument('--pages', metavar='TSV', help='с --csv: список страниц корпуса (метки строк таблицы)')
+    kbg.add_argument('--net-of', nargs='*', metavar='HOST', help='страна и организация IP сервера (ipinfo.io; IP не печатается)')
     a = ap.parse_args()
     if a.out_opt:
         a.out = a.out_opt

@@ -47,7 +47,9 @@ conventions:                          # одно решение на проду�
   thousands_space: "U+00A0"           # пробел в разрядах (ux 07/03 §6.6); U+202F — только решением ДС с проверкой глифа
   empty_state: {align: center}        # выравнивание пустого состояния: center — по умолчанию, start — вариант
                                       # (ui 06/06 §4); что показать и почему пусто — решают экраны
-  icons: {set: <набор>, sizes: [], stroke: <толщина>}   # набор иконок (ui 07/01); файлы — design/_assets/icons/
+  icons: {set: <набор>, style: line, sizes: [], stroke: <толщина>}   # набор иконок (ui 07/01); файлы —
+                                      # design/_assets/icons/; style: line — контурный набор, толщина — stroke;
+                                      # fill — набор с заливкой, stroke не задаётся
   status_colors: {<object>.<status>: <роль цвета>}      # статус объекта (object.md) → роль цвета токенов
   object_markers: {<object>: {icon: <иконка>, color: <роль цвета>}}   # маркеры объектов в интерфейсе
 

@@ -14,9 +14,12 @@
         маршрута дизайна без папок (подсказкой); --visual-list — в сводку перечень макетного прогона R-VIS
     design_audit visual <slug> <surface> --report [ЕДИНИЦА=]ОТЧЁТ.json … [--repo DIR] [--json]
         отчёты mockup_checks.py page (JSON) макетного прогона → находки R-VIS-001 по шкале ворот и сводка примет по
-        доменам в единице домена (страница или экран одного прогона; домены и единицы не складываются)
+        доменам в единице домена (страница или экран одного прогона; домены и единицы не складываются); находка,
+        снятая ключом --allow реестра примет (поле allowed отчёта), в R-VIS-001 не идёт — строка «Заметка» называет
+        её с ключом и причиной (поле reason находки)
     design_audit --selftest       фикстуры package-landing и package-cabinet (0 error), package-defects (14
-                                  посеянных дефектов — шапки манифестов package-*-defects), без сети
+                                  посеянных дефектов — шапки манифестов package-*-defects), сценарии правил на
+                                  копиях фикстур package-landing, input-site и package-cabinet, без сети
 
 Вывод check: без --json — отчёт по группам (уровень продукта, затем поверхность → категория → error, warning, hint),
 сводка и список правил чтением; с --json — только строки находок контракта `findings.py` (поля rule, severity,
@@ -27,41 +30,58 @@ $DDD_HOME/out/project/design_audit/<slug>/): findings.jsonl и summary.json — 
 выхода), surfaces (surface, type, web_kind, route, input_stage — этап действующего входа холста, accepted — единицы с
 принятым макетом, ready — статус манифеста готовности ready.yaml: ready · partial · not-ready, null — манифеста нет),
 counts, notes, reading, visual. Код 2 в called: у text/copydeck.py и text/claims_check.py — «есть error» (их находки —
-в отчёте по правилам или отброшены по реестру), у утилит project/ — сбой вызова или окружения.
+в отчёте по правилам или отброшены по реестру), у утилит project/ — сбой вызова или окружения. Заметки сводки
+(notes) называют и обходы copy deck с причинами: claims_allow — поле allowed вывода copydeck.py check, lint_allow — его
+заметки.
 
 Тяжесть — по правилу реестра: где правило зависит от этапа, этап выводится из статусов файлов (вход холста страницы
 или поверхности, закрытый copy deck, закрытая арт-дирекция, вердикт REVIEW.md); у находки валидатора — его уровень
 (error → error, warning → warning, сведения не переносятся), кроме правил с тяжестью по закрытию файла (R-REF-006 из
 ad_check: warning, error у закрытой арт-дирекции); шкала ворот и приёмки B/S/D → error/warning/hint. R-FRESH-005 —
-статичные копии артбордов и kit.json — сверяется только при постоянной просьбе заказчика о проверках макета (строка
-«Проверки макета: разрешены» в ARTIFACTS.md): копии нужны скриптам проверок, а оригинал макета — холст в claude.ai;
-без строки копий может не быть, и это не находка и не заметка. R-COV-002 — error под гейтом 2: у страницы строка
-«Приёмка» в REVIEW.md или она в партии действующего входа холста (поле units INPUT.md или папка pages/<id>/) этапа
-mockup или motion; в партии входа вайрфрейма или направлений — warning (тексты — до макета); закрытый copy deck без
-текста в слоте — error. Одобрение единицы (R-MAT-004) сверяется с отпечатком `ready`: артборды и источники единицы.
+статичные копии артбордов — сверяется только при постоянной просьбе заказчика о проверках макета (строка «Проверки
+макета: разрешены» в ARTIFACTS.md): копии нужны скриптам проверок, а оригинал макета — холст в claude.ai; без строки
+копий может не быть, и это не находка и не заметка; манифест кадров kit.json в git не хранится и не сверяется.
+R-COV-002 — error под гейтом 2: у страницы строка «Приёмка» в REVIEW.md или она в партии действующего входа холста
+(поле units INPUT.md или папка pages/<id>/) этапа mockup или motion; в партии входа вайрфрейма или направлений —
+warning (тексты — до макета); закрытый copy deck без текста в слоте — error; слот без текста у образца шаблона
+коллекции (страница copy deck с site_page_id = id плана) — warning: запись коллекции может слот не вести. Одобрение
+единицы (R-MAT-004) сверяется с отпечатком `ready`: артборды и источники единицы. Непройденный пункт S и исключение
+ворот (R-MAT-005) — по единице: исключение `x-gate-exception` плана снимает пункт только у своей страницы.
 Ключ ассета — страница и слот: строка манифеста ассетов с полем page сверяется с планом ассетов этой страницы, без
 page — общая для страниц с таким слотом, у которых нет своих строк (R-MAT-007, R-MAT-008, R-REF-008, R-COV-009); строка
-манифеста — на файл, слот принят, когда принята хотя бы одна его строка. R-FRESH-007 — колонка sha256 «Загрузок»
-ARTIFACTS.md против файла: расхождение — warning, отпечатка нет — одна подсказка со счётом, файла нет на машине —
-заметка сводки.
-R-REF-001 у refs.copy_deck плана — hint, пока copy deck страницы не заведён. Страницы copy deck с site_page_id = id
-плана — образцы шаблона коллекции (page.template): их стык с планом сверяет R-REF-003. R-MAT-009 — error у вопроса,
-который держит закрытие, hint у блокера публикации (пункт называет пробел фактов missing[] по id).
+манифеста — на файл, слот принят, когда принята хотя бы одна его строка. Источник файла (R-MAT-008) — у варианта плана
+ассетов, который называет строка манифеста (`variants[].source`); у варианта без поля — источник слота. R-MAT-013 —
+общие шапка и подвал: у страниц с той же секцией роли header или footer (блок и вариант; хлебные крошки — секция своей
+страницы) набор слотов плана и выбранные тексты copy deck равны, расхождение — warning с парой страниц и слотом.
+R-MAT-014 — загрузки принятых артбордов: файл загрузки `/_blob/<id>` (строка «Загрузок» ARTIFACTS.md) — из манифеста
+ассетов или демо-кадр `x-demo` плана ассетов этой страницы, иначе error у принятой единицы. R-FRESH-007 — колонка
+sha256 «Загрузок» ARTIFACTS.md против файла: расхождение — warning, отпечатка нет — одна подсказка со счётом, файла нет
+на машине — заметка сводки.
+R-REF-001 у ссылок плана на файлы следующих этапов — hint, пока этап не начат: refs.copy_deck — copy deck страницы
+не заведён, refs.asset_plan — плана ассетов страницы нет, refs.treatment — арт-дирекции поверхности нет. Страницы copy
+deck с site_page_id = id плана — образцы шаблона коллекции (page.template): их стык с планом сверяет R-REF-003.
+R-MAT-009 — error у вопроса, который держит закрытие, hint у блокера публикации (пункт называет пробел фактов
+missing[] по id). R-COV-005 «нет карты решений» у сайта до этапа дизайн-системы (арт-дирекция не утверждена, токенов ДС
+нет) — hint. R-COV-007: у продукта без поверхностей рода landing и site профиль голоса один — voice.product.yaml с
+каналом product-ui. R-PROJ-001…003: источник первичен, копия его поля в брифе на вид и арт-дирекции необязательна —
+сверяется только записанная копия, расхождение — warning.
 Ошибки публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
-R-COV-003 там, где факт стоит (план, copy deck). Совет находки называет этап: у site_validate — по коду (SB-* — brief,
-SM-* — site-map, PL-* — page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила
-(свежесть производных при битых токенах; артефакт ДС без токенов DTCG system.tokens.json и system.tokens.css — ds_build
-не зовётся), — заметка сводки, а не находка.
+R-COV-003 там, где факт стоит (план, copy deck). Предупреждение SM-22 site_validate (служебный шаблон без плана) в
+отчёт не идёт: страницу без плана называет R-COV-001 аудита; PL-U01 (план approved без записи approval) — одна находка
+со списком планов. Совет находки называет этап: у site_validate — по коду (SB-* — brief, SM-* — site-map, PL-* —
+page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила (свежесть производных при
+битых токенах; артефакт ДС без токенов DTCG system.tokens.json и system.tokens.css — ds_build не зовётся), — заметка
+сводки, а не находка.
 Окружение не установлено (нет PyYAML или jsonschema в Python окружения) — валидаторы не запускаются, в сводке —
 «утилиты не запускались», их правила уходят в чтение.
 
-Какие утилиты зовутся: site_validate.py (папка слоя страницы), vocab_lint.py, page_gates.py --resolve (профиль бюджета
-каждого плана), copydeck.py check, claims_check.py lint-facts, validate_any.py, validate_voice.py, spec_check.py spec,
-ad_check.py, vlm_to_dna.py validate, plan_to_assets.py check, утилиты project/ — ds_build (check), ds_coverage,
-canvas_input (check; у кабинета со входом в неё входят находки contract и demo_data), screen_map (check — только
-расхождения свода для R-MAT-011), ready (check), claude-design/dc_to_html.py check и kit/kit_manifest.py check (при
-строке «Проверки макета: разрешены»); находки утилит экранов (tree, states) — правила /screen-audit, сюда они не
-переносятся.
+Какие утилиты зовутся: site_validate.py (папка слоя страницы), vocab_lint.py (бриф, карта, планы, copy deck и факты),
+page_gates.py --resolve (профиль бюджета каждого плана), copydeck.py check, claims_check.py lint-facts,
+validate_any.py, validate_voice.py, spec_check.py spec, ad_check.py, vlm_to_dna.py validate, plan_to_assets.py check,
+утилиты project/ — ds_build (check), ds_coverage, canvas_input (check; у кабинета со входом в неё входят находки
+contract и demo_data), screen_map (check — только расхождения свода для R-MAT-011), ready (check),
+claude-design/dc_to_html.py check (при строке «Проверки макета: разрешены»); находки утилит экранов (tree, states) —
+правила /screen-audit, сюда они не переносятся.
 Код выхода: 0 — ошибок нет; 1 — есть error; 2 — ошибка вызова или окружения.
 """
 from __future__ import annotations
@@ -153,10 +173,13 @@ VISUAL = {
     "R-VIS-003": "пункты input/ACCEPTANCE.md места «макет» у принятых страниц и экранов — способом пункта",
     "R-VIS-004": "literal_tokens.py check <slug> <surface> --accepted: литералы облика в исходниках холста против "
                  "токенов ДС",
-    "R-VIS-005": "агент design-judge, вызов «рубрика»: пакет asset_audit.py judge-jobs --mode checklist, три прогона "
-                 "отдельными заданиями, разбор judge-parse — находка из двух; пока скрипты или сверка фактов "
-                 "красные, судья не зовётся",
+    "R-VIS-005": "агент design-judge, вызов «рубрика»: один пакет asset_audit.py judge-jobs --mode checklist --runs 3 "
+                 "(три прогона — задания пакета), разбор judge-parse — находка из двух; пока скрипты или сверка "
+                 "фактов красные, судья не зовётся",
 }
+# Секция роли header, которую страницы не делят: хлебные крошки — путь своей страницы, её слоты и тексты у каждой свои.
+OWN_CHROME = ("breadcrumbs",)
+BLOB = re.compile(r"/_blob/([A-Za-z0-9_-]+)")              # загрузка холста на артборде: /_blob/<id загрузки>
 
 
 # ------------------------------------------------------------------ окружение и модули соседей
@@ -666,6 +689,14 @@ class Audit:
           (r"^SB-(R0\d|M05)$", "R-REF-005"), (r"^PL-(B0\d|A0\d|E0\d|T0\d|R01)$", "R-REF-005"),
           (r"^PL-(N01|K0\d)$", "R-REF-004"), (r"^PL-C0\d$", "R-STRUCT-004"), (r"^PL-D01$", "R-COV-004"),
           (r"^PJ-01$", "R-STRUCT-001"), (r"^SM-2[23]$", "R-COV-001"))
+    # (код, уровень) site_validate, который повторяет находку самого аудита: служебный шаблон без плана — та же
+    # страница без плана, что называет R-COV-001 аудита; error того же кода (план не связан с шаблоном) остаётся
+    SV_TWIN = (("SM-22", "warning"),)
+    # код site_validate, который сводится в одну находку со списком планов: (правило, сообщение, (слово сообщения
+    # валидатора, приписка о планах с этим словом))
+    SV_ONE = {"PL-U01": ("R-STRUCT-002", "планы approved без записи утверждения approval {by, date} — кто и когда "
+                                         "утвердил",
+                         ("x-approval", "запись лежит расширением x-approval, её место — approval"))}
 
     def sv_rule(self, code):
         for rx, rule in self.SV:
@@ -698,6 +729,7 @@ class Audit:
         if r.rc not in (0, 1) or not isinstance(r.data, list):
             self.notes.append(f"site_validate.py {s}: не отработал ({last_line(r.err) or r.rc})")
             return
+        one = {}
         for x in r.data:
             lvl = x.get("level")
             if lvl not in ("error", "warning"):
@@ -705,12 +737,26 @@ class Audit:
             rule = self.sv_rule(x.get("code"))
             if rule is None or x.get("code") == "SB-M03" and not self.proof_refs_ok(s):
                 continue                                     # битую ссылку уже называет R-REF-001
+            if (x.get("code"), lvl) in self.SV_TWIN:
+                continue
             p, spot = self.where_path(x.get("where"), kbpaths.kb("site"))
             kind = "site-brief" if p.name == "site-brief.yaml" else "site-map" if p.name == "site-map.yaml" else \
                 "page-plan" if p.parent.name == "plans" else "surface"
+            if x.get("code") in self.SV_ONE and kind == "page-plan":
+                one.setdefault((x.get("code"), lvl), []).append((p, str(x.get("msg") or "")))
+                continue
             ref = (p.stem if kind == "page-plan" else kind if kind != "surface" else s) + (f"#{spot}" if spot else "")
             self.add(rule, lvl, s, kind, ref, p, f"{x.get('code')}: {x.get('msg')}",
                      self.dd(s, self.sv_stage(x.get("code"), kind, p.stem)))
+        by_file = {pp.resolve(): pid for pid, (pp, _plan) in self.plans(s).items()}
+        for (code, lvl), hits in one.items():
+            rule, what, (word, also) = self.SV_ONE[code]
+            pids = sorted({by_file.get(f, f.stem) for f, _msg in hits})
+            marked = sorted({by_file.get(f, f.stem) for f, msg in hits if word in msg})
+            self.add(rule, lvl, s, "page-plan", f"{s}#{code}", d / "plans",
+                     f"{code}: {what} — {len(pids)}: {', '.join(pids)}"
+                     + (f"; {also} — {', '.join(marked)}" if marked else ""),
+                     self.dd(s, "page-plan — запись approval словом владельца"))
 
     def proof_refs_ok(self, s):
         """proof.facts_ref брифа и proof_ref смысла ведут в файлы (тогда их неравенство — отдельная находка SB-M03)."""
@@ -729,9 +775,14 @@ class Audit:
         return True
 
     def vocab(self, s):
+        """Словарь site у файлов слоя страницы — брифа, карты, планов и copy deck — и у фактов продукта (места use):
+        находка в фактах — уровня продукта, одна на прогон при любом числе поверхностей."""
         d = docpaths.layer(self.slug, "site", s, self.root)
+        facts = docpaths.facts(self.slug, repo=self.root)
         files = [f for f in [self.site(s, "brief"), self.site(s, "site-map")] if f.is_file()]
-        files += sorted((d / "plans").glob("*.yaml")) if (d / "plans").is_dir() else []
+        for sub in ("plans", "copy"):
+            files += sorted((d / sub).glob("*.yaml")) if (d / sub).is_dir() else []
+        files += [facts] if facts.is_file() else []
         if not files:
             return
         r = self.tools.run("site/vocab_lint.py", files)
@@ -744,11 +795,15 @@ class Audit:
                 continue
             p = Path(m.group(1))
             p = p if p.is_absolute() else (self.tools.tmp / p).resolve()
-            kind = "page-plan" if p.parent.name == "plans" else "site-map" if p.name == "site-map.yaml" else \
-                "site-brief"
-            self.add("R-STRUCT-002", m.group(3), s, kind, f"{p.stem}#стр. {m.group(2)}", p,
-                     f"vocab_lint: {m.group(4)} «{m.group(5)}» — {m.group(6)}",
-                     self.dd(s, self.sv_stage("", kind, p.stem)))
+            msg = f"vocab_lint: {m.group(4)} «{m.group(5)}» — {m.group(6)}"
+            if p == facts.resolve():
+                self.add("R-STRUCT-002", m.group(3), None, "facts", f"facts#стр. {m.group(2)}", p, msg,
+                         self.dd(what="meaning (факты)"))
+                continue
+            kind = "page-plan" if p.parent.name == "plans" else "copy-deck" if p.parent.name == "copy" else \
+                "site-map" if p.name == "site-map.yaml" else "site-brief"
+            self.add("R-STRUCT-002", m.group(3), s, kind, f"{p.stem}#стр. {m.group(2)}", p, msg,
+                     self.dd(s, "copy" if kind == "copy-deck" else self.sv_stage("", kind, p.stem)))
 
     def budgets(self, s):
         seen = {}
@@ -815,6 +870,20 @@ class Audit:
                     rule = "R-STRUCT-003"
                 ref = (page or p.stem) + (f"#{where.split('/', 1)[1]}" if "/" in where else "")
                 self.add(rule, lvl, s, "copy-deck", ref, p, f"{code}: {x.get('message')}", self.dd(s, "copy"))
+            self.deck_bypasses(p, r.data)
+
+    def deck_bypasses(self, p, data):
+        """Обходы сверки и линтера copy deck — заметки сводки: решение человека с причиной, а не находка. Обходы
+        claims_allow — поле allowed вывода copydeck.py check ({rule, where, reason, by}), обходы lint_allow — его
+        заметки «lint_allow…: <правило> @ <место>: <причина>»."""
+        claims = [f"{x.get('rule')} @ {x.get('where')} — {x.get('reason')} ({x.get('by')})"
+                  for x in data.get("allowed") or [] if isinstance(x, dict)]
+        lint = [m.group(1) for m in (re.match(r"^lint_allow[^:]*:\s*(.+)$", str(n)) for n in data.get("notes") or [])
+                if m]
+        for name, rows in (("claims_allow", claims), ("lint_allow", lint)):
+            rows = list(dict.fromkeys(rows))
+            if rows:
+                self.note_once(f"обходы {name} copy deck {p.name} — {len(rows)}: " + listed(rows, 6, "; "))
 
     def note_once(self, text):
         if text not in self.notes:
@@ -1120,12 +1189,19 @@ class Audit:
         started = {p.name[:-len(f".{lang}.yaml")] if lang else p.stem for p, _deck, lang in self.decks(s)}
         for pid, (p, plan) in self.plans(s).items():
             fix = self.dd(s, f"page-plan:{pid}")
+            # план называет файлы следующих этапов заранее: пока этап не начат — текстов страницы нет ни на одном
+            # языке, плана ассетов страницы нет, арт-дирекции поверхности нет, — ссылка ждёт файл
+            ahead = {}
+            if pid not in started:
+                ahead["copy_deck"] = ("этап copy страницы не начат",
+                                      self.dd(s, f"copy — каркас copy deck {pid}: copydeck.py skeleton"))
+            if not (self.dsurf(s, "asset-plans") / f"{pid}.yaml").is_file():
+                ahead["asset_plan"] = ("этап asset-plan страницы не начат", self.dd(
+                    s, f"asset-plan — каркас плана ассетов {pid}: plan_to_assets.py build {self.slug} {s} --write"))
+            if not self.dsurf(s, "art-direction").is_file():
+                ahead["treatment"] = ("этап art-direction не начат", self.dd(s, "art-direction"))
             for fld in ("brief", "facts", "copy_deck", "asset_plan", "treatment"):
-                # план называет copy deck до этапа copy: пока текстов страницы нет ни на одном языке, ссылка ждёт файл
-                ahead = ("этап copy страницы не начат",
-                         self.dd(s, f"copy — каркас copy deck {pid}: copydeck.py skeleton")) \
-                    if fld == "copy_deck" and pid not in started else None
-                self.check_ref("page-plan", s, pid, p, f"refs.{fld}", get(plan, "refs", fld), fix, ahead)
+                self.check_ref("page-plan", s, pid, p, f"refs.{fld}", get(plan, "refs", fld), fix, ahead.get(fld))
             for fld in ("tokens_ref", "motion_spec_ref"):
                 self.check_ref("page-plan", s, pid, p, f"page.treatment.{fld}", get(plan, "page", "treatment", fld),
                                fix)
@@ -1332,9 +1408,7 @@ class Audit:
         markers = listify(allow.get("markers"))
         if not markers:
             return
-        tells = self.load(kbpaths.kb("common", "tells.yaml")) or {}
-        checks = tells.get("checks") if isinstance(tells.get("checks"), dict) else {}
-        keys = {v.get("allow") for v in checks.values() if isinstance(v, dict) and v.get("allow")}
+        keys = set(allow_keys().values())
         closed = self.closed("app-brief", self.dprod("app-brief"))
         sev = "error" if closed else "warning"
         for m in markers:
@@ -1557,36 +1631,47 @@ class Audit:
             if not slots:
                 continue
             dp, page = self.deck_of(s, pid)
-            have = {}
-            for sec in listify(get(page, "sections")):
-                for sl in listify(get(sec, "slots")):
-                    if isinstance(sl, dict):
-                        var = self.chosen(sl)
-                        have[(sec.get("section_id"), sl.get("slot_id"))] = bool(var and str(var.get("text") or "")
-                                                                                .strip())
-            miss = [k for k in slots if not have.get(k)]
-            if not miss:
-                continue
-            handed = self.page_has_input(s, pid)
-            closed = bool(page and page.get("status") == "approved")
-            if handed and handed[1]:
-                sev, why = "error", f"страница передана в дизайн: {handed[0]}"
-            elif closed:
-                sev, why = "error", "copy deck закрыт"
-            elif handed:
-                sev, why = "warning", f"{handed[0]}: тексты — до макета (гейт 2)"
-            else:
-                sev, why = "warning", "до передачи в дизайн"
             path = dp or self.site(s, "copy", f"{pid}.yaml")
-            fix = self.dd(s, f"copy — copy deck {pid}")
-            if len(miss) > 10:
-                self.add("R-COV-002", sev, s, "copy-deck", pid, path,
-                         f"текстовые слоты утверждённого плана {pid} без текста в copy deck ({why}) — {len(miss)}: "
-                         + listed((f"{a}/{b}" for a, b in miss), 8), fix)
-                continue
-            for a, b in miss:
-                self.add("R-COV-002", sev, s, "copy-deck", f"{pid}#/{a}/{b}", path,
-                         f"текстовый слот `{a}/{b}` утверждённого плана {pid} без текста в copy deck ({why})", fix)
+            # у шаблона коллекции тексты слотов плана ведёт и каждый образец записи — страница того же copy deck с
+            # site_page_id = id плана
+            samples = [pg for pg in listify(get(self.load(path), "copy_deck", "pages"))
+                       if isinstance(pg, dict) and pg.get("page_id") != pid and pg.get("site_page_id") == pid] \
+                if get(plan, "page", "template") else []
+            for unit, pg in [(pid, page)] + [(str(x.get("page_id")), x) for x in samples]:
+                have = {}
+                for sec in listify(get(pg, "sections")):
+                    for sl in listify(get(sec, "slots")):
+                        if isinstance(sl, dict):
+                            var = self.chosen(sl)
+                            have[(sec.get("section_id"), sl.get("slot_id"))] = bool(
+                                var and str(var.get("text") or "").strip())
+                miss = [k for k in slots if not have.get(k)]
+                if not miss:
+                    continue
+                handed = self.page_has_input(s, pid)
+                closed = bool(pg and pg.get("status") == "approved")
+                if unit != pid:
+                    # запись коллекции может не вести слот шаблона (услуг три, а не четыре): у образца — доклад
+                    sev, why = "warning", "образец шаблона коллекции: запись либо ведёт слот, либо его не показывает"
+                elif handed and handed[1]:
+                    sev, why = "error", f"страница передана в дизайн: {handed[0]}"
+                elif closed:
+                    sev, why = "error", "copy deck закрыт"
+                elif handed:
+                    sev, why = "warning", f"{handed[0]}: тексты — до макета (гейт 2)"
+                else:
+                    sev, why = "warning", "до передачи в дизайн"
+                whose = pid if unit == pid else f"{pid} у образца {unit}"
+                fix = self.dd(s, f"copy — copy deck {pid}")
+                if len(miss) > 10:
+                    self.add("R-COV-002", sev, s, "copy-deck", unit, path,
+                             f"текстовые слоты утверждённого плана {whose} без текста в copy deck ({why}) — "
+                             f"{len(miss)}: " + listed((f"{a}/{b}" for a, b in miss), 8), fix)
+                    continue
+                for a, b in miss:
+                    self.add("R-COV-002", sev, s, "copy-deck", f"{unit}#/{a}/{b}", path,
+                             f"текстовый слот `{a}/{b}` утверждённого плана {whose} без текста в copy deck ({why})",
+                             fix)
 
     def cov_ds(self, s):
         try:
@@ -1595,7 +1680,21 @@ class Audit:
             self.notes.append(f"ds_coverage {s}: {e}")
             return
         self.tools.note("project/ds_coverage.py", f"check {s}")
-        self.rep.extend(cov.rep.items)
+        # у сайта карта решений появляется на этапе дизайн-системы — после утверждённой арт-дирекции; пока её нет и
+        # токенов ДС нет, «нет карты решений» — этап не начат, а не разрыв покрытия
+        early = self.reg[s].page and not self.dprod("system").is_file() and not self.ds_stage(s)
+        for f in cov.rep.items:
+            if early and f.rule == "R-COV-005" and f.surface == s and f.ref == "system":
+                self.add(f.rule, "hint", f.surface, f.kind, f.ref, f.path,
+                         f.message + " — этап дизайн-системы не начат (арт-дирекция не утверждена, токенов ДС нет)",
+                         self.dd(what="design-system — после утверждённой арт-дирекции"))
+                continue
+            self.rep.extend([f])
+
+    def ds_stage(self, s):
+        """Поверхность сайта дошла до этапа дизайн-системы: арт-дирекция утверждена или токены ДС заведены."""
+        return self.closed("art-direction", self.dsurf(s, "art-direction")) or self.dprod("tokens").is_file() or \
+            self.dprod("tokens-css").is_file()
 
     def cov_roles(self, s):
         sysd = self.load(self.dprod("system"))
@@ -1683,15 +1782,31 @@ class Audit:
             return
         data = self.load(vp)
         fix = self.dd(what="meaning (голос)")
+
+        def channels(d):
+            return {str(x["surface"]): str(x.get("voice") or "") for x in listify(get(d, "scope", "surfaces"))
+                    if isinstance(x, dict) and x.get("surface")}
+
+        if not isinstance(data, dict) and not pages:
+            # продукт без сайта и лендинга: профиль голоса один — голос продукта, профиля бренда и ссылки
+            # scope.product_voice_ref у него нет
+            names = ", ".join(s.slug for s in ui)
+            pdata = self.load(vpp)
+            fix_p = self.dd(what="meaning (голос продукта)")
+            if not isinstance(pdata, dict):
+                self.add("R-COV-007", "warning", None, "voice-product", "voice-product", vpp,
+                         f"профиля голоса продукта voice.product.yaml нет: интерфейсу ({names}) не на что опереть "
+                         "тексты", fix_p)
+            elif channels(pdata).get("product-ui") != "product":
+                self.add("R-COV-007", "warning", None, "voice-product", "voice-product#/scope/surfaces", vpp,
+                         f"у интерфейса ({names}) нет канала product-ui с голосом product в voice.product.yaml", fix_p)
+            return
         if not isinstance(data, dict):
             self.add("R-COV-007", "warning", None, "voice", "voice", vp,
                      "профиля голоса voice.yaml нет: поверхностям " + ", ".join(s.slug for s in pages + ui)
                      + " не на что опереть тексты", fix)
             return
-        ch = {}
-        for x in listify(get(data, "scope", "surfaces")):
-            if isinstance(x, dict) and x.get("surface"):
-                ch[str(x["surface"])] = str(x.get("voice") or "")
+        ch = channels(data)
         if pages and ch.get("marketing-site") != "brand":
             self.add("R-COV-007", "warning", None, "voice", "voice#/scope/surfaces", vp,
                      f"у поверхностей рода landing или site ({', '.join(s.slug for s in pages)}) нет канала "
@@ -1739,25 +1854,28 @@ class Audit:
             return
         b = get(self.brief(s), "ambition")
         amb = ad.get("ambition") if isinstance(ad.get("ambition"), dict) else {}
-        fix = f"только бриф — {self.dd(s, 'brief')}; проекция в арт-дирекции пересобирается"
+        # источник первичен: копия поля в арт-дирекции необязательна, сверяется только та, что записана
+        fix = f"источник — бриф ({self.dd(s, 'brief')}); копию в арт-дирекции обновляет этап — " \
+              f"{self.dd(s, 'art-direction')}"
         if isinstance(b, dict):
             diff = []
-            if b.get("level") and amb.get("level") != b.get("level"):
+            if b.get("level") and amb.get("level") and amb.get("level") != b.get("level"):
                 diff.append(f"level {amb.get('level')} ≠ {b.get('level')}")
-            if b.get("motion_cap") and amb.get("motion_cap") != b.get("motion_cap"):
+            if b.get("motion_cap") and amb.get("motion_cap") and amb.get("motion_cap") != b.get("motion_cap"):
                 diff.append(f"motion_cap {amb.get('motion_cap')} ≠ {b.get('motion_cap')}")
             ad_roles = {str(x.get("role")): x.get("level") for x in listify(amb.get("by_section_role"))
                         if isinstance(x, dict)}
             for x in listify(b.get("by_section_role")):
-                if isinstance(x, dict) and ad_roles.get(str(x.get("role"))) != x.get("level"):
+                if isinstance(x, dict) and str(x.get("role")) in ad_roles and \
+                        ad_roles[str(x.get("role"))] != x.get("level"):
                     diff.append(f"секции {x.get('role')}: {ad_roles.get(str(x.get('role')))} ≠ {x.get('level')}")
             b_roles = {str(x.get("role")) for x in listify(b.get("by_section_role")) if isinstance(x, dict)}
             for role, lv in ad_roles.items():
                 if role not in b_roles and lv != b.get("level"):
                     diff.append(f"секции {role}: {lv} — уровня нет в брифе")
             if diff:
-                self.add("R-PROJ-002", "error", s, "art-direction", "art-direction#/ambition", adp,
-                         "уровень арт-дирекции не равен брифу: " + "; ".join(diff), fix)
+                self.add("R-PROJ-002", "warning", s, "art-direction", "art-direction#/ambition", adp,
+                         "копия уровня в арт-дирекции отстала от брифа: " + "; ".join(diff), fix)
         main = self.main_page(s)
         if main is None:
             return
@@ -1766,9 +1884,10 @@ class Audit:
         for fld, val in (("budget.profile", get(ad, "budget", "profile")),
                          ("ambition.budget_profile", amb.get("budget_profile"))):
             if prof and val and val != prof:
-                self.add("R-PROJ-003", "error", s, "art-direction", f"art-direction#/{fld.replace('.', '/')}", adp,
-                         f"{fld} арт-дирекции — {val}, а профиль плана главной страницы {pid} — {prof}",
-                         self.dd(s, "art-direction"))
+                self.add("R-PROJ-003", "warning", s, "art-direction", f"art-direction#/{fld.replace('.', '/')}", adp,
+                         f"копия {fld} арт-дирекции — {val} — отстала от профиля плана главной страницы {pid}: {prof}",
+                         f"источник — план страницы ({self.dd(s, f'page-plan:{pid}')}); копию в арт-дирекции "
+                         f"обновляет этап — {self.dd(s, 'art-direction')}")
 
     def main_page(self, s):
         plans = self.plans(s)
@@ -1821,9 +1940,10 @@ class Audit:
                 if known and str(c) not in known:
                     diff.append(f"platform_constraints — {c} нет в constraint.md")
         if diff:
+            # источник первичен: копия в ядре брифа необязательна, сверяется только та, что записана
             self.add("R-PROJ-001", "warning", None, "app-brief", "app-brief#/core", abp,
                      "ядро брифа на вид отстало от источников: " + listed(diff, 6, "; "),
-                     "проекцию — этап app-brief: " + self.dd(what="app-brief") + "; источник — его исполнитель")
+                     "копию обновляет этап app-brief: " + self.dd(what="app-brief") + "; источник — его исполнитель")
 
     # ================================================================ R-FRESH
     FROM_INPUT = ("R-FRESH-002", "R-FRESH-003", "R-FRESH-004", "R-MAT-012", "R-MAT-003", "R-MAT-011")
@@ -1871,14 +1991,13 @@ class Audit:
         return bool(re.search(r"^Проверки макета:\s*разрешен", text, re.M | re.I))
 
     def fresh_copies(self, s):
-        """R-FRESH-005 статичных копий артбордов и kit.json — только при постоянной просьбе о проверках макета: копии
-        читают кадры и скрипты проверок, оригинал макета — холст в claude.ai. Без просьбы копий может не быть: утилиты
-        не зовутся, находок и заметок о копиях нет."""
+        """R-FRESH-005 статичных копий артбордов — только при постоянной просьбе о проверках макета: копии читают
+        кадры и скрипты проверок, оригинал макета — холст в claude.ai. Без просьбы копий может не быть: утилита не
+        зовётся, находок и заметок о копиях нет. Манифест кадров kit.json в git не хранится — его собирает прогон
+        кадров, свежесть его здесь не сверяется."""
         if not self.checks_permitted():
             return
-        for name, args in (("claude-design/dc_to_html.py", ["check", self.slug, s, "--repo", self.root, "--json"]),
-                           ("claude-design/kit/kit_manifest.py", ["check", self.slug, s, "--repo", self.root,
-                                                                  "--json"])):
+        for name, args in (("claude-design/dc_to_html.py", ["check", self.slug, s, "--repo", self.root, "--json"]),):
             r = self.tools.run(name, args)
             if r.rc not in (0, 1):
                 self.notes.append(f"{name} check {s}: не отработал ({last_line(r.err) or r.rc})")
@@ -1945,8 +2064,11 @@ class Audit:
         for s in self.scope:
             if s.page:
                 self.mat_site(s.slug)
+                self.mat_chrome(s.slug)
             if s.design:
                 self.mat_review(s.slug)
+                self.mat_iterations(s.slug)
+                self.mat_boards(s.slug)
                 self.mat_assets(s.slug)
             if s.app:
                 self.mat_second_input(s)
@@ -2045,8 +2167,9 @@ class Audit:
             arows, _h = mod("canvas_input").parse_acceptance(ap.read_text(encoding="utf-8"))
             acc = {r.get("id"): r.get("серьёзность") for r in arows}
         plans = self.plans(s) if self.reg[s].page else {}
-        exc = {str(e.get("id")) for _pid, (_p, plan) in plans.items()
-               for e in listify(get(plan, "page", "x-gate-exception")) if isinstance(e, dict)}
+        # исключение ворот — запись плана своей страницы: пункт S оно снимает только у неё
+        exc = {pid: {str(e.get("id")) for e in listify(get(plan, "page", "x-gate-exception")) if isinstance(e, dict)}
+               for pid, (_p, plan) in plans.items()}
         failed = [(it.get("id"), self.item_unit(s, it, rows)) for it in items
                   if (it.get("итог") or "").startswith("не пройдено")]
         for unit, row in rows.items():
@@ -2055,7 +2178,7 @@ class Audit:
                 continue
             # непройденный пункт с единицей держит только её, без единицы — все принятые единицы
             open_b = [i for i, u in failed if acc.get(i) == "B" and u in (None, unit)]
-            open_s = [i for i, u in failed if acc.get(i) == "S" and i not in exc and u in (None, unit)]
+            open_s = [i for i, u in failed if acc.get(i) == "S" and i not in exc.get(unit, ()) and u in (None, unit)]
             fix = self.dd(s, "acceptance")
             if not row.get("одобрил") or row.get("одобрил") in ("—", "-") or not row.get("дата") or \
                     row.get("дата") in ("—", "-"):
@@ -2082,11 +2205,154 @@ class Audit:
                 self.add("R-MAT-012", "error", s, "input", "INPUT.md", inp,
                          f"холст этапа {fm.get('stage')} опубликован на входе с ошибками проверки ({errs} error в "
                          "манифесте)", f"canvas_input build {self.slug} {s} --stage {fm.get('stage')}")
-        iters = [p for p in sorted(self.dsurf(s, "review").iterdir()) if p.is_dir() and ITER_DIR.match(p.name)] \
-            if self.dsurf(s, "review").is_dir() else []
-        for p in iters:
-            self.add("R-SEM-002", "warning", s, "review", f"{s}#{p.name}", p,
-                     f"папка по итерациям в review/: {p.name} — review/ держит последний результат", self.dd(s))
+
+    def mat_iterations(self, s):
+        """R-SEM-002: папка итерации в review/ — review/ держит последний результат; сверяется и без REVIEW.md."""
+        d = self.dsurf(s, "review")
+        for p in sorted(d.iterdir()) if d.is_dir() else []:
+            if p.is_dir() and ITER_DIR.match(p.name):
+                self.add("R-SEM-002", "warning", s, "review", f"{s}#{p.name}", p,
+                         f"папка по итерациям в review/: {p.name} — review/ держит последний результат", self.dd(s))
+
+    # ---------- общие секции страниц
+    def chrome_slots(self, s, pid, plan):
+        """Общие секции страницы — роли header и footer, кроме секций своей страницы (OWN_CHROME): {(роль, блок,
+        вариант): {слот: текст выбранного варианта copy deck или None — у слота без текста и у слота не текста}}.
+        Ключ слота — «<группа слотов>/<id>»; секции одного ключа складываются."""
+        _dp, page = self.deck_of(s, pid)
+        texts = {}
+        for sec in listify(get(page, "sections")):
+            for sl in listify(get(sec, "slots")) if isinstance(sec, dict) else []:
+                if isinstance(sl, dict):
+                    var = self.chosen(sl)
+                    texts[(sec.get("section_id"), sl.get("slot_id"))] = str(var.get("text") or "").strip() \
+                        if var else None
+        out = {}
+        for sec in listify(plan.get("sections")):
+            if not isinstance(sec, dict) or sec.get("role") not in ("header", "footer") or \
+                    sec.get("block") in OWN_CHROME:
+                continue
+            key = (str(sec.get("role")), str(sec.get("block") or "—"), str(sec.get("variant") or "—"))
+            slots = out.setdefault(key, {})
+            for group, items in (sec.get("slots") or {}).items() if isinstance(sec.get("slots"), dict) else []:
+                for x in listify(items):
+                    if isinstance(x, dict) and x.get("id"):
+                        slots[f"{group}/{x['id']}"] = texts.get((sec.get("id"), x["id"])) if group == "text" else None
+        return out
+
+    def mat_chrome(self, s):
+        """R-MAT-013: общие шапка и подвал живут копиями в плане и copy deck каждой страницы — у страниц с той же
+        секцией (роль, блок, вариант) набор слотов и выбранные тексты равны. Образец — значение большинства страниц
+        (при равенстве — страницы, что раньше по порядку: главная, затем по id); находка — на страницу и слот, с
+        парой «страница — образец»; текст сверяется, когда он есть у обеих страниц."""
+        plans = self.plans(s)
+        main = self.main_page(s)
+        order = sorted(plans, key=lambda x: (main is None or x != main[0], x))
+        by_key = {}
+        for pid in order:
+            for key, slots in self.chrome_slots(s, pid, plans[pid][1]).items():
+                by_key.setdefault(key, {})[pid] = slots
+        for (role, block, variant), pages in by_key.items():
+            if len(pages) < 2:
+                continue
+            what = f"секции {role} (блок {block}" + (f", вариант {variant}" if variant != "—" else "") + ")"
+            for slot in sorted({x for slots in pages.values() for x in slots}):
+                have = [pid for pid in pages if slot in pages[pid]]
+                # набор слотов: образец — большинство (есть или нет)
+                norm_has = len(have) * 2 >= len(pages)
+                odd = [pid for pid in pages if (slot in pages[pid]) != norm_has]
+                ref_page = next(pid for pid in pages if (slot in pages[pid]) == norm_has)
+                for pid in odd:
+                    self.add("R-MAT-013", "warning", s, "page-plan", f"{pid}#/{role}/{slot}", plans[pid][0],
+                             f"слот {slot} {what}: у страницы {pid} его " + ("нет" if norm_has else "есть")
+                             + f", у страницы {ref_page} — " + ("есть" if norm_has else "нет")
+                             + ": общая секция расходится между страницами",
+                             self.dd(s, f"page-plan:{pid} — общая секция по образцу страницы {ref_page}"))
+                # тексты: образец — самый частый текст
+                texts = {pid: pages[pid][slot] for pid in have if pages[pid][slot]}
+                if len(set(texts.values())) < 2:
+                    continue
+                count = {}
+                for pid, t in texts.items():
+                    count[t] = count.get(t, 0) + 1
+                norm = max(count, key=lambda t: (count[t], -list(texts.values()).index(t)))
+                ref_page = next(pid for pid, t in texts.items() if t == norm)
+                for pid, t in texts.items():
+                    if t != norm:
+                        dp, _pg = self.deck_of(s, pid)
+                        self.add("R-MAT-013", "warning", s, "copy-deck", f"{pid}#/{role}/{slot}",
+                                 dp or plans[pid][0],
+                                 f"текст слота {slot} {what}: у страницы {pid} — «{t[:80]}», у страницы {ref_page} — "
+                                 f"«{norm[:80]}»: общая секция расходится между страницами",
+                                 self.dd(s, f"copy — copy deck {pid}: текст общей секции по образцу страницы "
+                                            f"{ref_page}"))
+
+    # ---------- загрузки принятых артбордов
+    def path_key(self, f, s=None):
+        """Путь файла загрузки или демо-кадра для сравнения: файл на диске — его полный путь; файла на машине нет
+        (демо-кадр вне git) — путь как записан, с раскрытыми `$DDD_HOME` и `~`."""
+        p = self.upload_path(f, s)
+        if p is not None:
+            return str(p)
+        if f.startswith("$DDD_HOME/"):
+            return str(kbpaths.home(f[len("$DDD_HOME/"):]))
+        return str(Path(f).expanduser()) if f.startswith("~") else f
+
+    def demo_paths(self, s, pid):
+        """Пути демо-кадров плана ассетов страницы — расширение x-demo его слотов (ключи path_key)."""
+        data = self.load(self.dsurf(s, "asset-plans") / f"{pid}.yaml")
+        return {self.path_key(f, s) for sl in listify(get(data, "slots")) if isinstance(sl, dict)
+                for _var, f, _what in mod("canvas_input").demo_files(sl)}
+
+    def mat_boards(self, s):
+        """R-MAT-014: что стоит на артбордах принятой единицы. Загрузка холста на артборде — `/_blob/<id>`; её файл
+        называет строка «Загрузок» ARTIFACTS.md с этим id. Файл — из манифеста ассетов поверхности или продукта либо
+        демо-кадр `x-demo` плана ассетов этой страницы; иначе единица принята на файле, которого нет ни в плане, ни
+        в манифесте."""
+        rows = {u: r for u, r in self.review(s)[1].items() if r.get("вердикт") in ACCEPTED}
+        art = self.dprod("artifacts")
+        if not rows or not art.is_file():
+            return
+        L = mod("layer")
+        t = L.Md(art).table(("id", "файл", "слот", "артефакт"))
+        ups = {L.cell(r.get("id")): self.upload_file(r.get("файл")) for r in t.rows} if t else {}
+        known = set()
+        for folder in (self.dsurf(s, "assets"), self.dprod("assets")):
+            for r in self.manifest_rows(folder / "manifest.yaml"):
+                p = self.asset_path(folder, r)
+                if p is not None:
+                    known.add(str(p))
+        proj = self.dsurf(s, "canvas-project")
+        rv = self.dsurf(s, "review") / "REVIEW.md"
+        for unit, row in rows.items():
+            ids = {}
+            for a in row.get("artboards") or []:
+                p = proj / a
+                if Path(a).name == a and p.is_file():
+                    for i in BLOB.findall(p.read_text(encoding="utf-8", errors="replace")):
+                        ids.setdefault(i, a)
+            if not ids:
+                continue
+            demo = self.demo_paths(s, unit)
+            lost, stray = [], []
+            for i, a in sorted(ids.items()):
+                f = ups.get(i)
+                if not f:
+                    lost.append(f"{i} ({a})")
+                    continue
+                key = self.path_key(f, s)
+                if key not in known and key not in demo:
+                    stray.append(f"{i} — {f}")
+            fix = self.dd(s, "assets — файл в манифест ассетов или демо-кадром x-demo плана ассетов страницы; строка "
+                             "«Загрузок» — по протоколу холста")
+            if stray:
+                self.add("R-MAT-014", "error", s, "review", f"{s}#Приёмка/{unit}", rv,
+                         f"{unit}: на принятых артбордах загрузки вне манифеста ассетов и вне x-demo плана ассетов "
+                         f"страницы — {len(stray)}: " + listed(stray, 4, "; "), fix)
+            if lost:
+                self.add("R-MAT-014", "error", s, "review", f"{s}#Приёмка/{unit}", rv,
+                         f"{unit}: на принятых артбордах загрузки без строки «Загрузок» ARTIFACTS.md — {len(lost)}: "
+                         + listed(lost, 4, "; ") + " — файл загрузки не установить", fix)
 
     def mat_artifacts(self):
         p = self.dprod("artifacts")
@@ -2111,6 +2377,20 @@ class Audit:
                          "строки «Проверки макета» в ARTIFACTS.md нет — снимается только подтверждённой человеком "
                          "разовой просьбой заказчика", self.dd(s.slug, "checks"))
 
+    GENERATED = ("generate", "edit-real")                   # источники слота и варианта, которые идут генерацией
+
+    @staticmethod
+    def row_source(slot, row):
+        """Источник файла строки манифеста → (источник, вариант плана или None). Строка называет вариант плана ассетов
+        (`variant`; файл на несколько вариантов — `desktop+mobile`): у варианта с полем `source` источник — его, у
+        варианта без поля и у строки без варианта — источник слота. Вариант-генерация среди вариантов строки —
+        первым."""
+        base = str(slot.get("source") or "")
+        by_id = {str(v.get("id")): v for v in listify(slot.get("variants")) if isinstance(v, dict)}
+        srcs = [(str(by_id[n].get("source") or base), n if by_id[n].get("source") else None)
+                for n in str(row.get("variant") or "").split("+") if n in by_id]
+        return next((x for x in srcs if x[0] in Audit.GENERATED), srcs[0] if srcs else (base, None))
+
     def mat_assets(self, s):
         folder = self.dsurf(s, "assets")
         rows = self.manifest_rows(folder / "manifest.yaml")
@@ -2129,20 +2409,24 @@ class Audit:
                              "генерация — только по утверждённому плану", self.dd(s, "asset-plan"))
                 continue
             ai = bool(r.get("ai") or r.get("ai_mark"))
+            # источник файла — у варианта плана, который называет строка; у варианта без поля — источник слота
+            src = {id(slot): self.row_source(slot, r) for _ap, slot, _plan in hits}
             # строка без page при одном id слота у нескольких страниц — общая для страниц без своих строк: генерацию
             # разрешает утверждённый план любой из них, находка — когда не разрешает ни один
             open_ = [(ap, slot, plan) for ap, slot, plan in hits
-                     if (ai or str(slot.get("source") or "") in ("generate", "edit-real"))
+                     if (ai or src[id(slot)][0] in self.GENERATED)
                      and not (get(plan, "status") == "approved" and bool(get(plan, "approval")))]
             if len(open_) == len(hits):
                 # первым — план, где слот генерируется: его источник и id называет находка
-                open_.sort(key=lambda x: (str(x[1].get("source") or "") not in ("generate", "edit-real"), x[0].stem))
+                open_.sort(key=lambda x: (src[id(x[1])][0] not in self.GENERATED, x[0].stem))
                 ap, slot, plan = open_[0]
+                source, var = src[id(slot)]
                 what = "; ".join(f"план ассетов {a.stem} — {get(p, 'status') or 'без статуса'}"
                                  + ("" if get(p, "approval") else " без approval") for a, _sl, p in open_)
-                self.add("R-MAT-008", "error", s, "asset-plan", f"{ap.stem}#{sid}", f if f.is_file() else ap,
-                         f"ассет слота {sid} ({slot.get('source')}) есть, а {what}: генерация — только после "
-                         "утверждения плана", self.dd(s, "asset-plan — утверждение"))
+                self.add("R-MAT-008", "error", s, "asset-plan", f"{ap.stem}#{sid}" + (f"/{var}" if var else ""),
+                         f if f.is_file() else ap,
+                         f"ассет слота {sid}" + (f", вариант {var}" if var else "") + f" ({source or None}) есть, а "
+                         f"{what}: генерация — только после утверждения плана", self.dd(s, "asset-plan — утверждение"))
         # ключевые ассеты и ДС (R-MAT-007)
         if not self.reg[s].page:
             return
@@ -2499,12 +2783,27 @@ def audit(slug, repo=None, surface=None, today=None, visual_list=False, run_tool
 
 # ------------------------------------------------------------------ макетный прогон: отчёты mockup_checks
 
+def allow_keys():
+    """Ключи снятия проверок макета — реестр примет kb/common/tells.yaml, раздел checks: {id проверки: ключ --allow}."""
+    p = kbpaths.kb(None, "common", "tells.yaml")
+    try:
+        checks = (yaml_mod().safe_load(p.read_text(encoding="utf-8")) or {}).get("checks")
+    except (OSError, ValueError, ImportError):
+        checks = None
+    return {str(k): str(v["allow"]) for k, v in (checks or {}).items() if isinstance(v, dict) and v.get("allow")} \
+        if isinstance(checks, dict) else {}
+
+
 def visual_summary(slug, surface, reports, repo=None):
-    """Отчёты mockup_checks.py page → (находки R-VIS-001, сводка {единица: {domains, clusters}}). Единица — имя до «=»
-    или target отчёта; счёт примет — по доменам в единице домена, домены и единицы не складываются."""
+    """Отчёты mockup_checks.py page → (находки R-VIS-001, сводка {единица: {domains, clusters, counts, allowed}}).
+    Единица — имя до «=» или target отчёта; счёт примет — по доменам в единице домена, домены и единицы не
+    складываются. Находка, снятая ключом --allow (поле allowed отчёта, ключ — у её проверки в реестре примет), в
+    R-VIS-001 не идёт при любой тяжести: сводка называет её в allowed — id, ключ, ширина и причина (поле reason находки
+    или allowed.reason, когда allowed — запись)."""
     rep = F.Report()
     summ = {}
     root = docpaths.root(repo)
+    keys = allow_keys()
     for spec in reports:
         unit, _, path = spec.rpartition("=") if "=" in spec else ("", "", spec)
         p = Path(path)
@@ -2513,10 +2812,16 @@ def visual_summary(slug, surface, reports, repo=None):
         s = data.get("summary") or {}
         summ[unit] = {"domains": {d: {"unit": v.get("unit"), "count": v.get("count", len(v.get("tells") or [])),
                                       "tells": v.get("tells") or []} for d, v in (s.get("domains") or {}).items()},
-                      "clusters": s.get("clusters") or [], "counts": s.get("counts") or {}}
+                      "clusters": s.get("clusters") or [], "counts": s.get("counts") or {}, "allowed": []}
         for f in data.get("findings") or []:
+            mark = f.get("allowed")
+            if mark and keys.get(str(f.get("id"))):
+                why = mark.get("reason") if isinstance(mark, dict) else f.get("reason")
+                summ[unit]["allowed"].append({"id": f.get("id"), "allow": keys[str(f.get("id"))],
+                                              "view": f.get("view"), "reason": str(why or "").strip() or None})
+                continue
             sev = GATE.get(str(f.get("severity")))
-            if sev is None or f.get("allowed"):
+            if sev is None:
                 continue
             view = f" · {f.get('view')}" if f.get("view") else ""
             rep.add("R-VIS-001", sev, surface=surface, kind="canvas", ref=f"{unit}#{f.get('id')}",
@@ -2562,6 +2867,10 @@ def main(argv=None):
                                    for c in v["clusters"]) or "—"
                     print(f"{unit}: приметы по доменам (единица домена, домены не складываются): {doms}; "
                           f"кластеры: {cl}")
+                    for x in v["allowed"]:
+                        view = f" · {x['view']}" if x.get("view") else ""
+                        print(f"Заметка: {unit}: {x['id']}{view} снята ключом --allow {x['allow']} — "
+                              + (x["reason"] or "причина в отчёте не записана"))
             return F.exit_code(items)
         res = audit(call.slug, call.repo, call.surface, today, call.args.visual_list)
         out_dir = call.out or kbpaths.out("project", TOOL, call.slug)
@@ -2606,7 +2915,8 @@ SEEDED_ALSO = (
 
 def _selftest():
     """Фикстуры package-landing, package-cabinet (0 error) и package-defects (14 посеянных дефектов), сценарии правил
-    на копиях без валидаторов; без сети."""
+    на копиях фикстур package-landing, input-site и package-cabinet — без валидаторов, а где правило идёт вызовом
+    утилиты базы — с ней; без сети."""
     import shutil
     ok = True
 
@@ -2719,8 +3029,17 @@ def _selftest():
                                    '"landing-lead-services@L2"').replace('"level": "L1"', '"level": "L2"', 1),
                        encoding="utf-8")
         got = rules_of()
-        check("уровень и профиль арт-дирекции не равны брифу и плану → R-PROJ-002, R-PROJ-003 error",
-              ("R-PROJ-002", "error") in got and ("R-PROJ-003", "error") in got)
+        bare = json.loads(adt)
+        bare.pop("budget", None)
+        bare["ambition"] = {k: v for k, v in bare["ambition"].items()
+                            if k not in ("level", "motion_cap", "budget_profile", "by_section_role")}
+        adp.write_text(json.dumps(bare, ensure_ascii=False), encoding="utf-8")
+        no_copy = rules_of()
+        check("копии уровня и профиля в арт-дирекции отстали от брифа и плана → R-PROJ-002, R-PROJ-003 warning, не "
+              "error; арт-дирекция без копий — находок R-PROJ нет",
+              {("R-PROJ-002", "warning"), ("R-PROJ-003", "warning")} <= got
+              and not any(r.startswith("R-PROJ") and s == "error" for r, s in got)
+              and not any(r.startswith("R-PROJ") for r, _s in no_copy))
 
         def ad_rules():
             aa = Audit(slug, root, today=today)
@@ -2819,6 +3138,18 @@ def _selftest():
         all_units = {ref for r, _s, ref, _m in found() if r == "R-MAT-005"}
         check("R-MAT-005 по единице: непройденный B с единицей (home) держит только её, без единицы — все принятые",
               one_unit == {"promo#Приёмка/home"} and all_units == {"promo#Приёмка/home", "promo#Приёмка/spasibo"})
+        sp = docpaths.site(slug, "promo", "plans", "spasibo.yaml", repo=root)
+        spt = sp.read_text(encoding="utf-8")
+        (rv / "REVIEW.md").write_text(accept + acc_md + "| `C1` | — | макет | не пройдено | кадр 390 |\n",
+                                      encoding="utf-8")
+        s_all = {ref for r, _s, ref, m in found() if r == "R-MAT-005" and "пунктах S" in m}
+        sp.write_text(spt.replace("\npage:\n", "\npage:\n  x-gate-exception:\n  - {id: C1, why: иллюстрация, who: "
+                                  "владелец продукта}\n", 1), encoding="utf-8")
+        s_one = {ref for r, _s, ref, m in found() if r == "R-MAT-005" and "пунктах S" in m}
+        sp.write_text(spt, encoding="utf-8")
+        check("R-MAT-005, пункт S по единице: непройденный S без единицы держит обе принятые единицы; исключение ворот "
+              "в плане spasibo снимает его только у spasibo",
+              s_all == {"promo#Приёмка/home", "promo#Приёмка/spasibo"} and s_one == {"promo#Приёмка/home"})
 
         def copies():
             aa = Audit(slug, root, today=today)
@@ -2835,10 +3166,10 @@ def _selftest():
         art.write_text(at.replace("Проверки макета: разрешены", "Проверки макета: —"), encoding="utf-8")
         not_asked, not_asked_read = copies(), reads_copies()
         art.write_text(at, encoding="utf-8")
-        check("R-FRESH-005 статичных копий: со строкой «Проверки макета: разрешены» — dc_to_html check и kit_manifest "
-              "check зовутся, копий артбордов нет — error; без строки — утилиты не зовутся, ни находки, ни заметки о "
-              "копиях, и без окружения правила нет в чтении",
-              asked[0] == {"error"} and {"claude-design/dc_to_html.py", "claude-design/kit/kit_manifest.py"} <= asked[1]
+        check("R-FRESH-005 статичных копий: со строкой «Проверки макета: разрешены» — зовётся dc_to_html check, копий "
+              "артбордов нет — error; манифест кадров kit.json не сверяется (kit_manifest не зовётся); без строки — "
+              "утилита не зовётся, ни находки, ни заметки о копиях, и без окружения правила нет в чтении",
+              asked[0] == {"error"} and asked[1] == {"claude-design/dc_to_html.py"}
               and not_asked == (set(), set(), []) and asked_read and not not_asked_read)
         # R-COV-002 по этапу: error под гейтом 2 — партия входа mockup или motion (units, pages/<id>/) или строка
         # «Приёмка»; партия входа вайрфрейма — warning
@@ -3046,6 +3377,65 @@ def _selftest():
         check("загрузки холста: таблица без колонки sha256 — одна подсказка R-FRESH-007, не ошибка",
               [x[1] for x in u2 if x[0] == "R-FRESH-007"] == ["hint"]
               and any(x[0] == "R-FRESH-007" and "нет колонки sha256" in x[3] and "1 из 1" in x[3] for x in u2))
+        # загрузки принятых артбордов: файл — из манифеста ассетов или демо-кадр x-demo плана ассетов страницы
+        demo_file = "$DDD_HOME/out/selftest-no-such/hero-visual-demo.webp"
+        owner = {"by": "владелец продукта (демо)", "date": "2026-09-29"}
+        home_slots = {"header-logo": {"source": "real"}, "hero-visual": {"source": "edit-real", "key": True}}
+        with_demo = dict(home_slots, **{"hero-visual": dict(home_slots["hero-visual"], **{
+            "x-demo": {"file": demo_file, "what": "иллюстрация: кадр макета"}})})
+        cp.mkdir(parents=True)
+        (cp / "Home.dc.html").write_text("<img src='/_blob/up-1'><img src=\"/_blob/up-4\"><img src='/_blob/up-6'>"
+                                         "<i style='background:url(/_blob/up-9)'></i>\n", encoding="utf-8")
+        (cp / "Spasibo.dc.html").write_text("<img src='/_blob/up-6'>\n", encoding="utf-8")
+        (rv / "REVIEW.md").write_text(
+            "# REVIEW\n\nИллюстрация самопроверки.\n\n## Приёмка\n\n"
+            "| страница или экран | артборды | вердикт | одобрил | дата | отпечаток | открыто |\n"
+            "|---|---|---|---|---|---|---|\n"
+            "| `home` | `Home.dc.html` | `accepted` | владелец продукта | 2026-09-29 | sha256:0 | — |\n"
+            "| `spasibo` | `Spasibo.dc.html` | `blocked` | — | — | — | — |\n", encoding="utf-8")
+        uploads_table("| id | файл | слот | артефакт |\n|---|---|---|---|\n"
+                      f"| `up-1` | `{up}header-logo.svg` | `header-logo` | `canvas:promo` |\n"
+                      f"| `up-4` | `{demo_file}` — демо, вне git | `hero-visual` | `canvas:promo` |\n"
+                      "| `up-6` | `$DDD_HOME/out/selftest-no-such/stray.webp` | `hero-visual` | `canvas:promo` |\n")
+
+        def boards():
+            aa = Audit(slug, root, today=today, run_tools=False)
+            aa.mat_boards("promo")
+            return [(f.rule, f.severity, f.ref, f.message) for f in aa.rep.items]
+
+        asset_plan("home", with_demo, status="approved", approval=owner)
+        m1 = boards()
+        asset_plan("home", home_slots, status="approved", approval=owner)
+        m2 = boards()
+        check("загрузки принятых артбордов (R-MAT-014 error у единицы): файл вне манифеста ассетов и вне x-demo плана "
+              "ассетов страницы (up-6) и загрузка без строки «Загрузок» (up-9) — находки; файл манифеста (up-1) и "
+              "демо-кадр x-demo (up-4) — нет; без x-demo в плане демо-кадр — тоже находка; единица без принятого "
+              "вердикта не сверяется",
+              [x[:3] for x in m1] == [("R-MAT-014", "error", "promo#Приёмка/home")] * 2
+              and any("— 1: up-6 — " in x[3] for x in m1) and any("— 1: up-9 (Home.dc.html)" in x[3] for x in m1)
+              and not any(u in x[3] for x in m1 for u in ("up-1", "up-4"))
+              and any("— 2: up-4 — " in x[3] and "up-6" in x[3] for x in m2) and not any("up-1" in x[3] for x in m2)
+              and not any("spasibo" in x[2] for x in m1 + m2))
+        (rv / "REVIEW.md").unlink()
+        shutil.rmtree(cp.parent)
+        # источник файла — у варианта плана ассетов, который называет строка манифеста
+        made["hero-visual-mobile.webp"] = "webp mobile\n"
+        sha["hero-visual-mobile.webp"] = hashlib.sha256(made["hero-visual-mobile.webp"].encode("utf-8")).hexdigest()
+        by_variant = [rows[2], "slot: hero-visual, variant: mobile, format: webp, file: hero-visual-mobile.webp, "
+                               "ai: false, status: draft"]
+        manifest(by_variant)
+        asset_plan("home", {"hero-visual": {"source": "real", "variants": [
+            {"id": "desktop"}, {"id": "mobile", "source": "generate"}]}}, status="draft")
+        g4 = [x for x in assets()[0] if x[0] == "R-MAT-008"]
+        asset_plan("home", {"hero-visual": {"source": "generate", "variants": [
+            {"id": "desktop", "source": "real"}, {"id": "mobile"}]}}, status="draft")
+        g5 = [x for x in assets()[0] if x[0] == "R-MAT-008"]
+        (adir / "hero-visual-mobile.webp").unlink()
+        check("источник по варианту плана ассетов: у настоящего слота вариант-генерация — R-MAT-008 только у строки "
+              "этого варианта, с вариантом в ref; у слота-генерации настоящий вариант — без находки, вариант без "
+              "поля source — источник слота",
+              [x[1:3] for x in g4] == [("error", "home#hero-visual/mobile")] and "вариант mobile (generate)" in g4[0][3]
+              and [x[1:3] for x in g5] == [("error", "home#hero-visual")] and "(generate)" in g5[0][3])
         art.write_text(at, encoding="utf-8")
         for n, p in aplans.items():
             p.write_text(aplan_texts[n], encoding="utf-8")
@@ -3068,6 +3458,19 @@ def _selftest():
         plan["page"]["template"] = True
         pp.write_text(y.safe_dump(plan, allow_unicode=True, sort_keys=False), encoding="utf-8")
         j1 = found_of("R-REF-003", "R-MAT-001")
+        c1 = [x for x in found_of("R-COV-002") if x[2].startswith("spasibo-obrazec")]
+        sl0 = sample["sections"][0]["slots"][0]
+        var0 = next(v for v in sl0["variants"] if v["id"] == sl0["chosen"])
+        text0, var0["text"] = var0["text"], ""
+        dp.write_text(y.safe_dump(deck, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        c2 = [x for x in found_of("R-COV-002") if x[2].startswith("spasibo-obrazec")]
+        var0["text"] = text0
+        check("покрытие текстов у образца шаблона коллекции: образец с текстами всех слотов плана — без R-COV-002; "
+              "слот образца без текста — R-COV-002 warning с id образца (запись коллекции — доклад, и у закрытой "
+              "страницы образца)",
+              not c1 and [x[1:3] for x in c2] == [("warning", f"spasibo-obrazec#/{sample['sections'][0]['section_id']}"
+                                                   f"/{sl0['slot_id']}")]
+              and "у образца spasibo-obrazec" in c2[0][3])
         sample["sections"][0]["slots"][0]["slot_id"] = "no-such-slot"
         dp.write_text(y.safe_dump(deck, allow_unicode=True, sort_keys=False), encoding="utf-8")
         j2 = found_of("R-REF-003")
@@ -3096,20 +3499,94 @@ def _selftest():
               r1.get("home#/refs/copy_deck", ("", ""))[1] == "hint"
               and "этап copy страницы не начат" in r1["home#/refs/copy_deck"][3]
               and [k for k, x in r1.items() if x[1] == "error"] == ["spasibo#/refs/copy_deck"])
+        # refs.asset_plan и refs.treatment плана до своих этапов
+        ap_dir = "../../../design/promo/assets/plans/"
+        for path, text, refs in ((hp, hpt, {"asset_plan": ap_dir + "home.yaml"}),
+                                 (pp, ptext, {"asset_plan": ap_dir + "spasibo-typo.yaml",
+                                              "treatment": "../../../design/promo/art-direction-typo.json"})):
+            data = y.safe_load(text)
+            data["refs"].update(refs)
+            path.write_text(y.safe_dump(data, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        aplans["home"].unlink()
+        r2 = {x[2]: x for x in found_of("R-REF-001")}
+        adp.unlink()
+        r3 = {x[2]: x for x in found_of("R-REF-001")}
+        adp.write_text(adt, encoding="utf-8")
+        aplans["home"].write_text(aplan_texts["home"], encoding="utf-8")
+        hp.write_text(hpt, encoding="utf-8")
+        pp.write_text(ptext, encoding="utf-8")
+        none = ("", "", "", "")
+        check("refs.asset_plan и refs.treatment плана ведут в файл, которого ещё нет: плана ассетов страницы нет "
+              "(home) — R-REF-001 hint «этап asset-plan страницы не начат», арт-дирекции поверхности нет — hint «этап "
+              "art-direction не начат»; файл этапа есть, а ссылка мимо (spasibo) — error",
+              r2.get("home#/refs/asset_plan", none)[1] == "hint"
+              and "этап asset-plan страницы не начат" in r2["home#/refs/asset_plan"][3]
+              and "home#/refs/treatment" not in r2
+              and [r2.get(f"spasibo#/refs/{k}", none)[1] for k in ("asset_plan", "treatment")] == ["error", "error"]
+              and [r3.get(f"{k}#/refs/treatment", none)[1] for k in ("home", "spasibo")] == ["hint", "hint"]
+              and "этап art-direction не начат" in r3["home#/refs/treatment"][3])
         # папка итерации в review/ — по имени
         (rv / "REVIEW.md").write_text(accept, encoding="utf-8")
         for n in ("checks", "iter-02"):
             (rv / n).mkdir()
             (rv / n / "home.json").write_text('{"example": true}\n', encoding="utf-8")
         sem = [x[1:3] for x in found_of("R-SEM-002") if x[2].startswith("promo#")]
+        (rv / "REVIEW.md").unlink()
+        sem_bare = [x[1:3] for x in found_of("R-SEM-002") if x[2].startswith("promo#")]
         for n in ("checks", "iter-02"):
             shutil.rmtree(rv / n)
-        (rv / "REVIEW.md").unlink()
-        check("подпапка review/: папка отчётов checks/ — не находка, папка итерации iter-02/ — R-SEM-002 warning",
-              sem == [("warning", "promo#iter-02")] and all(ITER_DIR.match(n) for n in (
+        check("подпапка review/: папка отчётов checks/ — не находка, папка итерации iter-02/ — R-SEM-002 warning, и "
+              "без REVIEW.md тоже",
+              sem == [("warning", "promo#iter-02")] == sem_bare and all(ITER_DIR.match(n) for n in (
                   "iter-1", "round3", "v2", "2026-09-30", "prev", "итерация-2", "03-mockup"))
               and not any(ITER_DIR.match(n) for n in ("checks", "shots", "shots-390", "kit", "reports", "runs", "390",
                                                       "1440", "390-dark")))
+        # обходы copy deck — заметки сводки; словарь — у copy deck и фактов
+        def with_tools(step):
+            aa = Audit(slug, root, today=today)
+            with tempfile.TemporaryDirectory(prefix="ddd-audit-deck-") as td:
+                aa.tools = Tools(td)
+                getattr(aa, step)("promo")
+            return [(f.rule, f.severity, f.kind, f.message) for f in aa.rep.items], aa.notes
+
+        deck = y.safe_load(dtext)
+        d_sec = next(x for x in deck["copy_deck"]["pages"][0]["sections"] if x["section_id"] == "confirmation")
+        d_slot = next(x for x in d_sec["slots"] if x["slot_id"] == "title")
+        d_slot["lint_allow"] = [{"rule": "ru-syn-passive", "reason": "формула подтверждения заявки"}]
+        dp.write_text(y.safe_dump(deck, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        _f, n_lint = with_tools("copy_decks")
+        dp.write_text(dtext, encoding="utf-8")
+        _f, n_none = with_tools("copy_decks")
+        aa = Audit(slug, root, today=today, run_tools=False)
+        aa.deck_bypasses(dp, {"allowed": [{"rule": "COPY-F-NUM", "where": "spasibo/confirmation/title",
+                                           "reason": "номер шага, не утверждение", "by": "аналитик"}], "notes": []})
+        check("обходы copy deck — заметки сводки с причиной: lint_allow слота (вывод copydeck.py check) и claims_allow "
+              "(поле allowed); copy deck без обходов — заметок нет",
+              [n for n in n_lint if n.startswith("обходы")] == [
+                  "обходы lint_allow copy deck spasibo.yaml — 1: ru-syn-passive @ spasibo/confirmation/title: формула "
+                  "подтверждения заявки"]
+              and not [n for n in n_none if n.startswith("обходы")]
+              and aa.notes == ["обходы claims_allow copy deck spasibo.yaml — 1: COPY-F-NUM @ spasibo/confirmation/title"
+                               " — номер шага, не утверждение (аналитик)"])
+        v0, _n = with_tools("vocab")
+        dp.write_text(re.sub(r"page_type: \S+", "page_type: no-such-page-type", dtext, count=1), encoding="utf-8")
+        v1, _n = with_tools("vocab")
+        dp.write_text(dtext, encoding="utf-8")
+        check("словарь site сверяется и у copy deck и фактов: чистая фикстура — находок у них нет; page_type вне "
+              "словаря в copy deck — R-STRUCT-002 у copy deck",
+              not [x for x in v0 if x[2] in ("copy-deck", "facts")]
+              and [x[:3] for x in v1 if x[2] == "copy-deck"] == [("R-STRUCT-002", "error", "copy-deck")]
+              and "no-such-page-type" in next(x[3] for x in v1 if x[2] == "copy-deck"))
+        # голос: у проекта с сайтом профиль бренда обязателен
+        vy = pj / "voice.yaml"
+        vyt = vy.read_text(encoding="utf-8")
+        vy.unlink()
+        aa = Audit(slug, root, today=today, run_tools=False)
+        aa.cov_voice()
+        vy.write_text(vyt, encoding="utf-8")
+        check("проект с лендингом без voice.yaml — R-COV-007 warning «профиля голоса voice.yaml нет»",
+              [(f.severity, f.kind) for f in aa.rep.items if f.rule == "R-COV-007"] == [("warning", "voice")]
+              and "voice.yaml нет" in aa.rep.items[0].message)
         # блокер публикации и блокер закрытия в заметке у закрытого плана
         note.parent.mkdir(parents=True)
         gap = "- (**blocker**) Этапы оплаты — из договора заказчика; до ответа на странице заглушка пробела\n" \
@@ -3126,6 +3603,132 @@ def _selftest():
               [x[1] for x in b1] == ["hint"] and "payment-stages" in b1[0][3]
               and sorted(x[1] for x in b2) == ["error", "hint"]
               and next(x for x in b2 if x[1] == "error")[3].endswith("— 1"))
+    # многостраничник: страницы и планы карты, запись утверждения планов, ДС до своего этапа, общие шапка и подвал
+    with fixture_project.built("input-site") as fx, tempfile.TemporaryDirectory(prefix="ddd-audit-site-") as td:
+        root, slug = fx.root, fx.slug
+        y = yaml_mod()
+        plans_dir = docpaths.site(slug, "corp", "plans", repo=root)
+
+        def site(*steps):
+            aa = Audit(slug, root, today=today)
+            aa.tools = Tools(td)
+            for step in steps:
+                getattr(aa, step)("corp")
+            return [(f.rule, f.severity, f.ref, f.message) for f in aa.rep.items], aa
+
+        got, aa = site("site_validate", "cov_pages", "cov_ds", "mat_chrome")
+        u01 = [x for x in got if "PL-U01" in x[3]]
+        check("многостраничник: страница «спасибо» карты читается из поля page (в страницах — thanks-request, пустых "
+              "id нет); страница без плана — одна находка R-COV-001; общие шапка и подвал планов равны — R-MAT-013 нет",
+              "thanks-request" in aa.site_pages("corp") and "None" not in aa.site_pages("corp")
+              and [x[1:3] for x in got if x[0] == "R-COV-001"] == [("hint", "consent")]
+              and not any(x[0] == "R-MAT-013" for x in got))
+        check("PL-U01: планы approved без записи approval — одна строка R-STRUCT-002 warning со списком планов",
+              [x[:3] for x in u01] == [("R-STRUCT-002", "warning", "corp#PL-U01")] and " — 15: " in u01[0][3]
+              and all(p in u01[0][3] for p in ("about", "home", "not-found", "thanks-request")))
+        check("сайт с планами до этапа дизайн-системы (арт-дирекция не утверждена, токенов ДС нет): «нет карты "
+              "решений» — R-COV-005 hint",
+              [x[1] for x in got if x[0] == "R-COV-005" and x[2] == "system"] == ["hint"])
+        texts = {p.name: p.read_text(encoding="utf-8") for p in sorted(plans_dir.glob("*.yaml"))}
+        for name, text in texts.items():
+            if name not in ("about.yaml", "home.yaml"):
+                (plans_dir / name).write_text(text.rstrip("\n") + "\napproval: {by: владелец продукта, date: "
+                                              "'2026-09-29'}\n", encoding="utf-8")
+        (plans_dir / "about.yaml").write_text(texts["about.yaml"].rstrip("\n") + "\nx-approval: {by: владелец "
+                                              "продукта, date: '2026-09-29'}\n", encoding="utf-8")
+        (plans_dir / "404.yaml").unlink()
+        tk = docpaths.design(slug, "tokens", repo=root)
+        tk.write_text('{"example": true}\n', encoding="utf-8")
+        got, aa = site("site_validate", "cov_pages", "cov_ds")
+        tk.unlink()
+        for name, text in texts.items():
+            (plans_dir / name).write_text(text, encoding="utf-8")
+        u01 = [x for x in got if "PL-U01" in x[3]]
+        check("PL-U01: два плана approved без approval — одна строка с двумя id; план с записью в расширении "
+              "x-approval назван припиской",
+              len(u01) == 1 and u01[0][3].endswith(" — 2: about, home; запись лежит расширением x-approval, её место — "
+                                                   "approval — about"))
+        check("служебный шаблон без плана: предупреждение SM-22 валидатора в аудит не идёт — у страницы not-found одна "
+              "находка R-COV-001, подсказка аудита",
+              [x[1] for x in got if x[0] == "R-COV-001" and "not-found" in x[3]] == ["hint"]
+              and not any("SM-22" in x[3] for x in got))
+        check("сайт с токенами ДС без карты решений — этап дизайн-системы начат: R-COV-005 warning, как у кабинета до "
+              "макета", [x[1] for x in got if x[0] == "R-COV-005" and x[2] == "system"] == ["warning"])
+        cplan = y.safe_load(texts["contacts.yaml"])
+        footer = next(x for x in cplan["sections"] if x.get("role") == "footer")
+        footer["slots"]["text"] = [x for x in footer["slots"]["text"] if x["id"] != "nav-3-label"]
+        (plans_dir / "contacts.yaml").write_text(y.safe_dump(cplan, allow_unicode=True, sort_keys=False),
+                                                 encoding="utf-8")
+        copy_dir = docpaths.site(slug, "corp", "copy", repo=root)
+        copy_dir.mkdir(parents=True, exist_ok=True)
+        for pid, label in (("home", "Оставить заявку"), ("about", "Оставить заявку"), ("contacts", "Отправить запрос")):
+            (copy_dir / f"{pid}.yaml").write_text(y.safe_dump({"example": True, "copy_deck": {"pages": [{
+                "page_id": pid, "sections": [{"section_id": "header", "slots": [{
+                    "slot_id": "cta-label", "chosen": "v1", "variants": [{"id": "v1", "text": label}]}]}]}]}},
+                allow_unicode=True, sort_keys=False), encoding="utf-8")
+        got, aa = site("mat_chrome")
+        (plans_dir / "contacts.yaml").write_text(texts["contacts.yaml"], encoding="utf-8")
+        shutil.rmtree(copy_dir)
+        ch = {x[2]: x for x in got if x[0] == "R-MAT-013"}
+        check("общие шапка и подвал (R-MAT-013 warning, пара страниц и слот): у страницы contacts нет слота подвала "
+              "nav-3-label — находка у её плана; текст кнопки шапки в copy deck contacts не как у home — находка у "
+              "copy deck; равные тексты (home, about) и хлебные крошки своей страницы — без находок",
+              sorted(ch) == ["contacts#/footer/text/nav-3-label", "contacts#/header/text/cta-label"]
+              and all(x[1] == "warning" for x in ch.values())
+              and re.search(r"у страницы contacts его нет, у страницы [a-z-]+ — есть",
+                            ch["contacts#/footer/text/nav-3-label"][3])
+              and re.search(r"у страницы contacts — «Отправить запрос», у страницы (home|about) — «Оставить заявку»",
+                            ch["contacts#/header/text/cta-label"][3]))
+    # продукт только с кабинетом: один профиль голоса продукта; копии ядра брифа на вид
+    with fixture_project.built("package-cabinet") as fx:
+        root, slug = fx.root, fx.slug
+        y = yaml_mod()
+        vpp = docpaths.voice(slug, True, root)
+
+        def part(step):
+            aa = Audit(slug, root, today=today, run_tools=False)
+            getattr(aa, step)()
+            return [(f.rule, f.severity, f.kind, f.message) for f in aa.rep.items]
+
+        v_none = part("cov_voice")
+        product = {"example": True, "scope": {"genres": ["interface"],
+                                              "surfaces": [{"surface": "product-ui", "voice": "product"}]}}
+        vpp.write_text(y.safe_dump(product, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        v_one = part("cov_voice")
+        product["scope"]["surfaces"][0]["voice"] = "brand"
+        vpp.write_text(y.safe_dump(product, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        v_bad = part("cov_voice")
+        vpp.unlink()
+        check("продукт только с кабинетом: один профиль voice.product.yaml с каналом product-ui — без R-COV-007 "
+              "(voice.yaml и scope.product_voice_ref не нужны); канал не product или профиля нет — R-COV-007 warning у "
+              "voice.product.yaml",
+              not v_one and [x[:3] for x in v_none] == [("R-COV-007", "warning", "voice-product")]
+              and "voice.product.yaml нет" in v_none[0][3]
+              and [x[:3] for x in v_bad] == [("R-COV-007", "warning", "voice-product")]
+              and "нет канала product-ui" in v_bad[0][3])
+        abp = docpaths.design(slug, "app-brief", repo=root)
+        abt = abp.read_text(encoding="utf-8")
+        ab = y.safe_load(abt)
+        p_base = part("proj_app")
+        ab["core"]["pointer"] = {"no-such-surface": "both"}
+        abp.write_text(y.safe_dump(ab, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        p_stale = part("proj_app")
+        for k in ("pointer", "postures", "status_roles", "platform_constraints"):
+            ab["core"].pop(k, None)
+        ab.pop("surfaces", None)
+        abp.write_text(y.safe_dump(ab, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        p_bare = part("proj_app")
+        ab = y.safe_load(abt)
+        ab["allow"] = {"markers": ["cards", "no-such-key"], "why": "иллюстрация: решение заказчика"}
+        abp.write_text(y.safe_dump(ab, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        lifted = part("app_allow")
+        abp.write_text(abt, encoding="utf-8")
+        check("ключи --allow брифа на вид против реестра примет kb/common/tells.yaml: ключ реестра (cards) — без "
+              "находки, ключ вне реестра — R-REF-006",
+              [x[0] for x in lifted] == ["R-REF-006"] and "«no-such-key»" in lifted[0][3])
+        check("копии источников в ядре брифа на вид: копия отстала — R-PROJ-001 warning с этапом обновления; бриф без "
+              "копий и чистая фикстура — без находки",
+              not p_base and not p_bare and [x[:3] for x in p_stale] == [("R-PROJ-001", "warning", "app-brief")])
     # макетный прогон: отчёт mockup_checks → R-VIS-001 и сводка по доменам
     with tempfile.TemporaryDirectory(prefix="ddd-audit-vis-") as td:
         rep = Path(td) / "home.json"
@@ -3146,6 +3749,27 @@ def _selftest():
         check("сводка примет — по доменам в единице домена, домены не складываются",
               set(summ["home"]["domains"]) == {"page-look", "honesty"}
               and all(v["count"] == 1 for v in summ["home"]["domains"].values()))
+        rep2 = Path(td) / "vhod.json"
+        rep2.write_text(json.dumps({"target": "canvas/html/vhod.html", "summary": {}, "findings": [
+            {"id": "M-NAV", "severity": "critical", "view": "390", "message": "меню нет", "fix": "", "allowed": True,
+             "reason": "страница входа без меню — решение заказчика"},
+            {"id": "M-NAV", "severity": "info", "view": "1440", "message": "меню нет", "fix": "",
+             "allowed": {"reason": "страница входа без меню"}},
+            {"id": "M-OVERFLOW", "severity": "critical", "view": "390", "message": "горизонтальная прокрутка",
+             "fix": "", "allowed": True}]}), encoding="utf-8")
+        items2, summ2 = visual_summary("otves-remont-nn", "promo", [str(rep2)], repo=None)
+        check("находка, снятая ключом --allow реестра примет (M-NAV — no-nav), в R-VIS-001 не идёт и при тяжести "
+              "critical: сводка называет её с ключом и причиной; пометка allowed у проверки без ключа снятия в "
+              "реестре находку не снимает",
+              [(f.severity, f.ref) for f in items2] == [("error", "vhod#M-OVERFLOW")]
+              and summ2["vhod"]["allowed"] == [
+                  {"id": "M-NAV", "allow": "no-nav", "view": "390",
+                   "reason": "страница входа без меню — решение заказчика"},
+                  {"id": "M-NAV", "allow": "no-nav", "view": "1440", "reason": "страница входа без меню"}]
+              and summ["home"]["allowed"] == [{"id": "LOOK-ARROWS", "allow": "arrows", "view": "390",
+                                               "reason": None}])
+    check("перечень макетного прогона: R-VIS-005 — один пакет заданий судьи с --runs 3",
+          "--runs 3" in VISUAL["R-VIS-005"] and "отдельными заданиями" not in VISUAL["R-VIS-005"])
     print("design_audit selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

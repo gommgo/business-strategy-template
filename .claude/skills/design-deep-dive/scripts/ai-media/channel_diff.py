@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
-"""N/04 — разница двух снимков каталогов RouterAI и Gen-API (дополнение к polza_catalog.py diff).
+"""Обслуживание базы: этапы не зовут. channel_diff.py — разница двух снимков каталогов RouterAI и Gen-API (дополнение
+к polza_catalog.py diff).
 
-Запуск: python3 channel_diff.py [--ra A B] [--ga A B]  (имена папок в 99-raw/cache/routerai|genapi; по умолчанию два последних)
+Запуск: python3 channel_diff.py [--ra A B] [--ga A B]  (имена папок снимков в $DDD_HOME/cache/ai-media/routerai и
+$DDD_HOME/cache/ai-media/genapi; по умолчанию два последних)
 Печатает Markdown: новые и удалённые модели (у RouterAI — только image/video по output_modalities), изменения цены
 картинки/видео > 0,1 %, изменения supported_parameters; у Gen-API — новые/удалённые сети и изменения cost.
 """
@@ -25,7 +27,7 @@ def price(m):
     ip = ip[0] if ip else {}
     return (ip.get('unit'), float(ip['price'])) if ip.get('price') is not None else (None, None)
 
-ap = argparse.ArgumentParser()
+ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 ap.add_argument('--ra', nargs=2)
 ap.add_argument('--ga', nargs=2)
 a = ap.parse_args()

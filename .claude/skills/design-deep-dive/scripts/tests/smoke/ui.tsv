@@ -1,5 +1,5 @@
 path	kind	smoke	xfail
-scripts/ui/build_reference_tokens.py	utility	help; run: --out brt	
+scripts/ui/build_reference_tokens.py	utility	help; run: --out brt; run: --selftest; run: --check	
 scripts/ui/measure_ui.py	utility	help; run: --selftest	
 scripts/ui/ui_audit.py	utility	help; run: --selftest; run: --slop-params	
 scripts/ui/data/thresholds.yaml	data	data	

@@ -20,9 +20,13 @@
        сборки»): вылет, навигация, медиа первого экрана за --wait-ms, кадр после возврата совпадает с исходным
        (--max-diff — порог cd 06/04 §3 B); окна по умолчанию — самая широкая ширина приёмки и самая широкая ниже
        первого брейкпоинта эталона ui; exit 0 pass / 2 fail
-  selftest  офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, демо-набор,
+  selftest [--browser] [--min-free-gb 2]
+       офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, демо-набор,
        список ассетов и реестр загрузок, части артборда, формы, пороги владельцев, id примет, поверхность примет,
-       вердикт кластера, токены ДС, сводка по доменам
+       вердикт кластера, токены ДС, сводка по доменам. С --browser — ещё код страницы в Chromium на синтетической
+       копии артборда в двух частях (`fixtures/artboard-parts/`): hero, тело, заглушки, ярлыки вайрфрейма, навигация
+       частей, медиа против списка ассетов; exit 0 — всё сошлось, 1 — нет, 3 — мало свободной памяти (браузер не
+       запускался)
 
 Ширины. У статичной копии артборда окно — её рамка. У другой цели (собранная страница) без --views окна — ширины
 артбордов `kb/common/acceptance-widths.yaml` (`artboards` — все ширины приёмки), с --acceptance — ещё отдельный прогон
@@ -35,6 +39,14 @@
 друг друга не затирают.
 Ярлыки вайрфрейма — элементы с атрибутом `data-wf` (ярлык роли секции, подпись заглушки медиа): пометки для чтения
 артборда, а не содержимое страницы. В проверки они не входят — как элементы --ignore-selector.
+Поверхность. Ключ --surface: страница сайта (`page`) или экран приложения (`app`). Без ключа у статичной копии из
+`design/<surface>/canvas/html/` поверхность называет манифест входа холста (`route` передней части
+`design/<surface>/input/INPUT.md`: `app` — экран приложения, `site` и `landing` — страница сайта); манифеста нет —
+страница сайта. От поверхности зависят приметы и запреты формы заявки: согласие на обработку персональных данных
+требуется у форм сайта и лендинга, у служебной формы кабинета (сотрудник вводит данные клиента) — нет.
+Снятие находки. Ключ --allow переводит находку своей проверки в info и помечает её: `allowed`, ключ `allow`, тяжесть
+без ключа `base_severity` и причина `reason`; сводка перечисляет снятые находки (`summary.allowed`), отчёт --md —
+строкой «Снято решением» с тяжестью без ключа. `no-nav` снимает M-NAV у страницы без меню по плану страницы.
 
 Проверки и id примет. id проверок — ключи раздела `checks` реестра `kb/common/tells.yaml`: там у ключа группа (look —
 приметы вида, honesty — честность, acceptance — проверки приёмки), id приметы `tell` и ключ `--allow`. Находка несёт
@@ -112,6 +124,8 @@ UI_ANTISLOP = kbpaths.kb('ui', '11-styles-trends', '04-anti-slop-ui.md')   # §1
 # Высота окна — параметр прогона, а не норма приёмки: широкие окна 900, окна уже первого брейкпоинта 844 (окна первого
 # экрана site 1440×900 и 390×844).
 VIEW_H_WIDE, VIEW_H_NARROW = 900, 844
+INPUT_MANIFEST = 'INPUT.md'                                           # манифест входа холста (project/canvas_input.py)
+FIXTURE_PARTS = kbpaths.scripts('claude-design', 'fixtures', 'artboard-parts')   # копия артборда в двух частях
 
 
 def _yaml(path):
@@ -844,6 +858,11 @@ def asset_for(img, assets, uploads):
     return None, ('shared' if re.search(r'(?:^|/)_assets/', up['file']) else 'off-list'), up
 
 
+# медиа страницы, которое сверяется со списком ассетов наравне с <img>: (кто, кого)
+MEDIA_RU = {'poster': ('постер видео', 'постера видео'), 'video': ('видео', 'видео'),
+            'source': ('источник медиа', 'источника медиа'), 'background': ('фон', 'фоновой картинки')}
+
+
 def load_form_sets(items):
     """--forms: id наборов lead-forms.yaml и YAML-файлы (план страницы, вход холста) со ссылками
     `lead-forms.yaml#<id>` → [id]."""
@@ -1104,12 +1123,25 @@ COLLECT_JS = r"""
     if (++k > LIM || bgs.length >= 120) break; if (isIgn(el)) continue;
     for (const ps of [null, '::before', '::after']) {
       const s = getComputedStyle(el, ps);
-      if (s.backgroundImage && s.backgroundImage.includes('url(')) bgs.push({el: desc(el) + (ps || ''), value: s.backgroundImage.slice(0, 500)});
+      if (s.backgroundImage && s.backgroundImage.includes('url(')) bgs.push({el: desc(el) + (ps || ''), value: s.backgroundImage.slice(0, 500), visible: visible(el)});
     }
   }
   out.bg_images = bgs;
   out.media_src = Array.from(document.querySelectorAll('source[srcset], source[src], video[poster], video[src]')).slice(0, 60)
-      .map(s => s.getAttribute('srcset') || s.getAttribute('src') || s.getAttribute('poster') || '');
+      .flatMap(s => ['srcset', 'src', 'poster'].map(a => s.getAttribute(a) || '')).filter(Boolean);
+  // постер и источники видео, источники <picture>: файлы страницы наравне с <img> — сверяются со списком ассетов
+  const media = [];
+  for (const v of Array.from(document.querySelectorAll('video')).filter(v => !isIgn(v)).slice(0, 40)) {
+    const vis = visible(v);
+    if (v.getAttribute('poster')) media.push({el: desc(v), kind: 'poster', src: v.poster || v.getAttribute('poster'), visible: vis});
+    if (v.getAttribute('src')) media.push({el: desc(v), kind: 'video', src: v.src || v.getAttribute('src'), visible: vis});
+    for (const s of v.querySelectorAll('source[src]')) media.push({el: desc(v), kind: 'source', src: s.src || s.getAttribute('src'), visible: vis});
+  }
+  for (const s of Array.from(document.querySelectorAll('picture source[srcset]')).filter(s => !isIgn(s)).slice(0, 60)) {
+    const im = s.parentElement.querySelector('img');
+    media.push({el: desc(s.parentElement), kind: 'source', src: s.getAttribute('srcset') || '', visible: im ? visible(im) : true});
+  }
+  out.media = media;
 
   // --- фон страницы и секций
   const cands = [...document.body.children, ...(main ? main.children : [])];
@@ -1411,15 +1443,19 @@ def collect(target, views, ignore, block_external, shots_dir, copy=None):
 
 # ---------------------------------------------------------------- анализ
 def add(findings, fid, sev, view, msg, evidence=None, fix=None, allowed=()):
-    """Находка: id проверки, примета и группа — из реестра примет (`checks`), ключ --allow снимает примету до info."""
+    """Находка: id проверки, примета и группа — из реестра примет (`checks`). Ключ --allow снимает находку до info и
+    помечает её: `allowed`, ключ `allow`, тяжесть без ключа `base_severity`, причина `reason` — решение о примете вида
+    или, у проверки приёмки, решение плана страницы."""
     row = registry()['checks'].get(fid, {})
     key = row.get('allow')
     lifted = bool(key and key in allowed)
+    f = {'id': fid, 'tell': row.get('tell'), 'group': row.get('group'), 'severity': sev, 'view': view,
+         'message': msg, 'evidence': evidence or {}, 'fix': fix or '', 'allowed': lifted}
     if lifted:
-        sev = 'info'
-        msg += f' (решение записано: --allow {key})'
-    findings.append({'id': fid, 'tell': row.get('tell'), 'group': row.get('group'), 'severity': sev, 'view': view,
-                     'message': msg, 'evidence': evidence or {}, 'fix': fix or '', 'allowed': lifted})
+        why = 'решение плана страницы' if row.get('group') == 'acceptance' else 'решение записано'
+        f.update(severity='info', allow=key, base_severity=sev, reason=f'{why}: --allow {key}',
+                 message=f'{msg} ({why}: --allow {key}; без ключа — {sev})')
+    findings.append(f)
 
 
 def urls_in(text):
@@ -1837,9 +1873,22 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
             continue
         caps_all.append({'el': im['el'], 'file': stem, 'src': im['src'][:160], 'blob': blob_id(im['src']),
                          'alt': im['alt'], 'caption': im['caption']})
+    # постер и источники видео, источники <picture>, фоновые загрузки холста — те же файлы списка ассетов, без подписей
+    media_all, seen = [], {c['src'] for c in caps_all}
+    cand = [(m['el'], s, m['kind']) for m in desk.get('media') or [] if m.get('visible', True)
+            for s in re.split(r',\s*', m.get('src') or '')]
+    cand += [(b['el'], u, 'background') for b in desk['bg_images'] if b.get('visible', True)
+             for u in urls_in(b['value']) if blob_id(u)]
+    for el, s, kind in cand:
+        s = s.strip().split(' ')[0]
+        if not s or s.startswith(('data:', 'blob:')) or s[:160] in seen:
+            continue
+        seen.add(s[:160])
+        media_all.append({'el': el, 'file': os.path.splitext(os.path.basename(urlparse(s).path))[0].lower(),
+                          'src': s[:160], 'blob': blob_id(s), 'alt': None, 'caption': None, 'kind': kind})
     if assets is not None:
         shared, unverified = [], []
-        for c in caps_all:
+        for c in caps_all + media_all:
             if not c['file'] or stock_kind(c.get('src') or ''):
                 continue
             row, status, up = asset_for(c, assets, opts.get('uploads'))
@@ -1851,15 +1900,16 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
                 continue
             if not row:
                 blob = c['blob']
+                what, of = MEDIA_RU.get(c.get('kind'), ('картинка', 'картинки'))
                 msg, fix = {
-                    'missing': (f"картинки «{c['file']}» нет в списке ассетов",
-                                f"картинка {c['el']}: только файлы из списка ассетов"),
+                    'missing': (f"{of} «{c['file']}» нет в списке ассетов",
+                                f"{what} {c['el']}: только файлы из списка ассетов"),
                     'unregistered': (f'загрузки {blob} нет в реестре загрузок',
-                                     f"картинка {c['el']}: только загрузки из списка ассетов — строка «Загрузок» "
+                                     f"{what} {c['el']}: только загрузки из списка ассетов — строка «Загрузок» "
                                      'ARTIFACTS.md (id, файл, слот) или id загрузки в списке'),
                     'off-list': (f"загрузка {blob} — файл {(up or {}).get('file') or '?'}, слот "
                                  f"{(up or {}).get('slot') or '?'}: ни файла, ни слота нет в списке ассетов страницы",
-                                 f"картинка {c['el']}: только файлы слотов плана ассетов страницы; общий ассет "
+                                 f"{what} {c['el']}: только файлы слотов плана ассетов страницы; общий ассет "
                                  'продукта — файл из design/_assets/'),
                 }[status]
                 add(F, 'HON-CAPTION', 'major', desk['viewport'], msg, {'img': c, 'upload': up}, fix)
@@ -1983,7 +2033,7 @@ def analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts
             add(F, 'M-NAV', 'major', v['viewport'], 'навигация не видна (нет кнопки меню и нет ≥ 2 ссылок в nav или header)',
                 {'navs': v['nav']['navs'][:3], 'toggles': v['nav']['toggles'][:3]},
                 f"на {v['viewport']}: кнопка меню в шапке (≥ 44 × 44 px), открывающая разделы, или видимые ссылки; "
-                'страница без меню по плану (посадочная, одноэкранная) — законна: находку отбросить с причиной')
+                'страница без меню по плану (посадочная, вход, «не найдено») — законна: ключ --allow no-nav', allowed)
         # тело — абзацы основного содержимого: строка реквизитов подвала или подпись шапки — не основной текст
         paras = [l for l in v['leaves'] if l.get('body', True) and l['tag'] in ('p', 'li', 'dd', 'blockquote')
                  and len(l['text'].split()) >= 8]
@@ -2170,7 +2220,9 @@ def summarize(F, allowed, surface='page'):
             'clusters_formed': [c['id'] for c in clusters if c['formed']],
             'groups': {g: sorted(v) for g, v in sorted(groups.items())},
             'acceptance_hint': {g: not groups.get(g) for g in ('look', 'honesty', 'acceptance')},
-            'allowed_by_brief': sorted(allowed)}
+            'allowed_by_brief': sorted(allowed),
+            'allowed': [{k: f.get(k) for k in ('id', 'allow', 'base_severity', 'view', 'reason')}
+                        for f in F if f.get('allowed')]}
 
 
 def exit_code(summary):
@@ -2194,6 +2246,10 @@ def to_md(res):
             continue
         L.append(f"| {f['id']} | {f.get('tell') or '—'} | {f['severity']} | {f['view']} | {f['message'].replace('|', '/')} | "
                  f"{f['fix'].replace('|', '/')} |")
+    lifted = [f for f in res['findings'] if f.get('allowed')]
+    if lifted:
+        L += ['', 'Снято решением (тяжесть без ключа): '
+              + '; '.join(f"{f['id']} — {f['base_severity']}, {f['view']}, {f['reason']}" for f in lifted) + '.']
     return '\n'.join(L) + '\n'
 
 
@@ -2205,6 +2261,27 @@ def static_copy(target):
     head = open(target, encoding='utf-8', errors='replace').read(4000)
     m = re.search(r'<!--\s*dc_to_html:\s*статичная копия артборда ([^;]+);.*?рамка (\d+)×(\d+)', head)
     return {'artboard': m.group(1).strip(), 'w': int(m.group(2)), 'h': int(m.group(3))} if m else None
+
+
+def input_surface(target):
+    """Поверхность проверки по манифесту входа холста: статичная копия лежит в `design/<surface>/canvas/html/`, манифест
+    — `design/<surface>/input/INPUT.md`; `route: app` его передней части — экран приложения (`app`), другой маршрут —
+    страница сайта (`page`). Цель вне папки копий или манифеста с маршрутом нет — None."""
+    if target.startswith(('http://', 'https://', 'file://')):
+        return None
+    import docpaths
+    d = os.path.abspath(target if os.path.isdir(target) else os.path.dirname(os.path.abspath(target)))
+    html = docpaths.DESIGN_SURFACE['canvas-html'].split('/')
+    if d.split(os.sep)[-len(html):] != html:
+        return None
+    man = os.path.join(d, *['..'] * len(html), docpaths.DESIGN_SURFACE['input'], INPUT_MANIFEST)
+    try:
+        head = open(man, encoding='utf-8').read(4000)
+    except OSError:
+        return None
+    fm = re.match(r'---\r?\n(.*?)\r?\n---', head, re.S)
+    m = re.search(r'^route:\s*["\']?([\w-]+)', fm.group(1), re.M) if fm else None
+    return None if not m else ('app' if m.group(1) == 'app' else 'page')
 
 
 def static_frame(target):
@@ -2237,6 +2314,8 @@ def cmd_page(a):
         return 3
     first_bp = first_breakpoint(a.tokens)
     aw = acceptance_widths()
+    by_input = None if a.surface else input_surface(a.target)
+    surface = a.surface or by_input or 'page'
     copy = static_copy(a.target)
     frame = copy['w'] if copy else None
     part = artboard_part(copy['artboard'], frame)[1] if copy else None
@@ -2265,22 +2344,23 @@ def cmd_page(a):
                                   os.path.splitext(os.path.basename(a.target))[0] if copy else None)
     if over:
         views[-1]['overflow_only'] = True
-    opts = {'surface': a.surface, 'preset': a.preset, 'first_bp': first_bp, 'form_sets': form_sets,
+    opts = {'surface': surface, 'preset': a.preset, 'first_bp': first_bp, 'form_sets': form_sets,
             'ds': ds_look(a.tokens), 'demo': demo, 'uploads': uploads, 'part': part}
     F = analyze(url, views, static, facts, copy_text, assets, allowed, blocked, opts)
     res = {'tool': 'mockup_checks.py', 'version': VERSION, 'target': a.target, 'url': url, 'static_frame': frame,
            'artboard': copy and copy['artboard'], 'part': part,
            'created': datetime.now(timezone.utc).isoformat(timespec='seconds'), 'seconds': round(time.time() - t0, 1),
-           'surface': a.surface, 'first_breakpoint': first_bp,
+           'surface': surface, 'first_breakpoint': first_bp,
+           'surface_source': '--surface' if a.surface else ('манифест входа холста' if by_input else 'умолчание'),
            'views': [v['viewport'] for v in views],
            'widths': '--views' if a.views else ('рамка статичной копии' if frame else 'kb/common/acceptance-widths.yaml'),
-           'off_surface': off_surface(a.surface),
+           'off_surface': off_surface(surface),
            'inputs': {'facts': a.facts, 'copy': a.copy, 'demo': a.demo, 'assets': a.assets, 'uploads': uploads_file,
                       'forms': form_sets, 'tokens': a.tokens, 'src': (static or {}).get('root'),
                       'block_external': block},
            'static': {k: v for k, v in (static or {}).items() if k != 'stock_hits'} if static else None,
            'shots': [v.get('shot') for v in views if v.get('shot')],
-           'summary': summarize(F, allowed, a.surface),
+           'summary': summarize(F, allowed, surface),
            'findings': sorted(F, key=lambda x: (SEV_ORDER[x['severity']], x['id']))}
     if a.json:
         os.makedirs(os.path.dirname(os.path.abspath(a.json)), exist_ok=True)
@@ -2760,6 +2840,20 @@ def cmd_selftest(_a):
           ([f['severity'] for f in F if f['id'] == 'M-NAV'], exit_code(summarize(F, set(), 'page'))) == (['major'], 0),
           [(f['id'], f['severity']) for f in F])
 
+    Fn = analyze('http://x/', [_view(), _view(390, 844, nav={'navs': [], 'toggles': []})], None, None, None, None,
+                 {'no-nav'}, [], opts)
+    nv = [f for f in Fn if f['id'] == 'M-NAV']
+    check('--allow no-nav: M-NAV — info с пометкой allowed, ключом, причиной и тяжестью без ключа',
+          [(f['severity'], f['allowed'], f.get('allow'), f.get('base_severity'), f.get('reason')) for f in nv]
+          == [('info', True, 'no-nav', 'major', 'решение плана страницы: --allow no-nav')], nv)
+    sn = summarize(Fn, {'no-nav'}, 'page')
+    check('--allow no-nav: сводка называет снятую находку с тяжестью без ключа, отчёт md — строкой «Снято решением»',
+          sn['allowed'] == [{'id': 'M-NAV', 'allow': 'no-nav', 'base_severity': 'major', 'view': '390x844',
+                             'reason': 'решение плана страницы: --allow no-nav'}]
+          and 'Снято решением (тяжесть без ключа): M-NAV — major' in to_md(
+              {'target': 't', 'created': 'c', 'summary': sn, 'findings': Fn}), sn['allowed'])
+    check('без ключа у находки нет полей снятия', all('allow' not in f and 'base_severity' not in f for f in F))
+
     # части артборда: шапка с навигацией и H1 — у первой части
     parts = [artboard_part(n, w) for n, w in (('Home-390-1.html', 390), ('Home-390-2.dc.html', 390), ('Home-1440.html', 1440),
                                               ('Flat-204-1440.dc.html', 1440), ('Tariff-B2-390.html', 390))]
@@ -2782,6 +2876,18 @@ def cmd_selftest(_a):
     F = analyze('http://x/', [_view(390, 844, leaves=[body, legal])], None, None, None, None, set(), [], opts)
     check('тот же абзац 14 px внутри main — M-BODY-16', 'M-BODY-16' in ids(F, ('major',)), ids(F))
 
+    with tempfile.TemporaryDirectory() as td:
+        for surf, route in (('office', 'app'), ('promo', 'landing'), ('bare', None)):
+            os.makedirs(os.path.join(td, 'design', surf, 'canvas', 'html'))
+            os.makedirs(os.path.join(td, 'design', surf, 'input'))
+            open(os.path.join(td, 'design', surf, 'canvas', 'html', 'Main.html'), 'w', encoding='utf-8').write('<p>т</p>')
+            if route:
+                open(os.path.join(td, 'design', surf, 'input', INPUT_MANIFEST), 'w', encoding='utf-8').write(
+                    f'---\nstage: mockup\nsurface: {surf}\nroute: {route}\n---\n# Вход холста\n')
+        got = [input_surface(os.path.join(td, 'design', s, 'canvas', 'html', 'Main.html')) for s in ('office', 'promo', 'bare')]
+        check('поверхность без ключа — по манифесту входа: route app — экран приложения, landing — страница, нет '
+              'манифеста — None', got + [input_surface('https://example.test/'), input_surface(td)]
+              == ['app', 'page', None, None, None], got)
     with tempfile.TemporaryDirectory() as td:
         cp = os.path.join(td, 'Main.html')
         open(cp, 'w', encoding='utf-8').write('<!doctype html><head><!-- dc_to_html: статичная копия артборда Main.dc.html; '
@@ -2815,8 +2921,55 @@ def cmd_selftest(_a):
           sm['acceptance_hint'])
     miss = sorted({f['id'] for f in F} - set(reg['checks']))
     check('id проверок сводки есть в реестре примет', not miss, miss)
+    if getattr(_a, 'browser', False):
+        fg = free_gb()
+        if fg is not None and fg < _a.min_free_gb:
+            print(f'selftest --browser: свободно {fg:.1f} ГБ < {_a.min_free_gb} ГБ — браузер не запускался')
+            print('selftest:', 'OK' if ok else 'FAIL', '(без браузера)')
+            return 3 if ok else 1
+        selftest_browser(check, dict(opts, first_bp=first_breakpoint()))
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
+
+
+def selftest_browser(check, opts):
+    """Код страницы COLLECT_JS в Chromium на синтетической копии артборда в двух частях (`fixtures/artboard-parts/`,
+    данные вымышлены): hero — секция разметки, а не рамка копии; ярлыки вайрфрейма вне проверок; тело 16 px; ряд
+    заглушек; навигация у первой части; постер, источник видео и фон-загрузка против списка ассетов."""
+    fx = str(FIXTURE_PARTS)
+    assets = parse_assets_readme(os.path.join(fx, 'assets.md'))
+    uploads = load_uploads(os.path.join(fx, 'ARTIFACTS.md'))
+    got = {}
+    for n in (1, 2):
+        target = os.path.join(fx, f'Stub-390-{n}.html')
+        copy = static_copy(target)
+        url, views, blocked = collect(target, [f"{copy['w']}x{VIEW_H_NARROW}"], '', True, None)
+        part = artboard_part(copy['artboard'], copy['w'])[1]
+        got[n] = (views[0], analyze(url, views, None, None, None, assets, set(), blocked,
+                                    dict(opts, part=part, uploads=uploads)))
+    (v1, F1), (v2, F2) = got[1], got[2]
+
+    def ids(F, sev=None):
+        return sorted({f['id'] for f in F if sev is None or f['severity'] in sev})
+
+    texts = ' '.join(l['text'] for v in (v1, v2) for l in v['leaves']) + ' '.join(b['text'] for v in (v1, v2) for b in v['blocks'])
+    check('браузер: копия — окно своей рамки, часть 1 и часть 2', [(v['vw'], g[1] is not None) for v, g in ((v1, got[1]), (v2, got[2]))]
+          == [(390, True), (390, True)] and [artboard_part(f'Stub-390-{n}.html', 390)[1] for n in (1, 2)] == [1, 2])
+    check('браузер: hero — секция разметки с H1, а не рамка копии', (v1['hero'] or {}).get('el', '').startswith('section'),
+          v1['hero'] and v1['hero']['el'])
+    check('браузер: ярлыки вайрфрейма data-wf не попадают в текст проверок', 'ярлык вайрфрейма' not in texts
+          and 'Переплёт книг на заказ' in texts, texts[:200])
+    check('браузер: тело 16 px у первой части — без M-BODY-16; 14 px у второй — M-BODY-16 major',
+          ('M-BODY-16' in ids(F1), 'M-BODY-16' in ids(F2, ('major',))) == (False, True), (ids(F1), ids(F2)))
+    check('браузер: ряд карточек-заглушек [PLACEHOLDER…] — не примета', 'LOOK-THREE-CARDS' not in ids(F1), ids(F1))
+    check('браузер: навигация — кнопка меню у первой части, у второй M-NAV справкой',
+          ([f['severity'] for f in F1 if f['id'] == 'M-NAV'], [f['severity'] for f in F2 if f['id'] == 'M-NAV'])
+          == ([], ['info']), [(f['id'], f['severity']) for f in F1 + F2 if f['id'] == 'M-NAV'])
+    kinds = sorted((m['kind'], blob_id(m['src'])) for m in v1.get('media') or [])
+    check('браузер: постер и источник видео собраны', kinds == [('poster', 'up-poster-01'), ('source', 'up-clip-01')], kinds)
+    hc = [(f['severity'], f['message']) for f in F1 if f['id'] == 'HON-CAPTION']
+    check('браузер: картинка, постер и источник видео — из списка ассетов; фон-загрузка вне реестра — HON-CAPTION major',
+          hc == [('major', 'загрузки up-ghost-99 нет в реестре загрузок')], hc)
 
 
 def main():
@@ -2826,7 +2979,8 @@ def main():
     p.add_argument('target')
     p.add_argument('--views', help='окна через запятую (1440x900,390x844); по умолчанию — артборды acceptance-widths.yaml')
     p.add_argument('--acceptance', action='store_true', help='все ширины приёмки и прогон вылета на overflow_only')
-    p.add_argument('--surface', choices=('page', 'app'), default='page', help='страница сайта или экран приложения')
+    p.add_argument('--surface', choices=('page', 'app'), help='страница сайта или экран приложения; без ключа — по '
+                                                              'манифесту входа холста копии, иначе страница сайта')
     p.add_argument('--preset', choices=('A', 'B', 'C', 'D'), default='A', help='пресет экрана приложения (порог шапки)')
     p.add_argument('--tokens', help='токены ДС (CSS, DTCG или tokens.json артефакта): первый брейкпоинт; антиква и '
                                     'тёплый фон из токенов — решение ДС, не примета')
@@ -2852,7 +3006,9 @@ def main():
     r.add_argument('--mobile', default=mob)
     r.add_argument('--wait-ms', type=int, default=1000); r.add_argument('--max-diff', type=float, default=0.02)
     r.add_argument('--shots'); r.add_argument('--min-free-gb', type=float, default=2.0)
-    sub.add_parser('selftest')
+    st = sub.add_parser('selftest', help='офлайн-проверки; с --browser — ещё код страницы на синтетической копии артборда')
+    st.add_argument('--browser', action='store_true', help='прогон Chromium по fixtures/artboard-parts/ (замок браузера)')
+    st.add_argument('--min-free-gb', type=float, default=2.0)
     a = ap.parse_args()
     return {'page': cmd_page, 'resize': cmd_resize, 'selftest': cmd_selftest}[a.cmd](a)
 

@@ -13,15 +13,22 @@
     python3 ui_audit.py экран.html --tokens docs/projects/<slug>/design/system.tokens.json --scheme both --hover --tab 20
     python3 ui_audit.py экран.html --acceptance --touch      # все ширины приёмки, вылет на 320 и тач-прогон
     python3 ui_audit.py --batch список.txt --preset admin
+    python3 ui_audit.py страница.html --surface page        # страница сайта: пороги профиля marketing
     python3 ui_audit.py --slop-params [--tokens ФАЙЛ]       # параметры скрипта маркеров ui 11/04 §3 (JSON)
     python3 ui_audit.py --selftest                          # парсеры, пороги и проверки на синтетике, без браузера
 
 Ключи:
-    --preset admin|consumer   пресет порогов ui 14/11: admin — A (плотная админка), consumer — B (кабинет клиента)
+    --preset admin|consumer|marketing
+                              пресет порогов: admin — A (плотная админка), consumer — B (кабинет клиента) — ui 14/11;
+                              marketing — профиль страницы сайта (`scripts/ui/data/marketing-profile.yaml`). Без ключа:
+                              у страницы сайта — marketing, у экрана приложения — admin
+    --surface page|app        поверхность цели: страница сайта или экран приложения. Без ключа у статичной копии
+                              артборда её называет манифест входа холста (`route` в `design/<surface>/input/INPUT.md`),
+                              у другой цели — экран приложения
     --tokens ФАЙЛ             токены ДС проекта: DTCG `system.tokens.json` или CSS `system.tokens.css`. Шкалы
                               отступов (`space.*`), кеглей, радиусов, высот, слоёв, длительностей и набор цветов берутся
                               из них. Без ключа у admin — эталонные токены ui (`kb/ui/14-recipes/examples/tokens.css`),
-                              у consumer — шкалы пресета; источник шкал записан в отчёте. Отступ со шкалы токенов
+                              у consumer и marketing — шкалы пресета; источник шкал записан в отчёте. Отступ со шкалы токенов
                               прогона — не находка A2 («кратные 5 и не кратные 4»)
     --viewport WxH            окно прогона (повторять ключ для нескольких); по умолчанию — первая ширина приёмки
     --acceptance              все ширины приёмки из `kb/common/acceptance-widths.yaml` и прогон вылета на `overflow_only`
@@ -45,8 +52,11 @@ J раскладка, K движение, L приметы вида, M сокр�
 — из пресета; соседние карточки ряда выровнены (J9). Находка несёт id приметы реестра `kb/common/tells.yaml`
 (раздел `checks`, ключ `ui_audit:<id проверки>`), отчёт сводит приметы без повторов.
 
-Профиль страницы сайта — `marketing` (`scripts/ui/data/marketing-profile.yaml`): его применяет
-`scripts/creative/marketing_audit.py` через load_profile и apply_profile; числа D3 — лимиты `glass-panel` каталога
+Профиль страницы сайта — `marketing` (`scripts/ui/data/marketing-profile.yaml`): пресет страницы (шкалы отступов,
+радиусов, высот, кеглей, слоёв и длительностей `preset.*` — их читают проверки, когда токены ДС не переданы) и таблица
+действий по проверкам. Прогон с пресетом marketing применяет профиль сам: перенастройка, серьёзность, «информативно»;
+проверки с пересчётом по узлам страницы (кроме D3, D4, L4) получают серьёзность профиля, а сам пересчёт делает
+`scripts/creative/marketing_audit.py` (load_profile и apply_profile). Числа D3 — лимиты `glass-panel` каталога
 эффектов creative. Общие пороги нескольких утилит — `scripts/ui/data/thresholds.yaml`.
 
 Что на выходе:
@@ -843,6 +853,38 @@ def load_profile(name="marketing"):
             preset[key] = lim[field]
     table = {cid: dict(row, severity=SEV_BY_CODE[row["severity"]]) for cid, row in (spec.get("checks") or {}).items()}
     return preset, table
+
+
+PROFILES = ("marketing",)            # профили данными: scripts/ui/data/<имя>-profile.yaml
+RECOMPUTED_HERE = ("D3", "D4", "L4")  # пересчёт по узлам, который run_checks делает при пресете профиля
+
+
+def preset_of(name):
+    """Пресет прогона по имени → (пресет, таблица профиля или None): admin и consumer — пресеты кода, marketing —
+    профиль данными."""
+    return load_profile(name) if name in PROFILES else (PRESETS[name], None)
+
+
+def default_preset(target, surface=None):
+    """Пресет без ключа --preset: у страницы сайта — профиль marketing, у экрана приложения — admin. Поверхность —
+    ключ --surface; без него у статичной копии артборда — манифест входа холста, у другой цели — экран приложения."""
+    if surface is None and target:
+        kbpaths.use("claude-design")
+        from mockup_checks import input_surface
+        surface = input_surface(str(target))
+    return "marketing" if surface == "page" else "admin"
+
+
+def apply_profile_alone(rep, table):
+    """Профиль в прогоне самой утилиты: общие действия таблицы (apply_profile), а у проверок с пересчётом по узлам,
+    которого здесь нет, — серьёзность профиля и пометка, кто считает порог страницы."""
+    apply_profile(rep, table)
+    for f in rep.findings:
+        row = table.get(f["id"])
+        if row and row["action"] == "recompute" and f["id"] not in RECOMPUTED_HERE:
+            f["severity"] = row["severity"]
+            f["threshold"] = f"{f['threshold']} (порог страницы — marketing_audit.py: {row['threshold']})"
+    return rep
 
 
 def apply_profile(rep, table, base="consumer"):
@@ -1790,10 +1832,10 @@ def to_url(target):
 
 def resolve_tokens(opts):
     """Токены прогона → (множества значений или None, строка для отчёта). Ключ --tokens — токены ДС проекта; без него
-    у пресета с эталоном (admin) — эталонные токены ui, у прочих — шкалы пресета."""
+    у пресета с эталоном (admin) — эталонные токены ui, у прочих (consumer, профиль marketing) — шкалы пресета."""
     if getattr(opts, "tokens", None):
         return load_tokens(opts.tokens), f"токены ДС проекта `{opts.tokens}`"
-    if PRESETS[opts.preset].get("reference_tokens"):
+    if preset_of(opts.preset)[0].get("reference_tokens"):
         return load_tokens(REFERENCE_TOKENS), ("эталонные токены ui `kb/ui/14-recipes/examples/tokens.css` "
                                                "(токены ДС проекта не переданы)")
     return None, f"шкалы пресета {opts.preset} (токены ДС проекта не переданы, эталонных токенов у пресета нет)"
@@ -1826,7 +1868,8 @@ def audit(target, opts):
 
     ts, tokens_note = resolve_tokens(opts)
     opts.tokens_set = ts
-    preset = tokens_to_preset(PRESETS[opts.preset], ts) if ts else PRESETS[opts.preset]
+    base, profile = preset_of(opts.preset)
+    preset = tokens_to_preset(base, ts) if ts else base
     first_bp = first_breakpoint(ts)
     combos, overflow = run_plan(opts, first_bp)
 
@@ -1867,6 +1910,8 @@ def audit(target, opts):
             elif normal_rows is None and scheme == "light":
                 normal_rows = data["rows"]
             rep = run_checks(data, preset, opts, ctx)
+            if profile:
+                apply_profile_alone(rep, profile)
             rep.context["viewport"] = f"{w}x{h}" + ("/reduced" if motion == "reduce" else "") + ("/touch" if touch else "")
             if opts.tab and not touch and motion != "reduce":
                 check_focus(page, rep, preset, opts.tab)
@@ -1907,7 +1952,8 @@ def audit(target, opts):
 def slop_params(ts, preset_name="admin"):
     """Параметры скрипта маркеров ui/11-styles-trends/04-anti-slop-ui.md §3: порог кеглей — из данных, доля шкалы и цель
     нажатия — из пресета, шкала отступов и цвета — из токенов (ДС проекта или эталона)."""
-    preset = tokens_to_preset(PRESETS[preset_name], ts) if ts else PRESETS[preset_name]
+    base = preset_of(preset_name)[0]
+    preset = tokens_to_preset(base, ts) if ts else base
     return {"fontSizesTellAbove": TH["font_sizes"]["tell_above"],
             "spaceScale": [v for v in preset["spacing"] if v],
             "spaceInScaleMin": preset["spacing_in_scale_min"],
@@ -2126,6 +2172,45 @@ def selftest():
     check("L4 consumer: крупные градиенты — информативно", _run(hero, PRESET_CONSUMER)["L4"]["threshold"],
           "информативно")
 
+    # пресет по умолчанию — по поверхности: страница сайта — профиль marketing, экран приложения — admin
+    import tempfile
+    with tempfile.TemporaryDirectory() as td:
+        for surf, route in (("promo", "landing"), ("office", "app")):
+            os.makedirs(os.path.join(td, "design", surf, "canvas", "html"))
+            os.makedirs(os.path.join(td, "design", surf, "input"))
+            with open(os.path.join(td, "design", surf, "input", "INPUT.md"), "w", encoding="utf-8") as fh:
+                fh.write(f"---\nstage: mockup\nroute: {route}\n---\n# Вход холста\n")
+            with open(os.path.join(td, "design", surf, "canvas", "html", "Main.html"), "w", encoding="utf-8") as fh:
+                fh.write("<p>т</p>")
+        copy = lambda s: os.path.join(td, "design", s, "canvas", "html", "Main.html")  # noqa: E731
+        check("пресет без ключа: копия поверхности сайта — marketing, кабинета — admin, цель без манифеста — admin; "
+              "ключ --surface page — marketing",
+              (default_preset(copy("promo")), default_preset(copy("office")), default_preset("https://example.test/"),
+               default_preset("https://example.test/", "page"), default_preset(copy("promo"), "app")),
+              ("marketing", "admin", "admin", "marketing", "admin"))
+    pm, tm = preset_of("marketing")
+    check("пресет marketing — профиль данными с таблицей; admin — пресет кода без таблицы",
+          (pm["name"], bool(tm), preset_of("admin")[0]["name"], preset_of("admin")[1]),
+          ("marketing", True, "admin", None))
+    section = [_row(0, pt=96, pb=96, w=1440, h=600), _row(1, pt=160, pb=160, w=1440, h=600)]
+    check("отступы секций 96 и 160: у экрана приложения — вне шкалы (A1), у страницы сайта — в шкале профиля",
+          (_run(section, PRESET_ADMIN)["A1"]["verdict"], _run(section, M)["A1"]["verdict"]), ("FAIL", "OK"))
+    dur = [_row(0, tp="opacity", td="0.56s"), _row(1, tp="transform", td="0.9s")]
+    check("K2 читает шкалу длительностей профиля (preset.durations): 560 и 900 мс — в шкале marketing, вне шкалы "
+          "consumer",
+          (_run(dur, M)["K2"]["verdict"], _run(dur, PRESET_CONSUMER)["K2"]["verdict"]), ("OK", "FAIL"))
+    ra = Report("synthetic", "marketing", {"scheme": "light", "viewport": "1440x900"})
+    ra.findings = [dict(x) for x in _run([_row(i, tag="button", h=hh, inter=True) for i, hh in
+                                          enumerate((30, 34, 38, 42, 46, 50, 54))], M).values()]
+    apply_profile_alone(ra, table)
+    fa = {x["id"]: x for x in ra.findings}
+    check("профиль в прогоне утилиты: проверка с пересчётом по узлам (B1) — серьёзность профиля и адрес пересчёта",
+          (fa["B1"]["severity"], "marketing_audit.py" in str(fa["B1"]["threshold"]), fa["B1"]["profile"]),
+          (SEV_POLISH, True, "recompute"))
+    idle = [_row(0, tp="all", td="0s"), _row(1, tp="all", td="0s, 0s"), _row(2, tp="all", td="0.2s")]
+    check("K1: `transition-property: all` без длительности — умолчание узла, не находка; с длительностью — находка",
+          _run(idle, PRESET_ADMIN)["K1"]["found"], 1)
+
     # синтетика без новых полей (строки вызывающей утилиты) не ломает проверки
     bare = [{k: v for k, v in _row(0, tag="p", txt="x" * 120, w=900).items()
              if k not in ("hid", "hw", "hh", "tlen", "ai", "as", "fd", "bgi", "bgclip", "onmedia", "bdmedia")}]
@@ -2134,7 +2219,7 @@ def selftest():
     sp = slop_params(ref, "admin")
     check("параметры скрипта ui 11/04 §3", (sp["fontSizesTellAbove"], sp["spaceInScaleMin"], sp["targetMin"],
                                              6.0 in sp["spaceScale"], "#155dfc" in sp["colors"]), (9, 0.95, 24, True, True))
-    print("\nпресеты:", ", ".join(PRESETS), "; профиль данными: marketing")
+    print("\nпресеты:", ", ".join(PRESETS), "; профиль данными:", ", ".join(PROFILES))
     print("групп проверок:", len(GROUP_ORDER))
     return 0 if ok else 1
 
@@ -2146,7 +2231,8 @@ def selftest():
 def main():
     p = argparse.ArgumentParser(add_help=False)
     p.add_argument("target", nargs="?")
-    p.add_argument("--preset", default="admin", choices=list(PRESETS))
+    p.add_argument("--preset", default=None, choices=list(PRESETS) + list(PROFILES))
+    p.add_argument("--surface", default=None, choices=["page", "app"])
     p.add_argument("--tokens")
     p.add_argument("--viewport", action="append", default=[])
     p.add_argument("--scheme", default="light", choices=["light", "dark", "both"])
@@ -2175,6 +2261,8 @@ def main():
         return 0
     if a.selftest:
         return selftest()
+    given = a.preset
+    a.preset = given or default_preset(None if a.batch else a.target, a.surface)
     if a.slop_params:
         ts, note = resolve_tokens(a)
         print(json.dumps(slop_params(ts, a.preset), ensure_ascii=False))
@@ -2197,6 +2285,8 @@ def main():
 
     worst = None
     for t in targets:
+        if a.batch and not given:
+            a.preset = default_preset(t, a.surface)
         a.name = a.name if (a.name and len(targets) == 1) else \
             re.sub(r"[^A-Za-z0-9._-]+", "_", os.path.basename(t) or t)[:60]
         md, md_path, js_path, findings = audit(t, a)

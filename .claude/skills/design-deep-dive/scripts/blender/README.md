@@ -50,7 +50,7 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 
 | утилита | что делает | вызов | выход |
 |---|---|---|---|
-| `qa_pipeline.py` | сводный конвейер с вердиктом fail · review · pass: `scene` — `scene_check.py` и предэкспортная проверка в одном фоновом Blender; `glb` — коллизии имён узлов, валидатор, `glb_lint`, что создал three, по запросу сверка вида и цена загрузки; `page` — `site_probe.py`, ворота 3D и import map | `scene <сцена>.blend … [--passport <паспорт>.json]`; `glb <модель>.glb [--blend <сцена>.blend --diff] [--bench] [--max-tris N] [--max-kb N]`; `page <URL или папка> [--mobile] [--reduced]`; `[--out <отчёт>.json] [--keep]`; `--selftest` | короткий JSON в stdout, полный — `--out`; код 0 pass · 1 review · 2 fail · 3 ошибка запуска |
+| `qa_pipeline.py` | сводный конвейер с вердиктом fail · review · pass: `scene` — `scene_check.py` и предэкспортная проверка в одном фоновом Blender; `glb` — коллизии имён узлов, валидатор, `glb_lint`, что создал three, по запросу сверка вида и цена загрузки; `page` — `site_probe.py`, ворота 3D и import map | `scene <сцена>.blend … [--passport <паспорт>.json]`; `glb <модель>.glb [--blend <сцена>.blend --diff] [--bench] [--max-tris N] [--max-kb N]`; `page <URL или папка> [--mobile] [--reduced]`; `[--out <отчёт>.json] [--keep] [--strict]`; `--selftest` | короткий JSON в stdout, полный — `--out`; код 0 — замер выполнен, вердикт в JSON · 2 — ошибка вызова или стадия без результата; с `--strict` — 1 fail · 3 review |
 | `scene_check.py` | внутри Blender: геометрия, паспорт (`dims_m`, касания, бюджет), кадр, материалы, свет; одна строка `SCENE_CHECK {json}` | через `qa_pipeline.py scene` или текстом в `execute_blender_code` | вердикт и коды находок |
 | `lint_agent_code.py` | текст скрипта агента до отправки в Blender: опасные приёмы в сцене человека, выход из процесса, устаревший API | `<скрипт>.py …`; `-` — stdin | JSON в stdout; код 0 чисто · 1 есть замечания |
 | `gltf_check.py` | валидатор Khronos, `gltf-transform inspect` и подсказки для веба (сжатие, размеры текстур, вес) | `<модель>.glb [--json] [--out <отчёт>.md]` | Markdown или JSON |
@@ -69,7 +69,7 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 | утилита | что делает | вызов | выход |
 |---|---|---|---|
 | `site_probe.py` | замер страницы с 3D: переданные байты по категориям и сигнатурам, контексты WebGL и WebGPU, вызовы отрисовки, первый 3D-кадр, LCP с элементом, TBT; `--no-3d` — прогон «постер без 3D» для вклада 3D в TBT | `<URL> <OUT_DIR> --quick [--mobile --throttle] [--reduced-motion] [--no-3d]`; `--selftest` | `<OUT_DIR>/probe[…].json`, скриншоты |
-| `gate_check.py` | ворота 3D по отчёту `site_probe.py` (§ ниже) | `<проба>.json mobile\|desktop [--reduced] [--baseline <проба без 3D>.json] [--profile P] [--json]`; `--selftest` | таблица или JSON (`rows`, `summary`) |
+| `gate_check.py` | ворота 3D по отчёту `site_probe.py` (§ ниже) | `<проба>.json mobile\|desktop [--reduced] [--baseline <проба без 3D>.json] [--profile P] [--json] [--strict]`; `--selftest` | таблица или JSON (`rows`, `summary`) |
 | `web_view.py` | GLB в three.js или страница в Chromium на видеокарте: ракурсы, вызовы отрисовки, время кадра, ошибки консоли; живой сайт — ещё сеть по категориям и библиотеки по рантайму | `<модель>.glb <OUT_DIR> [--tone …] [--anim]`; `--page <страница>.html <OUT_DIR> [--scroll 0,0.5,1] [--mobile]`; `--url <URL> <OUT_DIR> [--throttle]`; `--selftest` | скриншоты, `<OUT_DIR>/web_stats.json` или `<OUT_DIR>/page_stats.json` |
 | `fx_probe.py` | замер своей демо-страницы с 3D или шейдерным эффектом: режимы desktop, mobile, reduce, uncapped, покой отдельно от прокрутки | `<ROOT_DIR> <страница> <OUT_DIR> [--modes desktop,mobile,reduce,uncapped]` | `<OUT_DIR>/fx_<метка>.json`, скриншоты |
 | `serve_br.py` | локальный сервер «как хостинг»: предсжатые brotli-файлы, типы файлов, без кэша | `<папка> <порт>`; модуль — `from serve_br import start` | — |
@@ -79,9 +79,10 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 Ворота 3D отвечают за долю 3D на странице; LCP, CLS, TBT и вес страницы целиком — у ворот страницы
 `../site/page_gates.py`, в отчёте `gate_check.py` они зеркало D с порогом профиля `--profile`. Вердикт собранной страницы
 ставит `page_gates.py --gate3d` (указатель `../README.md` § Ворота после сборки).
-- **`gate_check.py`** — код 1 только при провале строки B: LCP-элемент canvas, 3D-ассеты сверх предела, ошибки консоли,
-  при reduce — вызовы или движение в покое. Провал S (вызовы в покое, DPR холста, первый 3D-кадр, вклад 3D в TBT) — в
-  отчёте, код 0: S исправляют или записывают исключением плана страницы.
+- **`gate_check.py`** — код 0 при выполненном замере, находки — в отчёте; с `--strict` — код 1 при провале строки B:
+  LCP-элемент canvas, 3D-ассеты сверх предела, ошибки консоли, при reduce — вызовы или движение в покое. Провал S
+  (вызовы в покое, DPR холста, первый 3D-кадр, вклад 3D в TBT) — в отчёте, код 0 и со `--strict`: S исправляют или
+  записывают исключением плана страницы.
 - **`qa_pipeline.py page`** — та же тяжесть: провал B — ошибка и вердикт fail, провал S — предупреждение и review,
   зеркала D — сведения; все строки ворот — в поле `gates`, итог — `gate_summary`.
 
@@ -89,8 +90,8 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 
 | утилита | что делает | вызов | выход |
 |---|---|---|---|
-| `run_recipes.py` | прогон рецептов `kb/blender/12-recipes/`: блоки python рецепта → Blender без окна → валидатор и three.js для каждого GLB | `<рецепт>.md … [--no-web]` | `$DDD_HOME/out/blender/run_recipes/result.json` |
-| `run_doc_blocks.py` | блоки python и bash итоговых md-файлов базы в напечатанном виде: python — в фоновом Blender с заводской сценой перед каждым блоком | `<файл>.md … [--json <отчёт>.json] [--only python,bash]` | строка `RESULT ok/total`, `--json` |
+| `run_recipes.py` | прогон рецептов `kb/blender/12-recipes/`: блоки python рецепта → Blender без окна → валидатор и three.js для каждого GLB | `<рецепт>.md … [--no-web]`; `--selftest` | `$DDD_HOME/out/blender/run_recipes/result.json` |
+| `run_doc_blocks.py` | блоки python и bash итоговых md-файлов базы в напечатанном виде: python — в фоновом Blender с заводской сценой перед каждым блоком | `<файл>.md … [--json <отчёт>.json] [--only python,bash] [--dry-run]`; `--selftest` | строка `RESULT ok/total`, у `--dry-run` — строки `PLAN` и `BLOCKS`; `--json` |
 
 ## Данные
 

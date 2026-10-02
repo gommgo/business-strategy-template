@@ -3,21 +3,24 @@
 marks.json. Модель не вызывается; сеть — только к шрифтам и ресурсам самих копий. Фоновых процессов не оставляет:
 сервер — поток этого процесса, браузер закрывается в finally.
 
-Кадры — список `artboards` манифеста (file, w, h, theme, title). Манифест HTML-копий холста — `kit.json`
-(`kit/kit_manifest.py` собирает его из статичных копий артбордов: кадр — копия на ширине и высоте своей рамки). Все
-ширины приёмки — артборды холста, поэтому своих ширин у съёмки нет; вылет на 320, ресайз и зум проверяются на собранной
-странице в репозитории кода. `--manifest` — имя файла в папке копий или путь к манифесту, собранному вне её (от рабочей
-папки или абсолютный): копии при этом остаются нетронутыми.
+Кадры — список `artboards` манифеста (file, w, h, theme, title). Манифест HTML-копий холста — `kit.json`: в git он не
+хранится, съёмка считает его сама сборкой `kit/kit_manifest.py` из статичных копий артбордов (кадр — копия на ширине и
+высоте своей рамки; подписи и порядок — из `canvas.json` исходников холста, ключ --canvas, без ключа — папка `project`
+рядом с папкой копий; ряды холста — набор ширин входа холста или проекта, без них — набор базы). Все ширины приёмки —
+артборды холста, поэтому своих ширин у съёмки нет; вылет на 320, ресайз и зум проверяются на собранной странице в
+репозитории кода. `--manifest` — имя файла в папке копий или путь к манифесту, собранному вне её (от рабочей папки
+или абсолютный): копии при этом остаются нетронутыми; `--manifest kit.json` без такого файла — манифест считается.
 
 Использование:
-  python3 shot.py <папка копий> <outdir> [--manifest kit.json | ПУТЬ/kit.json] [--only landing.html]
+  python3 shot.py <папка копий> <outdir> [--manifest kit.json | ПУТЬ/kit.json] [--canvas ПАПКА] [--only landing.html]
           [--themes light,dark] [--scale 1] [--tiles] [--no-plain] [--no-marks] [--no-canvas] [--canvas-dpr 0.5]
           [--set "radius-md=16px;color-accent=#0a7d4f"] [--prev review/iter-01/marks.json] [--iteration iter-02]
           [--lock /path/to/browser.lock] [--min-free-gb 2] [--strict]
   python3 shot.py serve <папка проекта> [--port 8765]
       → http://127.0.0.1:8765/ перенаправляет на /_kit/canvas.html?m=/canvas.json&marks=1 (холст для встроенного браузера
         приложения через .claude/launch.json или для своего браузера)
-  python3 shot.py --selftest      офлайн: шрифты и их метрические двойники, H1 у частей артборда, путь манифеста
+  python3 shot.py --selftest      офлайн: шрифты и их метрические двойники, H1 у частей артборда, путь манифеста,
+                                  манифест копий при съёмке, ярлыки вайрфрейма вне проверок кадра
 
 Что пишет в <outdir>:
   <файл>-<W>-<тема>.png            артборд целиком (full page) без меток
@@ -31,7 +34,9 @@ marks.json. Модель не вызывается; сеть — только к
 Проверки кадра (`failed_checks`). H1 на странице один: у артборда целиком — ровно один; страница длиннее предела высоты
 артборда лежит частями `<Имя>-<ширина>-<N>` — H1 в первой части, у следующих его нет. Шрифт: объявлен веб-шрифт, а
 рисуется системный с другим именем — `fonts_missing`; метрический двойник системного шрифта (Arimo на месте Arial) —
-не пропажа: объявленного системного шрифта на машине нет, раскладка та же.
+не пропажа: объявленного системного шрифта на машине нет, раскладка та же. Ярлыки вайрфрейма — элементы с атрибутом
+`data-wf` и их поддерево — пометки артборда, а не текст страницы: в счёт мелкого текста, наименьший кегль и невидимый
+текст они не входят.
 Коды выхода: 0 — готово; 2 — страница или браузер не открылись; 3 — нет кадров (манифест не читается, в нём нет рамок
 или --only мимо); 4 — --strict и есть непройденные проверки, наложения меток или расхождение номеров холста и кадров.
 """
@@ -56,6 +61,7 @@ METRIC_TWINS = {'arial': _SANS, 'helvetica': _SANS, 'arial narrow': ('liberation
                 'times new roman': _SERIF, 'times': _SERIF, 'courier new': _MONO, 'courier': _MONO,
                 'calibri': ('carlito',), 'cambria': ('caladea',), 'georgia': ('gelasio',)}
 MANIFEST_URL = '/_kit-manifest.json'       # манифест вне папки копий: холст берёт его из памяти сервера, кадры — из папки
+KIT_NAME = 'kit.json'                      # манифест статичных копий: файла нет — считается при съёмке
 
 # --- проверки страницы (плейсхолдеры — любые [КАПС-МЕТКИ]) ---------------------------------------------------------------
 CHECKS_JS = r"""
@@ -92,6 +98,7 @@ CHECKS_JS = r"""
   while (walker.nextNode()) {
     const t = walker.currentNode; if (!t.textContent.trim()) continue;
     const el = t.parentElement; if (!el || seen.has(el)) continue; seen.add(el);
+    if (el.closest('[data-wf]')) continue;                 // ярлык вайрфрейма и его поддерево — не текст страницы
     const cs = getComputedStyle(el); const r = el.getBoundingClientRect();
     if (cs.display === 'none' || r.width === 0 || r.height === 0) continue;
     if (['SCRIPT', 'STYLE', 'NOSCRIPT', 'TEMPLATE', 'TITLE'].includes(el.tagName)) continue;
@@ -340,6 +347,25 @@ def manifest_path(project, name):
     return inside if os.path.isfile(inside) or not os.path.isfile(name) else os.path.abspath(name)
 
 
+def copies_manifest(project, canvas=None):
+    """Манифест статичных копий папки — сборка `kit_manifest.build_manifest`: исходники холста — canvas или папка
+    `project` рядом с папкой копий (раскладка `design/<surface>/canvas/`), без них кадры идут по имени файла."""
+    if KIT_DIR not in sys.path:
+        sys.path.insert(0, KIT_DIR)
+    import kit_manifest
+    side = os.path.join(os.path.dirname(os.path.abspath(project)), 'project')
+    return kit_manifest.build_manifest(project, canvas or (side if os.path.isdir(side) else None))
+
+
+def read_manifest(project, name, canvas=None):
+    """Манифест кадров → (манифест, путь файла, посчитан ли): файл папки копий или путь как передан; `kit.json`,
+    которого нет ни там, ни там, — сборка из статичных копий папки (copies_manifest). Файл не читается — OSError или
+    ValueError."""
+    path = manifest_path(project, name)
+    computed = os.path.basename(name) == KIT_NAME and not os.path.isfile(path) and os.path.isdir(project)
+    return (copies_manifest(project, canvas) if computed else json.load(open(path, encoding='utf-8'))), path, computed
+
+
 def selftest():
     import subprocess, tempfile
     ok = True
@@ -388,6 +414,34 @@ def selftest():
         r = run('--manifest', os.path.join('out', 'side.json'))
         check('манифест вне папки копий читается: рамок в нём нет — код 3, без трассировки',
               r.returncode == 3 and 'нет рамок' in r.stderr and 'Traceback' not in r.stderr, (r.returncode, r.stderr[-300:]))
+        bare = os.path.join(td, 'design', 'promo', 'canvas', 'html')
+        os.makedirs(bare)
+        for name, w, h in (('Page-1440.html', 1440, 2000), ('Page-390.html', 390, 3000)):
+            open(os.path.join(bare, name), 'w', encoding='utf-8').write(
+                f'<!doctype html><head><!-- dc_to_html: статичная копия артборда {name[:-5]}.dc.html; перевод исходника · '
+                f'рамка {w}×{h} · твики: — --></head><p>т</p>')
+        open(os.path.join(bare, 'note.html'), 'w', encoding='utf-8').write('<!doctype html><p>не копия</p>')
+        man = copies_manifest(bare)
+        check('манифест копий считается при съёмке: кадр на статичную копию на её рамке, ряды — набор базы',
+              ([(f['file'], f['w'], f['h']) for f in man['artboards']], len(man['widths']) >= 2)
+              == ([('Page-1440.html', 1440, 2000), ('Page-390.html', 390, 3000)], True), man)
+        open(os.path.join(td, 'design', 'ARTIFACTS.md'), 'w', encoding='utf-8').write(
+            '# Артефакты\n\n## Условия холста\n\nШирины приёмки: 1440, 390 — набор проекта\n')
+        check('ряды манифеста — набор ширин проекта из ARTIFACTS.md', copies_manifest(bare)['widths'] == [1440, 390],
+              copies_manifest(bare)['widths'])
+        got = [(len(m['artboards']), c) for m, _p, c in (read_manifest(bare, 'kit.json'), read_manifest(proj, 'kit.json'))]
+        check('чтение манифеста: kit.json нет — считается из копий; файл есть — читается', got == [(2, True), (0, False)], got)
+        os.makedirs(os.path.join(td, 'design', 'promo', 'input'))
+        open(os.path.join(td, 'design', 'promo', 'input', 'INPUT.md'), 'w', encoding='utf-8').write(
+            '---\nstage: mockup\nacceptance_widths: [1440, 1024, 390]\n---\n# Вход холста\n')
+        check('ряды манифеста — набор входа холста (acceptance_widths в INPUT.md) первым',
+              copies_manifest(bare)['widths'] == [1440, 1024, 390], copies_manifest(bare)['widths'])
+        r = subprocess.run([sys.executable, os.path.abspath(__file__), os.path.join(td, 'out'), os.path.join(td, 'shots'),
+                            '--manifest', 'nope/kit.json'], capture_output=True, text=True, cwd=td)
+        check('папка без статичных копий и без kit.json: манифест считается пустым — код 3, без трассировки',
+              r.returncode == 3 and 'нет рамок' in r.stderr and 'Traceback' not in r.stderr, (r.returncode, r.stderr[-300:]))
+    check('проверки кадра: ярлык вайрфрейма data-wf и его поддерево — вне счёта мелкого и невидимого текста',
+          re.search(r"closest\('\[data-wf\]'\)\) continue;[^\n]*\n\s*const cs = getComputedStyle\(el\)", CHECKS_JS) is not None)
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 
@@ -413,7 +467,10 @@ def main():
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('project'); ap.add_argument('outdir')
-    ap.add_argument('--manifest', default='canvas.json', help='манифест кадров: kit.json HTML-копий холста или canvas.json kit')
+    ap.add_argument('--manifest', default='canvas.json', help='манифест кадров: kit.json HTML-копий холста (файла нет — '
+                                                              'считается при съёмке) или canvas.json kit')
+    ap.add_argument('--canvas', default='', help='папка исходников холста с canvas.json: подписи и порядок кадров '
+                                                 'манифеста копий; без ключа — папка project рядом с папкой копий')
     ap.add_argument('--only', default='', help='только рамки этого файла (через запятую)')
     ap.add_argument('--themes', default='', help='снять каждую рамку во всех темах списка, напр. light,dark')
     ap.add_argument('--scale', type=float, default=1.0, help='DPR кадров артбордов (2 — «ретина»)')
@@ -433,13 +490,13 @@ def main():
     project = os.path.abspath(a.project)
     man_path = manifest_path(project, a.manifest)
     try:
-        manifest = json.load(open(man_path, encoding='utf-8'))
+        manifest, man_path, computed = read_manifest(project, a.manifest, a.canvas)
     except (OSError, ValueError) as e:
         print(json.dumps({'error': f'манифест не читается: {man_path} ({type(e).__name__}: {e})'}, ensure_ascii=False),
               file=sys.stderr)
         return 3
     man_rel = os.path.relpath(man_path, project)
-    if man_rel.startswith('..'):
+    if computed or man_rel.startswith('..'):
         Handler.virtual[MANIFEST_URL] = json.dumps(manifest, ensure_ascii=False).encode('utf-8')
         man_url = MANIFEST_URL
     else:

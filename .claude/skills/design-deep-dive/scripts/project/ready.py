@@ -30,7 +30,13 @@
                                       холста принятых экранов, REVIEW.md. Исходники холста принятой единицы — её
                                       артборды из строки «Приёмка» REVIEW.md с вердиктом accepted или
                                       accepted_with_notes (`canvas/project/<Имя>.dc.html`, все ширины приёмки) и их
-                                      статичные копии `canvas/html/<Имя>.html`, если собраны (проверки по просьбе)
+                                      статичные копии `canvas/html/<Имя>.html`, если собраны (проверки по просьбе).
+                                      Лабораторная страница принятого приёма сайта — источник-папка
+                                      `design/<surface>/motion/lab/<id>/` (путь с «/» на конце): её называет
+                                      prototype.lab_path арт-дирекции или references[].source.url спецификации движения
+                                      страницы; статус — prototype.status (у папки из спецификации — «—»), sha256 —
+                                      отпечаток папки: строки «путь файла, sha256 файла» по алфавиту; папки нет —
+                                      источника нет
   units                               сайт — страницы планов site/<surface>/plans/ (порядок build_order карты или
                                       pages.list брифа); кабинет — экраны screens/<surface>/screens/
     composition                       сайт — статус плана; кабинет — статус экрана
@@ -39,13 +45,16 @@
     mockup                            вердикт строки «Приёмка» review/REVIEW.md, если отпечаток одобрения совпал с
                                       текущим; не совпал или строки нет — none; skipped — строка «макет пропущен»
                                       заметки пропусков поверхности (<state>/design/<surface>/_phase-jump.md)
-    budget_profile, gate_exceptions   сайт — page.budget_profile и id x-gate-exception плана; кабинет — «—» и []
+    budget_profile, gate_exceptions   сайт — page.budget_profile и id x-gate-exception плана своей страницы (исключение
+                                      ворот соседней страницы в единицу не идёт); кабинет — «—» и []
     after_build                       пункты input/ACCEPTANCE.md с местом «после сборки» (ST-<экран>-… — только у
                                       своего экрана)
-    open                              заглушки [PLACEHOLDER] выбранных текстов и демо-факты (example: true), которые
-                                      страница называет; затем строки «решение заказчика: …» — ДС не утверждена, у
-                                      кабинета ещё покрытие ДС типов своего экрана не полное (ds_coverage) и FSD-карта
-                                      не stable: готовность они не держат, решает заказчик
+    open                              заглушки [PLACEHOLDER] выбранных текстов, демо-факты (example: true), которые
+                                      страница называет, и демо-кадры — «демо-кадр: <слот>» на слот плана ассетов
+                                      страницы с расширением x-demo (кадр макета не для публикации); затем строки
+                                      «решение заказчика: …» — ДС не утверждена, у кабинета ещё покрытие ДС типов
+                                      своего экрана не полное (ds_coverage) и FSD-карта не stable: готовность они не
+                                      держат, решает заказчик
     ready                             композиция закрыта (план approved, экран stable), тексты approved, факты
                                       публикуемы или пробел назван, макет принят с совпавшим отпечатком (или пропущен
                                       решением заказчика)
@@ -104,6 +113,7 @@ ACCEPTED = ("accepted", "accepted_with_notes")
 TEXT_ORDER = ("draft", "assumed", "checked", "approved")
 STATE = (".claude", "skills", "entrypoint", "state", "projects")
 SKIP_LINE = re.compile(r"макет\s+пропущен", re.I)
+LAB_PATH = re.compile(r"(?:^|/)motion/lab/([A-Za-z0-9][A-Za-z0-9._-]*)")   # папка лабораторной страницы приёма → её id
 DECIDE = "решение заказчика: "                          # строка open: готовность не держит, решает заказчик
 FORM_KEYS = ("surface", "type", "web_kind", "consumer", "status", "sources", "units", "perf", "frontend_design",
              "blockers")
@@ -164,6 +174,13 @@ def load(path):
 
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def dir_sha(path):
+    """Отпечаток папки: sha256 строк «<путь файла от папки>\\t<sha256 файла>» по алфавиту путей."""
+    root = Path(path)
+    lines = [f"{p.relative_to(root).as_posix()}\t{sha(p)}" for p in sorted(x for x in root.rglob("*") if x.is_file())]
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
 
 
 def get(d, *path, default=None):
@@ -457,6 +474,7 @@ class Build:
             if bad:
                 why.append("факты: " + ", ".join(bad[:4]) + (f" и ещё {len(bad) - 4}" if len(bad) > 4 else ""))
             opened += [f"демо-факт: {x}" for x in sorted(set(demo))]
+            opened += [f"демо-кадр: {x}" for x in self.demo_slots(pid)]
             decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
             exc = [str(e.get("id")) for e in get(plan, "page", "x-gate-exception", default=[]) or []
                    if isinstance(e, dict) and e.get("id")]
@@ -465,9 +483,18 @@ class Build:
                          "after_build": list(after), "open": self.open_list(opened, decide)}, why))
         return out, brief
 
+    def demo_slots(self, pid):
+        """id слотов плана ассетов страницы с демо-кадром (расширение x-demo слота): кадр стоит на макете, в
+        публикацию идёт файл слота."""
+        d = load(self.dsurf("asset-plans") / f"{pid}.yaml")
+        demo = mod("canvas_input").demo_files
+        return [str(sl["id"]) for sl in get(d, "slots", default=[]) or [] if isinstance(sl, dict) and sl.get("id")
+                and demo(sl)]
+
     @staticmethod
     def open_list(opened, decide):
-        """Строки open единицы: заглушки и демо-факты по алфавиту, затем решения заказчика (ДС, покрытие, FSD)."""
+        """Строки open единицы: заглушки, демо-кадры и демо-факты по алфавиту, затем решения заказчика (ДС, покрытие,
+        FSD)."""
         return sorted(set(opened)) + [DECIDE + d for d in decide]
 
     # кабинет
@@ -620,6 +647,30 @@ class Build:
                     out.append(c)
         return out
 
+    def lab_dirs(self):
+        """Лабораторные страницы принятых приёмов сайта — папки design/<surface>/motion/lab/<id>/, которые называет
+        арт-дирекция (prototype.lab_path) или ссылка спецификации движения страницы (references[].source.url):
+        [(папка, статус)] по id. Статус — prototype.status у папки из арт-дирекции, у папки из спецификации — «—».
+        Значение без `motion/lab/<id>` (адрес в сети) и папка, которой нет, источника не дают."""
+        if not self.surf.page:
+            return []
+        named = {}
+
+        def name(value, status):
+            m = LAB_PATH.search(str(value or ""))
+            if m:
+                named.setdefault(m.group(1), status)
+
+        proto = get(load(self.dsurf("art-direction")), "prototype")
+        if isinstance(proto, dict):
+            name(proto.get("lab_path"), dash(proto.get("status")))
+        md = self.dsurf("motion")
+        for spec in sorted(md.glob("*.motion-spec.yaml")) if md.is_dir() else []:
+            for sec in get(load(spec), "sections", default=[]) or []:
+                for ref in get(sec, "references", default=[]) or []:
+                    name(get(ref, "source", "url"), "—")
+        return [(md / "lab" / i, st) for i, st in sorted(named.items()) if (md / "lab" / i).is_dir()]
+
     def run(self):
         page = self.surf.page
         if page:
@@ -630,6 +681,7 @@ class Build:
         ds = self.ds_status
         sources = [{"path": self.prel(f), "status": file_status(f, ds), "sha256": sha(f)}
                    for f in self.source_files()]
+        sources += [{"path": self.prel(d) + "/", "status": st, "sha256": dir_sha(d)} for d, st in self.lab_dirs()]
         sources.sort(key=lambda s: s["path"])
         ready = [u for u, _ in units if u["ready"]]
         status = "ready" if units and len(ready) == len(units) else ("partial" if ready else "not-ready")
@@ -980,6 +1032,60 @@ def _selftest():
               and any(p == "/status" and s == "error" for p, _m, s in errs)
               and any(p == "/units/0/mockup" and s == "error" for p, _m, s in errs)
               and any(p == "/units/0/extra" and s == "warning" for p, _m, s in errs))
+        # лабораторная страница приёма — источник-папка манифеста
+        lab_row = "design/promo/motion/lab/mask-reveal/"
+        adp = docpaths.design(slug, "art-direction", surface="promo", repo=root)
+        adt = adp.read_text(encoding="utf-8")
+        ad = json.loads(adt)
+        ad["prototype"] = {"status": "built", "lab_path": lab_row}
+        adp.write_text(json.dumps(ad, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        no_dir = build(slug, surf, root, today)
+        lab = docpaths.design(slug, "motion", surface="promo", repo=root) / "lab" / "mask-reveal"
+        (lab / "media").mkdir(parents=True)
+        (lab / "index.html").write_text("<!doctype html><title>иллюстрация самопроверки</title>\n", encoding="utf-8")
+        (lab / "media" / "take.txt").write_text("иллюстрация: запись приёма\n", encoding="utf-8")
+        with_dir = build(slug, surf, root, today)
+        row, lab_sha = next((s for s in with_dir["sources"] if s["path"] == lab_row), None), dir_sha(lab)
+        path.write_text(render(slug, with_dir), encoding="utf-8")
+        fresh = check_surface(slug, surf, root, today)
+        (lab / "media" / "take.txt").write_text("иллюстрация: запись приёма, правка\n", encoding="utf-8")
+        stale = check_surface(slug, surf, root, today)
+        ad["prototype"]["lab_path"] = "https://example.invalid/lab/mask-reveal"
+        adp.write_text(json.dumps(ad, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+        by_url = build(slug, surf, root, today)
+        check("лабораторная страница приёма: папка motion/lab/<id>/, которую называет prototype.lab_path арт-дирекции, "
+              "— источник манифеста (путь папки, статус прототипа, отпечаток папки), форма без замечаний; правка файла "
+              "папки — R-FRESH-006 с путём папки; папки нет или lab_path — адрес в сети — источника нет",
+              row is not None and row["status"] == "built" and row["sha256"] == lab_sha != dir_sha(lab)
+              and not form_errors(with_dir) and not fresh
+              and len(stale) == 1 and stale[0].rule == RULE and f"источник {lab_row}: sha256" in stale[0].message
+              and not any("/lab/" in s["path"] for s in no_dir["sources"] + by_url["sources"])
+              and [s["path"] for s in no_dir["sources"]] == [s["path"] for s in data["sources"]])
+        adp.write_text(adt, encoding="utf-8")
+        shutil.rmtree(lab.parent)
+        path.write_text(text, encoding="utf-8")
+        # демо-кадры x-demo плана ассетов страницы — строки open; исключение ворот — у единицы своей страницы
+        apl = docpaths.design(slug, "asset-plans", surface="promo", repo=root) / "spasibo.yaml"
+        apt = apl.read_text(encoding="utf-8")
+        ap = yaml_mod().safe_load(apt)
+        ap.setdefault("slots", []).append({"id": "confirmation-photo", "source": "real", "x-demo": {
+            "file": "$DDD_HOME/out/selftest-no-such/confirmation-photo-demo.webp", "what": "иллюстрация: кадр макета"}})
+        apl.write_text(yaml_mod().safe_dump(ap, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        plan.write_text(ptext.replace("\npage:\n", "\npage:\n  x-gate-exception:\n  - {id: SG-DEMO, why: иллюстрация, "
+                                      "who: владелец продукта}\n", 1), encoding="utf-8")
+        units = {u["id"]: u for u in build(slug, surf, root, today)["units"]}
+        was = {u["id"]: u for u in data["units"]}
+        check("демо-кадр x-demo плана ассетов страницы — строка open «демо-кадр: <слот>» у её единицы; у соседней и "
+              "без x-demo таких строк нет; исключение ворот плана — в gate_exceptions своей единицы, у соседней — []",
+              "\n  x-gate-exception:" in plan.read_text(encoding="utf-8")
+              and units["spasibo"]["open"] == sorted(was["spasibo"]["open"] + ["демо-кадр: confirmation-photo"],
+                                                     key=lambda x: (x.startswith(DECIDE), x))
+              and units["home"]["open"] == was["home"]["open"]
+              and not any("демо-кадр" in o for o in was["spasibo"]["open"])
+              and units["spasibo"]["gate_exceptions"] == ["SG-DEMO"] and units["home"]["gate_exceptions"] == []
+              and units["spasibo"]["ready"] == was["spasibo"]["ready"])
+        apl.write_text(apt, encoding="utf-8")
+        plan.write_text(ptext, encoding="utf-8")
         # одобрение с отпечатком по артбордам и источникам единицы (вход собирается и с ошибкой проверки: главная в
         # работе)
         def ci(stage):

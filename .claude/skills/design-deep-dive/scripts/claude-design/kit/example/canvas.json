@@ -3,10 +3,18 @@
   "iteration": "iter-01",
   "date": "2026-09-25",
   "artboards": [
-    { "file": "landing.html", "w": 1440, "h": 900, "theme": "light", "title": "Главная · десктоп" },
-    { "file": "landing.html", "w": 390, "h": 844, "theme": "light", "title": "Главная · телефон" },
-    { "file": "booking.html", "w": 1440, "h": 900, "theme": "dark", "title": "Запись · десктоп · тёмная" },
-    { "file": "booking.html", "w": 390, "h": 844, "theme": "dark", "title": "Запись · телефон · тёмная" }
+    { "file": "landing.html", "w": 1440, "h": 900, "theme": "light", "title": "Главная · 1440" },
+    { "file": "landing.html", "w": 1280, "h": 900, "theme": "light", "title": "Главная · 1280" },
+    { "file": "landing.html", "w": 1024, "h": 900, "theme": "light", "title": "Главная · 1024" },
+    { "file": "landing.html", "w": 768, "h": 900, "theme": "light", "title": "Главная · 768" },
+    { "file": "landing.html", "w": 390, "h": 844, "theme": "light", "title": "Главная · 390" },
+    { "file": "landing.html", "w": 360, "h": 844, "theme": "light", "title": "Главная · 360" },
+    { "file": "booking.html", "w": 1440, "h": 900, "theme": "dark", "title": "Запись · 1440 · тёмная" },
+    { "file": "booking.html", "w": 1280, "h": 900, "theme": "dark", "title": "Запись · 1280 · тёмная" },
+    { "file": "booking.html", "w": 1024, "h": 900, "theme": "dark", "title": "Запись · 1024 · тёмная" },
+    { "file": "booking.html", "w": 768, "h": 900, "theme": "dark", "title": "Запись · 768 · тёмная" },
+    { "file": "booking.html", "w": 390, "h": 844, "theme": "dark", "title": "Запись · 390 · тёмная" },
+    { "file": "booking.html", "w": 360, "h": 844, "theme": "dark", "title": "Запись · 360 · тёмная" }
   ],
   "marks": {
     "landing.html": { "base": 0 },

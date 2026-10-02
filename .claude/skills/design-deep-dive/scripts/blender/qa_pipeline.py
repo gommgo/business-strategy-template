@@ -7,16 +7,19 @@
   page:  site_probe.py → ворота 3D gate_check.evaluate() (пороги — kb/blender/09-web-runtime/page-3d-gates.yaml, описание —
          09/05 §7.2) + статическая проверка import map (одна версия three; min-ядро с jsDelivr — с переназначением three.core.js).
 
-  python3 qa_pipeline.py scene A.blend [B.blend …] [--passport P.json | --passports MAP.json] [--out r.json]
-  python3 qa_pipeline.py glb M.glb [--blend S.blend --diff [--tone neutral] [--engine cycles]] [--bench] [--max-tris N] [--max-kb N] [--out r.json]
-  python3 qa_pipeline.py page URL|DIR [--mobile] [--reduced] [--wait 16000] [--out r.json]
-  python3 qa_pipeline.py --selftest      # без Blender и браузера: вердикт page по тяжести строк ворот 3D
+  python3 qa_pipeline.py scene A.blend [B.blend …] [--passport P.json | --passports MAP.json] [--out r.json] [--strict]
+  python3 qa_pipeline.py glb M.glb [--blend S.blend --diff [--tone neutral] [--engine cycles]] [--bench] [--max-tris N] [--max-kb N]
+                         [--out r.json] [--strict]
+  python3 qa_pipeline.py page URL|DIR [--mobile] [--reduced] [--wait 16000] [--out r.json] [--strict]
+  python3 qa_pipeline.py --selftest      # без Blender и браузера: вердикт page по тяжести строк ворот 3D и коды выхода
 
 MAP.json для пакета: {"<имя файла без .blend>": {паспорт}, …}. Вердикт каждой стадии и общий: fail (есть ERROR) → review
 (есть WARN) → pass. У page тяжесть строки ворот 3D решает уровень: провал B — ERROR (fail), провал S — WARN (review:
 исправить или записать исключением плана), зеркала метрик страницы D — INFO; все строки — в поле gates, итог — gate_summary.
-Вердикт собранной страницы по профилю бюджета ставит site/page_gates.py. Код выхода: 0 pass, 1 review, 2 fail, 3 ошибка
-запуска. Временные папки удаляются (--keep — оставить). Пороги gltf_diff — kb/blender 11-evaluation-qa/03 §2.2.
+Вердикт собранной страницы по профилю бюджета ставит site/page_gates.py. Код выхода: 0 — замер выполнен (вердикт и находки — в
+JSON: строка stdout и файл ключа --out; обёртка читает JSON), 2 — ошибка вызова или стадия не дала результата (поле error).
+С --strict — выход по находкам: 1 — fail, 3 — review. Временные папки удаляются (--keep — оставить). Пороги gltf_diff —
+kb/blender 11-evaluation-qa/03 §2.2.
 """
 import json, os, re, shutil, struct, subprocess, sys, tempfile, time
 
@@ -26,7 +29,8 @@ ROOT = str(kbpaths.kb("blender"))
 TOOLS = str(kbpaths.scripts("blender"))
 E26 = TOOLS  # перенос: preflight_block, glb_lint_block — scripts/blender
 SERVE_BR = TOOLS  # перенос: serve_br — scripts/blender
-RANK = {"pass": 0, "review": 1, "fail": 2}
+RANK = {"pass": 0, "review": 1, "fail": 2}             # порядок вердиктов для worst(); коды выхода — exit_code()
+STRICT_CODE = {"pass": 0, "fail": 1, "review": 3}     # выход по находкам (--strict): есть ERROR — 1, только WARN — 3
 
 sys.path.insert(0, TOOLS)
 from gate_check import evaluate, gate_check  # noqa: F401 — gate_check: кортежи ворот 3D для кода, который берёт их отсюда
@@ -85,6 +89,19 @@ def issue(level, code, msg, stage):
 def verdict_of(issues):
     lv = {i["level"] for i in issues}
     return "fail" if "ERROR" in lv else ("review" if "WARN" in lv else "pass")
+
+
+def exit_code(res, strict=False):
+    """Код выхода по результату стадии: замер выполнен — 0, вердикт и находки остаются в JSON (вердикт страницы решает
+    site/page_gates.py); стадия не дала результата (поле error) — 2; с --strict — по вердикту: fail — 1, review — 3."""
+    if res.get("error") or res.get("verdict") not in STRICT_CODE:
+        return 2
+    return STRICT_CODE[res["verdict"]] if strict else 0
+
+
+def usage_error(msg):
+    print(f"qa_pipeline.py: {msg} (справка: --help)", file=sys.stderr)
+    sys.exit(2)
 
 
 # ------------------------------------------------------------------------------------------------ scene
@@ -327,7 +344,8 @@ def run_page(target, a):
     pp = os.path.join(tmp, f"probe{suffix}.json")
     if not os.path.exists(pp):
         iss.append(issue("ERROR", "probe_failed", (r.stdout + r.stderr)[-500:], "site_probe"))
-        return {"verdict": "fail", "issues": iss, "url": url, "tmp": tmp}
+        return {"verdict": "fail", "error": "site_probe.py не дал отчёта зонда", "codes": ["probe_failed"], "issues": iss,
+                "url": url, "tmp": tmp}
     return page_report(pp, mobile, reduced, iss, url, tmp)
 
 
@@ -353,7 +371,8 @@ def page_report(pp, mobile, reduced, iss, url, tmp):
 
 
 def selftest():
-    """Без Blender и браузера: вердикт page по тяжести строк ворот 3D на отчётах зонда из словарей."""
+    """Без Blender и браузера: вердикт page по тяжести строк ворот 3D на отчётах зонда из словарей, коды выхода с --strict
+    и без него, ошибки вызова."""
     ok = True
 
     def check(msg, cond):
@@ -375,15 +394,50 @@ def selftest():
             with open(pp, "w", encoding="utf-8") as f:
                 json.dump(probe, f)
             res[name] = page_report(pp, False, False, [], "selftest", td)
-    check("ворота 3D пройдены → pass, код 0", res["clean"]["verdict"] == "pass" and RANK["pass"] == 0)
+    check("ворота 3D пройдены → pass, код 0 и со --strict",
+          res["clean"]["verdict"] == "pass" and exit_code(res["clean"]) == 0 and exit_code(res["clean"], strict=True) == 0)
     s = res["only_s"]
-    check("только S (вызовы 75 > 60, первый кадр 2 600 > 2 000) → review, код 1, находки WARN; B 0, S 2",
-          s["verdict"] == "review" and RANK["review"] == 1 and {i["level"] for i in s["issues"]} == {"WARN"}
-          and s["gate_summary"]["B"] == 0 and s["gate_summary"]["S"] == 2)
+    check("только S (вызовы 75 > 60, первый кадр 2 600 > 2 000) → review, находки WARN; B 0, S 2; код 0, со --strict — 3",
+          s["verdict"] == "review" and {i["level"] for i in s["issues"]} == {"WARN"}
+          and s["gate_summary"]["B"] == 0 and s["gate_summary"]["S"] == 2
+          and exit_code(s) == 0 and exit_code(s, strict=True) == 3)
     b = res["with_b"]
-    check("провал B (LCP-элемент canvas) → fail, код 2; S остаются в отчёте предупреждениями",
-          b["verdict"] == "fail" and RANK["fail"] == 2 and sum(i["level"] == "ERROR" for i in b["issues"]) == 1
-          and sum(i["level"] == "WARN" for i in b["issues"]) == 2 and b["gate_summary"]["blocked"])
+    check("провал B (LCP-элемент canvas) → fail; S остаются в отчёте предупреждениями; код 0, со --strict — 1",
+          b["verdict"] == "fail" and sum(i["level"] == "ERROR" for i in b["issues"]) == 1
+          and sum(i["level"] == "WARN" for i in b["issues"]) == 2 and b["gate_summary"]["blocked"]
+          and exit_code(b) == 0 and exit_code(b, strict=True) == 1)
+    lost = {"verdict": "fail", "error": "стадия не дала результата", "issues": []}
+    check("стадия не дала результата (поле error) → код 2 и без --strict", exit_code(lost) == 2 and exit_code(lost, strict=True) == 2)
+    me = os.path.abspath(__file__)
+    rc = {k: subprocess.run([sys.executable, me] + args, capture_output=True, text=True).returncode
+          for k, args in (("help", ["--help"]), ("none", []), ("mode", ["render"]), ("glb", ["glb"]), ("scene", ["scene", "--strict"]),
+                          ("no_file", ["glb", os.path.join(tempfile.gettempdir(), "qa_pipeline_selftest_none.glb")]))}
+    check("вызов: --help — код 0; без режима, чужой режим, режим без входа, нет файла GLB — код 2",
+          rc == {"help": 0, "none": 2, "mode": 2, "glb": 2, "scene": 2, "no_file": 2})
+
+    def staged(res, args):
+        """main() на подменённой стадии glb → (код выхода, строка JSON из stdout)."""
+        import contextlib, io
+        saved, argv, buf = globals()["run_glb"], sys.argv, io.StringIO()
+        globals()["run_glb"] = lambda glb, a: dict(res)
+        try:
+            sys.argv = ["qa_pipeline.py", "glb", me] + args          # вход — существующий файл: стадия подменена
+            with contextlib.redirect_stdout(buf):
+                main()
+        except SystemExit as e:
+            return e.code, json.loads(buf.getvalue().strip().splitlines()[-1])
+        finally:
+            globals()["run_glb"], sys.argv = saved, argv
+    with tempfile.TemporaryDirectory() as td:
+        outp = os.path.join(td, "r.json")
+        rv = {"verdict": "review", "codes": ["glb_lint"], "issues": [issue("WARN", "glb_lint", "образец", "glb_lint")], "report": {}, "tmp": ""}
+        c0, s0 = staged(rv, ["--out", outp])
+        c1, _ = staged(rv, ["--out", outp, "--strict"])
+        full = json.load(open(outp, encoding="utf-8"))
+        c2, s2 = staged({"verdict": "fail", "error": "стадия не дала результата", "tmp": ""}, ["--strict"])
+    check("main() на подменённой стадии: review — код 0, вердикт в stdout и в файле --out; со --strict — 3; стадия без результата — 2 и error",
+          (c0, c1, c2) == (0, 3, 2) and s0["verdict"] == "review" and full["verdict"] == "review" and len(full["issues"]) == 1
+          and "error" in s2)
     g = {x["id"] + ":" + x["check"]: x for x in s["gates"]}
     check("поле gates — все строки ворот с id, тяжестью и статусом; зеркала D без профиля — SKIP",
           all({"id", "severity", "status", "ok"} <= set(x) for x in s["gates"])
@@ -397,12 +451,20 @@ def main():
     a = sys.argv[1:]
     if a and a[0] == "--selftest":
         sys.exit(selftest())
-    if not a or a[0] in ("-h", "--help") or a[0] not in ("scene", "glb", "page"):
-        print(__doc__); sys.exit(3)
+    if a and a[0] in ("-h", "--help"):
+        print(__doc__); sys.exit(0)
+    if not a or a[0] not in ("scene", "glb", "page"):
+        usage_error("нужен режим: scene, glb или page")
     t0 = time.time()
     mode = a[0]
+    if mode != "scene" and (len(a) < 2 or a[1].startswith("--")):
+        usage_error(f"{mode}: нужен вход — " + ("файл .glb" if mode == "glb" else "URL, папка или файл .html"))
+    if mode == "glb" and not os.path.isfile(a[1]):
+        usage_error(f"glb: нет файла {a[1]}")
     if mode == "scene":
         files = [x for x in a[1:] if x.endswith(".blend")]
+        if not files:
+            usage_error("scene: нужен хотя бы один файл .blend")
         passports = {}
         if opt(a, "--passports"):
             passports = json.load(open(opt(a, "--passports")))
@@ -426,8 +488,10 @@ def main():
     short = {k: res[k] for k in ("verdict", "codes", "sec") if k in res}
     if mode == "scene":
         short["files"] = {k: [v["verdict"], v["codes"]] for k, v in res.get("files", {}).items()}
+    if res.get("error"):
+        short["error"] = res["error"][-400:]
     print(json.dumps(short, ensure_ascii=False))
-    sys.exit(RANK.get(res.get("verdict"), 3))
+    sys.exit(exit_code(res, "--strict" in a))
 
 
 if __name__ == "__main__":

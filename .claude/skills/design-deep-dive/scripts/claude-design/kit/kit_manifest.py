@@ -3,15 +3,21 @@
 
 Оригинал макета — холст в claude.ai. Статичные копии артбордов (`<Имя>.html`, перевод `dc_to_html.py`) и манифест
 нужны скриптам проверок макета и собираются, когда заказчик попросил проверки (строка «Проверки макета: разрешены» в
-ARTIFACTS.md; `references/claude-design.md § HTML-копии и kit`). Все ширины приёмки — артборды холста
-(`kb/common/acceptance-widths.yaml#artboards`, набор задаёт заказчик в одном месте, NU-01), поэтому кадр — сама копия:
+ARTIFACTS.md; `references/claude-design.md § HTML-копии и kit`). Манифест — производная копий с одним потребителем:
+в git он не хранится — `kit/shot.py` считает его при съёмке, а `build` пишет в папку выходов. Все ширины приёмки —
+артборды холста (`kb/common/acceptance-widths.yaml#artboards`, набор задаёт заказчик в одном месте, NU-01), поэтому
+кадр — сама копия:
   - кадр статичной копии — на ширине и высоте её рамки, в теме её твиков (тёмная — при твике темы со значением dark), с
     подписью и этапом страницы холста из canvas.json;
-  - `widths` манифеста — ширины артбордов из файла ширин: по ним `kit/canvas.html` раскладывает кадры рядами;
+  - `widths` манифеста — ширины артбордов: набор входа холста (поле `acceptance_widths` передней части
+    `design/<surface>/input/INPUT.md`), без него — набор проекта (строка «Ширины приёмки: 1440, 1024, 390 — …» раздела
+    «Условия холста» ARTIFACTS.md продукта, числа до тире), без строки — набор файла ширин; по ним `kit/canvas.html`
+    раскладывает кадры рядами;
   - HTML без строки происхождения dc_to_html — не копия: кадра у него нет;
   - вылет на `overflow_only`, ресайз и зум проверяются на собранной странице в репозитории кода: кадров для них нет.
 `kit/shot.py <canvas/html> <кадры> --manifest kit.json` снимает кадры по списку `artboards` манифеста (поля file, w, h,
-theme, title). Манифест — производная: руками не правится, в нём нет даты — пересборка без изменений даёт те же байты.
+theme, title): файла `kit.json` в папке копий нет — съёмка считает манифест сама этой же сборкой. Манифест —
+производная: руками не правится, в нём нет даты — пересборка без изменений даёт те же байты.
 Из Python (их читает вход холста): `classes(widths, first_bp, overflow)` — ширины классов экрана по `by_viewport` (NU-02:
 `desktop` — от первого брейкпоинта ДС, `mobile` — ниже него и вылет, `any` — все и вылет; без overflow — без вылета),
 `reference_breakpoints(route)` — эталонные границы без токенов ДС: кабинет — эталонные токены ui
@@ -19,8 +25,10 @@ theme, title). Манифест — производная: руками не п
 (`kb/site/04-blocks/blocks.yaml`).
 
 Команды (файлы проекта — через lib/docpaths.py):
-  kit_manifest.py build <slug> <surface> [--repo DIR] [--json]   пишет design/<surface>/canvas/html/kit.json
-  kit_manifest.py check <slug> <surface> [--repo DIR] [--json]   R-FRESH-005: kit.json равен сборке из копий и ширин
+  kit_manifest.py build <slug> <surface> [--repo DIR] [--out DIR] [--json]
+      пишет kit.json в --out, без ключа — в `$DDD_HOME/out/claude-design/kit/<slug>/<surface>/`; в проект не пишет
+  kit_manifest.py check <slug> <surface> [--repo DIR] [--json]
+      R-FRESH-005: kit.json, оставленный рядом с копиями, равен сборке из копий и ширин; файла нет — находки нет
   kit_manifest.py make <папка копий> [--canvas ПАПКА] [--out ФАЙЛ] [--json]   вне проекта; без --out — в stdout
   kit_manifest.py --selftest                                      на фикстуре canvas (пример базы), без сети
 Коды выхода: 0 — готово, ошибок нет; 1 — есть находки error (check); 2 — ошибка вызова или окружения.
@@ -59,6 +67,73 @@ class ToolError(RuntimeError):
 def _yaml():
     import yaml
     return yaml
+
+
+WIDTHS_LINE = re.compile(r"^Ширины приёмки:[ \t]*(.*)$", re.M)     # строка раздела «Условия холста» ARTIFACTS.md
+WIDTHS_SECTION = "Условия холста"
+PROJECT_WIDTHS = "ARTIFACTS.md § Условия холста, строка «Ширины приёмки»"
+INPUT_MANIFEST = "INPUT.md"                                       # манифест входа холста (project/canvas_input.py)
+INPUT_WIDTHS_KEY = "acceptance_widths"                            # поле его передней части: ширины приёмки входа
+INPUT_WIDTHS = "INPUT.md входа холста, поле acceptance_widths"
+
+
+def _widths(values):
+    """Числа набора ширин → от широкой к узкой без повторов; чисел нет — None."""
+    nums = {int(x) for x in values if isinstance(x, (int, float)) and not isinstance(x, bool) and x > 0}
+    return sorted(nums, reverse=True) or None
+
+
+def input_widths(manifest):
+    """Набор ширин входа холста — список `acceptance_widths` передней части INPUT.md. Файла, передней части, поля или
+    чисел в нём нет — None."""
+    if not manifest or not Path(manifest).is_file():
+        return None
+    fm = re.match(r"---\r?\n(.*?)\r?\n---", Path(manifest).read_text(encoding="utf-8"), re.S)
+    try:
+        data = _yaml().safe_load(fm.group(1)) if fm else None
+    except _yaml().YAMLError:
+        return None
+    vals = data.get(INPUT_WIDTHS_KEY) if isinstance(data, dict) else None
+    return _widths(vals) if isinstance(vals, list) else None
+
+
+def input_near(html_dir):
+    """Манифест входа холста для папки копий `design/<surface>/canvas/html/` — `design/<surface>/input/INPUT.md`;
+    папка копий лежит иначе или манифеста нет — None."""
+    d = Path(html_dir).resolve()
+    html = docpaths.DESIGN_SURFACE["canvas-html"].split("/")
+    if list(d.parts[-len(html):]) != html:
+        return None
+    p = d.parents[len(html) - 1] / docpaths.DESIGN_SURFACE["input"] / INPUT_MANIFEST
+    return p if p.is_file() else None
+
+
+def project_widths(artifacts):
+    """Набор ширин проекта — строка «Ширины приёмки: …» раздела «Условия холста» ARTIFACTS.md: числа до тире, от
+    широкой к узкой. Файла, раздела, строки или чисел в ней нет — None: действует набор файла ширин."""
+    if not artifacts or not Path(artifacts).is_file():
+        return None
+    text = Path(artifacts).read_text(encoding="utf-8")
+    head = re.search(r"^(#+)[ \t]+" + re.escape(WIDTHS_SECTION) + r"[ \t]*$", text, re.M)
+    if not head:
+        return None
+    body = text[head.end():]
+    nxt = re.search(r"^#{1,%d}[ \t]+\S" % len(head.group(1)), body, re.M)
+    m = WIDTHS_LINE.search(body[:nxt.start()] if nxt else body)
+    if not m:
+        return None
+    return _widths(int(x) for x in re.findall(r"\d+", re.split(r"\s[—–-]\s", m.group(1), maxsplit=1)[0]))
+
+
+def artifacts_near(html_dir, depth=4):
+    """ARTIFACTS.md продукта для папки копий: первая папка вверх (не дальше depth уровней), где он лежит, — у проекта
+    это `design/` над `design/<surface>/canvas/html/`; нет — None."""
+    d = Path(html_dir).resolve()
+    for _ in range(depth):
+        d = d.parent
+        if (d / docpaths.DESIGN_PRODUCT["artifacts"]).is_file():
+            return d / docpaths.DESIGN_PRODUCT["artifacts"]
+    return None
 
 
 def acceptance():
@@ -120,10 +195,15 @@ def frame_of(copy_text):
     return (int(m.group(1)), int(m.group(2))) if m else (None, None)
 
 
-def build_manifest(html_dir, canvas_dir=None, title=""):
-    """Манифест kit по папке копий: кадр на статичную копию артборда в порядке canvas.json (без него — по имени)."""
+def build_manifest(html_dir, canvas_dir=None, title="", artifacts=None, input_manifest=None):
+    """Манифест kit по папке копий: кадр на статичную копию артборда в порядке canvas.json (без него — по имени).
+    Ширины рядов — набор входа холста (input_manifest; без него — INPUT.md поверхности папки копий), иначе набор
+    проекта из ARTIFACTS.md (artifacts; без него — файл над папкой копий), иначе файл ширин."""
     html_dir = Path(html_dir)
     aw = acceptance()
+    own, own_src = input_widths(input_manifest or input_near(html_dir)), INPUT_WIDTHS
+    if not own:
+        own, own_src = project_widths(artifacts or artifacts_near(html_dir)), PROJECT_WIDTHS
     canvas = DC.load_canvas(canvas_dir) if canvas_dir and Path(canvas_dir).is_dir() else None
     statics = []
     for p in sorted(html_dir.glob("*.html")):
@@ -140,9 +220,9 @@ def build_manifest(html_dir, canvas_dir=None, title=""):
     statics.sort(key=lambda s: (s["order"], s["file"]))
     return {
         "title": (title or (canvas or {}).get("title") or html_dir.parent.name) + " — кадры kit",
-        "source": {"acceptance_widths": "kb/common/acceptance-widths.yaml",
-                   "acceptance_widths_sha256_16": aw["sha256_16"]},
-        "widths": aw["artboards"],
+        "source": dict({"acceptance_widths": "kb/common/acceptance-widths.yaml",
+                        "acceptance_widths_sha256_16": aw["sha256_16"]}, **({"widths": own_src} if own else {})),
+        "widths": own or aw["artboards"],
         "artboards": [{k: s[k] for k in ("file", "artboard", "w", "h", "theme", "title", "stage")} for s in statics],
     }
 
@@ -158,7 +238,9 @@ def project_manifest(call):
     canvas_dir = docpaths.design(call.slug, "canvas-project", surface=call.surface, repo=call.repo)
     if not html_dir.is_dir():
         raise ToolError(f"нет HTML-копий: {docpaths.rel(html_dir, call.repo)} (dc_to_html build)")
-    return html_dir / NAME, build_manifest(html_dir, canvas_dir)
+    inp = docpaths.design(call.slug, "input", surface=call.surface, repo=call.repo) / INPUT_MANIFEST
+    return html_dir / NAME, build_manifest(html_dir, canvas_dir, input_manifest=inp,
+                                           artifacts=docpaths.design(call.slug, "artifacts", repo=call.repo))
 
 
 def has_copies(html_dir):
@@ -168,13 +250,15 @@ def has_copies(html_dir):
 
 
 def cmd_build(call):
-    path, man = project_manifest(call)
+    _inside, man = project_manifest(call)
+    out = Path(call.out) if call.out else kbpaths.out("claude-design", "kit", call.slug, call.surface)
+    out.mkdir(parents=True, exist_ok=True)
+    path = out / NAME
     text = dumps(man)
     same = path.is_file() and path.read_text(encoding="utf-8") == text
     if not same:
         path.write_text(text, encoding="utf-8")
-    res = {"path": docpaths.rel(path, call.repo), "written": not same, "frames": len(man["artboards"]),
-           "widths": man["widths"]}
+    res = {"path": str(path), "written": not same, "frames": len(man["artboards"]), "widths": man["widths"]}
     print(json.dumps(res, ensure_ascii=False) if call.json else
           f"{res['path']}: {'записан' if not same else 'без изменений'}, кадров {res['frames']}, ширины артбордов "
           f"{', '.join(str(w) for w in res['widths'])}")
@@ -187,14 +271,12 @@ def cmd_check(call):
     if has_copies(html_dir):
         path, man = project_manifest(call)
         rel = docpaths.rel(path, call.repo)
-        fix = f"kit_manifest build {call.slug} {call.surface} — манифест собирается из копий и acceptance-widths.yaml"
-        if not path.is_file():
+        fix = (f"снять {NAME} из папки копий: манифест считает kit/shot.py при съёмке, сборка в папку выходов — "
+               f"kit_manifest build {call.slug} {call.surface}")
+        if path.is_file() and path.read_text(encoding="utf-8") != dumps(man):
             rep.add(RULE, "error", surface=call.surface, kind="kit", ref=NAME, path=rel,
-                    message="нет манифеста kit.json у статичных копий артбордов", fix=fix)
-        elif path.read_text(encoding="utf-8") != dumps(man):
-            rep.add(RULE, "error", surface=call.surface, kind="kit", ref=NAME, path=rel,
-                    message="kit.json не равен сборке из копий и acceptance-widths.yaml: правлен руками или копии либо "
-                            "файл ширин изменились", fix=fix)
+                    message="kit.json рядом с копиями не равен сборке из копий и ширин приёмки: правлен руками или "
+                            "копии либо набор ширин изменились", fix=fix)
     FND.print_findings(rep.items, as_json=call.json,
                        title=None if call.json else f"kit_manifest check {call.slug} {call.surface}")
     return rep.exit_code()
@@ -246,8 +328,14 @@ def selftest():
         dc = str(Path(DC.__file__))
         subprocess.run([sys.executable, dc, "build"] + argv, capture_output=True, text=True, check=True)
         (html_dir / "home.html").write_text("<!doctype html><title>страница</title>", encoding="utf-8")
-        r = subprocess.run([sys.executable, __file__, "build"] + argv + ["--json"], capture_output=True, text=True)
-        check("фикстура canvas: build — код 0", r.returncode, 0)
+        out_dir = fx.root / "kit-out"
+        r = subprocess.run([sys.executable, __file__, "build"] + argv + ["--out", str(out_dir), "--json"],
+                           capture_output=True, text=True)
+        check("фикстура canvas: build — код 0, kit.json — в --out, в папку копий не пишется",
+              (r.returncode, (out_dir / NAME).is_file(), (html_dir / NAME).exists()), (0, True, False))
+        r = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json"], capture_output=True, text=True)
+        check("копии без kit.json рядом — check без находок: манифест считает съёмка", (r.returncode, r.stdout), (0, ""))
+        (html_dir / NAME).write_text((out_dir / NAME).read_text(encoding="utf-8"), encoding="utf-8")
         man = json.loads((html_dir / NAME).read_text(encoding="utf-8"))
         fr = man["artboards"]
         check("манифест — заголовок, источник, ширины артбордов и кадры; полей кадров вылета и классов нет",
@@ -263,22 +351,48 @@ def selftest():
               {f["file"]: (f["artboard"], f["stage"]) for f in fr if f["file"] in ("Dir-Paper.html", "Main.html")},
               {"Dir-Paper.html": ("Dir-Paper.dc.html", "directions"), "Main.html": ("Main.dc.html", "mockup")})
         r = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json"], capture_output=True, text=True)
-        check("check после build — 0 находок", (r.returncode, r.stdout), (0, ""))
+        check("kit.json рядом с копиями равен сборке — 0 находок", (r.returncode, r.stdout), (0, ""))
         (html_dir / NAME).write_text((html_dir / NAME).read_text(encoding="utf-8").replace('"w": 390', '"w": 400'),
                                      encoding="utf-8")
         r = subprocess.run([sys.executable, __file__, "check"] + argv + ["--json"], capture_output=True, text=True)
         items = FND.parse_lines(r.stdout)
         check("правленый kit.json — R-FRESH-005 error", (r.returncode, [(f.rule, f.severity, f.ref) for f in items]),
               (1, [(RULE, "error", NAME)]))
-        r1 = subprocess.run([sys.executable, __file__, "build"] + argv, capture_output=True, text=True)
-        b1 = (html_dir / NAME).read_bytes()
-        subprocess.run([sys.executable, __file__, "build"] + argv, capture_output=True, text=True)
-        check("пересборка — те же байты", (r1.returncode, (html_dir / NAME).read_bytes() == b1), (0, True))
+        b1 = (out_dir / NAME).read_bytes()
+        r1 = subprocess.run([sys.executable, __file__, "build"] + argv + ["--out", str(out_dir)], capture_output=True,
+                            text=True)
+        check("пересборка — те же байты", (r1.returncode, (out_dir / NAME).read_bytes() == b1), (0, True))
         canvas_dir = docpaths.design(fx.slug, "canvas-project", surface="promo", repo=fx.root)
         r = subprocess.run([sys.executable, __file__, "make", str(html_dir), "--canvas", str(canvas_dir)],
                            capture_output=True, text=True)
         check("make вне проекта — тот же манифест в stdout", (r.returncode, r.stdout),
-              (0, (html_dir / NAME).read_text(encoding="utf-8")))
+              (0, (out_dir / NAME).read_text(encoding="utf-8")))
+        art = docpaths.design(fx.slug, "artifacts", repo=fx.root)
+        old = art.read_text(encoding="utf-8") if art.is_file() else "# Артефакты\n"
+        art.write_text(old + "\n## Условия холста\n\nШирины приёмки: 1440, 390, 1024 — заказчик, встреча 2 из 3"
+                       "\n\n## Дальше\n\nШирины приёмки: 800\n", encoding="utf-8")
+        check("набор ширин проекта — строка «Ширины приёмки» раздела «Условия холста»: числа до тире, от широкой",
+              project_widths(art), [1440, 1024, 390])
+        own = build_manifest(html_dir, canvas_dir)
+        check("манифест: ширины рядов — набор проекта вместо набора базы, источник назван",
+              (own["widths"], own["source"].get("widths"),
+               [f["file"] for f in own["artboards"]] == [f["file"] for f in fr]), ([1440, 1024, 390], PROJECT_WIDTHS, True))
+        inp = docpaths.design(fx.slug, "input", surface="promo", repo=fx.root) / INPUT_MANIFEST
+        inp.parent.mkdir(parents=True, exist_ok=True)
+        inp.write_text("---\nstage: mockup\nroute: landing\nacceptance_widths:\n- 1440\n- 768\n- 360\n---\n# Вход\n",
+                       encoding="utf-8")
+        own = build_manifest(html_dir, canvas_dir)
+        check("манифест: набор входа холста (acceptance_widths в INPUT.md) — первым, источник назван",
+              (input_widths(inp), own["widths"], own["source"].get("widths")),
+              ([1440, 768, 360], [1440, 768, 360], INPUT_WIDTHS))
+        r = subprocess.run([sys.executable, __file__, "build"] + argv + ["--out", str(out_dir), "--json"],
+                           capture_output=True, text=True)
+        check("build проекта берёт набор входа холста", json.loads(r.stdout or "{}").get("widths"), [1440, 768, 360])
+        inp.write_text("---\nstage: mockup\n---\n# Вход без поля ширин\n", encoding="utf-8")
+        art.write_text("# Артефакты\n\n## Условия холста\n\nШирины приёмки: как в базе\n", encoding="utf-8")
+        check("ни поля входа, ни чисел в строке — набор базы",
+              (input_widths(inp), project_widths(art), build_manifest(html_dir, canvas_dir)["widths"]),
+              (None, None, aw["artboards"]))
     print("selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

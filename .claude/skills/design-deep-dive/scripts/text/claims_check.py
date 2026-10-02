@@ -44,11 +44,14 @@
           --deck DECK — copy deck, к слотам которого по тексту привязывается вход без слотов; отрасль и юрисдикция —
           из его шапки;
           --allow FILE — обходы сверки, принятые человеком: JSON с полем allowed (вывод copydeck.py validate --final
-          --json, check --json или claims --json) либо список записей {rule, where, reason, by[, fragment]}. Находка
-          под обходом — info с причиной и тем, кто решил. Обходятся только COPY-F-CLASS и COPY-F-NUM (с
-          COPY-F-NUM-MISMATCH); запись без reason или by и запись с другим правилом не действуют. Место обхода — слот
-          или страница copy deck (вход — copy deck или привязка --deck); у единицы без привязки — запись с тем же
-          фрагментом (fragment).
+          --json, check --json или claims --json) либо список записей {rule, where, reason, by[, value][, fragment]}.
+          Находка под обходом — info с причиной и тем, кто решил. rule — COPY-F-CLASS, COPY-F-NUM (число без факта и
+          число, не совпавшее с фактом) или COPY-F-NUM-MISMATCH (только несовпавшее число); запись без reason или by,
+          с другим правилом или с value не числом не действует. Запись снимает находку, когда совпали место и снятое.
+          Место — where записи: слот «страница/секция/слот», мета «страница/meta» (только тексты мета) или страница
+          (вход — copy deck или привязка --deck). Снятое — value (число фрагмента находки) и fragment (слово или
+          фраза фрагмента находки целиком); без них запись снимает все находки своего правила на своём месте. У
+          единицы без привязки — запись с тем же фрагментом (fragment).
           exit 0 — нет error; 2 — есть error; 1 — ошибка входа или утилиты
   lint-facts FACTS [--today …] [--final] — проверка самого инвентаря (вывод без основания, истёкшие, без разрешений,
           id мест use по словарю site, демо-данные); разрешение pending и демо-данные — warning, с --final (ворота
@@ -1135,31 +1138,71 @@ def bind_units(units, deck_units):
     return out, n
 
 
-# Обход эвристик сверки — как claims_allow слота и страницы copy deck: запись покрывает находки своего семейства. Право
-# (COPY-L-…), never_claim, «утверждение шире факта» и остальная сверка не обходятся.
-ALLOW_FAMILIES = {'COPY-F-CLASS': ('COPY-F-CLASS',), 'COPY-F-NUM': ('COPY-F-NUM', 'COPY-F-NUM-MISMATCH')}
+# Обход эвристик сверки — как claims_allow слота, мета и страницы copy deck. rule записи — семейство или id находки:
+# COPY-F-CLASS — маркер класса без факта; COPY-F-NUM — число без факта и число, не совпавшее с фактом;
+# COPY-F-NUM-MISMATCH — только несовпавшее число. Право (COPY-L-…), never_claim, «утверждение шире факта» и остальная
+# сверка не обходятся.
+ALLOW_FAMILIES = {'COPY-F-CLASS': ('COPY-F-CLASS',), 'COPY-F-NUM': ('COPY-F-NUM', 'COPY-F-NUM-MISMATCH'),
+                  'COPY-F-NUM-MISMATCH': ('COPY-F-NUM-MISMATCH',)}
+ALLOW_SCOPES = ('slot', 'meta', 'page')
+ALLOW_NUMBER_RX = re.compile(r'\d+(?:[.,]\d+)?')
+
+
+def allow_number(s):
+    """Число записи обхода и фрагмента находки одним видом: «7 900» = «7900», «4,9» = «4.9», «12.0» = «12»; не число —
+    None."""
+    t = re.sub(r'(?<=\d)\s(?=\d)', '', str(s).strip()).replace(',', '.')
+    if not re.fullmatch(r'\d+(?:\.\d+)?', t):
+        return None
+    return t.rstrip('0').rstrip('.') if '.' in t else t
+
+
+def fragment_numbers(fragment):
+    """Числа фрагмента находки (разряды через пробел — одно число) видом allow_number."""
+    t = re.sub(r'(?<=\d)\s(?=\d{3}(?!\d))', '', str(fragment or ''))
+    return {allow_number(x) for x in ALLOW_NUMBER_RX.findall(t)}
+
+
+def allow_scope(where):
+    """Место записи обхода по её where: slot — «страница/секция/слот» (у текста мета — «страница/meta/поле»), meta —
+    «страница/meta» (все тексты мета страницы), page — «страница»; другое — None."""
+    parts = str(where or '').split('/')
+    if not all(parts):
+        return None
+    if len(parts) == 3:
+        return 'slot'
+    if len(parts) == 2:
+        return 'meta' if parts[1] == 'meta' else None
+    return 'page' if len(parts) == 1 else None
 
 
 def load_allow(path):
     """Обходы сверки из JSON: поле allowed вывода copydeck.py (validate --final, check, claims) или список записей
-    {rule, where, reason, by[, fragment]}. → (действующие записи, заметки о недействующих). Действует запись с правилом
-    семейства ALLOW_FAMILIES, причиной (reason) и тем, кто решил (by)."""
+    {rule, where, reason, by[, scope][, value][, fragment]}. → (действующие записи, заметки о недействующих). Действует
+    запись с правилом из ALLOW_FAMILIES, причиной (reason) и тем, кто решил (by); value — число и только у обхода
+    числа. Место записи — её where: слот, мета или страница; scope записи (где решение записано в copy deck) места не
+    меняет, без него scope — по виду where."""
     with open(path, encoding='utf-8') as f:
         data = json.load(f)
     raw = data.get('allowed') if isinstance(data, dict) else data
     if not isinstance(raw, list):
         raise SystemExit(f'{path}: нет списка обходов (поле allowed или список записей)')
-    family = {r: fam for fam, rs in ALLOW_FAMILIES.items() for r in rs}
     ok, notes = [], []
     for e in raw:
         e = e if isinstance(e, dict) else {'rule': e}
         rule, where, reason, by = (str(e.get(k) or '').strip() for k in ('rule', 'where', 'reason', 'by'))
-        if rule not in family:
-            notes.append(f"обход «{rule or '—'}» ({where or '—'}) не действует: обходятся только {' и '.join(ALLOW_FAMILIES)}")
+        value = '' if e.get('value') in (None, '') or isinstance(e.get('value'), bool) else str(e['value']).strip()
+        if rule not in ALLOW_FAMILIES:
+            notes.append(f"обход «{rule or '—'}» ({where or '—'}) не действует: обходятся только {', '.join(ALLOW_FAMILIES)}")
         elif not reason or not by:
             notes.append(f"обход {rule} ({where or '—'}) не действует: нет reason или by")
+        elif value and (rule == 'COPY-F-CLASS' or allow_number(value) is None):
+            notes.append(f"обход {rule} ({where or '—'}) не действует: value «{value}» — число и только у обхода числа; "
+                         'слово или фразу называет fragment')
         else:
-            rec = {'rule': family[rule], 'where': where, 'reason': reason, 'by': by, 'fragment': norm(str(e.get('fragment') or ''))}
+            rec = {'rule': rule, 'where': where, 'scope': e.get('scope') if e.get('scope') in ALLOW_SCOPES else allow_scope(where),
+                   'reason': reason, 'by': by, 'value': allow_number(value) if value else '',
+                   'fragment': norm(str(e.get('fragment') or ''))}
             if rec not in ok:
                 ok.append(rec)
     return ok, notes
@@ -1170,30 +1213,49 @@ def unit_place(u):
     return '/'.join(str(u[k]) for k in ('page', 'section', 'slot')) if all(u.get(k) for k in ('page', 'section', 'slot')) else None
 
 
+def unit_places(u):
+    """Места обхода единицы со слотом — от ближнего к дальнему: слот, мета страницы (у текста мета), страница; у единицы
+    без слота — пусто."""
+    place = unit_place(u)
+    if not place:
+        return []
+    page = str(u['page'])
+    return [place] + ([f'{page}/meta'] if str(u.get('section')) == 'meta' else []) + [page]
+
+
+def allow_names(e, fragment):
+    """Называет ли запись обхода эту находку: value — число фрагмента находки, fragment — слово или фраза фрагмента
+    целиком (без регистра, «ё» = «е»). Запись без value и fragment подходит любой находке своего правила."""
+    if e['value'] and e['value'] not in fragment_numbers(fragment):
+        return False
+    if e['fragment'] and not re.search(r'(?<![0-9a-zа-я])' + re.escape(e['fragment']) + r'(?![0-9a-zа-я])', norm(str(fragment))):
+        return False
+    return True
+
+
 def apply_allow(F, units, entries):
-    """Находка под обходом → info с причиной и тем, кто решил. Место обхода — слот или страница единицы; у единицы без
-    слота — запись с тем же фрагментом. → (число обойдённых находок, число записей, которым не нашлось места: слот или
-    страница без единиц со слотами во входе)."""
+    """Находка под обходом → info с причиной и тем, кто решил. Запись снимает находку, когда совпали место и снятое:
+    место — слот единицы, мета её страницы (у текста мета) или страница; снятое — правило записи (семейство или id
+    находки) и, если запись их называет, число value и фрагмент fragment. Из подходящих записей берётся ближняя: слот,
+    мета, страница. У единицы без слота места нет — запись с тем же фрагментом. → (число обойдённых находок, число
+    записей, которым не нашлось места: слот, мета или страница без единиц со слотами во входе)."""
     by_id = {u['id']: u for u in units}
-    places = {unit_place(u) for u in units} | {str(u.get('page')) for u in units if unit_place(u)}
+    places = {p for u in units for p in unit_places(u)}
     n = 0
     for f in F:
-        u = by_id.get(f['unit']) or {}
-        place = unit_place(u)
-        for e in entries:
-            if f['rule'] not in ALLOW_FAMILIES[e['rule']]:
-                continue
-            if place:
-                if e['where'] not in (place, str(u.get('page'))):
-                    continue
-            elif not e['fragment'] or e['fragment'] != norm(str(f['fragment'])):
-                continue
-            if f['level'] != 'info':
-                f['level_was'], f['level'] = f['level'], 'info'
-            f['allowed'] = {k: e[k] for k in ('rule', 'where', 'reason', 'by')}
-            f['message'] += f" — обход claims_allow: {e['reason']} ({e['by']})"
-            n += 1
-            break
+        spots, frag = unit_places(by_id.get(f['unit']) or {}), str(f['fragment'])
+        fits = [e for e in entries if f['rule'] in ALLOW_FAMILIES[e['rule']] and allow_names(e, frag)]
+        if spots:
+            e = next((e for spot in spots for e in fits if e['where'] == spot), None)
+        else:
+            e = next((e for e in fits if e['fragment'] and e['fragment'] == norm(frag)), None)
+        if e is None:
+            continue
+        if f['level'] != 'info':
+            f['level_was'], f['level'] = f['level'], 'info'
+        f['allowed'] = {k: e[k] for k in ('rule', 'where', 'reason', 'by', 'scope') if k != 'scope' or e[k]}
+        f['message'] += f" — обход claims_allow: {e['reason']} ({e['by']})"
+        n += 1
     return n, sum(1 for e in entries if e['where'] not in places and not e['fragment'])
 
 
@@ -2643,8 +2705,8 @@ def cmd_check(a):
         entries, anotes = load_allow(a.allow)
         n_allowed, n_lost = apply_allow(F, units, entries)
         if n_lost:
-            anotes.append(f'обходов без места во входе: {n_lost} — слот или страница copy deck; у входа без слотов нужен ключ --deck '
-                          'или записи с фрагментом (copydeck.py check --json)')
+            anotes.append(f'обходов без места во входе: {n_lost} — слот, мета или страница copy deck; у входа без слотов нужен ключ '
+                          '--deck или записи с фрагментом (copydeck.py check --json)')
         if not a.quiet:
             for x in anotes:
                 print('обходы:', x, file=sys.stderr)
@@ -3103,6 +3165,61 @@ def _selftest_binding(check, facts):
         code_t, res_t = run(tp, '--allow', ap)
         check('--allow у текста без слотов: записи слота без фрагмента не находится места — находка остаётся',
               code_t == 2 and res_t['allow']['applied'] == 0 and any('без места' in x for x in res_t['allow']['notes']), (code_t, res_t['allow']))
+        # место и снятое записи обхода: мета, число value, id находки, фрагмент; запись без scope — по виду where
+        deck_m = {'copy_deck': {'version': 0, 'pages': [{'page_id': 'home', 'page_type': 'landing-waitlist',
+                                                         'meta': {'title': 'Лампа для чтения — 12 лет работы'}, 'sections': [
+            {'section_id': 'hero', 'section_role': 'hero', 'slots': [
+                {'slot_id': 'h1', 'slot_type': 'headline', 'variants': [{'id': 'a', 'text': '12 лет делаем лампы'}], 'chosen': 'a', 'fact_ids': []},
+                {'slot_id': 'sub', 'slot_type': 'subheadline', 'variants': [{'id': 'a', 'text': 'Собрали 340 ламп для библиотек за 12 лет'}], 'chosen': 'a', 'fact_ids': []},
+                {'slot_id': 'note', 'slot_type': 'cta-note', 'variants': [{'id': 'a', 'text': '10 000 клиентов доверяют нам'}], 'chosen': 'a', 'fact_ids': []}]}]}]}}
+        mp = os.path.join(td, 'deck-meta.yaml')
+        with open(mp, 'w', encoding='utf-8') as fo:
+            yaml.safe_dump(deck_m, fo, allow_unicode=True, sort_keys=False)
+        t12, h12, s12, s340, n10k = (('home/meta/title', 'COPY-F-NUM', '12 лет'), ('home/hero/h1', 'COPY-F-NUM', '12 лет'), ('home/hero/sub', 'COPY-F-NUM', '12 лет'),
+                                     ('home/hero/sub', 'COPY-F-NUM-MISMATCH', '340'), ('home/hero/note', 'COPY-F-NUM-MISMATCH', '10 000'))
+        why = {'reason': 'считаем от года основания мастерской', 'by': 'аналитик'}
+
+        def allow_run(records):
+            """Сверка copy deck с записями обхода → (находки под обходом, оставшиеся error — тройками «место, правило,
+            фрагмент»; результат)."""
+            with open(ap, 'w', encoding='utf-8') as fo:
+                json.dump(records, fo, ensure_ascii=False)
+            _code, r = run(mp, '--allow', ap) if records is not None else run(mp)
+            key = lambda f: ('/'.join(f['unit'].split('/')[:3]), f['rule'], f['fragment'])
+            return ({key(f) for f in r['findings'] if f.get('allowed')}, {key(f) for f in r['findings'] if f['level'] == 'error'}, r)
+        _got, left, _r = allow_run(None)
+        check('обходы: без файла пять находок чисел — error (мета, заголовок, две в подзаголовке, сноска)', left == {t12, h12, s12, s340, n10k}, left)
+        got, left, r_m = allow_run({'allowed': [dict(why, rule='COPY-F-NUM', where='home/meta', scope='meta')]})
+        check('обход мета (where «страница/meta») снимает находку только в мета: то же число в слотах остаётся error',
+              got == {t12} and left == {h12, s12, s340, n10k} and not r_m['allow']['notes']
+              and [f['allowed']['scope'] for f in r_m['findings'] if f.get('allowed')] == ['meta'], (got, left, r_m['allow']))
+        got, left, r_m = allow_run([dict(why, rule='COPY-F-NUM', where='home', reason='запись страницы'), dict(why, rule='COPY-F-NUM', where='home/meta')])
+        check('обход: из записей страницы и мета тексту мета достаётся ближняя — запись мета',
+              [f['allowed']['where'] for f in r_m['findings'] if f['unit'] == 'home/meta/title'] == ['home/meta'] and got == {t12, h12, s12, s340, n10k}, (got, left))
+        got, left, _r = allow_run({'allowed': [dict(why, rule='COPY-F-NUM', where='home', scope='page', value=12)]})
+        check('обход с value снимает находки только этого числа: 12 — снято на всей странице, 340 и 10 000 остаются error',
+              got == {t12, h12, s12} and left == {s340, n10k}, (got, left))
+        got, left, _r = allow_run([dict(why, rule='COPY-F-NUM', where='home', value='10000')])
+        check('обход с value: число записи и фрагмент находки сравниваются без разрядов — «10000» снимает «10 000»', got == {n10k} and left == {t12, h12, s12, s340}, (got, left))
+        got, left, _r = allow_run([dict(why, rule='COPY-F-NUM-MISMATCH', where='home')])
+        check('обход с id находки COPY-F-NUM-MISMATCH: сняты только несовпавшие числа, числа без факта остаются error',
+              got == {s340, n10k} and left == {t12, h12, s12}, (got, left))
+        got, left, r_m = allow_run([dict(why, rule='COPY-F-NUM', where='home/hero/sub')])
+        check('обход без scope, value и fragment — на своём слоте: сняты обе находки семейства в слоте, соседние слоты и мета — error',
+              got == {s12, s340} and left == {t12, h12, n10k} and {f['allowed']['scope'] for f in r_m['findings'] if f.get('allowed')} == {'slot'}, (got, left))
+        got, left, _r = allow_run([dict(why, rule='COPY-F-NUM', where='home/hero/sub', fragment='12 лет')])
+        check('обход с fragment: в слоте снята находка с этим фрагментом, вторая находка слота остаётся error', got == {s12} and left == {t12, h12, s340, n10k}, (got, left))
+        got, left, r_m = allow_run({'allowed': [dict(why, rule='COPY-F-NUM', where='home/hero/h1', fragment='12 лет', scope='page', message='число без факта')]})
+        check('обход записью находки (copydeck.py check --json): место — слот из where, scope «page» его не расширяет',
+              got == {h12} and left == {t12, s12, s340, n10k} and [f['allowed']['scope'] for f in r_m['findings'] if f.get('allowed')] == ['page'], (got, left))
+        got, left, r_m = allow_run([dict(why, rule='COPY-F-NUM', where='home', value='двенадцать'), dict(why, rule='COPY-F-CLASS', where='home', value=12)])
+        check('обход: value не число и value у маркера класса — записи не действуют',
+              not got and r_m['allow']['entries'] == 0 and len(r_m['allow']['notes']) == 2 and all('value' in x for x in r_m['allow']['notes']), r_m['allow'])
+        check('обход: число записи против фрагмента находки — разряды, запятая, число целиком',
+              allow_number('7 900') == '7900' and allow_number('4,90') == '4.9' and allow_number('12.0') == '12' and allow_number('двенадцать') is None
+              and fragment_numbers('от 7 900 ₽ за 12 лет') == {'7900', '12'} and '12' not in fragment_numbers('120 лет')
+              and [allow_scope(x) for x in ('home', 'home/meta', 'home/hero/h1', 'home/hero', '')] == ['page', 'meta', 'slot', None, None],
+              (allow_number('4,90'), fragment_numbers('от 7 900 ₽ за 12 лет')))
     schema = load_schema()
     svc = Facts({'facts': [], 'never_claim_defaults': 'none',
                  'entities': [{'id': 'svc-lunch', 'type': 'product', 'names': ['Доставка обедов', 'доставки обедов']}]}, schema, False)
@@ -3518,7 +3635,8 @@ def main(argv=None):
         p.add_argument('--legal-only', action='store_true', help='в отчёт — только находки правил права (claims-rules.yaml, --rules)')
         p.add_argument('--deck', help='copy deck: вход без слотов (HTML, Markdown, текст) привязывается к его слотам по тексту')
         p.add_argument('--allow', help='обходы сверки: JSON с полем allowed (вывод copydeck.py validate --final --json) или список '
-                                       'записей {rule, where, reason, by[, fragment]}; находка под обходом — info с причиной')
+                                       'записей {rule, where, reason, by[, value][, fragment]}; место записи — слот, мета или '
+                                       'страница (where); находка под обходом — info с причиной')
     if cmd in ('check', 'lint-facts'):
         p.add_argument('--final', action='store_true', help='ворота публикации: демо-данные (example: true) — error; '
                                                             'у lint-facts ещё разрешение pending — error')

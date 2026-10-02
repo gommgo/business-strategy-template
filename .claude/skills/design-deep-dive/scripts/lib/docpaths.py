@@ -26,8 +26,8 @@
     <утилита> --selftest                                                                  на встроенной фикстуре
 Разбор — `parser()` и `parse()`: ошибка вызова или окружения (нет корня, проекта, поверхности) — код выхода 2.
 
-    ap = docpaths.parser("canvas_input", "Вход холста …", surface="required",
-                         stages=("directions", "wireframe", "mockup", "motion"), accept=lambda s: s.design)
+    ap = docpaths.parser("canvas_input", "Вход холста …", surface="required", accept=lambda s: s.design,
+                         stages=("directions", "treatment", "wireframe", "mockup", "motion"))
     ap.add_argument("--width", type=int)          # свои ключи утилиты
     call = docpaths.parse(ap)                     # call.command, call.slug, call.surf, call.repo, call.out, call.json …
 
