@@ -1,4 +1,6 @@
-# 01-product — Claude Design как продукт (агент A, 25.09.2026)
+# 01-product — Claude Design как продукт
+
+Снимок: 25.09.2026 · источников: 35
 
 | Файл | Что внутри |
 |---|---|
@@ -17,6 +19,6 @@
   (2–3 или «ten options, then remix») → правка по размеру (chat / inline comments / прямая правка — «use no tokens») → экспорт (.zip,
   PDF, PPTX, HTML, 15 сервисов) или handoff «Send to local coding agent» / «Send to Claude Code Web».
 - Ограничения: комментарии иногда пропадают (дублировать в чат), нет истории версий, совместная правка «still basic», нет модели
-  картинок, большие репозитории — через Claude Code; что внутри handoff bundle, help center не описывает (агент B).
+  картинок, большие репозитории — через Claude Code; что внутри handoff bundle, help center не описывает (разбор — `../02-claude-code-bridge/` §8).
 - Данные: Pro/Max — обучение только при включённом «Help Improve our AI models» (выключить до загрузки материалов клиента); Team/Ent —
   без обучения по умолчанию; превью в sandboxed iframe с короткоживущими токенами.

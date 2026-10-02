@@ -1,28 +1,27 @@
 <!-- Сводка замера 24.09.2026, скопирована 26.09.2026: имена генератора, вендора и хостинга заменены метками (G, G0, «вендор G», «хостинг-G»), числа не менялись; легенда — README.md этой папки. -->
-# E/03 — замер живых страниц G: витрина сайтостроителя G и свободные демо
+# Замер живых страниц G: витрина сайтостроителя G и свободные демо
 
-Агент E: поиск превью — продолжатель-1 (24.09 03:37), цепочка замеров — продолжатель-2 (запуск 03:55), сводки, осмотр и
-доп. образцы — продолжатель-3 (04:15–05:10). Браузер — один Playwright за раз; модель не запускалась.
+Браузер — один Playwright за раз; модель не запускалась.
 
-**Цель.** Измерить «дефолтный вид» G на публичных образцах (задание E, файл `06-design-process/05-default-look.md`).
+**Цель.** Измерить «дефолтный вид» G на публичных образцах (файл `../05-default-look.md`).
 
 **Цели (`targets.tsv`, 22 + `targets_extra.tsv`, 2).** 15 работ витрины сайтостроителя G (`showcases/websites`) после выхода G (дата по id:
 `id >> 22` + 1288834974657 мс; 13 опубликованы 31.08 07:51–07:53, 2 — 31.07), 2 без даты (прайсинг вендора G — вероятно до G; видео-герои),
 3 демо из HN/X (`ydaurtg3fdwhq.хостинг-G` «Impress me», `macos27.хостинг-G`, `windows-xp.хостинг-G` — 24.09 это 404), 2 работы витрины
 до G (январь, апрель 2026) для контраста; доп.: `3ssfec6kooz3q.хостинг-G` (Reddit 1uy63c1, AURUM) и индекс `G.demos.sulat.com`
-(→ опыт E/04). Промты витрины — `prompts.json` (дословно, ≈ 150 слов), живые адреса превью — `previews.json` (`find_previews.py`).
+(→ `model-pairs.md`). Промты витрины — `prompts.json` (дословно, ≈ 150 слов), живые адреса превью — `previews.json` (`find_previews.py`).
 
 **Цепочка `run_chain.sh` (03:55–04:56, закончилась сама, журнал `run.log`).**
 1. `probe_shots.py` — окна 1440×900 и 390×844, медленная прокрутка, приметы в JS (шрифты, кегли, выделенное слово, капс-лейблы,
    «·», стрелки, тире, эмодзи, градиентный текст, стекло, свечения, зерно, курсор, видео/canvas, хосты картинок, вылет, 10 × Tab),
    до 10 кадров и контактный лист → `probe/`, `shots/`, `sheets/`. 22/22.
-2. `99-raw/tools/measure_ui.py --batch measure_targets.jsonl` → `99-raw/cache/measurements/e03-*.json` и `…/screens/`. 44/44
+2. `measure_ui.py --batch measure_targets.jsonl` → файлы замеров `e03-*.json` и кадры. 44/44
    (yanxi 390 — таймаут 60 с).
-3. `99-raw/tools/ui_audit.py --preset consumer --viewport 1440x900 --viewport 390x844 --tab 12` → `audit/`. 21/22 (нет yue-studio).
-4. `impeccable detect --no-config --json --viewport …` (бинарник из D/02, свой `IMPECCABLE_HOME`) → `impeccable/`. 44 прогона,
+3. `ui_audit.py --preset consumer --viewport 1440x900 --viewport 390x844 --tab 12` → `audit/`. 21/22 (нет yue-studio).
+4. `impeccable detect --no-config --json --viewport …` (свой `IMPECCABLE_HOME`) → `impeccable/`. 44 прогона,
    11 — «Navigation timeout of 30000 ms» (хостинг вендора G грузит страницы 8–28 с); у образцов G результат есть для 13 из 16.
 
-**Сводки (продолжатель-3, без браузера).** `summarize_probe.py` → `probe_summary.{tsv,md,json}`; `summarize_measure.py` →
+**Сводки (без браузера).** `summarize_probe.py` → `probe_summary.{tsv,md,json}`; `summarize_measure.py` →
 `measure_summary.{tsv,md}` (блок `derived`, нормы ui 12/02 §5); `summarize_audit.py` → `audit_summary.md` (частоты FAIL ui_audit
 и находок impeccable).
 

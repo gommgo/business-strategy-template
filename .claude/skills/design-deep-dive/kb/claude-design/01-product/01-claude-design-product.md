@@ -1,12 +1,10 @@
 # Claude Design: продукт на 25.09.2026
 
-Агент A (продукт) базы claude-design-research, 25.09.2026 (MSK). Читатель — Claude-оркестратор и заказчик.
-Прочитано 33 источника: help center — 11 статей (Claude Design, дизайн-системы, два админ-гайда, артефакты, шаринг, release notes,
+Снимок: 25.09.2026 · источников: 33: help center — 11 статей (Claude Design, дизайн-системы, два админ-гайда, артефакты, шаринг, release notes,
 модели и effort, модели по умолчанию, доступ к моделям, Fable на тарифах; обновлены 02–24.09.2026); privacy center — 4 статьи;
 anthropic.com — анонс Claude Design (17.04), 9 анонсов моделей, страница вебинара; claude.com — страница продукта, страница
 артефактов, 3 поста блога (17.06, 24.07, 16.09), страница плагина Design; code.claude.com — документация артефактов; плюс 3 файла
-соседних баз; ролики заказчика — только через заметки агента V. Полные тексты —
-`99-raw/cache/`, ход работы — `99-raw/notes/A-notes.md`.
+соседних баз; ролики заказчика — ссылками с таймкодом.
 Главные ограничения: Claude Design не запускался (решение оркестратора) — всё о качестве, скорости, реальном расходе лимитов и
 поведении интерфейса `[не проверено]`; help center читается без JavaScript (`fetch.py`, таблицы — отдельным разбором HTML), даты
 статей — `dateModified`; **переключатель модели в Claude Design официально есть, но модель по умолчанию и список доступных моделей
@@ -38,7 +36,7 @@ anthropic.com — анонс Claude Design (17.04), 9 анонсов модел�
 11. Знай: экспорт — .zip, PDF, PPTX, standalone HTML, Google Slides (только standalone), 15 внешних сервисов (Canva, Lovable, v0,
     Vercel, Netlify, Replit, Miro и др.) и handoff: «Send to local coding agent» / «Send to Claude Code Web». `[документация]` → §6
 12. Знай: из Claude Code дизайн-систему заводит `/design-sync` (React-компоненты и токены), а `/design` создаёт, правит, импортирует
-    дизайн; в терминале Claude даёт ссылку на веб. Детали моста — `02-claude-code-bridge/` (агент B). `[документация]` → §4, §6
+    дизайн; в терминале Claude даёт ссылку на веб. Детали моста — `02-claude-code-bridge/`. `[документация]` → §4, §6
 13. Знай: лимиты **общие** с чатом и Claude Code с 17.06.2026 (раньше — свой недельный лимит); большие кодовые базы, полные деки и
     много итераций расходуют больше; при исчерпании — стоп до сброса или usage credits. Прямые правки на холсте, по словам автора
     продукта, «use no tokens» — финальные мелочи делай руками. `[документация]` `[мнение вендора]` → §7
@@ -89,7 +87,7 @@ and from the Artifacts tab, with on-canvas editing and your design system includ
 | iOS, Android | попросить дизайн и посмотреть в Artifacts; «To start from a template, edit on the canvas, or change sharing settings, use Claude on web or desktop.» |
 | claude.ai/design | «The standalone experience keeps working, and your existing projects stay where they are.» Только здесь — экспорт в Google Slides, аналитика DAU/WAU/MAU |
 
-**Из Claude Code — продуктово** (code.claude.com/docs/en/artifacts, без даты, прочитано 25.09; подробно — агент B) `[документация]`:
+**Из Claude Code — продуктово** (code.claude.com/docs/en/artifacts, без даты, прочитано 25.09; подробно — `02-claude-code-bridge/`) `[документация]`:
 «To mock up a UI, a screen flow, a landing page, or a poster rather than build a page, run `/design` with a brief. Claude drafts the
 design as artboards on one canvas and publishes the canvas as a Design artifact.» Пример вендора: `/design a settings screen for a
 mobile banking app`. «Open the published artifact in a desktop browser to review the artboards. Select an element on an artboard and
@@ -136,7 +134,7 @@ explorations, pitch decks (теперь — Claude Slides), marketing collateral
 | Effort | «Always start with the default model and effort level … This setting applies in chat, Cowork, Claude Code, Claude for Office, Claude Design, and Claude Science.» (15330088) → у разговоров Claude Design есть уровень effort; есть ли меню effort в холсте standalone — не сказано | `[документация]` косвенно; `[не проверено]` |
 | Fable в Claude Design | «You can access Claude Fable 5 and Fable 5.1 on: … Claude Cowork · Claude Code · Claude Design …» (15424964, 02.09) | `[документация]` |
 | Opus 5 и Claude Design | «Our latest Opus-class model, Claude Opus 5, is better than previous Opus models at reading charts, diagrams, and screenshots, making it powerful when paired with Claude Design» (блог, Nate Parrott, 24.07) — единственная связка «модель ↔ Claude Design» после запуска | `[мнение вендора]` |
-| Opus 5.5 | анонс 22.09 и release notes о Claude Design молчат; ролик 24.09 «Opus 5.5 Just 10X'd Claude Design» по речи показывает Opus 5.5 в Claude, Claude Code и Codex (заметки V) | `[документация]`, `[мнение]` |
+| Opus 5.5 | анонс 22.09 и release notes о Claude Design молчат; ролик 24.09 «Opus 5.5 Just 10X'd Claude Design» по речи показывает Opus 5.5 в Claude, Claude Code и Codex | `[документация]`, `[мнение]` |
 | Пустые места | 6 статей help center о Claude Design и артефактах (23–24.09) — 0 слов model / Opus / effort; 9 анонсов моделей (10 файлов кэша) — 0 упоминаний Claude Design (`grep` по кэшу, 25.09) | `[проверено]` |
 
 **Effort в Claude (8664678, 22.09.2026)** `[документация]`: селектор есть у Opus 5.5, Fable 5.1, Opus 5, Sonnet 5, Fable 5, Opus 4.7,
@@ -158,7 +156,7 @@ than other Claude models»; Pro и standard-места — только usage cr
 Fable 5 для всех платных» закончилось 19.07.2026.
 
 **Практика:** Иван (13.08, standalone) — «выбрал бы модель помощнее, типа Opus 5, Fable 5, и не экономил» `[V:uS7gmBLeUV0 03:08]`
-`[практика]`; сторонний мок бэкенда Claude Design эмулирует путь `/v1/design/model-selection` (заметки C) `[мнение]`.
+`[практика]`; сторонний мок бэкенда Claude Design эмулирует путь `/v1/design/model-selection` (`03-practice-pipelines/` §9.1) `[мнение]`.
 
 **Правило для оркестратора** `[не проверено]` → T-01: перед работой открыть переключатель модели в Claude Design и выбрать модель
 явно, а не полагаться на дефолт; для дизайн-системы и первых макетов — Opus 5.5 (на 25.09 «performs at the level of Claude Fable 5.1
@@ -176,7 +174,7 @@ on most work and costs 40% less to run than Opus 5», входит в лимит
 | Fable 5.1, 01.09 | — | Canva: «in Canva Code it built a rhythm game with real music»; Hebbia: «the best decks of any model» |
 | Opus 5.5, 22.09 | «had several Claude models build a game from a single prompt; Opus 5.5 scored higher than any other model on the strength of its graphics and polish» | Rogo: «its slides come out denser, more in line with industry standards» |
 
-Арены на 23.09 (Opus 5.5 там ещё нет) — `03-practice-pipelines/` (агент C).
+Арены на 23.09 (Opus 5.5 там ещё нет) — `03-practice-pipelines/` §5.1.
 
 ## 3. Холст и правка: чат, комментарии, прямая правка, «ручки», варианты, версии
 
@@ -276,9 +274,9 @@ references.» Beta на Pro, Max, Team, Enterprise; на Enterprise включа
 - **Качество зависит от источника:** «Design system import is only as good as its source. A messy codebase or an incomplete file will
   show up in the output.»; «Include real examples, not just specs. A finished landing page or marketing site tells Claude more about
   your brand's feel than a color palette alone.» `[документация]`
-- **Связь с Claude Code** (кратко; подробно — агент B): `/design-sync` синхронизирует локальную библиотеку компонентов с проектом
+- **Связь с Claude Code** (кратко; подробно — `02-claude-code-bridge/` §6): `/design-sync` синхронизирует локальную библиотеку компонентов с проектом
   дизайн-системы в claude.ai/design через инструмент `DesignSync` (методы, `@dsCard`, `_ds_manifest.json`, `.render-check.json` —
-  `PLAN.md` §Окружение) `[исходник]` (Claude Code 2.1.281). Help center упоминает только команды `/design-sync` и `/design`.
+  `02-claude-code-bridge/` §6.1–§6.2) `[исходник]` (Claude Code 2.1.281). Help center упоминает только команды `/design-sync` и `/design`.
 
 ## 5. Импорт и контекст
 
@@ -308,7 +306,7 @@ Admin FAQ: «export to HTML bundles, PPTX, and PDF, hand-off to Claude Code, and
 партнёров `[мнение вендора]`: Replit — «**The Claude Design MCP integration** is a natural next step: builders can now design on-brand
 apps in Claude Design and build, refine, and ship them in Replit»; Wix — «connects seamlessly to Wix Headless»; Vercel — «push it
 straight to Vercel to ship»; Gamma — «move straight into Gamma, fully editable». То есть у Claude Design есть MCP-интеграция для
-партнёров (для моста с Claude Code — см. агента B) `[не проверено]`. Доступ через Claude Tag (Slack) — «coming soon» (FAQ страницы
+партнёров (для моста с Claude Code — `02-claude-code-bridge/` §8) `[не проверено]`. Доступ через Claude Tag (Slack) — «coming soon» (FAQ страницы
 продукта, 25.09).
 
 **Handoff в Claude Code** `[документация]`:
@@ -321,7 +319,7 @@ straight to Vercel to ship»; Gamma — «move straight into Gamma, fully editab
   let Claude build the whole thing from start to finish.» Появилось 17.06 (блог: «Prefer to begin in Claude Code? Ask for a design from
   your session on desktop or in the terminal, or use /design to create, edit, and sync design projects»); страница артефактов: «Pull a
   prototype out of your coding session, then send it back in.»
-- **Что внутри бандла, help center не описывает** (файлы, спецификации, формат) — разбор у агента B `[не проверено]`. Отзыв Brilliant
+- **Что внутри бандла, help center не описывает** (файлы, спецификации, формат) — разбор в `02-claude-code-bridge/` §8 `[не проверено]`. Отзыв Brilliant
   (17.04): «Including design intent in Claude Code handoffs has made the jump from prototype to production seamless.»
   `[мнение вендора]`. В роликах: при handoff «выбираете локальный агент или веб-сессию, можно добавить другие файлы и написать
   инструкции» `[V:uS7gmBLeUV0 08:58]`; после handoff — «We've hit a dev server failure», Claude Code чинит сам `[V:PjBfho9Knlw 13:13]`
@@ -458,7 +456,7 @@ one worth refining.» `[документация]`
 one-pagers, social graphics, mockups), «How to import your design system. The one setup step that keeps every deck, doc, and graphic
 on brand», «brief to final export» `[документация]` — кандидат для заказчика.
 
-**Смежное официальное (гайды platform.claude.com для API; выписки — `99-raw/notes/C-notes.md`):** «Prompting Claude Opus 5.5» — запрет
+**Смежное официальное (гайды platform.claude.com для API; разбор — `03-practice-pipelines/` §4):** «Prompting Claude Opus 5.5» — запрет
 «avoid a generic AI look» «mostly swaps one default for another», перечислять приметы («Do not use a cream or off-white background,
 italic accent words in headlines, numbered "01/02/03" section labels, monospace labels, or pill-shaped buttons.»); «Prompting Claude
 Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick one». Перенос в Claude Design `[не проверено]`.
@@ -486,7 +484,7 @@ Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick o
 |---|---|---|
 | 16.04 | Opus 4.7: «more tasteful and creative … producing higher-quality interfaces, slides, and docs»; зрение до 2 576 px по длинной стороне | анонс Opus 4.7 `[документация]` |
 | 17.04 | Запуск Claude Design (Anthropic Labs), research preview, «powered by our most capable vision model, Claude Opus 4.7»; Pro, Max, Team, Enterprise (Ent — выкл.); отдельный недельный лимит | анонс, release notes `[документация]` |
-| 28.04 | «Claude for Creative Work»: Claude Design «built to export the results to other tools, starting with Canva» | кэш blender-research `[документация]` |
+| 28.04 | «Claude for Creative Work»: Claude Design «built to export the results to other tools, starting with Canva» | анонс «Claude for Creative Work» `[документация]` |
 | 28.05 | Opus 4.8; **effort control в claude.ai и Cowork** «alongside the model selector», на всех тарифах | анонс Opus 4.8 `[документация]` |
 | 09.06 | Fable 5 (Mythos-класс): на подписках бесплатно до 22.06, дальше usage credits; 12.06 доступ приостановлен (экспортный контроль США) | анонсы `[документация]` |
 | 12.06 | «Edit Claude's drafts in place» — правка выделением в артефактах чата | release notes `[документация]` |
@@ -504,7 +502,7 @@ Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick o
 | 17.09 | Ролик Mikey «… Master 95% of Claude Design» (теги «claude design 2.0») | `91-videos/` |
 | 22.09 | Opus 5.5: «performs at the level of Claude Fable 5.1 on most work and costs 40% less to run than Opus 5»; выше пятичасовые лимиты подписок, сохраняемый сброс лимита. Про Claude Design — ни слова | анонс, release notes `[документация]` |
 | 23–24.09 | Статьи help center о Claude Design и артефактах переписаны под новый формат (beta, шаблоны, общие лимиты) | help center `[документация]` |
-| 24.09 | Ролик «Opus 5.5 Just 10X'd Claude Design» — по речи работа в основном в Claude, Claude Code и Codex, а не в холсте Claude Design | заметки V `[мнение]` |
+| 24.09 | Ролик «Opus 5.5 Just 10X'd Claude Design» — по речи работа в основном в Claude, Claude Code и Codex, а не в холсте Claude Design | ролик заказчика `[мнение]` |
 
 **«2.0» и «3.0».** Нумерованных версий у Claude Design нет ни в release notes, ни в help center, ни в блоге; в release notes между
 17.04 и 16.09 записей про Claude Design нет вовсе `[документация]`. Единственное крупное официальное обновление между ними — **пост
@@ -573,7 +571,7 @@ Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick o
 12. **T-12 Web capture.** Искать инструмент в standalone и в шаблоне → есть или нет, как работает.
 13. **T-13 Большой репозиторий.** Подключить репозиторий заказчика в браузере и через Claude Code → лаги зафиксированы или их нет.
 14. **T-14 Совместная работа.** Второй аккаунт: комментарий, «ask Claude in a comment», одновременная правка → что работает.
-15. **T-15 Качество на брифе.** Один бриф — Claude Design, Kimi K3 (`../kimi-research/09-test-plan/` T-501), Claude Code + `frontend-design`;
+15. **T-15 Качество на брифе.** Один бриф — Claude Design и Claude Code + `frontend-design`;
     слепая оценка по `../ui/13-evaluation-checklists/` → ранжирование с оценками.
 16. **T-16 Приватность.** «Help Improve our AI models» выключен до загрузки материалов клиента; есть ли отдельная настройка у standalone
     → скриншот настроек.
@@ -585,11 +583,11 @@ Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick o
 2. **Effort в холсте standalone** — упомянут только косвенно (Enterprise-настройка «default model and effort level» для Claude Design).
 3. **Free:** release notes 16.09 («every plan, including Free») против 4 источников («paid plans»). Позиция: шаблон Design — только
    платные. `[спорно]`
-4. **Что внутри handoff bundle** (файлы, design intent, спецификации) — help center не описывает; разбор — агент B. `[не проверено]`
+4. **Что внутри handoff bundle** (файлы, design intent, спецификации) — help center не описывает; разбор — `02-claude-code-bridge/` §8. `[не проверено]`
 5. **Web capture** есть в анонсе 17.04, нет в статьях 23–24.09 и на странице продукта. `[не проверено]`
 6. **Экспорт PNG и MP4:** у Ивана есть, в help center нет (PNG — только для артбордов `/design` в документации Claude Code).
 7. **Когда статус сменился с research preview на beta** — вероятно 17.06 (картинка поста «Claude-Design-beta-static»), прямой фразы нет.
-8. **«Claude Design MCP integration»** (Replit, 17.06) — только для партнёров или доступна и Claude Code? → агент B.
+8. **«Claude Design MCP integration»** (Replit, 17.06) — только для партнёров или доступна и Claude Code? → `02-claude-code-bridge/` §8.
 9. **Наследование дизайн-системы в новый проект:** help center — наследуется системой организации; Mikey — «tied to that project».
 10. **Приватность standalone claude.ai/design** на потребительских тарифах — privacy center Claude Design не упоминает.
 11. **Release notes неполны:** обновления 17.06 в них нет; для хронологии Claude Design главный источник — блог claude.com.
@@ -597,7 +595,7 @@ Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick o
 
 ## Источники
 
-Дата чтения — 25.09.2026 для всех. Кэш — `99-raw/cache/`.
+Дата чтения — 25.09.2026 для всех.
 
 | # | Источник (URL) | Дата публикации / обновления | Метка | Где | Кэш |
 |---|---|---|---|---|---|
@@ -616,7 +614,7 @@ Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick o
 | 13 | privacy.claude.com/en/articles/10023548 How long do you store my data? | 01.07.2026 | `[документация]` | §8 | `…10023548…_a2a83e89.md` |
 | 14 | privacy.claude.com/en/articles/12109829 Model improvement settings | 03.08.2026 | `[документация]` | §8 | `…12109829…_22472ab8.md` |
 | 15 | privacy.claude.com/en/articles/7996868 Model training (commercial) | 18.08.2026 | `[документация]` | §8 | `…7996868…_c3499e60.md` |
-| 16 | anthropic.com/news/claude-design-anthropic-labs | 17.04.2026 | `[документация]`, отзывы `[мнение вендора]` | §1–§7, §11 | `../ux-research/99-raw/cache/www.anthropic.com_news_claude-design-anthropic-labs_0573c409.md` |
+| 16 | anthropic.com/news/claude-design-anthropic-labs | 17.04.2026 | `[документация]`, отзывы `[мнение вендора]` | §1–§7, §11 | — |
 | 17 | anthropic.com/news/claude-opus-4-7 | 16.04.2026 | `[документация]` | §2, §11 | `www.anthropic.com_news_claude-opus-4-7_b5232cfa.md` |
 | 18 | anthropic.com/news/claude-opus-4-8 | 28.05.2026 | `[документация]` | §2, §11 | `…claude-opus-4-8_5f3a9a51.md` |
 | 19 | anthropic.com/news/claude-fable-5-mythos-5 | 09.06.2026 | `[документация]` | §2, §8, §11 | `…claude-fable-5-mythos-5_11c4ac33.md` |
@@ -634,5 +632,5 @@ Opus 4.8» — «propose 4 distinct visual directions … Ask the user to pick o
 | 31 | claude.com/blog/cowork-is-now-claude | 16.09.2026 | `[документация]` | §1, §11 | `claude.com_blog_cowork-is-now-claude_dc7fec7f.md` |
 | 32 | claude.com/plugins/design | без даты | `[документация]` | Частые ошибки | `claude.com_plugins_design_2935d306.md` |
 | 33 | code.claude.com/docs/en/artifacts | без даты | `[документация]` | §1 | `code.claude.com_docs_en_artifacts_2da616de.md` |
-| 34 | Соседние базы: `../blender` (кэш «Claude for Creative Work», 28.04.2026), `../kimi-research/99-raw/cache/platform.claude.com_claude-prompting-best-practices.md` (~23.09), `../kimi-research/99-raw/notes/wave1/E-notes.md` (HN) | — | `[документация]`, `[мнение]` | §9, §11 | — |
-| 35 | Заметки агентов V (`99-raw/notes/V-notes.md`: ролики uS7gmBLeUV0, PjBfho9Knlw, HOXrLsVqinY) и C (`99-raw/notes/C-notes.md`: мок claude-code-router, гайды Opus 4.8 / 5.5) | 25.09.2026 | `[V:…]`, `[мнение]` | §2–§11 | — |
+| 34 | «Claude for Creative Work» (28.04.2026); platform.claude.com, руководства по промтам (~23.09); Hacker News | — | `[документация]`, `[мнение]` | §9, §11 | — |
+| 35 | Ролики заказчика uS7gmBLeUV0, PjBfho9Knlw, HOXrLsVqinY; мок claude-code-router и гайды Opus 4.8 / 5.5 — `03-practice-pipelines/` §4, §9.1 | 25.09.2026 | `[V:…]`, `[мнение]` | §2–§11 | — |

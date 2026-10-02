@@ -1,11 +1,6 @@
 # Claude Code ↔ Claude Design: что есть на самом деле (мост, 25.09.2026)
 
-Агент B (продолжатель), 25.09.2026 15:26–15:55 MSK. Прочитано: бинарник Claude Code 2.1.281 — разобран граф модулей Bun
-(2 249 файлов), извлечены и прочитаны ≈ 30 JS-модулей и 12 встроенных скиллов и справок (скиллы лежат сжатыми `.md.zst`, grep их не
-видит), строки сверены с 2.1.278 и 2.1.280; кэш флагов `~/.claude.json` (только флаги дизайна, снимок 25.09 15:23 MSK);
-code.claude.com (artifacts, commands, deep-links, whats-new 2026-w34, changelog); help center (7 статей, кэш A); блог claude.com
-17.06.2026; 3 issue `anthropics/claude-code`; Consumer Terms; `frontend-design`; `../kimi-research/02-…/05-…`. Всего ≈ 25 источников.
-Выдержки: `99-raw/cache/cc-2.1.281-design/` (`bunfs/` — скиллы и модули целиком). Ограничения: Claude Design, `DesignSync`,
+Ограничения: Claude Design, `DesignSync`,
 `ClaudeDesign`, `Artifact`, `/design*` не запускались — ответы сервера `[не проверено]`; флаги GrowthBook меняются без релиза.
 
 ## Выжимка для агента
@@ -54,8 +49,8 @@ code.claude.com (artifacts, commands, deep-links, whats-new 2026-w34, changelog)
     Design — руками заказчика для холста и вариантов; результат — zip-бандлом в репозиторий. `[мнение базы]` → §10
 18. **Делай, когда включат types или hub (схема Б)**: Claude Code создаёт дизайн в Claude Design сам (`/design` или `ClaudeDesign`),
     заказчик правит на холсте, Claude Code читает обратно (`read_file`, `render_preview`). `[исходник]` `[не проверено]` → §10
-19. **Знай: из Kimi-архитектуры переносятся бриф, пакет, цикл арт-директора, приёмка по кадрам; не переносятся** транспорт `-p`,
-    stream-json, обёртка и сторож: Claude Design не процесс, а облачный проект. `[мнение базы]` → §11
+19. **Знай: Claude Design не процесс, а облачный проект**: транспорт `-p`, stream-json, обёртка и сторож ему не нужны; бриф, пакет,
+    цикл арт-директора и приёмка по кадрам от исполнителя не зависят. `[мнение базы]`
 
 ## 1. Карта: что в Claude Code 2.1.281 связано с Claude Design
 
@@ -163,7 +158,7 @@ the place)». `[исходник]`
 | `tengu_omelette_fouet` (hub, `ClaudeDesign`) | нет в кэше → `false` | там же `[проверено]` |
 | Артефакты | инструмент `Artifact` есть в сеансе; флаги `tengu_cobalt_plinth*` (27 шт.) в основном `true` | схема инструментов, `~/.claude.json` `[проверено]` |
 | Artifact-типы | у `Artifact` нет `type_query`/`type_url`/`intent`; сервер: «No Artifact types are listed for this account (the type catalog isn't available to it yet)» | схема инструмента в этом сеансе, ответ оркестратору 15:2x `[проверено]` |
-| `DesignSync` у оркестратора | есть → `vO()` = true | PLAN.md «Окружение» `[проверено]` |
+| `DesignSync` у оркестратора | есть → `vO()` = true | схема инструментов сеанса `[проверено]` |
 | Вход | `claude-desktop`, `disableBundledSkills` нет | env, `~/.claude/settings.json` `[проверено]` |
 
 Итог: режим **consent** `[проверено по коду и флагам; меню не открывалось]`. `skillUsage.design` = 2, последний 18.09.2026 14:32 MSK —
@@ -191,7 +186,7 @@ juniper` появились в 2.1.281. `[исходник]`
   `clientInfo {name:"claude-cli-design-tool"}`) → `Mcp-Session-Id` → `tools/list` (операция `list`) → `tools/call`. Заголовок
   `X-Anthropic-Client: claude-cli-design-tool`, таймаут 60 с, SSE клиент не принимает. Только first-party: «Claude Design is only
   reachable from api.anthropic.com». `[исходник: chunk-wtvnrw6c.js]`
-- Это тот самый путь `DESIGN_MCP_PATH = "/v1/design/mcp"`, который C нашёл в стороннем моке claude-code-router. `[исходник]`
+- Это тот самый путь `DESIGN_MCP_PATH = "/v1/design/mcp"`, который есть в стороннем моке claude-code-router (`../03-practice-pipelines/` §9.1). `[исходник]`
 - Включение: `isEnabled: uhe` (флаг `tengu_omelette_fouet`); без `shouldDefer`, `maxResultSizeChars` 100 000.
 
 ### 3.2. Операции (клиентская таблица; сервер может добавить новые — чтение станет доступно после `list`, запись — только с
@@ -262,7 +257,7 @@ Claude Code потом читает файлы и транскрипт (`read_fi
 
 ## 6. `/design-sync` и `DesignSync`: дизайн-система Claude Code → Claude Design
 
-### 6.1. Инструмент `DesignSync` (сверка с PLAN.md — описание совпадает дословно)
+### 6.1. Инструмент `DesignSync`
 
 - Добавка, когда доступны Artifact-типы: «Never use it to make a design, deck or prototype: those are made from a Slides or Design
   Artifact type with the Artifact tool.» Отложенный (`shouldDefer`), подсказка поиска «sync local design system components to a
@@ -321,8 +316,8 @@ the design agent act on this without guessing?*» Четыре темы: обё�
 
 ### 6.4. Что это значит для нас
 
-- Синхронизируется только **React-библиотека со сборкой** (`dist/` + `.d.ts`, Storybook желателен); «токены + DESIGN.md» из
-  `../kimi-research/07-brief-handoff/` — не вход для `/design-sync`. Help center: «If your design system already exists as React
+- Синхронизируется только **React-библиотека со сборкой** (`dist/` + `.d.ts`, Storybook желателен); «токены + DESIGN.md»
+  (cd 06/02 §2) — не вход для `/design-sync`. Help center: «If your design system already exists as React
   components, run /design-sync… works best for product design systems in code»; для брендовых ДС — чат (шрифты, цвета, гайды).
   `[документация]` `[исходник]`
 - Направление одно: репо → проект-ДС. Обратно (правки ДС в Claude Design → код) инструмент не тянет — только `get_file` для
@@ -421,7 +416,7 @@ canvas (редактор Claude Design в артефакте). Исполнит�
 
 | | А. Без Claude Design (работает сейчас) | Б. Claude Code пишет в Claude Design (после включения types/hub) | В. Заказчик в Claude Design, Claude Code — ДС и приёмка (сейчас) |
 |---|---|---|---|
-| Бриф | Claude Code (kimi 07, ui 14/09) | Claude Code | Claude Code: промт goal/layout/content/audience |
+| Бриф | Claude Code (cd 06/01, ui 14/09) | Claude Code | Claude Code: промт goal/layout/content/audience |
 | Вайрфрейм | Claude Code: 3–5 low-fi направлений HTML, публикация артефактом для выбора | `/design <бриф>` (человек) или `ClaudeDesign` (модель): 2–4 low-fi артборда | заказчик вставляет промт в claude.ai/design, «2–3 alternative layouts» |
 | Макет | Claude Code + `frontend-design` + наши нормы; глаза — `shot.py`, `ui_audit` | Claude Code на ДС проекта; глаза — `render_preview` (hub) | агент приложения на ДС из `/design-sync`; правки заказчика — чат, комментарии, холст |
 | Прототип | код в репо (React/HTML) | заказчик правит на холсте; Claude Code читает (`import`, `read_file`, `Artifact read`) | handoff: «Download zip instead» → репо |
@@ -437,19 +432,6 @@ canvas (редактор Claude Design в артефакте). Исполнит�
 Схема А с артефактами: артефакты у заказчика включены (`Artifact` в сеансе) — варианты можно
 публиковать страницей claude.ai/code/artifact, делиться и собирать комментарии (комментарии — Team/Enterprise, ≥ 2.1.221).
 `[документация]` `[проверено: флаги]`
-
-## 11. Контраст с архитектурой Kimi (`../kimi-research/02-harness-orchestration/05-architecture-recommendation.md`)
-
-| Элемент Kimi-схемы | Для Claude Design |
-|---|---|
-| `kimi -p` + stream-json, обёртка `kimi_run.py`, сторож, `-S <id>` | не переносится: Claude Design — облачный проект без CLI; транспорт — `ClaudeDesign` (MCP) или артефакт; сессии нет |
-| `summary.json`, `passport.json` из `wire.jsonl` | нет аналога; паспорт итерации — вручную: версия Claude Code, режим `/design`, флаги, id проекта, дата |
-| Пакет входа `TASK.md`, `DESIGN.md`, `ACCEPTANCE.md`, `refs/` | переносится: в Б — в промт `/design` и файлы проекта; `DESIGN.md` → `.design-sync/conventions.md` (в системный промт агента) |
-| «Зрение в цикле» `shot.py` + `read_media` | в Б — `render_preview`; в В — только после handoff, на коде; в А — как у Kimi |
-| Правка файлом `NOTES-iter-N.md` (≤ 7 пунктов, «Keep») | в Б — тем же текстом в чат/комментарии; в В — заказчик вставляет; `put_conversation` может оставить заметки в проекте `[не проверено]` |
-| Откат git, варианты папками | в А — как есть; в Claude Design — «Save what we have and try a completely different approach» (версий нет) |
-| ToS «interactive use only» Kimi | другая логика: у Anthropic есть официальный путь (инструменты Claude Code), автоматизировать claude.ai браузером нельзя (п. 3.7) |
-| Исполнитель — чужая модель (K3) | исполнитель — та же семья Claude; выигрыш Claude Design — холст, ДС-панель, агент приложения, а не модель |
 
 ## Частые ошибки
 
@@ -485,8 +467,8 @@ canvas (редактор Claude Design в артефакте). Исполнит�
    видит правку.
 7. **Когда включат hub** → `ClaudeDesign list` отдаёт каталог; `get_claude_design_prompt` — сохранить текст промта в кэш базы;
    `render_preview` даёт картинку; `get_conversation` читает переписку приложения → цикл без ручного экспорта.
-8. **Качество схем** → один бриф: А (Claude Code + `frontend-design`), В (Claude Design руками заказчика), Б (если доступна), K3 из
-   kimi T-501 → слепое попарное сравнение по рубрике ui-research → выбор основной схемы.
+8. **Качество схем** → один бриф: А (Claude Code + `frontend-design`), В (Claude Design руками заказчика), Б (если доступна) →
+   слепое попарное сравнение по рубрике ui 13/02 → выбор основной схемы.
 9. **Лимиты** → расход (% окна) одного прохода в Claude Design и в Claude Code на том же брифе.
 10. **Deep link** → `xdg-open "claude-cli://open?cwd=/абс/путь&q=…"` на машине заказчика открывает терминал с промтом.
 
@@ -501,15 +483,15 @@ canvas (редактор Claude Design в артефакте). Исполнит�
 - Есть ли «Ask Claude» в канвасе Artifact «Design», созданном из Claude Code, и какая там модель.
 - Как локальный Claude Code получает «Claude Design connector» (код MCP-пути и расширения скоупов есть, документации нет; #69246
   закрыт без комментариев).
-- Free: release notes 16.09 «every plan, including Free» против help center «paid plans only» (A) `[спорно]`.
-- Кэш `99-raw/cache/cc-2.1.281-design/` содержит проприетарные промты Anthropic из бинарника — только для внутреннего использования,
-  не публиковать и не пересылать.
+- Free: release notes 16.09 «every plan, including Free» против help center «paid plans only» (`../01-product/` §1) `[спорно]`.
+- Тексты бинарника — проприетарные промты Anthropic: только для внутреннего использования,
+  не публиковать и не пересылать; в базе — пересказ и короткие цитаты.
 
 ## Источники
 
 | # | Источник | Дата | Прочитано | Метка | Где | Кэш |
 |---|---|---|---|---|---|---|
-| S1 | Бинарник Claude Code 2.1.281 (`~/.local/share/claude/versions/2.1.281`) | сборка 23.09.2026 | 25.09 15:2x–15:4x | `[исходник]` | §1–§8 | `99-raw/cache/cc-2.1.281-design/` (`seg_*`, `win_*`, `bunfs/`), разбор — `99-raw/tools/cc_bunfs_extract.py` |
+| S1 | Бинарник Claude Code 2.1.281 (`~/.local/share/claude/versions/2.1.281`) | сборка 23.09.2026 | 25.09 15:2x–15:4x | `[исходник]` | §1–§8 | — |
 | S2 | Бинарники 2.1.278, 2.1.280 (сверка строк) | 19.09, 22.09 | 25.09 | `[исходник]` | §2.5 | — |
 | S3 | `~/.claude.json` (`cachedGrowthBookFeatures`, `skillUsage`), env сеанса, `~/.claude/settings.json` | 25.09 15:23 | 25.09 | `[проверено]` | §2.4 | — |
 | S4 | code.claude.com/docs/en/artifacts | без даты | 25.09 | `[документация]` | §2.5, §9.6 | `code.claude.com_docs_en_artifacts.md` |
@@ -517,11 +499,10 @@ canvas (редактор Claude Design в артефакте). Исполнит�
 | S6 | whats-new 2026-w34 | 17–21.08.2026 | 25.09 | `[документация]` | §2.5 | `code.claude.com_docs_en_whats-new_2026-w34.md` |
 | S7 | code.claude.com/docs/en/deep-links | без даты | 25.09 | `[документация]` | §8 | `code.claude.com_docs_en_deep-links.md` |
 | S8 | code.claude.com/docs/en/changelog | до 2.1.281 (23.09) | 25.09 | `[документация]` | §2.5 | `code.claude.com_docs_en_changelog.md` |
-| S9 | Help center 14604416, 17153992, 14604397, 16994751 | 23–24.09.2026 | 25.09 (A) | `[документация]` | §5, §6.4, §9.6 | `support.claude.com_en_articles_*` |
+| S9 | Help center 14604416, 17153992, 14604397, 16994751 | 23–24.09.2026 | 25.09 | `[документация]` | §5, §6.4, §9.6 | `support.claude.com_en_articles_*` |
 | S10 | claude.com/blog «Claude Design now stays on brand for daily work» | 17.06.2026 (+ апдейт 09.2026) | 25.09 | `[мнение вендора]` | §2.5 | `claude.com_blog_claude-design-stays-on-brand-for-daily-work_22f7359a.md` |
 | S11 | GitHub anthropics/claude-code #69246 | 18.06.2026, closed | 25.09 | `[практика]`, единичный источник | §8 | `github.com_anthropics_claude-code_issues_69246__webfetch-summary.md` |
 | S12 | GitHub #60327 (closed not planned), #51980 (closed not planned) | 18.05, 22.04.2026 | 25.09 | `[практика]` | §8, §9.3 | — (WebFetch) |
 | S13 | Anthropic Consumer Terms (п. 3.4, 3.7) | без даты | 25.09 | `[документация]` | §9.4 | `www.anthropic.com_legal_consumer-terms_45a03603.md` |
 | S14 | `frontend-design` SKILL.md (claude-plugins-official) | локально | 25.09 | `[исходник]` | §10 | — |
-| S15 | `../kimi-research/02-harness-orchestration/05-architecture-recommendation.md` | 24.09.2026 | 25.09 | база | §11 | — |
-| S16 | Заметки A (help center, release notes), C (claude-code-router: `/v1/design/mcp` в моке) | 25.09 | 25.09 | `[документация]`, сторонний код | §3.1, §9.6 | `99-raw/notes/A-notes.md`, `C-notes.md` |
+| S16 | `../01-product/` (help center, release notes), `../03-practice-pipelines/` §9.1 (claude-code-router: `/v1/design/mcp` в моке) | 25.09 | 25.09 | `[документация]`, сторонний код | §3.1, §9.6 | — |

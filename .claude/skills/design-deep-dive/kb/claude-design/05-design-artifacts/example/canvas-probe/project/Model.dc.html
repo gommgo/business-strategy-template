@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Проба 3 · модель из Blender и WebAssembly</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#101216}
+a{color:#9fb4c8}a:hover{color:#c9d6e2}
+.t-root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e6e8eb}
+.t-canvas{display:block;width:100%;height:210px;border:1px solid #2a2f37;background:#15181d}
+.t-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:18px}
+.t-key{color:#98a2ad}
+</style>
+</helmet>
+<div class="t-root" data-test="model" style="width: 720px; height: 520px; box-sizing: border-box; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; background: #101216">
+<h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Проба 3 · модель из Blender и WebAssembly</h1>
+<canvas class="t-canvas" width="672" height="210" ref="{{ setStage }}"></canvas>
+<ul class="t-list">
+<li><span class="t-key">Библиотека three.js: </span><span data-status="lib">{{ lib }}</span></li>
+<li><span class="t-key">Загрузчик моделей glTF: </span><span data-status="loader">{{ loader }}</span></li>
+<li><span class="t-key">WebAssembly: </span><span data-status="wasm">{{ wasm }}</span></li>
+<li><span class="t-key">Декодер сжатия meshopt: </span><span data-status="meshopt">{{ meshopt }}</span></li>
+<li><span class="t-key">Модель текстом (.json), без сжатия: </span><span data-status="plainJson">{{ plainJson }}</span></li>
+<li><span class="t-key">Модель текстом (.json), со сжатием meshopt: </span><span data-status="meshoptJson">{{ meshoptJson }}</span></li>
+<li><span class="t-key">На экране: </span><span data-status="shown">{{ shown }}</span><span class="t-key"> · кадр меняется: </span><span data-status="change">{{ change }}</span></li>
+</ul>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":520}}'>
+class Component extends DCLogic {
+  // Проба: three.js и загрузчик glTF берутся с cdn.jsdelivr.net; модель — стандартная фигура Blender, экспорт GLB.
+  // Файл .glb холст не принимает (тип не из перечня отдаваемых), поэтому модель лежит текстом — base64 в .json:
+  // без сжатия и со сжатием meshopt. Отдельной строкой — WebAssembly: он нужен декодерам сжатых моделей.
+  // Первый удавшийся путь показывает модель на canvas.
+  get urls() {
+    return {
+      three: 'https://cdn.jsdelivr.net/npm/three@0.186.0/+esm',
+      loader: 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/loaders/GLTFLoader.js/+esm',
+      meshopt: 'https://cdn.jsdelivr.net/npm/three@0.186.0/examples/jsm/libs/meshopt_decoder.module.js',
+    };
+  }
+  get sources() {
+    return [
+      { key: 'plainJson', url: './assets/probe-plain.glb.json', kind: 'json' },
+      { key: 'meshoptJson', url: './assets/probe-meshopt.glb.json', kind: 'json' },
+    ];
+  }
+
+  componentDidMount() {
+    this._alive = true;
+    this._frames = 0;
+    this._sum = null;
+    this._rep = {
+      lib: 'запрошена, ждём', loader: 'ждём', wasm: 'ждём', meshopt: 'ждём',
+      plainJson: 'ждём', meshoptJson: 'ждём', shown: 'ничего', change: 'ждём',
+    };
+    this.wasmProbe();
+    const u = this.urls;
+    let THREE = null;
+    this.ask(u.three)
+      .then((m) => { THREE = m; this.note({ lib: 'загружена — three.js r' + m.REVISION }); })
+      .catch((err) => {
+        this.note({ lib: 'не загружена: ' + this.msg(err), loader: 'не запрошен', shown: 'сцены нет', change: 'нет' });
+      })
+      .then(() => { this.push(); return THREE ? this.ask(u.loader) : null; })
+      .then((m) => {
+        if (!m) { return null; }
+        this.note({ loader: 'загружен' });
+        return m.GLTFLoader;
+      })
+      .catch((err) => { this.note({ loader: 'не загружен: ' + this.msg(err) }); return null; })
+      .then((GLTFLoader) => this.ask(u.meshopt)
+        .then((m) => m.MeshoptDecoder.ready.then(() => m.MeshoptDecoder))
+        .then((dec) => { this.note({ meshopt: 'готов' }); return dec; })
+        .catch((err) => { this.note({ meshopt: 'не готов: ' + this.msg(err) }); return null; })
+        .then((dec) => ({ GLTFLoader: GLTFLoader, dec: dec })))
+      .then((kit) => {
+        this.push();
+        if (!this._alive) { return; }
+        if (THREE && kit.GLTFLoader) {
+          this.start(THREE, kit.GLTFLoader, kit.dec);
+        } else {
+          const why = 'не проверено: нет библиотеки или загрузчика';
+          this.note({ plainJson: why, meshoptJson: why });
+          this.push();
+        }
+      });
+    this._timer = setInterval(() => this.sample(), 500);
+    this.push();
+  }
+  componentWillUnmount() {
+    this._alive = false;
+    if (this._raf) { cancelAnimationFrame(this._raf); }
+    if (this._timer) { clearInterval(this._timer); }
+    if (this._renderer) { this._renderer.dispose(); }
+  }
+  note(patch) { this._rep = Object.assign({}, this._rep, patch); }
+  push() { if (this._alive) { this.setState({ rep: this._rep }); } }
+  msg(err) { return err && err.message ? err.message : String(err); }
+  ask(url) { try { return import(url); } catch (err) { return Promise.reject(err); } }
+
+  // Наименьший модуль WebAssembly: функция add(a, b). Собрался и ответил 5 — среда исполняет WebAssembly.
+  wasmProbe() {
+    if (typeof WebAssembly === 'undefined') { this.note({ wasm: 'нет в этой среде' }); return; }
+    const bytes = new Uint8Array([
+      0, 97, 115, 109, 1, 0, 0, 0,
+      1, 7, 1, 96, 2, 127, 127, 1, 127,
+      3, 2, 1, 0,
+      7, 7, 1, 3, 97, 100, 100, 0, 0,
+      10, 9, 1, 7, 0, 32, 0, 32, 1, 106, 11,
+    ]);
+    let asked = null;
+    try { asked = WebAssembly.instantiate(bytes); } catch (err) { this.note({ wasm: 'не работает: ' + this.msg(err) }); return; }
+    asked
+      .then((res) => {
+        const sum = res.instance.exports.add(2, 3);
+        this.note({ wasm: sum === 5 ? 'работает — модуль собран, 2 + 3 = 5' : 'модуль собран, ответ неверный: ' + sum });
+      })
+      .catch((err) => { this.note({ wasm: 'не работает: ' + this.msg(err) }); })
+      .then(() => this.push());
+  }
+
+  start(THREE, GLTFLoader, dec) {
+    const c = this._stage;
+    if (!c) { this.note({ shown: 'нет элемента canvas' }); this.push(); return; }
+    let holder = null;
+    try {
+      const w = c.width;
+      const h = c.height;
+      const renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(w, h, false);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x15181d);
+      const cam = new THREE.PerspectiveCamera(32, w / h, 0.01, 100);
+      cam.position.set(0, 0.3, 3.6);
+      cam.lookAt(0, 0, 0);
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x1b2430, 1.4));
+      const key = new THREE.DirectionalLight(0xffffff, 2.6);
+      key.position.set(3, 4, 5);
+      scene.add(key);
+      holder = new THREE.Group();
+      scene.add(holder);
+      this._renderer = renderer;
+      const gl = renderer.getContext();
+      const t0 = performance.now();
+      const px = new Uint8Array(16 * 16 * 4);
+      const tick = (t) => {
+        if (!this._alive) { return; }
+        holder.rotation.y = ((t - t0) / 1000) * 0.8;
+        renderer.render(scene, cam);
+        this._frames += 1;
+        gl.readPixels(Math.floor(w / 2) - 8, Math.floor(h / 2) - 8, 16, 16, gl.RGBA, gl.UNSIGNED_BYTE, px);
+        let sum = 0;
+        for (let i = 0; i < px.length; i += 1) { sum = (sum + px[i] * (i % 251 + 1)) % 1000000007; }
+        this._now = sum;
+        this._raf = requestAnimationFrame(tick);
+      };
+      this._raf = requestAnimationFrame(tick);
+    } catch (err) {
+      this.note({ shown: 'сцена не собрана: ' + this.msg(err), change: 'нет' });
+      this.push();
+      return;
+    }
+
+    const loader = new GLTFLoader();
+    if (dec) { loader.setMeshoptDecoder(dec); }
+    const fromBase64 = (text) => {
+      const bin = atob(text);
+      const out = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i += 1) { out[i] = bin.charCodeAt(i); }
+      return out.buffer;
+    };
+    const count = (root) => {
+      let meshes = 0;
+      let tris = 0;
+      root.traverse((o) => {
+        if (o.isMesh && o.geometry) {
+          meshes += 1;
+          const g = o.geometry;
+          tris += Math.floor((g.index ? g.index.count : (g.attributes.position ? g.attributes.position.count : 0)) / 3);
+        }
+      });
+      return { meshes: meshes, tris: tris };
+    };
+    const show = (src, root) => {
+      if (this._shown) { return; }
+      this._shown = src.key;
+      const box = new THREE.Box3().setFromObject(root);
+      const size = box.getSize(new THREE.Vector3());
+      const mid = box.getCenter(new THREE.Vector3());
+      const k = 1.7 / Math.max(size.x, size.y, size.z, 0.0001);
+      root.position.sub(mid);
+      holder.scale.setScalar(k);
+      holder.add(root);
+      this.note({ shown: 'модель пути «' + src.key + '»' });
+    };
+    const one = (src) => fetch(src.url)
+      .then((res) => {
+        if (!res.ok) { throw new Error('HTTP ' + res.status); }
+        return src.kind === 'bin' ? res.arrayBuffer() : res.json().then((j) => fromBase64(j.data));
+      })
+      .then((buf) => new Promise((ok, bad) => { loader.parse(buf, '', ok, bad); }))
+      .then((gltf) => {
+        const n = count(gltf.scene);
+        this.note({ [src.key]: 'загружена — сеток ' + n.meshes + ', треугольников ' + n.tris });
+        show(src, gltf.scene);
+      })
+      .catch((err) => { this.note({ [src.key]: 'не загружена: ' + this.msg(err) }); })
+      .then(() => this.push());
+    this.sources.reduce((chain, src) => chain.then(() => one(src)), Promise.resolve());
+  }
+
+  sample() {
+    const patch = {};
+    if (this._frames > 0 && this._shown) {
+      if (this._sum !== null) { patch.change = this._now !== this._sum ? 'да — кадров ' + this._frames : 'нет'; }
+      this._sum = this._now;
+    }
+    this.note(patch);
+    this.push();
+  }
+
+  renderVals() {
+    if (!this._fns) { this._fns = { setStage: (el) => { this._stage = el; } }; }
+    const r = (this.state && this.state.rep) || this._rep || {};
+    const v = (k) => r[k] || 'ждём';
+    return Object.assign({
+      lib: v('lib'), loader: v('loader'), wasm: v('wasm'), meshopt: v('meshopt'),
+      plainJson: v('plainJson'), meshoptJson: v('meshoptJson'),
+      shown: v('shown'), change: v('change'),
+    }, this._fns);
+  }
+}
+</script>
+</body>
+</html>

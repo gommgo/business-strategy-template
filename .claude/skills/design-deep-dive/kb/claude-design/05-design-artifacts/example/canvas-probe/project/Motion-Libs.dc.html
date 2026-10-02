@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Проба 4 · GSAP, Lottie и файлы поддержки</title>
+<script src="./support.js"></script>
+<script src="./lib/probe.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#101216}
+a{color:#9fb4c8}a:hover{color:#c9d6e2}
+.t-root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e6e8eb}
+.t-row{display:flex;gap:16px}
+.t-stage{position:relative;flex:1 1 0;min-width:0;height:200px;border:1px solid #2a2f37;background:#15181d;overflow:hidden}
+.t-box{position:absolute;left:40px;top:24px;width:44px;height:44px;background:#4fb3a5}
+.t-wave{position:absolute;left:0;bottom:0;width:100%;height:90px}
+.t-flat{display:block;flex:0 0 200px;width:200px;height:200px;border:1px solid #2a2f37;background:#15181d}
+.t-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:3px;font-size:13px;line-height:18px}
+.t-key{color:#98a2ad}
+</style>
+</helmet>
+<div class="t-root" data-test="motion-libs" style="width: 720px; height: 520px; box-sizing: border-box; padding: 20px 24px; display: flex; flex-direction: column; gap: 10px; background: #101216">
+<h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Проба 4 · GSAP, Lottie и файлы поддержки</h1>
+<div class="t-row">
+<div class="t-stage">
+<div class="t-box" ref="{{ setBox }}"></div>
+<canvas class="t-wave" width="440" height="90" ref="{{ setWave }}"></canvas>
+</div>
+<canvas class="t-flat" width="200" height="200" ref="{{ setFlat }}"></canvas>
+</div>
+<ul class="t-list">
+<li><span class="t-key">Скрипт файлом (lib/probe.js): </span><span data-status="file">{{ file }}</span></li>
+<li><span class="t-key">Волна из скрипта-файла меняется: </span><span data-status="fileDraw">{{ fileDraw }}</span></li>
+<li><span class="t-key">Библиотека GSAP: </span><span data-status="gsap">{{ gsap }}</span></li>
+<li><span class="t-key">Движение квадрата на GSAP: </span><span data-status="tween">{{ tween }}</span></li>
+<li><span class="t-key">Библиотека Lottie: </span><span data-status="lottie">{{ lottie }}</span></li>
+<li><span class="t-key">Файл анимации (assets/spin.lottie.json): </span><span data-status="data">{{ data }}</span></li>
+<li><span class="t-key">Анимация Lottie в canvas: </span><span data-status="play">{{ play }}</span><span class="t-key"> · кадр меняется: </span><span data-status="change">{{ change }}</span></li>
+</ul>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":520}}'>
+class Component extends DCLogic {
+  // Проба: (1) свой скрипт — файл поддержки под project/, подключён в <head>; он рисует волну на canvas 2D;
+  // (2) библиотека движения GSAP с cdn.jsdelivr.net двигает квадрат; (3) проигрыватель Lottie оттуда же рисует
+  // анимацию из файла данных .json в canvas, который стоит в разметке.
+  get urls() {
+    return {
+      gsap: 'https://cdn.jsdelivr.net/npm/gsap@3.15.0/+esm',
+      lottie: 'https://cdn.jsdelivr.net/npm/lottie-web@5.13.0/+esm',
+      data: './assets/spin.lottie.json',
+    };
+  }
+
+  componentDidMount() {
+    this._alive = true;
+    this._sumWave = null;
+    this._sumLottie = null;
+    this._x = null;
+    this._rep = {
+      file: 'ждём', fileDraw: 'ждём', gsap: 'запрошена, ждём', tween: 'ждём',
+      lottie: 'запрошена, ждём', data: 'ждём', play: 'ждём', change: 'ждём',
+    };
+    const u = this.urls;
+
+    const probe = (typeof CanvasProbe !== 'undefined' && CanvasProbe && CanvasProbe.wave) ? CanvasProbe : null;
+    if (probe) {
+      this.note({ file: 'исполнен — версия ' + probe.version });
+      const t0 = performance.now();
+      const tick = (t) => {
+        if (!this._alive) { return; }
+        this.drawWave(probe, (t - t0) / 1000);
+        this._raf = requestAnimationFrame(tick);
+      };
+      this._raf = requestAnimationFrame(tick);
+    } else {
+      this.note({ file: 'не исполнен: глобального имени CanvasProbe нет', fileDraw: 'нет' });
+    }
+
+    this.ask(u.gsap)
+      .then((m) => {
+        const g = m.gsap || m.default;
+        this._gsap = g;
+        this.note({ gsap: 'загружена — ' + g.version });
+        if (this._box && this._alive) {
+          this._tween = g.to(this._box, { x: 300, rotation: 180, duration: 1.3, repeat: -1, yoyo: true, ease: 'power2.inOut' });
+        }
+      })
+      .catch((err) => { this.note({ gsap: 'не загружена: ' + this.msg(err), tween: 'нет' }); })
+      .then(() => this.push());
+
+    let player = null;
+    this.ask(u.lottie)
+      .then((m) => { player = m.default || m; this.note({ lottie: 'загружена — lottie-web ' + (player.version || '') }); })
+      .catch((err) => { this.note({ lottie: 'не загружена: ' + this.msg(err), play: 'нет', change: 'нет' }); })
+      .then(() => { this.push(); return fetch(u.data); })
+      .then((res) => { if (!res.ok) { throw new Error('HTTP ' + res.status); } return res.json(); })
+      .then((data) => {
+        this.note({ data: 'получен — слоёв ' + (data.layers ? data.layers.length : 0) + ', кадров ' + data.op });
+        if (player && this._alive) { this.play(player, data); }
+      }, (err) => { this.note({ data: 'не получен: ' + this.msg(err) }); })
+      .then(() => this.push());
+
+    this._timer = setInterval(() => this.sample(), 500);
+    this.push();
+  }
+  componentWillUnmount() {
+    this._alive = false;
+    if (this._raf) { cancelAnimationFrame(this._raf); }
+    if (this._timer) { clearInterval(this._timer); }
+    if (this._tween) { this._tween.kill(); }
+    if (this._anim) { this._anim.destroy(); }
+  }
+  note(patch) { this._rep = Object.assign({}, this._rep, patch); }
+  push() { if (this._alive) { this.setState({ rep: this._rep }); } }
+  msg(err) { return err && err.message ? err.message : String(err); }
+  ask(url) { try { return import(url); } catch (err) { return Promise.reject(err); } }
+
+  drawWave(probe, s) {
+    const c = this._wave;
+    if (!c || !c.getContext) { return; }
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    if (!ctx) { this.note({ fileDraw: 'контекст 2D не создан' }); return; }
+    probe.wave(ctx, c.width, c.height, s);
+    this._waveCtx = ctx;
+  }
+
+  play(player, data) {
+    try {
+      const ctx = this._flat.getContext('2d', { willReadFrequently: true });
+      this._lottieCtx = ctx;
+      this._anim = player.loadAnimation({
+        renderer: 'canvas', loop: true, autoplay: true, animationData: data,
+        rendererSettings: { context: ctx, clearCanvas: true },
+      });
+      this.note({ play: 'идёт' });
+    } catch (err) {
+      this.note({ play: 'ошибка: ' + this.msg(err), change: 'нет' });
+    }
+  }
+
+  sum(ctx, c, step) {
+    const d = ctx.getImageData(0, 0, c.width, c.height).data;
+    let sum = 0;
+    for (let i = 0; i < d.length; i += step) { sum = (sum + d[i] * (i % 251 + 1)) % 1000000007; }
+    return sum;
+  }
+
+  sample() {
+    const patch = {};
+    if (this._waveCtx && this._wave) {
+      try {
+        const s = this.sum(this._waveCtx, this._wave, 97);
+        if (this._sumWave !== null) { patch.fileDraw = s !== this._sumWave ? 'да' : 'нет'; }
+        this._sumWave = s;
+      } catch (err) { patch.fileDraw = 'ошибка чтения: ' + this.msg(err); }
+    }
+    if (this._gsap && this._tween && this._box) {
+      const x = Number(this._gsap.getProperty(this._box, 'x'));
+      if (this._x !== null) { patch.tween = x !== this._x ? 'идёт' : 'стоит'; }
+      this._x = x;
+    }
+    if (this._lottieCtx && this._flat && this._anim) {
+      try {
+        const s = this.sum(this._lottieCtx, this._flat, 53);
+        if (this._sumLottie !== null) { patch.change = s !== this._sumLottie ? 'да' : 'нет'; }
+        this._sumLottie = s;
+      } catch (err) { patch.change = 'ошибка чтения: ' + this.msg(err); }
+    }
+    this.note(patch);
+    this.push();
+  }
+
+  renderVals() {
+    if (!this._fns) {
+      this._fns = {
+        setBox: (el) => { this._box = el; },
+        setWave: (el) => { this._wave = el; },
+        setFlat: (el) => { this._flat = el; },
+      };
+    }
+    const r = (this.state && this.state.rep) || this._rep || {};
+    const v = (k) => r[k] || 'ждём';
+    return Object.assign({
+      file: v('file'), fileDraw: v('fileDraw'), gsap: v('gsap'), tween: v('tween'),
+      lottie: v('lottie'), data: v('data'), play: v('play'), change: v('change'),
+    }, this._fns);
+  }
+}
+</script>
+</body>
+</html>

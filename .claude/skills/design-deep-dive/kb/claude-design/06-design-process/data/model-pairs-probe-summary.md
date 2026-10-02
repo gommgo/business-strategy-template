@@ -1,5 +1,5 @@
 <!-- Сводка замера 24.09.2026, скопирована 26.09.2026: имена генератора, вендора и хостинга заменены метками (G, G0, «вендор G», «хостинг-G»), числа не менялись; легенда — README.md этой папки. -->
-# E/03 — сводка примет (probe_shots, 1440x900; мобильный вылет — 390x844)
+# Сводка примет (probe_shots, 1440x900; мобильный вылет — 390x844)
 
 | slug | bg | bg_class | fonts | display | accent | caps_share | middots | arrows | emoji | em_dash | grad_text | glass | glow | noise | blend | animated | pill | radii_top | img | unsplash | video | canvas | gsap | three | lenis | react | hover_m_px | cons_err | bad_resp | focus_ok |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|

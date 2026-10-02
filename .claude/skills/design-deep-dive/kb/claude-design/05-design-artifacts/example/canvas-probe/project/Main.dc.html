@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Проба 1 · кадры, canvas и WebGL</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#101216}
+a{color:#9fb4c8}a:hover{color:#c9d6e2}
+.t-root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e6e8eb}
+.t-row{display:flex;gap:16px}
+.t-cell{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:8px}
+.t-stage{position:relative;height:150px;border:1px solid #2a2f37;background:#15181d;overflow:hidden}
+.t-box{position:absolute;left:calc(50% - 22px);top:18px;width:44px;height:44px;background:#4fb3a5}
+.t-canvas{display:block;width:100%;height:150px;border:1px solid #2a2f37;background:#15181d}
+.t-canvas2d{position:absolute;left:0;bottom:0;width:100%;height:70px}
+.t-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:20px}
+.t-key{color:#98a2ad}
+.t-report{margin:0;font:12px/16px ui-monospace,Menlo,Consolas,monospace;color:#98a2ad;white-space:pre-wrap;word-break:break-all}
+</style>
+</helmet>
+<div class="t-root" data-test="main" style="width: 720px; height: 460px; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 16px; background: #101216">
+<h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Проба 1 · кадры, canvas и WebGL</h1>
+<div class="t-row">
+<div class="t-cell">
+<div class="t-stage">
+<div class="t-box" ref="{{ setBox }}"></div>
+<canvas class="t-canvas2d" width="320" height="70" ref="{{ setFlat }}"></canvas>
+</div>
+<ul class="t-list">
+<li><span class="t-key">Кадры requestAnimationFrame: </span><span data-status="raf">{{ raf }}</span></li>
+<li><span class="t-key">Рисунок на canvas (2D) меняется: </span><span data-status="change2d">{{ change2d }}</span></li>
+</ul>
+</div>
+<div class="t-cell">
+<canvas class="t-canvas" width="320" height="150" ref="{{ setGl }}"></canvas>
+<ul class="t-list">
+<li><span class="t-key">Контекст WebGL: </span><span data-status="gl">{{ gl }}</span></li>
+<li><span class="t-key">Шейдер: </span><span data-status="shader">{{ shader }}</span></li>
+<li><span class="t-key">Кадр WebGL меняется: </span><span data-status="changeGl">{{ changeGl }}</span></li>
+</ul>
+</div>
+</div>
+<pre class="t-report" data-report="main">{{ report }}</pre>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":460}}'>
+class Component extends DCLogic {
+  // Проба: (1) анимация на requestAnimationFrame — блок двигается через style.transform, линия рисуется на canvas 2D;
+  // (2) canvas с контекстом WebGL и фрагментным шейдером. Итог пишется строками и блоком report.
+  componentDidMount() {
+    this._alive = true;
+    this._frames = 0;
+    this._seen = 0;
+    this._t0 = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    this._rep = { raf: 'ждём первого кадра', change2d: 'ждём', gl: 'ждём', shader: 'ждём', changeGl: 'ждём' };
+    this._sum2d = null;
+    this._sumGl = null;
+    this.glInit();
+    const tick = (t) => {
+      if (!this._alive) { return; }
+      this._frames += 1;
+      const s = (t - this._t0) / 1000;
+      if (this._box) {
+        this._box.style.transform = 'translateX(' + (Math.sin(s * 2) * 110).toFixed(1) + 'px) rotate(' + ((s * 120) % 360).toFixed(1) + 'deg)';
+      }
+      this.draw2d(s);
+      this.drawGl(s);
+      this._raf = requestAnimationFrame(tick);
+    };
+    this._raf = requestAnimationFrame(tick);
+    this._timer = setInterval(() => this.sample(), 500);
+  }
+  componentWillUnmount() {
+    this._alive = false;
+    if (this._raf) { cancelAnimationFrame(this._raf); }
+    if (this._timer) { clearInterval(this._timer); }
+  }
+  note(patch) { this._rep = Object.assign({}, this._rep, patch); }
+
+  draw2d(s) {
+    const c = this._flat;
+    if (!c || !c.getContext) { return; }
+    const ctx = c.getContext('2d', { willReadFrequently: true });
+    if (!ctx) { this.note({ change2d: 'контекст 2D не создан' }); return; }
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#e0a458';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (let x = 0; x <= c.width; x += 4) {
+      const y = c.height / 2 + Math.sin(x / 24 + s * 3) * 22;
+      if (x === 0) { ctx.moveTo(x, y); } else { ctx.lineTo(x, y); }
+    }
+    ctx.stroke();
+    this._ctx2d = ctx;
+  }
+
+  glInit() {
+    const c = this._glc;
+    if (!c || !c.getContext) { this.note({ gl: 'нет элемента canvas' }); return; }
+    let gl = null;
+    let kind = '';
+    try {
+      gl = c.getContext('webgl2', { preserveDrawingBuffer: true });
+      kind = 'webgl2';
+      if (!gl) { gl = c.getContext('webgl', { preserveDrawingBuffer: true }); kind = 'webgl'; }
+    } catch (err) {
+      this.note({ gl: 'ошибка: ' + (err && err.message ? err.message : String(err)) });
+      return;
+    }
+    if (!gl) { this.note({ gl: 'контекст не создан', shader: 'не проверен', changeGl: 'нет' }); return; }
+    let card = '';
+    try {
+      const info = gl.getExtension('WEBGL_debug_renderer_info');
+      card = info ? String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)) : '';
+    } catch (err) { card = ''; }
+    this.note({ gl: 'создан — ' + kind + ', ' + gl.getParameter(gl.VERSION) + (card ? ', ' + card.slice(0, 60) : '') });
+    const vsSrc = 'attribute vec2 p; void main(){ gl_Position = vec4(p, 0.0, 1.0); }';
+    const fsSrc = 'precision mediump float; uniform float t; uniform vec2 r; void main(){ vec2 uv = gl_FragCoord.xy / r; '
+      + 'float v = sin(uv.x * 10.0 + t) + sin(uv.y * 8.0 - t * 1.3) + sin((uv.x + uv.y) * 6.0 + t * 0.7); '
+      + 'gl_FragColor = vec4(0.5 + 0.5 * sin(v), 0.5 + 0.5 * sin(v + 2.1), 0.5 + 0.5 * sin(v + 4.2), 1.0); }';
+    const make = (type, src) => {
+      const sh = gl.createShader(type);
+      gl.shaderSource(sh, src);
+      gl.compileShader(sh);
+      if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) { throw new Error(gl.getShaderInfoLog(sh) || 'шейдер не собран'); }
+      return sh;
+    };
+    try {
+      const prog = gl.createProgram();
+      gl.attachShader(prog, make(gl.VERTEX_SHADER, vsSrc));
+      gl.attachShader(prog, make(gl.FRAGMENT_SHADER, fsSrc));
+      gl.linkProgram(prog);
+      if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) { throw new Error(gl.getProgramInfoLog(prog) || 'программа не собрана'); }
+      gl.useProgram(prog);
+      const buf = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+      const loc = gl.getAttribLocation(prog, 'p');
+      gl.enableVertexAttribArray(loc);
+      gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+      this._gl = gl;
+      this._uT = gl.getUniformLocation(prog, 't');
+      this._uR = gl.getUniformLocation(prog, 'r');
+      this.note({ shader: 'собран и запущен' });
+    } catch (err) {
+      this.note({ shader: 'ошибка: ' + (err && err.message ? err.message : String(err)) });
+    }
+  }
+  drawGl(s) {
+    const gl = this._gl;
+    if (!gl) { return; }
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.uniform1f(this._uT, s);
+    gl.uniform2f(this._uR, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.drawArrays(gl.TRIANGLES, 0, 3);
+  }
+
+  // Раз в полсекунды: сколько кадров прошло и изменились ли точки обоих canvas.
+  sample() {
+    const fps = (this._frames - this._seen) * 2;
+    this._seen = this._frames;
+    const patch = { raf: this._frames > 0 ? 'идут — ' + fps + ' в секунду, всего ' + this._frames : 'кадров нет' };
+    if (this._ctx2d && this._flat) {
+      try {
+        const d = this._ctx2d.getImageData(0, 0, this._flat.width, this._flat.height).data;
+        let sum = 0;
+        for (let i = 0; i < d.length; i += 97) { sum = (sum + d[i] * (i % 251 + 1)) % 1000000007; }
+        if (this._sum2d !== null) { patch.change2d = sum !== this._sum2d ? 'да' : 'нет'; }
+        this._sum2d = sum;
+      } catch (err) { patch.change2d = 'ошибка чтения: ' + err.message; }
+    }
+    const gl = this._gl;
+    if (gl) {
+      try {
+        const px = new Uint8Array(16 * 16 * 4);
+        gl.readPixels(Math.floor(gl.drawingBufferWidth / 2) - 8, Math.floor(gl.drawingBufferHeight / 2) - 8, 16, 16, gl.RGBA, gl.UNSIGNED_BYTE, px);
+        let sum = 0;
+        for (let i = 0; i < px.length; i += 1) { sum = (sum + px[i] * (i % 251 + 1)) % 1000000007; }
+        if (this._sumGl !== null) { patch.changeGl = sum !== this._sumGl ? 'да' : 'нет'; }
+        this._sumGl = sum;
+      } catch (err) { patch.changeGl = 'ошибка чтения: ' + err.message; }
+    }
+    this.note(patch);
+    this.setState({ rep: this._rep });
+  }
+
+  renderVals() {
+    if (!this._fns) {
+      this._fns = {
+        setBox: (el) => { this._box = el; },
+        setFlat: (el) => { this._flat = el; },
+        setGl: (el) => { this._glc = el; },
+      };
+    }
+    const r = (this.state && this.state.rep) || this._rep || {};
+    return Object.assign({
+      raf: r.raf || 'ждём', change2d: r.change2d || 'ждём', gl: r.gl || 'ждём', shader: r.shader || 'ждём', changeGl: r.changeGl || 'ждём',
+      report: JSON.stringify(r),
+    }, this._fns);
+  }
+}
+</script>
+</body>
+</html>

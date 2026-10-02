@@ -1,7 +1,5 @@
 # 04-claude-code-native — Claude Design в сессии Claude Code, без интерфейса
 
-Агент D, 25.09.2026, Claude Code 2.1.281, Opus 5.5. Повод — решение заказчика 25.09 ≈ 16:05: «всё в чате, в сессии Claude Code».
-
 ## Файлы
 
 | Файл | О чём |
@@ -9,13 +7,10 @@
 | `01-claude-design-in-claude-code-session.md` | карта 35 функций Claude Design → как в чате Claude Code → что теряем → статус; чат-протокол правок по меткам `#N` (грамматика, пакет ≤ 7, эхо, проверка «изменилось только то, что просили»); где смотреть результат; как это делает Anthropic (canvas-скилл `design`, тип «Design» — своими словами); официальный путь `/design`; прототип; спецификация скилла `studio`; что теряем и выигрываем; тесты T-D1…T-D12 |
 | `../../../scripts/claude-design/kit/canvas.html` | холст: рамки манифеста рядами по ширинам, подписи, темы, `?marks=1`, `?set=`, `?theme=`, `?zoom=` |
 | `../../../scripts/claude-design/kit/marks.js` | нумерация значимых элементов бейджами `#N`, карта номеров, отпечатки для сверки правок |
-| `../../../scripts/claude-design/kit/shot.py` | кадры артбордов с метками и без, весь холст, `marks.json` / `marks.md`, проверки (из `shot.py` v3 kimi 07), `--prev`, `--set`, `serve` |
+| `../../../scripts/claude-design/kit/shot.py` | кадры артбордов с метками и без, весь холст, `marks.json` / `marks.md`, проверки, `--prev`, `--set`, `serve` |
 | `../../../scripts/claude-design/kit/export.py` | PDF по артбордам + общий, PNG 2×, `standalone.html` (весь холст одним файлом), zip |
 | `../../../scripts/claude-design/kit/diffshots.py` | сверка двух снимков по меткам: что изменилось, что сдвинулось, что «НЕОЖИДАННО» |
 | `kit/example/` | пример: лендинг и запись «Спица» на `tokens.css` (светлая и тёмная темы), `canvas.json` на 4 рамки |
-
-Смоук и опыты — `../99-raw/experiments/D/01-kit-smoke/` (журнал `SMOKE.md`), заметки — `../99-raw/notes/D-notes.md`,
-отчёт — `../99-raw/reports/D-report.md`.
 
 ## Выжимка
 
@@ -29,4 +24,4 @@
    0 неожиданных изменений, 3 непрошеные правки пойманы 3 из 3; «ручки» — `--set` без правки файлов; экспорт PDF, PNG 2×, standalone, zip.
 5. Смотреть — во встроенном браузере десктоп-приложения (`standalone.html?marks=1` или `shot.py serve`); артефакт — только с разрешения.
 6. Теряем правку мышью «без токенов» и живой промт Claude Design; выигрываем глаза модели, версии в git, проверяемую локальность, код без
-   handoff. Качество против Claude Design и K3 — тесты T-D6, T-D7.
+   handoff. Качество против Claude Design — тест T-D6.

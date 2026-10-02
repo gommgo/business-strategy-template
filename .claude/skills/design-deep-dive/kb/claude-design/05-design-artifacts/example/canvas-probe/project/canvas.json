@@ -1,0 +1,68 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-10-02T09:20:00Z"
+  },
+  "title": "Проба: что холст исполняет",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 720,
+      "h": 460,
+      "title": "Проба 1 · кадры, canvas и WebGL",
+      "is_interactive": true
+    },
+    "Three-Cdn.dc.html": {
+      "x": 800,
+      "y": 0,
+      "w": 720,
+      "h": 460,
+      "title": "Проба 2 · three.js с CDN",
+      "is_interactive": true
+    },
+    "Model.dc.html": {
+      "x": 0,
+      "y": 580,
+      "w": 720,
+      "h": 520,
+      "title": "Проба 3 · модель из Blender и WebAssembly",
+      "is_interactive": true
+    },
+    "Motion-Libs.dc.html": {
+      "x": 800,
+      "y": 580,
+      "w": 720,
+      "h": 520,
+      "title": "Проба 4 · GSAP, Lottie и файлы поддержки",
+      "is_interactive": true
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Three-Cdn.dc.html",
+    "Model.dc.html",
+    "Motion-Libs.dc.html"
+  ],
+  "notes": {
+    "row-title": {
+      "x": 0,
+      "y": -300,
+      "text": "Проба: что холст исполняет",
+      "kind": "title1",
+      "maxW": 1520
+    },
+    "how-to-read": {
+      "x": 1600,
+      "y": 0,
+      "w": 420,
+      "text": "Как читать. У каждого артборда нажмите Play и прочитайте строки под картинкой. «идут», «создан», «загружена», «работает», «да» — холст это исполняет. «не создан», «не загружена», «не работает», «нет» — не исполняет."
+    }
+  },
+  "designSystems": []
+}

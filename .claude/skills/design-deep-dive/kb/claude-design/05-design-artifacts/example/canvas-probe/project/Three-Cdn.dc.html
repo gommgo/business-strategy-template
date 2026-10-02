@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Проба 2 · three.js с CDN</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+body{margin:0;background:#101216}
+a{color:#9fb4c8}a:hover{color:#c9d6e2}
+.t-root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#e6e8eb}
+.t-canvas{display:block;width:100%;height:230px;border:1px solid #2a2f37;background:#15181d}
+.t-list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;font-size:14px;line-height:20px}
+.t-key{color:#98a2ad}
+.t-report{margin:0;font:12px/16px ui-monospace,Menlo,Consolas,monospace;color:#98a2ad;white-space:pre-wrap;word-break:break-all}
+</style>
+</helmet>
+<div class="t-root" data-test="three-cdn" style="width: 720px; height: 460px; box-sizing: border-box; padding: 24px; display: flex; flex-direction: column; gap: 12px; background: #101216">
+<h1 style="margin: 0; font-size: 20px; line-height: 28px; font-weight: 600">Проба 2 · three.js с CDN</h1>
+<canvas class="t-canvas" width="672" height="230" ref="{{ setStage }}"></canvas>
+<ul class="t-list">
+<li><span class="t-key">Библиотека: </span><span data-status="lib">{{ lib }}</span></li>
+<li><span class="t-key">Сцена: </span><span data-status="scene">{{ scene }}</span></li>
+<li><span class="t-key">Кадр меняется: </span><span data-status="change">{{ change }}</span></li>
+</ul>
+<pre class="t-report" data-report="three-cdn">{{ report }}</pre>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":720,"height":460}}'>
+class Component extends DCLogic {
+  // Проба: three.js берётся из внешней сети — динамическим import() с cdn.jsdelivr.net. Правила типа внешнюю сеть
+  // запрещают (кроме шрифтов Google и загрузок холста): артборд показывает, пропускает ли её страница claude.ai.
+  get cdnUrl() { return 'https://cdn.jsdelivr.net/npm/three@0.186.0/build/three.module.js'; }
+
+  componentDidMount() {
+    this._alive = true;
+    this._frames = 0;
+    this._sum = null;
+    this._rep = { lib: 'запрошена с CDN, ждём', scene: 'ждём', change: 'ждём' };
+    let asked = null;
+    try {
+      asked = import(this.cdnUrl);
+    } catch (err) {
+      this.note({ lib: 'не загружена: ' + (err && err.message ? err.message : String(err)), scene: 'не собрана', change: 'нет' });
+    }
+    if (asked && asked.then) {
+      asked.then((lib) => {
+        if (!this._alive) { return; }
+        this.note({ lib: 'загружена с CDN — three.js r' + lib.REVISION });
+        this.start(lib);
+        this.setState({ rep: this._rep });
+      }).catch((err) => {
+        this.note({ lib: 'не загружена: ' + (err && err.message ? err.message : String(err)), scene: 'не собрана', change: 'нет' });
+        this.setState({ rep: this._rep });
+      });
+    }
+    this._timer = setInterval(() => this.sample(), 500);
+    this.setState({ rep: this._rep });
+  }
+  componentWillUnmount() {
+    this._alive = false;
+    if (this._raf) { cancelAnimationFrame(this._raf); }
+    if (this._timer) { clearInterval(this._timer); }
+    if (this._renderer) { this._renderer.dispose(); }
+  }
+  note(patch) { this._rep = Object.assign({}, this._rep, patch); }
+
+  start(THREE) {
+    const c = this._stage;
+    if (!c) { this.note({ scene: 'нет элемента canvas' }); return; }
+    try {
+      const w = c.width;
+      const h = c.height;
+      const renderer = new THREE.WebGLRenderer({ canvas: c, antialias: true });
+      renderer.setPixelRatio(1);
+      renderer.setSize(w, h, false);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x15181d);
+      const cam = new THREE.PerspectiveCamera(38, w / h, 0.1, 50);
+      cam.position.set(0, 0.4, 4.2);
+      scene.add(new THREE.HemisphereLight(0xffffff, 0x1b2430, 1.1));
+      const key = new THREE.DirectionalLight(0xffffff, 2.4);
+      key.position.set(3, 4, 5);
+      scene.add(key);
+      const mesh = new THREE.Mesh(
+        new THREE.IcosahedronGeometry(1.1, 1),
+        new THREE.MeshStandardMaterial({ color: 0xe0a458, roughness: 0.4, metalness: 0.2, flatShading: true })
+      );
+      scene.add(mesh);
+      this._renderer = renderer;
+      const gl = renderer.getContext();
+      const t0 = performance.now();
+      const px = new Uint8Array(16 * 16 * 4);
+      const tick = (t) => {
+        if (!this._alive) { return; }
+        const s = (t - t0) / 1000;
+        mesh.rotation.y = s * 0.9;
+        mesh.rotation.x = s * 0.4;
+        renderer.render(scene, cam);
+        this._frames += 1;
+        gl.readPixels(Math.floor(w / 2) - 8, Math.floor(h / 2) - 8, 16, 16, gl.RGBA, gl.UNSIGNED_BYTE, px);
+        let sum = 0;
+        for (let i = 0; i < px.length; i += 1) { sum = (sum + px[i] * (i % 251 + 1)) % 1000000007; }
+        this._now = sum;
+        this._raf = requestAnimationFrame(tick);
+      };
+      this._raf = requestAnimationFrame(tick);
+      this.note({ scene: 'собрана — контекст ' + (gl instanceof WebGL2RenderingContext ? 'webgl2' : 'webgl') });
+    } catch (err) {
+      this.note({ scene: 'ошибка: ' + (err && err.message ? err.message : String(err)), change: 'нет' });
+    }
+  }
+
+  sample() {
+    const patch = {};
+    if (this._frames > 0) {
+      if (this._sum !== null) { patch.change = this._now !== this._sum ? 'да — кадров ' + this._frames : 'нет'; }
+      this._sum = this._now;
+    }
+    this.note(patch);
+    this.setState({ rep: this._rep });
+  }
+
+  renderVals() {
+    if (!this._fns) { this._fns = { setStage: (el) => { this._stage = el; } }; }
+    const r = (this.state && this.state.rep) || this._rep || {};
+    return Object.assign({ lib: r.lib || 'ждём', scene: r.scene || 'ждём', change: r.change || 'ждём', report: JSON.stringify(r) }, this._fns);
+  }
+}
+</script>
+</body>
+</html>

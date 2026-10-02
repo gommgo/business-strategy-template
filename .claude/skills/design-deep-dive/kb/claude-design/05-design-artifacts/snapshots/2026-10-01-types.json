@@ -109,5 +109,47 @@
     "Design: редактор пересохраняет project/canvas.json — ключ attachments, ширина w заголовков, launch без страницы; правкой заказчика это не является",
     "Design: состояние доступа называет ответ публикации; первая публикация холста пришла со статусом «shared as Anyone with the link», хотя доступ никто не менял",
     "Артефакт привязан к аккаунту, в котором создан: сессия другого аккаунта читает его только с согласия владельца и без права правки не публикует"
-  ]
+  ],
+  "runs": {
+    "checked": "2026-10-02",
+    "type": "Design",
+    "release": "1790869903-0489",
+    "contract": "0.2.47",
+    "probe": "example/canvas-probe/project/",
+    "doc": "03-what-canvas-runs.md",
+    "how": "Play у каждого артборда пробы — владелец аккаунта; отказ публикации — ответ инструмента Artifact",
+    "on_claude_ai": {
+      "raf_animation": true,
+      "canvas_2d": true,
+      "webgl": true,
+      "shader": true,
+      "cdn_import_jsdelivr_npm": true,
+      "three_scene": true,
+      "gltf_model_as_json_text": true,
+      "meshopt_decoder": true,
+      "webassembly": true,
+      "support_script_in_head": true,
+      "support_json_fetch": true,
+      "gsap_tween": true,
+      "lottie_canvas_renderer": true
+    },
+    "local_only": [
+      "адрес загрузки /_blob/<id> для скрипта и файла данных",
+      "библиотека кодом внутри артборда",
+      "Lottie разметкой SVG, которую строит библиотека"
+    ],
+    "not_checked": [
+      "движение по кадрам в обзоре без Play",
+      "Rive, dotLottie, model-viewer",
+      "экспорт и миниатюра артборда с canvas",
+      "Play на телефоне"
+    ],
+    "refused_file_types": [".glb"],
+    "served_file_types": [
+      ".html", ".css", ".js", ".mjs", ".wasm", ".json", ".map", ".geojson", ".webmanifest", ".txt", ".md", ".csv", ".xml",
+      ".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".avif", ".ico", ".woff", ".woff2", ".ttf", ".otf",
+      ".mp3", ".wav", ".ogg", ".mp4", ".webm", ".pdf"
+    ],
+    "libraries": { "three": "0.186.0", "gsap": "3.15.0", "lottie-web": "5.13.0" }
+  }
 }

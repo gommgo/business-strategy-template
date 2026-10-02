@@ -379,7 +379,7 @@ IR ≤ 0,15 и Lighthouse ≥ 95 — ворота приёмки на одном
 План живого теста text: LT-01…LT-04 под «только Opus»	text/09-ai-generation-evaluation/live-test-plan.md §2	закрыто	JU-32	—
 Модель для текстов — только Opus (text X41, X вопрос 12, решение заказчика п. 8)	text/09-ai-generation-evaluation/01-models-for-copy.md §2.2	закрыто	JU-33	text/CONTRADICTIONS.md §X41; text/PLAN.md; text/09-ai-generation-evaluation/live-test-plan.md
 Big 8 «дорогой сайт» и три вопроса Dry (text kimi-16)	text/01-foundations/03-schools-formulas-myths.md §2.3	закрыто	JU-34	text/01-foundations/formulas.yaml
-Одна легенда меток доказательности: common/evidence.md	common/evidence.md	закрыто	JU-35	site/PLAN.md; text/PLAN.md; creative/PLAN.md; ux/README.md; ux/PLAN.md; ui/README.md; ui/PLAN.md; ai-media/PLAN.md; ai-media/README.md; blender/README.md; blender/PLAN.md; claude-design/PLAN.md; claude-design/README.md; claude-design/06-design-process/README.md; site/99-raw/prompts/_common.md
+Одна легенда меток доказательности: common/evidence.md	common/evidence.md	закрыто	JU-35	site/PLAN.md; text/PLAN.md; creative/PLAN.md; ux/README.md; ux/PLAN.md; ui/README.md; ui/PLAN.md; ai-media/PLAN.md; ai-media/README.md; blender/README.md; blender/PLAN.md; claude-design/README.md; claude-design/06-design-process/README.md; site/99-raw/prompts/_common.md
 Метки тройки v2: мнение вендора, награда, правоприменение ≡ регулятор, гипотеза	common/evidence.md	закрыто	JU-36	site/PLAN.md; text/PLAN.md; creative/PLAN.md
 ux: `[данные]` шире общего; `[норма]`, `[APG]` — это `[стандарт]`	common/evidence.md	закрыто	JU-37	ux/README.md; ux/PLAN.md
 ui: `[система]`, `[измерение]`, `[расчёт]`, `[консенсус видео]`, `[вывод]`	common/evidence.md	закрыто	JU-38	ui/README.md; ui/PLAN.md
@@ -420,7 +420,7 @@ EN 301 549 v4.1.1 (с 02.09.2026): канон и метка	ux/08-accessibility/
 Рамка итога ai-media: «соседей не знать» снято Р17–Р18; ключи — Р73	ai-media/README.md §Зачем и для кого	закрыто	CN-114	ai-media/PLAN.md
 Агент и Blender: `blender -b`, Blender Lab — по желанию, mcp-for-blender — нет	blender/04-ai-agents-mcp/06-headless-operations.md §1	закрыто	CN-115	blender/README.md §Решения заказчика (23.09.2026) и что осталось открытым; blender/04-ai-agents-mcp/01-mcp-for-blender.md
 Поправки blender к соседям вносит Ф10 по строкам реестра Ф4	blender/README.md §Что предложено соседним базам	закрыто	CN-116	blender/README.md §Решения заказчика (23.09.2026) и что осталось открытым; blender/99-raw/handoff-to-neighbours.md
-Claude Design из сессии Claude Code; claude.ai — живой редактор и показ	claude-design/05-design-artifacts/01-design-system-and-canvas-in-session.md §1	закрыто	CN-117	claude-design/README.md; claude-design/PLAN.md
+Claude Design из сессии Claude Code; claude.ai — живой редактор и показ	claude-design/05-design-artifacts/01-design-system-and-canvas-in-session.md §1	закрыто	CN-117	claude-design/README.md
 Дом таблиц контракта тройки §2–§3 после уборки `99-raw` — `kb/common/owners.md`	common/owners.md	закрыто	CN-118	site/README.md §Сёстры и точки синхронизации; site/99-raw/prompts/_common.md; creative/99-raw/prompts/_common.md; site/PLAN.md; text/PLAN.md; creative/PLAN.md; site/99-raw/notes/triad-contract-2026-09-24.md §2; site/99-raw/notes/triad-contract-2026-09-24.md §3
 Одна норма — одно место: таблицы канонов пяти баз сведены в реестр	common/canon.tsv	закрыто	CN-119	—
 Данные Mathur о таймерах: 157 лживых из 393	ux/06-feedback-states-motion/04-dark-patterns-and-ethics.md §5.2	закрыто	CN-12	ux/13-app-types/02-client-facing-app-playbook.md §13
