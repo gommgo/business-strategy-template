@@ -1,0 +1,8 @@
+file	kind	lines	tokens	actions	other	markers
+ui/09-design-tokens/01-architecture-and-naming.md	prose	696	20864			process 3
+ui/09-design-tokens/02-dtcg-format-and-tooling.md	prose	662	19138			process 1
+ui/09-design-tokens/03-theming-and-modes.md	prose	889	24426			raw 1; research 1; process 2
+ui/09-design-tokens/04-reference-token-schema.md	prose	4773	130744		W1-Z6: §2.5 и вывод 6 выжимки («`calc(20 / 14)` — точно, без накопления ошибки») — оговорка, если проверка браузером подтвердит модель интерлиньяжа; результата проверки нет — пункт в «Не сделано»	raw 4; research 2; ns_dtcg 282; process 13
+ui/09-design-tokens/05-anti-patterns-and-pipeline.md	prose	635	15826			ns_dtcg 1; process 9
+ui/09-design-tokens/README.md	prose	65	2498			process 3
+ui/09-design-tokens/glossary.md	prose	228	5655			ns_dtcg 1; process 1

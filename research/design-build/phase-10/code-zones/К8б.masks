@@ -1,0 +1,11 @@
+# К8б — creative: каталоги и реестры (данные) (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/kb/creative/06-effects-catalog/effects.yaml
+.claude/skills/design-deep-dive/kb/creative/06-effects-catalog/effects.schema.json
+.claude/skills/design-deep-dive/kb/creative/09-ai-execution-evaluation/block-treatments.yaml
+.claude/skills/design-deep-dive/kb/creative/08-uniqueness-anti-slop/cliche-registry.yaml
+.claude/skills/design-deep-dive/kb/creative/04-visual-language/cyrillic-display-fonts.yaml
+.claude/skills/design-deep-dive/kb/creative/04-visual-language/marketing-tokens.json
+.claude/skills/design-deep-dive/kb/creative/04-visual-language/marketing-tokens.css
+.claude/skills/design-deep-dive/kb/common/tells.yaml
+.claude/skills/design-deep-dive/scripts/creative/registry_check.py
+.claude/skills/design-deep-dive/scripts/lib/color.py

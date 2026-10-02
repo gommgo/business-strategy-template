@@ -1,0 +1,4 @@
+# К3б — вход холста: проекции новых полей (волна 2); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/project/canvas_input.py
+.claude/skills/design-deep-dive/scripts/project/contract.py
+.claude/skills/design-deep-dive/scripts/project/data/canvas.yaml

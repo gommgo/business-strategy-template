@@ -1,0 +1,6 @@
+# К13 — фикстуры своими файлами (волна 3); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/tests/fixtures/*
+.claude/skills/design-deep-dive/scripts/tests/fixture_project.py
+.claude/skills/design-deep-dive/scripts/maint/fixture_gen.py
+.claude/skills/design-deep-dive/scripts/maint/data/fixtures.yaml
+.claude/skills/design-deep-dive/scripts/maint/data/sync.yaml

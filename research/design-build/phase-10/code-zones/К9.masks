@@ -1,0 +1,7 @@
+# К9 — дизайн-система (волна 2); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/project/ds_build.py
+.claude/skills/design-deep-dive/scripts/project/ds_sync.py
+.claude/skills/design-deep-dive/scripts/project/ds_coverage.py
+.claude/skills/design-deep-dive/scripts/ui/build_reference_tokens.py
+.claude/skills/design-deep-dive/kb/common/components.yaml
+.claude/skills/design-deep-dive/kb/ui/14-recipes/examples/tokens.css

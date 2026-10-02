@@ -1,0 +1,9 @@
+file	kind	lines	tokens	actions	other	markers
+ai-media/03-image-models/01-landscape-and-benchmarks.md	prose	593	32336			raw 6; research 1; process 14
+ai-media/03-image-models/02-model-cards.md	prose	1245	95461			raw 22; research 2; process 45; plan 1
+ai-media/03-image-models/03-capabilities-by-task.md	prose	587	27583	VI-37: пять мест ai-media — одной строкой из site 08/02 §2.2 («Предложение ai-media»); 12/04 №12 — канон ai-media для декора, совпадает [по колонке copies]		raw 9; process 40
+ai-media/03-image-models/README.md	prose	36	2363			raw 2; process 8
+ai-media/04-video-models/01-landscape-and-benchmarks.md	prose	417	18478			raw 1; process 14
+ai-media/04-video-models/02-model-cards.md	prose	922	46149			raw 11; process 41
+ai-media/04-video-models/03-capabilities-by-task.md	prose	557	25583			raw 8; process 36
+ai-media/04-video-models/README.md	prose	27	2361			raw 3; process 8

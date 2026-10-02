@@ -1,0 +1,3 @@
+# К2 — аудит проекта и пакет (волна 2); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/project/design_audit.py
+.claude/skills/design-deep-dive/scripts/project/ready.py

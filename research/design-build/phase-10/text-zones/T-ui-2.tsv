@@ -1,0 +1,17 @@
+file	kind	lines	tokens	actions	other	markers
+ui/01-color/01-color-models-and-scales.md	prose	926	29470			process 2
+ui/01-color/02-semantic-roles-and-architecture.md	prose	715	21292			process 3
+ui/01-color/03-contrast.md	prose	707	20923			process 1
+ui/01-color/04-dark-theme.md	prose	723	20386			process 4
+ui/01-color/05-states-and-interaction.md	prose	600	15893			process 2
+ui/01-color/06-character-gradients-tools.md	prose	497	16536			raw 1; process 2
+ui/01-color/README.md	prose	65	2455			process 1
+ui/01-color/glossary.md	prose	308	7335			process 1
+ui/02-typography/01-font-selection.md	prose	860	28090	VI-21: ui 02/01 §3.3 — ссылка на `cyrillic-display-fonts.yaml` (cu-04)		raw 1; process 2
+ui/02-typography/02-type-scale.md	prose	1119	35592	NU-15: ui 02/02 §9.2 — «тело не уменьшать; база меньше 16 на узкой ширине — 16»; ui 14/11 пресеты A, C, D — строка «< 640: body 16, поля 16», как у B; NU-19: ui 02/02 §9 — строка «страница сайта — creative 04/01 §2» (cu-01)		raw 1; process 2
+ui/02-typography/03-leading-tracking-measure.md	prose	742	20673	NU-18: ui 14/11 пресет A — «абзац 520 (65ch при 14)» и «para max 640» свести к 65ch; ui 02/03 §3.1 — «50–75» как довод к норме ux 45–75; handoff §5 п. 1 — длина строки подтверждена; NU-21: ui 02/03 §2 — ссылка на `cyrillic-display-fonts.yaml` (cu-03)		raw 1; process 3
+ui/02-typography/04-weight-hierarchy-color.md	prose	568	16014			raw 1; process 2
+ui/02-typography/05-numbers-rhythm-opentype.md	prose	735	19502	TX-27: ui 02/05 §1.5 и откр. п. 7, 02/06 §2.3, §3.6, text 08/02 §3.1 — «`Intl` для ru — U+00A0»; handoff ui-03 — закрыто		raw 1; process 2
+ui/02-typography/06-localization-and-ai-errors.md	prose	618	14676	TX-26: ui 02/06 §3.3 — «прочерк — ux 07/01 §11.5»; TX-27: ui 02/05 §1.5 и откр. п. 7, 02/06 §2.3, §3.6, text 08/02 §3.1 — «`Intl` для ru — U+00A0»; handoff ui-03 — закрыто		raw 1; process 4
+ui/02-typography/README.md	prose	121	8851			raw 2; process 7
+ui/02-typography/glossary.md	prose	162	5500			process 1

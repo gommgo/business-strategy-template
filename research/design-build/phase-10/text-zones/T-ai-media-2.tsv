@@ -1,0 +1,9 @@
+file	kind	lines	tokens	actions	other	markers
+ai-media/02-providers-platforms/01-polza-api.md	prose	839	34775		W1-Z7: §4 и таблица команд — операция с id исходника и тем же файлом не выполняется; коды выхода — по текущему поведению `polza.py`	raw 26; process 53; decision 1; plan 3
+ai-media/02-providers-platforms/02-polza-models-params-prices.md	prose	1376	64015			raw 14; process 70
+ai-media/02-providers-platforms/03-aggregators-and-platforms.md	prose	594	31380			raw 38; process 21
+ai-media/02-providers-platforms/04-direct-apis-and-services.md	prose	1090	50393			raw 14; process 34
+ai-media/02-providers-platforms/05-open-weights-landscape.md	prose	923	47678		снятые утилиты: layers.py×1	raw 24; process 33
+ai-media/02-providers-platforms/06-gap-map.md	prose	151	9335			raw 3; process 24
+ai-media/02-providers-platforms/07-multichannel-client.md	prose	504	23418		W1-Z7: отказ канала — паспорт с ответом канала	raw 26; process 54
+ai-media/02-providers-platforms/README.md	prose	96	5062			raw 6; process 24

@@ -1,0 +1,232 @@
+file	where	kind	lines_with_99-raw	sample
+assets/calibration/index.yaml	вне kb	data	31	- path: creative-research/99-raw/experiments/J/04-light-pass/out/f-before/hero.png
+kb/ai-media/05-prompting/dialects.yaml	kb	data	21	"- ""0.3 (2026-09-23 18:40, D2b): снимок каталога 17:45; модели google/gemini-omni-1.1-flash (GA, FLF полями frames_via) и grok-imagine-image-2-0/text-to-image; с"
+kb/ai-media/06-art-direction-consistency/examples/dna-warm-consumer.json	kb	data	5	"""file"": ""../../99-raw/experiments/F/05-color/brand_warm_consumer.cube"""
+kb/ai-media/10-web-integration/pages/00-hero-summary.html	kb	code	1	Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure/00 (Chromium 153, 1440×900, Pixel 7, CPU×4 + 4G). -->
+kb/ai-media/10-web-integration/pages/01-image-hero.html	kb	code	1	Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure (Chromium 153, 1440×900 и Pixel 7). -->
+kb/ai-media/10-web-integration/pages/02-video-hero.html	kb	code	1	Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/04-video-page и 06-pages-measure (Chromium 153). -->
+kb/ai-media/10-web-integration/pages/02b-video-source-media.html	kb	code	1	(99-raw/experiments/J/04-video-page): при reduce не выбран ни один источник → 0 байт видео, виден poster. Ограничения —
+kb/ai-media/10-web-integration/pages/03-alpha-object-hero.html	kb	code	1	Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure (Chromium 153). -->
+kb/ai-media/10-web-integration/pages/04-two-states-spotlight.html	kb	code	1	Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/08-effects и 06-pages-measure (Chromium 153). -->
+kb/ai-media/10-web-integration/pages/05-scroll-sequence.html	kb	code	1	Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/09-scroll (Chromium 153). -->
+kb/ai-media/10-web-integration/pages/css/base.css	kb	code	1	Проверено в Chromium 153 (99-raw/experiments/J/06-pages-measure). Шрифт — системный стек: страница не ждёт веб-шрифт
+kb/ai-media/10-web-integration/pages/js/hero-video.js	kb	code	1	// Проверено: Chromium 153 (99-raw/experiments/J/06-pages-measure). Правила — 10-web-integration/02-video-delivery.md.
+kb/ai-media/11-evaluation-qa/rubrics/bg-abstract.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/cutout.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/edit.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/hero-photo.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/icon3d.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/illustration.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/product.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/series.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/svg-icon.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/text-image.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/video-loop.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/rubrics/video-product.rubric.json	kb	data	1	"""checklist_note"": ""вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только ес"
+kb/ai-media/11-evaluation-qa/thresholds.yaml	kb	data	5	#   uncalibrated — эвристика K, пересмотреть по фазе 5 (задания K-01…K-06, 99-raw/phase5/K-plan.md).
+kb/ai-media/13-routing-matrix/routing.yaml	kb	data	86	# Основа: routing.v1.yaml (N, 24.09) + итоги фазы 5 (живые прогоны 25.09.2026, заходы 1–3: 99-raw/phase5/runs/README.md).
+kb/ai-media/13-routing-matrix/stand/briefs/S03-product-scene.spec.json	kb	data	2	"""src"": ""99-raw/phase5/inputs/E/product_ref.png"","
+kb/ai-media/13-routing-matrix/stand/briefs/S05-bg-abstract.spec.json	kb	data	1	"""notes"": ""копия 99-raw/experiments/D/03-compile-prototype/ab/B3.spec.json (агент D, волна 1)"""
+kb/ai-media/13-routing-matrix/stand/briefs/S09-product-tea-count.spec.json	kb	data	1	"""notes"": ""копия 99-raw/experiments/D/03-compile-prototype/ab/B4.spec.json (агент D, волна 1)"""
+kb/ai-media/13-routing-matrix/stand/tasks.yaml	kb	data	19	#   99-raw/tools/venv-D/bin/python ../../scripts/ai-media/stand_run.py build        → 99-raw/phase5/jobs/E-*.jsonl
+kb/ai-media/14-recipes/examples/demo-landing/brand/dna-forest-roast.json	kb	data	1	"""brand"": ""Демо «Лесная обжарка»: обжарочная кофе в зёрнах, D2C, Россия («тёплый, ремесленный, спокойный»); цвета этикетки — 99-raw/phase5/inputs/E/label.json"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-01-hero-16x9-2k.spec.json	kb	data	1	"""src"": ""../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-02-hero-phone-3x4-2k.spec.json	kb	data	1	"""src"": ""../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-03-cinemagraph-steam.spec.json	kb	data	4	"""src"": ""../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-04-icon3d-bean.spec.json	kb	data	2	"""src"": ""../../../../../99-raw/phase5/inputs/M/form_bean.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-04-icon3d-box.spec.json	kb	data	2	"""src"": ""../../../../../99-raw/phase5/inputs/M/form_box.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-04-icon3d-cup.spec.json	kb	data	2	"""src"": ""../../../../../99-raw/phase5/inputs/M/form_cup.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-06-hero-evening-edit.spec.json	kb	data	1	"""src"": ""../../../../../99-raw/phase5/inputs/M/hero-16x9-stub.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/specs/M-07b-floating-beans-loop.spec.json	kb	data	4	"""src"": ""../../../../../99-raw/phase5/inputs/M/beans-chroma-stub.png"","
+kb/ai-media/14-recipes/examples/demo-landing/brand/tokens.json	kb	data	1	"""$description"": ""Токены UI демо-бренда «Лесная обжарка» (DTCG, формат ui-research 09/04) · агент M, волна 3, 24.09.2026 · цвета этикетки — 99-raw/phase5/inputs/"
+kb/ai-media/14-recipes/examples/demo-landing/js/hero-video.js	kb	code	1	// Проверено: Chromium 153 (99-raw/experiments/J/06-pages-measure). Правила — 10-web-integration/02-video-delivery.md.
+kb/ai-media/14-recipes/recipes/abstract-background.yaml	kb	data	7	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/cinemagraph.yaml	kb	data	11	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/favicons.yaml	kb	data	2	cmd: python3 99-raw/experiments/M/08-svg-favicons/build.py
+kb/ai-media/14-recipes/recipes/format-family.yaml	kb	data	5	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py ratios <spec>
+kb/ai-media/14-recipes/recipes/hero-floating-object.yaml	kb	data	12	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/hero-loop.yaml	kb	data	20	example: 99-raw/phase5/jobs/I-03-loop-AA-fixedlens.json
+kb/ai-media/14-recipes/recipes/hero-pair.yaml	kb	data	16	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/hero-two-states.yaml	kb	data	7	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/icon-set.yaml	kb	data	8	- 99-raw/phase5/jobs/G-01-llm-svg-gpt56sol.polza-chat.json
+kb/ai-media/14-recipes/recipes/icon3d-series.yaml	kb	data	11	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/illustration-series.yaml	kb	data	14	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/marketplace-infographic.yaml	kb	data	6	cmd: flock -w 900 99-raw/tools/.locks/browser.lock python3 ../../scripts/ai-media/layout_check.py
+kb/ai-media/14-recipes/recipes/og-cyrillic.yaml	kb	data	8	- 99-raw/phase5/jobs/E-02-cyr-screen.jsonl
+kb/ai-media/14-recipes/recipes/pdp-packshot-scene.yaml	kb	data	13	example: 99-raw/phase5/jobs/E-10-product.jsonl
+kb/ai-media/14-recipes/recipes/product-in-interior.yaml	kb	data	7	compile: 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --dialects <семейный> --repeats 1 --test
+kb/ai-media/14-recipes/recipes/recraft-illustration.yaml	kb	data	9	- 99-raw/phase5/jobs/G-10-recraft-illustration.routerai.json
+kb/ai-media/14-recipes/recipes/texture-pattern.yaml	kb	data	5	- 99-raw/phase5/jobs/H-09-texture-seam.jsonl
+kb/blender/09-web-runtime/examples/camera-path-scroll/build_scene.py	kb	code	2	# Blender 5.2.2 — [проверено: 99-raw/experiments/F2/03-camera-path] сцена для «путь камеры + клип на прокрутке»
+kb/blender/09-web-runtime/examples/camera-path-scroll/index.html	kb	code	2	<!-- three r186 + GSAP 3.15 ScrollTrigger + Lenis 1.3.26 — [проверено: 99-raw/experiments/F2/03-camera-path]
+kb/blender/09-web-runtime/examples/hero-lazy/hero.js	kb	code	1	// three r186 — hero «постер → 3D после LCP» (эталон F1, собран из 99-raw/experiments/F1/02-hero-variants/hero.js).
+kb/blender/09-web-runtime/examples/r3f-hero/index.html	kb	code	1	<!-- R3F 9.8 + drei 10.7.8 + three r186 — [проверено: 99-raw/experiments/F2/02-r3f-hero] hero для React-проекта -->
+kb/blender/09-web-runtime/examples/shader-background/index.html	kb	code	1	<!-- three r186 + @paper-design/shaders 0.0.81 — [проверено: 99-raw/experiments/F2/04-shader-bg] шейдерный фон героя без Blender.
+kb/blender/12-recipes/examples/01-hero-product/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 01: кейс наушников → постер Blender + GLB для hero
+kb/blender/12-recipes/examples/01-hero-product/index.html	kb	code	1	<!-- three r186 — [проверено: 99-raw/experiments/K/01-run-recipes, K/02-hero-page] рецепт 01: эталон hero-lazy (F1) с ассетом рецепта; менялись только HERO_CFG,
+kb/blender/12-recipes/examples/02-icon-series/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 02: серия из 3 иконок (формы D1/04, паспорт D2/04)
+kb/blender/12-recipes/examples/02-icon-series/post.py	kb	code	1	# run: system — Python 3 + Pillow — [проверено: 99-raw/experiments/K/01-run-recipes] PNG 512² → AVIF/WebP 1×/2× + страница-сетка
+kb/blender/12-recipes/examples/03-device-mockup/build.py	kb	code	2	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 03: телефон D1/02 + скриншот из файла → постер + GLB
+kb/blender/12-recipes/examples/04-abstract-sculpture/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 04: лента по узлу (D1/06), два варианта паспорта
+kb/blender/12-recipes/examples/05-scroll-showcase/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 05: кейс рецепта 01 + клип «Reveal» (слоты, H/12)
+kb/blender/12-recipes/examples/05-scroll-showcase/index.html	kb	code	1	// three r186 — [проверено: 99-raw/experiments/K/07-scroll-page] страница H/21 с ассетом рецепта 05: клип «Reveal» → action.time, damp; кадр по габариту
+kb/blender/12-recipes/examples/06-logo-3d-particles/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 06: 3D-логотип (text_mesh) + точки для частиц (.bin)
+kb/blender/12-recipes/examples/06-logo-3d-particles/index.html	kb	code	1	<!-- three r186 — [проверено: 99-raw/experiments/K/04-particles-page] рецепт 06: облако точек → логотип по прокрутке; формы — .bin из Blender -->
+kb/blender/12-recipes/examples/07-lowpoly-diorama/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 07: low-poly остров D1/07 (палитра, GN-инстансы)
+kb/blender/12-recipes/examples/08-sequence-video-alpha/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 08: вращение 360° импортированного GLB → PNG RGBA
+kb/blender/12-recipes/examples/08-sequence-video-alpha/index.html	kb	code	1	<!-- HTML — [проверено: 99-raw/experiments/K/08-video-page] рецепт 08: вращение предрендером — VP9 с альфой, постер-кадр, reduce → пауза -->
+kb/blender/12-recipes/examples/08-sequence-video-alpha/post.py	kb	code	1	# run: system — Python 3 + Pillow + ffmpeg — [проверено: 99-raw/experiments/K/01-run-recipes] команды A/06 (encode.py) на кадрах рецепта
+kb/blender/12-recipes/examples/09-glass-product/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 09: стеклянный флакон (transmission + volume) + сцена за ним
+kb/blender/12-recipes/examples/09-glass-product/index.html	kb	code	1	<!-- three r186 — [проверено: 99-raw/experiments/K/05-glass-page] рецепт 09: стекло transmission + volume; ?bg=scene (фон в canvas) | ?bg=css (прозрачный canvas
+kb/blender/12-recipes/examples/09-glass-product/index_css.html	kb	code	1	<!-- three r186 — [проверено: 99-raw/experiments/K/05-glass-page] рецепт 09: стекло transmission + volume; ?bg=scene (фон в canvas) | ?bg=css (прозрачный canvas
+kb/blender/12-recipes/examples/10-instance-field/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 10: 900 GN-инстансов → EXT_mesh_gpu_instancing
+kb/blender/12-recipes/examples/11-shader-background/index.html	kb	code	1	<!-- three r186 + @paper-design/shaders 0.0.81 — [проверено: 99-raw/experiments/F2/04-shader-bg] шейдерный фон героя без Blender.
+kb/blender/12-recipes/examples/12-model-viewer-ar/build.py	kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/K/01-run-recipes] рецепт 12: AR-GLB (лимиты Scene Viewer) + USDZ (Quick Look)
+kb/blender/12-recipes/examples/12-model-viewer-ar/index.html	kb	code	1	<!-- model-viewer 4.3.1 — [проверено: 99-raw/experiments/K/09-mv-page — загрузка и рендер в Chromium; AR на устройствах не проверен] рецепт 12 -->
+kb/blender/15-showcase/_shared/code3d/src/scene.js	kb	code	1	// Исходник фазы 1 — 99-raw/experiments/CD/src/scene-v3p1.js (один файл); здесь он разложен по модулям без изменения поведения
+kb/blender/15-showcase/sdano/a-code/_shared/fonts.css	kb	code	1	[проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+kb/blender/15-showcase/sdano/a-code/_shared/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/blender/15-showcase/sdano/a-code/motion-spec.yaml	kb	data	2	# Проверка схемой: 99-raw/tools/venv-I/bin/python 99-raw/experiments/I/01-schemas/spec_check.py spec 10-recipes/examples/l0-sdano/motion-spec.yaml
+kb/blender/15-showcase/sdano/b-blender/_shared/fonts.css	kb	code	1	[проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+kb/blender/15-showcase/sdano/b-blender/_shared/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/blender/15-showcase/sdano/b-blender/motion-spec.yaml	kb	data	1	# Проверка схемой: creative-research/99-raw/tools/venv-I/bin/python scripts/creative/spec_check.py spec <файл>
+kb/blender/15-showcase/sdano/c-hybrid/_shared/fonts.css	kb	code	1	[проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+kb/blender/15-showcase/sdano/c-hybrid/_shared/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/blender/15-showcase/sdano/c-hybrid/motion-spec.yaml	kb	data	1	# Проверка схемой: creative-research/99-raw/tools/venv-I/bin/python scripts/creative/spec_check.py spec <файл>
+kb/blender/15-showcase/sdano/numbers.json	kb	data	1	"""copy"": ""99-raw/experiments/SD/gates/c-hybrid_sd3-0455/"""
+kb/blender/15-showcase/velmora/ai/01-mouse-scrub/index.html	kb	code	1	Агент B, сессия 4, 25.09.2026. Сборка ассетов — 99-raw/experiments/B/10-scrub-delivery/build_scrub.py. -->
+kb/blender/15-showcase/velmora/b-blender/index.html	kb	code	1	reduce / Save-Data — 0 байт медиа, облёт по кнопке. Дорожка VD, фазы 2–3, 25–26.09.2026. Сборка — 99-raw/experiments/VD/
+kb/blender/15-showcase/vote/pairs.json	kb	data	6	"""from"": ""../99-raw/experiments/A/sites/hubtown/shot_0.jpg"""
+kb/blender/15-showcase/zveno/a-code/_shared/fonts.css	kb	code	1	[проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+kb/blender/15-showcase/zveno/a-code/_shared/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/blender/15-showcase/zveno/a-code/js/main.js	kb	code	1	// J2 (световой проход, сцена v2 — 99-raw/experiments/J/04-light-pass/src/scene.js): телефон получает quality 'low' (Standard, без карты теней).
+kb/blender/15-showcase/zveno/a-code/motion-spec.yaml	kb	data	4	# Проверка схемой: 99-raw/tools/venv-I/bin/python 99-raw/experiments/I/01-schemas/spec_check.py spec 10-recipes/examples/l2-zveno/motion-spec.yaml
+kb/blender/15-showcase/zveno/a-code/numbers.json	kb	data	26	"""out"": ""/home/mm/Документы/app-design/blender-research/99-raw/experiments/CD/out/cd3/gates2/motion-l2"""
+kb/blender/15-showcase/zveno/b-blender/_shared/fonts.css	kb	code	1	[проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+kb/blender/15-showcase/zveno/b-blender/_shared/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/blender/15-showcase/zveno/b-blender/motion-spec.yaml	kb	data	4	# Проверка схемой: 99-raw/tools/venv-I/bin/python 99-raw/experiments/I/01-schemas/spec_check.py spec 10-recipes/examples/l2-zveno/motion-spec.yaml
+kb/blender/15-showcase/zveno/c-hybrid/_shared/fonts.css	kb	code	1	[проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+kb/blender/15-showcase/zveno/c-hybrid/_shared/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/blender/15-showcase/zveno/c-hybrid/js/main.js	kb	code	1	// J2 (световой проход, сцена v2 — 99-raw/experiments/J/04-light-pass/src/scene.js): телефон получает quality 'low' (Standard, без карты теней).
+kb/blender/15-showcase/zveno/c-hybrid/motion-spec.yaml	kb	data	4	# Проверка схемой: 99-raw/tools/venv-I/bin/python 99-raw/experiments/I/01-schemas/spec_check.py spec 10-recipes/examples/l2-zveno/motion-spec.yaml
+kb/blender/15-showcase/zveno/numbers.json	kb	data	2	"""out"": ""/home/mm/Документы/app-design/blender-research/99-raw/experiments/Z/out/motion_b"""
+kb/common/canon.tsv	kb	data	74	"Ключ роли эффекта: `effect_role` в `effects.yaml`, не `section_role`	creative/06-effects-catalog/effects.schema.json#effect_role	закрыто	GL-16	site/00-glossary/"
+kb/creative/01-creative-direction/ambition-levels.yaml	kb	data	1	# 99-raw/experiments/A/03-budget-quartiles (квартили по ai-media, blender, site M).
+kb/creative/01-creative-direction/drafts-for-site/site-brief-creative-fields.yaml	kb	data	3	# Проверка: 99-raw/experiments/A/02-c1-check/c1_check.py — схема site v0 с этими фрагментами (в памяти, файл site не трогается)
+kb/creative/01-creative-direction/drafts-for-site/treatment.v0.schema.json	kb	data	1	"""description"": ""Подсхема контейнера treatment{} плана страницы site (page-plan v0.9, контракт тройки v2 §2 и §3 п.12). Владелец — creative-research. Ранний выпу"
+kb/creative/01-creative-direction/examples/art-direction-okoshko.json	kb	data	2	"""brief"": ""../../../site-research/99-raw/experiments/E/03-saas-demo-brief/site-brief-okoshko-demo.yaml"","
+kb/creative/04-visual-language/cyrillic-display-fonts.yaml	kb	data	3	"- ""type.today: display (04.11.2025), display2 (16.01.2026), geo (11.02.2021), old-style (01.06.2021), transitional (02.11.2021), gfdidones (11.07.2023) — 99-raw"
+kb/creative/04-visual-language/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/creative/04-visual-language/marketing-tokens.json	kb	data	2	"""wcag_1_4_4_rule"": ""every fluid text size has max <= 2.5 x min (Barvian 2023; verified by zoom emulation 99-raw/experiments/D/01-clamp-display/zoom_chromium.jso"
+kb/creative/06-effects-catalog/effects.schema.json	kb	data	1	"""evidence"": [""[проверено: 99-raw/experiments/F/01-pilot]""], ""checked_at"": ""2026-09-24"""
+kb/creative/06-effects-catalog/effects.yaml	kb	data	396	# Собирается скриптом 99-raw/experiments/F/07-yaml/build_effects.py — правьте entries.py и пересобирайте.
+kb/creative/07-stack-implementation/stack.yaml	kb	data	2	"size_br: ""минимальный бандл: esbuild 0.25.12, ESM, minify, production, brotli q11 (как blender A/03); число — сценарий «типовая инициализация», словарь — ключ с"
+kb/creative/08-uniqueness-anti-slop/cliche-registry.yaml	kb	data	5	# v0.1 (status: draft — до калибровки порогов K в волне 3): даты first_seen / saturated_since — опыт H/02 (99-raw/experiments/H/02-dating);
+kb/creative/09-ai-execution-evaluation/effect-gates.yaml	kb	data	4	"kimi: ""../kimi-research/99-raw/tools/k3_checks.py — приметы K3 (K3-*, --allow), M-H1-LINES, M-OVERFLOW, M-NAV; ACCEPTANCE F2/F3, D1"""
+kb/creative/09-ai-execution-evaluation/effectiveness.rubric.json	kb	data	4	"""3"": ""Звено v1 (J/02): свет RoomEnvironment, объект читается, материалы простые — лист 99-raw/experiments/J/04-light-pass/pairs-desk.jpg (слева)."","
+kb/creative/09-ai-execution-evaluation/examples/art-direction-okoshko.v1.json	kb	data	2	"""brief"": ""../../../site-research/99-raw/experiments/E/03-saas-demo-brief/site-brief-okoshko-demo.yaml"","
+kb/creative/09-ai-execution-evaluation/examples/otves-home.motion-spec.yaml	kb	data	2	# Опыт «достаточность спецификации»: секция how-it-works собрана только по этому файлу — 99-raw/experiments/I/02-spec-sufficiency.
+kb/creative/09-ai-execution-evaluation/examples/otves-home.treatment.yaml	kb	data	1	#   99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py plan \
+kb/creative/10-recipes/examples/_shared/fonts.css	kb	code	1	[проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+kb/creative/10-recipes/examples/_shared/marketing-tokens.css	kb	code	2	[проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
+kb/creative/10-recipes/examples/l0-sdano/motion-spec.yaml	kb	data	1	# Проверка схемой: 99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l0-sdano/motion-spec.yaml
+kb/creative/10-recipes/examples/l1-sverka/motion-spec.yaml	kb	data	3	# Проверка схемой: 99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l1-sverka/motion-spec.yaml
+kb/creative/10-recipes/examples/l2-zveno/js/main.js	kb	code	1	// J2 (световой проход, сцена v2 — 99-raw/experiments/J/04-light-pass/src/scene.js): телефон получает quality 'low' (Standard, без карты теней).
+kb/creative/10-recipes/examples/l2-zveno/motion-spec.yaml	kb	data	3	# Проверка схемой: 99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l2-zveno/motion-spec.yaml
+kb/creative/10-recipes/recipes/01-lead-services-l0.recipe.yaml	kb	data	2	"source: ""01-creative-direction/ambition-levels.yaml L0; пример — 99-raw/experiments/J/01-l0-sdano/motion/gates.md"""
+kb/creative/10-recipes/recipes/02-saas-l1.recipe.yaml	kb	data	2	"source: ""ambition-levels.yaml L1; пример — 99-raw/experiments/J/03-l1-sverka/motion-0.1.3/gates.md (J2, 0.1.3)"""
+kb/creative/10-recipes/recipes/03-product-launch-l2.recipe.yaml	kb	data	3	"source: ""ambition-levels.yaml L2; пример — 99-raw/experiments/J/04-light-pass/gates-l2/gates.md (motion_check 0.1.3, v2)"""
+kb/creative/10-recipes/recipes/recipe.schema.json	kb	data	1	"""description"": ""Машиночитаемая половина рецепта NN-<тип>-<уровень>.md. Ссылки на чужие id — с пространством имён (block:, effect:, cliche:, recipe:) или по файл"
+kb/site/02-site-types/crosswalk.tsv	kb	data	264	"text-research	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	landing	page_type		none	жанр text; у site — поле page_type.genre=landing (все landing-*)"
+kb/site/02-site-types/vocabulary.yaml	kb	data	1	"checks: ""build_crosswalk.py --check — 0 ошибок; vocab_lint.py по всем YAML базы (кроме самого словаря) — 0 ошибок (99-raw/experiments/J/00-vocabulary-v1/README."
+kb/site/04-blocks/blocks.schema.json	kb	data	1	"""description"": ""Для каждого текстового слота словаря: класс длины и нужен ли факт — ВЫВЕДЕНО скриптом из copy-slots.yaml text (опыт 99-raw/experiments/E/02-…); "
+kb/site/04-blocks/blocks.yaml	kb	data	1	# Проверка: 99-raw/tools/venv-E/bin/python 99-raw/experiments/E/01-validate/validate.py (схема + связи);
+kb/site/04-blocks/page-plan.schema.json	kb	data	1	"""description"": ""ЗАМЕНЕНО v1: ../10-playbooks-contracts/schemas/page-plan.schema.json (J, волна 3, 2026-09-24); эта схема v0.9 остаётся для файлов версии 0.9. Вл"
+kb/site/07-seo-geo-performance-analytics/crawlers.yaml	kb	data	3	24.09.2026. Сырые таблицы — 99-raw/experiments/H/00-sources/. Списки ботов меняются без анонсов: перепроверять
+kb/site/07-seo-geo-performance-analytics/events.yaml	kb	data	1	"- {source: ""perplexity.ai, www.perplexity.ai, copilot.microsoft.com, gemini.google.com, claude.ai, chat.deepseek.com, meta.ai"", signal: ""реферер (если браузер е"
+kb/site/07-seo-geo-performance-analytics/head-kit.yaml	kb	data	4	evidence: '[проверено: 99-raw/experiments/H/01-geo-probe-corpus-d] alfabank.ru, t-j.ru (Qrator + noindex), invitro.ru'
+kb/site/07-seo-geo-performance-analytics/page-gates.yaml	kb	data	3	"calibration: ""пороги PERF и WEIGHT — лаборатория и замер M (без поля CrUX: нет ключа PSI); строки CONTENT, NAV, MOB — самопроверка и смоук-прогон на en-buffer-p"
+kb/site/09-ai-generation-evaluation/ai-landing-markers.yaml	kb	data	9	"- ""гейт Hallmark 8 (../../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/slop-test.md)"""
+kb/site/09-ai-generation-evaluation/site-checklist.yaml	kb	data	24	"source_file: [""04-blocks/03-slots-and-page-plan.md"", ""99-raw/experiments/E/01-validate/validate.py?""]"
+kb/site/10-playbooks-contracts/examples/corporate-b2b-stalkon/site-brief.yaml	kb	data	1	raw_ref: ../../text-research/99-raw/experiments/B1/01-briefs-to-meaning/README.md#вход
+kb/site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml	kb	data	1	treatment: ../../../../../creative-research/99-raw/experiments/A/02-c1-check/treatments.yaml
+kb/site/10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml	kb	data	1	raw_ref: ../../text-research/99-raw/experiments/B1/01-briefs-to-meaning/README.md#вход
+kb/site/10-playbooks-contracts/examples/saas-okoshko/facts.yaml	kb	data	1	# КОПИЯ демо-фактов text E (../../../../text-research/99-raw/experiments/E/facts-demo-saas-okoshko.yaml) — вымышлены; J добавил пробел product-screenshots
+kb/site/10-playbooks-contracts/schemas/blocks.schema.json	kb	data	1	"""description"": ""Для каждого текстового слота словаря: класс длины и нужен ли факт — ВЫВЕДЕНО скриптом из copy-slots.yaml text (опыт 99-raw/experiments/E/02-…); "
+kb/text/01-foundations/formulas.yaml	kb	data	2	# Проверка загрузки и полей: python3 99-raw/experiments/A/04-formulas-yaml-check/check_formulas.py
+kb/text/02-strategy-messaging/examples/facts-kvarts.yaml	kb	data	2	# Откуда: ../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/ (описание заказчика,
+kb/text/02-strategy-messaging/examples/hierarchy-kvarts-problem-aware.yaml	kb	data	1	# 99-raw/experiments/B1/01-briefs-to-meaning/README.md §1 (что меняется в сообщениях секций).
+kb/text/02-strategy-messaging/examples/hierarchy-otves-problem-aware.yaml	kb	data	1	# hierarchy-otves-product-aware.yaml (опыт 99-raw/experiments/B1/02-two-hierarchies/: что меняется между ними).
+kb/text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml	kb	data	1	# перед звонком. Разница — опыт 99-raw/experiments/B1/02-two-hierarchies/.
+kb/text/02-strategy-messaging/examples/meaning-kvarts.yaml	kb	data	2	# Вход: описание заказчика и ответы (../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/
+kb/text/02-strategy-messaging/examples/meaning-otves.yaml	kb	data	1	# их id — оттуда. Вход — сообщение заказчика (ai-self, 99-raw/experiments/B1/01-briefs-to-meaning/README.md §3).
+kb/text/03-corpus-measured/thresholds.yaml	kb	data	1	source: 03-corpus-measured/corpus.tsv, measurements.tsv; 99-raw/experiments/D/03-measure/
+kb/text/04-copy-by-block/copy-slots.yaml	kb	data	9	"examples_rule: ""RU и EN, метка ai-self; факты — 02-strategy-messaging/examples/facts-*.yaml (otves, kvarts) и 99-raw/experiments/E/facts-demo-saas-okoshko.yaml "
+kb/text/05-voice-editorial/examples/voice-grafa-b2b.yaml	kb	data	5	# Бренд «Графа» — ВЫМЫШЛЕННАЯ компания; ДЕМО-факты — ../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml
+kb/text/05-voice-editorial/examples/voice-otves-warm.yaml	kb	data	2	# агент F), прошли claims_check.py и copy_lint.py: 99-raw/experiments/F/04-voice-samples/README.md.
+kb/text/05-voice-editorial/examples/voice-peklo-bold.yaml	kb	data	5	# Бренд «Пекло» — ВЫМЫШЛЕННЫЙ; ДЕМО-факты и демо-бриф — ../../99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml
+kb/text/05-voice-editorial/voice.schema.yaml	kb	data	1	#    основы, «ё» = [её]); конвертер `99-raw/experiments/F/03-schema-lint/voice_to_lint.py` делает из профиля файл правил
+kb/text/06-anti-slop/lexicon/analyzers.yaml	kb	data	1	"evidence: ""[практика]; пороги калиброваны на 5 абзацах ai-self (99-raw/experiments/C/04-overcorrection) [проверено]"""
+kb/text/07-seo-geo-copy/geo-checklist.yaml	kb	data	2	# словарей C. Тест загрузки: python3 99-raw/experiments/G/00-rules-load/test_rules.py (проверяет и этот файл).
+kb/text/07-seo-geo-copy/geo-rules.yaml	kb	data	2	# Слоты GEO-слоя (временный словарь 99-raw/notes/temp-vocabulary-v0.yaml): geo-answer, definition, faq-q, faq-a,
+kb/text/07-seo-geo-copy/meta-rules.yaml	kb	data	8	#   делаются — `checks_outside_linter`, скрипт опыта 99-raw/experiments/G/01-meta-corpus/run.py.
+kb/text/09-ai-generation-evaluation/copy-checklist.yaml	kb	data	9	# Проверка: python3 99-raw/experiments/I/01-rubric-corpus/check_rubric.py (загрузка, уникальность id, ссылки).
+kb/text/09-ai-generation-evaluation/copy-rubric.yaml	kb	data	4	# Проверка загрузки: python3 99-raw/experiments/I/01-rubric-corpus/check_rubric.py (схема полей, ссылки на маркеры C,
+kb/text/10-templates-recipes/before-after.tsv	kb	data	54	"Бронь 990 ₽ входит в цену лампы; вернём её в течение 14 дней по заявке	Бронь 990 ₽ входит в цену лампы	99-raw/experiments/E/04-copy-deck-v0/deck-kvarts-preorder"
+kb/text/10-templates-recipes/examples/facts/facts-demo-saas-okoshko-en.yaml	kb	data	2	# КОПИЯ демо-фактов агента E без изменений данных: 99-raw/experiments/E/facts-demo-saas-okoshko-en.yaml (md5 faa3236958d1…, 2026-09-24) — снимок для примеров 10
+kb/text/10-templates-recipes/examples/facts/facts-demo-saas-okoshko.yaml	kb	data	2	# КОПИЯ демо-фактов агента E без изменений данных: 99-raw/experiments/E/facts-demo-saas-okoshko.yaml (md5 1dc98a8f131a…, 2026-09-24) — снимок для примеров 10-te
+kb/text/10-templates-recipes/examples/facts/facts-demo-webinar-okoshko.yaml	kb	data	1	# копии из 99-raw/experiments/E/facts-demo-saas-okoshko.yaml с теми же id; у трёх use дополнен event-program (тема программы).
+kb/text/10-templates-recipes/examples/facts/facts-otves-en.yaml	kb	data	1	# (99-raw/experiments/F/04-voice-samples/en-overlays/otves-remont-nn.yaml; «₽9,800» → «₽9800»: запятую тысяч сверка читает
+kb/text/10-templates-recipes/examples/ru-kvarts-preorder.yaml	kb	data	1	notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-kvarts-preorder-v0.yaml (ai-self E3, 0 error),
+kb/text/10-templates-recipes/examples/ru-okoshko-saas.yaml	kb	data	1	notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-okoshko-saas-v0.yaml (ai-self E3, 0 error), upgrade
+kb/text/10-templates-recipes/examples/ru-otves-lead.yaml	kb	data	1	notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-otves-lead-v0.yaml (ai-self E3, 0 error), upgrade
+kb/ui/14-recipes/examples/tokens.css	kb	code	1	Сгенерировано из tokens.json (99-raw/tools/build_reference_tokens.py).
+scripts/README.md	вне kb	md	5	| `site/build_profile.py` | step | маркетинговый профиль UX-чек-листа для страниц сайта: решение по каждому пункту UX-* сводного чек-листа ux. | без ключей — пе
+scripts/ai-media/alpha_check.py	вне kb	code	1	Выход — JSON в stdout. [проверено: 99-raw/experiments/H/01-background-removal]
+scripts/ai-media/avif_pick.sh	вне kb	code	1	# Запуск: 99-raw/tools/avif_pick.sh in.png out.avif [порог=80]   → строки q / байты / s2 и PICK q=…; [проверено: рендер 1024² → q40, 4,7 КБ, 80,7]
+scripts/ai-media/channel_diff.py	вне kb	code	1	Запуск: python3 channel_diff.py [--ra A B] [--ga A B]  (имена папок в 99-raw/cache/routerai|genapi; по умолчанию два последних)
+scripts/ai-media/composition_metrics.py	вне kb	code	1	"CLI: python3 composition_metrics.py IMG [IMG…]  → JSON-строки. [проверено: 99-raw/experiments/F/04-slop-metrics]"""""""
+scripts/ai-media/edit_check.py	вне kb	code	1	[проверено: 99-raw/experiments/H/03-edit-check]
+scripts/ai-media/layout_check.py	вне kb	code	1	# Запуск — под browser.lock: flock -w 900 99-raw/tools/.locks/browser.lock python3 layout_check.py
+scripts/ai-media/polza.py	вне kb	code	4	Проверен на локальном макете сервера (99-raw/experiments/B/01-mock-server), НЕ на настоящем polza (ключа нет).
+scripts/ai-media/polza_catalog.py	вне kb	code	3	SNAP — имя папки в 99-raw/cache/polza/ (например 2026-09-23), путь к папке или к api-v1-models.json; по умолчанию —
+scripts/ai-media/series_metrics.py	вне kb	code	1	Python 3.13, numpy, Pillow; палитра и OKLab — ../05-color/palette.py. [проверено: 99-raw/experiments/F/06-series-metrics]
+scripts/ai-media/split_recraft.py	вне kb	code	2	иконке — комментарий о происхождении. Затем svgo (preset-default). Окружение — 99-raw/tools/venv-G (svgelements).
+scripts/ai-media/stand_run.py	вне kb	code	3	"inp[""images""] = [str(Path(""../.."") / p.replace(""99-raw/"", """", 1)) if p.startswith(""99-raw/"") else p"
+scripts/ai-media/svg_sheet.py	вне kb	code	2	Агент A, сессия 4, 25.09.2026 (этап 2: CM-01, CM-03, CM-11, G-01…G-18). Запуск — `99-raw/tools/venv-G/bin/python`
+scripts/ai-media/tests/test_asset_audit.py	вне kb	code	5	"I = ROOT / ""99-raw/phase5/inputs/H"""
+scripts/ai-media/text_zone.py	вне kb	code	1	Python 3.13, numpy, Pillow 11.3. [проверено: 99-raw/experiments/F/02-text-zone]
+scripts/ai-media/tile_check.py	вне kb	code	1	Python 3.13 + numpy + Pillow (системные). Функции перенесены из опыта 99-raw/experiments/H/05-tiling-banding/tiling.py.
+scripts/ai-media/video_loop_check.py	вне kb	code	1	Выход — JSON в stdout. [проверено: 99-raw/experiments/I/02-loop-seam, 03-chroma-key]
+scripts/blender/agent_scene.py	вне kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/I/01-own-collection-vs-wipe] работа агента в чужой сцене:
+scripts/blender/animx.py	вне kb	code	1	"Подключение: sys.path.insert(0, "".../99-raw/experiments/H/_lib""); import animx"
+scripts/blender/blender_supervisor.py	вне kb	code	1	Проверено: 99-raw/experiments/O/01-supervisor (падения), O/02-bwrap-sandbox (--sandbox).
+scripts/blender/bpy_probe.py	вне kb	code	12	python3 99-raw/tools/bpy_probe.py <команда> [аргументы] [--out file.json]
+scripts/blender/bpyx.py	вне kb	code	3	Проверено: Blender 5.2.2 LTS (Python 3.13), тесты — test_bpyx.py (запуск через 99-raw/tools/blender_run.py).
+scripts/blender/d1lib.py	вне kb	code	2	Надстройка над 03-bpy-api/snippets/bpyx.py (агент B) и идеями 99-raw/experiments/C1/12-protocol-objects/proto_lib.py
+scripts/blender/d2lib.py	вне kb	code	1	"Подключение: sys.path.insert(0, "".../99-raw/experiments/D2/_lib""); import d2lib (bpyx подключается сам)."""""""
+scripts/blender/fx_probe.py	вне kb	code	2	"""""""fx_probe.py (агент F2, перенесено в 99-raw/tools агентом U волна 4) — замер своей демо-страницы с 3D/шейдерным"
+scripts/blender/glb_lint_block.py	вне kb	code	1	# Python 3.10+ (без bpy) — [проверено: 99-raw/experiments/E/26-doc-snippets/glb_lint_result.json, run_md04.py] проверка готового GLB:
+scripts/blender/gltf_check.py	вне kb	code	2	Инструменты лежат в 99-raw/tools/node (npm): gltf-transform 4.5, gltfpack 1.2, gltf-validator, meshoptimizer, draco3dgltf.
+scripts/blender/hygiene.py	вне kb	code	1	# Blender 5.2.2 — [проверено: 99-raw/experiments/I/02-file-hygiene] гигиена СВОЕГО файла агента: отчёт и чистка
+scripts/blender/lint_agent_code.py	вне kb	code	3	Проверено на 24 скриптах «первой попытки» 99-raw/experiments/C1/11-naive-first-try/{haiku,sonnet,opus}/*.py: те же
+scripts/blender/preflight_block.py	вне kb	code	1	# Blender 5.2.2 / glTF-IO 5.2.40 — [проверено: 99-raw/experiments/E/26-doc-snippets/preflight_test.py, run_md04.py] предэкспортная проверка сцены для веба
+scripts/blender/presets.py	вне kb	code	2	# Blender 5.2.2 / glTF-Blender-IO 5.2.40 — пресеты bpy.ops.export_scene.gltf для веба (three r186). [проверено: 99-raw/experiments/E/24-presets]
+scripts/blender/rk.py	вне kb	code	5	d1lib  (99-raw/experiments/D1/_lib, D1)    — формы (rounded_slab, lathe, sweep, text/svg, точки), студия, кадр
+scripts/blender/run_doc_blocks.py	вне kb	code	1	python3 99-raw/tools/run_doc_blocks.py FILE.md [FILE2.md …] [--json result.json] [--only python,bash] [--timeout 600]
+scripts/blender/run_recipes.py	вне kb	code	5	python3 99-raw/experiments/K/01-run-recipes/run_recipes.py 12-recipes/01-hero-product.md [ещё.md …] [--no-web]
+scripts/blender/scene_audit.py	вне kb	code	1	# [проверено: 99-raw/experiments/C1/10-scene-audit]. Совместим с BLENDER_MCP_SAFE_MODE (нет lambda/os/numpy/time/class).
+scripts/blender/scene_check.py	вне kb	code	2	# Запуск в фоне с аргументами — через обёртку: python3 99-raw/tools/qa_pipeline.py scene file.blend [--passport p.json]
+scripts/blender/serve_br.py	вне kb	code	1	"# ""Address already in use"" (соединение в TIME_WAIT) — проверено 99-raw/experiments/U/09-serve-br-close."
+scripts/creative/recipe_check.py	вне kb	code	1	Запуск: 99-raw/tools/venv-J/bin/python 99-raw/experiments/J/03-recipes-check/recipe_check.py 10-recipes/recipes/*.recipe.yaml [--ledger OUT.md]
+scripts/creative/spec_check.py	вне kb	code	1	if '/99-raw/' in f or not os.path.isfile(f):
+scripts/maint/canon_check.py	вне kb	code	2	"r = case(clean_rows + [(""Черновик"", ""text/99-raw/reports"", ""закрыто"", ""GL-05"", ""—"")])"
+scripts/maint/check_links.py	вне kb	code	45	папки рядом. Обходит `.md` тематических папок `NN-…` (кроме `99-raw/`), файлы `NN-….md` корня базы и корневые
+scripts/maint/data/traces.tsv	вне kb	data	1	"not-norm	материал к разбору	99-raw/	text/99-raw/notes/x.md"
+scripts/maint/fixture_gen.py	вне kb	code	1	"R(""  treatment: ../../../../../creative-research/99-raw/experiments/A/02-c1-check/treatments.yaml\n"","
+scripts/maint/mapcheck.py	вне kb	code	2	• НЕ НОРМА — адрес (любой, и без раздела) ведёт в материал к разбору (`99-raw/`), в `PLAN.md` базы или в журнал
+scripts/site/ab_plan.py	вне kb	code	9	python3 99-raw/tools/ab_plan.py size --base 0.05 --mde-rel 0.20
+scripts/site/build_profile.py	вне kb	code	3	OUT_AC = str(kbpaths.kb('site', '99-raw', 'experiments', 'K', '02-ux-profile', 'ac-profile.tsv'))
+scripts/tests/fixtures/package-landing/manifest.yaml	вне kb	data	1	"- find: ""  treatment: ../../../../../creative-research/99-raw/experiments/A/02-c1-check/treatments.yaml\n"""
+scripts/tests/smoke/ai-media.tsv	вне kb	data	1	"scripts/ai-media/polza_catalog.py	utility	help; run: selftest	run: самопроверка сравнивает снимки 2026-09-23 из кэша источника (99-raw/cache не переносится) — с"
+scripts/ui/build_reference_tokens.py	вне kb	code	1	"L.append(""   Сгенерировано из tokens.json (99-raw/tools/build_reference_tokens.py)."")"

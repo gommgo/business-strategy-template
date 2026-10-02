@@ -1,0 +1,23 @@
+file	kind	lines	tokens	actions	other	markers
+creative/02-references-moodboards/01-sources-landscape.md	prose	345	18172			raw 9; process 21; decision 3
+creative/02-references-moodboards/02-refs-client-and-library.md	prose	533	23243	VI-56: 02/03 §2 строка «рунет» — Dprofile «поиск» (§6.12 п. 20); 02/02 §1.2 — основной путь Р40, скрипт — по месту; §5.1 — превью работ площадок не сохраняются; VI-58: creative 02/02 §6.2 абзац «Автор», CRV-REF-11 и «Открытые вопросы» 02/02, X-59 в `creative/CONTRADICTIONS.md` — по Р151		machine 2; raw 11; kimi 6; k3 1; research 4; process 39; decision 7
+creative/02-references-moodboards/03-moodboard-and-handoff.md	prose	345	13756	VI-56: 02/03 §2 строка «рунет» — Dprofile «поиск» (§6.12 п. 20); 02/02 §1.2 — основной путь Р40, скрипт — по месту; §5.1 — превью работ площадок не сохраняются	F9-046: §1.3 — граница различия тона 10–110° против 10–60° в 01/01 §6.2: одна граница в одном пространстве, второе место — ссылкой; W1-Z8: F9-010 — число «12–18» согласовать со сбором кандидатов (§1.2: 30–60 кандидатов — другой шаг)	raw 2; kimi 41; k3 17; research 11; process 16; decision 2
+creative/02-references-moodboards/README.md	prose	22	1251			k3 2; process 2
+creative/02-references-moodboards/library-example/README.md	prose	21	867			process 1
+creative/02-references-moodboards/refs-library.schema.json	data	567	5883	TR-23: refs-library.schema.json — пример `block:hero-media`		research 2; process 2
+creative/03-live-sites-measured/01-effects-sites-measured.md	prose	433	19551	CN-66: blender 09/01 §1.1–1.2, 13/02 — числа с методикой и ссылкой на запись `stack.yaml`; creative 07/01, 03/01 — без своих чисел, слайды роликов не цитировать		raw 11; kimi 3; k3 18; research 6; process 10; plan 1
+creative/03-live-sites-measured/02-motion-on-live-sites.md	prose	269	11130			raw 3; k3 5; research 2; process 6; plan 1
+creative/03-live-sites-measured/README.md	prose	58	3035			raw 2; process 1
+creative/04-visual-language/01-display-typography.md	prose	398	16529	TX-19: свод-11 и kimi-06 — адресат снят, закрыто; creative 04/01 §7 — число со ссылкой на `cta-label`		raw 6; kimi 2; k3 1; research 7; process 33
+creative/04-visual-language/02-composition-rhythm-sections.md	prose	248	9617	VI-41: creative 04/02 §2 и 01/03 (кампании L2) — абзац о визуальном совпадении с объявлением, ссылка на text 02/02 §1.6		kimi 8; k3 1; research 7; process 5; decision 2
+creative/04-visual-language/03-color-surfaces-product.md	prose	247	9174	GT-28: ai-media 01/03 §7.1 — «для сайта: норма L0; L1–L2 — по уровню» (ca-02); creative 04/03 §1.1 — обоснование со ссылкой на YAML		raw 3; kimi 2; k3 2; research 5; process 12; decision 1
+creative/04-visual-language/README.md	prose	21	1115			research 1; ns_dtcg 1; process 1
+creative/05-motion/01-motion-principles-and-access.md	prose	659	32123	NU-25: ui 08/03 §4 (14 → 15, итог 42), §7.3, 14/11 B.1, creative 05/01 §1.2 — 42 или без числа; TX-44: creative 05/01 §3.3 — «имя меняется, `aria-pressed` не ставится»		raw 6; kimi 7; k3 9; research 9; process 9; decision 1; plan 2
+creative/05-motion/02-choreography-scroll-transitions.md	prose	504	21081	TR-28: строка в creative 05/02 §4.1 (класс длины слотов сцены); NU-38: ui 08/02 §5.3 и blender 09/03 §3.1 — ссылка на `stack.yaml` (cu-08, cb-05); тексты creative — без чисел поддержки [по колонке copies]; CN-67: 05/02, 05/03 — числа параллакса, магнита и хвоста ссылкой на `effects.yaml`		raw 10; kimi 2; k3 5; research 7; process 19; decision 3; plan 2
+creative/05-motion/03-micro-motion-and-performance.md	prose	305	12278	CN-67: 05/02, 05/03 — числа параллакса, магнита и хвоста ссылкой на `effects.yaml`		raw 6; kimi 5; k3 4; research 6; process 5
+creative/05-motion/README.md	prose	26	1417			raw 1; kimi 1; process 3
+creative/06-effects-catalog/01-effects-catalog.md	prose	683	31521		W1-Z8 (F9-155): §10.1–§10.2 — строка о загрузке кадра у приёмов (правило стоит в `effects.yaml`)	raw 10; kimi 3; k3 3; research 6; process 30
+creative/06-effects-catalog/02-hero-video-background.md	prose	231	9463			raw 6; kimi 2; k3 1; research 4; process 18; decision 1
+creative/06-effects-catalog/03-effects-lab-method.md	prose	217	9922	CN-70: 06/03 «Открытые вопросы» — порог «контроль + 25 мс/с» и режимы без данных — снять (Р39)		machine 1; raw 9; process 14; decision 1
+creative/06-effects-catalog/README.md	prose	22	1695			raw 1; process 1
+creative/06-effects-catalog/effects.yaml	data	3636	104803	VI-08: ui 11/04 §5 — ссылка на creative 08/01 §2 (механизм «урок → кит → умолчание», cu-09); `effects.yaml` — статус ссылкой на запись реестра (X §2-12)		raw 396; research 1; process 14

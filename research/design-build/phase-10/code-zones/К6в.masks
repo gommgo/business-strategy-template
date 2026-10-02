@@ -1,0 +1,5 @@
+# К6в — план ассетов и таблица соответствий (волна 2); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/site/plan_to_assets.py
+.claude/skills/design-deep-dive/kb/ai-media/05-prompting/asset-plan.schema.json
+.claude/skills/design-deep-dive/kb/ai-media/05-prompting/asset-manifest.schema.json
+.claude/skills/design-deep-dive/kb/site/02-site-types/crosswalk.tsv

@@ -1,0 +1,5 @@
+# К4а — тексты: copy deck (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/text/copydeck.py
+.claude/skills/design-deep-dive/scripts/text/chain_inputs.py
+.claude/skills/design-deep-dive/kb/text/10-templates-recipes/copy-deck.schema.json
+.claude/skills/design-deep-dive/kb/text/04-copy-by-block/copy-slots.yaml

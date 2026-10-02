@@ -1,0 +1,22 @@
+file	kind	lines	tokens	actions	other	markers
+blender/07-animation/01-keyframes-actions-5x.md	prose	507	20719			raw 19; research 1; process 76
+blender/07-animation/02-shape-keys-rigs-constraints.md	prose	423	17494			raw 12; process 48
+blender/07-animation/03-gltf-to-web-playback.md	prose	446	17559			raw 16; research 1; process 51
+blender/07-animation/04-js-vs-blender-vs-prerender.md	prose	295	11930	NU-34: blender 07/04 выжимка п. 11, §5 и пример кода — «парение ≥ 10 с» (cb-03); ui 08/02 §3.7, ошибка 7, чек-лист п. 9 — полоса 2,5–6 с с источниками (cu-06); NU-35: blender 07/04 §5 — пульсация по creative §6.4 (cb-03)		raw 10; research 3; process 40
+blender/07-animation/README.md	prose	37	1944			raw 2; process 2
+blender/08-export-gltf/01-export-contract.md	prose	1207	53503			raw 163; process 179
+blender/08-export-gltf/02-baking.md	prose	780	29881			raw 100; process 61
+blender/08-export-gltf/03-compression-textures-budgets.md	prose	609	28032	GT-07: 01/02 §3.1, KIT §5, cd 06/01 §6 — ссылкой; 08/03 §6.5 — метка сцены `[мнение]`; CN-79: 08/03 §3.1 — метка `[консенсус]` (П-55); 01/02 — ссылкой		machine 2; raw 88; research 1; process 50
+blender/08-export-gltf/04-validation-pitfalls-presets.md	prose	680	28694			machine 3; raw 89; research 2; process 76
+blender/08-export-gltf/README.md	prose	32	1451			raw 4; process 3
+blender/09-web-runtime/01-threejs-core.md	prose	590	25366	CN-66: blender 09/01 §1.1–1.2, 13/02 — числа с методикой и ссылкой на запись `stack.yaml`; creative 07/01, 03/01 — без своих чисел, слайды роликов не цитировать		raw 20; process 121
+blender/09-web-runtime/02-r3f-drei-and-other-engines.md	prose	415	19597			machine 1; raw 12; research 1; process 54
+blender/09-web-runtime/03-scroll-interaction-animation.md	prose	397	16059	GT-34: blender 09/03 §2.1 — CLS от pin и лечение, открытый вопрос «pin не проверялся» снять (cb-04); NU-38: ui 08/02 §5.3 и blender 09/03 §3.1 — ссылка на `stack.yaml` (cu-08, cb-05); тексты creative — без чисел поддержки; VI-24: blender 09/03 §3.1 — «на каждом блоке без системы», ссылка на запись; cd 06/05 §3 — порог записи; CN-89: creative X-61 — закрыт (открыт только для проекта-конструктора); blender R13, 09/03 §2.3, 13/02 §2 — ссылкой на creative 07/01 §9; CN-99: blender 09/03 «не выбирать Theatre.js» — `[практика]`: авторский таймлайн как паттерн		raw 12; research 5; process 46
+blender/09-web-runtime/04-shaders-effects-catalog-impl.md	prose	461	20508			raw 15; process 46; showcase 1
+blender/09-web-runtime/05-performance-a11y-fallbacks.md	prose	408	17072	GT-04: blender 11/05 §9 — WEB-01 «LCP-элемент — текст или постер (Б); LCP страницы — ворота site по профилю», WEB-02 «место под canvas зарезервировано (Б); CLS страницы — SG-PERF-03»; 09/05 §7.2 строки 2–3 и KIT §5 — так же; GT-05: blender 11/05 §9 WEB-04 — «доля 3D ≤ 0,8 / 1,5 МБ (Б ассета); вес страницы — профиль site»; 09/05 §1.1 строка «вес страницы», §7.2 строка 5, 01/02 §3.1 и §8 — ссылкой на профиль; GT-06: 09/05 §7.2 строка 4 — поле и величина; в ambition-levels.yaml у TBT страницы L1 источник — не «вклад 3D»; GT-09: правило — в blender 09/05 (цикл и загрузка) как норма страницы, рецепт — ссылкой; NU-33: blender 09/05 §5.2 — «страница — бюджет уровня creative»; ux 03/03 §9.2 — «страница сайта — creative 05/01 §5» (cx-01); JU-47: метки у норм владельцев по списку отчёта JU §7 — одним проходом с уборкой файла [по колонке copies]; CN-78: 09/05 (таблица телефонов KTX2), 09/06 — «204 КБ» → 212 КБ со ссылкой на 09/01 §3.2		raw 12; process 54
+blender/09-web-runtime/06-deliverables-ar-ktx2-webgpu.md	prose	444	18675	CN-78: 09/05 (таблица телефонов KTX2), 09/06 — «204 КБ» → 212 КБ со ссылкой на 09/01 §3.2; CN-83: 09/06 §1.3 — вид данных у «−20–40 %» и ссылка на 12/06		machine 2; raw 17; research 1; process 50
+blender/09-web-runtime/README.md	prose	39	3886			raw 3; process 2
+blender/09-web-runtime/examples/camera-path-scroll/README.md	prose	31	1681		PLAN Ф10: пример без постера — как выше	raw 3; process 2
+blender/09-web-runtime/examples/hero-lazy/README.md	prose	43	2043		PLAN Ф10: пример без постера — назвать, чем постер собирается (`make_poster.py`), или снять слово «проверенный»	machine 1; raw 2; research 1; process 3
+blender/09-web-runtime/examples/r3f-hero/README.md	prose	31	1710			raw 3; process 2
+blender/09-web-runtime/examples/shader-background/README.md	prose	26	1335			raw 2; process 1

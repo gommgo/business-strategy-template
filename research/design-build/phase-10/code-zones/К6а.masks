@@ -1,0 +1,12 @@
+# К6а — генерация: компилятор задания и паспорт визуала (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/ai-media/prompt_compile.py
+.claude/skills/design-deep-dive/scripts/ai-media/vlm_to_dna.py
+.claude/skills/design-deep-dive/scripts/ai-media/tests/test_prompt_compile.py
+.claude/skills/design-deep-dive/scripts/ai-media/tests/test_prompt_compile_x2.py
+.claude/skills/design-deep-dive/scripts/ai-media/tests/fixtures/D02/*
+.claude/skills/design-deep-dive/scripts/ai-media/tests/fixtures/D03/*
+.claude/skills/design-deep-dive/scripts/ai-media/tests/fixtures/v2-*.spec.json
+.claude/skills/design-deep-dive/kb/ai-media/05-prompting/dialects.yaml
+.claude/skills/design-deep-dive/kb/ai-media/05-prompting/asset-spec.schema.json
+.claude/skills/design-deep-dive/kb/ai-media/06-art-direction-consistency/visual-dna.schema.json
+.claude/skills/design-deep-dive/kb/ai-media/14-recipes/recipes/*.yaml

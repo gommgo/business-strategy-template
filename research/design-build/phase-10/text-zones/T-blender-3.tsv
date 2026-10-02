@@ -1,0 +1,20 @@
+file	kind	lines	tokens	actions	other	markers
+blender/04-ai-agents-mcp/01-mcp-for-blender.md	prose	867	36667	CN-85: 04/01, 04/02, 13/03 — CVSS с версией шкалы ссылкой на 04/07 §5.3; CN-115: README blender «Решения заказчика» п. 1–4 — снять (среда — установкой); 04/01 — справкой с причиной отказа (04/07 §5.3)		machine 1; raw 19; process 17; decision 1; removed 1
+blender/04-ai-agents-mcp/02-integrations-landscape.md	prose	550	32318	CN-85: 04/01, 04/02, 13/03 — CVSS с версией шкалы ссылкой на 04/07 §5.3		raw 7; process 19
+blender/04-ai-agents-mcp/03-research-llm-3d.md	prose	895	51273			raw 8; process 34
+blender/04-ai-agents-mcp/04-agent-operating-protocol.md	prose	540	19590	VI-49: ui 12/01 §6 — текст blender handoff §1.3 (вступление со ссылкой, §6.1 с колонкой «рецепт», §6.2 — ссылка, §6.3 `[не проверено]`, §6.4 как есть, выжимка п. 19, ошибки п. 15, чек-лист п. 21 — ссылка); ui 07/02 §5 — рецепт 02 и паспорт (3.3); blender 04/04 §3.1 — ссылка на 06/02 §6; ai-media R6 — «свет 3D — паспорт blender»		raw 13; research 5; process 30
+blender/04-ai-agents-mcp/05-failure-modes-catalog.md	prose	512	24338			raw 17; process 78
+blender/04-ai-agents-mcp/06-headless-operations.md	prose	327	12634			raw 7; process 29
+blender/04-ai-agents-mcp/07-security.md	prose	357	14143	CN-115: README blender «Решения заказчика» п. 1–4 — снять (среда — установкой); 04/01 — справкой с причиной отказа (04/07 §5.3)		raw 7; process 26; decision 1
+blender/04-ai-agents-mcp/README.md	prose	55	3577			raw 5; process 8
+blender/05-modeling/01-form-and-aesthetics.md	prose	407	15207			machine 4; raw 19; research 12; process 88
+blender/05-modeling/02-modifiers-bmesh-curves.md	prose	376	16359			machine 5; raw 16; research 5; process 50
+blender/05-modeling/03-geometry-nodes-procedural.md	prose	315	13015			machine 5; raw 11; research 5; process 40
+blender/05-modeling/04-styles-and-archetypes.md	prose	303	11816			machine 3; raw 11; research 3; process 75
+blender/05-modeling/05-topology-budgets-cleanup.md	prose	367	14544			machine 5; raw 13; research 5; process 55
+blender/05-modeling/README.md	prose	35	2081			raw 2; process 4
+blender/06-materials-lighting-render/01-materials-pbr.md	prose	382	15466	VI-35: MAT-07 — «или вид задан эталоном веб-вида» (cb-09); blender 06/01 §3.5 — ссылка на `effect:holo-shader-bg` (cb-06); CN-97: blender 06/01 §3.5 — ссылка на `effect:holo-shader-bg`		machine 2; raw 9; research 2; process 47
+blender/06-materials-lighting-render/02-lighting-camera-composition.md	prose	374	13573			machine 5; raw 11; research 8; process 38
+blender/06-materials-lighting-render/03-render-engines-color.md	prose	492	19236			machine 3; raw 15; research 3; process 50
+blender/06-materials-lighting-render/04-outputs-for-web.md	prose	325	11879			machine 3; raw 10; research 3; process 48
+blender/06-materials-lighting-render/README.md	prose	27	1684			raw 3; process 2

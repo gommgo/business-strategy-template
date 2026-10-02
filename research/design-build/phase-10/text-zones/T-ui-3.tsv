@@ -1,0 +1,19 @@
+file	kind	lines	tokens	actions	other	markers
+ui/03-spacing-sizing/01-spacing-scale.md	prose	656	23298			raw 1; process 8
+ui/03-spacing-sizing/02-density.md	prose	507	15314	NU-09: ux 08/01 §12.4 — строки «в клиентском сервисе» и «основное, деструктивное, навигация» → на таче; правило 46 — «на таче — каждая цель»; UX-A11-14, AC-LAY-03 — «на таче ≥ 44×44» (id прежние); handoff §3 — зона, не высота; site `target-size`, SITE-A11Y-08, 08/03 — на таче каждая цель 44 [по имени `target-size` в файле]; NU-10: ui — медиазапрос целей и плотного режима `any-pointer: coarse` (03/02 §3.3, §8.2, 05/05, 13/01 А8, 14/04, 14/09, глоссарии); NU-12: ui 03/02 §5.3 — «зоны различаются ролями компонентов в одном режиме»; ux 03/02 §5.4 и 08/04 §3.2 — одна формулировка переключателя; NU-13: ui 03/02 §9.1 — значения из схемы или ссылка на неё; §3.1, §6 — «ориентиры систем», эталон — токены; ux 04/01 §4.1 — ссылка на `size.row.table`; handoff §4 `03-spacing-sizing` — выполнено		process 4
+ui/03-spacing-sizing/03-control-and-panel-sizes.md	prose	712	18417			process 7
+ui/03-spacing-sizing/README.md	prose	34	1468			raw 1; process 4
+ui/03-spacing-sizing/glossary.md	prose	54	2928			process 1
+ui/04-shape-elevation/01-radius-and-borders.md	prose	618	19634			process 5
+ui/04-shape-elevation/02-shadows-layers-depth.md	prose	854	24770			process 5
+ui/04-shape-elevation/03-tools-checks-and-ai-errors.md	prose	537	13340		D10: «1440 и 390» в прозе — ширины приёмки (`common/acceptance-widths.yaml`); если файл не называет пару — пункт в «Не сделано» с местом	process 6
+ui/04-shape-elevation/README.md	prose	37	1841			raw 1; process 6
+ui/04-shape-elevation/glossary.md	prose	55	2908			process 1
+ui/05-layout-grid/01-grids-breakpoints-containers.md	prose	695	24064			raw 2; process 17
+ui/05-layout-grid/02-app-shells.md	prose	1044	35789	ST-08: ui 05/02 §2 — «четыре варианта навигации основного каркаса (A–D) и раскладки рабочей области (E–H)», числа остаются каноном вида; ST-09: ui 05/02 §3 и 14/06 шаг 1 — «выбор — ux 02/02 §1.6», пороги ux, числа A–D остаются		raw 2; process 32
+ui/05-layout-grid/03-page-anatomy.md	prose	894	28208	ST-07: 13/04 §14 — «пустой экран нового аккаунта» → S01 стартового экрана роли, «служебная страница» → «служебный экран: маршрут вне реестра, сервис недоступен, плановые работы» (403 — S18, офлайн — S16), колонка «числа — ui» по таблице ST §2.1; 03/01 §12 — ссылка на 06/01 §4; ui 05/03 выжимка — «типы и их логика — ux 13/04 §14»; ST-21: 03/01 §12 — «кнопка шапки или кнопка пустого состояния, не обе (06/01 §4.8)»; ui 05/03 §7 — схема без дубля; ST-22: ux 06/01 §4.4 — «выравнивание и размеры — ui 06/06 §4»; ui 05/03 §7 — причины по ux 06/01 §4.3 с id, S18 и S13 раздельно, код второстепенно; ui 06/06 §4.2 — «ошибка загрузки» — S13, не пустое состояние		raw 2; process 19
+ui/05-layout-grid/04-alignment-whitespace-composition.md	prose	737	20905			raw 2; process 9
+ui/05-layout-grid/05-responsive-and-overlays.md	prose	703	20724	NU-10: ui — медиазапрос целей и плотного режима `any-pointer: coarse` (03/02 §3.3, §8.2, 05/05, 13/01 А8, 14/04, 14/09, глоссарии)		raw 2; process 12
+ui/05-layout-grid/06-ai-errors-and-checks.md	prose	706	21438	NU-01: cd 06/04 §1, 06/01 §6, 06/02 D1 — ссылка на файл; cd 06/07 — кадры на всех ширинах приёмки; site SITE-OUT-02 и «Устройства» 02-site-checklist — ширины приёмки (окна первого экрана остаются у site); ux UX-MOB-01 (id прежний), 12/03 §6.2а, §5.1, 09/01 §4.3, ui 14/10, 05/06 — ширины приёмки плюс проверка перестроения (NU-05); NU-06: ui 14/10 и 05/06 — «зум 400 %» ссылкой на ux 08/01 §3.2		raw 2; process 7
+ui/05-layout-grid/README.md	prose	58	2961			raw 1; process 5
+ui/05-layout-grid/glossary.md	prose	148	6626			process 1

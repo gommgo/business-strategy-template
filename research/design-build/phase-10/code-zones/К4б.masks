@@ -1,0 +1,12 @@
+# К4б — тексты: сверка фактов, линтер, смысл, голос (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/text/claims_check.py
+.claude/skills/design-deep-dive/scripts/text/copy_lint.py
+.claude/skills/design-deep-dive/scripts/text/validate_meaning.py
+.claude/skills/design-deep-dive/scripts/text/validate_voice.py
+.claude/skills/design-deep-dive/scripts/text/validate_any.py
+.claude/skills/design-deep-dive/scripts/text/validate_facts.py
+.claude/skills/design-deep-dive/scripts/text/run_checks.py
+.claude/skills/design-deep-dive/scripts/text/ux_dict_to_yaml.py
+.claude/skills/design-deep-dive/kb/text/06-anti-slop/profiles.yaml
+.claude/skills/design-deep-dive/kb/text/05-voice-editorial/voice.schema.yaml
+.claude/skills/design-deep-dive/kb/text/02-strategy-messaging/message-hierarchy.schema.yaml
