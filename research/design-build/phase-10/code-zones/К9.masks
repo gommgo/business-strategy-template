@@ -5,3 +5,4 @@
 .claude/skills/design-deep-dive/scripts/ui/build_reference_tokens.py
 .claude/skills/design-deep-dive/kb/common/components.yaml
 .claude/skills/design-deep-dive/kb/ui/14-recipes/examples/tokens.css
+.claude/skills/design-deep-dive/kb/common/system.schema.yaml
