@@ -16,6 +16,7 @@
     import kbpaths
 
     kbpaths.kb("site", "02-site-types", "vocabulary.yaml")   # файл базы site
+    kbpaths.skill_version()                                     # версия скилла: файл VERSION
     kbpaths.use("ui"); import ui_audit                          # модуль соседнего домена
     kbpaths.out("creative", "audit")                            # каталог выходов (создаётся)
     with kbpaths.lock("browser"): ...                           # общая блокировка браузера, с ожиданием
@@ -91,6 +92,15 @@ def repo(*parts):
     """Корень репозитория, в котором лежит скилл: skill → skills → .claude → корень. Канон форм проекта
     (`docs/projects/_template/`) берут отсюда; корень данных проектов для утилит — `docpaths.root()`."""
     return SKILL.parents[2].joinpath(*parts)
+
+
+def skill_version():
+    """Версия скилла — строка файла `VERSION` в его корне: версия контракта утилит с репозиторием кода, её несут
+    манифест готовности и JSON ворот страницы, copy deck и сверки фактов. Нет файла или он пуст — None."""
+    try:
+        return (SKILL / "VERSION").read_text(encoding="utf-8").strip() or None
+    except OSError:
+        return None
 
 
 def kb(base=None, *parts):
@@ -402,7 +412,8 @@ _no_bytecode()
 # ------------------------------------------------------------------ диагностика
 
 def describe():
-    rows = [("skill", SKILL), ("repo", repo()), ("kb", KB), ("scripts", SCRIPTS), ("home", home()),
+    rows = [("skill", SKILL), ("version", skill_version() or "— нет файла VERSION"), ("repo", repo()), ("kb", KB),
+            ("scripts", SCRIPTS), ("home", home()),
             ("python", python()), ("node_modules", node_modules()), ("bin", bin_dir()), ("models", models()),
             ("browsers", browsers()), ("locks", home("locks")), ("out", home("out")), ("cache", home("cache"))]
     for b in BASES:
@@ -562,6 +573,9 @@ def _selftest():
     check("data('blender')", data("blender") == SCRIPTS / "blender" / "data")
     check("домен project: scripts('project')", scripts("project") == SCRIPTS / "project")
     check("repo() — репозиторий скилла: .claude/skills/<скилл> внутри", SKILL == repo(".claude", "skills", SKILL.name))
+    check("skill_version() — строка файла VERSION корня скилла (<major>.<minor>.<patch>)",
+          skill_version() == (SKILL / "VERSION").read_text(encoding="utf-8").strip()
+          and len(str(skill_version()).split(".")) == 3)
     with tempfile.TemporaryDirectory() as td:
         old = os.environ.get(ENV_HOME)
         old_path = os.environ.get("PATH", "")

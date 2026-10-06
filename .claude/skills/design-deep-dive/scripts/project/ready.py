@@ -19,6 +19,8 @@
 Поверхности — с маршрутом дизайна и холстом: web рода landing, site или app; admin, desktop, embed.
 
 Что собирается (поля формы):
+  skill_version                       версия скилла (файл VERSION, kbpaths.skill_version) — версия контракта утилит с
+                                      репозиторием кода; check её не сравнивает
   surface, type, web_kind, consumer   реестр surface.md: landing и site → <org>/site; app, admin, desktop, embed →
                                       <org>/frontend; web_kind у admin, desktop, embed — «—»
   sources                             файлы, которые читает код, со статусом и sha256 (путь — от папки проекта): сайт —
@@ -50,15 +52,19 @@
                                       своего экрана): {id, severity, check} — тяжесть из критериев входа, способ
                                       проверки — поле check пункта kb/common/acceptance-criteria.yaml (gates, tool,
                                       code, manual); пункта вне списка базы в манифесте нет
-    open                              заглушки [PLACEHOLDER] выбранных текстов, демо-факты (example: true), которые
-                                      страница называет, и демо-кадры — «демо-кадр: <слот>» на слот плана ассетов
-                                      страницы с расширением x-demo (кадр макета не для публикации); затем строки
-                                      «решение заказчика: …» — ДС не утверждена, у кабинета ещё покрытие ДС типов
-                                      своего экрана не полное (ds_coverage) и FSD-карта не stable: готовность они не
-                                      держат, решает заказчик
+    open                              заглушки [PLACEHOLDER] выбранных текстов (вариант chosen, у слота без chosen —
+                                      единственный), демо-факты (example: true), которые страница называет, и
+                                      демо-кадры — «демо-кадр: <слот>» на слот плана ассетов страницы с расширением
+                                      x-demo (кадр макета не для публикации); затем строки «решение заказчика: …» — ДС
+                                      не утверждена, у кабинета ещё покрытие ДС типов своего экрана не полное
+                                      (ds_coverage) и FSD-карта не stable, и открытые источники группы «контекст»
+                                      («<путь> <статус>», context_open): готовность они не держат, решает заказчик
     ready                             композиция закрыта (план approved, экран stable), тексты approved, факты
                                       публикуемы или пробел назван, макет принят с совпавшим отпечатком (или пропущен
-                                      решением заказчика)
+                                      решением заказчика); у сайта ещё закрыта поверхность — бриф и у рода site карта
+                                      approved (иначе блокер «поверхность: …»)
+    publishable                       ready, а в open только строки «решение заказчика: …» — единицу код публикует
+                                      (вместе с copydeck.py validate --final без error)
   факты единицы сайта — ссылки fact: и missing: слотов данных плана и fact_ids выбранных текстов copy deck: демо-факт —
   строка open (пробел назван), missing: со строкой пробела в facts.yaml — названный пробел; готовность единицы они не
   держат, публикацию сайта с демо-фактом держит copydeck.py validate --final; в blockers («факты: …») — факт, которого
@@ -116,10 +122,11 @@ STATE = (".claude", "skills", "entrypoint", "state", "projects")
 SKIP_LINE = re.compile(r"макет\s+пропущен", re.I)
 LAB_PATH = re.compile(r"(?:^|/)motion/lab/([A-Za-z0-9][A-Za-z0-9._-]*)")   # папка лабораторной страницы приёма → её id
 DECIDE = "решение заказчика: "                          # строка open: готовность не держит, решает заказчик
-FORM_KEYS = ("surface", "type", "web_kind", "consumer", "status", "sources", "units", "perf", "frontend_design",
-             "blockers")
-UNIT_KEYS = ("id", "ready", "composition", "texts", "mockup", "budget_profile", "gate_exceptions", "after_build",
-             "open")
+CLOSED = ("approved", "verified", "stable", "accepted")   # закрытый статус источника контекста по его форме
+FORM_KEYS = ("skill_version", "surface", "type", "web_kind", "consumer", "status", "sources", "units", "perf",
+             "frontend_design", "blockers")
+UNIT_KEYS = ("id", "ready", "publishable", "composition", "texts", "mockup", "budget_profile", "gate_exceptions",
+             "after_build", "open")
 FD_KEYS = ("surface", "ambition", "motion_cap", "app_screens")
 HEADER = ("# ready.yaml — готовность поверхности {surface} к сборке для репозитория кода.",
           "# Производный файл: собирает `scripts/project/ready.py build {slug} {surface}` из файлов стратегии; руками "
@@ -145,12 +152,13 @@ _MOD = {}
 
 
 def mod(name):
-    """Модуль соседней утилиты: dc_to_html (claude-design), claims_check (text), утилиты project/ — по имени."""
+    """Модуль соседней утилиты: dc_to_html (claude-design), claims_check и copydeck (text), утилиты project/ — по
+    имени."""
     if name not in _MOD:
         import importlib
         if name == "dc_to_html":
             kbpaths.use("claude-design")
-        elif name == "claims_check":
+        elif name in ("claims_check", "copydeck"):
             kbpaths.use("text")
         _MOD[name] = importlib.import_module(name)
     return _MOD[name]
@@ -241,6 +249,8 @@ class Build:
         self.project = docpaths.project(slug, repo=self.repo)
         self.today = today or dt.date.today()
         self.blockers = []
+        self.surf_open = []
+        self.context = []
         self._facts = None
         self._src = {}
 
@@ -422,7 +432,8 @@ class Build:
 
     @staticmethod
     def chosen_texts(page):
-        """[(место, текст, fact_ids)] выбранных вариантов страницы copy deck."""
+        """[(место, текст, fact_ids)] выбранных вариантов страницы copy deck: вариант `chosen`, у слота без `chosen` —
+        его единственный вариант (`copydeck.chosen_variant` — то же правило, что читает код)."""
         out = []
         for key, val in (get(page, "meta") or {}).items() if isinstance(get(page, "meta"), dict) else []:
             if isinstance(val, str):
@@ -431,8 +442,7 @@ class Build:
             for sl in s.get("slots") or [] if isinstance(s, dict) else []:
                 if not isinstance(sl, dict):
                     continue
-                var = next((v for v in sl.get("variants") or [] if isinstance(v, dict)
-                            and v.get("id") == sl.get("chosen")), None)
+                var = mod("copydeck").chosen_variant(sl)
                 if var is not None:
                     out.append((f"{s.get('section_id')}/{sl.get('slot_id')}", str(var.get("text") or ""),
                                 list(sl.get("fact_ids") or []) + list(var.get("fact_ids") or [])))
@@ -452,11 +462,25 @@ class Build:
                         refs.add((m.group(1), m.group(2)))
         return refs
 
+    def surface_open(self):
+        """Группа «поверхность» не закрыта: [«бриф <статус>», «карта <статус>»] — у брифа и у рода site карты статус не
+        approved или файла нет; у кабинета группы нет — []."""
+        if not self.surf.page:
+            return []
+        out = []
+        for word, kind in [("бриф", "brief")] + ([("карта", "site-map")] if self.surf.web_kind == "site" else []):
+            p = docpaths.site(self.slug, self.surface, kind, repo=self.repo)
+            st = docpaths.status(p) if p.is_file() else None
+            if st != "approved":
+                out.append(f"{word} {st or 'нет'}")
+        return out
+
     def site(self):
         units, brief = self.site_units()
         rev = self.review()
         after = self.after_build()
         ds = self.ds_status
+        self.surf_open = self.surface_open()
         ids = [u[0] for u in units]
         out = []
         for pid, path, plan in units:
@@ -483,12 +507,21 @@ class Build:
             opened += [f"демо-факт: {x}" for x in sorted(set(demo))]
             opened += [f"демо-кадр: {x}" for x in self.demo_slots(pid)]
             decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
+            decide += [line for line, scope in self.context if scope in (None, ("page", pid))]
             exc = [str(e.get("id")) for e in get(plan, "page", "x-gate-exception", default=[]) or []
                    if isinstance(e, dict) and e.get("id")]
-            out.append(({"id": pid, "ready": not why, "composition": comp, "texts": texts, "mockup": verdict,
-                         "budget_profile": dash(get(plan, "page", "budget_profile")), "gate_exceptions": exc,
-                         "after_build": [dict(a) for a in after], "open": self.open_list(opened, decide)}, why))
+            out.append((self.unit(pid, not why and not self.surf_open, comp, texts, verdict,
+                                  dash(get(plan, "page", "budget_profile")), exc, [dict(a) for a in after],
+                                  self.open_list(opened, decide)), why))
         return out, brief
+
+    @staticmethod
+    def unit(uid, ready, comp, texts, verdict, budget, exc, after, opened):
+        """Единица формы; publishable — готова, а в open только «решение заказчика: …» (заглушек, демо-фактов и
+        демо-кадров нет): такую единицу код публикует."""
+        return {"id": uid, "ready": ready, "publishable": ready and all(o.startswith(DECIDE) for o in opened),
+                "composition": comp, "texts": texts, "mockup": verdict, "budget_profile": budget,
+                "gate_exceptions": exc, "after_build": after, "open": opened}
 
     def demo_slots(self, pid):
         """id слотов плана ассетов страницы с демо-кадром (расширение x-demo слота): кадр стоит на макете, в
@@ -500,9 +533,9 @@ class Build:
 
     @staticmethod
     def open_list(opened, decide):
-        """Строки open единицы: заглушки, демо-кадры и демо-факты по алфавиту, затем решения заказчика (ДС, покрытие,
-        FSD)."""
-        return sorted(set(opened)) + [DECIDE + d for d in decide]
+        """Строки open единицы: заглушки, демо-кадры и демо-факты по алфавиту, затем по алфавиту решения заказчика
+        (ДС, покрытие, FSD-карта, открытые источники контекста)."""
+        return sorted(set(opened)) + sorted({DECIDE + d for d in decide})
 
     # кабинет
     def app(self):
@@ -556,11 +589,12 @@ class Build:
                                   f"{', '.join(sorted({t for _f, ts in bad for t in ts}))})")
             if fsd != "stable":
                 decide.append("FSD-карты нет" if fsd == "none" else f"FSD-карта {fsd}")
+            decide += [line for line, scope in self.context
+                       if scope is None or scope in {("record", r) for r in comp_recs | {shell}}]
             ab = [a for a in after if not (a["id"].startswith("ST-") and a["id"] != "ST-DYN"
                                            and not a["id"].startswith(f"ST-{slug}-"))]
-            out.append(({"id": slug, "ready": not why, "composition": comp, "texts": texts, "mockup": verdict,
-                         "budget_profile": "—", "gate_exceptions": [], "after_build": ab,
-                         "open": self.open_list(opened, decide)}, why))
+            out.append((self.unit(slug, not why, comp, texts, verdict, "—", [], ab, self.open_list(opened, decide)),
+                        why))
         return out, lay
 
     def cov_of(self, cov, screen):
@@ -678,23 +712,62 @@ class Build:
                     name(get(ref, "source", "url"), "—")
         return [(md / "lab" / i, st) for i, st in sorted(named.items()) if (md / "lab" / i).is_dir()]
 
+    def context_open(self, files, labs):
+        """Открытые источники группы «контекст» (design README, «Что обязано быть закрыто») — строки решения
+        заказчика: [(«<путь> <статус>», область)]. Контекст — всё в sources[], что не единица (планы, copy deck, факты,
+        холст, REVIEW.md; у кабинета — экраны и texts.md) и не поверхность (бриф, карта), и строка поверхности в
+        surface.md. Открыт — статус есть и не закрытый (CLOSED); без статуса («—»: манифесты ассетов, папка из
+        спецификации) строки нет. ДС и FSD-карта — своими строками: их статус сводный. Область — None (у всех
+        единиц), ("page", id) — спецификация движения страницы, ("record", slug) — блок или каркас кабинета."""
+        page = self.surf.page
+        layer = docpaths.layer(self.slug, "site" if page else "screens", self.surface, self.repo)
+        own = [layer / "plans", layer / "copy"] if page else [layer / "screens",
+                                                              docpaths.layer(self.slug, "fsd", self.surface, self.repo)]
+        own += [self.dsurf("canvas-project"), self.dsurf("canvas-html")]
+        skip = {self.dsurf("review") / "REVIEW.md"} | {self.dprod(k) for k in ("tokens", "tokens-css", "design-md",
+                                                                               "system")}
+        if page:
+            skip |= {docpaths.site(self.slug, self.surface, k, repo=self.repo) for k in ("brief", "site-map")}
+            skip |= set(docpaths.product_files(self.slug, repo=self.repo)["facts"])
+        else:
+            skip.add(layer / "texts.md")
+        skip = {Path(x).resolve() for x in skip}
+        own = [Path(x).resolve() for x in own]
+        out = []
+        if self.surf.status and self.surf.status not in CLOSED:
+            out.append((f"строка {self.surface} в surface.md {self.surf.status}", None))
+        for f, st in [(f, file_status(f)) for f in files] + [(d, st) for d, st in labs]:
+            r = Path(f).resolve()
+            if r in skip or any(o == r or o in r.parents for o in own) or st in CLOSED or st == "—":
+                continue
+            scope = None
+            if page and r.name.endswith(".motion-spec.yaml"):
+                scope = ("page", r.name[:-len(".motion-spec.yaml")])
+            elif not page and r.name == "index.md" and r.parent.parent.name in ("blocks", "shells"):
+                scope = ("record", r.parent.name)
+            out.append((f"{self.prel(f)}{'/' if Path(f).is_dir() else ''} {st}", scope))
+        return out
+
     def run(self):
         page = self.surf.page
+        ds = self.ds_status
+        files, labs = self.source_files(), self.lab_dirs()
+        self.context = self.context_open(files, labs)
         if page:
             units, brief = self.site()
         else:
             units, _lay = self.app()
             brief = {}
-        ds = self.ds_status
-        sources = [{"path": self.prel(f), "status": file_status(f, ds), "sha256": sha(f)}
-                   for f in self.source_files()]
-        sources += [{"path": self.prel(d) + "/", "status": st, "sha256": dir_sha(d)} for d, st in self.lab_dirs()]
+        sources = [{"path": self.prel(f), "status": file_status(f, ds), "sha256": sha(f)} for f in files]
+        sources += [{"path": self.prel(d) + "/", "status": st, "sha256": dir_sha(d)} for d, st in labs]
         sources.sort(key=lambda s: s["path"])
         ready = [u for u, _ in units if u["ready"]]
         status = "ready" if units and len(ready) == len(units) else ("partial" if ready else "not-ready")
         blockers = []
         if not units:
             blockers.append("единиц нет: " + ("планов страниц нет" if page else "экранов нет"))
+        if self.surf_open:
+            blockers.append("поверхность: " + ", ".join(self.surf_open))
         for u, why in units:
             blockers += [f"{u['id']}: {w}" for w in why]
         if page:
@@ -706,7 +779,7 @@ class Build:
         else:
             fd = {"surface": self.surf.web_kind if self.surf.type == "web" else self.surf.type, "ambition": "—",
                   "motion_cap": "—", "app_screens": C25}
-        self.data = {"surface": self.surface, "type": self.surf.type,
+        self.data = {"skill_version": kbpaths.skill_version() or "—", "surface": self.surface, "type": self.surf.type,
                      "web_kind": self.surf.web_kind if self.surf.type == "web" and self.surf.web_kind else "—",
                      "consumer": CONSUMER["page" if page else "app"], "status": status, "sources": sources,
                      "units": [u for u, _ in units], "perf": "plans" if page else dict(PERF_APP),
@@ -739,7 +812,7 @@ def _flow(v):
 def render(slug, data):
     """Текст ready.yaml: ключи — в порядке формы, источник и пункт after_build — строкой, прочие списки — в строку."""
     out = [h.format(slug=slug, surface=data["surface"]) for h in HEADER] + [""]
-    for k in ("surface", "type", "web_kind", "consumer", "status"):
+    for k in ("skill_version", "surface", "type", "web_kind", "consumer", "status"):
         out.append(f"{k}: {_flow(data[k])}")
     out.append("")
     out.append("sources:" + ("" if data["sources"] else " []"))
@@ -774,6 +847,8 @@ def form_errors(data):
     for k in data:
         if k not in FORM_KEYS and k != "example":
             out.append((f"/{k}", f"ключ {k} вне формы", "warning"))
+    if "skill_version" in data and not (isinstance(data["skill_version"], str) and data["skill_version"].strip()):
+        out.append(("/skill_version", "skill_version — строка версии скилла (файл VERSION)", "error"))
     if "status" in data and data["status"] not in ("ready", "partial", "not-ready"):
         out.append(("/status", f"status «{data['status']}» — ready · partial · not-ready", "error"))
     if "consumer" in data and data["consumer"] not in CONSUMER.values():
@@ -800,8 +875,9 @@ def form_errors(data):
                 out.append((f"/units/{i}/{k}", f"ключ единицы {k} вне формы", "warning"))
         if "mockup" in u and u["mockup"] not in VERDICTS:
             out.append((f"/units/{i}/mockup", f"mockup «{u['mockup']}» — {' · '.join(VERDICTS)}", "error"))
-        if "ready" in u and not isinstance(u["ready"], bool):
-            out.append((f"/units/{i}/ready", "ready — true или false", "error"))
+        for k in ("ready", "publishable"):
+            if k in u and not isinstance(u[k], bool):
+                out.append((f"/units/{i}/{k}", f"{k} — true или false", "error"))
         ab = u.get("after_build")
         if "after_build" in u and not (isinstance(ab, list) and all(
                 isinstance(a, dict) and set(a) == {"id", "severity", "check"} and a["severity"] in ("B", "S", "D")
@@ -828,10 +904,11 @@ def _ab_diff(old, new):
 
 
 def _diff(old, new):
-    """Расхождения манифеста на диске и сборки — строки для сообщения."""
+    """Расхождения манифеста на диске и сборки — строки для сообщения. skill_version не сравнивается: смена версии
+    скилла без смены содержания манифест не устаревает."""
     out = []
     old = {k: v for k, v in (old or {}).items() if k != "example"}
-    for k in FORM_KEYS:
+    for k in FORM_KEYS[1:]:
         a, b = old.get(k), new.get(k)
         if a == b:
             continue
@@ -966,6 +1043,7 @@ def main(argv=None):
             n = len(data["units"])
             print(f"{docpaths.rel(dest, call.repo)} — {'записан' if old != text else 'без изменений'}: "
                   f"{data['status']}, единиц {n}, готовы {sum(1 for u in data['units'] if u['ready'])}, "
+                  f"публикуемы {sum(1 for u in data['units'] if u['publishable'])}, "
                   f"источников {len(data['sources'])}")
             for b in data["blockers"][:12]:
                 print(f"  блокер: {b}")
@@ -1028,6 +1106,20 @@ def _selftest():
         check("status not-ready: макета нет — блокеры называют единицы",
               data["status"] == "not-ready" and any(b.startswith("spasibo: макета нет") for b in data["blockers"]))
         check("форма ready.yaml (R-STRUCT-008) — без замечаний", not form_errors(data))
+        hm, sp = ({u["id"]: u for u in data["units"]}[i] for i in ("home", "spasibo"))
+        common = {DECIDE + x for x in ("design/brand.yaml none", "design/promo/art-direction.json proposed",
+                                       "voice.yaml draft", "строка promo в surface.md draft")}
+        check("контекст: открытые источники вне единицы и поверхности — строки «решение заказчика: <путь> <статус>» у "
+              "каждой единицы (бренд none, арт-дирекция proposed, голос draft, строка поверхности draft); спецификация "
+              "движения home — только у home; бриф, планы, copy deck и факты строк решения не дают",
+              common <= set(hm["open"]) and common <= set(sp["open"])
+              and f"{DECIDE}design/promo/motion/home.motion-spec.yaml proposed" in hm["open"]
+              and not any("motion-spec" in o for o in sp["open"])
+              and not any(x in o for o in hm["open"] + sp["open"] for x in ("site-brief", "plans/", "copy/", "facts")))
+        check("skill_version — версия скилла (VERSION); поверхность лендинга не закрыта (бриф proposed) — блокер "
+              "«поверхность: бриф proposed»; не готовая единица — publishable false",
+              data["skill_version"] == kbpaths.skill_version() and "поверхность: бриф proposed" in data["blockers"]
+              and not any(u["publishable"] for u in data["units"]))
         r = cli("check", slug, "--repo", root, "--today", today.isoformat(), "--json", cwd=cwd)
         check("check сразу после build — код 0, находок нет", r.returncode == 0 and not F.parse_lines(r.stdout))
         text = path.read_text(encoding="utf-8")
@@ -1038,6 +1130,10 @@ def _selftest():
         check("пометка иллюстрации example: true — не расхождение и не ключ вне формы",
               not check_surface(slug, surf, root, today)
               and not form_errors(yaml_mod().safe_load(path.read_text(encoding="utf-8"))))
+        path.write_text(text.replace(f"skill_version: {data['skill_version']}\n", "skill_version: 0.0.1\n"),
+                        encoding="utf-8")
+        check("check не сравнивает skill_version: другая версия при том же содержании — находок нет",
+              "skill_version: 0.0.1\n" in path.read_text(encoding="utf-8") and not check_surface(slug, surf, root, today))
         path.write_text(text, encoding="utf-8")
         plan = docpaths.site(slug, "promo", "plans", "spasibo.yaml", repo=root)
         ptext = plan.read_text(encoding="utf-8")
@@ -1052,13 +1148,14 @@ def _selftest():
               items and "на этапе package" in items[0].fix and "design_audit check на переходе" in items[0].fix
               and "/design-audit — перед коммитом" in items[0].fix and "без error" not in items[0].fix)
         plan.write_text(ptext, encoding="utf-8")
-        bad = dict(data, status="done", units=[dict(data["units"][0], mockup="ok", extra=1)])
+        bad = dict(data, status="done", units=[dict(data["units"][0], mockup="ok", extra=1, publishable="да")])
         bad.pop("blockers")
+        bad.pop("skill_version")
         errs = form_errors(bad)
-        check("форма: нет ключа и значение вне перечня — error, ключ вне формы — warning",
-              any(p == "/blockers" and s == "error" for p, _m, s in errs)
-              and any(p == "/status" and s == "error" for p, _m, s in errs)
-              and any(p == "/units/0/mockup" and s == "error" for p, _m, s in errs)
+        check("форма: нет ключа (blockers, skill_version) и значение вне перечня (status, mockup, publishable не bool) — "
+              "error, ключ вне формы — warning",
+              all(any(p == x and s == "error" for p, _m, s in errs)
+                  for x in ("/blockers", "/skill_version", "/status", "/units/0/mockup", "/units/0/publishable"))
               and any(p == "/units/0/extra" and s == "warning" for p, _m, s in errs))
         # лабораторная страница приёма — источник-папка манифеста
         lab_row = "design/promo/motion/lab/mask-reveal/"
@@ -1212,6 +1309,34 @@ def _selftest():
         units = {u["id"]: u for u in build(slug, surf, root, today)["units"]}
         check("решение «макет пропущен» в заметке пропусков → mockup skipped у названной единицы",
               units["spasibo"]["mockup"] == "skipped" and units["home"]["mockup"] == "none")
+        # публикация: поверхность закрыта, тексты утверждены, макет пропущен решением заказчика
+        bp = docpaths.site(slug, "promo", "brief", repo=root)
+        btext = bp.read_text(encoding="utf-8")
+        approved = dtext.replace("    status: draft\n", "    status: approved\n", 1)
+        dk.write_text(approved, encoding="utf-8")
+        d_open = build(slug, surf, root, today)
+        bp.write_text(btext.replace("project:\n  slug: otves-remont-nn\n  status: proposed\n",
+                                    "project:\n  slug: otves-remont-nn\n  status: approved\n", 1), encoding="utf-8")
+        d_pub = build(slug, surf, root, today)
+        dk.write_text(approved.replace("        - {id: a, text: 'Прораб позвонит и договорится о дне замера', status: "
+                                       "assumed, source: ai-self}\n        chosen: a\n",
+                                       "        - {id: a, text: '[PLACEHOLDER: срок звонка] Прораб позвонит', status: "
+                                       "assumed, source: ai-self}\n", 1), encoding="utf-8")
+        d_ph = build(slug, surf, root, today)
+        s_open, s_pub, s_ph = ({u["id"]: u for u in x["units"]}["spasibo"] for x in (d_open, d_pub, d_ph))
+        check("публикация: тексты approved, макет пропущен, бриф proposed — spasibo не готова, блокер поверхности; бриф "
+              "approved — готова и publishable (в open только «решение заказчика: …»); заглушка в единственном "
+              "варианте слота без chosen — строка open, ready true, publishable false",
+              not s_open["ready"] and "поверхность: бриф proposed" in d_open["blockers"]
+              and not any(b.startswith("spasibo:") for b in d_open["blockers"])
+              and s_pub["ready"] and s_pub["publishable"] and s_pub["open"]
+              and all(o.startswith(DECIDE) for o in s_pub["open"])
+              and not any(b.startswith("поверхность") for b in d_pub["blockers"])
+              and s_ph["ready"] and not s_ph["publishable"] and "[PLACEHOLDER]: confirmation/next-steps" in s_ph["open"]
+              and "chosen: a\n        fact_ids: []\n        claim_flags: []\n    - section_id: footer"
+              not in dk.read_text(encoding="utf-8"))
+        bp.write_text(btext, encoding="utf-8")
+        dk.write_text(dtext, encoding="utf-8")
         shutil.rmtree(note.parents[3])
         r = cli("build", "nope", "promo", "--repo", root, cwd=cwd)
         r2 = cli("build", slug, "--repo", root, cwd=cwd)
@@ -1306,7 +1431,8 @@ def _selftest():
         check("кабинет: FSD-карты нет, ДС не утверждена, у KpiTile optional_states вне словаря — plan-dashboard готова "
               "(макет принят, отпечаток совпал после starter и статуса ДС), решения заказчика — строки open; "
               "покрытие — только у экрана с KpiTile; блокеров о ДС, покрытии и FSD нет; статус partial",
-              pd["ready"] and pd["mockup"] == "accepted" and d["status"] == "partial"
+              pd["ready"] and pd["publishable"] and pd["mockup"] == "accepted" and d["status"] == "partial"
+              and not any(u["publishable"] for u in d["units"] if u["id"] != "plan-dashboard")
               and f"{DECIDE}FSD-карты нет" in pd["open"]
               and f"{DECIDE}ДС не утверждена (system.yaml proposed)" in pd["open"]
               and len(cov_lines["plan-dashboard"]) == 1 and "KpiTile" in cov_lines["plan-dashboard"][0]

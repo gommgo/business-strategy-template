@@ -374,11 +374,12 @@
 
 - **Закрыто:** своего статуса нет — манифест производный: собирает `ready build <slug> <surface>`, свежесть —
   `ready check` (R-FRESH-006); его `status` (`ready`, `partial`, `not-ready`) выводится из единиц, а единица
-  `ready: true` — только по правилу готовности формы; неутверждённая ДС, неполное покрытие ДС и FSD-карта не `stable`
-  — строки `open` «решение заказчика: …», готовность они не держат.
-- **Поля:** `surface`, `type`, `web_kind`, `consumer`, `status`, `sources` (путь, статус, `sha256`), `units` (`id`,
-  `ready`, `composition`, `texts`, `mockup`, `budget_profile`, `gate_exceptions`, `after_build` — пункты `{id,
-  severity, check}`, `open`), `perf`, `frontend_design`, `blockers`.
+  `ready: true` — только по правилу готовности формы; неутверждённая ДС, неполное покрытие ДС, FSD-карта не `stable`
+  и открытый источник контекста — строки `open` «решение заказчика: …», готовность они не держат; `publishable` —
+  готовность без заглушек, демо-фактов и демо-кадров.
+- **Поля:** `skill_version`, `surface`, `type`, `web_kind`, `consumer`, `status`, `sources` (путь, статус, `sha256`),
+  `units` (`id`, `ready`, `publishable`, `composition`, `texts`, `mockup`, `budget_profile`, `gate_exceptions`,
+  `after_build` — пункты `{id, severity, check}`, `open`), `perf`, `frontend_design`, `blockers`.
 - **Anti-patterns:** манифест, правленый руками; `ready: true` при несовпавшем отпечатке; `mockup: skipped` без решения
   заказчика в заметке пропусков; отпечатки, отставшие от файлов.
 - **Порядок:** источники → единицы → `perf` → `frontend_design` → `blockers` → статус.

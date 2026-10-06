@@ -2,6 +2,7 @@
 # Производный файл: собирает `scripts/project/ready.py build otves-remont-nn promo` из файлов стратегии; руками не правится.
 # Форма — docs/projects/_template/design/_template/ready.yaml.
 
+skill_version: 0.1.0
 example: true   # пометка иллюстрации фикстуры: манифест собран на чистой основе package-landing
 surface: promo
 type: web
@@ -24,26 +25,29 @@ sources:
 units:
   - id: home
     ready: false
+    publishable: false
     composition: proposed
     texts: none
     mockup: none
     budget_profile: landing-lead-services@L1
     gate_exceptions: []
     after_build: []
-    open: ['демо-факт: case-two-room-47-days', 'демо-факт: company-since-2014', 'демо-факт: estimate-free', 'демо-факт: foreman-lapin', 'демо-факт: guarantee-3-years', 'демо-факт: price-from-per-m2', 'демо-факт: promo-october-10', 'демо-факт: rating-yandex-maps', 'демо-факт: review-anna-k']
+    open: ['демо-факт: case-two-room-47-days', 'демо-факт: company-since-2014', 'демо-факт: estimate-free', 'демо-факт: foreman-lapin', 'демо-факт: guarantee-3-years', 'демо-факт: price-from-per-m2', 'демо-факт: promo-october-10', 'демо-факт: rating-yandex-maps', 'демо-факт: review-anna-k', 'решение заказчика: design/brand.yaml none', 'решение заказчика: design/promo/art-direction.json proposed', 'решение заказчика: design/promo/motion/home.motion-spec.yaml proposed', 'решение заказчика: voice.yaml draft', 'решение заказчика: строка promo в surface.md draft']
   - id: spasibo
     ready: false
+    publishable: false
     composition: approved
     texts: draft
     mockup: none
     budget_profile: thank-you-page@L0
     gate_exceptions: []
     after_build: []
-    open: []
+    open: ['решение заказчика: design/brand.yaml none', 'решение заказчика: design/promo/art-direction.json proposed', 'решение заказчика: voice.yaml draft', 'решение заказчика: строка promo в surface.md draft']
 
 perf: plans
 frontend_design: {surface: landing, ambition: L1, motion_cap: expressive, app_screens: —}
 blockers:
+  - 'поверхность: бриф proposed'
   - 'home: план proposed'
   - 'home: текстов нет'
   - 'home: макета нет: строки в REVIEW.md и решения «макет пропущен» нет'
