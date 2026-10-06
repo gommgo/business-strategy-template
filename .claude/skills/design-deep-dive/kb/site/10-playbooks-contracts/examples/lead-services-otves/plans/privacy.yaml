@@ -13,6 +13,7 @@ refs:
 page:
   id: privacy
   page_type: legal-page
+  url: /privacy
   lang: ru
   locale: ru-RU
   jurisdiction:

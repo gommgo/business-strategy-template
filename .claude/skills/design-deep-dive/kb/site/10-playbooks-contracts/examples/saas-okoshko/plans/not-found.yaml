@@ -17,6 +17,7 @@ refs:
 page:
   id: not-found
   page_type: not-found-page
+  url: /404
   lang: ru
   locale: ru-RU
   jurisdiction:

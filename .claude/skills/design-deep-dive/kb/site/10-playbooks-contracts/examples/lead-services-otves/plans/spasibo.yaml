@@ -13,6 +13,7 @@ refs:
 page:
   id: spasibo
   page_type: thank-you-page
+  url: /spasibo
   lang: ru
   locale: ru-RU
   jurisdiction:

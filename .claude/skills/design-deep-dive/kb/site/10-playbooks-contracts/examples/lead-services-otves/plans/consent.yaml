@@ -13,6 +13,7 @@ refs:
 page:
   id: consent
   page_type: legal-page
+  url: /consent
   lang: ru
   locale: ru-RU
   jurisdiction:

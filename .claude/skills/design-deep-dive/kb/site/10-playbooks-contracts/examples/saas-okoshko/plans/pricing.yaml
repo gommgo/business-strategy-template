@@ -17,6 +17,7 @@ refs:
 page:
   id: pricing
   page_type: pricing-page
+  url: /pricing
   lang: ru
   locale: ru-RU
   jurisdiction:
