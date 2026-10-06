@@ -1,6 +1,0 @@
-# К14 — blender: коды замеров, рецепты, исходники опытов (волна 2); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
-.claude/skills/design-deep-dive/scripts/blender/gate_check.py
-.claude/skills/design-deep-dive/scripts/blender/qa_pipeline.py
-.claude/skills/design-deep-dive/scripts/blender/run_recipes.py
-.claude/skills/design-deep-dive/scripts/blender/run_doc_blocks.py
-.claude/skills/design-deep-dive/kb/blender/12-recipes/examples/*/src/*

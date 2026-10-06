@@ -1,6 +1,0 @@
-# К7 — лаборатория ai-media (волна 2); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
-.claude/skills/design-deep-dive/scripts/ai-media/split_recraft.py
-.claude/skills/design-deep-dive/scripts/ai-media/stand_run.py
-.claude/skills/design-deep-dive/scripts/ai-media/svg_sheet.py
-.claude/skills/design-deep-dive/scripts/ai-media/asset_inventory.py
-.claude/skills/design-deep-dive/scripts/ai-media/channel_diff.py

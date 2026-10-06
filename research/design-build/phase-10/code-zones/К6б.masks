@@ -1,7 +1,0 @@
-# К6б — генерация: каналы, каталоги, маршруты (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
-.claude/skills/design-deep-dive/scripts/ai-media/polza.py
-.claude/skills/design-deep-dive/scripts/ai-media/polza_catalog.py
-.claude/skills/design-deep-dive/scripts/ai-media/mp_client.py
-.claude/skills/design-deep-dive/scripts/ai-media/routing_check.py
-.claude/skills/design-deep-dive/scripts/ai-media/data/genapi_prices_*.json
-.claude/skills/design-deep-dive/kb/ai-media/13-routing-matrix/routing.yaml

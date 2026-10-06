@@ -1,7 +1,0 @@
-# К3 — вход холста: отпечатки, выбор файлов, критерии (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
-.claude/skills/design-deep-dive/scripts/project/canvas_input.py
-.claude/skills/design-deep-dive/scripts/project/contract.py
-.claude/skills/design-deep-dive/scripts/project/demo_data.py
-.claude/skills/design-deep-dive/scripts/project/data/demo.yaml
-.claude/skills/design-deep-dive/scripts/project/data/canvas.yaml
-.claude/skills/design-deep-dive/kb/common/acceptance-criteria.yaml

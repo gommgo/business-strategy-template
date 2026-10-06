@@ -1,9 +1,0 @@
-# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
-source: blender-research/99-raw/tools/three_probe.py
-source_sha256: 4aa5bb17b138003171ba40dc7e9348d50b0697e67fdfdf1b8a44dd2f65e792d7
-result_sha256: 9d54bcbf7d02d934ed838ead4a2053512a5e0214a3db86d499d374b098c3d374
-dest: .claude/skills/design-deep-dive/scripts/blender/three_probe.py
-edits:
-- code: abs
-  find: sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/tools")
-  replace: 'sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # перенос: gltf_diff.py — рядом'

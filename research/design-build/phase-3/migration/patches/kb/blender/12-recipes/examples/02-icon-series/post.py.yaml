@@ -1,9 +1,0 @@
-# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
-source: blender-research/12-recipes/examples/02-icon-series/post.py
-source_sha256: f8474c06bb5439203e701f3beaca1f7e04c84d47b0ba97d5fe0e38bd8065c4fe
-result_sha256: 24004fa6073f944c93fa189e4ecc5ce7f102c2330e6fb41bb03f56df2655e3e8
-dest: .claude/skills/design-deep-dive/kb/blender/12-recipes/examples/02-icon-series/post.py
-edits:
-- code: abs
-  find: EX = "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series"
-  replace: 'EX = os.path.dirname(os.path.abspath(__file__))  # перенос: папка примера'

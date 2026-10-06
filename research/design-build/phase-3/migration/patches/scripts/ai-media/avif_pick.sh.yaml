@@ -1,9 +1,0 @@
-# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
-source: ai-media-research/99-raw/tools/avif_pick.sh
-source_sha256: 7d2d6e2cd3d50d07f8d711a942d28992afe954e4d5b05e87cd1edde6496aaa76
-result_sha256: fa634d3a3088caaecdf9502b2eee79046a70f9e08e8cef24ee796ed6e2a98173
-dest: .claude/skills/design-deep-dive/scripts/ai-media/avif_pick.sh
-edits:
-- code: bin
-  find: B=/home/mm/Документы/app-design/ai-media-research/99-raw/tools/bin
-  replace: 'B="${DDD_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/design-deep-dive}/bin"  # перенос: бинарники ставит scripts/install.sh'

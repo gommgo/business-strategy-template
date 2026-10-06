@@ -1,9 +1,0 @@
-# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
-source: blender-research/99-raw/experiments/D2/_lib/d2lib.py
-source_sha256: 6e16219a543c069166895512aed7b8d1d4484c89ae6d5a174f0fab95ae860def
-result_sha256: cb5c99168144f82708e51ac5dfdf40c2def6b5bc86ded38d01d1bd8c07240a32
-dest: .claude/skills/design-deep-dive/scripts/blender/d2lib.py
-edits:
-- code: imp
-  find: sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
-  replace: 'sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))  # перенос: bpyx.py — рядом'

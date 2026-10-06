@@ -1,9 +1,0 @@
-# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
-source: blender-research/12-recipes/examples/08-sequence-video-alpha/post.py
-source_sha256: 990d4c45661258def0eb3285e01e8389722a001c26eacd1b3542366db22f9551
-result_sha256: e96167884d17095c4b4ce76f98a9b37a98a481b0544e095953bf49f16c124bc6
-dest: .claude/skills/design-deep-dive/kb/blender/12-recipes/examples/08-sequence-video-alpha/post.py
-edits:
-- code: abs
-  find: EX = "/home/mm/Документы/app-design/blender-research/12-recipes/examples/08-sequence-video-alpha"
-  replace: 'EX = os.path.dirname(os.path.abspath(__file__))  # перенос: папка примера'

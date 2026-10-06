@@ -1,5 +1,0 @@
-id	node	kind	topic	sides	positions	resolution	basis	canon	copies	action	status	source
-GL-01	GL	term	зона: омоним	ux:ux/00-glossary.md §Ложные друзья; site:site/00-glossary/glossary.md §0; Р28	ux: область экрана; site: не термин	«зона» — область экрана; в interface — смысловая группа блоков	SYNTHESIS §6.4; Р67	common/glossary.md#зона	ui/00-glossary/glossary.md §14; research/design-build/phase-2/SYNTHESIS.md §6.4	Ф10: ссылки вместо определений	позиция	§9 п. 5; IN-0076; IN-0124…IN-0125
-GL-1	TR	terms	тттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттттт	ux:ux/нет-такого.md §1				ux/00-glossary.md; site/00-glossary/glossary.md			готово	IN-9999
-GL-01	GL	gap	дубль id								закрыто	IN-0076
-GL-03	GL	gap	путь с хвостом	ux/00-glossary.md п. 3		норма		ux/00-glossary.md			позиция	IN-0170

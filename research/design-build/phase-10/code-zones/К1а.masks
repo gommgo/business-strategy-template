@@ -1,6 +1,0 @@
-# К1а — слой страницы: схемы и валидатор карты и плана (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
-.claude/skills/design-deep-dive/scripts/site/site_validate.py
-.claude/skills/design-deep-dive/kb/site/10-playbooks-contracts/schemas/page-plan.schema.json
-.claude/skills/design-deep-dive/kb/site/10-playbooks-contracts/schemas/site-map.schema.json
-.claude/skills/design-deep-dive/kb/site/07-seo-geo-performance-analytics/head-kit.yaml
-.claude/skills/design-deep-dive/kb/site/10-playbooks-contracts/examples/*.yaml

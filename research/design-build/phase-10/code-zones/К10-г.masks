@@ -1,5 +1,0 @@
-# К10-г — сквозное, папки blender, claude-design, ui, ux (волна 5); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
-.claude/skills/design-deep-dive/scripts/blender/*
-.claude/skills/design-deep-dive/scripts/claude-design/*
-.claude/skills/design-deep-dive/scripts/ui/*
-.claude/skills/design-deep-dive/scripts/ux/*

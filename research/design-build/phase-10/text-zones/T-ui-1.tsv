@@ -1,6 +1,0 @@
-file	kind	lines	tokens	actions	other	markers
-ui/00-glossary/README.md	prose	40	1351			process 2
-ui/00-glossary/glossary.md	prose	1889	108174	CM-16: ux 04/08 §3.2 «около 5» → «5–6 с» (реестр № 11); ux 03/04 §8 п. 5 «с действием — дольше» → «не исчезает сам» (№ 12); ui 06/05 §3.4 — таблица длительностей заменяется ссылкой на ux 04/08 §3.2 и таблицу «событие → форма»; «4 с» в выжимке 06/05 п. 10, README 06 п. 8, глоссариях 06 и 00, 06/08, 14/06 — «Sonner по умолчанию 4 с; срок — ux 04/08 §3.2»; NU-10: ui — медиазапрос целей и плотного режима `any-pointer: coarse` (03/02 §3.3, §8.2, 05/05, 13/01 А8, 14/04, 14/09, глоссарии)		raw 1; research 1; ns_dtcg 1; process 1
-ui/CONTRADICTIONS.md	prose	319	20695	CN-104: ui 11/03 §6.4 п. 1 и C39 — «переключатель — если тем две; вторая тема — решение брифа»; CN-122: реестры баз — ссылкой на межбазовый [место названо вручную]		raw 3; research 1; process 2; plan 1
-ui/PLAN.md	prose	184	8657			raw 21; research 1; process 32; decision 1; plan 1
-ui/README.md	prose	498	24555	JU-35: разделы «Метки доказательности» баз — ссылка на evidence.md и свои метки базы; метки в текстах не заменяются, при ужатии сохраняются (Р132) [по колонке copies]		raw 5; ns_dtcg 1; process 23; plan 3

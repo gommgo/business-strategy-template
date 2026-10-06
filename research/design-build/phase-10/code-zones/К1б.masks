@@ -1,6 +1,0 @@
-# К1б — каталог блоков и словарь (волна 1); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
-.claude/skills/design-deep-dive/kb/site/04-blocks/blocks.yaml
-.claude/skills/design-deep-dive/kb/site/04-blocks/blocks.schema.json
-.claude/skills/design-deep-dive/kb/site/10-playbooks-contracts/schemas/blocks.schema.json
-.claude/skills/design-deep-dive/kb/site/02-site-types/vocabulary.yaml
-.claude/skills/design-deep-dive/scripts/site/vocab_lint.py

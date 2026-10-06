@@ -1,9 +1,0 @@
-# Механические правки при переносе (агент B). Формат — apply_patches.py; коды — SPEC-code.md §3.
-source: blender-research/12-recipes/examples/09-glass-product/build.py
-source_sha256: c84c51fd3c0d5f4e1be908eac3c5e75ed0103bca8c85159d61793f04f5a29852
-result_sha256: c42ed7bdca5fd111a76fc2db3b966b2387d69378ca26361ac1ee89a5fb77407a
-dest: .claude/skills/design-deep-dive/kb/blender/12-recipes/examples/09-glass-product/build.py
-edits:
-- code: imp
-  find: sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
-  replace: 'import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender'
