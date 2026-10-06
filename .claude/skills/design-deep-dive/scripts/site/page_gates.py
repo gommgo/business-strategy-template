@@ -1410,9 +1410,9 @@ def ready_items(manifest, unit):
 
 def after_build_status(items, results):
     """Исход пунктов after_build со способом gates (правило — kb/common/acceptance-criteria.yaml, поле check):
-    [{id, gates, status, severity}]. Решают строки вердикта с id ворот пункта, кроме зеркал (mirror): строка FAIL без
-    исключения плана — fail с худшей тяжестью таких строк; строк нет или все SKIP — unchecked с тяжестью пункта
-    (наибольшей, которую ворота дают предмету); иначе pass."""
+    [{id, gates, status, severity}]. Решают строки вердикта с id ворот пункта, кроме зеркал (mirror): у какого-либо из
+    ворот строк нет или все SKIP — unchecked с тяжестью пункта (наибольшей, которую ворота дают предмету); иначе строка
+    FAIL без исключения плана — fail с худшей тяжестью таких строк; иначе pass."""
     out = []
     for it in items:
         ids = it['check'].get('gates') if isinstance(it.get('check'), dict) else None
@@ -1420,10 +1420,10 @@ def after_build_status(items, results):
             continue
         rows = [r for r in results if r.id in ids and not r.mirror]
         fails = [r for r in rows if r.status == 'FAIL' and not getattr(r, 'excepted', False)]
-        if fails:
-            status, sev = 'fail', max((r.severity for r in fails), key=lambda s: SEV_RANK.get(s, 0))
-        elif all(r.status == 'SKIP' for r in rows):
+        if any(all(r.status == 'SKIP' for r in rows if r.id == g) for g in ids):
             status, sev = 'unchecked', it['severity']
+        elif fails:
+            status, sev = 'fail', max((r.severity for r in fails), key=lambda s: SEV_RANK.get(s, 0))
         else:
             status, sev = 'pass', '-'
         out.append({'id': it['id'], 'gates': list(ids), 'status': status, 'severity': sev})
@@ -1943,7 +1943,7 @@ def selftest_brief(check, budgets, fake):
 def selftest_ready(check, clean):
     """--ready: исход пунктов after_build со способом gates по строкам вердикта (случаи LCP между целью и «плохо»,
     вес под исключением плана, зеркало соседа, призыв после JS, счётчики ЕС — только библиотеки и события; пункт без
-    строк) — на вымышленных плане, манифесте и замерах."""
+    строк, ворота пункта без строк — замер только телефона) — на вымышленных плане, манифесте и замерах."""
     import contextlib
     import io
     import tempfile
@@ -1970,8 +1970,9 @@ def selftest_ready(check, clean):
             return p
 
         def case(name, jur='ru', summary=None, network=None, accept=None, motion=None, exception=None, geo=(),
-                 anatomy=True):
-            """Чистая страница с правкой случая; без anatomy — без замера анатомии; geo None — без geo_probe."""
+                 anatomy=True, desktop=True):
+            """Чистая страница с правкой случая (правка — у телефона); без anatomy — без замера анатомии, без desktop —
+            анатомия только телефона; geo None — без geo_probe."""
             page = {'id': 'home', 'budget_profile': 'landing-lead-services@L1', 'jurisdiction': [jur]}
             if exception:
                 page['x-gate-exception'] = [{'id': exception, 'why': 'вымышлено', 'who': 'заказчик',
@@ -1983,6 +1984,8 @@ def selftest_ready(check, clean):
                 d['summary'].update(summary or {})
                 d['network'].update(network or {})
                 put(f'{name}/anatomy/anatomy_mobile.json', d)
+                if desktop:
+                    put(f'{name}/anatomy/anatomy_desktop.json', copy.deepcopy(clean['mobile']))
                 keys += ['--anatomy', os.path.join(td, name, 'anatomy')]
             for mode, rep in (accept or {}).items():
                 put(f'{name}/accept/accept_{mode}.json', rep)
@@ -2035,9 +2038,13 @@ def selftest_ready(check, clean):
         check('без geo_probe строк SG-SEO-05 нет: I6 — unchecked S, S вердикта его считает',
               ab['I6'] == ('unchecked', 'S') and out['S'] == 1 and out['verdict'] == 'accepted_with_notes')
         out, ab = case('no-anatomy', anatomy=False, accept=thr, geo=None)
-        check('без анатомии строк SG-GEO-01 и SG-LEGAL-01 нет: I3 — unchecked B, вердикт blocked',
-              ab['I3'] == ('unchecked', 'B') and ab['J4b'] == ('unchecked', 'S') and out['verdict'] == 'blocked'
-              and out['B'] == 1)
+        check('без анатомии строк SG-GEO-01, SG-LEGAL-01 и десктопа нет: I3 и F2 — unchecked B, вердикт blocked',
+              ab['I3'] == ab['F2'] == ('unchecked', 'B') and ab['J4b'] == ('unchecked', 'S')
+              and out['verdict'] == 'blocked' and out['B'] == 2)
+        out, ab = case('mobile-only', accept=thr, desktop=False)
+        check('замер только телефона: у SG-PERF-02 строк нет — F2 unchecked B при строке SG-PERF-01 FAIL S, вердикт '
+              'blocked', ab['F2'] == ('unchecked', 'B') and ab['I3'] == ('pass', '-') and out['verdict'] == 'blocked'
+              and any(r['id'] == 'SG-PERF-01' and r['status'] == 'FAIL' and r['severity'] == 'S' for r in out['gates']))
         bad = []
         for keys in (['--ready', put('x/ready.yaml', manifest('S'))],
                      ['--plan', put('y/home.yaml', {'page': {'id': 'about', 'budget_profile': 'landing-lead-services@L1'}}),
