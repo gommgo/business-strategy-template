@@ -137,14 +137,14 @@ sibling-checkout'ами:
 | `<org>/frontend` | `projects/<slug>/fsd/<surface>/` (карта слайсов → scaffold) + `screens/<surface>/` (карта маршрутов, тексты интерфейса) + `design/` (дизайн-система, исходники холста с принятыми артбордами экранов, `REVIEW.md`, манифест готовности
 `ready.yaml`) + `interface/` и домены (контекст) |
 | `<org>/site` | `projects/<slug>/site/<surface>/` (бриф, карта, планы, тексты по слотам → страницы и коллекции) + факты и голос продукта + `design/` (дизайн-система, арт-дирекция, движение, ассеты, исходники холста с принятыми артбордами страниц,
-`REVIEW.md`, манифест готовности `ready.yaml`) |
+`REVIEW.md`, манифест готовности `ready.yaml`) + каталоги базы скилла — снимком с локом отпечатков |
 | `<org>/<bot>` | `projects/<slug>/telegram-bot-flow/<surface>/` (диалоги бота → код) + голос продукта |
 | `<org>/mobile` | `projects/<slug>/mobile/<surface>/` (карта приложения → scaffold в `{shared,androidApp,iosApp}/`) + `interface/` и домены (контекст) + токены дизайн-системы (тема) и голос продукта |
 | `<org>/infra` | скиллы хаба — `projects/<slug>/{vision,surface}.md` (`/init-project`, `/stack-deep-dive`, `/de-template`; род веб-поверхности `web-kind` — какой код-репо поднимать); `services/`, паспорта, `projects/infrastructure/` и манифесты готовности `ready.yaml` — контекст при планировании (`/plan`) |
 
 Полный контракт — [`docs/README.md`](docs/README.md), раздел «Что docs отдаёт соседям».
 Канон карты экосистемы и флоу —
-[`project-infra-template-compose/docs/reference/ecosystem.md`](https://git.stit.tech/stit-core/project-infra-template-compose/src/branch/main/docs/reference/ecosystem.md).
+[`docs/reference/ecosystem.md` шаблона хаба](https://git.stit.tech/stit-core/project-infra-template-compose/src/branch/main/docs/reference/ecosystem.md).
 
 ## Путь форка
 

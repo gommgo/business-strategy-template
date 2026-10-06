@@ -34,7 +34,10 @@ three_d. Каркас проходит свою проверку: строки, 
                 forbidden; poster_for на строку, которой нет; warning — форма демо-картинки макета x-demo {file |
                 files, what} (есть ли файл, не сверяется: путь вне git), local_edit у строки без настоящего кадра
                 (источник не real и не edit-real), instance без записи в instances; в проекте — форма манифеста ассетов поверхности
-                (design/<surface>/assets/manifest.yaml) по схеме asset-manifest.schema.json (warning)
+                (design/<surface>/assets/manifest.yaml) по схеме asset-manifest.schema.json (warning); у принятой строки
+                (status: accepted) манифестов поверхности и продукта (design/_assets/manifest.yaml) sha256 есть и равен
+                файлу — error: по нему код-репо сверяет снимок (docs/projects/_template/design/README.md § Пакет для
+                кода)
   R-MAT-002     поля утверждённого плана: approval, дорога 3D у 3D-слота, нет заглушек TODO, у generate и
                 edit-real слота или варианта — коды задач routing.yaml
   R-COV-004     3D-слот без постера; с планом страницы — строка на каждый медиа- и 3D-слот (нет строки: error у
@@ -42,7 +45,8 @@ three_d. Каркас проходит свою проверку: строки, 
                 слота, ни у варианта (error) и с ai_fit: forbidden, постер 3D-слота как в плане страницы; в проекте — план страницы ведёт в план
                 ассетов (refs.asset_plan), план ассетов есть у страницы с медиа- и 3D-слотами (error — у страницы
                 партии входа холста: поле units манифеста INPUT.md; у остальных страниц и до входа — hint)
-  R-REF-001     refs.* плана ассетов и refs.asset_plan плана страницы ведут в пустоту или в другой файл
+  R-REF-001     refs.* плана ассетов и refs.asset_plan плана страницы ведут в пустоту или в другой файл; файл принятой строки
+                манифеста ассетов (путь от папки манифеста) не найден
   R-MAT-001     в проекте — план ассетов approved при плане страницы или арт-дирекции не approved (warning)
   R-STRUCT-001  в проекте — план ассетов страницы, которой нет среди планов поверхности (warning)
 
@@ -63,8 +67,9 @@ three_d. Каркас проходит свою проверку: строки, 
                                                         в проект, только для страниц без плана ассетов (план ассетов
                                                         правит агент, существующий файл не перезаписывается)
   plan_to_assets.py check <slug> [<surface>] [--page ID …] [--repo DIR] [--json]
-                                                        планы ассетов поверхностей со слоем страницы, покрытие и
-                                                        форма манифеста ассетов; --page — только эти страницы
+                                                        планы ассетов поверхностей со слоем страницы, покрытие,
+                                                        форма манифеста ассетов и отпечатки его принятых строк, без
+                                                        --page — и манифеста продукта; --page — только эти страницы
                                                         (находки и код выхода — по ним; из манифеста — их строки)
   plan_to_assets.py --selftest                          примеры баз, 10 типов v1, фикстура asset-plan, без сети
 Без <surface> — все поверхности проекта со слоем страницы (web рода landing и site). Корень данных — --repo,
@@ -77,6 +82,7 @@ import argparse
 import copy
 import csv
 import difflib
+import hashlib
 import json
 import os
 import re
@@ -703,6 +709,25 @@ def check_manifest(K, path, c, pages=None):
         who = f"{row.get('slot')}: " if isinstance(row, dict) and row.get("slot") else ""
         c.add("R-STRUCT-005", "warning", "/" + "/".join(str(x) for x in ap_) if ap_ else "",
               f"форма манифеста ассетов: {who}{e.message[:300]}")
+    # принятая строка — файл снимка код-репо: лок берёт её sha256 как отпечаток файла, поэтому отпечаток, не равный файлу,
+    # — дефект строки, как ссылка в пустоту (docs/projects/_template/design/README.md § Пакет для кода)
+    for i, row in enumerate(rows if isinstance(rows, list) else []):
+        if not (isinstance(row, dict) and row.get("status") == "accepted" and isinstance(row.get("file"), str)):
+            continue
+        if pages is not None and str(row.get("page") or "") not in pages:
+            continue
+        ptr = f"/assets/{i}" if branch else f"/{i}"
+        f = path.parent / row["file"]
+        if not f.is_file():
+            c.add("R-REF-001", "error", ptr + "/file", f"{row.get('slot')}: файл принятой строки ведёт в пустоту: "
+                  f"{row['file']} (путь — от папки манифеста)")
+            continue
+        sha = str(row.get("sha256") or "").removeprefix("sha256:")
+        real = hashlib.sha256(f.read_bytes()).hexdigest()
+        if sha != real:
+            what = f"sha256 не равен файлу (файл — {real})" if sha else f"нет sha256 (файл — {real})"
+            c.add("R-STRUCT-005", "error", ptr + "/sha256", f"{row.get('slot')}: у принятой строки {row['file']} "
+                  f"{what}: по нему код-репо сверяет снимок")
 
 
 def has_media(plan):
@@ -997,6 +1022,11 @@ def cmd_check(call):
     unknown = sorted(wanted - {pid for _, plans, aps in found for pid in (*plans, *aps)})
     if unknown:
         raise F.ToolError(f"--page: нет страниц {', '.join(unknown)} среди планов страниц и планов ассетов")
+    man = docpaths.design(call.slug, "assets", "manifest.yaml", repo=call.repo)
+    if man.is_file() and not wanted:
+        # манифест продукта: строки без страницы, общие для поверхностей, — проверяется один раз, без --page
+        check_manifest(K, man, Ctx(rep, docpaths.rel(man, call.repo), "_assets/manifest", None,
+                                   f"/design-deep-dive {call.slug} assets", kind=MANIFEST_KIND))
     for s, plans, aps in found:
         ad_status = docpaths.status(docpaths.design(call.slug, "art-direction", surface=s.slug, repo=call.repo))
         has_input, batch = input_batch(docpaths.design(call.slug, "input", surface=s.slug, repo=call.repo))
@@ -1341,10 +1371,39 @@ def _selftest():
 
         check("фикстура: манифест ассетов фикстуры package-landing-defects проходит схему — check 0 находок",
               man_src.is_file() and man_check(man_src.read_text(encoding="utf-8")) == (0, []))
+        hero = man.parent / "hero-visual-desktop.webp"
+        hero.write_bytes(b"webp\n")
+        real = hashlib.sha256(b"webp\n").hexdigest()
         row = ("slot: hero-visual\n  page: home\n  file: hero-visual-desktop.webp\n  variant: desktop\n  format: webp\n"
                "  status: accepted\n  license: права у заказчика (демо)\n  origin: съёмка заказчика (демо)\n  ai: false\n"
-               "  sha256: " + "a1" * 32 + "\n")
-        check("фикстура: манифест списком строк — 0 находок", man_check("- " + row) == (0, []))
+               "  sha256: " + real + "\n")
+        check("фикстура: манифест списком строк, у принятой строки отпечаток файла — 0 находок",
+              man_check("- " + row) == (0, []))
+        # отпечаток принятой строки — отпечаток файла в локе снимка код-репо: расхождение — error
+        check("фикстура: у принятой строки sha256 не равен файлу → R-STRUCT-005 error, код 1",
+              man_check("- " + row.replace(real, "a1" * 32)) == (1, [("R-STRUCT-005", "error", MANIFEST_KIND)]))
+        check("фикстура: у принятой строки нет sha256 → R-STRUCT-005 error",
+              man_check("- " + row.replace("  sha256: " + real + "\n", "")) == (1, [("R-STRUCT-005", "error", MANIFEST_KIND)]))
+        check("фикстура: файла принятой строки нет → R-REF-001 error",
+              man_check("- " + row.replace("hero-visual-desktop.webp", "nope.webp")) == (1, [("R-REF-001", "error", MANIFEST_KIND)]))
+        check("фикстура: черновая строка с чужим sha256 не сверяется — 0 находок",
+              man_check("- " + row.replace(real, "a1" * 32).replace("status: accepted", "status: draft")) == (0, []))
+        check("фикстура: check --page — общая строка без page с чужим sha256 не сверяется",
+              man_check("- " + row.replace(real, "a1" * 32).replace("  page: home\n", ""), "--page", "home") == (0, []))
+        man.write_text("- " + row, encoding="utf-8")
+        prod = fx.project / "design" / "_assets" / "manifest.yaml"
+        prod.parent.mkdir(parents=True, exist_ok=True)
+        (prod.parent / "logo.svg").write_text("<svg/>\n", encoding="utf-8")
+        prod.write_text("assets:\n- slot: header-logo\n  file: logo.svg\n  status: accepted\n  sha256: " + "b2" * 32 + "\n",
+                        encoding="utf-8")
+        r = subprocess.run(tool + ["check", fx.slug, "--repo", str(fx.root), "--json"], capture_output=True, text=True)
+        got = [(f.rule, f.severity, f.surface, f.path.endswith("design/_assets/manifest.yaml")) for f in F.parse_lines(r.stdout)]
+        check("фикстура: манифест продукта — у принятой строки sha256 не равен файлу → R-STRUCT-005 error без поверхности",
+              r.returncode == 1 and got == [("R-STRUCT-005", "error", None, True)])
+        check("фикстура: check --page — манифест продукта не сверяется",
+              man_check("- " + row, "--page", "home") == (0, []))
+        prod.unlink()
+        (prod.parent / "logo.svg").unlink()
         broken = ("manifest_version: 1\nassets:\n- " + row.replace("status: accepted", "status: done")
                   + "- slot: header-logo\n  role: informational\n")
         check("фикстура: статус строки вне перечня и строка без file → R-STRUCT-005 warning вида asset-manifest, код 0",

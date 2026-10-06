@@ -334,6 +334,7 @@ class Audit:
         self._stage = {}
         self._review = {}
         self._layers = {}
+        self.fingerprinted = set()      # манифесты ассетов, отпечатки принятых строк которых сверил plan_to_assets
 
     # ---------- пути и чтение
     def rel(self, p):
@@ -1053,6 +1054,8 @@ class Audit:
             self.rep.extend(F.parse_lines(r.out))
         except ValueError as e:
             self.notes.append(f"plan_to_assets.py check {s}: вывод не по контракту находок ({e})")
+            return
+        self.fingerprinted |= {self.dsurf(s, "assets") / "manifest.yaml", self.dprod("assets") / "manifest.yaml"}
 
     # ---------- токены и формы
     def forms(self):
@@ -1767,12 +1770,14 @@ class Audit:
                 self.add("R-COV-009", "warning", s, "asset", relp, f, f"файл ассета {relp} без строки манифеста "
                          f"{self.prel(man_path)}", self.dd(s, "assets"))
                 continue
+            # отпечаток принятой строки сверил plan_to_assets (R-STRUCT-005 error): одна несостыковка — одна находка
+            own_sha = not (r.get("status") == "accepted" and man_path in self.fingerprinted)
             need = [k for k, alts in (("slot", ("slot",)), ("role", ("role",)), ("license", ("license",)),
                                       ("origin", ("origin", "provenance")), ("ai", ("ai", "ai_mark", "ai_label")),
-                                      ("sha256", ("sha256",)), ("status", ("status",)))
-                    if not any(r.get(a) not in (None, "") for a in alts)]
+                                      ("sha256", ("sha256",) if own_sha else ()), ("status", ("status",)))
+                    if alts and not any(r.get(a) not in (None, "") for a in alts)]
             sha = str(r.get("sha256") or "").replace("sha256:", "")
-            if sha and sha != __import__("hashlib").sha256(f.read_bytes()).hexdigest():
+            if own_sha and sha and sha != __import__("hashlib").sha256(f.read_bytes()).hexdigest():
                 need.append("sha256 не совпадает с файлом")
             if r.get("page") not in (None, "") and r.get("slot") and slots and not self.row_slots(slots, r):
                 need.append(f"page {r['page']}: слота {r['slot']} нет в плане ассетов этой страницы")
@@ -3346,6 +3351,22 @@ def _selftest():
               "утверждён), общая строка с пометкой ИИ служит spasibo — R-MAT-008 error по плану spasibo",
               [x[:3] for x in g3 if x[0] == "R-MAT-008"] == [("R-MAT-008", "error", "spasibo#header-logo")])
         (adir / "uslugi-header-logo.svg").unlink()
+        # отпечаток принятой строки сверяет plan_to_assets (R-STRUCT-005 error): сверенный им манифест R-COV-009 о
+        # sha256 принятой строки не повторяет, черновая строка остаётся за R-COV-009
+        manifest(rows)
+        am.write_text(am.read_text(encoding="utf-8").replace(sha["header-logo.svg"], "c3" * 32)
+                      .replace(sha["hero-visual-desktop.webp"], "c3" * 32), encoding="utf-8")
+
+        def sha_refs(fingerprinted):
+            aa = Audit(slug, root, today=today, run_tools=False)
+            if fingerprinted:
+                aa.fingerprinted.add(am)
+            aa.cov_assets(adir, "promo")
+            return sorted(f.ref for f in aa.rep.items if f.rule == "R-COV-009" and "sha256" in f.message)
+
+        check("манифест, сверенный plan_to_assets: sha256 принятой строки R-COV-009 не называет, черновой — называет",
+              sha_refs(False) == ["header-logo.svg", "hero-visual-desktop.webp"]
+              and sha_refs(True) == ["hero-visual-desktop.webp"])
         manifest(rows)
         up = "design/promo/assets/"
 
