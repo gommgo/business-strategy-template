@@ -5,7 +5,7 @@
 Форма — `docs/projects/_template/design/_template/ready.yaml`; канон — `docs/projects/_template/design/README.md`,
 «Пакет для кода»; этап — `references/phases.md`, `package`. Манифест производный: его собирает эта утилита из закрытых
 файлов стратегии, он коммитится вместе с источниками и руками не правится. Репозиторий кода собирает единицы с
-`ready: true` и читает из манифеста пункты «после сборки».
+`ready: true` и проверяет пункты «после сборки» способом из манифеста.
 
     ready build <slug> <surface> [--repo DIR] [--out DIR] [--today ГГГГ-ММ-ДД] [--json]
         собрать и записать design/<surface>/ready.yaml (--out DIR — в DIR/ready.yaml); --json — манифест JSON в stdout
@@ -47,7 +47,9 @@
     budget_profile, gate_exceptions   сайт — page.budget_profile и id x-gate-exception плана своей страницы (исключение
                                       ворот соседней страницы в единицу не идёт); кабинет — «—» и []
     after_build                       пункты input/ACCEPTANCE.md с местом «после сборки» (ST-<экран>-… — только у
-                                      своего экрана)
+                                      своего экрана): {id, severity, check} — тяжесть из критериев входа, способ
+                                      проверки — поле check пункта kb/common/acceptance-criteria.yaml (gates, tool,
+                                      code, manual); пункта вне списка базы в манифесте нет
     open                              заглушки [PLACEHOLDER] выбранных текстов, демо-факты (example: true), которые
                                       страница называет, и демо-кадры — «демо-кадр: <слот>» на слот плана ассетов
                                       страницы с расширением x-demo (кадр макета не для публикации); затем строки
@@ -309,16 +311,21 @@ class Build:
         return False
 
     def after_build(self):
+        """Пункты input/ACCEPTANCE.md места «после сборки»: [{id, severity, check}]. Тяжесть — из критериев входа
+        (условия поверхности разрешил canvas_input), способ проверки — поле check пункта списка базы; пункта, которого
+        в списке «после сборки» нет (вход отстал от базы), в манифесте нет."""
         p = self.dsurf("input") / "ACCEPTANCE.md"
         if not p.is_file():
             return []
-        rows, _heads = mod("canvas_input").parse_acceptance(p.read_text(encoding="utf-8"))
+        CI = mod("canvas_input")
+        rows, _heads = CI.parse_acceptance(p.read_text(encoding="utf-8"))
+        checks = CI.after_build_checks("site" if self.surf.page else "app")
         seen, out = set(), []
         for r in rows:
             i = r.get("id")
-            if r.get("где") == "после сборки" and i and i not in seen:
+            if r.get("где") == "после сборки" and i in checks and i not in seen:
                 seen.add(i)
-                out.append(i)
+                out.append({"id": i, "severity": r.get("серьёзность"), "check": checks[i]})
         return out
 
     def mockup(self, unit, rev, units):
@@ -480,7 +487,7 @@ class Build:
                    if isinstance(e, dict) and e.get("id")]
             out.append(({"id": pid, "ready": not why, "composition": comp, "texts": texts, "mockup": verdict,
                          "budget_profile": dash(get(plan, "page", "budget_profile")), "gate_exceptions": exc,
-                         "after_build": list(after), "open": self.open_list(opened, decide)}, why))
+                         "after_build": [dict(a) for a in after], "open": self.open_list(opened, decide)}, why))
         return out, brief
 
     def demo_slots(self, pid):
@@ -549,8 +556,8 @@ class Build:
                                   f"{', '.join(sorted({t for _f, ts in bad for t in ts}))})")
             if fsd != "stable":
                 decide.append("FSD-карты нет" if fsd == "none" else f"FSD-карта {fsd}")
-            ab = [a for a in after if not (a.startswith("ST-") and a != "ST-DYN"
-                                           and not a.startswith(f"ST-{slug}-"))]
+            ab = [a for a in after if not (a["id"].startswith("ST-") and a["id"] != "ST-DYN"
+                                           and not a["id"].startswith(f"ST-{slug}-"))]
             out.append(({"id": slug, "ready": not why, "composition": comp, "texts": texts, "mockup": verdict,
                          "budget_profile": "—", "gate_exceptions": [], "after_build": ab,
                          "open": self.open_list(opened, decide)}, why))
@@ -730,7 +737,7 @@ def _flow(v):
 
 
 def render(slug, data):
-    """Текст ready.yaml: ключи — в порядке формы, источники и списки — в строку."""
+    """Текст ready.yaml: ключи — в порядке формы, источник и пункт after_build — строкой, прочие списки — в строку."""
     out = [h.format(slug=slug, surface=data["surface"]) for h in HEADER] + [""]
     for k in ("surface", "type", "web_kind", "consumer", "status"):
         out.append(f"{k}: {_flow(data[k])}")
@@ -742,7 +749,11 @@ def render(slug, data):
     for u in data["units"]:
         out.append(f"  - id: {_flow(u['id'])}")
         for k in UNIT_KEYS[1:]:
-            out.append(f"    {k}: {_flow(u[k])}")
+            if k == "after_build" and u[k]:
+                out.append(f"    {k}:")
+                out += [f"      - {_flow(a)}" for a in u[k]]
+            else:
+                out.append(f"    {k}: {_flow(u[k])}")
     out.append("")
     out.append(f"perf: {_flow(data['perf'])}")
     out.append(f"frontend_design: {_flow(data['frontend_design'])}")
@@ -791,6 +802,12 @@ def form_errors(data):
             out.append((f"/units/{i}/mockup", f"mockup «{u['mockup']}» — {' · '.join(VERDICTS)}", "error"))
         if "ready" in u and not isinstance(u["ready"], bool):
             out.append((f"/units/{i}/ready", "ready — true или false", "error"))
+        ab = u.get("after_build")
+        if "after_build" in u and not (isinstance(ab, list) and all(
+                isinstance(a, dict) and set(a) == {"id", "severity", "check"} and a["severity"] in ("B", "S", "D")
+                and mod("canvas_input").check_form(a["check"]) is None for a in ab)):
+            out.append((f"/units/{i}/after_build", f"after_build единицы {u.get('id', i)} — пункты {{id, severity, "
+                        "check}: тяжесть B · S · D, способ — {gates}, {tool, field}, code или manual", "error"))
     fd = data.get("frontend_design")
     if "frontend_design" in data:
         if not isinstance(fd, dict):
@@ -801,6 +818,13 @@ def form_errors(data):
     if "blockers" in data and not isinstance(data["blockers"], list):
         out.append(("/blockers", "blockers — список строк", "error"))
     return out
+
+
+def _ab_diff(old, new):
+    """id пунктов after_build, которые на диске и в сборке разные: нет, лишний, другие тяжесть или способ."""
+    om = {a.get("id"): a for a in old if isinstance(a, dict)} if isinstance(old, list) else {}
+    nm = {a["id"]: a for a in new}
+    return ", ".join(i for i in dict.fromkeys(list(nm) + list(om)) if om.get(i) != nm.get(i)) or "(форма)"
 
 
 def _diff(old, new):
@@ -832,7 +856,11 @@ def _diff(old, new):
                     out.append(f"новая единица {i}")
                 elif am[i] != bm[i]:
                     for f in UNIT_KEYS[1:]:
-                        if am[i].get(f) != bm[i].get(f):
+                        if am[i].get(f) == bm[i].get(f):
+                            continue
+                        if f == "after_build":
+                            out.append(f"{i}.after_build: не равны сборке пункты {_ab_diff(am[i].get(f), bm[i][f])}")
+                        else:
                             out.append(f"{i}.{f}: {_flow(am[i].get(f))} → {_flow(bm[i].get(f))}")
         else:
             out.append(f"{k}: {_flow(a)} → {_flow(b)}")
@@ -1198,12 +1226,30 @@ def _selftest():
         data = yaml_mod().safe_load(docpaths.design(slug, "ready", surface="promo", repo=root).read_text(
             encoding="utf-8"))
         ab = data["units"][0]["after_build"]
+        by_id = {a["id"]: a for a in ab}
         check("лендинг input-landing со входом wireframe: after_build — пункты ACCEPTANCE.md места «после сборки» "
               "(I2, K1, L2 …), единица home, профиль landing-lead-services@L1",
-              ci.returncode == 0 and r.returncode == 0 and {"I2", "K1", "L2"} <= set(ab) and "A1" not in ab
+              ci.returncode == 0 and r.returncode == 0 and {"I2", "K1", "L2"} <= set(by_id) and "A1" not in by_id
               and data["units"][0]["id"] == "home" and data["units"][0]["budget_profile"] == "landing-lead-services@L1")
+        gate_ids = {g["id"] for g in yaml_mod().safe_load(kbpaths.kb(
+            "site", "07-seo-geo-performance-analytics", "page-gates.yaml").read_text(encoding="utf-8"))["gates"]}
+        check("пункт after_build — {id, severity, check}: тяжесть из ACCEPTANCE.md (J4b и L3 при юрисдикции ru — S, "
+              "как SG-LEGAL-01), способ — из списка базы; id ворот пунктов gates — строки page-gates.yaml; форма "
+              "манифеста без замечаний",
+              all(set(a) == {"id", "severity", "check"} for a in ab)
+              and by_id["J4b"] == {"id": "J4b", "severity": "S", "check": {"gates": ["SG-LEGAL-01"]}}
+              and by_id["L3"]["severity"] == "S" and by_id["K1"] == {"id": "K1", "severity": "B", "check": "code"}
+              and {g for a in ab if isinstance(a["check"], dict) for g in a["check"].get("gates", [])} <= gate_ids
+              and any("tool" in a["check"] for a in ab if isinstance(a["check"], dict)) and not form_errors(data))
         r = cli("check", slug, "promo", "--repo", root, "--today", today.isoformat(), cwd=cwd)
         check("input-landing: check сразу после build — код 0", r.returncode == 0 and "0 error" in r.stdout)
+        old = dict(data["units"][0], after_build=[a["id"] for a in ab])
+        stale = dict(data, units=[old])
+        errs = form_errors(stale)
+        diff = _diff(stale, data)
+        check("after_build строками id — форма не та (error), расхождение со сборкой называет пункты",
+              any(p == "/units/0/after_build" and s == "error" for p, _m, s in errs)
+              and any(d.startswith("home.after_build: не равны сборке пункты ") and "J4b" in d for d in diff))
     with fixture_project.built("package-cabinet") as fx:
         root, slug = fx.root, fx.slug
         surf = docpaths.surface(slug, "office", root)

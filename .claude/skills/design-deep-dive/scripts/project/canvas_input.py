@@ -34,7 +34,8 @@ git); без `--stage` — этап действующего входа; `--out 
   brief.yaml      бриф холста — поля cd 06/01 §7 по x-canvas-map схем-владельцев                        все этапы
   ACCEPTANCE.md   критерии приёмки по роду и уровню (`§ 12. Приёмка`), у пункта — где он проверяется: пункты,
                   их серьёзность, способ, место и этап — список базы `kb/common/acceptance-criteria.yaml`, сборщик
-                  отбирает пункты рода поверхности, проверяет условия и подставляет значения проекта    все этапы
+                  отбирает пункты рода поверхности, проверяет условия и подставляет значения проекта; способ
+                  проверки пунктов «после сборки» во вход не идёт — его берёт ready.py (after_build_checks)  все этапы
   facts.md        «Факты» · «Нет» · «Нельзя утверждать» (выгрузка copydeck.export_facts_md)   wireframe, mockup
   refs.md         3–5 референсов исполнителю по ролям                                                   mockup
   сайт:    pages/<page-id>/page.yaml (wireframe, mockup), copy.md (directions, treatment — тексты слотов первого
@@ -2393,6 +2394,49 @@ def criteria(ctx, flags, values, states=()):
     return out
 
 
+CHECK_WORDS = ("code", "manual")                      # способ проверки пункта «после сборки» словом
+
+
+def check_form(ch, gate_ids=None):
+    """Способ проверки пункта «после сборки»: None — по форме, иначе — что не так. Форма — {gates: [id ворот]},
+    {tool: команда, field: поле JSON и условие} или слово code · manual; с gate_ids (id строк page-gates.yaml) id
+    ворот сверяются со списком."""
+    if ch in CHECK_WORDS:
+        return None
+    if isinstance(ch, dict) and set(ch) == {"tool", "field"} and all(isinstance(v, str) and v.strip()
+                                                                   for v in ch.values()):
+        return None
+    gates = ch.get("gates") if isinstance(ch, dict) and set(ch) == {"gates"} else None
+    if isinstance(gates, list) and gates and all(isinstance(g, str) for g in gates):
+        miss = [g for g in gates if gate_ids is not None and g not in gate_ids]
+        return f"ворот {', '.join(miss)} нет в page-gates.yaml" if miss else None
+    return "способ проверки check не по форме — {gates: [id ворот]}, {tool: команда, field: поле}, code или manual"
+
+
+def after_build_checks(kind, doc=None, gate_ids=None):
+    """Способ проверки пунктов места «после сборки» рода kind (site · app) из списка базы `ACC_FILE`: {id: check} в
+    порядке файла. Пункт без способа или не по форме (`check_form`), id ворот вне page-gates.yaml — ошибка базы. doc и
+    gate_ids — данные вместо файлов базы (самопроверка)."""
+    if doc is None:
+        doc, err = load_doc(kbpaths.kb(*KB_DOCS["acceptance-criteria"]))
+        if err:
+            raise F.ToolError(f"{ACC_FILE}: {err}")
+    if gate_ids is None:
+        gates, err = load_doc(kbpaths.kb("site", "07-seo-geo-performance-analytics", "page-gates.yaml"))
+        if err:
+            raise F.ToolError(f"page-gates.yaml: {err}")
+        gate_ids = {g.get("id") for g in (gates or {}).get("gates") or [] if isinstance(g, dict)}
+    out = {}
+    for c in (doc or {}).get("criteria") or []:
+        if not isinstance(c, dict) or c.get("where") != "после сборки" or kind not in (c.get("for") or ("site", "app")):
+            continue
+        why = check_form(c.get("check"), gate_ids)
+        if why:
+            raise F.ToolError(f"{ACC_FILE}: у пункта {c.get('id')} места «после сборки» {why}")
+        out[c["id"]] = c["check"]
+    return out
+
+
 def acc_values(A):
     """Условия и подстановки пунктов, общие для сайта и кабинета: темы, цель доступности, ширины."""
     return ({"a11y": bool(A.get("a11y")), "dark": "dark" in A["themes"]},
@@ -2434,6 +2478,8 @@ def site_items(ctx, A, pages, brief):
     modes = get(level_row(ctx, lvl), "maps_to", "claude_design", "three_d_mode", default=[]) or []
     flags, values = acc_values(A)
     flags["cookie"] = cookie
+    # основная юрисдикция — первая в page.jurisdiction плана: по ней же page_gates.py ставит тяжесть SG-LEGAL-01
+    flags["eu"] = any((str_list(pg.page.get("jurisdiction")) or [None])[0] == "eu" for pg in pages)
     values.update({
         "mains": "; ".join(mains), "a3": a3, "h1s": "; ".join(h1s), "types": ", ".join(types) or "—",
         "events": listed(events, 12) or "—", "jur": ", ".join(sorted(jur)) or "—",
@@ -2462,12 +2508,13 @@ def acceptance_md(ctx, items, A, extra=()):
     unit = "экраны" if ctx.route == "app" else "страницы"
     out = [f"# Критерии приёмки — {ctx.surface} ({kind}), этап {ctx.stage}", "",
            "Производный файл: собирает `canvas_input` вместе со входом по роду поверхности, уровню и партии входа; "
-           "руками не правится. Серьёзность: B — блокирует приёмку (critical): честность макета — тексты, числа, "
-           "факты и картинки только из входа — и пункты места «после сборки»; S — исправить или принять с записью "
-           "заказчика (major); D — по месту (minor). Где: «макет» — проверяется на холсте (способ «скрипт» — на "
-           "статичных копиях артбордов, когда заказчик попросил проверки макета), «после сборки» — на собранной "
-           "странице в репозитории кода, пункт уходит в манифест готовности. Этап — с какого этапа холста пункт "
-           "проверяется. Итог и одобрение — `review/REVIEW.md`.", "",
+           "руками не правится. Серьёзность: B — блокирует (critical): на макете — честность макета, тексты, числа, "
+           "факты и картинки только из входа; после сборки — страницу, у пункта, который судят и ворота страницы, — "
+           "с тяжестью ворот; S — исправить или принять с записью заказчика (major); D — по месту (minor). Где: "
+           "«макет» — проверяется на холсте (способ «скрипт» — на статичных копиях артбордов, когда заказчик попросил "
+           "проверки макета), «после сборки» — на собранной странице в репозитории кода, пункт со способом проверки "
+           "уходит в манифест готовности. Этап — с какого этапа холста пункт проверяется. Итог и одобрение — "
+           "`review/REVIEW.md`.", "",
            f"Партия входа ({unit}): {', '.join(ctx.units) or '—'}.", "",
            f"Уровень: {A['level']} · темы: {', '.join(A['themes'])} · артборды — все ширины приёмки: "
            f"{', '.join(map(str, A['artboards']))}; вылет на {A['overflow']}, ресайз и зум — на сборке", ""]
@@ -3642,6 +3689,25 @@ def selftest():
         except F.ToolError as e:
             check("подстановка, которой сборщик не даёт, — ошибка базы с id пункта и именем",
                   "X1" in str(e) and "{nope}" in str(e))
+        doc = ctx.kb("acceptance-criteria")
+        after = {k: [c["id"] for c in doc["criteria"] if c.get("where") == "после сборки"
+                     and k in (c.get("for") or ("site", "app"))] for k in ("site", "app")}
+        checks = {k: after_build_checks(k) for k in ("site", "app")}
+        check("способ проверки check — у каждого пункта места «после сборки» списка базы, у сайта и кабинета; id "
+              "ворот — строки page-gates.yaml; J4b и L3 — строка вердикта SG-LEGAL-01",
+              all(list(checks[k]) == after[k] and after[k] for k in after)
+              and checks["site"]["J4b"] == checks["site"]["L3"] == {"gates": ["SG-LEGAL-01"]})
+        bad = [({"check": "скрипт"}, "не по форме"), ({"check": {"gates": ["SG-NOPE-01"]}}, "SG-NOPE-01"),
+               ({"check": {"tool": "ui/ui_audit.py URL"}}, "не по форме"), ({}, "не по форме")]
+        caught = []
+        for extra, word in bad:
+            try:
+                after_build_checks("site", {"criteria": [dict({"id": "X9", "where": "после сборки"}, **extra)]},
+                                   {"SG-LEGAL-01"})
+            except F.ToolError as e:
+                caught.append("X9" in str(e) and word in str(e))
+        check("check не по форме (слово вне code и manual, tool без field, нет поля) и id ворот вне page-gates.yaml "
+              "— ошибка базы с id пункта", caught == [True] * len(bad))
         a3 = next((r for r in arows if r.get("id") == "A3"), {})
         check("A3 — по first_screen_policy плана (offer-cta)", "offer-cta" in (a3.get("вопрос (да = норма)") or ""))
         trimmed = "\n".join(x for x in acc.splitlines() if not re.match(r"^\| [IJKL]\d", x))
@@ -3693,6 +3759,20 @@ def selftest():
               b_mock == {"B1", "B2", "B3", "J3"} and b_after and all(sev.get(i) == "S" for i in
                                                                     ("A1", "A3", "D1", "G1", "K2"))
               and "кластера примет" in next(r for r in acc if r.get("id") == "C4")["вопрос (да = норма)"])
+        hp = docpaths.site(fx.slug, "promo", "plans", "home.yaml", repo=fx.root)
+        htext = hp.read_text(encoding="utf-8")
+        sev_jur = {}
+        for jur in ("eu, ru", "ru, eu"):
+            hp.write_text(htext.replace("  jurisdiction:\n  - ru\n", f"  jurisdiction: [{jur}]\n", 1), encoding="utf-8")
+            m_jur = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
+            a = parse_acceptance(m_jur.files[ACCEPT])[0]
+            sev_jur[jur] = {r.get("id"): r.get("серьёзность") for r in a if r.get("id") in ("J4b", "L3")}
+        hp.write_text(htext, encoding="utf-8")
+        check("J4b и L3 — тяжесть SG-LEGAL-01 по основной юрисдикции плана: ru — S, [eu, ru] — B, [ru, eu] — S; F2 и "
+              "I5 — B, как их ворота",
+              "  jurisdiction:\n  - ru\n" in htext and sev.get("J4b") == sev.get("L3") == "S"
+              and sev_jur == {"eu, ru": {"J4b": "B", "L3": "B"}, "ru, eu": {"J4b": "S", "L3": "S"}}
+              and sev.get("F2") == sev.get("I5") == "B")
         where = {r.get("id"): r.get("где") for r in acc}
         check("ACCEPTANCE.md: вылет на 320 (D5), ресайз (H5), зум (V3) и темы на всех ширинах (V1) — после сборки; "
               "артборды всех ширин (D1) — на макете; строка ширин — «артборды — все ширины приёмки», вылет, ресайз и "

@@ -246,9 +246,12 @@ README домена — `blender/README.md`: назначение утилит �
 `gate_check.py` при выполненном замере возвращают 0, находки — в JSON; выход по находкам — ключом `--strict`, у
 `page_accept` — по своим порогам (LCP, `alt`, петля без паузы), а не по B, поэтому цепочку не обрывают на коде звена
 (`set -e`, `&&`). Вердикт — только поля `verdict`, `B`, `S` вывода `page_gates.py --json`: код 1 — есть B (страница не
-передаётся), 0 — нет; S — исправить или записать исключением `x-gate-exception` плана. Пункты `after_build` манифеста
-`ready.yaml` — команды этой таблицы. Профиль бюджета без замера — `page_gates.py --resolve P` (его читает
-`project/canvas_input.py`).
+передаётся), 0 — нет; S — исправить или записать исключением `x-gate-exception` плана. Пункт `after_build` манифеста
+`ready.yaml` (`{id, severity, check}`, `docs/projects/_template/design/README.md § Пакет для кода`) со способом `gates`
+решают строки `gates[]` этого вердикта с названными id, со способом `tool` — поле JSON названной утилиты:
+`ui/ui_audit.py URL --acceptance` пишет `<--out>/<--name>.json` (`findings[] {id, verdict, severity, run}`),
+`claude-design/mockup_checks.py resize URL` — JSON в stdout (`verdict`, `problems`). Профиль бюджета без замера —
+`page_gates.py --resolve P` (его читает `project/canvas_input.py`).
 
 | звено | выход | кто читает | поля |
 |---|---|---|---|
@@ -258,7 +261,7 @@ README домена — `blender/README.md`: назначение утилит �
 | `blender/site_probe.py URL OUT --quick [--mobile --throttle] [--no-3d]` | `<OUT>/probe[…].json` | `blender/gate_check.py` | `vitals_pre_scroll.{lcp.tag, lcp.t, cls, tbt_ms, first_draw_ms}`, `network.{transfer_kb, by_category}`, `idle.dc_median`, `idle_motion_pct`, `detected.canvases[]`, `console_errors`, `no_3d.aborted` |
 | `blender/gate_check.py ПРОБА mode [--reduced] --baseline ПРОБА_БЕЗ_3D --profile P --json` | stdout JSON | `page_gates.py --gate3d ФАЙЛ …`; `qa_pipeline.py page` (`gate_check.evaluate`: тяжесть строк B/S/D) | `tool`, `probe`, `mode`, `reduced`, `baseline`, `profile`, `gates`, `rows[] {id, key, check, value, limit, severity (B/S/D), status (PASS/FAIL/SKIP), note, mirror}`, `summary {B, S, D, blocked}` |
 | `site/geo_probe.py URL --out DIR` · `site/ia_probe.py URL --out DIR` · `site/run_axe_targets.py ID URL MARKET DIR` | `<id>.json` · `<id>/ia.json` · `<id>.json` | `page_gates.py --geo`, `--ia`, `--axe` | флаги `head-kit.yaml`; `summary`, `sitemap`, `robots`, `not_found`; `axe.violations[].nodes[]` с адресами |
-| `site/page_gates.py --profile P …` | stdout: таблица или `--json` | код-репо; `ready.yaml#after_build` | `--json`: `profile`, `level`, `log`, `verdict`, `B`, `S`, `gates[] {id, device, status, value, threshold, severity, note, source, mirror, excepted?, site_checklist, scope}`, `layers {effects {tool, level, path, B, S, D, na, fails[]}, three_d[] {probe, mode, reduced, B, S, D, blocked}}`, `sources {…: bool}`; код 1 — есть B, 2 — ошибка вызова |
+| `site/page_gates.py --profile P …` | stdout: таблица или `--json` | код-репо; пункты `ready.yaml#after_build` со способом `gates` | `--json`: `profile`, `level`, `log`, `verdict`, `B`, `S`, `gates[] {id, device, status, value, threshold, severity, note, source, mirror, excepted?, site_checklist, scope}`, `layers {effects {tool, level, path, B, S, D, na, fails[]}, three_d[] {probe, mode, reduced, B, S, D, blocked}}`, `sources {…: bool}`; код 1 — есть B, 2 — ошибка вызова |
 | `site/page_gates.py --resolve P [--site-level L]` | stdout JSON | `project/canvas_input.py`, `project/design_audit.py` | `id`, `level`, `page_type`, `outcome`, `weight`, `all_levels`, `log`; неизвестный профиль — код 2 и сообщение |
 
 Кроме ворот на собранной странице код-репо гоняет `claims_check.py` и `lang_check.py` на собранном HTML, визуальный

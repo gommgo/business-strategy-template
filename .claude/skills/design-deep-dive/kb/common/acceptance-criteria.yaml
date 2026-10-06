@@ -3,7 +3,8 @@
 # Список пунктов файла ACCEPTANCE.md входа холста: вопрос (да — норма), серьёзность, способ и место проверки, этап
 # холста, с которого пункт проверяется, источник нормы. Файл читает сборщик входа холста
 # (scripts/project/canvas_input.py): он отбирает пункты по роду поверхности, проверяет условия и подставляет значения
-# проекта. Правка пункта — правка этого файла; условие или подстановка, которых сборщик не знает, — ошибка сборки.
+# проекта; способ проверки пунктов «после сборки» берёт манифест готовности (scripts/project/ready.py). Правка пункта —
+# правка этого файла; условие или подстановка, которых сборщик не знает, — ошибка сборки.
 #
 # Поля пункта:
 #   id        id пункта; первая буква — группа (`groups`); у пункта `each: state` — шаблон id с подстановками
@@ -11,18 +12,30 @@
 #   each      state — пункт повторяется на каждое состояние каждого экрана партии входа
 #   question  вопрос; `{имя}` — подстановка сборщика
 #   add       хвосты вопроса: `text` дописывается, когда выполнено условие `when`
-#   severity  B — блокирует приёмку · S — исправить или принять с записью заказчика · D — по месту
+#   severity  B — блокирует: на макете приёмку, после сборки страницу · S — исправить или принять с записью заказчика ·
+#             D — по месту. Пункт, который судят и ворота страницы (site/07-seo-geo-performance-analytics/
+#             page-gates.yaml), несёт их тяжесть при условиях поверхности — наибольшую, которую ворота дают его
+#             предмету: у пункта и вердикта page_gates.py тяжесть одна
 #   method    скрипт · глаза · судья · заказчик · протокол
 #   where     макет · после сборки
 #   stage     этап холста, с которого пункт проверяется: wireframe · mockup · motion; «—» — у пунктов «после сборки»
 #   source    источник нормы
-# Значение severity, stage и source — строка или словарь «условие: значение» с ключом `else`.
+#   check     у пунктов «после сборки» — способ проверки в репозитории кода; манифест готовности несёт пункт как
+#             {id, severity, check}:
+#               {gates: [id ворот]}         строки вердикта page_gates.py --json с этими id решают пункт: их статус и
+#                                           тяжесть
+#               {tool: команда, field: …}   утилита скилла (путь от scripts/) и поле её JSON с условием прохождения
+#               code                        тест самого репозитория кода по вопросу и источнику пункта: предмет
+#                                           знает только код (формы, события, разметка по плану, сайт целиком)
+#               manual                      человек на собранной странице, итог записывается
+# Значение severity, stage и source — строка или словарь «условие: значение» с ключом `else`; check — без условий.
 #
 # Условия (`when` и ключи словарей):
 #   site, app        род поверхности
 #   a11y             в брифе задана цель доступности
 #   dark             у дизайн-системы есть тёмная тема
 #   cookie           у страниц партии есть баннер cookie
+#   eu               основная юрисдикция страницы партии — eu (первый элемент page.jurisdiction плана)
 #   state_required   состояние входит в обязательный набор экрана
 #
 # Подстановки:
@@ -247,6 +260,7 @@ criteria:
   where: после сборки
   stage: —
   source: acceptance-widths.yaml#overflow_only; ux 08/01 §3.2; ui_audit.py --acceptance
+  check: {tool: ui/ui_audit.py URL --acceptance, field: 'findings[id=J5].verdict — OK на каждом прогоне'}
 - id: E1
   for: [site]
   question: 'Анимируются только свойства спецификации движения, не шире уровня {lvl}: {properties_allowed};
@@ -303,11 +317,12 @@ criteria:
 - id: F2
   for: [site]
   question: 'Вес и скорость — профиль бюджета страницы ({prof}, build.perf): первый экран и LCP по профилю'
-  severity: S
+  severity: B
   method: скрипт
   where: после сборки
   stage: —
   source: page_gates.py --resolve; budgets.yaml
+  check: {gates: [SG-PERF-01, SG-PERF-02, SG-WEIGHT-01]}
 - id: F2
   for: [app]
   question: 'Скорость — поле p75 и живые замеры (RUM): лабораторных порогов у экранов нет'
@@ -316,6 +331,7 @@ criteria:
   where: после сборки
   stage: —
   source: design/README.md § Пакет для кода
+  check: code
 - id: F3
   for: [site]
   question: 3D — только в режимах уровня ({modes}) и в бюджете уровня; у 3D-слота — постер из той же модели
@@ -397,6 +413,7 @@ criteria:
   where: после сборки
   stage: —
   source: mockup_checks.py resize
+  check: {tool: claude-design/mockup_checks.py resize URL, field: verdict — pass}
 - id: I1
   for: [site]
   question: Ровно один H1 — слот seo.h1 плана ({h1s})
@@ -413,6 +430,7 @@ criteria:
   where: после сборки
   stage: —
   source: head-kit.yaml; geo_probe.py
+  check: code
 - id: I3
   for: [site]
   question: H1, цены, условия и главный призыв — в исходном HTML без JS
@@ -421,6 +439,7 @@ criteria:
   where: после сборки
   stage: —
   source: page_gates.py
+  check: {gates: [SG-GEO-01]}
 - id: I4
   for: [site]
   question: JSON-LD только типов плана ({types}), значения видны на странице
@@ -429,14 +448,16 @@ criteria:
   where: после сборки
   stage: —
   source: seo.structured_data планов
+  check: code
 - id: I5
   for: [site]
   question: robots — по seo.indexable плана
-  severity: S
+  severity: B
   method: скрипт
   where: после сборки
   stage: —
   source: seo.indexable планов
+  check: code
 - id: I6
   for: [site]
   question: og:image — абсолютный адрес
@@ -445,6 +466,7 @@ criteria:
   where: после сборки
   stage: —
   source: head-kit.yaml
+  check: {gates: [SG-SEO-05]}
 - id: J1
   for: [site]
   question: 'Согласие на ПД — отдельный неотмеченный чекбокс у каждой формы (legal.pd_consent: {pd_consent})'
@@ -480,11 +502,12 @@ criteria:
 - id: J4b
   for: [site]
   question: Счётчики и пиксели загружаются только после выбора в баннере cookie
-  severity: B
+  severity: {eu: B, else: S}
   method: скрипт
   where: после сборки
   stage: —
   source: page_gates.py (SG-LEGAL)
+  check: {gates: [SG-LEGAL-01]}
 - id: J5
   for: [site]
   question: 'Маркировка рекламы у рекламных блоков (ad_marking: {ad_marking})'
@@ -509,6 +532,7 @@ criteria:
   where: после сборки
   stage: —
   source: lead-forms.yaml
+  check: code
 - id: K2
   for: [site]
   question: Поля и видимые подписи — набор lead-forms.yaml ({forms_line})
@@ -541,6 +565,7 @@ criteria:
   where: после сборки
   stage: —
   source: lead-forms.yaml#defaults.antispam
+  check: code
 - id: K6
   for: [site]
   question: Скрытые поля источника (utm_*, yclid, ym_client_id, landing_url, page_url, form_id, variant)
@@ -549,6 +574,7 @@ criteria:
   where: после сборки
   stage: —
   source: lead-forms.yaml#defaults.hidden_fields
+  check: code
 - id: L1
   for: [site]
   question: События плана — на своих триггерах с именами из events.yaml ({events})
@@ -557,6 +583,7 @@ criteria:
   where: после сборки
   stage: —
   source: events.yaml; планы
+  check: code
 - id: L2
   for: [site]
   question: lead-submit — только по успеху сервера
@@ -565,14 +592,16 @@ criteria:
   where: после сборки
   stage: —
   source: events.yaml
+  check: code
 - id: L3
   for: [site]
   question: Счётчики — после согласия по юрисдикции ({jur})
-  severity: B
+  severity: {eu: B, else: S}
   method: скрипт
   where: после сборки
   stage: —
   source: legal-requirements.yaml
+  check: {gates: [SG-LEGAL-01]}
 - id: L4
   for: [site]
   question: Цели не ставятся на клик
@@ -581,6 +610,7 @@ criteria:
   where: после сборки
   stage: —
   source: events.yaml
+  check: code
 - id: N1
   for: [app]
   question: Один main; один заголовок роли title вне оверлеев
@@ -641,6 +671,7 @@ criteria:
   where: после сборки
   stage: —
   source: ux 06/01 §2; FSD-карта
+  check: code
 - id: V1
   question: Темы ДС ({themes}) — на всех ширинах приёмки
   add:
@@ -651,6 +682,7 @@ criteria:
   where: после сборки
   stage: —
   source: acceptance-widths.yaml#themes; ux 06/01 §7.3
+  check: {tool: ui/ui_audit.py URL --acceptance --scheme both, field: 'findings[verdict=FAIL].severity — нет «блокер»'}
 - id: V2
   question: 'Сокращённое движение: конечные состояния, невидимого текста 0 (ui_audit.py --reduced-motion)'
   severity: S
@@ -667,6 +699,7 @@ criteria:
   where: после сборки
   stage: —
   source: ux 08/01 §3.2
+  check: code
 - id: V4
   question: forced-colors — смысл не потерян; кадр с эмуляцией смотрят глазами
   severity: D
