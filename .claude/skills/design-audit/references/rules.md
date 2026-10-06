@@ -216,10 +216,11 @@
   `proof.facts_ref` брифа; иерархии — `meaning_ref`; copy deck — `page_plan_ref`, `facts_ref`, `voice_ref`,
   `meaning_ref`, `hierarchy_ref`; профиль голоса — `scope.product_voice_ref`, `brand.facts_ref`, `brand.meaning_ref`;
   бренд — `voice_ref`; бриф на вид — `brand.ref`; паспорт сайта — `derived_from_ui.tokens`; принятая строка
-  манифеста ассетов — `file` от папки манифеста (`plan_to_assets.py check`). Все ссылки сверяет `design_audit`; значение с пробелами или со схемой вроде «copy-deck: ждём …» — «не путь к файлу». `hint` — ссылка
-  плана на файл этапа, который ещё не начат: `refs.copy_deck` — copy deck страницы не заведён ни на одном языке,
-  `refs.asset_plan` — плана ассетов страницы нет, `refs.treatment` — арт-дирекции поверхности нет; файл этапа есть, а
-  ссылка ведёт мимо — `error`. Коды ссылок
+  манифеста ассетов — `file` от папки манифеста (`plan_to_assets.py check`). Все ссылки сверяет `design_audit`;
+  значение с пробелами или со схемой вроде «copy-deck: ждём …» — «не путь к файлу». `hint` — ссылка плана на файл
+  этапа, который ещё не начат: `refs.copy_deck` — copy deck страницы не заведён ни на одном языке, `refs.asset_plan` —
+  плана ассетов страницы нет, `refs.treatment` — арт-дирекции поверхности нет; файл этапа есть, а ссылка ведёт мимо —
+  `error`. Коды ссылок
   `site_validate.py` (SB-B01, SB-F01, SB-M00, PL-F00) сюда не переносятся: одна несостыковка — одна находка.
 - **Норма.** Пути — `docs/projects/_template/site/README.md § Файлы слоя`,
   `docs/projects/_template/design/README.md § Файлы`.
