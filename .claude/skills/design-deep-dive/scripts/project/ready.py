@@ -322,12 +322,13 @@ class Build:
 
     def after_build(self, page=None):
         """Пункты места «после сборки» критериев приёмки базы (`canvas_input.after_build_items`): [{id, severity,
-        check}] в порядке списка — способ проверки и тяжесть пункта, у сайта условие eu — основная юрисдикция своей
-        страницы (page — раздел page плана); вход холста манифест не читает."""
+        check}] в порядке списка — способ проверки и тяжесть пункта, у сайта условия eu и law — по основной
+        юрисдикции своей страницы (`canvas_input.page_flags`, page — раздел page плана); вход холста манифест не
+        читает."""
         CI = mod("canvas_input")
         if not self.surf.page:
             return CI.after_build_items("app")
-        return CI.after_build_items("site", {"eu": CI.main_jurisdiction(page) == "eu"})
+        return CI.after_build_items("site", CI.page_flags(page))
 
     def mockup(self, unit, rev, units):
         """(вердикт для манифеста, причина блокера или None)."""
@@ -1173,13 +1174,18 @@ def _selftest():
         sp_plan.write_text(sp_text.replace("  jurisdiction:\n  - ru\n", "  jurisdiction:\n  - eu\n  - ru\n"),
                            encoding="utf-8")
         eu = {u["id"]: {a["id"]: a["severity"] for a in u["after_build"]} for u in build(slug, surf, root, today)["units"]}
+        sp_plan.write_text(sp_text.replace("  jurisdiction:\n  - ru\n", "  jurisdiction:\n  - kz\n  - ru\n"),
+                           encoding="utf-8")
+        kz = {u["id"]: {a["id"]: a["severity"] for a in u["after_build"]} for u in build(slug, surf, root, today)["units"]}
         sp_plan.write_text(sp_text, encoding="utf-8")
         check("after_build без входа холста — пункты критериев приёмки «после сборки» у каждой единицы (F2 B, K1 B, I6 "
-              "S); J4b и L3 — по основной юрисдикции своей страницы: ru — S, у spasibo с [eu, ru] — B, у home — S",
+              "S); J4b и L3 — по основной юрисдикции своей страницы: ru — S, у spasibo с [eu, ru] — B, у home — S; у "
+              "spasibo с [kz, ru] (вне права базы) — пунктов J4b и L3 нет",
               ab["home"] == ab["spasibo"] and {"F2", "K1", "J4b", "L3", "D5"} <= set(ab["home"])
               and ab["home"]["F2"] == ab["home"]["K1"] == "B" and ab["home"]["I6"] == "S"
               and ab["home"]["J4b"] == ab["home"]["L3"] == "S" and eu["spasibo"]["J4b"] == eu["spasibo"]["L3"] == "B"
-              and eu["home"]["J4b"] == "S")
+              and eu["home"]["J4b"] == "S" and kz["home"] == ab["home"]
+              and kz["spasibo"] == {k: v for k, v in ab["spasibo"].items() if k not in ("J4b", "L3")})
         # лабораторная страница приёма — источник-папка манифеста
         lab_row = "design/promo/motion/lab/mask-reveal/"
         adp = docpaths.design(slug, "art-direction", surface="promo", repo=root)

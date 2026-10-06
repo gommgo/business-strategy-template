@@ -2362,16 +2362,21 @@ ACC_VAR = re.compile(r"\{([a-z0-9_]+)\}")               # подстановка
 
 
 def criteria(ctx, flags, values, states=()):
-    """Пункты приёмки поверхности из списка базы (`ACC_FILE`, порядок файла): пункты своего рода (`for`: site · app);
-    значение поля — строка или словарь «условие: значение» с `else`; хвосты вопроса `add` — по условию `when`; `{имя}`
-    — подстановка из values; пункт `each: state` — на каждое состояние экранов партии (states: screen, id, key,
-    required). flags — условия сборки. Пункт не по форме, подстановка или значение без ответа сборщика — ошибка базы."""
+    """Пункты приёмки поверхности из списка базы (`ACC_FILE`, порядок файла): пункты своего рода (`for`: site · app),
+    у которых выполнено условие `when`; значение поля — строка или словарь «условие: значение» с `else`; хвосты вопроса
+    `add` — по условию `when`; `{имя}` — подстановка из values; пункт `each: state` — на каждое состояние экранов партии
+    (states: screen, id, key, required). flags — условия сборки. Пункт не по форме, условие `when` пункта, подстановка
+    или значение без ответа сборщика — ошибка базы."""
     kind = "app" if ctx.route == "app" else "site"
     out = []
     for c in ctx.kb("acceptance-criteria").get("criteria") or []:
         if not isinstance(c, dict) or any(k not in c for k in ("id",) + ACC_FIELDS):
             raise F.ToolError(f"{ACC_FILE}: у пункта {get(c, 'id') or '?'} нет полей id, {', '.join(ACC_FIELDS)}")
         if kind not in (c.get("for") or ("site", "app")):
+            continue
+        if c.get("when") is not None and c["when"] not in flags:
+            raise F.ToolError(f"{ACC_FILE}: у пункта {c['id']} условие when {c['when']} — сборщик его не знает")
+        if c.get("when") is not None and not flags[c["when"]]:
             continue
         for st in (states if c.get("each") == "state" else (None,)):
             fl = dict(flags, site=kind == "site", app=kind == "app", state_required=bool(st and st["required"]))
@@ -2457,12 +2462,27 @@ def main_jurisdiction(page):
     return (str_list((page or {}).get("jurisdiction")) or [None])[0]
 
 
+LAW = ("ru", "eu")                                    # юрисдикции с правом в базе (legal-requirements.yaml)
+
+
+def law_covered(page):
+    """Условие law критериев приёмки: основная юрисдикция страницы — ru или eu, без юрисдикции — как ru (умолчание
+    page_gates.py); прочие ворота судят как none, без строк права."""
+    return main_jurisdiction(page) in LAW + (None,)
+
+
+def page_flags(page):
+    """Условия пунктов «после сборки» сайта по плану своей страницы (page — раздел page): eu и law."""
+    return {"eu": main_jurisdiction(page) == "eu", "law": law_covered(page)}
+
+
 def after_build_items(kind, flags=None, doc=None, gates=None):
     """Пункты места «после сборки» рода kind (site · app) из списка базы `ACC_FILE` в порядке файла: [{id, severity,
-    check}] — тяжесть по условиям flags (у сайта eu — основная юрисдикция страницы), способ проверки — поле check.
-    Ошибка базы: пункт без способа или не по форме (`check_form`), id ворот вне page-gates.yaml, у пункта gates
-    наибольшая тяжесть по всем условиям — не наибольший ключ threshold его ворот, условие тяжести вне flags, пункт с
-    each. doc и gates ({id ворот: наибольшая тяжесть}, `gate_severities`) — данные вместо файлов базы (самопроверка)."""
+    check}] — пункты с выполненным условием `when`, тяжесть по условиям flags (у сайта — `page_flags` своей страницы),
+    способ проверки — поле check. Ошибка базы: пункт без способа или не по форме (`check_form`), id ворот вне
+    page-gates.yaml, у пункта gates наибольшая тяжесть по всем условиям — не наибольший ключ threshold его ворот,
+    условие тяжести или `when` вне flags, пункт с each. doc и gates ({id ворот: наибольшая тяжесть},
+    `gate_severities`) — данные вместо файлов базы (самопроверка)."""
     if doc is None:
         doc, err = load_doc(kbpaths.kb(*KB_DOCS["acceptance-criteria"]))
         if err:
@@ -2492,9 +2512,12 @@ def after_build_items(kind, flags=None, doc=None, gates=None):
                 why = f"условие тяжести {', '.join(miss)} — сборщик манифеста его не знает"
         if not why and sev not in SEV_RANK:
             why = f"тяжесть {sev!r} — B · S · D"
+        if not why and c.get("when") is not None and c["when"] not in fl:
+            why = f"условие when {c['when']} — сборщик манифеста его не знает"
         if why:
             raise F.ToolError(f"{ACC_FILE}: у пункта {c.get('id')} места «после сборки» {why}")
-        out.append({"id": c["id"], "severity": sev, "check": c["check"]})
+        if c.get("when") is None or fl[c["when"]]:
+            out.append({"id": c["id"], "severity": sev, "check": c["check"]})
     return out
 
 
@@ -2539,7 +2562,8 @@ def site_items(ctx, A, pages, brief):
     modes = get(level_row(ctx, lvl), "maps_to", "claude_design", "three_d_mode", default=[]) or []
     flags, values = acc_values(A)
     flags["cookie"] = cookie
-    flags["eu"] = any(main_jurisdiction(pg.page) == "eu" for pg in pages)
+    flags["eu"] = any(page_flags(pg.page)["eu"] for pg in pages)
+    flags["law"] = any(page_flags(pg.page)["law"] for pg in pages)
     values.update({
         "mains": "; ".join(mains), "a3": a3, "h1s": "; ".join(h1s), "types": ", ".join(types) or "—",
         "events": listed(events, 12) or "—", "jur": ", ".join(sorted(jur)) or "—",
@@ -3752,15 +3776,19 @@ def selftest():
         doc = ctx.kb("acceptance-criteria")
         after = {k: [c["id"] for c in doc["criteria"] if c.get("where") == "после сборки"
                      and k in (c.get("for") or ("site", "app"))] for k in ("site", "app")}
-        items = {k: after_build_items(k, {"eu": False}) for k in ("site", "app")}
-        eu = {x["id"]: x["severity"] for x in after_build_items("site", {"eu": True})}
+        items = {k: after_build_items(k, page_flags({"jurisdiction": ["ru"]})) for k in ("site", "app")}
+        eu = {x["id"]: x["severity"] for x in after_build_items("site", page_flags({"jurisdiction": ["eu", "ru"]}))}
+        kz = [x["id"] for x in after_build_items("site", page_flags({"jurisdiction": ["kz", "ru"]}))]
         by = {x["id"]: x for x in items["site"]}
         check("пункты места «после сборки» — все пункты списка базы рода, у сайта и кабинета, {id, severity, check}; "
               "id ворот — строки page-gates.yaml; J4b и L3 — строка вердикта SG-LEGAL-01, тяжесть по основной "
-              "юрисдикции страницы: eu — B, иначе S; F2 сайта — B; у пунктов tool — команда с URL, путь и условие",
+              "юрисдикции страницы: eu — B, иначе S, вне права базы (kz) — пунктов нет (when: law), без юрисдикции — "
+              "как ru; F2 сайта — B; у пунктов tool — команда с URL, путь и условие",
               all([x["id"] for x in items[k]] == after[k] and after[k] for k in after)
               and by["J4b"] == {"id": "J4b", "severity": "S", "check": {"gates": ["SG-LEGAL-01"]}}
               and by["L3"]["severity"] == "S" and eu["J4b"] == eu["L3"] == "B" and by["F2"]["severity"] == "B"
+              and kz == [i for i in after["site"] if i not in ("J4b", "L3")]
+              and page_flags({}) == {"eu": False, "law": True}
               and main_jurisdiction({"jurisdiction": ["eu", "ru"]}) == "eu" and main_jurisdiction({}) is None
               and by["D5"]["check"] == {"tool": "ui/ui_audit.py URL --acceptance --json",
                                         "field": "findings[id=J5].verdict", "pass": {"all": "OK"}}
@@ -3777,6 +3805,7 @@ def selftest():
                ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": "S"}, "не наибольшая"),
                ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": {"eu": "S", "else": "D"}}, "не наибольшая"),
                ({"check": "code", "severity": {"cookie": "B", "else": "S"}}, "cookie"),
+               ({"check": "code", "when": "kz"}, "when kz"),
                ({"check": "code", "each": "state"}, "each")]
         caught = []
         for extra, word in bad:
@@ -3789,11 +3818,11 @@ def selftest():
         sev = gate_severities()
         check("check не по форме (слово вне code и manual, tool без pass, нет поля; у tool — утилиты нет, в команде нет "
               "URL, путь не «имя» или «имя[ключ=значение].поле», сравнение не all или none), id ворот вне "
-              "page-gates.yaml, тяжесть пункта gates ниже наибольшего ключа threshold его ворот, условие тяжести, "
-              "которого сборщик манифеста не знает, и each — ошибка базы с id пункта; у пунктов списка тяжесть gates "
-              "равна ключу ворот (F2, I3, J4b — B, I6 — S)", caught == [True] * len(bad) and tool_form(tool) is None
-              and sev["SG-LEGAL-01"] == sev["SG-GEO-01"] == "B" and sev["SG-SEO-05"] == "S"
-              and sev["SG-WEIGHT-01"] == "S")
+              "page-gates.yaml, тяжесть пункта gates ниже наибольшего ключа threshold его ворот, условие тяжести и "
+              "when, которых сборщик манифеста не знает, и each — ошибка базы с id пункта; у пунктов списка тяжесть "
+              "gates равна ключу ворот (F2, I3, J4b — B, I6 — S)",
+              caught == [True] * len(bad) and tool_form(tool) is None and sev["SG-LEGAL-01"] == sev["SG-GEO-01"] == "B"
+              and sev["SG-SEO-05"] == "S" and sev["SG-WEIGHT-01"] == "S")
         a3 = next((r for r in arows if r.get("id") == "A3"), {})
         check("A3 — по first_screen_policy плана (offer-cta)", "offer-cta" in (a3.get("вопрос (да = норма)") or ""))
         trimmed = "\n".join(x for x in acc.splitlines() if not re.match(r"^\| [IJKL]\d", x))
@@ -3848,16 +3877,16 @@ def selftest():
         hp = docpaths.site(fx.slug, "promo", "plans", "home.yaml", repo=fx.root)
         htext = hp.read_text(encoding="utf-8")
         sev_jur = {}
-        for jur in ("eu, ru", "ru, eu"):
+        for jur in ("eu, ru", "ru, eu", "kz, ru"):
             hp.write_text(htext.replace("  jurisdiction:\n  - ru\n", f"  jurisdiction: [{jur}]\n", 1), encoding="utf-8")
             m_jur = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
             a = parse_acceptance(m_jur.files[ACCEPT])[0]
             sev_jur[jur] = {r.get("id"): r.get("серьёзность") for r in a if r.get("id") in ("J4b", "L3")}
         hp.write_text(htext, encoding="utf-8")
-        check("J4b и L3 — тяжесть SG-LEGAL-01 по основной юрисдикции плана: ru — S, [eu, ru] — B, [ru, eu] — S; F2 и "
-              "I5 — B, как их ворота",
+        check("J4b и L3 — тяжесть SG-LEGAL-01 по основной юрисдикции плана: ru — S, [eu, ru] — B, [ru, eu] — S, "
+              "[kz, ru] — пунктов нет (when: law); F2 и I5 — B, как их ворота",
               "  jurisdiction:\n  - ru\n" in htext and sev.get("J4b") == sev.get("L3") == "S"
-              and sev_jur == {"eu, ru": {"J4b": "B", "L3": "B"}, "ru, eu": {"J4b": "S", "L3": "S"}}
+              and sev_jur == {"eu, ru": {"J4b": "B", "L3": "B"}, "ru, eu": {"J4b": "S", "L3": "S"}, "kz, ru": {}}
               and sev.get("F2") == sev.get("I5") == "B")
         where = {r.get("id"): r.get("где") for r in acc}
         check("ACCEPTANCE.md: вылет на 320 (D5), ресайз (H5), зум (V3) и темы на всех ширинах (V1) — после сборки; "

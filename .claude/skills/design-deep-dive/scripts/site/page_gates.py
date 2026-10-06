@@ -46,7 +46,8 @@ ambition-levels.yaml` (`defaults_by_page_type`, `levels[L0].appropriate_for.lead
 after_build[] {id, gates, status pass · fail · unchecked, severity}. B — строки FAIL тяжести B, S — тяжести S без
 исключения плана (исключение снимает S; вердикт с ним — accepted_with_notes); с --ready B и S считают и непроверенные
 пункты своей тяжестью. Код репозитория читает поля JSON, а не код выхода. Код выхода: 1 — есть B; 0 — нет B; 2 —
-ошибка вызова. Замер без троттлинга сети помечается `lab-unthrottled`.
+ошибка вызова. LCP телефона без троттлинга сети (анатомия) — строка диагностики: diagnostic, пометка lab-unthrottled;
+пункт after_build она не решает.
 
 Модуль для утилит замера (kbpaths.use("site"); import page_gates): resolve_profile(), profile_value(), conditions(),
 cdp_network(), mobile_device(), heavy_lock() — условия замера и тишина машины из budgets.yaml, одно место на все ворота;
@@ -278,7 +279,8 @@ def brief_params(brief=None, plan=None, crawlers=None):
       profile           page.budget_profile плана
       jurisdiction      основная (первая) юрисдикция page.jurisdiction плана, без плана — constraints.jurisdiction
                         брифа: ru и eu — как есть, прочие — none с записью в журнал (профилей права других стран в базе
-                        нет); так же основную юрисдикцию берёт условие eu критериев приёмки
+                        нет); так же основную юрисдикцию берут условия eu и law критериев приёмки (вне ru и eu
+                        пунктов права у страницы нет)
       ai_bots_policy    search.ai_bots_policy брифа; ask или поля нет — crawlers.yaml#policies.ask.default_if_no_answer
       site_level        ambition.level брифа
       hot_mobile_share  сумма share источников traffic.sources[] брифа с temperature hot и device mobile; ни у одного
@@ -484,10 +486,12 @@ def load_headkit(path):
 
 class Gate:
     """Строка вердикта. source — утилита-источник замера; mirror — метрика страницы, измеренная соседом: серьёзность не
-    выше D, на вердикт не влияет."""
-    def __init__(self, gid, device, status, value, threshold, severity, note='', source=None, mirror=False):
+    выше D, на вердикт не влияет; diagnostic — замер не в условиях метода ворот (LCP телефона без троттлинга): пункт
+    after_build он не решает."""
+    def __init__(self, gid, device, status, value, threshold, severity, note='', source=None, mirror=False,
+                 diagnostic=False):
         self.__dict__.update(id=gid, device=device, status=status, value=value, threshold=threshold, severity=severity,
-                             note=note, source=source, mirror=mirror)
+                             note=note, source=source, mirror=mirror, diagnostic=diagnostic)
 
 
 def cmp_outcome(gid, dev, value, node, note='', source=None):
@@ -850,14 +854,18 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
     rv = h1_reveal_evidence(html_text, css_text, nz) if (html_text or css_text) else {'hidden': [], 'near_zero': []}
     for dev, d in anatomy.items():
         s = d.get('summary') or {}
-        # SG-PERF-01/02: LCP — сначала page_accept с троттлингом (телефон), иначе анатомия как диагностика
+        # SG-PERF-01/02: LCP — сначала page_accept с троттлингом (телефон), иначе анатомия; у телефона она без
+        # замедления сети — диагностика (budgets.yaml conditions.lab_mobile): пункт after_build строка не решает
         acc = accept_main(accept.get((dev, dev == 'mobile')))
         if g(acc, 'lcp', 't') is not None:
             R.append(cmp_outcome('SG-PERF-01' if dev == 'mobile' else 'SG-PERF-02', dev, g(acc, 'lcp', 't'),
                                  oc['lcp_ms_lab'], 'page_accept' + (' --throttle' if dev == 'mobile' else ''), source='page_accept'))
         else:
-            R.append(cmp_outcome('SG-PERF-01' if dev == 'mobile' else 'SG-PERF-02', dev, s.get('lcp_ms'), oc['lcp_ms_lab'],
-                                 'lab-unthrottled: диагностика, не приёмка' if dev == 'mobile' else 'anatomy, без троттлинга'))
+            row = cmp_outcome('SG-PERF-01' if dev == 'mobile' else 'SG-PERF-02', dev, s.get('lcp_ms'), oc['lcp_ms_lab'],
+                              'lab-unthrottled: диагностика, не приёмка' if dev == 'mobile'
+                              else 'anatomy, без троттлинга')
+            row.diagnostic = dev == 'mobile'
+            R.append(row)
         # SG-PERF-03: CLS — окно сессии web-vitals (fin.wv_cls), а не сумма всех сдвигов (summary.cls_session): сумма
         # завышает CLS прокрутки (страница корпуса базы, телефон: сумма 0,42, web-vitals 0,15)
         wv_cls = g(d, 'fin', 'wv_cls')
@@ -1410,15 +1418,16 @@ def ready_items(manifest, unit):
 
 def after_build_status(items, results):
     """Исход пунктов after_build со способом gates (правило — kb/common/acceptance-criteria.yaml, поле check):
-    [{id, gates, status, severity}]. Решают строки вердикта с id ворот пункта, кроме зеркал (mirror): у какого-либо из
-    ворот строк нет или все SKIP — unchecked с тяжестью пункта (наибольшей, которую ворота дают предмету); иначе строка
-    FAIL без исключения плана — fail с худшей тяжестью таких строк; иначе pass."""
+    [{id, gates, status, severity}]. Решают строки вердикта с id ворот пункта, кроме зеркал (mirror) и диагностики
+    (diagnostic): у какого-либо из ворот таких строк нет или все SKIP — unchecked с тяжестью пункта (наибольшей,
+    которую ворота дают предмету); иначе строка FAIL без исключения плана — fail с худшей тяжестью таких строк; иначе
+    pass."""
     out = []
     for it in items:
         ids = it['check'].get('gates') if isinstance(it.get('check'), dict) else None
         if not ids:
             continue
-        rows = [r for r in results if r.id in ids and not r.mirror]
+        rows = [r for r in results if r.id in ids and not r.mirror and not r.diagnostic]
         fails = [r for r in rows if r.status == 'FAIL' and not getattr(r, 'excepted', False)]
         if any(all(r.status == 'SKIP' for r in rows if r.id == g) for g in ids):
             status, sev = 'unchecked', it['severity']
@@ -1943,7 +1952,8 @@ def selftest_brief(check, budgets, fake):
 def selftest_ready(check, clean):
     """--ready: исход пунктов after_build со способом gates по строкам вердикта (случаи LCP между целью и «плохо»,
     вес под исключением плана, зеркало соседа, призыв после JS, счётчики ЕС — только библиотеки и события; пункт без
-    строк, ворота пункта без строк — замер только телефона) — на вымышленных плане, манифесте и замерах."""
+    строк, ворота пункта без строк — замер только телефона, LCP телефона только диагностикой без page_accept
+    --throttle) — на вымышленных плане, манифесте и замерах."""
     import contextlib
     import io
     import tempfile
@@ -1971,8 +1981,10 @@ def selftest_ready(check, clean):
 
         def case(name, jur='ru', summary=None, network=None, accept=None, motion=None, exception=None, geo=(),
                  anatomy=True, desktop=True):
-            """Чистая страница с правкой случая (правка — у телефона); без anatomy — без замера анатомии, без desktop —
+            """Чистая страница с правкой случая (правка — у телефона); accept — отчёты page_accept, без ключа — чистый
+            прогон телефона с троттлингом, {} — без page_accept; без anatomy — без замера анатомии, без desktop —
             анатомия только телефона; geo None — без geo_probe."""
+            accept = good if accept is None else accept
             page = {'id': 'home', 'budget_profile': 'landing-lead-services@L1', 'jurisdiction': [jur]}
             if exception:
                 page['x-gate-exception'] = [{'id': exception, 'why': 'вымышлено', 'who': 'заказчик',
@@ -2005,6 +2017,8 @@ def selftest_ready(check, clean):
 
         thr = {'mobile_thr': {'device': 'mobile', 'throttle': True, 'no_preference': {'lcp': {'t': 3200, 'tag': 'H1'},
                                                                                       'console': []}}}
+        good = copy.deepcopy(thr)
+        good['mobile_thr']['no_preference']['lcp']['t'] = 1800
         out, ab = case('clean')
         check('--ready, чистая страница: пункты gates пройдены, K1 (code) вердикт не судит, unit — page.id плана',
               out['unit'] == 'home' and ab == {k: ('pass', '-') for k in ('F2', 'I3', 'I6', 'J4b')}
@@ -2045,6 +2059,12 @@ def selftest_ready(check, clean):
         check('замер только телефона: у SG-PERF-02 строк нет — F2 unchecked B при строке SG-PERF-01 FAIL S, вердикт '
               'blocked', ab['F2'] == ('unchecked', 'B') and ab['I3'] == ('pass', '-') and out['verdict'] == 'blocked'
               and any(r['id'] == 'SG-PERF-01' and r['status'] == 'FAIL' and r['severity'] == 'S' for r in out['gates']))
+        out, ab = case('no-accept', accept={})
+        diag = [r for r in out['gates'] if r['id'] == 'SG-PERF-01']
+        check('без page_accept --throttle LCP телефона — строка анатомии PASS с diagnostic: F2 unchecked B, вердикт '
+              'blocked', ab['F2'] == ('unchecked', 'B') and out['verdict'] == 'blocked' and len(diag) == 1
+              and diag[0]['status'] == 'PASS' and diag[0]['diagnostic'] is True
+              and all(r['diagnostic'] is False for r in out['gates'] if r['id'] == 'SG-PERF-02'))
         bad = []
         for keys in (['--ready', put('x/ready.yaml', manifest('S'))],
                      ['--plan', put('y/home.yaml', {'page': {'id': 'about', 'budget_profile': 'landing-lead-services@L1'}}),

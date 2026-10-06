@@ -177,8 +177,8 @@ ai-media `page.media_class` — проекция по строке §8 `../../kb
 | `--html FILE`, `--css FILE …` | сохранённый HTML и CSS | SG-CONTENT-05, SG-CONTENT-06, признаки невидимого H1 (SG-PERF-06), SG-A11Y-08 (clamp кеглей) |
 | `--ai-bots-policy`, `--ads-google` / `--no-ads-google` | условия брифа для флагов ботов (без ключа — из `--brief`) | закрытые ИИ-боты при `deny-all` — не дефект; AdsBot — B только для посадочной под Google Ads |
 
-Замер без троттлинга сети (анатомия телефона) для SG-PERF-01 помечается `lab-unthrottled` — диагностика, не приёмка;
-для приёмки — `page_accept.py --mobile --throttle`. Ограничения: сторонние КБ первого экрана — верхняя оценка (КБ домена
+Замер без троттлинга сети (анатомия телефона) для SG-PERF-01 — строка диагностики (`diagnostic`, пометка
+`lab-unthrottled`): пункт `after_build` она не решает; для приёмки — `page_accept.py --mobile --throttle`. Ограничения: сторонние КБ первого экрана — верхняя оценка (КБ домена
 за сессию); INP-сценарий после загрузки занижен; классы узлов контраста и распознавание призыва — эвристики, ключевой
 провал подтверждать кадром. Модуль для утилит замера (`kbpaths.use("site")`, `import page_gates`): `resolve_profile()`,
 `profile_value()`, `conditions()`, `cdp_network()`, `mobile_device()`, `heavy_lock()` — одно место условий лаборатории и
