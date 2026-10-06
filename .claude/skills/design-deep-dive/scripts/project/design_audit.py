@@ -707,8 +707,9 @@ class Audit:
                 return rule
         return "R-STRUCT-002"
 
-    # код site_validate → этап, где правится файл: бриф, карта сайта, план страницы
-    SV_STAGE = (("SB-", "brief"), ("PJ-", "brief"), ("SM-", "site-map"), ("PL-", "page-plan"))
+    # код site_validate → этап, где правится файл: бриф, карта сайта, план страницы; None — по файлу находки (форма
+    # адресов PJ-04 правится в карте или в плане, у лендинга — в планах)
+    SV_STAGE = (("SB-", "brief"), ("PJ-04", None), ("PJ-", "brief"), ("SM-", "site-map"), ("PL-", "page-plan"))
 
     def sv_stage(self, code, kind, page):
         stage = next((st for pre, st in self.SV_STAGE if str(code or "").startswith(pre)), None) or \

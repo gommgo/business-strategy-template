@@ -43,7 +43,10 @@
   forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля.
   project DIR                бриф + facts + site-map + plans/*.yaml одной папки со всеми связями (PJ-*); страница брифа
                              без плана и без строки карты — PJ-03: error, у служебной (thank-you-page, legal-page,
-                             not-found-page) — warning.
+                             not-found-page) — warning. PJ-04 — форма адресов (warning): хвостовой слеш адресов карты
+                             (pages[].url, collections[].url_pattern) и планов (page.url) — url_policy.trailing_slash
+                             карты; у лендинга без карты — одна форма у адресов планов (site 06/02 §4.1); корень «/»
+                             формы не имеет.
 
 Запуск:
   python3 scripts/site/site_validate.py PATH [PATH…] [--today ГГГГ-ММ-ДД] [--json [OUT]] [--quiet]
@@ -1388,6 +1391,40 @@ def brief_facts(brief_path, brief):
     return load_facts(fp) if fp is not None and fp.is_file() else None
 
 
+def url_slash(u):
+    """Хвостовой слеш адреса: True — есть, False — нет, None — у корня «/» и не пути формы нет."""
+    if not isinstance(u, str) or not u.startswith('/'):
+        return None
+    path = re.split(r'[?#]', u, maxsplit=1)[0]
+    return None if path == '/' else path.endswith('/')
+
+
+def check_url_form(d, sitemap, map_path, plan_files):
+    """PJ-04: у страниц сайта одна форма адреса, вторая — 301 на первую (site 06/02 §4.1). Форму задаёт
+    url_policy.trailing_slash карты; у лендинга без карты адреса планов сверяются друг с другом."""
+    urls = [(rel(pf), (load_yaml(pf).get('page') or {}).get('url')) for pf in plan_files]
+    want = None
+    if sitemap is not None:
+        w0 = rel(map_path)
+        urls += [(f"{w0}:pages.{p.get('id')}", p.get('url')) for p in sitemap.get('pages') or [] if isinstance(p, dict)]
+        urls += [(f"{w0}:collections.{c.get('id')}", c.get('url_pattern'))
+                 for c in sitemap.get('collections') or [] if isinstance(c, dict)]
+        want = (sitemap.get('url_policy') or {}).get('trailing_slash')
+    forms = [(w, u, url_slash(u)) for w, u in urls if url_slash(u) is not None]
+    if isinstance(want, bool):
+        for w, u, f in forms:
+            if f != want:
+                R.add('warning', 'PJ-04', w, f"адрес {u} {'со слешем' if f else 'без слеша'} на конце, а "
+                      f"url_policy.trailing_slash карты — {str(want).lower()}: у страниц одна форма адреса, вторая — 301 "
+                      "на первую")
+    elif sitemap is None:
+        slash = sorted({u for _, u, f in forms if f})
+        bare = sorted({u for _, u, f in forms if not f})
+        if slash and bare:
+            R.add('warning', 'PJ-04', rel(d), f"адреса планов в двух формах — со слешем на конце: {', '.join(slash)}; без "
+                  f"слеша: {', '.join(bare)}: у страниц лендинга одна форма адреса, вторая — 301 на первую")
+
+
 def check_project(d, ctx):
     d = Path(d)
     briefs = sorted(d.glob('site-brief*.yaml'))
@@ -1426,6 +1463,7 @@ def check_project(d, ctx):
                                                       "план по site 10/02 §2.1 — до её макета, другие страницы он не держит")
                 else:
                     R.add('error', 'PJ-03', rel(d), f"страница брифа {x['id']} ({pt}) без плана и без строки карты")
+    check_url_form(d, sitemap, maps[0] if maps else None, plan_files)
     R.add('info', 'PJ-00', rel(d), f'проект: бриф {len(briefs)}, карт {len(maps)}, планов {len(plan_files)}')
 
 
@@ -1760,6 +1798,36 @@ def selftest(ctx):
         print(f"{name}: {'OK' if good else 'FAIL'} ({level} {code}; ошибок {len(errs)})")
         ok &= good
         shutil.rmtree(dst, ignore_errors=True)
+    # форма адресов (PJ-04): у многостраничника — url_policy.trailing_slash карты, у лендинга — одна форма планов
+    def url_form_case(name, exname, edits, want):
+        dst = Path(tempfile.mkdtemp(dir=ex.parent, prefix='.selftest-'))
+        shutil.copytree(ex.parent / exname, dst, dirs_exist_ok=True)
+        for fname, fn in edits:
+            edit(dst / fname, fn)
+        R.items.clear()
+        check_project(dst, ctx)
+        got = sorted(i[2].replace(rel(dst), '<пример>') for i in R.items if i[1] == 'PJ-04' and i[0] == 'warning')
+        good = got == want and not [i for i in R.items if i[1] == 'PJ-04' and i[0] == 'error']
+        print(f"{name}: {'OK' if good else 'FAIL ' + str(got)}")
+        shutil.rmtree(dst, ignore_errors=True)
+        return good
+
+    def url(u):
+        return lambda doc: doc['page'].__setitem__('url', u)
+
+    def map_url(pid, u):
+        return lambda m: next(p for p in m['pages'] if p['id'] == pid).__setitem__('url', u)
+
+    ok &= url_form_case('N79 карта и планы в форме url_policy — без PJ-04', site,
+                        [('plans/news.yaml', url('/o-kompanii/novosti/'))], [])
+    ok &= url_form_case('N80 страница карты без слеша при trailing_slash: true → PJ-04 warning', site,
+                        [('site-map.yaml', map_url('projects', '/proekty'))], ['<пример>/site-map.yaml:pages.projects'])
+    ok &= url_form_case('N81 адрес плана без слеша при trailing_slash: true → PJ-04 warning', site,
+                        [('plans/news.yaml', url('/o-kompanii/novosti'))], ['<пример>/plans/news.yaml'])
+    ok &= url_form_case('N82 лендинг: адреса планов в одной форме — без PJ-04', ex.name,
+                        [('plans/spasibo.yaml', url('/spasibo')), ('plans/privacy.yaml', url('/privacy'))], [])
+    ok &= url_form_case('N83 лендинг: адреса планов в двух формах → одно PJ-04 warning на проект', ex.name,
+                        [('plans/spasibo.yaml', url('/spasibo/')), ('plans/privacy.yaml', url('/privacy'))], ['<пример>'])
     # сроки фактов считаются от даты прогона: на день позже ближайшего valid.until примера факт не допущен
     fp = (ex / ((load_yaml(ex / 'site-brief.yaml').get('proof') or {}).get('facts_ref') or '')).resolve()
     ends = sorted(dt.date.fromisoformat(str(u)[:10]) for u in ((f.get('valid') or {}).get('until')
