@@ -90,15 +90,16 @@ System; исходники — в репозитории, claude.ai — живо
 9 код         та же сессия: компоненты и тема из tokens.css в стеке → снимки сборки теми же ширинами → сверка с макетом
 ```
 
-Команды (`04-claude-code-native/` §6.2; браузер — headless, под общей блокировкой и при свободной памяти ≥ 2 ГБ):
+Команды (`04-claude-code-native/` §6.2; браузер — headless, при свободной памяти ≥ 2 ГБ; замок браузера `shot.py` и
+`export.py` берут сами):
 
 ```bash
-K=../../scripts/claude-design/kit; P=design; L=$DDD_HOME/locks/browser.lock
-flock $L python3 $K/shot.py $P review/iter-01 --tiles --iteration iter-01 --min-free-gb 2           # кадры с метками, холст, marks.json
-flock $L python3 $K/shot.py $P review/iter-02 --tiles --prev review/iter-01/marks.json --min-free-gb 2
+K=../../scripts/claude-design/kit; P=design
+python3 $K/shot.py $P review/iter-01 --tiles --iteration iter-01 --min-free-gb 2                    # кадры с метками, холст, marks.json
+python3 $K/shot.py $P review/iter-02 --tiles --prev review/iter-01/marks.json --min-free-gb 2
 python3 $K/diffshots.py review/iter-01 review/iter-02 --expect 16,22,37,38 --strict                  # код 0 = ничего лишнего не изменилось
-flock $L python3 $K/shot.py $P review/try --set "color-accent=#0B6E4F;radius-md=4px"                  # «ручки»: предпросмотр без правки файлов
-flock $L python3 $K/export.py all $P export --min-free-gb 2                                          # PDF, PNG 2×, standalone, zip
+python3 $K/shot.py $P review/try --set "color-accent=#0B6E4F;radius-md=4px"                           # «ручки»: предпросмотр без правки файлов
+python3 $K/export.py all $P export --min-free-gb 2                                                   # PDF, PNG 2×, standalone, zip
 python3 $K/shot.py serve $P --port 8765                                                              # живой холст для встроенного браузера
 ```
 
@@ -200,8 +201,8 @@ python3 $K/shot.py serve $P --port 8765                                         
     17.06, по Reddit — в конце мая. Раунд правок в Claude Code тоже стоит лимита: меряй тестом T-4. → `01/01` §7, `03/01` §7 `[документация]` `[спорно]`
 27. **Модель и effort — явно**: `/model`, `/effort`. Opus 5.5 — $4 / $20, «на уровне Fable 5.1 и на 40 % дешевле Opus 5». Fable 5.1 на Pro —
     только за usage credits. → `01/01` §2 `[документация]`
-28. **Данные клиента**: на Pro и Max выключи «Help Improve our AI models» до загрузки материалов. Публичные ссылки артефактов не делай с
-    реальными данными. → `01/01` §8 `[документация]`
+28. **Данные клиента**: на Pro и Max выключи «Help Improve our AI models» до загрузки материалов. Публичные ссылки
+    артефактов с реальными данными — только с согласия их владельца. → `01/01` §8 `[документация]`
 29. **Закрытые тексты Anthropic** и сторонние снимки промта Claude Design — только
     для понимания. В свои скиллы — пересказ принципов, не копия. → `02/01`, `03/01` §9.2, `04/01` §4 `[мнение базы]`
 30. **Когда `/design` сменит режим** — тест T-6 на том же брифе; в hub сначала сохрани в кэш результат `get_claude_design_prompt`.
