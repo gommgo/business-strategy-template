@@ -1347,7 +1347,8 @@ S2–S3 цепочки текстов; `site-map` — `step:site-map`; `page-pla
   вердикта ворот, утилита скилла и поле её JSON, тест самого код-репо или человек
   (`docs/projects/_template/design/README.md § Пакет для кода`, «Ворота после сборки»); цепочка ворот —
   `docs/README.md § Что docs отдаёт соседям` (абзац «Ворота после сборки»), поля JSON звеньев —
-  `scripts/README.md § Ворота после сборки`; вердикт — `page_gates.py --json` (`verdict`, `B`, `S`).
+  `scripts/README.md § Ворота после сборки`; вердикт — `page_gates.py --brief … --plan … --json` (`verdict`, `B`, `S`;
+  код читает поля JSON, а не код выхода).
 - **Утверждает.** Владелец продукта — передачу в код; коммит, push и слияние — его слово (`CLAUDE.md` §5).
 - **Нормы.** `page-gates.yaml#phases`; ux 12/03 §9; `ui/CONTRADICTIONS.md §[C25]` (бриф `frontend-design` для
   экранов кабинета).

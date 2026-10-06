@@ -23,7 +23,7 @@ methods:
   gates: "../../scripts/site/page_gates.py — сводит JSON по профилю budgets.yaml и выдаёт PASS / S / B; метрики страницы, измеренные соседями (motion, probe), — зеркалом D"
   geo: "../../scripts/site/geo_probe.py"
   axe: "axe-core (I; сырой сигнал)"
-  plan: "проверка page-plan и site-brief (site_validate.py); page_gates.py --plan читает first_screen_policy, seo.indexable, x-gate-exception"
+  plan: "проверка page-plan и site-brief (site_validate.py); page_gates.py --plan читает budget_profile, jurisdiction, first_screen_policy, seo.indexable, x-gate-exception; --brief — юрисдикцию без плана, ai_bots_policy, уровень сайта, долю горячего мобильного трафика, ценовую полосу, рекламу Google (brief_params)"
   ia: "../../scripts/site/ia_probe.py URL --out DIR → ia.json: 404 на шаблонах, меню в HTML, sitemap, hreflang, крошки — строки scope: site"
   html: "сохранённый HTML страницы (curl или page_anatomy) — скан заглушек и маркеров ИИ-лендинга (page_gates.py --html)"
   human: "человек или судья (site 09/03)"

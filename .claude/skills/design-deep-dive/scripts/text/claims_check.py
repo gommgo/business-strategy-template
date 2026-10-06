@@ -2714,7 +2714,8 @@ def cmd_check(a):
     softened = soften_unbound(F, units) if meta.get('canvas_copy') else 0
     if a.legal_only:
         F = [f for f in F if f['rule'] in rule_ids]
-    res = {'tool': 'claims_check.py', 'version': VERSION, 'today': today.isoformat(), 'input': a.input, 'format': fmt,
+    res = {'tool': 'claims_check.py', 'command': 'check', 'skill_version': kbpaths.skill_version(), 'version': VERSION,
+           'today': today.isoformat(), 'input': a.input, 'format': fmt,
            'facts': a.facts, 'schema': os.path.relpath(a.schema, ROOT) if os.path.exists(a.schema) else None,
            'rules_loaded': [os.path.relpath(p, ROOT) if p.startswith(ROOT) else p for p in rule_paths if os.path.exists(p)],
            'summary': summarize(F, stats), 'findings': F, 'supported': ok_claims if a.verbose else [], 'verbose': a.verbose, 'final': bool(a.final),
@@ -2783,7 +2784,8 @@ def cmd_inventory(a):
         b['source_visible'] += int(r['source_visible'])
     total = len(rows)
     vis = sum(r['source_visible'] for r in rows)
-    res = {'tool': 'claims_check.py inventory', 'version': VERSION, 'input': a.input, 'format': fmt, 'units': len(units),
+    res = {'tool': 'claims_check.py', 'command': 'inventory', 'skill_version': kbpaths.skill_version(), 'version': VERSION,
+           'input': a.input, 'format': fmt, 'units': len(units),
            'claims': total, 'source_visible': vis, 'source_visible_share': round(vis / total, 3) if total else None,
            'by_class': by, 'rows': rows}
     if a.json:
@@ -2837,7 +2839,8 @@ def cmd_lint_facts(a):
     for m in facts.missing:
         if not PLACEHOLDER_RX.fullmatch(m.get('placeholder') or ''):
             add(F, 'error', 'COPY-F-PLACEHOLDER', unit(f"missing:{m.get('id')}", m.get('what', '')), m.get('placeholder'), None, 'placeholder не в форме [PLACEHOLDER: …]', 'Исправьте текст заглушки.')
-    res = {'tool': 'claims_check.py lint-facts', 'version': VERSION, 'today': today.isoformat(), 'input': a.input,
+    res = {'tool': 'claims_check.py', 'command': 'lint-facts', 'skill_version': kbpaths.skill_version(), 'version': VERSION,
+           'today': today.isoformat(), 'input': a.input,
            'summary': {lv: sum(1 for f in F if f['level'] == lv) for lv in LEVELS}, 'findings': F}
     if a.json:
         with open(a.json, 'w', encoding='utf-8') as f:
@@ -3088,6 +3091,10 @@ def _selftest_legal(check):
         code = main(['check', pin, '--legal-only', '--quiet', '--json', pout, '--today', '2026-09-24'])
         with open(pout, encoding='utf-8') as f:
             res = json.load(f)
+        check('--json для кода: tool claims_check.py, command check, skill_version — VERSION скилла, summary.error',
+              res.get('tool') == 'claims_check.py' and res.get('command') == 'check'
+              and res.get('skill_version') == kbpaths.skill_version() and isinstance(res['summary'].get('error'), int),
+              {k: res.get(k) for k in ('tool', 'command', 'skill_version')})
         check('право: CLI --legal-only: только COPY-L, код 1, блок legal', code == 1 and res['findings'] and all(x['rule'].startswith('COPY-L-') for x in res['findings']) and res['legal']['jurisdiction'] == 'ru', (code, res.get('legal'), [x['rule'] for x in res['findings']]))
         check('право: одно нарушение — одна находка права', [(x['rule'], x['level']) for x in res['findings']] == [('COPY-L-SUP-01', 'error')], [(x['rule'], x['level']) for x in res['findings']])
 

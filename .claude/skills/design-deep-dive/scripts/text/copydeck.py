@@ -2666,7 +2666,8 @@ def render_md(rep, title, meta_line):
 
 
 def write_outputs(a, rep, command, extra=None):
-    payload = {'tool': 'copydeck.py', 'version': VERSION, 'date': DATE, 'command': command, 'input': getattr(a, 'deck', None),
+    payload = {'tool': 'copydeck.py', 'skill_version': kbpaths.skill_version(), 'version': VERSION, 'date': DATE,
+               'command': command, 'input': getattr(a, 'deck', None),
                'today': getattr(a, 'today', None), 'summary': rep.summary(), 'tools': rep.tools,
                'findings': sorted(rep.findings, key=lambda x: (ORDER[x['level']], TOOL_ORDER.get(x['tool'], 9))),
                'allowed': rep.allowed, 'notes': list(dict.fromkeys(rep.notes))}
@@ -5386,6 +5387,10 @@ def selftest():
                     dk_e = yaml.safe_load(f)
                 with open(jp_u, encoding='utf-8') as f:
                     js_e = json.load(f)
+                check('--json для кода: tool copydeck.py, skill_version — VERSION скилла, command, summary.error — число',
+                      js_e.get('tool') == 'copydeck.py' and js_e.get('skill_version') == kbpaths.skill_version()
+                      and js_e.get('command') == 'check' and isinstance((js_e.get('summary') or {}).get('error'), int),
+                      {k: js_e.get(k) for k in ('tool', 'skill_version', 'command', 'summary')})
                 st_e = {sl['slot_id']: _status_of(chosen_variant(sl)) for s in sections_of(deck_root(dk_e)['pages'][0]) for sl in slots_of(s)}
                 check('check --update --promote при error COPY-D-MISSING-REF: текст с error и страница не повышаются, чистые тексты — checked',
                       rc_e == 1 and st_e['a1'] == 'draft' and st_e['h1'] == 'checked' and deck_root(dk_e)['pages'][0]['status'] == 'assumed'

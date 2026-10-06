@@ -19,20 +19,28 @@ ambition-levels.yaml` (`defaults_by_page_type`, `levels[L0].appropriate_for.lead
   geo_probe.py     → <id>.json (--geo): флаги head-kit.yaml — коды, robots, боты, SSR, canonical, JSON-LD, OG
   ia_probe.py      → ia.json (--ia): мягкая 404 на шаблонах, меню в HTML, sitemap, hreflang, крошки (строки scope: site)
   axe-core         → JSON с violations (--axe): формат run_axe_targets.py (адреса узлов) или axe.run
-  page-plan.yaml   → first_screen_policy, seo.indexable, x-gate-exception[{id, why, who, until}] (--plan)
+  page-plan.yaml   → budget_profile, jurisdiction, first_screen_policy, seo.indexable,
+                     x-gate-exception[{id, why, who, until}] (--plan)
+  site-brief.yaml  → юрисдикция без плана, ai_bots_policy, уровень сайта, доля горячего мобильного трафика, ценовая
+                     полоса, реклама Google (--brief; правило — brief_params)
   HTML и CSS       → заглушки и маркеры «ИИ-лендинга», признаки невидимого H1, clamp() кеглей (--html, --css)
 Числа строк без профиля (доля текста без JS, вылет телефона, clamp, энтропия постера) — поле `limits` строки page-gates.yaml.
 Строки без данных — SKIP: их проверяет человек, судья или соседняя утилита.
 
-Код репозитория запускает утилиту соседним чекаутом: ../strategy/.claude/skills/design-deep-dive/scripts/site/page_gates.py.
-  page_gates.py --profile landing-lead-services@L1 --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …]
-      [--geo FILE] [--ia FILE] [--axe FILE] [--plan FILE] [--html FILE] [--css FILE …] [--jurisdiction ru|eu|none]
-      [--ai-bots-policy allow-all] [--ads-google] [--site-level L1] [--hot-mobile-share 0.6 --price-band mid] [--json]
-  page_gates.py --resolve landing-lead-services@L1 [--site-level L1]   # профиль (JSON): id, level, page_type, outcome,
-                                                                        # weight, all_levels, log
+Код репозитория запускает утилиту соседним чекаутом: ../strategy/.claude/skills/design-deep-dive/scripts/site/page_gates.py,
+бриф и план передаёт файлами снимка: --brief site-brief.yaml --plan plans/<page>.yaml.
+  page_gates.py --brief FILE --plan FILE --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …] [--geo FILE]
+      [--ia FILE] [--axe FILE] [--html FILE] [--css FILE …] [--json]
+      профиль — page.budget_profile плана; ключи ниже сильнее брифа и плана: [--profile P] [--jurisdiction ru|eu|none]
+      [--ai-bots-policy allow-all|allow-search-deny-training|deny-all] [--ads-google | --no-ads-google]
+      [--site-level L1] [--hot-mobile-share 0.6] [--price-band low|mid|high|very-high]
+  page_gates.py --resolve landing-lead-services@L1 [--brief FILE] [--site-level L1]   # профиль (JSON): id, level,
+                                                                        # page_type, outcome, weight, all_levels, log
   page_gates.py --conditions        # условия замера budgets.yaml: окно первого экрана, телефон, десктоп, замок тишины
   page_gates.py --selftest [--gates FILE]
-Код выхода: 1 — есть B; 0 — нет B; 2 — ошибка вызова. Замер без троттлинга сети помечается `lab-unthrottled`.
+Вывод --json: tool, skill_version (файл VERSION скилла), profile, level, log, params (ключи вердикта после брифа и
+плана), verdict, B, S, gates[], layers, sources. Код репозитория читает поля JSON, а не код выхода. Код выхода: 1 — есть
+B; 0 — нет B; 2 — ошибка вызова. Замер без троттлинга сети помечается `lab-unthrottled`.
 
 Модуль для утилит замера (kbpaths.use("site"); import page_gates): resolve_profile(), profile_value(), conditions(),
 cdp_network(), mobile_device(), heavy_lock() — условия замера и тишина машины из budgets.yaml, одно место на все ворота;
@@ -63,6 +71,10 @@ WIDTHS = str(kbpaths.kb(None, 'common', 'acceptance-widths.yaml'))
 LEVELS = ('L0', 'L1', 'L2')
 FOREIGN_VENDORS = {'ga4', 'gtm', 'meta-pixel', 'youtube', 'google-fonts', 'recaptcha', 'google-ads', 'google-maps',
                    'microsoft-ads', 'hotjar', 'intercom', 'onetrust'}   # SG-LEGAL-07 (I): зарубежные сервисы
+CRAWLERS = os.path.join(DIR07, 'crawlers.yaml')
+JURISDICTIONS = ('ru', 'eu', 'none')                    # профили права ворот: ru, eu; none — строки права пропускаются
+AI_BOTS = ('allow-all', 'allow-search-deny-training', 'deny-all')
+PRICE_BANDS = ('low', 'mid', 'high', 'very-high')       # словарь брифа decision_context.price_band
 GATE_ID = re.compile(r'^SG-(PERF|WEIGHT|SEO|GEO|A11Y|LEGAL|CONTENT|NAV|MOB)-\d{2}$')
 SEV_RANK = {'-': 0, 'D': 1, 'S': 2, 'B': 3}
 
@@ -251,6 +263,67 @@ def profile_value(prof, path, device=None, key='goal'):
     if isinstance(cur, dict):
         cur = cur.get(key, cur.get('max'))
     return cur if isinstance(cur, (int, float)) and not isinstance(cur, bool) else None
+
+
+# ---------------------------------------------------------------- ключи вердикта из брифа и плана
+def brief_params(brief=None, plan=None, crawlers=None):
+    """Ключи вердикта из брифа сайта и плана страницы (код репозитория передаёт их файлами — --brief, --plan) →
+    ({ключ: значение}, [строки журнала]); ключа, о котором файлы молчат, в словаре нет.
+      profile           page.budget_profile плана
+      jurisdiction      основная (первая) юрисдикция page.jurisdiction плана, без плана — constraints.jurisdiction
+                        брифа: ru и eu — как есть, прочие — none с записью в журнал (профилей права других стран в базе
+                        нет); так же основную юрисдикцию берёт условие eu критериев приёмки
+      ai_bots_policy    search.ai_bots_policy брифа; ask или поля нет — crawlers.yaml#policies.ask.default_if_no_answer
+      site_level        ambition.level брифа
+      hot_mobile_share  сумма share источников traffic.sources[] брифа с temperature hot и device mobile; ни у одного
+                        такого источника нет share — данных нет
+      price_band        decision_context.price_band брифа (словарь брифа: low · mid · high · very-high)
+      ads_google        источник paid-search в traffic.sources[] и google в search.engines брифа (по умолчанию yandex,
+                        google): посадочная под контекстную рекламу Google
+    Значение вне словаря ключа — ValueError с полем."""
+    out, log = {}, []
+    page = (plan or {}).get('page') if isinstance((plan or {}).get('page'), dict) else {}
+    brief = brief if isinstance(brief, dict) else None
+    if isinstance(page.get('budget_profile'), str):
+        out['profile'] = page['budget_profile']
+    jur, where = page.get('jurisdiction'), 'page.jurisdiction плана'
+    if not jur and brief is not None:
+        jur, where = (brief.get('constraints') or {}).get('jurisdiction'), 'constraints.jurisdiction брифа'
+    main = jur[0] if isinstance(jur, list) and jur else jur
+    if isinstance(main, str) and main:
+        out['jurisdiction'] = main if main in ('ru', 'eu') else 'none'
+        if main not in ('ru', 'eu'):
+            log.append(f'юрисдикция {main} ({where}) — профиля права в базе нет: none, строки права пропущены')
+    if brief is None:
+        return out, log
+    search = brief.get('search') if isinstance(brief.get('search'), dict) else {}
+    policy = search.get('ai_bots_policy')
+    if policy in (None, 'ask'):
+        ask = ((((crawlers if crawlers is not None else load_yaml(CRAWLERS)) or {}).get('policies') or {})
+               .get('ask') or {})
+        log.append(f'ai_bots_policy {policy or "не задан"} → {ask.get("default_if_no_answer")} '
+                   '(crawlers.yaml policies.ask.default_if_no_answer)')
+        policy = ask.get('default_if_no_answer')
+    out['ai_bots_policy'] = policy
+    level = (brief.get('ambition') or {}).get('level') if isinstance(brief.get('ambition'), dict) else None
+    if level:
+        out['site_level'] = level
+    sources = [s for s in ((brief.get('traffic') or {}).get('sources') or []) if isinstance(s, dict)] \
+        if isinstance(brief.get('traffic'), dict) else []
+    shares = [s['share'] for s in sources if s.get('temperature') == 'hot' and s.get('device') == 'mobile'
+              and isinstance(s.get('share'), (int, float)) and not isinstance(s.get('share'), bool)]
+    if shares:
+        out['hot_mobile_share'] = round(sum(shares), 4)
+    band = (brief.get('decision_context') or {}).get('price_band') if isinstance(brief.get('decision_context'),
+                                                                                  dict) else None
+    if band:
+        out['price_band'] = band
+    engines = search.get('engines') or ['yandex', 'google']
+    out['ads_google'] = any(s.get('source') == 'paid-search' for s in sources) and 'google' in engines
+    for key, allowed in (('ai_bots_policy', AI_BOTS), ('site_level', LEVELS), ('price_band', PRICE_BANDS)):
+        if key in out and out[key] not in allowed:
+            raise ValueError(f'{key} {out[key]!r} брифа — не из {", ".join(allowed)}')
+    return out, log
 
 
 # ---------------------------------------------------------------- условия замера (budgets.yaml conditions)
@@ -1531,6 +1604,7 @@ def selftest(gates_path=None):
           bool(h1_reveal_evidence('<style>@keyframes r{from{opacity:0}} .rv{animation:.7s both r}</style><div class="rv"><h1>x</h1></div>')['hidden'])
           and bool(h1_reveal_evidence('<h1 class="h1">x</h1>', 'html.js .h1{opacity:0}')['hidden']))
     selftest_sources(check, budgets, gates, prof, f2)
+    selftest_brief(check, budgets, fake)
     for st, name in checks:
         print(st, name)
     print(f"итог: {sum(c[0] == 'PASS' for c in checks)}/{len(checks)} PASS")
@@ -1552,7 +1626,8 @@ def selftest_sources(check, budgets, gates, prof, clean):
           all(k in rule for k in ('page_type', 'hot_mobile_share_min', 'price_bands', 'otherwise', 'no_data')))
     share = rule.get('hot_mobile_share_min')
     check('доля = порогу и полоса из данных → L0', resolve_profile('landing-lead-services', budgets, None, share, rule['price_bands'][0], levels)['level'] == 'L0')
-    check('полоса вне списка → otherwise', resolve_profile('landing-lead-services', budgets, None, 0.9, 'premium', levels)['level'] == rule['otherwise'])
+    check('полоса вне списка (very-high брифа) → otherwise',
+          resolve_profile('landing-lead-services', budgets, None, 0.9, 'very-high', levels)['level'] == rule['otherwise'])
     check('данных о трафике нет → no_data', resolve_profile('landing-lead-services', budgets, None, None, None, levels)['level'] == rule['no_data'])
     lv2 = copy.deepcopy(levels)
     lead_rule(lv2)['hot_mobile_share_min'] = 0.99
@@ -1739,6 +1814,75 @@ def selftest_sources(check, budgets, gates, prof, clean):
     check('H1 — LCP, показ H1: первый кадр opacity 0,001 → D', {r.id: r for r in evaluate(prof, f12)}['SG-PERF-06'].severity == 'D')
 
 
+def selftest_brief(check, budgets, fake):
+    """Ключи вердикта из брифа и плана (brief_params), явный ключ сильнее, вывод JSON для кода (tool, skill_version,
+    params) — на вымышленных брифе и плане."""
+    import contextlib
+    import io
+    import tempfile
+    brief = {'constraints': {'jurisdiction': ['eu', 'ru']}, 'search': {'ai_bots_policy': 'ask', 'engines': ['yandex', 'google']},
+             'ambition': {'level': 'L1'}, 'decision_context': {'price_band': 'very-high'},
+             'traffic': {'sources': [{'source': 'paid-search', 'temperature': 'hot', 'device': 'mobile', 'share': 0.4},
+                                     {'source': 'maps-local', 'temperature': 'hot', 'device': 'mobile', 'share': 0.25},
+                                     {'source': 'search-brand', 'temperature': 'warm', 'device': 'mobile', 'share': 0.2},
+                                     {'source': 'messenger', 'temperature': 'hot', 'device': 'mixed', 'share': 0.1}]}}
+    plan = {'page': {'id': 'home', 'budget_profile': 'landing-lead-services@L1', 'jurisdiction': ['ru']}}
+    ask = (load_yaml(CRAWLERS).get('policies') or {}).get('ask', {}).get('default_if_no_answer')
+    got, log = brief_params(brief, plan)
+    check('brief_params: профиль — page.budget_profile плана, юрисдикция — основная плана (ru сильнее eu брифа), ask → '
+          f'crawlers.yaml policies.ask ({ask}), уровень сайта, доля горячего мобильного (hot и mobile, без mixed), полоса '
+          'very-high словаря брифа, paid-search и google — реклама Google',
+          got == {'profile': 'landing-lead-services@L1', 'jurisdiction': 'ru', 'ai_bots_policy': ask, 'site_level': 'L1',
+                  'hot_mobile_share': 0.65, 'price_band': 'very-high', 'ads_google': True}
+          and ask in AI_BOTS and any('policies.ask' in x for x in log))
+    no_plan, _ = brief_params(brief)
+    kz, kz_log = brief_params({'constraints': {'jurisdiction': ['kz']}, 'search': {'ai_bots_policy': 'deny-all'}})
+    bare, _ = brief_params({'traffic': {'sources': [{'source': 'paid-search', 'temperature': 'hot', 'device': 'mobile'}]},
+                            'search': {'engines': ['yandex']}})
+    check('brief_params: без плана — основная юрисдикция брифа (eu); kz — none с записью в журнал; share нет — доли нет; '
+          'google нет в search.engines — рекламы Google нет',
+          no_plan['jurisdiction'] == 'eu' and 'profile' not in no_plan and kz['jurisdiction'] == 'none'
+          and any('kz' in x for x in kz_log) and kz['ai_bots_policy'] == 'deny-all'
+          and 'hot_mobile_share' not in bare and bare['ads_google'] is False)
+    try:
+        brief_params({'decision_context': {'price_band': 'premium'}})
+        check('brief_params: полоса вне словаря брифа — ValueError', False)
+    except ValueError as e:
+        check('brief_params: полоса вне словаря брифа — ValueError с полем', 'price_band' in str(e))
+    lead = resolve_profile('landing-lead-services', budgets, None, got['hot_mobile_share'], got['price_band'])
+    check('правило лидогенерации по брифу: доля 0,65 при very-high → не L0', lead['level'] != 'L0')
+    with tempfile.TemporaryDirectory() as td:
+        bf, pf, ad = os.path.join(td, 'site-brief.yaml'), os.path.join(td, 'home.yaml'), os.path.join(td, 'anatomy')
+        os.makedirs(ad)
+        import yaml
+        for path, data in ((bf, brief), (pf, plan)):
+            with open(path, 'w', encoding='utf-8') as f:
+                yaml.safe_dump(data, f, allow_unicode=True)
+        with open(os.path.join(ad, 'anatomy_mobile.json'), 'w', encoding='utf-8') as f:
+            json.dump(fake['mobile'], f)
+
+        def run(*keys):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = main(['--brief', bf, '--plan', pf, '--anatomy', ad, '--json', *keys])
+            out = json.loads(buf.getvalue())
+            return rc, out, {r['id']: r for r in out['gates'] if r['device'] == 'mobile'}
+
+        rc, out, rows = run()
+        rc_eu, out_eu, rows_eu = run('--jurisdiction', 'eu', '--no-ads-google', '--profile', 'landing-lead-services@L0')
+        check('--brief --plan: JSON для кода — tool page_gates.py, skill_version (VERSION), профиль из плана, params '
+              'брифа и плана; трекинг до согласия при юрисдикции плана ru — S',
+              out['tool'] == 'page_gates.py' and out['skill_version'] == kbpaths.skill_version()
+              and out['profile'] == 'landing-lead-services@L1' and out['params']['jurisdiction'] == 'ru'
+              and out['params']['ai_bots_policy'] == ask and out['params']['ads_google'] is True
+              and out['sources']['brief'] and rows['SG-LEGAL-01']['severity'] == 'S' and 'verdict' in out
+              and isinstance(out['B'], int) and rc in (0, 1))
+        check('явный ключ сильнее брифа и плана: --jurisdiction eu — B у SG-LEGAL-01, --no-ads-google, --profile',
+              out_eu['params']['jurisdiction'] == 'eu' and rows_eu['SG-LEGAL-01']['severity'] == 'B'
+              and out_eu['params']['ads_google'] is False and out_eu['profile'] == 'landing-lead-services@L0'
+              and out_eu['verdict'] == 'blocked' and rc_eu == 1)
+
+
 def _selftest_accept_dir(loader):
     """Два отчёта page_accept во временной папке: новый (поля device, throttle) и по имени режима."""
     import tempfile
@@ -1754,7 +1898,7 @@ def _selftest_accept_dir(loader):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description=__doc__.split('\n')[0])
-    ap.add_argument('--profile', help='профиль бюджета <page_type>@L<n> (page-plan page.budget_profile)')
+    ap.add_argument('--profile', help='профиль бюджета <page_type>@L<n>; без ключа — page.budget_profile плана (--plan)')
     ap.add_argument('--resolve', help='показать профиль (JSON: id, level, page_type, outcome, weight, all_levels, log)')
     ap.add_argument('--conditions', action='store_true', help='условия замера budgets.yaml (JSON)')
     ap.add_argument('--anatomy', help='папка anatomy_<устройство>.json page_anatomy.py')
@@ -1765,15 +1909,19 @@ def main(argv=None):
     ap.add_argument('--geo', help='JSON geo_probe.py (файл или папка с одним JSON)')
     ap.add_argument('--ia', help='ia.json ia_probe.py (строки scope: site)')
     ap.add_argument('--axe', help='JSON axe (run_axe_targets.py — адреса узлов — или результат axe.run)')
-    ap.add_argument('--plan', help='page-plan.yaml (first_screen_policy, seo.indexable, x-gate-exception)')
+    ap.add_argument('--brief', help='site-brief.yaml: юрисдикция без плана, ai_bots_policy, уровень сайта, доля горячего '
+                                    'мобильного трафика, ценовая полоса, реклама Google (brief_params)')
+    ap.add_argument('--plan', help='page-plan.yaml: budget_profile, jurisdiction, first_screen_policy, seo.indexable, '
+                                   'x-gate-exception')
     ap.add_argument('--html', help='сохранённый HTML страницы (заглушки и автоматические маркеры)')
     ap.add_argument('--css', nargs='*', help='файлы CSS страницы для SG-A11Y-08 (clamp кеглей), если стили внешние')
-    ap.add_argument('--jurisdiction', default='ru', choices=['ru', 'eu', 'none'])
-    ap.add_argument('--ai-bots-policy', default='allow-all', choices=['allow-all', 'allow-search-deny-training', 'deny-all'])
-    ap.add_argument('--ads-google', action='store_true', help='посадочная под Google Ads: закрытый AdsBot — B')
-    ap.add_argument('--site-level', choices=LEVELS)
-    ap.add_argument('--hot-mobile-share', type=float)
-    ap.add_argument('--price-band', choices=['low', 'mid', 'high', 'premium'])
+    ap.add_argument('--jurisdiction', choices=JURISDICTIONS, help='сильнее плана и брифа; без них — ru')
+    ap.add_argument('--ai-bots-policy', choices=AI_BOTS, help='сильнее брифа; без него — allow-all')
+    ap.add_argument('--ads-google', action=argparse.BooleanOptionalAction,
+                    help='посадочная под Google Ads: закрытый AdsBot — B; сильнее брифа')
+    ap.add_argument('--site-level', choices=LEVELS, help='уровень сайта; сильнее брифа')
+    ap.add_argument('--hot-mobile-share', type=float, help='доля горячего мобильного трафика 0–1; сильнее брифа')
+    ap.add_argument('--price-band', choices=PRICE_BANDS, help='ценовая полоса словаря брифа; сильнее брифа')
     ap.add_argument('--gates', help='другой page-gates.yaml (самопроверка черновика)')
     ap.add_argument('--json', action='store_true')
     ap.add_argument('--selftest', action='store_true')
@@ -1785,26 +1933,37 @@ def main(argv=None):
         print(json.dumps(conditions(budgets), ensure_ascii=False, indent=1))
         return 0
     try:
+        brief = load_yaml(a.brief) if a.brief else None
+        plan = load_yaml(a.plan) if a.plan else None
+        got, notes = brief_params(brief, plan) if brief is not None or plan is not None else ({}, [])
+        # явный ключ сильнее брифа и плана; о чём молчат и они — умолчание ключа
+        params = {k: getattr(a, k) if getattr(a, k) is not None else got.get(k, dflt)
+                  for k, dflt in (('jurisdiction', 'ru'), ('ai_bots_policy', 'allow-all'), ('site_level', None),
+                                  ('hot_mobile_share', None), ('price_band', None), ('ads_google', False))}
+        lvl = (params['site_level'], params['hot_mobile_share'], params['price_band'])
         if a.resolve:
-            p = resolve_profile(a.resolve, budgets, a.site_level, a.hot_mobile_share, a.price_band)
+            p = resolve_profile(a.resolve, budgets, *lvl)
+            p['log'] = notes + p['log']
             print(json.dumps(p, ensure_ascii=False, indent=1))
             return 0
-        if not a.profile or not (a.anatomy or a.accept or a.motion or a.gate3d or a.geo or a.ia or a.axe or a.html or a.css):
+        profile = a.profile or got.get('profile')
+        if not profile or not (a.anatomy or a.accept or a.motion or a.gate3d or a.geo or a.ia or a.axe or a.html or a.css):
             ap.print_help()
             return 2
-        prof = resolve_profile(a.profile, budgets, a.site_level, a.hot_mobile_share, a.price_band)
-    except ValueError as e:
+        prof = resolve_profile(profile, budgets, *lvl)
+    except Exception as e:                                  # noqa: BLE001 — файл не читается, значение вне словаря
         print(f'page_gates.py: {e}', file=sys.stderr)
         return 2
+    prof['log'] = notes + prof['log']
     use_gates(a.gates)
-    plan = load_yaml(a.plan) if a.plan else None
     raw = open(a.html, encoding='utf-8', errors='replace').read() if a.html else None
     css = '\n'.join(open(f, encoding='utf-8', errors='replace').read() for f in (a.css or []))
     motion, gate3d = load_motion(a.motion), load_gate3d(a.gate3d)
-    res = evaluate(prof, load_anatomy(a.anatomy) if a.anatomy else {}, load_accept(a.accept) if a.accept else {}, a.jurisdiction,
-                   geo=load_json(a.geo), ia=load_json(a.ia), axe=load_json(a.axe), plan=plan, html_text=raw,
-                   headkit=load_headkit(os.path.join(DIR07, 'head-kit.yaml')), ai_bots_policy=a.ai_bots_policy,
-                   ads_google=a.ads_google, css_text=css or None, motion=motion, gate3d=gate3d)
+    res = evaluate(prof, load_anatomy(a.anatomy) if a.anatomy else {}, load_accept(a.accept) if a.accept else {},
+                   params['jurisdiction'], geo=load_json(a.geo), ia=load_json(a.ia), axe=load_json(a.axe), plan=plan,
+                   html_text=raw, headkit=load_headkit(os.path.join(DIR07, 'head-kit.yaml')),
+                   ai_bots_policy=params['ai_bots_policy'], ads_google=params['ads_google'], css_text=css or None,
+                   motion=motion, gate3d=gate3d)
     meta = gate_meta(a.gates or GATES)
     lay = layers(motion, gate3d)
     if a.json:
@@ -1815,8 +1974,10 @@ def main(argv=None):
             d.update(meta.get(r.id, {}))
             rows.append(d)
         src = {k: bool(x) for k, x in (('anatomy', a.anatomy), ('accept', a.accept), ('motion', motion), ('gate3d', gate3d),
-                                       ('geo', a.geo), ('ia', a.ia), ('axe', a.axe), ('plan', a.plan), ('html', a.html))}
-        print(json.dumps({'profile': prof['id'], 'level': prof['level'], 'log': prof['log'], 'verdict': v, 'B': nb, 'S': ns,
+                                       ('geo', a.geo), ('ia', a.ia), ('axe', a.axe), ('plan', a.plan), ('brief', a.brief),
+                                       ('html', a.html))}
+        print(json.dumps({'tool': 'page_gates.py', 'skill_version': kbpaths.skill_version(), 'profile': prof['id'],
+                          'level': prof['level'], 'log': prof['log'], 'params': params, 'verdict': v, 'B': nb, 'S': ns,
                           'gates': rows, 'layers': lay, 'sources': src}, ensure_ascii=False, indent=1, default=str))
     else:
         print_table(prof, res, lay)
