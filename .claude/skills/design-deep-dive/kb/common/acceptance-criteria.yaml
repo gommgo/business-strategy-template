@@ -26,7 +26,13 @@
 #             {id, severity, check}:
 #               {gates: [id ворот]}         строки вердикта page_gates.py с этими id, кроме зеркал (mirror); исход
 #                                           пункта пишет сам вердикт с --ready (поле after_build[])
-#               {tool: команда, field: …}   утилита скилла (путь от scripts/) и поле её JSON с условием прохождения
+#               {tool: команда, field: путь, pass: {all: значение} | {none: значение}}
+#                                           утилита скилла: команда — путь от scripts/ с ключами, URL в ней — адрес
+#                                           собранной страницы; JSON с полями tool и skill_version утилита печатает
+#                                           в stdout. Путь выбирает значения JSON: имя — поле верхнего уровня,
+#                                           имя[ключ=значение].поле — поле строк списка «имя», у которых ключ равен
+#                                           значению; all — каждое выбранное значение равно значению условия, none —
+#                                           ни одно не равно
 #               code                        тест самого репозитория кода по вопросу и источнику пункта: предмет
 #                                           знает только код (формы, события, разметка по плану, сайт целиком)
 #               manual                      человек на собранной странице, итог записывается
@@ -34,7 +40,9 @@
 #               gates    у какого-либо из его ворот строк нет или все SKIP — не проверен; иначе строка FAIL без
 #                        исключения плана (excepted) — провален с худшей тяжестью таких строк (её B — уже B
 #                        вердикта); иначе пройден
-#               прочие   провален — по своему способу; нет итога (теста, JSON утилиты, записи) — не проверен
+#               tool     JSON нет, в нём есть поле error, нет поля «имя» пути (у пути со строками — списка) или у all
+#                        выборка пуста — не проверен; условие выполнено — пройден, иначе провален
+#               прочие   провален — по своему способу; нет итога (теста, записи) — не проверен
 #             Тяжесть непройденного пункта — поле severity, у провала gates — худшая строка; что из этого блокирует —
 #             гейт 5 (references/phases.md § Принципы всех этапов).
 # Значение severity, stage и source — строка или словарь «условие: значение» с ключом `else`; check — без условий.
@@ -270,7 +278,7 @@ criteria:
   where: после сборки
   stage: —
   source: acceptance-widths.yaml#overflow_only; ux 08/01 §3.2; ui_audit.py --acceptance
-  check: {tool: ui/ui_audit.py URL --acceptance, field: 'findings[id=J5].verdict — OK на каждом прогоне'}
+  check: {tool: ui/ui_audit.py URL --acceptance --json, field: 'findings[id=J5].verdict', pass: {all: OK}}
 - id: E1
   for: [site]
   question: 'Анимируются только свойства спецификации движения, не шире уровня {lvl}: {properties_allowed};
@@ -423,7 +431,7 @@ criteria:
   where: после сборки
   stage: —
   source: mockup_checks.py resize
-  check: {tool: claude-design/mockup_checks.py resize URL, field: verdict — pass}
+  check: {tool: claude-design/mockup_checks.py resize URL, field: verdict, pass: {all: pass}}
 - id: I1
   for: [site]
   question: Ровно один H1 — слот seo.h1 плана ({h1s})
@@ -692,7 +700,10 @@ criteria:
   where: после сборки
   stage: —
   source: acceptance-widths.yaml#themes; ux 06/01 §7.3
-  check: {tool: ui/ui_audit.py URL --acceptance --scheme both, field: 'findings[verdict=FAIL].severity — нет «блокер»'}
+  check:
+    tool: ui/ui_audit.py URL --acceptance --scheme both --json
+    field: 'findings[verdict=FAIL].severity'
+    pass: {none: блокер}
 - id: V2
   question: 'Сокращённое движение: конечные состояния, невидимого текста 0 (ui_audit.py --reduced-motion)'
   severity: S

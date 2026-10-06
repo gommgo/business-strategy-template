@@ -874,7 +874,7 @@ def form_errors(data):
                 isinstance(a, dict) and set(a) == {"id", "severity", "check"} and a["severity"] in ("B", "S", "D")
                 and mod("canvas_input").check_form(a["check"]) is None for a in ab)):
             out.append((f"/units/{i}/after_build", f"after_build единицы {u.get('id', i)} — пункты {{id, severity, "
-                        "check}: тяжесть B · S · D, способ — {gates}, {tool, field}, code или manual", "error"))
+                        "check}: тяжесть B · S · D, способ — {gates}, {tool, field, pass}, code или manual", "error"))
     fd = data.get("frontend_design")
     if "frontend_design" in data:
         if not isinstance(fd, dict):

@@ -2395,22 +2395,42 @@ def criteria(ctx, flags, values, states=()):
 
 
 CHECK_WORDS = ("code", "manual")                      # способ проверки пункта «после сборки» словом
+TOOL_PATH = re.compile(r"^[a-z_]+(?:\[[a-z_]+=[^\]]+\]\.[a-z_]+)?$")   # путь поля JSON у способа tool
+TOOL_PASS = ("all", "none")                           # сравнения условия pass у способа tool
+
+
+def tool_form(ch):
+    """Способ tool пункта «после сборки» ({tool, field, pass}, правило — шапка ACC_FILE): None — по форме, иначе — что
+    не так. Команда — утилита скилла (путь от scripts/) с адресом страницы URL, field — путь «имя» или
+    «имя[ключ=значение].поле», pass — одно сравнение all или none со значением."""
+    cmd = ch["tool"].split() if isinstance(ch.get("tool"), str) else []
+    if not cmd or not kbpaths.scripts().joinpath(cmd[0]).is_file():
+        return f"команда tool {ch.get('tool')!r} — не утилита скилла (путь от scripts/)"
+    if "URL" not in cmd:
+        return f"в команде tool {ch['tool']!r} нет адреса страницы URL"
+    if not (isinstance(ch.get("field"), str) and TOOL_PATH.match(ch["field"])):
+        return f"путь field {ch.get('field')!r} — имя или имя[ключ=значение].поле"
+    cond = ch.get("pass")
+    if not (isinstance(cond, dict) and len(cond) == 1 and set(cond) <= set(TOOL_PASS)
+            and isinstance(next(iter(cond.values())), (str, int, float, bool))):
+        return f"условие pass {cond!r} — {{all: значение}} или {{none: значение}}"
+    return None
 
 
 def check_form(ch, gate_ids=None):
     """Способ проверки пункта «после сборки»: None — по форме, иначе — что не так. Форма — {gates: [id ворот]},
-    {tool: команда, field: поле JSON и условие} или слово code · manual; с gate_ids (id строк page-gates.yaml) id
-    ворот сверяются со списком."""
+    {tool: команда, field: путь, pass: условие} (`tool_form`) или слово code · manual; с gate_ids (id строк
+    page-gates.yaml) id ворот сверяются со списком."""
     if ch in CHECK_WORDS:
         return None
-    if isinstance(ch, dict) and set(ch) == {"tool", "field"} and all(isinstance(v, str) and v.strip()
-                                                                   for v in ch.values()):
-        return None
+    if isinstance(ch, dict) and set(ch) == {"tool", "field", "pass"}:
+        return tool_form(ch)
     gates = ch.get("gates") if isinstance(ch, dict) and set(ch) == {"gates"} else None
     if isinstance(gates, list) and gates and all(isinstance(g, str) for g in gates):
         miss = [g for g in gates if gate_ids is not None and g not in gate_ids]
         return f"ворот {', '.join(miss)} нет в page-gates.yaml" if miss else None
-    return "способ проверки check не по форме — {gates: [id ворот]}, {tool: команда, field: поле}, code или manual"
+    return ("способ проверки check не по форме — {gates: [id ворот]}, {tool: команда, field: путь, pass: условие}, "
+            "code или manual")
 
 
 SEV_RANK = {"D": 1, "S": 2, "B": 3}
@@ -3737,13 +3757,23 @@ def selftest():
         by = {x["id"]: x for x in items["site"]}
         check("пункты места «после сборки» — все пункты списка базы рода, у сайта и кабинета, {id, severity, check}; "
               "id ворот — строки page-gates.yaml; J4b и L3 — строка вердикта SG-LEGAL-01, тяжесть по основной "
-              "юрисдикции страницы: eu — B, иначе S; F2 сайта — B",
+              "юрисдикции страницы: eu — B, иначе S; F2 сайта — B; у пунктов tool — команда с URL, путь и условие",
               all([x["id"] for x in items[k]] == after[k] and after[k] for k in after)
               and by["J4b"] == {"id": "J4b", "severity": "S", "check": {"gates": ["SG-LEGAL-01"]}}
               and by["L3"]["severity"] == "S" and eu["J4b"] == eu["L3"] == "B" and by["F2"]["severity"] == "B"
-              and main_jurisdiction({"jurisdiction": ["eu", "ru"]}) == "eu" and main_jurisdiction({}) is None)
+              and main_jurisdiction({"jurisdiction": ["eu", "ru"]}) == "eu" and main_jurisdiction({}) is None
+              and by["D5"]["check"] == {"tool": "ui/ui_audit.py URL --acceptance --json",
+                                        "field": "findings[id=J5].verdict", "pass": {"all": "OK"}}
+              and by["H5"]["check"]["pass"] == {"all": "pass"} and by["V1"]["check"]["pass"] == {"none": "блокер"})
+        tool = {"tool": "ui/ui_audit.py URL --json", "field": "verdict", "pass": {"all": "pass"}}
         bad = [({"check": "скрипт"}, "не по форме"), ({"check": {"gates": ["SG-NOPE-01"]}}, "SG-NOPE-01"),
-               ({"check": {"tool": "ui/ui_audit.py URL"}}, "не по форме"), ({}, "не по форме"),
+               ({"check": {"tool": "ui/ui_audit.py URL", "field": "verdict"}}, "не по форме"), ({}, "не по форме"),
+               ({"check": dict(tool, tool="ui/nope.py URL")}, "не утилита скилла"),
+               ({"check": dict(tool, tool="ui/ui_audit.py --json")}, "URL"),
+               ({"check": dict(tool, field="verdict — pass")}, "путь field"),
+               ({"check": dict(tool, field="findings[id=J5]")}, "путь field"),
+               ({"check": dict(tool, **{"pass": {"eq": "pass"}})}, "условие pass"),
+               ({"check": dict(tool, **{"pass": {"all": "OK", "none": "FAIL"}})}, "условие pass"),
                ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": "S"}, "не наибольшая"),
                ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": {"eu": "S", "else": "D"}}, "не наибольшая"),
                ({"check": "code", "severity": {"cookie": "B", "else": "S"}}, "cookie"),
@@ -3757,10 +3787,11 @@ def selftest():
             except F.ToolError as e:
                 caught.append("X9" in str(e) and word in str(e))
         sev = gate_severities()
-        check("check не по форме (слово вне code и manual, tool без field, нет поля), id ворот вне page-gates.yaml, "
-              "тяжесть пункта gates ниже наибольшего ключа threshold его ворот, условие тяжести, которого сборщик "
-              "манифеста не знает, и each — ошибка базы с id пункта; у пунктов списка тяжесть gates равна ключу ворот "
-              "(F2, I3, J4b — B, I6 — S)", caught == [True] * len(bad)
+        check("check не по форме (слово вне code и manual, tool без pass, нет поля; у tool — утилиты нет, в команде нет "
+              "URL, путь не «имя» или «имя[ключ=значение].поле», сравнение не all или none), id ворот вне "
+              "page-gates.yaml, тяжесть пункта gates ниже наибольшего ключа threshold его ворот, условие тяжести, "
+              "которого сборщик манифеста не знает, и each — ошибка базы с id пункта; у пунктов списка тяжесть gates "
+              "равна ключу ворот (F2, I3, J4b — B, I6 — S)", caught == [True] * len(bad) and tool_form(tool) is None
               and sev["SG-LEGAL-01"] == sev["SG-GEO-01"] == "B" and sev["SG-SEO-05"] == "S"
               and sev["SG-WEIGHT-01"] == "S")
         a3 = next((r for r in arows if r.get("id") == "A3"), {})

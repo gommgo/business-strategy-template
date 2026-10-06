@@ -45,6 +45,8 @@
     --wait N                  ожидание после загрузки, мс (по умолчанию 400 для файлов, 2000 для URL)
     --fail-on blocker|serious|any   код возврата 1, если есть нарушения такого уровня
     --quiet                   не печатать таблицу в stdout
+    --json                    JSON отчёта в stdout вместо таблицы, одна цель (без --batch); его читает код-репо: пункты
+                              D5 и V1 критериев приёмки после сборки, `kb/common/acceptance-criteria.yaml`
 
 Проверки — 14 групп: A отступы, B размеры, C форма, D глубина, E слои, F цели, G фокус, H типографика, I цвет,
 J раскладка, K движение, L приметы вида, M сокращённое движение, S состояния. Визуально скрытое (clip, 1×1, вне предка с
@@ -61,7 +63,9 @@ J раскладка, K движение, L приметы вида, M сокр�
 
 Что на выходе:
     <out>/<name>.md    таблица «правило | найдено | порог | вердикт | серьёзность» + примеры узлов + приметы
-    <out>/<name>.json  те же данные машиночитаемо (для цикла «прогнал -> вернул модели -> правки»)
+    <out>/<name>.json  те же данные машиночитаемо (для цикла «прогнал -> вернул модели -> правки»): tool, skill_version
+                       (файл VERSION скилла), target, preset, tokens, runs, findings[] {id, verdict, severity, run, …},
+                       tells; с --json — тот же JSON в stdout
 
 Ограничения (важно для чтения результата):
   * computed styles — это применение токенов на конкретном экране, а не сами токены;
@@ -1936,16 +1940,22 @@ def audit(target, opts):
 
     findings = merge_reports(reports)
     md = render_md(target, preset, findings, runs, tokens_note)
+    data = report_data(target, preset["name"], tokens_note, runs, findings)
     os.makedirs(opts.out, exist_ok=True)
     md_path = os.path.join(opts.out, opts.name + ".md")
     js_path = os.path.join(opts.out, opts.name + ".json")
     with open(md_path, "w", encoding="utf-8") as f:
         f.write(md)
     with open(js_path, "w", encoding="utf-8") as f:
-        json.dump({"target": target, "preset": preset["name"], "tokens": tokens_note, "runs": runs,
-                   "findings": findings, "tells": tells_summary(findings)},
-                  f, ensure_ascii=False, indent=1)
-    return md, md_path, js_path, findings
+        json.dump(data, f, ensure_ascii=False, indent=1)
+    return md, md_path, js_path, findings, data
+
+
+def report_data(target, preset_name, tokens_note, runs, findings):
+    """JSON отчёта (файл <out>/<name>.json и stdout с --json): какая утилита ответила и версия контракта скилла
+    (`tool`, `skill_version`), цель, пресет, шкалы, прогоны, находки и приметы."""
+    return {"tool": "ui_audit.py", "skill_version": kbpaths.skill_version(), "target": target, "preset": preset_name,
+            "tokens": tokens_note, "runs": runs, "findings": findings, "tells": tells_summary(findings)}
 
 
 # =====================================================================================
@@ -2222,6 +2232,11 @@ def selftest():
     sp = slop_params(ref, "admin")
     check("параметры скрипта ui 11/04 §3", (sp["fontSizesTellAbove"], sp["spaceInScaleMin"], sp["targetMin"],
                                              6.0 in sp["spaceScale"], "#155dfc" in sp["colors"]), (9, 0.95, 24, True, True))
+    rep = report_data("https://example.test/", "marketing", "шкалы пресета", [{"run": 1}],
+                      [{"id": "J5", "verdict": "OK", "severity": "блокер", "run": 1}])
+    check("JSON отчёта (файл и stdout с --json): tool, skill_version — версия скилла, находки",
+          (rep["tool"], rep["skill_version"], [f["id"] for f in rep["findings"]], "tells" in rep),
+          ("ui_audit.py", kbpaths.skill_version(), ["J5"], True))
     print("\nпресеты:", ", ".join(PRESETS), "; профиль данными:", ", ".join(PROFILES))
     print("групп проверок:", len(GROUP_ORDER))
     return 0 if ok else 1
@@ -2254,6 +2269,7 @@ def main():
     p.add_argument("--acceptance", action="store_true")
     p.add_argument("--fail-on", default=None, choices=["blocker", "serious", "any"])
     p.add_argument("--quiet", action="store_true")
+    p.add_argument("--json", action="store_true")
     p.add_argument("--selftest", action="store_true")
     p.add_argument("--slop-params", action="store_true")
     p.add_argument("-h", "--help", action="store_true")
@@ -2264,6 +2280,9 @@ def main():
         return 0
     if a.selftest:
         return selftest()
+    if a.json and a.batch:
+        print("--json — JSON одной цели в stdout, без --batch", file=sys.stderr)
+        return 2
     given = a.preset
     a.preset = given or default_preset(None if a.batch else a.target, a.surface)
     if a.slop_params:
@@ -2292,8 +2311,10 @@ def main():
             a.preset = default_preset(t, a.surface)
         a.name = a.name if (a.name and len(targets) == 1) else \
             re.sub(r"[^A-Za-z0-9._-]+", "_", os.path.basename(t) or t)[:60]
-        md, md_path, js_path, findings = audit(t, a)
-        if not a.quiet:
+        md, md_path, js_path, findings, data = audit(t, a)
+        if a.json:
+            print(json.dumps(data, ensure_ascii=False, indent=1))
+        elif not a.quiet:
             print(md)
         print(f"\n→ {md_path}\n→ {js_path}", file=sys.stderr)
         fails = [f for f in findings if f["verdict"] == "FAIL"]

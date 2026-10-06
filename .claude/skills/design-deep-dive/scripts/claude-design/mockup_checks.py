@@ -15,11 +15,13 @@
        [--shots DIR] [--json OUT.json] [--md OUT.md] [--min-free-gb 2]
        exit 0 — нет critical и кластера примет, 2 — есть, 1 — ошибка, 3 — мало свободной памяти (браузер не
        запускался)
-  resize <url|file> [--desktop 1440x900] [--mobile 390x844] [--wait-ms 1000] [--shots DIR]
+  resize <url|file> [--desktop 1440x900] [--mobile 390x844] [--wait-ms 1000] [--shots DIR] [--min-free-gb 2]
        ресайз без перезагрузки на собранной странице: широкий → узкий → широкий (пункт H5 приёмки, место «после
        сборки»): вылет, навигация, медиа первого экрана за --wait-ms, кадр после возврата совпадает с исходным
        (--max-diff — порог cd 06/04 §3 B); окна по умолчанию — самая широкая ширина приёмки и самая широкая ниже
-       первого брейкпоинта эталона ui; exit 0 pass / 2 fail
+       первого брейкпоинта эталона ui. JSON в stdout (его читает код-репо): tool, skill_version (файл VERSION
+       скилла), command, target, verdict pass · fail · error, problems, steps; error — проверка не шла (мало
+       свободной памяти), причина — поле error. exit 0 pass / 1 fail / 3 — мало свободной памяти
   selftest [--browser] [--min-free-gb 2]
        офлайн-проверки: цвет, контраст, числа с единицей и объектом, факты и копия таблицами и YAML, демо-набор,
        список ассетов и реестр загрузок, части артборда, формы, пороги владельцев, id примет, поверхность примет,
@@ -2406,7 +2408,8 @@ RESIZE_JS = r"""
 def cmd_resize(a):
     fg = free_gb()
     if fg is not None and fg < a.min_free_gb:
-        print(json.dumps({'error': f'свободно {fg:.1f} ГБ < {a.min_free_gb} ГБ'}, ensure_ascii=False))
+        print(json.dumps(resize_report(a.target, verdict='error', error=f'свободно {fg:.1f} ГБ < {a.min_free_gb} ГБ — '
+                                       'браузер не запускаю'), ensure_ascii=False, indent=1))
         return 3
     from playwright.sync_api import sync_playwright
     from PIL import Image, ImageChops, ImageStat
@@ -2474,10 +2477,17 @@ def cmd_resize(a):
         diff = round(sum(ImageStat.Stat(ImageChops.difference(shots[0], shots[-1])).mean) / 3 / 255, 4)
         if diff > a.max_diff:
             problems.append(f'после возврата на {a.desktop} кадр отличается от исходного (средняя разница {diff} > {a.max_diff})')
-    res = {'target': a.target, 'wait_ms': a.wait_ms, 'steps': steps, 'desktop_restore_diff': diff, 'problems': problems,
-           'verdict': 'fail' if problems else 'pass'}
+    res = resize_report(a.target, wait_ms=a.wait_ms, steps=steps, desktop_restore_diff=diff, problems=problems,
+                        verdict='fail' if problems else 'pass')
     print(json.dumps(res, ensure_ascii=False, indent=1))
     return 1 if problems else 0
+
+
+def resize_report(target, **fields):
+    """JSON подкоманды resize: какая утилита ответила и версия контракта скилла (tool, skill_version, command), цель и
+    поля прогона; verdict — pass · fail, error — проверка не шла (причина — поле error)."""
+    return {'tool': 'mockup_checks.py', 'skill_version': kbpaths.skill_version(), 'command': 'resize', 'target': target,
+            **fields}
 
 
 # ---------------------------------------------------------------- самопроверка
@@ -2548,6 +2558,21 @@ def cmd_selftest(_a):
     check('ширины приёмки из файла: артборды — все ширины приёмки, вылет 320',
           (aw['artboards'], aw['overflow_only']) == (aw['widths'], 320) and len(aw['widths']) == 6, aw)
     check('ресайз по умолчанию: 1440x900 → 390x844', resize_windows() == ('1440x900', '390x844'), resize_windows())
+    import contextlib
+    import io
+    real_free, buf = free_gb, io.StringIO()
+    globals()['free_gb'] = lambda: 0.0
+    try:
+        with contextlib.redirect_stdout(buf):
+            rc = cmd_resize(argparse.Namespace(target='https://example.test/', min_free_gb=2.0))
+    finally:
+        globals()['free_gb'] = real_free
+    rr, ok_rep = json.loads(buf.getvalue()), resize_report('https://example.test/', verdict='pass', problems=[])
+    check('resize, JSON для кода: tool, skill_version — версия скилла, command; мало памяти — код 3, verdict error с '
+          'причиной в error',
+          rc == 3 and rr['tool'] == ok_rep['tool'] == 'mockup_checks.py' and rr['command'] == 'resize'
+          and rr['skill_version'] == ok_rep['skill_version'] == kbpaths.skill_version() and rr['verdict'] == 'error'
+          and 'ГБ' in rr['error'] and ok_rep['verdict'] == 'pass' and 'error' not in ok_rep, rr)
     check('первый брейкпоинт без токенов ДС — эталон ui 640', first_breakpoint() == 640.0, first_breakpoint())
     check('шапка страницы: телефон 64, десктоп 80', (header_limit('page', 'A', 390, 640), header_limit('page', 'A', 1440, 640)) == (64, 80))
     check('шапка приложения по пресету: A 48, B 64', (header_limit('app', 'A', 1440, 640), header_limit('app', 'B', 390, 640)) == (48, 64))

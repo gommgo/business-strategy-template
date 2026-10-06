@@ -218,7 +218,8 @@ FSD-карта, слой страницы сайта и лендинга, диа
 `ia_probe.py` у многостраничника и `run_axe_targets.py` — ключами `--geo`, `--ia`,
 `--axe`). Код-репо читает поля JSON, а не коды выхода: у вердикта — `tool`,
 `skill_version`, `verdict`, `B`, `S`, `after_build`; у `copydeck.py` и `claims_check.py` —
-`tool`, `skill_version`, `summary.error`. Кроме ворот —
+`tool`, `skill_version`, `summary.error`; у утилит пунктов `tool` (JSON в stdout) —
+`tool`, `skill_version` и путь пункта. Кроме ворот —
 `claims_check.py` и `lang_check.py` на собранном HTML, визуальный аудит
 `marketing_audit.py` или `ui_audit.py`, у 3D — `gltf_load_bench.py`, `web_view.py`;
 здесь же пункты среды, которых на макете не проверить (артборд — страница
@@ -227,9 +228,10 @@ FSD-карта, слой страницы сайта и лендинга, диа
 `mockup_checks.py resize URL`).
 У пункта `after_build` манифеста `ready.yaml` — тяжесть и способ проверки `check`:
 строки вердикта `page_gates.py` с id ворот (`gates`: их исход вердикт с `--ready`
-пишет сам — поле `after_build`), утилита скилла и поле её JSON (`tool`), тест самого
-код-репо (`code`) или человек с записью итога (`manual`). Исход пункта и его тяжесть —
-правило критериев приёмки скилла (`kb/common/acceptance-criteria.yaml`, поле `check`);
+пишет сам — поле `after_build`), утилита скилла с путём в её JSON и условием (`tool`),
+тест самого код-репо (`code`) или человек с записью итога (`manual`). Форма способа, исход
+пункта и его тяжесть — правило критериев приёмки скилла
+(`kb/common/acceptance-criteria.yaml`, поле `check`);
 блокирует только B — вердикта и непройденного пункта со способом `code`, `tool`,
 `manual` (гейт 5 скилла — `references/phases.md`, «Принципы всех этапов»); поля
 отчётов звеньев — `scripts/README.md` скилла, раздел «Ворота после сборки».
