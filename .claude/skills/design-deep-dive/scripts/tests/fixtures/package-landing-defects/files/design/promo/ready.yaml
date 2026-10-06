@@ -31,7 +31,25 @@ units:
     mockup: none
     budget_profile: landing-lead-services@L1
     gate_exceptions: []
-    after_build: []
+    after_build:
+      - {id: D5, severity: S, check: {tool: ui/ui_audit.py URL --acceptance, field: 'findings[id=J5].verdict — OK на каждом прогоне'}}
+      - {id: F2, severity: B, check: {gates: [SG-PERF-01, SG-PERF-02, SG-WEIGHT-01]}}
+      - {id: H5, severity: S, check: {tool: claude-design/mockup_checks.py resize URL, field: verdict — pass}}
+      - {id: I2, severity: S, check: code}
+      - {id: I3, severity: B, check: {gates: [SG-GEO-01]}}
+      - {id: I4, severity: S, check: code}
+      - {id: I5, severity: B, check: code}
+      - {id: I6, severity: S, check: {gates: [SG-SEO-05]}}
+      - {id: J4b, severity: S, check: {gates: [SG-LEGAL-01]}}
+      - {id: K1, severity: B, check: code}
+      - {id: K5, severity: S, check: code}
+      - {id: K6, severity: S, check: code}
+      - {id: L1, severity: S, check: code}
+      - {id: L2, severity: B, check: code}
+      - {id: L3, severity: S, check: {gates: [SG-LEGAL-01]}}
+      - {id: L4, severity: S, check: code}
+      - {id: V1, severity: S, check: {tool: ui/ui_audit.py URL --acceptance --scheme both, field: 'findings[verdict=FAIL].severity — нет «блокер»'}}
+      - {id: V3, severity: S, check: code}
     open: ['демо-факт: case-two-room-47-days', 'демо-факт: company-since-2014', 'демо-факт: estimate-free', 'демо-факт: foreman-lapin', 'демо-факт: guarantee-3-years', 'демо-факт: price-from-per-m2', 'демо-факт: promo-october-10', 'демо-факт: rating-yandex-maps', 'демо-факт: review-anna-k', 'решение заказчика: design/brand.yaml none', 'решение заказчика: design/promo/art-direction.json proposed', 'решение заказчика: design/promo/motion/home.motion-spec.yaml proposed', 'решение заказчика: voice.yaml draft', 'решение заказчика: строка promo в surface.md draft']
   - id: spasibo
     ready: false
@@ -41,7 +59,25 @@ units:
     mockup: none
     budget_profile: thank-you-page@L0
     gate_exceptions: []
-    after_build: []
+    after_build:
+      - {id: D5, severity: S, check: {tool: ui/ui_audit.py URL --acceptance, field: 'findings[id=J5].verdict — OK на каждом прогоне'}}
+      - {id: F2, severity: B, check: {gates: [SG-PERF-01, SG-PERF-02, SG-WEIGHT-01]}}
+      - {id: H5, severity: S, check: {tool: claude-design/mockup_checks.py resize URL, field: verdict — pass}}
+      - {id: I2, severity: S, check: code}
+      - {id: I3, severity: B, check: {gates: [SG-GEO-01]}}
+      - {id: I4, severity: S, check: code}
+      - {id: I5, severity: B, check: code}
+      - {id: I6, severity: S, check: {gates: [SG-SEO-05]}}
+      - {id: J4b, severity: S, check: {gates: [SG-LEGAL-01]}}
+      - {id: K1, severity: B, check: code}
+      - {id: K5, severity: S, check: code}
+      - {id: K6, severity: S, check: code}
+      - {id: L1, severity: S, check: code}
+      - {id: L2, severity: B, check: code}
+      - {id: L3, severity: S, check: {gates: [SG-LEGAL-01]}}
+      - {id: L4, severity: S, check: code}
+      - {id: V1, severity: S, check: {tool: ui/ui_audit.py URL --acceptance --scheme both, field: 'findings[verdict=FAIL].severity — нет «блокер»'}}
+      - {id: V3, severity: S, check: code}
     open: ['решение заказчика: design/brand.yaml none', 'решение заказчика: design/promo/art-direction.json proposed', 'решение заказчика: voice.yaml draft', 'решение заказчика: строка promo в surface.md draft']
 
 perf: plans

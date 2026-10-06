@@ -48,10 +48,10 @@
                                       заметки пропусков поверхности (<state>/design/<surface>/_phase-jump.md)
     budget_profile, gate_exceptions   сайт — page.budget_profile и id x-gate-exception плана своей страницы (исключение
                                       ворот соседней страницы в единицу не идёт); кабинет — «—» и []
-    after_build                       пункты input/ACCEPTANCE.md с местом «после сборки» (ST-<экран>-… — только у
-                                      своего экрана): {id, severity, check} — тяжесть из критериев входа, способ
-                                      проверки — поле check пункта kb/common/acceptance-criteria.yaml (gates, tool,
-                                      code, manual); пункта вне списка базы в манифесте нет
+    after_build                       пункты места «после сборки» kb/common/acceptance-criteria.yaml рода поверхности:
+                                      {id, severity, check} — тяжесть по условиям пункта (у сайта eu — основная
+                                      юрисдикция своей страницы), способ проверки — поле check (gates, tool, code,
+                                      manual); вход холста манифест не читает
     open                              заглушки [PLACEHOLDER] выбранных текстов (вариант chosen, у слота без chosen —
                                       единственный), демо-факты (example: true), которые страница называет, и
                                       демо-кадры — «демо-кадр: <слот>» на слот плана ассетов страницы с расширением
@@ -320,23 +320,14 @@ class Build:
                 return True
         return False
 
-    def after_build(self):
-        """Пункты input/ACCEPTANCE.md места «после сборки»: [{id, severity, check}]. Тяжесть — из критериев входа
-        (условия поверхности разрешил canvas_input), способ проверки — поле check пункта списка базы; пункта, которого
-        в списке «после сборки» нет (вход отстал от базы), в манифесте нет."""
-        p = self.dsurf("input") / "ACCEPTANCE.md"
-        if not p.is_file():
-            return []
+    def after_build(self, page=None):
+        """Пункты места «после сборки» критериев приёмки базы (`canvas_input.after_build_items`): [{id, severity,
+        check}] в порядке списка — способ проверки и тяжесть пункта, у сайта условие eu — основная юрисдикция своей
+        страницы (page — раздел page плана); вход холста манифест не читает."""
         CI = mod("canvas_input")
-        rows, _heads = CI.parse_acceptance(p.read_text(encoding="utf-8"))
-        checks = CI.after_build_checks("site" if self.surf.page else "app")
-        seen, out = set(), []
-        for r in rows:
-            i = r.get("id")
-            if r.get("где") == "после сборки" and i in checks and i not in seen:
-                seen.add(i)
-                out.append({"id": i, "severity": r.get("серьёзность"), "check": checks[i]})
-        return out
+        if not self.surf.page:
+            return CI.after_build_items("app")
+        return CI.after_build_items("site", {"eu": CI.main_jurisdiction(page) == "eu"})
 
     def mockup(self, unit, rev, units):
         """(вердикт для манифеста, причина блокера или None)."""
@@ -478,7 +469,6 @@ class Build:
     def site(self):
         units, brief = self.site_units()
         rev = self.review()
-        after = self.after_build()
         ds = self.ds_status
         self.surf_open = self.surface_open()
         ids = [u[0] for u in units]
@@ -511,7 +501,7 @@ class Build:
             exc = [str(e.get("id")) for e in get(plan, "page", "x-gate-exception", default=[]) or []
                    if isinstance(e, dict) and e.get("id")]
             out.append((self.unit(pid, not why and not self.surf_open, comp, texts, verdict,
-                                  dash(get(plan, "page", "budget_profile")), exc, [dict(a) for a in after],
+                                  dash(get(plan, "page", "budget_profile")), exc, self.after_build(get(plan, "page")),
                                   self.open_list(opened, decide)), why))
         return out, brief
 
@@ -591,10 +581,8 @@ class Build:
                 decide.append("FSD-карты нет" if fsd == "none" else f"FSD-карта {fsd}")
             decide += [line for line, scope in self.context
                        if scope is None or scope in {("record", r) for r in comp_recs | {shell}}]
-            ab = [a for a in after if not (a["id"].startswith("ST-") and a["id"] != "ST-DYN"
-                                           and not a["id"].startswith(f"ST-{slug}-"))]
-            out.append((self.unit(slug, not why, comp, texts, verdict, "—", [], ab, self.open_list(opened, decide)),
-                        why))
+            out.append((self.unit(slug, not why, comp, texts, verdict, "—", [], [dict(a) for a in after],
+                                  self.open_list(opened, decide)), why))
         return out, lay
 
     def cov_of(self, cov, screen):
@@ -837,10 +825,13 @@ def render(slug, data):
 
 def form_errors(data):
     """Форма ready.yaml (R-STRUCT-008): [(JSON Pointer, сообщение, тяжесть)] — нет ключа или значение вне перечня —
-    error; ключ вне формы — warning; `example` — пометка иллюстрации, не ключ формы."""
+    error; ключ вне формы — warning; `example` — пометка иллюстрации, не ключ формы. Манифест без skill_version —
+    форма другой версии скилла: поштучных замечаний нет, его называет одна находка R-FRESH-006 (`check_surface`)."""
     out = []
     if not isinstance(data, dict):
         return [("", "ready.yaml — не словарь формы", "error")]
+    if "skill_version" not in data:
+        return []
     for k in FORM_KEYS:
         if k not in data:
             out.append((f"/{k}", f"нет ключа {k}", "error"))
@@ -945,20 +936,31 @@ def _diff(old, new):
 
 
 def check_surface(slug, surf, repo=None, today=None):
-    """Находки R-FRESH-006 одной поверхности: манифест на диске против сборки; файла нет — []."""
+    """Находки R-FRESH-006 одной поверхности: манифест на диске против сборки; файла нет — []. Манифест без
+    skill_version — форма другой версии скилла: одна находка с порядком пересборки (вход холста, затем манифест), без
+    сверки по полям."""
     r = docpaths.root(repo)
     p = docpaths.design(slug, "ready", surface=surf.slug, repo=r)
     if not p.is_file():
         return []
     rep = F.Report()
-    kw = dict(surface=surf.slug, kind=KIND, ref=surf.slug, path=docpaths.rel(p, r),
-              fix=f"ready build {slug} {surf.slug} — на этапе package, после аудита: design_audit check на переходе, "
-                  "скилл /design-audit — перед коммитом")
+    tail = (f"ready build {slug} {surf.slug} — на этапе package, после аудита: design_audit check на переходе, скилл "
+            "/design-audit — перед коммитом")
+    kw = dict(surface=surf.slug, kind=KIND, ref=surf.slug, path=docpaths.rel(p, r))
     try:
         old = yaml_mod().safe_load(p.read_text(encoding="utf-8"))
     except Exception as e:                                  # noqa: BLE001
-        rep.add(RULE, "error", message=f"ready.yaml не разбирается: {str(e).splitlines()[0][:120]}", **kw)
+        rep.add(RULE, "error", message=f"ready.yaml не разбирается: {str(e).splitlines()[0][:120]}", fix=tail, **kw)
         return rep.items
+    if isinstance(old, dict) and "skill_version" not in old:
+        inp = docpaths.design(slug, "input", surface=surf.slug, repo=r) / "INPUT.md"
+        stage = (mod("canvas_input").read_manifest(inp)[0] or {}).get("stage") if inp.is_file() else None
+        fix = (f"пересобрать вход холста и манифест: canvas_input build {slug} {surf.slug} --stage {stage}, затем "
+               if stage else "пересобрать манифест: ") + tail
+        rep.add(RULE, "error", message="манифест готовности не по форме этой версии скилла: нет skill_version — форма "
+                "единиц и пунктов after_build другой версии", fix=fix, **kw)
+        return rep.items
+    kw["fix"] = tail
     new = build(slug, surf, r, today)
     diff = _diff(old if isinstance(old, dict) else {}, new)
     if diff:
@@ -1148,15 +1150,36 @@ def _selftest():
               items and "на этапе package" in items[0].fix and "design_audit check на переходе" in items[0].fix
               and "/design-audit — перед коммитом" in items[0].fix and "без error" not in items[0].fix)
         plan.write_text(ptext, encoding="utf-8")
-        bad = dict(data, status="done", units=[dict(data["units"][0], mockup="ok", extra=1, publishable="да")])
+        bad = dict(data, status="done", skill_version="", units=[dict(data["units"][0], mockup="ok", extra=1,
+                                                                      publishable="да")])
         bad.pop("blockers")
-        bad.pop("skill_version")
         errs = form_errors(bad)
-        check("форма: нет ключа (blockers, skill_version) и значение вне перечня (status, mockup, publishable не bool) — "
-              "error, ключ вне формы — warning",
+        check("форма: нет ключа (blockers), пустая skill_version и значение вне перечня (status, mockup, publishable не "
+              "bool) — error, ключ вне формы — warning",
               all(any(p == x and s == "error" for p, _m, s in errs)
                   for x in ("/blockers", "/skill_version", "/status", "/units/0/mockup", "/units/0/publishable"))
               and any(p == "/units/0/extra" and s == "warning" for p, _m, s in errs))
+        older = {k: v for k, v in bad.items() if k != "skill_version"}
+        path.write_text(text.replace(f"skill_version: {data['skill_version']}\n", ""), encoding="utf-8")
+        items = check_surface(slug, surf, root, today)
+        check("манифест без skill_version — форма другой версии скилла: одна находка R-FRESH-006 с советом пересборки "
+              "(входа нет — ready build), поштучных замечаний формы нет",
+              not form_errors(older) and len(items) == 1 and items[0].rule == RULE and "skill_version" in
+              items[0].message and items[0].fix.startswith(f"пересобрать манифест: ready build {slug} promo"))
+        path.write_text(text, encoding="utf-8")
+        ab = {u["id"]: {a["id"]: a["severity"] for a in u["after_build"]} for u in data["units"]}
+        sp_plan = docpaths.site(slug, "promo", "plans", "spasibo.yaml", repo=root)
+        sp_text = sp_plan.read_text(encoding="utf-8")
+        sp_plan.write_text(sp_text.replace("  jurisdiction:\n  - ru\n", "  jurisdiction:\n  - eu\n  - ru\n"),
+                           encoding="utf-8")
+        eu = {u["id"]: {a["id"]: a["severity"] for a in u["after_build"]} for u in build(slug, surf, root, today)["units"]}
+        sp_plan.write_text(sp_text, encoding="utf-8")
+        check("after_build без входа холста — пункты критериев приёмки «после сборки» у каждой единицы (F2 B, K1 B, I6 "
+              "S); J4b и L3 — по основной юрисдикции своей страницы: ru — S, у spasibo с [eu, ru] — B, у home — S",
+              ab["home"] == ab["spasibo"] and {"F2", "K1", "J4b", "L3", "D5"} <= set(ab["home"])
+              and ab["home"]["F2"] == ab["home"]["K1"] == "B" and ab["home"]["I6"] == "S"
+              and ab["home"]["J4b"] == ab["home"]["L3"] == "S" and eu["spasibo"]["J4b"] == eu["spasibo"]["L3"] == "B"
+              and eu["home"]["J4b"] == "S")
         # лабораторная страница приёма — источник-папка манифеста
         lab_row = "design/promo/motion/lab/mask-reveal/"
         adp = docpaths.design(slug, "art-direction", surface="promo", repo=root)
@@ -1352,14 +1375,14 @@ def _selftest():
             encoding="utf-8"))
         ab = data["units"][0]["after_build"]
         by_id = {a["id"]: a for a in ab}
-        check("лендинг input-landing со входом wireframe: after_build — пункты ACCEPTANCE.md места «после сборки» "
+        check("лендинг input-landing со входом wireframe: after_build — пункты списка базы места «после сборки» "
               "(I2, K1, L2 …), единица home, профиль landing-lead-services@L1",
               ci.returncode == 0 and r.returncode == 0 and {"I2", "K1", "L2"} <= set(by_id) and "A1" not in by_id
               and data["units"][0]["id"] == "home" and data["units"][0]["budget_profile"] == "landing-lead-services@L1")
         gate_ids = {g["id"] for g in yaml_mod().safe_load(kbpaths.kb(
             "site", "07-seo-geo-performance-analytics", "page-gates.yaml").read_text(encoding="utf-8"))["gates"]}
-        check("пункт after_build — {id, severity, check}: тяжесть из ACCEPTANCE.md (J4b и L3 при юрисдикции ru — S, "
-              "как SG-LEGAL-01), способ — из списка базы; id ворот пунктов gates — строки page-gates.yaml; форма "
+        check("пункт after_build — {id, severity, check} списка базы: тяжесть по юрисдикции страницы (J4b и L3 при ru — "
+              "S, как SG-LEGAL-01), способ — поле check; id ворот пунктов gates — строки page-gates.yaml; форма "
               "манифеста без замечаний",
               all(set(a) == {"id", "severity", "check"} for a in ab)
               and by_id["J4b"] == {"id": "J4b", "severity": "S", "check": {"gates": ["SG-LEGAL-01"]}}
@@ -1375,6 +1398,15 @@ def _selftest():
         check("after_build строками id — форма не та (error), расхождение со сборкой называет пункты",
               any(p == "/units/0/after_build" and s == "error" for p, _m, s in errs)
               and any(d.startswith("home.after_build: не равны сборке пункты ") and "J4b" in d for d in diff))
+        mp = docpaths.design(slug, "ready", surface="promo", repo=root)
+        mtext = mp.read_text(encoding="utf-8")
+        mp.write_text(mtext.replace(f"skill_version: {data['skill_version']}\n", ""), encoding="utf-8")
+        items = check_surface(slug, surf, root, today)
+        mp.write_text(mtext, encoding="utf-8")
+        check("манифест без skill_version при входе холста — совет называет порядок: вход холста (canvas_input build с "
+              "этапом входа), затем ready build",
+              len(items) == 1 and f"canvas_input build {slug} promo --stage wireframe, затем ready build {slug} promo"
+              in items[0].fix)
     with fixture_project.built("package-cabinet") as fx:
         root, slug = fx.root, fx.slug
         surf = docpaths.surface(slug, "office", root)

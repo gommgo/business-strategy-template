@@ -35,7 +35,7 @@ git); без `--stage` — этап действующего входа; `--out 
   ACCEPTANCE.md   критерии приёмки по роду и уровню (`§ 12. Приёмка`), у пункта — где он проверяется: пункты,
                   их серьёзность, способ, место и этап — список базы `kb/common/acceptance-criteria.yaml`, сборщик
                   отбирает пункты рода поверхности, проверяет условия и подставляет значения проекта; способ
-                  проверки пунктов «после сборки» во вход не идёт — его берёт ready.py (after_build_checks)  все этапы
+                  проверки пунктов «после сборки» во вход не идёт — пункты берёт ready.py (after_build_items)  все этапы
   facts.md        «Факты» · «Нет» · «Нельзя утверждать» (выгрузка copydeck.export_facts_md)   wireframe, mockup
   refs.md         3–5 референсов исполнителю по ролям                                                   mockup
   сайт:    pages/<page-id>/page.yaml (wireframe, mockup), copy.md (directions, treatment — тексты слотов первого
@@ -2431,33 +2431,50 @@ def gate_severities(doc=None):
     return out
 
 
-def after_build_checks(kind, doc=None, gates=None):
-    """Способ проверки пунктов места «после сборки» рода kind (site · app) из списка базы `ACC_FILE`: {id: check} в
-    порядке файла. Ошибка базы: пункт без способа или не по форме (`check_form`), id ворот вне page-gates.yaml, у
-    пункта gates наибольшая тяжесть по всем условиям — не наибольший ключ threshold его ворот. doc и gates ({id ворот:
-    наибольшая тяжесть}, `gate_severities`) — данные вместо файлов базы (самопроверка)."""
+def main_jurisdiction(page):
+    """Основная юрисдикция страницы — первый элемент page.jurisdiction плана (условие eu критериев приёмки; по ней же
+    page_gates.py ставит тяжесть SG-LEGAL-01)."""
+    return (str_list((page or {}).get("jurisdiction")) or [None])[0]
+
+
+def after_build_items(kind, flags=None, doc=None, gates=None):
+    """Пункты места «после сборки» рода kind (site · app) из списка базы `ACC_FILE` в порядке файла: [{id, severity,
+    check}] — тяжесть по условиям flags (у сайта eu — основная юрисдикция страницы), способ проверки — поле check.
+    Ошибка базы: пункт без способа или не по форме (`check_form`), id ворот вне page-gates.yaml, у пункта gates
+    наибольшая тяжесть по всем условиям — не наибольший ключ threshold его ворот, условие тяжести вне flags, пункт с
+    each. doc и gates ({id ворот: наибольшая тяжесть}, `gate_severities`) — данные вместо файлов базы (самопроверка)."""
     if doc is None:
         doc, err = load_doc(kbpaths.kb(*KB_DOCS["acceptance-criteria"]))
         if err:
             raise F.ToolError(f"{ACC_FILE}: {err}")
     if gates is None:
         gates = gate_severities()
-    out = {}
+    fl = dict(flags or {}, site=kind == "site", app=kind == "app")
+    out = []
     for c in (doc or {}).get("criteria") or []:
         if not isinstance(c, dict) or c.get("where") != "после сборки" or kind not in (c.get("for") or ("site", "app")):
             continue
         why = check_form(c.get("check"), gates)
+        sev = c.get("severity")
         ids = c["check"].get("gates") if not why and isinstance(c["check"], dict) else None
         if ids:
-            sev = c.get("severity")
             top = max((sev.values() if isinstance(sev, dict) else [sev]), key=lambda s: SEV_RANK.get(s, 0))
             want = max((gates[g] for g in ids if gates.get(g)), key=SEV_RANK.get, default=None)
             if top != want:
                 why = (f"тяжесть {top} — не наибольшая тяжесть его ворот {', '.join(ids)} ({want}): пункт со "
                        "способом gates несёт наибольший ключ threshold своих ворот")
+        if not why and c.get("each"):
+            why = "повторяется по each — манифест готовности несёт пункт один раз"
+        if not why and isinstance(sev, dict):
+            miss = [k for k in sev if k != "else" and k not in fl]
+            sev = next((x for k, x in sev.items() if k != "else" and fl.get(k)), sev.get("else"))
+            if miss:
+                why = f"условие тяжести {', '.join(miss)} — сборщик манифеста его не знает"
+        if not why and sev not in SEV_RANK:
+            why = f"тяжесть {sev!r} — B · S · D"
         if why:
             raise F.ToolError(f"{ACC_FILE}: у пункта {c.get('id')} места «после сборки» {why}")
-        out[c["id"]] = c["check"]
+        out.append({"id": c["id"], "severity": sev, "check": c["check"]})
     return out
 
 
@@ -2502,8 +2519,7 @@ def site_items(ctx, A, pages, brief):
     modes = get(level_row(ctx, lvl), "maps_to", "claude_design", "three_d_mode", default=[]) or []
     flags, values = acc_values(A)
     flags["cookie"] = cookie
-    # основная юрисдикция — первая в page.jurisdiction плана: по ней же page_gates.py ставит тяжесть SG-LEGAL-01
-    flags["eu"] = any((str_list(pg.page.get("jurisdiction")) or [None])[0] == "eu" for pg in pages)
+    flags["eu"] = any(main_jurisdiction(pg.page) == "eu" for pg in pages)
     values.update({
         "mains": "; ".join(mains), "a3": a3, "h1s": "; ".join(h1s), "types": ", ".join(types) or "—",
         "events": listed(events, 12) or "—", "jur": ", ".join(sorted(jur)) or "—",
@@ -3716,26 +3732,35 @@ def selftest():
         doc = ctx.kb("acceptance-criteria")
         after = {k: [c["id"] for c in doc["criteria"] if c.get("where") == "после сборки"
                      and k in (c.get("for") or ("site", "app"))] for k in ("site", "app")}
-        checks = {k: after_build_checks(k) for k in ("site", "app")}
-        check("способ проверки check — у каждого пункта места «после сборки» списка базы, у сайта и кабинета; id "
-              "ворот — строки page-gates.yaml; J4b и L3 — строка вердикта SG-LEGAL-01",
-              all(list(checks[k]) == after[k] and after[k] for k in after)
-              and checks["site"]["J4b"] == checks["site"]["L3"] == {"gates": ["SG-LEGAL-01"]})
+        items = {k: after_build_items(k, {"eu": False}) for k in ("site", "app")}
+        eu = {x["id"]: x["severity"] for x in after_build_items("site", {"eu": True})}
+        by = {x["id"]: x for x in items["site"]}
+        check("пункты места «после сборки» — все пункты списка базы рода, у сайта и кабинета, {id, severity, check}; "
+              "id ворот — строки page-gates.yaml; J4b и L3 — строка вердикта SG-LEGAL-01, тяжесть по основной "
+              "юрисдикции страницы: eu — B, иначе S; F2 сайта — B",
+              all([x["id"] for x in items[k]] == after[k] and after[k] for k in after)
+              and by["J4b"] == {"id": "J4b", "severity": "S", "check": {"gates": ["SG-LEGAL-01"]}}
+              and by["L3"]["severity"] == "S" and eu["J4b"] == eu["L3"] == "B" and by["F2"]["severity"] == "B"
+              and main_jurisdiction({"jurisdiction": ["eu", "ru"]}) == "eu" and main_jurisdiction({}) is None)
         bad = [({"check": "скрипт"}, "не по форме"), ({"check": {"gates": ["SG-NOPE-01"]}}, "SG-NOPE-01"),
                ({"check": {"tool": "ui/ui_audit.py URL"}}, "не по форме"), ({}, "не по форме"),
                ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": "S"}, "не наибольшая"),
-               ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": {"eu": "S", "else": "D"}}, "не наибольшая")]
+               ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": {"eu": "S", "else": "D"}}, "не наибольшая"),
+               ({"check": "code", "severity": {"cookie": "B", "else": "S"}}, "cookie"),
+               ({"check": "code", "each": "state"}, "each")]
         caught = []
         for extra, word in bad:
             try:
-                after_build_checks("site", {"criteria": [dict({"id": "X9", "where": "после сборки", "severity": "B"},
-                                                              **extra)]}, {"SG-LEGAL-01": "B"})
+                after_build_items("site", {"eu": False},
+                                  {"criteria": [dict({"id": "X9", "where": "после сборки", "severity": "B"}, **extra)]},
+                                  {"SG-LEGAL-01": "B"})
             except F.ToolError as e:
                 caught.append("X9" in str(e) and word in str(e))
         sev = gate_severities()
-        check("check не по форме (слово вне code и manual, tool без field, нет поля), id ворот вне page-gates.yaml и "
-              "тяжесть пункта gates ниже наибольшего ключа threshold его ворот — ошибка базы с id пункта; у пунктов "
-              "списка она равна (F2, I3, J4b — B, I6 — S)", caught == [True] * len(bad)
+        check("check не по форме (слово вне code и manual, tool без field, нет поля), id ворот вне page-gates.yaml, "
+              "тяжесть пункта gates ниже наибольшего ключа threshold его ворот, условие тяжести, которого сборщик "
+              "манифеста не знает, и each — ошибка базы с id пункта; у пунктов списка тяжесть gates равна ключу ворот "
+              "(F2, I3, J4b — B, I6 — S)", caught == [True] * len(bad)
               and sev["SG-LEGAL-01"] == sev["SG-GEO-01"] == "B" and sev["SG-SEO-05"] == "S"
               and sev["SG-WEIGHT-01"] == "S")
         a3 = next((r for r in arows if r.get("id") == "A3"), {})

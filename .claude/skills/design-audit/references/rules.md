@@ -200,8 +200,9 @@
 - **Проверка.** `…/design/app-brief.yaml`, `…/design/system.yaml`, `…/design/brand.yaml`, `…/design/ARTIFACTS.md`,
   `…/design/<surface>/review/REVIEW.md` и `…/design/<surface>/ready.yaml` держат ключи, перечни и таблицы своих форм.
   `error` — нет обязательного ключа, значение вне перечня; `warning` — ключ вне формы. Бренд, карта решений и бриф на
-  вид сверяются со схемами уровня продукта, манифест готовности — с формой `ready.yaml`, `ARTIFACTS.md` и `REVIEW.md` —
-  с таблицами форм; всё считает `design_audit`.
+  вид сверяются со схемами уровня продукта, манифест готовности — с формой `ready.yaml` (манифест без `skill_version`
+  — форма другой версии скилла: его называет одна находка R-FRESH-006, поштучных замечаний формы нет), `ARTIFACTS.md`
+  и `REVIEW.md` — с таблицами форм; всё считает `design_audit`.
 - **Норма.** Схемы `kb/common/brand.schema.yaml`, `kb/common/system.schema.yaml`, `kb/common/app-brief.schema.yaml`;
   формы `docs/projects/_template/design/_template/` — `app-brief.yaml`, `system.yaml`, `brand.yaml`, `ARTIFACTS.md`,
   `REVIEW.md`, `ready.yaml`.
@@ -510,12 +511,14 @@
   `skill_version` не сравнивается;
   `mockup` — вердикт `REVIEW.md` с совпавшим отпечатком, `skipped` — только при решении заказчика в заметке пропусков
   поверхности `<state>/design/<surface>/_phase-jump.md` («макет пропущен: сборка по ДС и плану»); `after_build` —
-  пункты места «после сборки» `{id, severity, check}`: тяжесть — из критериев входа, способ проверки — из
-  `kb/common/acceptance-criteria.yaml` скилла `design-deep-dive`; `budget_profile` и `gate_exceptions` — из плана (у
-  кабинета — «—»); `perf` — по роду;
-  `status` манифеста следует из единиц; `blockers` называют, что держит не готовые единицы. `ready check` — вызовом
-  `design_audit`; отпечаток одобрения единицы — её артборды и источники (текущий — `ready show`). Без окружения —
-  чтением: манифест против файлов.
+  пункты места «после сборки» `{id, severity, check}` из `kb/common/acceptance-criteria.yaml` скилла
+  `design-deep-dive`: тяжесть — по условиям своей страницы (`eu` — основная юрисдикция плана), способ проверки — поле
+  `check`; вход холста манифест не читает; `budget_profile` и `gate_exceptions` — из плана (у кабинета — «—»); `perf`
+  — по роду;
+  `status` манифеста следует из единиц; `blockers` называют, что держит не готовые единицы. Манифест без
+  `skill_version` — форма другой версии скилла: одна находка без сверки по полям, совет — пересобрать вход холста
+  (`canvas_input build`), затем манифест (`ready build`). `ready check` — вызовом `design_audit`; отпечаток одобрения
+  единицы — её артборды и источники (текущий — `ready show`). Без окружения — чтением: манифест против файлов.
 - **Норма.** Форма `docs/projects/_template/design/_template/ready.yaml`;
   `docs/projects/_template/design/README.md § Пакет для кода`.
 
