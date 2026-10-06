@@ -1,0 +1,5 @@
+# К10-а — сквозное, папка ai-media (волна 5); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/ai-media/*
+.claude/skills/design-deep-dive/kb/ai-media/13-routing-matrix/stand/tasks.yaml
+.claude/skills/design-deep-dive/kb/ai-media/14-recipes/recipes/*.yaml
+.claude/skills/design-deep-dive/kb/ai-media/05-prompting/dialects.yaml

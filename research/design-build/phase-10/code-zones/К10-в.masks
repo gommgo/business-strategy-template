@@ -1,0 +1,3 @@
+# К10-в — сквозное, папки site и creative (волна 5); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/site/*
+.claude/skills/design-deep-dive/scripts/creative/*

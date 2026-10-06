@@ -1,0 +1,6 @@
+# К10-д — сквозное, папки maint и lib, смоук и установка (волна 5); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/maint/*
+.claude/skills/design-deep-dive/scripts/lib/*
+.claude/skills/design-deep-dive/scripts/tests/smoke.py
+.claude/skills/design-deep-dive/scripts/install.sh
+.claude/skills/design-deep-dive/scripts/tests/fixtures/canvas/manifest.yaml

@@ -1,0 +1,3 @@
+# К10-б — сквозное, папки text и project (волна 5); маски — glob от корня репозитория, для scripts/maint/accept.py --masks-file
+.claude/skills/design-deep-dive/scripts/text/*
+.claude/skills/design-deep-dive/scripts/project/*
