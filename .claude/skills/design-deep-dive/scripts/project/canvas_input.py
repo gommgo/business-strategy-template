@@ -2413,24 +2413,48 @@ def check_form(ch, gate_ids=None):
     return "способ проверки check не по форме — {gates: [id ворот]}, {tool: команда, field: поле}, code или manual"
 
 
-def after_build_checks(kind, doc=None, gate_ids=None):
+SEV_RANK = {"D": 1, "S": 2, "B": 3}
+
+
+def gate_severities(doc=None):
+    """{id ворот: наибольший ключ threshold} строк page-gates.yaml; doc — данные вместо файла (самопроверка)."""
+    if doc is None:
+        doc, err = load_doc(kbpaths.kb("site", "07-seo-geo-performance-analytics", "page-gates.yaml"))
+        if err:
+            raise F.ToolError(f"page-gates.yaml: {err}")
+    out = {}
+    for g in (doc or {}).get("gates") or []:
+        if isinstance(g, dict) and g.get("id"):
+            keys = [k for k in (g.get("threshold") or {}) if k in SEV_RANK] if isinstance(g.get("threshold"), dict) \
+                else []
+            out[g["id"]] = max(keys, key=SEV_RANK.get) if keys else None
+    return out
+
+
+def after_build_checks(kind, doc=None, gates=None):
     """Способ проверки пунктов места «после сборки» рода kind (site · app) из списка базы `ACC_FILE`: {id: check} в
-    порядке файла. Пункт без способа или не по форме (`check_form`), id ворот вне page-gates.yaml — ошибка базы. doc и
-    gate_ids — данные вместо файлов базы (самопроверка)."""
+    порядке файла. Ошибка базы: пункт без способа или не по форме (`check_form`), id ворот вне page-gates.yaml, у
+    пункта gates наибольшая тяжесть по всем условиям — не наибольший ключ threshold его ворот. doc и gates ({id ворот:
+    наибольшая тяжесть}, `gate_severities`) — данные вместо файлов базы (самопроверка)."""
     if doc is None:
         doc, err = load_doc(kbpaths.kb(*KB_DOCS["acceptance-criteria"]))
         if err:
             raise F.ToolError(f"{ACC_FILE}: {err}")
-    if gate_ids is None:
-        gates, err = load_doc(kbpaths.kb("site", "07-seo-geo-performance-analytics", "page-gates.yaml"))
-        if err:
-            raise F.ToolError(f"page-gates.yaml: {err}")
-        gate_ids = {g.get("id") for g in (gates or {}).get("gates") or [] if isinstance(g, dict)}
+    if gates is None:
+        gates = gate_severities()
     out = {}
     for c in (doc or {}).get("criteria") or []:
         if not isinstance(c, dict) or c.get("where") != "после сборки" or kind not in (c.get("for") or ("site", "app")):
             continue
-        why = check_form(c.get("check"), gate_ids)
+        why = check_form(c.get("check"), gates)
+        ids = c["check"].get("gates") if not why and isinstance(c["check"], dict) else None
+        if ids:
+            sev = c.get("severity")
+            top = max((sev.values() if isinstance(sev, dict) else [sev]), key=lambda s: SEV_RANK.get(s, 0))
+            want = max((gates[g] for g in ids if gates.get(g)), key=SEV_RANK.get, default=None)
+            if top != want:
+                why = (f"тяжесть {top} — не наибольшая тяжесть его ворот {', '.join(ids)} ({want}): пункт со "
+                       "способом gates несёт наибольший ключ threshold своих ворот")
         if why:
             raise F.ToolError(f"{ACC_FILE}: у пункта {c.get('id')} места «после сборки» {why}")
         out[c["id"]] = c["check"]
@@ -2509,8 +2533,8 @@ def acceptance_md(ctx, items, A, extra=()):
     out = [f"# Критерии приёмки — {ctx.surface} ({kind}), этап {ctx.stage}", "",
            "Производный файл: собирает `canvas_input` вместе со входом по роду поверхности, уровню и партии входа; "
            "руками не правится. Серьёзность: B — блокирует (critical): на макете — честность макета, тексты, числа, "
-           "факты и картинки только из входа; после сборки — страницу, у пункта, который судят и ворота страницы, — "
-           "с тяжестью ворот; S — исправить или принять с записью заказчика (major); D — по месту (minor). Где: "
+           "факты и картинки только из входа; после сборки — страницу; S — исправить или принять с записью заказчика "
+           "(major); D — по месту (minor). Где: "
            "«макет» — проверяется на холсте (способ «скрипт» — на статичных копиях артбордов, когда заказчик попросил "
            "проверки макета), «после сборки» — на собранной странице в репозитории кода, пункт со способом проверки "
            "уходит в манифест готовности. Этап — с какого этапа холста пункт проверяется. Итог и одобрение — "
@@ -3698,16 +3722,22 @@ def selftest():
               all(list(checks[k]) == after[k] and after[k] for k in after)
               and checks["site"]["J4b"] == checks["site"]["L3"] == {"gates": ["SG-LEGAL-01"]})
         bad = [({"check": "скрипт"}, "не по форме"), ({"check": {"gates": ["SG-NOPE-01"]}}, "SG-NOPE-01"),
-               ({"check": {"tool": "ui/ui_audit.py URL"}}, "не по форме"), ({}, "не по форме")]
+               ({"check": {"tool": "ui/ui_audit.py URL"}}, "не по форме"), ({}, "не по форме"),
+               ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": "S"}, "не наибольшая"),
+               ({"check": {"gates": ["SG-LEGAL-01"]}, "severity": {"eu": "S", "else": "D"}}, "не наибольшая")]
         caught = []
         for extra, word in bad:
             try:
-                after_build_checks("site", {"criteria": [dict({"id": "X9", "where": "после сборки"}, **extra)]},
-                                   {"SG-LEGAL-01"})
+                after_build_checks("site", {"criteria": [dict({"id": "X9", "where": "после сборки", "severity": "B"},
+                                                              **extra)]}, {"SG-LEGAL-01": "B"})
             except F.ToolError as e:
                 caught.append("X9" in str(e) and word in str(e))
-        check("check не по форме (слово вне code и manual, tool без field, нет поля) и id ворот вне page-gates.yaml "
-              "— ошибка базы с id пункта", caught == [True] * len(bad))
+        sev = gate_severities()
+        check("check не по форме (слово вне code и manual, tool без field, нет поля), id ворот вне page-gates.yaml и "
+              "тяжесть пункта gates ниже наибольшего ключа threshold его ворот — ошибка базы с id пункта; у пунктов "
+              "списка она равна (F2, I3, J4b — B, I6 — S)", caught == [True] * len(bad)
+              and sev["SG-LEGAL-01"] == sev["SG-GEO-01"] == "B" and sev["SG-SEO-05"] == "S"
+              and sev["SG-WEIGHT-01"] == "S")
         a3 = next((r for r in arows if r.get("id") == "A3"), {})
         check("A3 — по first_screen_policy плана (offer-cta)", "offer-cta" in (a3.get("вопрос (да = норма)") or ""))
         trimmed = "\n".join(x for x in acc.splitlines() if not re.match(r"^\| [IJKL]\d", x))

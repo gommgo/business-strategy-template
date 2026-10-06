@@ -152,16 +152,16 @@ ai-media `page.media_class` — проекция по строке §8 `../../kb
 замера. Метрику страницы воротами ставит только она; те же метрики, измеренные соседями (`motion_check.py`, зонд 3D),
 идут в отчёт зеркалом (серьёзность D) и на вердикт не влияют; ворота эффектов и 3D — слоями отчёта. Числа строк без
 профиля — поле `limits` строки `page-gates.yaml`. Цепочка после сборки: `page_anatomy.py` →
-`page_accept.py --budget-profile …` → `page_gates.py --brief … --plan … --anatomy … --accept …` (+ `--motion`,
-`--gate3d`, `--geo`, `--ia`, `--axe`, `--html`); ключи вердикта из брифа и плана и вывод JSON для кода —
-`../README.md § Ворота после сборки`.
+`page_accept.py --budget-profile …` → `page_gates.py --brief … --plan … --ready … --anatomy … --accept …` (+
+`--motion`, `--gate3d`, `--geo`, `--ia`, `--axe`, `--html`); ключи вердикта из брифа и плана, исход пунктов
+`after_build` и вывод JSON для кода — `../README.md § Ворота после сборки`.
 
 | вызов | что делает |
 |---|---|
-| `page_gates.py --brief FILE --plan FILE --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …] [--json]` | вердикт, строки PASS/FAIL/SKIP с порогом, серьёзностью и источником; профиль и ключи — из плана и брифа, явный ключ (`--profile`, `--jurisdiction ru\|eu\|none` и другие) сильнее; JSON — `tool`, `skill_version`, `params`, `verdict`, `B`, `S`; код 1 при B, 2 — ошибка вызова |
+| `page_gates.py --brief FILE --plan FILE [--ready FILE] --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …] [--json]` | вердикт, строки PASS/FAIL/SKIP с порогом, серьёзностью и источником; профиль и ключи — из плана и брифа, явный ключ (`--profile`, `--jurisdiction ru\|eu\|none` и другие) сильнее; с `--ready` — исход пунктов `after_build` единицы со способом `gates`; JSON — `tool`, `skill_version`, `params`, `verdict`, `B`, `S`, `after_build`; код 1 при B, 2 — ошибка вызова |
 | `page_gates.py --resolve landing-lead-services [--site-level L1] [--hot-mobile-share 0.6 --price-band mid]` | профиль (JSON: `id`, `level`, `page_type`, `outcome`, `weight`, `all_levels`, `log`) — его читает сборщик входа холста |
 | `page_gates.py --conditions` | условия замера `budgets.yaml` для утилит: окно первого экрана, телефон, десктоп, замок тишины |
-| `page_gates.py --selftest` | строки и `limits` ворот, профиль и правило лидогенерации из данных, контракты JSON соседей, зеркала |
+| `page_gates.py --selftest` | строки и `limits` ворот, профиль и правило лидогенерации из данных, контракты JSON соседей, зеркала, ключи из брифа и плана, исход пунктов `after_build` (`--ready`) |
 
 | ключ | что читает | какие ворота |
 |---|---|---|

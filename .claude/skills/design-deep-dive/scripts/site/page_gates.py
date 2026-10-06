@@ -28,19 +28,25 @@ ambition-levels.yaml` (`defaults_by_page_type`, `levels[L0].appropriate_for.lead
 Строки без данных — SKIP: их проверяет человек, судья или соседняя утилита.
 
 Код репозитория запускает утилиту соседним чекаутом: ../strategy/.claude/skills/design-deep-dive/scripts/site/page_gates.py,
-бриф и план передаёт файлами снимка: --brief site-brief.yaml --plan plans/<page>.yaml.
-  page_gates.py --brief FILE --plan FILE --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …] [--geo FILE]
-      [--ia FILE] [--axe FILE] [--html FILE] [--css FILE …] [--json]
+бриф, план и манифест готовности передаёт файлами снимка: --brief site-brief.yaml --plan plans/<page>.yaml
+--ready ready.yaml.
+  page_gates.py --brief FILE --plan FILE --ready FILE --anatomy DIR [--accept DIR] [--motion DIR] [--gate3d FILE …]
+      [--geo FILE] [--ia FILE] [--axe FILE] [--html FILE] [--css FILE …] [--json]
       профиль — page.budget_profile плана; ключи ниже сильнее брифа и плана: [--profile P] [--jurisdiction ru|eu|none]
       [--ai-bots-policy allow-all|allow-search-deny-training|deny-all] [--ads-google | --no-ads-google]
       [--site-level L1] [--hot-mobile-share 0.6] [--price-band low|mid|high|very-high]
+      --ready — пункты after_build единицы (page.id плана) со способом gates судит сам вердикт (after_build_status):
+      исход — правило kb/common/acceptance-criteria.yaml, поле check
   page_gates.py --resolve landing-lead-services@L1 [--brief FILE] [--site-level L1]   # профиль (JSON): id, level,
                                                                         # page_type, outcome, weight, all_levels, log
   page_gates.py --conditions        # условия замера budgets.yaml: окно первого экрана, телефон, десктоп, замок тишины
   page_gates.py --selftest [--gates FILE]
 Вывод --json: tool, skill_version (файл VERSION скилла), profile, level, log, params (ключи вердикта после брифа и
-плана), verdict, B, S, gates[], layers, sources. Код репозитория читает поля JSON, а не код выхода. Код выхода: 1 — есть
-B; 0 — нет B; 2 — ошибка вызова. Замер без троттлинга сети помечается `lab-unthrottled`.
+плана; явный ключ, который их перебил, — строкой log), verdict, B, S, gates[], layers, sources; с --ready — unit и
+after_build[] {id, gates, status pass · fail · unchecked, severity}. B — строки FAIL тяжести B, S — тяжести S без
+исключения плана (исключение снимает S; вердикт с ним — accepted_with_notes); с --ready B и S считают и непроверенные
+пункты своей тяжестью. Код репозитория читает поля JSON, а не код выхода. Код выхода: 1 — есть B; 0 — нет B; 2 —
+ошибка вызова. Замер без троттлинга сети помечается `lab-unthrottled`.
 
 Модуль для утилит замера (kbpaths.use("site"); import page_gates): resolve_profile(), profile_value(), conditions(),
 cdp_network(), mobile_device(), heavy_lock() — условия замера и тишина машины из budgets.yaml, одно место на все ворота;
@@ -1388,10 +1394,54 @@ def apply_exceptions(results, exceptions):
     return results
 
 
-def verdict(results):
-    b = [r for r in results if r.status == 'FAIL' and r.severity == 'B']
-    sv = [r for r in results if r.status == 'FAIL' and r.severity == 'S']
-    return 'blocked' if b else ('accepted_with_notes' if sv else 'accepted'), len(b), len(sv)
+def ready_items(manifest, unit):
+    """Пункты after_build единицы манифеста готовности (ready.yaml): [{id, severity, check}]; единицы нет или пункты не
+    по форме — ValueError."""
+    units = manifest.get('units') if isinstance(manifest, dict) else None
+    u = next((x for x in units or [] if isinstance(x, dict) and str(x.get('id')) == unit), None)
+    if u is None:
+        raise ValueError(f'--ready: единицы {unit} в манифесте нет')
+    items = u.get('after_build')
+    if not isinstance(items, list) or not all(isinstance(x, dict) and x.get('id') and x.get('severity') in SEV_RANK
+                                              and 'check' in x for x in items):
+        raise ValueError(f'--ready: after_build единицы {unit} не по форме — пункты {{id, severity, check}}')
+    return items
+
+
+def after_build_status(items, results):
+    """Исход пунктов after_build со способом gates (правило — kb/common/acceptance-criteria.yaml, поле check):
+    [{id, gates, status, severity}]. Решают строки вердикта с id ворот пункта, кроме зеркал (mirror): строка FAIL без
+    исключения плана — fail с худшей тяжестью таких строк; строк нет или все SKIP — unchecked с тяжестью пункта
+    (наибольшей, которую ворота дают предмету); иначе pass."""
+    out = []
+    for it in items:
+        ids = it['check'].get('gates') if isinstance(it.get('check'), dict) else None
+        if not ids:
+            continue
+        rows = [r for r in results if r.id in ids and not r.mirror]
+        fails = [r for r in rows if r.status == 'FAIL' and not getattr(r, 'excepted', False)]
+        if fails:
+            status, sev = 'fail', max((r.severity for r in fails), key=lambda s: SEV_RANK.get(s, 0))
+        elif all(r.status == 'SKIP' for r in rows):
+            status, sev = 'unchecked', it['severity']
+        else:
+            status, sev = 'pass', '-'
+        out.append({'id': it['id'], 'gates': list(ids), 'status': status, 'severity': sev})
+    return out
+
+
+def verdict(results, items=()):
+    """(вердикт, B, S): B — строки FAIL тяжести B; S — тяжести S без исключения плана (исключение снимает S); items —
+    исход пунктов after_build (after_build_status): непроверенный считается своей тяжестью. accepted_with_notes — есть S
+    или S, снятое исключением."""
+    nb = sum(1 for r in results if r.status == 'FAIL' and r.severity == 'B')
+    ns = sum(1 for r in results if r.status == 'FAIL' and r.severity == 'S' and not getattr(r, 'excepted', False))
+    noted = any(r.status == 'FAIL' and r.severity == 'S' and getattr(r, 'excepted', False) for r in results)
+    for it in items:
+        if it['status'] == 'unchecked':
+            nb += it['severity'] == 'B'
+            ns += it['severity'] == 'S'
+    return 'blocked' if nb else ('accepted_with_notes' if ns or noted else 'accepted'), nb, ns
 
 
 def gate_meta(gates_yaml):
@@ -1402,17 +1452,19 @@ def gate_meta(gates_yaml):
         return {}
 
 
-def print_table(prof, results, lay=None):
+def print_table(prof, results, lay=None, items=()):
     print(f"профиль {prof['id']} (уровень {prof['level']})" + ('; ' + '; '.join(prof['log']) if prof['log'] else ''))
     for r in results:
         print(f"{r.status:4} {r.severity}  {r.id:13} {r.device:7}  значение {str(r.value)[:40]:>14}  порог {str(r.threshold)[:34]:>10}  "
               f"{r.note}" + (f' [{r.source}]' if r.source and not r.mirror else ''))
     for k, v in (lay or {}).items():
-        items = v if isinstance(v, list) else [v]
-        for x in items:
+        lines = v if isinstance(v, list) else [v]
+        for x in lines:
             print(f"слой {k}: " + ', '.join(f'{a}={b}' for a, b in x.items() if a not in ('fails', 'path', 'probe')) +
                   (f"; провалы: {', '.join(x.get('fails') or [])}" if x.get('fails') else ''))
-    v, nb, ns = verdict(results)
+    for it in items:
+        print(f"пункт {it['id']} ({', '.join(it['gates'])}): {it['status']} {it['severity']}")
+    v, nb, ns = verdict(results, items)
     print(f'вердикт: {v} (B: {nb}, S: {ns})')
 
 
@@ -1605,6 +1657,7 @@ def selftest(gates_path=None):
           and bool(h1_reveal_evidence('<h1 class="h1">x</h1>', 'html.js .h1{opacity:0}')['hidden']))
     selftest_sources(check, budgets, gates, prof, f2)
     selftest_brief(check, budgets, fake)
+    selftest_ready(check, f2)
     for st, name in checks:
         print(st, name)
     print(f"итог: {sum(c[0] == 'PASS' for c in checks)}/{len(checks)} PASS")
@@ -1877,10 +1930,122 @@ def selftest_brief(check, budgets, fake):
               and out['params']['ai_bots_policy'] == ask and out['params']['ads_google'] is True
               and out['sources']['brief'] and rows['SG-LEGAL-01']['severity'] == 'S' and 'verdict' in out
               and isinstance(out['B'], int) and rc in (0, 1))
-        check('явный ключ сильнее брифа и плана: --jurisdiction eu — B у SG-LEGAL-01, --no-ads-google, --profile',
+        check('явный ключ сильнее брифа и плана: --jurisdiction eu — B у SG-LEGAL-01, --no-ads-google, --profile; '
+              'каждый перебитый ключ — строкой log',
               out_eu['params']['jurisdiction'] == 'eu' and rows_eu['SG-LEGAL-01']['severity'] == 'B'
               and out_eu['params']['ads_google'] is False and out_eu['profile'] == 'landing-lead-services@L0'
-              and out_eu['verdict'] == 'blocked' and rc_eu == 1)
+              and out_eu['verdict'] == 'blocked' and rc_eu == 1
+              and all(any(x.startswith(k) and 'явный ключ' in x for x in out_eu['log'])
+                      for k in ('jurisdiction eu', 'ads_google False', 'profile landing-lead-services@L0'))
+              and not any('явный ключ' in x for x in out['log']))
+
+
+def selftest_ready(check, clean):
+    """--ready: исход пунктов after_build со способом gates по строкам вердикта (случаи LCP между целью и «плохо»,
+    вес под исключением плана, зеркало соседа, призыв после JS, счётчики ЕС — только библиотеки и события; пункт без
+    строк) — на вымышленных плане, манифесте и замерах."""
+    import contextlib
+    import io
+    import tempfile
+    import yaml
+
+    def item(i, sev, gates):
+        return {'id': i, 'severity': sev, 'check': {'gates': gates}}
+
+    def manifest(j4b):
+        return {'skill_version': kbpaths.skill_version(), 'units': [{'id': 'home', 'after_build': [
+            item('F2', 'B', ['SG-PERF-01', 'SG-PERF-02', 'SG-WEIGHT-01']), item('I3', 'B', ['SG-GEO-01']),
+            item('I6', 'S', ['SG-SEO-05']), item('J4b', j4b, ['SG-LEGAL-01']),
+            {'id': 'K1', 'severity': 'B', 'check': 'code'}]}]}
+
+    with tempfile.TemporaryDirectory() as td:
+        def put(name, data):
+            p = os.path.join(td, name)
+            os.makedirs(os.path.dirname(p), exist_ok=True)
+            with open(p, 'w', encoding='utf-8') as f:
+                if name.endswith('.json'):
+                    json.dump(data, f)
+                else:
+                    yaml.safe_dump(data, f, allow_unicode=True)
+            return p
+
+        def case(name, jur='ru', summary=None, network=None, accept=None, motion=None, exception=None, geo=(),
+                 anatomy=True):
+            """Чистая страница с правкой случая; без anatomy — без замера анатомии; geo None — без geo_probe."""
+            page = {'id': 'home', 'budget_profile': 'landing-lead-services@L1', 'jurisdiction': [jur]}
+            if exception:
+                page['x-gate-exception'] = [{'id': exception, 'why': 'вымышлено', 'who': 'заказчик',
+                                             'until': '2099-01-01'}]
+            keys = ['--plan', put(f'{name}/home.yaml', {'page': page}),
+                    '--ready', put(f'{name}/ready.yaml', manifest('B' if jur == 'eu' else 'S'))]
+            if anatomy:
+                d = copy.deepcopy(clean['mobile'])
+                d['summary'].update(summary or {})
+                d['network'].update(network or {})
+                put(f'{name}/anatomy/anatomy_mobile.json', d)
+                keys += ['--anatomy', os.path.join(td, name, 'anatomy')]
+            for mode, rep in (accept or {}).items():
+                put(f'{name}/accept/accept_{mode}.json', rep)
+            if accept:
+                keys += ['--accept', os.path.join(td, name, 'accept')]
+            if motion:
+                put(f'{name}/motion/results.json', motion)
+                put(f'{name}/motion/gates.json', {'level': 'L1', 'rows': []})
+                keys += ['--motion', os.path.join(td, name, 'motion')]
+            if geo is not None:
+                keys += ['--geo', put(f'{name}/geo.json', {'flags': list(geo)})]
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                rc = main(keys + ['--json'])
+            out = json.loads(buf.getvalue())
+            return out, {x['id']: (x['status'], x['severity']) for x in out['after_build']}
+
+        thr = {'mobile_thr': {'device': 'mobile', 'throttle': True, 'no_preference': {'lcp': {'t': 3200, 'tag': 'H1'},
+                                                                                      'console': []}}}
+        out, ab = case('clean')
+        check('--ready, чистая страница: пункты gates пройдены, K1 (code) вердикт не судит, unit — page.id плана',
+              out['unit'] == 'home' and ab == {k: ('pass', '-') for k in ('F2', 'I3', 'I6', 'J4b')}
+              and out['verdict'] == 'accepted' and out['B'] == 0 and out['sources']['ready'])
+        out, ab = case('lcp-mid', accept=thr)
+        check('LCP телефона между целью и «плохо» — строка SG-PERF-01 S: F2 (тяжесть B в манифесте) — fail S, вердикт '
+              'без B', ab['F2'] == ('fail', 'S') and out['B'] == 0 and out['verdict'] == 'accepted_with_notes')
+        out, ab = case('weight-excepted', summary={'first_screen_kb': 1800}, exception='SG-WEIGHT-01')
+        check('вес первого экрана сверх профиля под исключением плана: F2 пройден, S без строки excepted, вердикт '
+              'accepted_with_notes', ab['F2'] == ('pass', '-') and out['S'] == 0 and out['B'] == 0
+              and out['verdict'] == 'accepted_with_notes')
+        out, ab = case('mirror', motion={'mob': {'vitals': {'lcp_ms': 2900}}})
+        rows = [r for r in out['gates'] if r['id'] == 'SG-PERF-01' and r['mirror']]
+        check('зеркало motion_check с id SG-PERF-01 — FAIL D: F2 пройден, вердикт accepted',
+              rows and rows[0]['status'] == 'FAIL' and ab['F2'] == ('pass', '-') and out['verdict'] == 'accepted')
+        out, ab = case('cta-after-js', summary={'nojs_cta': False})
+        check('главный призыв только после JS — SG-GEO-01 S: I3 — fail S, B 0', ab['I3'] == ('fail', 'S')
+              and out['B'] == 0)
+        out, ab = case('og-after-1mb', geo=['og-after-1mb'])
+        check('OG после 1 МБ — SG-SEO-05 S: I6 — fail S', ab['I6'] == ('fail', 'S') and out['B'] == 0)
+        libs = {'tracking_requests': [{'u': 'https://www.googletagmanager.com/gtm.js', 'vendor': 'gtm', 'phase': 'load'}]}
+        out, ab = case('eu-libs', jur='eu', summary={'tracking_before_action': 'gtm'}, network=libs)
+        check('ЕС, до выбора только библиотеки — SG-LEGAL-01 S: J4b (B в манифесте) — fail S, вердикт без B',
+              ab['J4b'] == ('fail', 'S') and out['B'] == 0)
+        ev = {'tracking_requests': libs['tracking_requests'] + [{'u': 'https://region1.google-analytics.com/g/collect',
+                                                                 'vendor': 'ga4', 'phase': 'load'}]}
+        out, ab = case('eu-events', jur='eu', summary={'tracking_before_action': 'gtm;ga4'}, network=ev)
+        check('ЕС, события до выбора — SG-LEGAL-01 B: J4b — fail B, вердикт blocked',
+              ab['J4b'] == ('fail', 'B') and out['B'] == 1 and out['verdict'] == 'blocked')
+        out, ab = case('no-geo', geo=None)
+        check('без geo_probe строк SG-SEO-05 нет: I6 — unchecked S, S вердикта его считает',
+              ab['I6'] == ('unchecked', 'S') and out['S'] == 1 and out['verdict'] == 'accepted_with_notes')
+        out, ab = case('no-anatomy', anatomy=False, accept=thr, geo=None)
+        check('без анатомии строк SG-GEO-01 и SG-LEGAL-01 нет: I3 — unchecked B, вердикт blocked',
+              ab['I3'] == ('unchecked', 'B') and ab['J4b'] == ('unchecked', 'S') and out['verdict'] == 'blocked'
+              and out['B'] == 1)
+        bad = []
+        for keys in (['--ready', put('x/ready.yaml', manifest('S'))],
+                     ['--plan', put('y/home.yaml', {'page': {'id': 'about', 'budget_profile': 'landing-lead-services@L1'}}),
+                      '--ready', put('y/ready.yaml', manifest('S'))]):
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                bad.append(main(keys + ['--profile', 'landing-lead-services@L1', '--html', put('x/p.json', {}),
+                                        '--json']))
+        check('--ready без --plan и единица не из манифеста — код 2', bad == [2, 2])
 
 
 def _selftest_accept_dir(loader):
@@ -1913,6 +2078,8 @@ def main(argv=None):
                                     'мобильного трафика, ценовая полоса, реклама Google (brief_params)')
     ap.add_argument('--plan', help='page-plan.yaml: budget_profile, jurisdiction, first_screen_policy, seo.indexable, '
                                    'x-gate-exception')
+    ap.add_argument('--ready', help='ready.yaml поверхности: исход пунктов after_build единицы (page.id плана --plan) со '
+                                    'способом gates — поле after_build[] вывода, непроверенные — в B и S')
     ap.add_argument('--html', help='сохранённый HTML страницы (заглушки и автоматические маркеры)')
     ap.add_argument('--css', nargs='*', help='файлы CSS страницы для SG-A11Y-08 (clamp кеглей), если стили внешние')
     ap.add_argument('--jurisdiction', choices=JURISDICTIONS, help='сильнее плана и брифа; без них — ru')
@@ -1940,6 +2107,16 @@ def main(argv=None):
         params = {k: getattr(a, k) if getattr(a, k) is not None else got.get(k, dflt)
                   for k, dflt in (('jurisdiction', 'ru'), ('ai_bots_policy', 'allow-all'), ('site_level', None),
                                   ('hot_mobile_share', None), ('price_band', None), ('ads_google', False))}
+        for k in ('profile',) + tuple(params):
+            if getattr(a, k) is not None and k in got and got[k] != getattr(a, k):
+                notes.append(f'{k} {getattr(a, k)} — явный ключ сильнее брифа и плана ({got[k]})')
+        items, unit = [], None
+        if a.ready:
+            if plan is None:
+                raise ValueError('--ready: единицу называет план — нужен --plan')
+            unit = str(((plan.get('page') if isinstance(plan, dict) else None) or {}).get('id')
+                       or os.path.splitext(os.path.basename(a.plan))[0])
+            items = ready_items(load_yaml(a.ready), unit)
         lvl = (params['site_level'], params['hot_mobile_share'], params['price_band'])
         if a.resolve:
             p = resolve_profile(a.resolve, budgets, *lvl)
@@ -1966,8 +2143,9 @@ def main(argv=None):
                    motion=motion, gate3d=gate3d)
     meta = gate_meta(a.gates or GATES)
     lay = layers(motion, gate3d)
+    ab = after_build_status(items, res)
     if a.json:
-        v, nb, ns = verdict(res)
+        v, nb, ns = verdict(res, ab)
         rows = []
         for r in res:
             d = dict(r.__dict__)
@@ -1975,13 +2153,16 @@ def main(argv=None):
             rows.append(d)
         src = {k: bool(x) for k, x in (('anatomy', a.anatomy), ('accept', a.accept), ('motion', motion), ('gate3d', gate3d),
                                        ('geo', a.geo), ('ia', a.ia), ('axe', a.axe), ('plan', a.plan), ('brief', a.brief),
-                                       ('html', a.html))}
-        print(json.dumps({'tool': 'page_gates.py', 'skill_version': kbpaths.skill_version(), 'profile': prof['id'],
-                          'level': prof['level'], 'log': prof['log'], 'params': params, 'verdict': v, 'B': nb, 'S': ns,
-                          'gates': rows, 'layers': lay, 'sources': src}, ensure_ascii=False, indent=1, default=str))
+                                       ('html', a.html), ('ready', a.ready))}
+        out = {'tool': 'page_gates.py', 'skill_version': kbpaths.skill_version(), 'profile': prof['id'],
+               'level': prof['level'], 'log': prof['log'], 'params': params, 'verdict': v, 'B': nb, 'S': ns,
+               'gates': rows, 'layers': lay, 'sources': src}
+        if a.ready:
+            out.update(unit=unit, after_build=ab)
+        print(json.dumps(out, ensure_ascii=False, indent=1, default=str))
     else:
-        print_table(prof, res, lay)
-    return 1 if verdict(res)[0] == 'blocked' else 0
+        print_table(prof, res, lay, ab)
+    return 1 if verdict(res, ab)[0] == 'blocked' else 0
 
 
 if __name__ == '__main__':

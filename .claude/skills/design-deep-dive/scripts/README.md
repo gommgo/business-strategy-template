@@ -70,7 +70,7 @@ README домена — `site/README.md`: назначение утилит и �
 | `site/geo_probe.py` | utility | доступность страницы для поисковых и ИИ-ботов: robots, коды, head, текст без JS, JSON-LD, SSR. | `URL --out DIR` (§ Ворота после сборки) | stdout / `--out` | PyYAML, playwright, requests, urllib3; chromium (Playwright, --render) |
 | `site/ia_probe.py` | utility | структура многостраничного сайта по HTTP: robots, sitemap, шаблоны URL, шапка и подвал, крошки, hreflang, 404. | `URL --out DIR`; `--selftest`; `--batch` — группа «обслуживание базы» в `--help` | `$DDD_HOME/out/site/ia_probe/selftest`, `$DDD_HOME/out/site/ia_probe` | stdlib |
 | `site/page_anatomy.py` | utility | анатомия живой посадочной страницы или страницы сайта: структура, призывы, формы, согласия, скорость, вес. | `URL OUT [--mobile] [--inp] [--net [auto\|метка]] [--exit-country CC] [--timezone TZ]` — сеть (страна сервера, маршрут VPN) проверяется только с `--net`; ключи корпуса — группа «обслуживание базы» в `--help`; `--selftest` | `<OUT>/anatomy_<устройство>.json`; кэш — `$DDD_HOME/cache/site` | Pillow, playwright; web-vitals 6.2.2; chromium (Playwright) |
-| `site/page_gates.py` | utility | ворота собранной страницы: вердикт PASS / S / B по `page-gates.yaml` с порогами профиля бюджета. | `--brief ФАЙЛ --plan ФАЙЛ --anatomy DIR --accept DIR --motion DIR --gate3d ФАЙЛ … [--geo] [--ia] [--axe] [--json]` — профиль и ключи вердикта из брифа и плана, явный ключ сильнее (§ Ворота после сборки); `--resolve P` — профиль бюджета JSON; `--conditions`; `--selftest` | stdout: таблица или `--json` | PyYAML |
+| `site/page_gates.py` | utility | ворота собранной страницы: вердикт PASS / S / B по `page-gates.yaml` с порогами профиля бюджета. | `--brief ФАЙЛ --plan ФАЙЛ --ready ФАЙЛ --anatomy DIR --accept DIR --motion DIR --gate3d ФАЙЛ … [--geo] [--ia] [--axe] [--json]` — профиль и ключи вердикта из брифа и плана, явный ключ сильнее, исход пунктов `after_build` со способом `gates` (§ Ворота после сборки); `--resolve P` — профиль бюджета JSON; `--conditions`; `--selftest` | stdout: таблица или `--json` | PyYAML |
 | `site/plan_to_assets.py` | utility | план ассетов страницы: каркас из медиа- и 3D-слотов плана страницы и проверка плана. | `build <slug> [<surface>] [--page ID …] [--write]` — каркасы, с `--write` — в проект страницам без плана ассетов; `check <slug> [<surface>] [--page ID …] [--json]` — находки контракта `project/` по планам ассетов, форме манифеста ассетов поверхности и отпечаткам принятых строк манифестов поверхности и продукта (`sha256` равен файлу — по нему код-репо сверяет снимок), с `--page` — находки и код выхода только по этим страницам, без манифеста продукта; вне проекта — `PAGE_PLAN [--out ФАЙЛ]`, `--check ФАЙЛ … [--plan PAGE_PLAN]`, `--spec-role`, `--types` | `build` — `$DDD_HOME/out/site/plan_to_assets/<slug>/`, с `--write` — `…/design/<surface>/assets/plans/<page-id>.yaml` | PyYAML, jsonschema |
 | `site/site_validate.py` | utility | схемы и перекрёстные ссылки контрактов сайта: бриф, план страницы, карта сайта, каталог блоков, формы. | `ПУТЬ… [--today ГГГГ-ММ-ДД] [--json [OUT]] [--quiet]` — `--json` без файла печатает находки JSON в stdout (папка поверхности — со всеми стыками: страница брифа без плана — PJ-03 `error`, у служебной `thank-you-page`, `legal-page`, `not-found-page` — `warning`; шаблон карты без плана — SM-22: `info`, у служебного — `warning`, `error` — план есть, а с шаблоном не связан; адрес не в форме `url_policy` карты, у лендинга — план без `page.url` или адреса планов в двух формах — PJ-04 `warning`); `--all`, `--selftest` — на дате примеров базы (`--today` у `--all` её переопределяет) | stdout / `--json` | PyYAML, jsonschema, referencing |
 | `site/vocab_lint.py` | utility | идентификаторы вне словаря site в YAML, JSON и Markdown; проверка таблицы соответствий словарей. | `ФАЙЛ… [--map КЛЮЧ=ПРОСТРАНСТВО]` — карта «ключ → пространство» по умолчанию знает и copy deck (`slot_type`, роль секции, блок, тип страницы), и `facts.yaml` (места `use`); `--check-crosswalk` — таблица `crosswalk.tsv`; `--selftest` | stdout | PyYAML |
@@ -242,19 +242,23 @@ README домена — `blender/README.md`: назначение утилит �
 `../strategy/.claude/skills/design-deep-dive/scripts/…` на коммите лока снимка, с рабочей папкой код-репо; окружение —
 `$DDD_HOME` машины. Порядок: замеры (`page_anatomy`, `page_accept --budget-profile`, `motion_check`; у страницы с 3D —
 `site_probe` дважды, второй раз с `--no-3d`, и `gate_check` по каждому прогону) → вердикт `page_gates.py --brief
-<бриф> --plan <план> --anatomy … --accept … --motion … --gate3d …`, бриф и план — файлы снимка. Код-репо читает поля
-JSON, а не коды выхода: коды выхода замеров вердикт не решают (`page_accept.py` и `gate_check.py` при выполненном
-замере возвращают 0, находки — в JSON; выход по находкам — ключом `--strict`, у `page_accept` — по своим порогам: LCP,
-`alt`, петля без паузы, а не B), поэтому цепочку не обрывают на коде звена (`set -e`, `&&`). Вердикт — поля
-`verdict`, `B`, `S` вывода `page_gates.py --json`: B > 0 — страница не передаётся; S — исправить или записать
-исключением `x-gate-exception` плана; `tool` и `skill_version` — какая утилита ответила и версия контракта, `params` —
-ключи вердикта после брифа и плана. У `copydeck.py` и `claims_check.py` с `--json` — `tool`, `skill_version`,
-`command`, `summary {error, warning, info}`: публикацию держит `summary.error`. Пункт `after_build` манифеста
-`ready.yaml` (`{id, severity, check}`, `docs/projects/_template/design/README.md § Пакет для кода`) со способом `gates`
-решают строки `gates[]` этого вердикта с названными id, со способом `tool` — поле JSON названной утилиты:
+<бриф> --plan <план> --ready <манифест> --anatomy … --accept … --motion … --gate3d …`, бриф, план и манифест
+готовности — файлы снимка. Код-репо читает поля JSON, а не коды выхода: коды выхода замеров вердикт не решают
+(`page_accept.py` и `gate_check.py` при выполненном замере возвращают 0, находки — в JSON; выход по находкам — ключом
+`--strict`, у `page_accept` — по своим порогам: LCP, `alt`, петля без паузы, а не B), поэтому цепочку не обрывают на
+коде звена (`set -e`, `&&`). Вердикт — поля `verdict`, `B`, `S` вывода `page_gates.py --json`: B > 0 — страница не
+передаётся; S — исправить или записать исключением `x-gate-exception` плана (строка под исключением — `excepted`, в S
+не идёт); `tool` и `skill_version` — какая утилита ответила и версия контракта, `params` — ключи вердикта после брифа
+и плана. Пункт `after_build` манифеста `ready.yaml` (`{id, severity, check}`,
+`docs/projects/_template/design/README.md § Пакет для кода`) со способом `gates` судит сам вердикт с `--ready`:
+`after_build[] {id, gates, status, severity}` — `pass`, `fail` с худшей тяжестью строк или `unchecked` с тяжестью
+пункта, непроверенный идёт в `B` и `S` (правило — `kb/common/acceptance-criteria.yaml`, поле `check`); со способом
+`tool` — поле JSON названной утилиты:
 `ui/ui_audit.py URL --acceptance` пишет `<--out>/<--name>.json` (`findings[] {id, verdict, severity, run}`),
-`claude-design/mockup_checks.py resize URL` — JSON в stdout (`verdict`, `problems`). Профиль бюджета без замера —
-`page_gates.py --resolve P` (его читает `project/canvas_input.py`).
+`claude-design/mockup_checks.py resize URL` — JSON в stdout (`verdict`, `problems`). У `copydeck.py` и
+`claims_check.py` с `--json ФАЙЛ` — в файле `tool`, `skill_version`, `command`, `summary {error, warning, info}`:
+публикацию держит `summary.error`. Профиль бюджета без замера — `page_gates.py --resolve P` (его читает
+`project/canvas_input.py`).
 
 | звено | выход | кто читает | поля |
 |---|---|---|---|
@@ -264,7 +268,7 @@ JSON, а не коды выхода: коды выхода замеров вер
 | `blender/site_probe.py URL OUT --quick [--mobile --throttle] [--no-3d]` | `<OUT>/probe[…].json` | `blender/gate_check.py` | `vitals_pre_scroll.{lcp.tag, lcp.t, cls, tbt_ms, first_draw_ms}`, `network.{transfer_kb, by_category}`, `idle.dc_median`, `idle_motion_pct`, `detected.canvases[]`, `console_errors`, `no_3d.aborted` |
 | `blender/gate_check.py ПРОБА mode [--reduced] --baseline ПРОБА_БЕЗ_3D --profile P --json` | stdout JSON | `page_gates.py --gate3d ФАЙЛ …`; `qa_pipeline.py page` (`gate_check.evaluate`: тяжесть строк B/S/D) | `tool`, `probe`, `mode`, `reduced`, `baseline`, `profile`, `gates`, `rows[] {id, key, check, value, limit, severity (B/S/D), status (PASS/FAIL/SKIP), note, mirror}`, `summary {B, S, D, blocked}` |
 | `site/geo_probe.py URL --out DIR` · `site/ia_probe.py URL --out DIR` · `site/run_axe_targets.py ID URL MARKET DIR` | `<id>.json` · `<id>/ia.json` · `<id>.json` | `page_gates.py --geo`, `--ia`, `--axe` | флаги `head-kit.yaml`; `summary`, `sitemap`, `robots`, `not_found`; `axe.violations[].nodes[]` с адресами |
-| `site/page_gates.py --brief B --plan P …` | stdout: таблица или `--json` | код-репо; пункты `ready.yaml#after_build` со способом `gates` | `--json`: `tool`, `skill_version`, `profile`, `level`, `log`, `params {jurisdiction, ai_bots_policy, site_level, hot_mobile_share, price_band, ads_google}`, `verdict`, `B`, `S`, `gates[] {id, device, status, value, threshold, severity, note, source, mirror, excepted?, site_checklist, scope}`, `layers {effects {tool, level, path, B, S, D, na, fails[]}, three_d[] {probe, mode, reduced, B, S, D, blocked}}`, `sources {…: bool}`; код 1 — есть B, 2 — ошибка вызова |
+| `site/page_gates.py --brief B --plan P --ready R …` | stdout: таблица или `--json` | код-репо; пункты `ready.yaml#after_build` со способом `gates` | `--json`: `tool`, `skill_version`, `profile`, `level`, `log` (и явный ключ, который перебил бриф или план), `params {jurisdiction, ai_bots_policy, site_level, hot_mobile_share, price_band, ads_google}`, `verdict`, `B`, `S` (без строк `excepted`; с `--ready` — и непроверенные пункты), `gates[] {id, device, status, value, threshold, severity, note, source, mirror, excepted?, site_checklist, scope}`, `layers {effects {tool, level, path, B, S, D, na, fails[]}, three_d[] {probe, mode, reduced, B, S, D, blocked}}`, `sources {…: bool}`; с `--ready` — `unit` (`page.id` плана), `after_build[] {id, gates, status pass · fail · unchecked, severity}`; код 1 — есть B, 2 — ошибка вызова |
 | `site/page_gates.py --resolve P [--brief B] [--site-level L]` | stdout JSON | `project/canvas_input.py`, `project/design_audit.py` | `id`, `level`, `page_type`, `outcome`, `weight`, `all_levels`, `log`; неизвестный профиль — код 2 и сообщение |
 
 Ключи вердикта бриф и план дают сами (`page_gates.brief_params`); явный ключ сильнее брифа и плана, о чём молчат и

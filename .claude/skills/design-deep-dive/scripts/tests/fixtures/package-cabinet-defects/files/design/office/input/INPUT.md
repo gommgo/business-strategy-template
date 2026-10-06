@@ -24,13 +24,13 @@ check:
   warning: 1
   hint: 0
 files:
-  ACCEPTANCE.md: sha256:a431ad24fe92a68155a5c4239018e2d0499bf3f005297e9da9b2110f67832df9
+  ACCEPTANCE.md: sha256:2ef8fa87fa9e91c57bcebcf02ec12c8d1d6ba9b00468c60ed7d6bcbecef9e141
   assets.md: sha256:a639c884bedb7f5b4700e4bd3596e31300b46c0c2907362cd7c79aaf88149206
   brief.yaml: sha256:9c293891fdc9e7dcf6b31005ab98f8f7e53cb5cf225539b6d02c42ee52d8ee46
   contract.md: sha256:0dbacd12e0d58c123db1d6fb714556763b9374dd870947d9b0bbc6a9ee582fb7
   copy.md: sha256:456134aab65cafd47882c90ebe6414b6e9284975c2257a982e503b0a4e5f637c
   demo-data.json: sha256:8ad5dbea9e6ed789b5dac16dea5b10a576c3f9e175371612108095d6c7042315
-manifest: sha256:cc032fa9e9b06a1e56f130b892bfd550dab16ab3490abe569ed49bcf2bac9719
+manifest: sha256:96ba9403f57bac9837dc07de068046340b550b69a4b3a330aa48fdbfeccf392e
 ---
 # Вход холста — `office` (web · app), этап `mockup`
 
@@ -71,7 +71,7 @@ manifest: sha256:cc032fa9e9b06a1e56f130b892bfd550dab16ab3490abe569ed49bcf2bac971
 | screens | `docs/projects/otves-office/screens/office/texts.md` | — | `sha256:3d3c2bd1084e1cfa0faa333734834fdb497e558ced21b457e43b66859e0d3ef2` |
 | user | `docs/projects/otves-office/user.md` | — | `sha256:f6a3d8a78c812a87cb1f62e4673ec8329d5cee88c9a0a5ec97aefc1827958e84` |
 | vision | `docs/projects/otves-office/vision.md` | draft | `sha256:fe81774f1e9ad71dfff632bd52ef7afab2f2b37a1cf93d00e0b42c56ee930a5d` |
-| acceptance-criteria | `kb/common/acceptance-criteria.yaml` | база | `sha256:357b2fef6ccc3c3276920ed0ea74528d59191f0888a160cfdbcd73396b555690` |
+| acceptance-criteria | `kb/common/acceptance-criteria.yaml` | база | `sha256:97f9b6ab58989b8f19a42636ca0a932aa25da5ba7ed7af7a7151fb76992a2695` |
 | acceptance-widths | `kb/common/acceptance-widths.yaml` | база | `sha256:d4526b119a7da5391670c82cbd16e7458455c5fd7b84cf72c11bb0add78a2d7c` |
 | components | `kb/common/components.yaml` | база | `sha256:f343a9a53a00a0c05bea833c9b90d4ab4e582a08a6d80ecbfc3e4a710cac6e66` |
 | tells | `kb/common/tells.yaml` | база | `sha256:d91a66d002b618398844833bc6d1eeae835cb2e4e0b54261219db83458ca5a8e` |
