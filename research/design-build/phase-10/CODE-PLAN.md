@@ -163,7 +163,7 @@ reduce, limits, meta}` — ключи контракта `system.tokens.json`, �
 5. **`PY scripts/project/design_audit.py --selftest`** — зелёный (он читает вход, валидаторы, тексты, ДС).
 6. **Схемы и данные**: JSON и YAML разбираются, схемы проходят метасхему Draft 2020-12, примеры базы проходят свои
    схемы; `PY scripts/creative/spec_check.py canvas-map` — 0 `error` после правки любой схемы с `x-canvas-map`.
-7. **Повтор на проекте пилота — только чтением**: `--repo /home/mm/git/stit-core/pilot-greats`, выход — во временную
+7. **Повтор на проекте пилота — только чтением**: `--repo /home/mm/git/stit-core/<рабочая копия пилота>`, выход — во временную
    папку `~/.cache/design-deep-dive/out/f10/<зона>/`. Команды: `design_audit.py check <slug> web --repo … --json`,
    `canvas_input.py build <slug> web --stage mockup --repo … --out …`, `plan_to_assets.py check <slug> web --repo …`,
    `site_validate.py <папка слоя страницы>`, `copydeck.py check <copy deck>` без `--update` и без `approve`,

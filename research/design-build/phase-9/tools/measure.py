@@ -42,7 +42,7 @@ DDD_HOME = Path(os.environ.get("DDD_HOME") or Path.home() / ".cache/design-deep-
 CLAUDE_PROJECTS = Path.home() / ".claude/projects"
 
 # Папка проекта пилота — по ней ищутся журналы сессий Claude Code.
-PILOT_DIRS = {"P2": Path("/home/mm/git/stit-core/pilot-greats")}
+PILOT_DIRS = {"P2": Path("/home/mm/git/stit-core/<рабочая копия пилота>")}
 PILOT_LEDGER = {"P2": DDD_HOME / "out/ai-media/_ledger-P2.jsonl"}
 
 MEASURE_COLS = ["id", "at", "pilot", "unit", "stage", "kind", "tool", "trigger", "rule", "level", "gate", "count",
