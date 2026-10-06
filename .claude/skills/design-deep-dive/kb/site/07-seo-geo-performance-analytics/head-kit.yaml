@@ -205,7 +205,7 @@ jsonld_policy:
     - 'Не размечать отзывы о себе ради звёзд: LocalBusiness и Organization, контролирующие отзывы о себе, не получают звёзды (review snippet 2026-09-08)'
     - 'Не переносить в разметку оценки с других сайтов (Яндекс Карты, 2ГИС, G2, App Store): «Don''t aggregate reviews or ratings from other websites»'
     - 'Не добавлять устаревшее ради «полноты»: SearchAction (снят 11.2024), HowTo (2023), FAQPage ради сниппета (снят 2026-05-07), Course info (снят 11.2025)'
-    - 'JSON-LD для Google; для Яндекса главные каналы — Яндекс Бизнес и фиды (раздел yandex); валидатор Яндекса называет микроданные, RDFa, OG — JSON-LD прямо не упомянут'
+    - 'JSON-LD — для Google и Яндекса: Яндекс берёт из JSON-LD навигационную цепочку сниппета (BreadcrumbList) и вопросы-ответы мобильной выдачи (QAPage); данные об организации у Яндекса — Яндекс Бизнес и фиды (раздел yandex)'
   recipes:
     organization:
       where: главная или about-page
@@ -241,6 +241,7 @@ jsonld_policy:
         breadcrumb trails», в его примере в разметке два трейла, а видимый блок один (Breadcrumb, просмотр 2026-09-24); польза не
         измерена. По умолчанию генератор пишет один трейл — по parent, равный видимому; второй — только для страницы в двух
         хабах (also_listed_in) по решению заказчика, первым идёт видимый [документация + практика]
+      yandex: 'цепочка в сниппете — из BreadcrumbList только в JSON-LD; в справке поля name, url, position и до трёх элементов рекомендовано, у длинной цепочки показываются последние (Навигационная цепочка, просмотр 2026-10-06)'
     article:
       where: article-page, case-page, blog
       google: 'обязательных нет; headline, image, datePublished, dateModified, author (Person с url профиля) — рекомендованы'
@@ -383,6 +384,13 @@ yandex:
       ysclid, yrclid Яндекс, как правило, удаляет сам; не сочетать с Disallow тех же адресов; Google строку игнорирует
       (kUnsupportedTags) — ему canonical. Синтаксис — crawlers.yaml rt-yandex-clean-param
     evidence: '[документация] Яндекс Вебмастер «Директива Clean-param», просмотр 2026-09-24'
+  - id: hk-ya-get-params
+    rule: >-
+      «Настройка GET-параметров» Вебмастера (Индексирование) — тот же выбор «учитывать параметр или нет», что Clean-param,
+      в кабинете; вступает в силу в течение недели; при расхождении с robots.txt робот выполняет правило, которое запрещает
+      индексировать адрес с параметром. Правило параметров — Clean-param в robots.txt сайта (hk-ya-clean-param): оно в коде
+      и одно на все среды; кабинет — сверка: служебный параметр, который нашёл робот, а в Clean-param его нет, дописывается туда
+    evidence: '[документация] Яндекс Вебмастер «Настройка GET-параметров», просмотр 2026-10-06; блог Вебмастера 2025-12-11'
   - id: hk-ya-webmaster
     rule: 'сайт добавлен в Вебмастер: регион (при локальном бизнесе), «Видимость сайта в Алисе AI», рендеринг JS — «не выполнять», если SSR/SSG'
 
@@ -497,4 +505,7 @@ sources:
   - {id: google-breadcrumb, title: 'Breadcrumb (BreadcrumbList) structured data — multiple breadcrumb trails', date: 2026-09-24, url: 'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'}
   - {id: yandex-clean-param, title: 'Директива Clean-param (параметры, которые удаляются автоматически)', date: 2026-09-24, url: 'https://yandex.ru/support/webmaster/ru/robot-workings/clean-param'}
   - {id: yandex-crawl-delay, title: 'Директива Crawl-delay (не учитывается с 2018-02-22)', date: 2026-09-24, url: 'https://yandex.ru/support/webmaster/ru/robot-workings/crawl-delay'}
+  - {id: yandex-json-ld, title: 'JSON-LD (навигационная цепочка, вопросы и ответы, Почта)', date: 2026-10-06, url: 'https://yandex.ru/support/webmaster/ru/json-ld/about'}
+  - {id: yandex-breadcrumbs, title: 'Навигационная цепочка (BreadcrumbList в JSON-LD)', date: 2026-10-06, url: 'https://yandex.ru/support/webmaster/ru/supported-schemas/navigation-links'}
+  - {id: yandex-get-params, title: 'Настройка GET-параметров', date: 2026-10-06, url: 'https://yandex.ru/support/webmaster/ru/indexing-options/get-parameters'}
   - {id: w2-digests, title: 'Видео: Splitt «Maybe it isn’t JavaScript» (2024-10-23), SOTR 113 «Should you block your Search result pages?» (2026-07-30)', date: 2026-09-24}

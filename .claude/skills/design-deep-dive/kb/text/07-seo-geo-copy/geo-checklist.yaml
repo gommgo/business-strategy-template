@@ -222,10 +222,10 @@ checks:
     applies: {genres: [article, geo], page_types: [article-page, seo-landing-page]}
     how: [{method: claims, ref: "факт person с разрешением"}, {method: human}]
     level: gate
-    engines: {google: "Who, How, Why; bylines «where someone might think, “Who wrote this?”» (helpful content, 2025-12-10); E-E-A-T: Trust главное", yandex: "экспертность ЭПОС: авторы, специализация, сертификаты; генеративная статья без автора — «неизвестный человечеству гений» [V:AbqU-GxAYs8 41:49]"}
+    engines: {google: "Who, How, Why; bylines «where someone might think, “Who wrote this?”» (helpful content, 2025-12-10); E-E-A-T: Trust главное; у текста с ИИ — «adding information on how your content was created… how automation was used» (using-gen-ai-content, 2026-10-01)", yandex: "экспертность ЭПОС: авторы, специализация, сертификаты; генеративная статья без автора — «неизвестный человечеству гений» [V:AbqU-GxAYs8 41:49]"}
     evidence: "[документация]"
-    source: "Google helpful content (2025-12-10); SQRG 11.09.2025 §3.4; Яндекс ЭПОС; пост Вебмастера 2024-03-22 (медицина — созданное или проверенное экспертами)"
-    date: 2026-09-24
+    source: "Google helpful content (2025-12-10); Google using-gen-ai-content (2026-10-01); SQRG 11.09.2025 §3.4; Яндекс ЭПОС; пост Вебмастера 2024-03-22 (медицина — созданное или проверенное экспертами)"
+    date: 2026-10-06
 
   - id: COPY-GEO-20
     name: "Нет набивки: ни ключей, ни списков городов, ни страниц под перефразы запроса"
@@ -275,10 +275,10 @@ checks:
     applies: {genres: [article, geo, site-page, landing]}
     how: [{method: claims}, {method: linter}, {method: human}]
     level: gate
-    engines: {google: "генерация многих страниц «without adding value» — scaled content abuse (using-gen-ai-content, 2025-12-10)", yandex: "«массово публиковать тексты без редактуры и фактической проверки» — «плохой путь» [V:AbqU-GxAYs8 1:04:52]; нейросети не негатив, если текст «проверен экспертом» (пост 2025-03-28)"}
+    engines: {google: "«manually factcheck and review all AI-generated content for accuracy and trustworthiness before publishing» — и title, description, разметку, alt; массовые страницы без ценности — scaled content abuse и «little to no effort» (SQRG §4.6.5, §4.6.6; using-gen-ai-content, 2026-10-01)", yandex: "«массово публиковать тексты без редактуры и фактической проверки» — «плохой путь» [V:AbqU-GxAYs8 1:04:52]; нейросети не негатив, если текст «проверен экспертом» (пост 2025-03-28)"}
     evidence: "[документация]"
-    source: "Google using-gen-ai-content; Яндекс, блог Вебмастера 2025-03-28; «Малополезный контент» (признаки автогенерации)"
-    date: 2026-09-24
+    source: "Google using-gen-ai-content (2026-10-01); Яндекс, блог Вебмастера 2025-03-28; «Малополезный контент» (признаки автогенерации)"
+    date: 2026-10-06
 
   # ============ D. Мета, сниппет и измерение ============
   - id: COPY-GEO-25

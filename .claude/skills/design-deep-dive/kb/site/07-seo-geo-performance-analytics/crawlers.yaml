@@ -10,15 +10,15 @@ status: released            # перепроверка — раз в кварт�
 owner: site
 network_note: >-
   Страницы документации зарубежных платформ сняты через выход в ЕС (VPN, Литва), Яндекса — с российского адреса,
-  24.09.2026. Списки ботов меняются без анонсов: перепроверять
-  раз в квартал и перед запуском сайта (doc_url + дата checked).
+  2026-09-24; записи с более поздней датой checked сняты в день проверки. Списки ботов меняются без анонсов:
+  перепроверять раз в квартал и перед запуском сайта (doc_url + дата checked).
 
 vocab:
   purpose:
     training: сбор контента для обучения моделей (или токен, которым владелец это разрешает или запрещает)
     search: построение поискового индекса, из которого ИИ-ответы берут и цитируют страницы
     user_fetch: разовая загрузка страницы по запросу человека (чат, агент, «прочитай ссылку»)
-    ads: проверка посадочных страниц рекламы
+    ads: реклама — проверка посадочных страниц объявлений и улучшение рекламных продуктов платформы
     other: превью ссылок, рендеринг, служебные и исследовательские обходы
   kind:
     crawler: обходит сайт сам
@@ -232,11 +232,35 @@ bots:
     ip_list_url: https://developers.google.com/static/crawling/ipranges/user-triggered-agents.json
     verify: ip-list
     doc_url: https://developers.google.com/crawling/docs/crawlers-fetchers/google-user-triggered-fetchers
-    checked: 2026-09-24
+    checked: 2026-10-06
     notes: >-
       «Used by agents hosted on Google infrastructure to navigate the web and perform actions upon user request».
       Агенты читают скриншоты, DOM и дерево доступности (ai-optimization-guide 2026-07-10) — формы и CTA должны работать
-      семантически. Соседний fetcher Google-GeminiNotebook (источники Gemini Notebook; бывший Google-NotebookLM — до 08.2026).
+      семантически. Часть запросов подписана Web Bot Auth (emerging web-bot-auth).
+
+  - id: google-geminianotebook
+    owner: Google
+    user_agent_token: Google-GeminiNotebook
+    ua_substring: "Google-GeminiNotebook"
+    purpose: user_fetch
+    kind: fetcher
+    respects_robots: partial
+    star_group_applies: false
+    robots_control: "user-triggered fetchers «generally ignore robots.txt rules»"
+    on_disallow: нет гарантированного эффекта
+    feeds: []
+    priority: 3
+    ip_list_url: https://developers.google.com/static/crawling/ipranges/user-triggered-fetchers-google.json
+    verify: ip-list+rdns
+    rdns_suffix: [google.com, googleusercontent.com]
+    doc_url: https://developers.google.com/crawling/docs/crawlers-fetchers/google-user-triggered-fetchers
+    checked: 2026-10-06
+    notes: >-
+      «Requests individual URLs that Gemini Notebook users have provided as sources for their projects»: страница —
+      источник заметок пользователя, а не ИИ-ответов поиска. Токен в UA мобильной и десктопной версий —
+      «compatible; Google-GeminiNotebook». IP — в файлах user-triggered-fetchers-google.json (rDNS google-proxy-…google.com)
+      и user-triggered-fetchers.json (rDNS …gae.googleusercontent.com): какой из них у этого fetcher'а, Google не уточняет.
+      В политиках robots.txt не перечисляется: правила robots.txt он, как правило, не исполняет (policies.deny-all.tradeoffs).
 
   - id: google-googleother
     owner: Google
@@ -577,6 +601,29 @@ bots:
     checked: 2026-09-24
     notes: Загружает ссылки по запросу пользователя, в том числе для ИИ-агентов, выполняющих задачи на сайтах.
 
+  - id: meta-externalads
+    owner: Meta
+    user_agent_token: meta-externalads
+    ua_substring: "meta-externalads/"
+    purpose: ads
+    kind: crawler
+    respects_robots: "yes"
+    star_group_applies: true
+    robots_control: "User-agent: meta-externalads"
+    on_disallow: контент сайта не используется для улучшения рекламы и других бизнес-продуктов и сервисов Meta
+    feeds: []
+    priority: 3
+    ip_list_url: null
+    verify: none
+    doc_url: https://developers.facebook.com/docs/sharing/webmasters/web-crawlers
+    checked: 2026-10-06
+    notes: >-
+      «Crawls the web for use cases such as improving advertising and other business-related products and services»;
+      UA — «meta-externalads/1.1». Запрет — поимённой группой: «add a disallow for the relevant crawler to robots.txt». В
+      политики ИИ-ботов не входит: по документации это не обучение моделей и не ИИ-ответы; закрывать — решением
+      заказчика, отдельно от search.ai_bots_policy. Посадочные объявлений Meta этот бот не проверяет (rt-ads его не
+      касается).
+
   - id: meta-facebookexternalhit
     owner: Meta
     user_agent_token: facebookexternalhit
@@ -831,8 +878,9 @@ policies:
       - "<meta name=\"applebot\" content=\"nosnippet\"> — вне ИИ-ответов Siri и Search Apple"
     effect: страница остаётся в поиске Яндекса, Google, Bing, Apple; из ИИ-ответов и обучения — выход там, где платформа это позволяет
     tradeoffs: >-
-      Загрузки по запросу пользователя (ChatGPT-User, Perplexity-User, Google-Agent, meta-externalfetcher) robots.txt
-      соблюдают не всегда — закрыть только WAF по IP-спискам, и это отрежет агентов, которые ведут к заявке.
+      Загрузки по запросу пользователя (ChatGPT-User, Perplexity-User, Google-Agent, Google-GeminiNotebook,
+      meta-externalfetcher) robots.txt соблюдают не всегда — закрыть только WAF по IP-спискам, и это отрежет агентов,
+      которые ведут к заявке.
       Для лидогенерации противоречит цели «чтобы нейронки показывали в ответах» — только по явному решению заказчика.
   ask:
     name: Спросить заказчика
@@ -955,7 +1003,8 @@ google_unsupported_rules:
   supported_by_google: [user-agent, allow, disallow, sitemap]
 
 emerging:
-  # Файлы и протоколы «для ИИ» вне robots.txt и meta — статус на 2026-09-24. Решения базы — 02-geo-ai-search.md §5, §8.4.
+  # Файлы и протоколы «для ИИ» вне robots.txt и meta — статус на дату checked записи. Решения базы — 02-geo-ai-search.md
+  # §5, §8.4.
   - id: llms-txt
     what: "/llms.txt — Markdown: H1 (обязателен), цитата-резюме, разделы H2 со списками ссылок, раздел Optional; в корне или в подпапке"
     spec: "llmstxt.org, версия 2 (J. Howard) — предложение, не стандарт"
@@ -1011,6 +1060,38 @@ emerging:
     readers: "упомянут Google в ai-optimization-guide (2026-07-10)"
     decision: "вне рамок базы (магазины)"
     checked: 2026-09-24
+  - id: markdown-for-agents
+    what: >-
+      Cloudflare «Markdown for Agents»: на запрос с Accept: text/markdown edge сам переводит HTML страницы в Markdown;
+      в ответе content-type: text/markdown, x-markdown-tokens, vary: accept и content-signal — если сервер не ставит
+      свой, Cloudflare пишет ai-train=yes, search=yes, ai-input=yes
+    spec: >-
+      функция Cloudflare (changelog 2026-02-12, документация обн. 2026-07-13): тарифы Pro, Business, Enterprise и SSL for
+      SaaS; включается в AI Crawl Control, по умолчанию выключена; переводит только HTML, ответ сервера — до 2 МБ
+    readers: >-
+      ИИ-системы и агенты, которые просят text/markdown в заголовке Accept (описание Cloudflare); документированных
+      читателей среди ботов раздела bots база не знает
+    decision: >-
+      маркетинговому сайту — не включать, как и markdown-alternates: читатели не документированы, у страницы одна версия
+      для людей и машин (02-geo-ai-search.md §5.4). Сайт за Cloudflare с включённой функцией ставит свой заголовок
+      content-signal по search.ai_bots_policy: умолчание Cloudflare разрешает обучение и расходится с политиками
+      allow-search-deny-training и deny-all
+    doc_url: https://developers.cloudflare.com/fundamentals/reference/markdown-for-agents/
+    checked: 2026-10-06
+  - id: web-bot-auth
+    what: >-
+      подпись запросов бота: HTTP Message Signatures (RFC 9421) — заголовки Signature, Signature-Input и Signature-Agent;
+      открытые ключи — в каталоге /.well-known/http-message-signatures-directory владельца бота
+    spec: >-
+      черновик IETF; Google — эксперимент (документация 2026-05-04): подписана часть запросов Google-Agent, заголовок
+      Signature-Agent: g="https://agent.bot.goog", ключи — https://agent.bot.goog/.well-known/http-message-signatures-directory
+    readers: "проверяет сервер, CDN или WAF сайта"
+    decision: >-
+      сайту делать ничего не нужно: подлинность ботов проверяется по verify записей bots (IP-списки, обратный DNS), подпись —
+      дополнительный признак у WAF, который её умеет; Google советует проверку по IP, DNS и UA не снимать, пока подписан не
+      весь трафик
+    doc_url: https://developers.google.com/crawling/docs/crawlers-fetchers/web-bot-auth
+    checked: 2026-10-06
 
 observed:
   # Сверка с geo_probe.py и Web Almanac — фон, не норма.

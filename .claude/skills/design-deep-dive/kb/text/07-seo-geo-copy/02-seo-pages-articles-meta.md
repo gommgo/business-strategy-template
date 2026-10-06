@@ -287,6 +287,7 @@ description) — `checks_outside_linter`.
 | 2025-09-11 | SQRG: §4.6.5 scaled content abuse, §4.6.6 MC «auto or AI generated… with little to no effort» — Lowest; «the use of Generative AI tools alone does not determine the level of effort» [S12] | — |
 | 2025-12 | using-gen-ai-content: генерация многих страниц без ценности — scaled content abuse; точность мета, разметки и `alt` [S14] | Сливинский: граница «генеративный контент — спам» = ценность ответа + честность; не подписывать людьми; «массово… без редактуры» — «плохой путь» [S15: AbqU 46:55, 48:57, 1:04:52] |
 | 2026 | спам-политики (2026-08-28): scaled content abuse «no matter how it's created», манипуляция ИИ-ответами [S2] | «Малополезный контент»: признаки автогенерации — «отклонение от основной темы или циклическое повторение», «добавление предложений ради увеличения объема», «подача вымышленных или непроверенных фактов как достоверных» [S10] |
+| 2026-10-01 | using-gen-ai-content: «manually factcheck and review all AI-generated content for accuracy and trustworthiness before publishing» — вместе с title, description, разметкой и `alt`; мерило — SQRG §4.6.5 (scaled content abuse) и §4.6.6 (little to no effort); читателю — как сделан текст и как использована автоматизация [S14] | — |
 
 Для конвейера: публикация ИИ-текста — только после `claims_check.py`, `copy_lint.py` и человека (`geo-checklist.yaml`
 `COPY-GEO-24`); признаки «малополезного» по Яндексу почти дословно совпадают с маркерами C (раздувание, повторы
@@ -353,7 +354,7 @@ description) — `checks_outside_linter`.
 - [S11] Яндекс Вебмастер, «Отображение даты в сниппете» и «Сниппет», снято 2026-09-24. `[документация]`
 - [S12] Google, Search Quality Rater Guidelines, 11.09.2025 (182 с.): §3.4, §4.6.5–4.6.7, заголовки как часть MC. `[документация]`
 - [S13] Sullivan D., Nelson C. (Google), «Google Search's guidance about AI-generated content», 2023-02-08. `[документация]`
-- [S14] Google Search Central, «Google Search's guidance on using generative AI content on your website», обновлено 2025-12-10. `[документация]`
+- [S14] Google Search Central, «Google Search's guidance on using generative AI content on your website», обновлено 2026-10-01, просмотр 2026-10-06. `[документация]`
 - [S15] Дайджесты W2: `91-videos/digests/h1rZdfW5vqM.md`, `i4jDc58ofH4.md` (Google SOTR 12.2025, 01.2026), `AbqU-GxAYs8.md` (Сливинский 12.2025), `XoStBfaV9Gw.md` (Сливинский 02.2026). `[документация]` (слова представителей)
 - [S16] Блог Вебмастера, «Сайты с качественным контентом смогут получать больше трафика…», 2025-03-28. `[документация]`
 - [S17] D, `03-corpus-measured/02-measurements.md` §2.2, §2.4, §3; `thresholds.yaml`; опыт `99-raw/experiments/G/01-meta-corpus`. `[проверено]`

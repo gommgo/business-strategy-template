@@ -237,6 +237,8 @@ GEO здесь — техника: доступ ИИ-ботов, HTML без JS,
 | Markdown-версии страниц | `page.html.md`, `rel="alternate" type="text/markdown"` (llmstxt v2) [S34] | для документации разработчиков; для услуг и магазинов — «developer bias» `[V:Vkn3R6DUJ34 21:08–22:28]` | маркетинговым страницам не делаем |
 | WebMCP | инструменты сайта для браузерного агента: декларативные в HTML и императивные в JS; «proposed web standard… available for experimentation in production in Chrome, with an origin trial» [S40]; аудит Lighthouse через CDP-домен WebMCP [S36] | эксперимент Chrome (ранний показ — блог Chrome for Developers 2026-02-10, по дайджесту W) | по умолчанию нет; кандидат для записи и калькулятора — после стандарта (§8) |
 | UCP (ucp.dev) | протокол агентов для покупок, на который ссылается Google [S2] | для магазинов | вне рамок базы |
+| Markdown for Agents (Cloudflare) | на запрос с `Accept: text/markdown` edge переводит HTML страницы в Markdown; в ответе `content-signal`, без своего заголовка сервера — `ai-train=yes, search=yes, ai-input=yes` [S55] | функция Cloudflare (2026-02-12), тарифы Pro и выше, по умолчанию выключена; читатели среди ботов не документированы | не включаем; включена — сервер ставит свой `content-signal` по `ai_bots_policy` (`crawlers.yaml` `emerging`) |
+| Web Bot Auth | подпись запросов бота по RFC 9421: `Signature`, `Signature-Input`, `Signature-Agent`, ключи — в `/.well-known/http-message-signatures-directory` [S56] | черновик IETF; у Google — эксперимент: подписана часть запросов `Google-Agent` | сайту ничего не нужно: боты проверяются по IP-спискам и обратному DNS (`crawlers.yaml` `verify`), подпись — дополнительный признак у WAF |
 
 ### 5.4. Решение для генератора
 
@@ -527,3 +529,5 @@ forms» [S9]; meta-externalfetcher [S19]. Cloudflare выделил их в кл
 - [S52] Яндекс Вебмастер, «Поддержка протокола IndexNow», yandex.ru/support/webmaster/ru/indexing-options/index-now. `[документация]`
 - [S53] G: `../06-multipage-ia/02-navigation-linking-i18n.md` §2.1, §3.6, §6; опыт `../99-raw/experiments/G/01-ia-probe/README.md` (20 многостраничников, 2026-09-24). `[проверено]`
 - [S54] ux-research: `../../ux/08-accessibility/02-keyboard-focus-semantics.md`, `03-forms-tables-dynamic-content.md` — семантика, фокус, формы. `[консенсус]` (канон соседа)
+- [S55] Cloudflare, «Markdown for Agents», обн. 2026-07-13, developers.cloudflare.com/fundamentals/reference/markdown-for-agents; changelog 2026-02-12 — просмотр 2026-10-06. `[документация]` поставщика инфраструктуры
+- [S56] Google Crawling Infrastructure, «Authenticate requests with Web Bot Auth (experimental)», обн. 2026-05-04, developers.google.com/crawling/docs/crawlers-fetchers/web-bot-auth — просмотр 2026-10-06. `[документация]`
