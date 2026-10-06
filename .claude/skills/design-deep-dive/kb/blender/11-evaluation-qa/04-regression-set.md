@@ -85,7 +85,6 @@ Blender 5.2.2, three r186.
 
 ```bash
 # Python 3 + Blender 5.2.2 + three r186 — [проверено: 11-evaluation-qa/regression] только отрицательные контроли (≈ 10 с)
-cd /home/mm/Документы/app-design/blender-research
 python3 ../../scripts/blender/regression/run_set.py --label negcheck --tiers negative
 ```
 

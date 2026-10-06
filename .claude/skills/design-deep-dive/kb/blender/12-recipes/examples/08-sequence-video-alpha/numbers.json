@@ -3,7 +3,7 @@
  "sec_per_frame": 0.93,
  "sec_frames": 22.2,
  "passport": {
-  "glb": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/sculpture_ink_34_raw.glb",
+  "glb": "../04-abstract-sculpture/sculpture_ink_34_raw.glb",
   "frames": 24,
   "res": [
    512,

@@ -1,4 +1,4 @@
-"""kbp — паспорт клавиатуры «Ё» в метрах (дорожка KB, 15-showcase). Без bpy: общий источник чисел для Blender (B, C) и кода (A).
+"""kbp — паспорт клавиатуры «Ё» в метрах. Без bpy: общий источник чисел для Blender (B, C) и кода (A).
 
 python3 kbp.py  → пишет passport.json в $DDD_HOME/out/blender/recipes/13-wow-light-hero/ (образец — 15-showcase/keyboard/passport.json;
 раскладка, профиль, корпус, пластина, свитчи, грузик, ножки, палитры).

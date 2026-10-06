@@ -122,7 +122,7 @@ Firefox в Playwright (решение 13) и Safari 26 на телефоне —
 нет; F — `custom` (`06-effects-catalog/effects.schema.json` берёт перечисление из v0). *Итог:* `treatment` v1 I содержит `stations`
 (`09/01` §2.2, схема `urn:…:treatment:1`, 69/69 документов v0 проходят — `compat_check.py`, перезапуск X). **Хвост:** в `effects.yaml`
 у `pin-scrub-story` `fallback.reduce.strategy: custom` (одна запись из 56), схема F держит перечисление v0. *Правит:* S1 — перечисление
-`effects.schema.json` на v1 и `stations` у `pin-scrub-story` (пересборка `99-raw/experiments/F/07-yaml/build_effects.py`).
+`effects.schema.json` на v1 и `stations` у `pin-scrub-story`.
 **Исправлено S1 (2026-09-25):** схема F — перечисление v1 (`stations`), `pin-scrub-story` — `stations`; `effects.yaml` v0.3 пересобран.
 
 **X-06. «CSS scroll-driven вне главного потока».** *A:* Chrome и Carmen Ansio — анимации прокрутки идут на компоновщике [V:YGxOh85VtFg].
@@ -231,7 +231,7 @@ F2 развёл: **`effect:view-transition` (кросс-документный V
 **Исправлено S1 (2026-09-25) по решению оркестратора (вариант 1):** итог выше ошибочен (X2: `view-transition` — переход внутри
 документа, JS; кросс-документный `@view-transition` — это `page-transition`). Решение: `page-transition` — **L1** для нативного
 кросс-документного VT (`@supports`, только `prefers-reduced-motion: no-preference`, ≤ 400 мс на многостраничнике); библиотеки (Barba,
-Swup) и JS-переходы с заставкой — L2 (`limits.library_level_min`). Правлены: `effects.yaml` v0.3 (источник `entries.py`), `06/01`
+Swup) и JS-переходы с заставкой — L2 (`limits.library_level_min`). Правлены: `effects.yaml` v0.3, `06/01`
 §1.2, §6.2, лаборатория `page-transition` (400 мс), `01/03` §3.1, `ambition-levels.yaml` L1/L2, `treatment.schema.json`
 (`x-effect-levels` и условия уровней пересобраны `spec_check.py levels`), `block-treatments.yaml` (portfolio-gallery, case-cards),
 пример «Сталькон» (`effect:page-transition`), `09/01` §3.2. Рецепт 08 — X2.
@@ -492,7 +492,7 @@ unauthorized use») `[документация]` (`02/01` откр. вопр., `
 `page-transition` — библиотека, SPA, L2»), пример I «Сталькон» (`effect:view-transition` для перехода «обложка карточки → hero кейса»
 между страницами), имена техник A (`ambition-levels.yaml`: L1 `view-transitions` — «между страницами многостраничника», L2 `page-transitions`).
 *B:* F `effects.yaml` v0.2 и `06/01` §6.1–6.2 — `view-transition` = переход внутри страницы (`document.startViewTransition`, JS),
-`page-transition` = кросс-документный `@view-transition { navigation: auto }` (0 КБ JS); `id_map` — оба «без изменений» (F2 не разводил);
+`page-transition` = кросс-документный `@view-transition { navigation: auto }` (0 КБ JS);
 G `stack.yaml` — `view-transitions-cross-document` → `use_for: effect:page-transition`. Рецепты J следуют F и G (06 — оба id, 07 —
 `view-transition` внутри страницы, 08 — `page-transition`). *Итог:* правка рецепта 08 «→ `view-transition`» (отчёт X §15) дала бы
 исполнителю JS-переход внутри документа вместо перехода между страницами — не применена; оркестратор решил (2026-09-25, вариант 1):
@@ -527,7 +527,7 @@ J/J2 читать как «craft (рендер)» `[мнение: один су�
 `effects.schema.json`) или допуск в MS-05 для `one-shot` с `model: time` и `repeat: once` (I, `spec_check.py`). *Правит:* владелец формата
 (выбор — S1).
 **Исправлено S1 (2026-09-25, продолжатель S1b):** выбран формат F — `motion.kind` строкой или списком классов (схема `effects.schema.json`
-x-version 0.3: `anyOf` перечисление | массив ≥ 2 уникальных), `3d-scene` — `[scroll-linked, one-shot]` (`entries.py` → `effects.yaml`); MS-05
+x-version 0.3: `anyOf` перечисление | массив ≥ 2 уникальных), `3d-scene` — `[scroll-linked, one-shot]` (`effects.yaml`); MS-05
 `spec_check.py` берёт класс момента из списка — пример L2 «Звено» 0/0/0, остальные 5 примеров и `--selftest` без изменений. Допуск в MS-05 по
 `model: time` не выбран: он пропускал бы разовый момент у любого эффекта прокрутки, а список держит строгость для остальных 55 записей.
 

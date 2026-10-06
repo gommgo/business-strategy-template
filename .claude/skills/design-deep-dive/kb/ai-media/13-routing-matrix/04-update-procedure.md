@@ -22,9 +22,9 @@
 8. **Смена версии модели в маршруте — регрессионные ворота**: тот же мини-стенд; «ruined my grass» — новый чекпойнт молча
    портит детали. → §4 [мнение, V:KLDdXOw6jIc 38:41]
 9. **Снятие модели — за 7 дней до даты**: перевести маршрут на `fallback`, модель — в `defaults.deprecated` (или `until:`),
-   пересобрать задания, где она есть (`grep -l <id> 99-raw/phase5/jobs/*`). → §5 [документация: даты вендоров]
+   пересобрать задания, где она есть (`grep -l <id> $DDD_HOME/out/ai-media/stand/*`). → §5 [документация: даты вендоров]
 10. **Метка `[не проверено]` меняется только по правилу стенда**: `[стенд: N задач × M моделей × R повторов, судья, дата]`
-    при фильтрах кода + ≥ 70 % решающих пар; одиночный прогон — `[проверено: путь]`, не `[стенд]`. → §3 [практика: E 01 §5]
+    при фильтрах кода + ≥ 70 % решающих пар; одиночный прогон — `[проверено: условия]`, не `[стенд]`. → §3 [практика: E 01 §5]
 11. **Равные по интервалу — дешевле**: победа внутри интервала лидера маршрут не меняет, если победитель дороже. → §3
     [исследование: E 01 §4.4]
 12. **Параметр появился у модели** (например, `output_format` у NB Pro 24.09) — проверить компилятор и `dialects.yaml`; если
@@ -51,12 +51,12 @@
 
 ```bash
 # polza_catalog.py 1.0, mp_client.py 1.0, routing_check.py 1.0 — [проверено: 99-raw/experiments/N/04-update-dryrun, 24.09.2026]
-R=/home/mm/Документы/app-design/ai-media-research; cd $R
+cd .claude/skills/design-deep-dive/kb/ai-media                       # корень базы: пути ../../scripts/… — от него
 python3 ../../scripts/ai-media/polza_catalog.py snapshot                      # → 99-raw/cache/polza/<дата>[_ЧЧММ]/ (0 ₽, без ключа)
 python3 ../../scripts/ai-media/mp_client.py snapshot --channel all            # → 99-raw/cache/{routerai,genapi}/<дата_время>/
 python3 ../../scripts/ai-media/polza_catalog.py diff <прошлый> latest > diff.md          # новые / удалённые / параметры / цены
 python3 ../../scripts/ai-media/channel_diff.py > ch.md         # RouterAI и Gen-API
-# в routing.yaml поправить catalog_snapshots (polza, routerai, genapi) на новые папки
+# в routing.yaml поправить catalog_snapshots (polza, routerai, genapi): имя папки нового снимка, не путь
 python3 ../../scripts/ai-media/routing_check.py --md rc.md --json rc.json               # 0 ошибок — иначе §2.1
 python3 99-raw/experiments/N/02-phase5-plan/plan_calc.py                     # estimate всех заданий плана: 0 ошибок, суммы уровней
 ```
@@ -71,7 +71,6 @@ python3 99-raw/experiments/N/02-phase5-plan/plan_calc.py                     # e
 | `провайдер P не из [...]` | провайдер ушёл или добавился | `provider` в `routing.yaml` и заданиях; новый провайдер — триаж цены и параметров (у одной модели у разных провайдеров параметры разные) |
 | `устаревшая модель X среди вариантов` | наступила дата снятия | §5 |
 | `модель с флагом research должна быть final: false` | попытка поставить Qwen 2.1 в финал | вернуть `final: false`; снять флаг — только решением L (письменная лицензия исполнителя) |
-| `тест T не найден` | задание переименовано или удалено | поправить `phase5_test` |
 | `рубрики R нет` / `audit_mode` | K переименовал рубрику | сверить с `11-evaluation-qa/rubrics/` |
 
 ## 3. Правило замены меток
@@ -105,18 +104,19 @@ python3 99-raw/experiments/N/02-phase5-plan/plan_calc.py                     # e
 
 ```bash
 # stand_run.py (E) — [проверено: 99-raw/experiments/N/04-update-dryrun, estimate 0 ошибок]
-99-raw/tools/venv-D/bin/python ../../scripts/ai-media/stand_run.py ministand --model grok-imagine-image-2-0/text-to-image \
-    --out 99-raw/phase5/jobs/E-MS-grok-image-2-0.jsonl        # 11 заданий (S03 пропущен: нет 4:3), 33,00 ₽
-python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/E-MS-grok-image-2-0.jsonl      # 0 ошибок
-python3 ../../scripts/ai-media/polza.py batch 99-raw/phase5/jobs/E-MS-grok-image-2-0.jsonl --live   # только с заказчиком
+99-raw/tools/venv-D/bin/python ../../scripts/ai-media/stand_run.py ministand --model grok-imagine-image-2-0/text-to-image
+    # → E-MS-<модель>.jsonl в папке заданий ($DDD_HOME/out/ai-media/stand/ или --jobs-dir): 11 заданий (S03 пропущен: нет 4:3), 33,00 ₽
+python3 ../../scripts/ai-media/polza.py estimate $DDD_HOME/out/ai-media/stand/E-MS-<модель>.jsonl      # 0 ошибок
+python3 ../../scripts/ai-media/polza.py batch $DDD_HOME/out/ai-media/stand/E-MS-<модель>.jsonl --live   # только с заказчиком
 99-raw/tools/venv-D/bin/python ../../scripts/ai-media/stand_run.py collect && … metrics && … page --tests ministand
 ```
 
 Регрессионный набор — задачи `reg: true` в `stand/tasks.yaml` (S01–S05, S08, S09, S13, S14, 3 × S22): фото-hero, люди,
-продукт, иллюстрация, абстракция, кириллица, счёт предметов, латиница, правка, анти-дефолт. Новую модель показывать в
-парах чаще (её интервал шире). Решение — правило `01` §5; результат — §3 этой процедуры.
+продукт, иллюстрация, абстракция, кириллица, счёт предметов, латиница, правка, анти-дефолт; задачи постобработки и
+видео (поле `pipeline`) в набор не входят. Новую модель показывать в парах чаще (её интервал шире). Решение — правило
+`01` §5; результат — §3 этой процедуры.
 
-**Модели каналов** (RouterAI, Gen-API): `ministand` их не собирает — задания по образцу `99-raw/phase5/jobs/*.routerai.json`
+**Модели каналов** (RouterAI, Gen-API): `ministand` их не собирает — задания по образцу `$DDD_HOME/out/ai-media/stand/*.routerai.json`
 на тех же брифах вручную (кандидат в задачу B2/E, см. отчёт N).
 
 ## 5. Снятие, устаревание, смена провайдера
@@ -145,7 +145,7 @@ python3 ../../scripts/ai-media/polza.py batch 99-raw/phase5/jobs/E-MS-grok-image
 | российские витрины | `P/04-ru-aggregators/parse_genapi.py` (прайс Gen-API); снимки RouterAI/Gen-API — `mp_client.py snapshot` | при каждом снимке | `genapi_prices_<дата>.json` — источник цен `mp_client` |
 | лимиты промтов | `D/01-catalog-prompt-limits/extract.py` (указать снимок) | новый снимок | `prompt_limits.json` → компилятор, `dialects.yaml` |
 | карточки вызова 44 моделей | `B/07-model-cards/gen_model_cards.py` | новый снимок | `tables.md` |
-| задания стенда | `stand_run.py build` (компилятор D2) | новая версия компилятора / диалекта | `99-raw/phase5/jobs/E-*.jsonl` |
+| задания стенда | `stand_run.py build` по рецептам `stand/tasks.yaml`, ключ `recipes` (компилятор D2) | новая версия компилятора / диалекта | `$DDD_HOME/out/ai-media/stand/E-*.jsonl` |
 | задания каналов | `mp_client.py estimate … --summary` | новый снимок RouterAI/Gen-API | отказы лимитов, расхождения цен |
 | маршруты | `routing_check.py` | всегда последним | 0 ошибок |
 
@@ -153,7 +153,7 @@ python3 ../../scripts/ai-media/polza.py batch 99-raw/phase5/jobs/E-MS-grok-image
 
 1. Результаты каждого теста — паспорта `*.passport.json`, `asset_audit.py` (вердикты), голоса `stand_run.py tally`, судья K
    (`agree`), провенанс L (`provenance.md`).
-2. Для каждого маршрута с `phase5_test`: ворота из `03-routing-matrix.md` §8 → решение → метка по §3 → поле `decides`
+2. Для каждого маршрута, который проверял тест: ворота из `03-routing-matrix.md` §8 → решение → метка по §3 → поле `decides`
    заменить итогом («E-08: Sunburst ≥ 70 % пар, 2K > 4K; Flare в интервале → Flare/Sunburst равны → цена равна → Sunburst»).
 3. `dialects.yaml` → `ab_results` (D2-01/02, правило ≥ 10 п. п. и ДИ > 0); `thresholds.yaml` K → `status: calibrated` по K-07.
 4. Флаг `visible-vendor-mark` у Seedream — снять или оставить по E-01/L-02; `provider` NB Pro — flex по T5.
@@ -181,7 +181,7 @@ alt без цены; цены RouterAI → 24.09; валидатор 0 ошиб�
 
 ## Чек-лист
 
-- Снимки polza, RouterAI, Gen-API свежие (сегодня) и прописаны в `catalog_snapshots`?
+- Снимки polza, RouterAI, Gen-API свежие (сегодня) и прописаны в `catalog_snapshots` именами папок (не путями)?
 - `diff` и `channel_diff.py` прочитаны; новые модели прошли триаж §4?
 - `routing_check.py` — 0 ошибок; предупреждения (`until`) прочитаны?
 - Одинаковый сдвиг цен распознан как курс; неодинаковый — пересчитаны бюджеты маршрутов?

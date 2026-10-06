@@ -1,11 +1,9 @@
 # Пример motion-spec v1 — «Отвес», главная (L1). Учебный.
-# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
 # Проверка: spec_check.py spec 09-ai-execution-evaluation/examples/otves-home.motion-spec.yaml --plan <план site> --overlay otves-home.treatment.yaml
 # Проекции: spec_check.py moments … (строки T7), motion-md … (MOTION.md пакета), values … --out DIR (JSON чисел на секцию).
-# Опыт «достаточность спецификации»: секция how-it-works собрана только по этому файлу — 99-raw/experiments/I/02-spec-sufficiency.
+# Проверка достаточности спецификации: секция how-it-works собрана только по этому файлу.
 motion_spec_version: "1.0"
 id: otves-home
-x-revision: "1.1 — после опыта I/02: subject диапазона = линия, станции по якорям, грузик через attach, ветка unsupported"
 example: true
 status: proposed
 checked_at: "2026-09-24"
@@ -122,7 +120,7 @@ sections:
         interrupt: follow-input
         reduce: {strategy: final-state, describe: "линия нарисована целиком"}
         mobile: {strategy: simplified, describe: "линия у левого края колонки, 2 px; маркеры шагов — на линии (центр маркера на оси линии)"}
-        note: "v1.1 (после опыта I/02): диапазон считается по самой линии, а не по списку — в v1.0 конец линии отставал от маркеров до 98 px"
+        note: "диапазон считается по самой линии, а не по списку: по списку конец линии отстаёт от маркеров до 98 px"
       - id: plumb-bob-follow
         class: scroll-linked
         purpose: orient
@@ -167,7 +165,7 @@ sections:
         - {id: hiw-s4, at: {station: s4}, viewport: desktop, describe: "Линия от маркера 1 до маркера 4, все маркеры залиты; дальше страница прокручивается, линия не меняется.", check: "линия = 100 % высоты между маркерами 1 и 4"}
         - {id: hiw-m, at: {progress: 0.5}, viewport: mobile, describe: "Телефон: одна колонка, линия 2 px у левого края, грузика нет; залиты маркеры пройденных шагов."}
         - {id: hiw-r, at: {progress: 0}, viewport: reduce, describe: "Reduce: линия целиком, грузик внизу, все маркеры залиты — уже на входе в секцию.", check: "движение при прокрутке внутри секции 0 %"}
-      note: "эскизы по кадрам не рисовались: описание словами + проверка кадров записи (опыт I/02)"
+      note: "эскизы по кадрам не рисовались: описание словами + проверка кадров записи"
     reduce: {strategy: final-state, describe: "линия целиком, грузик внизу колонки, маркеры залиты; ничего не движется"}
     mobile: {strategy: simplified, describe: "линия 2 px у левого края, без грузика; маркеры на линии; site blocks.yaml steps убирает соединительные линии < 40rem — здесь линия несёт тезис и остаётся"}
     fallback:
@@ -176,7 +174,7 @@ sections:
     budget: {js_kb_br: 0, loops_in_view: 0, long_frames_pct_max: 2, idle_motion_pct_s_max: 0, cls_scroll_max: 0.1, load: eager}
     acceptance:
       - {id: hiw-idle, check: "в покое между шагами прокрутки движения нет (скраб стоит вместе с прокруткой)", tool: scroll_record, at: desktop, threshold: 0}
-      - {id: hiw-stations, check: "зонд станций: конец линии и грузик на середине окна ±24 px, залито N маркеров (99-raw/experiments/I/02-spec-sufficiency/shoot_stations.py)", tool: eye, at: "s1–s4", threshold: 24}
+      - {id: hiw-stations, check: "зонд станций: конец линии и грузик на середине окна ±24 px, залито N маркеров", tool: eye, at: "s1–s4", threshold: 24}
       - {id: hiw-reduce, check: "в reduce линия целиком с первого кадра секции, доля меняющихся пикселей 0 %", tool: motion_check, metric: rm.idle_first_pct, at: reduce, threshold: 0}
       - {id: hiw-no-js, check: "эффект без JS: 0 КБ скриптов подачи; без поддержки scroll-driven — линия целиком", tool: effects_probe, at: desktop, threshold: 0}
       - {id: hiw-cls, check: "CLS при прокрутке ≤ 0,1", tool: motion_check, gate: EG-PERF-02, metric: scroll.cls, at: desktop, threshold: 0.1}

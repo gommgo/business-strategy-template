@@ -7,10 +7,10 @@
  "approved_by": null,
  "checked_at": "2026-09-25",
  "refs": {
-  "brief": "../../../site-research/99-raw/experiments/E/03-saas-demo-brief/site-brief-okoshko-demo.yaml",
-  "facts": "../../../text-research/99-raw/experiments/E/facts-demo-saas-okoshko.yaml",
+  "brief": "../../../site/10-playbooks-contracts/examples/saas-okoshko/site-brief.yaml",
+  "facts": "../../../text/10-templates-recipes/examples/facts/facts-demo-saas-okoshko.yaml",
   "page_plans": [
-   "../../../site-research/04-blocks/examples/page-plan-saas-okoshko.yaml"
+   "../../../site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml"
   ]
  },
  "inputs": {
@@ -48,7 +48,7 @@
   "source": "default",
   "budget_profile": "landing-saas@L1",
   "motion_cap": "expressive",
-  "rationale": "SaaS-лендинг — умолчание L1 (решение п. 13). Фирменный приём — продукт в работе (закреплённая сцена расписания); тарифы — L0; холодный мобильный трафик из соцсетей → первый экран ≤ 2 МБ, сцена после LCP.",
+  "rationale": "SaaS-лендинг — умолчание L1. Фирменный приём — продукт в работе (закреплённая сцена расписания); тарифы — L0; холодный мобильный трафик из соцсетей → первый экран ≤ 2 МБ, сцена после LCP.",
   "by_section_role": [
    {
     "role": "pricing",
@@ -202,7 +202,7 @@
     "text": "Golos Text",
     "cyrillic_checked": false,
     "license": "OFL",
-    "note": "v1: Nunito → Commissioner по cyrillic-display-fonts.yaml (Oswald — avoid, Nunito — average)"
+    "note": "Commissioner вместо Nunito по cyrillic-display-fonts.yaml (Oswald — avoid, Nunito — average)"
    },
    "signature_move": {
     "what": "Пузыри сообщений появляются по одному при прокрутке, как в чате",
@@ -250,7 +250,7 @@
     "text": "Golos Text",
     "cyrillic_checked": false,
     "license": "OFL",
-    "note": "v1: Oswald → Sofia Sans Condensed по cyrillic-display-fonts.yaml (Oswald — avoid, Nunito — average)"
+    "note": "Sofia Sans Condensed вместо Oswald по cyrillic-display-fonts.yaml (Oswald — avoid, Nunito — average)"
    },
    "signature_move": {
     "what": "Перекидные цифры табло один раз показывают долю неявок до и после (fact:noshow-average, fact:case-noshow-kazan)",
@@ -264,7 +264,7 @@
    "first_viewport": "Крупное табло «сегодня 14:00 — занято» и одна строка обещания с кнопкой",
    "imagery": "типографика",
    "motion": "одно перелистывание цифр",
-   "risk": "Почти-чёрный + жёлтый акцент — кластер ui 11/04 №2; ряд цифр — примета K3 stats; счётчики — клише",
+   "risk": "Почти-чёрный + жёлтый акцент — кластер ui 11/04 №2; ряд цифр — примета stats-row; счётчики — клише",
    "cost": "дёшево",
    "level_fit": [
     "L1",
@@ -424,7 +424,7 @@
  "decisions": [
   {
    "id": "d-stats-row",
-   "technique": "k3:stats (ряд цифр)",
+   "technique": "примета stats-row (ряд цифр)",
    "decision": "twist",
    "criteria": {
     "concept": {
@@ -467,7 +467,7 @@
     },
     "epoch": {
      "result": "fail",
-     "note": "сходимость генераторов (kimi 05/03, Kilo)"
+     "note": "сходимость генераторов (Kilo)"
     },
     "singularity": {
      "result": "na"
@@ -589,7 +589,7 @@
     "version": "0.1",
     "date": "2026-09-24",
     "change": "4 направления для демо SaaS",
-    "by": "Claude (пример A/01)"
+    "by": "Claude (пример)"
    }
   ],
   "review_by": "2027-03-24",

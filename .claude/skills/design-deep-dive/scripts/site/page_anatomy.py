@@ -38,8 +38,9 @@
  10. текст без JS: тело ответа главного документа (что сервер отдал браузеру) против отрисованного DOM — доля слов, h1,
      текст главного CTA, цены, заголовки секций, title и description, JSON-LD.
 
-Запуск (замер — на тихой машине: утилита берёт общий тяжёлый замок, замок браузера и замок site — page_gates.heavy_lock;
---no-lock — обёртка их уже держит; не дольше 5 мин на страницу). Код репозитория — соседним чекаутом
+Запуск (замер — на тихой машине: утилита берёт общий тяжёлый замок, замок браузера и замок site — page_gates.heavy_lock,
+kbpaths.lock; вложенный вызов из процесса, который их уже держит, не ждёт; --no-lock — замер без замков; не дольше 5 мин
+на страницу). Код репозитория — соседним чекаутом
 ../strategy/.claude/skills/design-deep-dive/scripts/site/page_anatomy.py:
   page_anatomy.py URL OUT_DIR [--mobile] [--inp] [--quick] [--no-cmp-close] [--label PAGE_TYPE]
           [--id ID] [--net [auto|ru-direct|vpn-lt|unknown]] [--exit-country CC] [--timezone TZ] [--site-type X]
@@ -70,7 +71,7 @@ import threading, time, urllib.parse, urllib.request
 from html.parser import HTMLParser
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('site'))
 WV_IIFE = str(kbpaths.node_modules('web-vitals', 'dist', 'web-vitals.attribution.iife.js'))
@@ -2616,7 +2617,7 @@ def main():
     ap.add_argument('--template'); ap.add_argument('--site-id'); ap.add_argument('--source'); ap.add_argument('--timeout', type=int, default=60)
     ap.add_argument('--wait', type=int, default=None, help='окно первого экрана после load, мс (по умолчанию — budgets.yaml)')
     ap.add_argument('--cpu', type=int, default=None); ap.add_argument('--crux', action='store_true')
-    ap.add_argument('--no-lock', action='store_true', help='не брать замки тишины (обёртка их уже держит)')
+    ap.add_argument('--no-lock', action='store_true', help='не брать замки тишины')
     ap.add_argument('--selftest', action='store_true'); ap.add_argument('--out', dest='out_opt')
     kbg = ap.add_argument_group('обслуживание базы', 'замер и пересчёт корпуса страниц базы знаний; замеру страницы проекта '
                                                      'эти ключи не нужны')

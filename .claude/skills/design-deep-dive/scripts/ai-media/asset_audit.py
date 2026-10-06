@@ -78,7 +78,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # scrip
 import kbpaths  # noqa: E402
 ROOT = kbpaths.kb("ai-media")
 TOOLS = kbpaths.scripts("ai-media")
-LOCKS = Path(kbpaths.lock_path("heavy", "ai-media")).parent  # $DDD_HOME/locks/ai-media/{heavy,browser,blender}.lock
 THRESHOLDS = ROOT / "11-evaluation-qa" / "thresholds.yaml"
 RUBRICS = ROOT / "11-evaluation-qa" / "rubrics"
 OCR_MODELS = kbpaths.models("ocr")
@@ -189,39 +188,15 @@ def last_line(text: str, n: int = 300) -> str:
     return (lines[-1] if lines else "")[:n]
 
 
-def _ancestor_holds_lock(lock_name: str) -> bool:
-    """Держит ли уже этот замок процесс-предок через flock(1) (`flock … heavy.lock python3 asset_audit.py …`).
+def run_locked(cmd: list[str], lock: str = "heavy", wait: int = 1800, **kw) -> subprocess.CompletedProcess:
+    """Команда под замком `$DDD_HOME/locks/ai-media/<lock>.lock` (heavy — модели, browser — Chromium, blender — Blender).
 
-    Повторный `flock` на тот же файл из дочернего процесса ждал бы родителя до таймаута — самоблокировка
-    — поэтому замок предка не берут повторно. Только Linux (/proc); при любой ошибке — False.
+    Замок берёт `kbpaths.lock`: он реентерабелен по дереву процессов — замок, который уже держит этот процесс или его
+    предок (переменная DDD_LOCKS_HELD), повторно не берётся и не ждёт, а дочерняя команда наследует переменную. Замок
+    занят дольше wait секунд — TimeoutError.
     """
-    try:
-        pid = os.getppid()
-        for _ in range(16):
-            if pid <= 1:
-                break
-            with open(f"/proc/{pid}/cmdline", "rb") as fh:
-                args = [a.decode("utf-8", "replace") for a in fh.read().split(b"\0") if a]
-            if args and os.path.basename(args[0]) == "flock" and any(a.endswith(lock_name) for a in args[1:]):
-                return True
-            with open(f"/proc/{pid}/stat", encoding="utf-8", errors="replace") as fh:
-                pid = int(fh.read().rsplit(")", 1)[1].split()[1])
-    except (OSError, ValueError, IndexError):
-        return False
-    return False
-
-
-def locked(cmd: list[str], lock: str = "heavy", wait: int = 1800) -> list[str]:
-    """Команда под flock из $DDD_HOME/locks/ai-media (heavy — модели, browser — Chromium, blender — Blender).
-
-    Если замок уже держит процесс-предок (утилиту обернули во внешний `flock`), повторно не берём — иначе самоблокировка.
-    """
-    if shutil.which("flock") is None:
-        return cmd
-    if _ancestor_holds_lock(f"{lock}.lock"):
-        return cmd
-    LOCKS.mkdir(parents=True, exist_ok=True)
-    return ["flock", "-w", str(wait), str(LOCKS / f"{lock}.lock")] + cmd
+    with kbpaths.lock(lock, "ai-media", timeout=wait):
+        return subprocess.run(cmd, **kw)
 
 
 # ================================================================ пороги
@@ -493,9 +468,12 @@ def run_ocr(paths: list, lang: str = "ru", text_score: float = 0.3, timeout: int
     fg = free_gb()
     if fg is not None and fg < 1.0:
         return [{"file": str(p), "error": f"мало памяти ({fg:.1f} ГБ available) — OCR не запущен"} for p in paths]
-    cmd = locked([kbpaths.python(), str(Path(__file__).resolve()), "_ocr-worker", "--lang", lang, "--text-score", str(text_score)]
-                 + [str(Path(p).resolve()) for p in paths])
-    r = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
+    cmd = ([kbpaths.python(), str(Path(__file__).resolve()), "_ocr-worker", "--lang", lang, "--text-score", str(text_score)]
+           + [str(Path(p).resolve()) for p in paths])
+    try:
+        r = run_locked(cmd, "heavy", capture_output=True, text=True, timeout=timeout)
+    except TimeoutError as e:
+        return [{"file": str(p), "error": f"OCR не запущен: {e}"} for p in paths]
     try:
         return json.loads(r.stdout)
     except json.JSONDecodeError:
@@ -1033,7 +1011,7 @@ def slop_color_metrics(path: Path) -> dict:
 
 
 def dna_reference_metrics(dna: dict | None, dna_path: Path | None) -> dict | None:
-    """Средние цветовые метрики эталонов паспорта визуала (references) — основа порогов «к эталону бренда» (A/04, F/04)."""
+    """Средние цветовые метрики эталонов паспорта визуала (references) — основа порогов «к эталону бренда» (ai-media 06/04)."""
     if not dna or not dna_path:
         return None
     refs = [r.get("src") for r in dna.get("references", []) if r.get("src")]
@@ -1080,7 +1058,7 @@ def check_slop_color(R: Report, path: Path, ref: dict | None, dna: dict | None):
     wb_neutral = bool(dna and ((dna.get("palette") or {}).get("neutral_wb") or {}).get("target_b", 1) <= 0.004)
     if m.get("warm_b") is not None and m["warm_b"] > th("image.warm_b_max", 4.0):
         R.defect("QA-COLOR-WARM", "warn" if wb_neutral else "info",   # предупреждение — только при нейтральном белом в паспорте
-                 f"b* нейтралей +{m['warm_b']} — жёлтый сдвиг белого (у 9 из 51 фото лидеров это стиль, A/04)",
+                 f"b* нейтралей +{m['warm_b']} — жёлтый сдвиг белого (у 9 из 51 фото лидеров это стиль)",
                  metric="slop_color.warm_b", value=m["warm_b"], th_key="image.warm_b_max", marker="IMG-M04")
     purple_ok = False
     if dna:
@@ -1144,7 +1122,7 @@ def check_composition(R: Report, path: Path, rect, slot: str | None, dna: dict |
 
 
 def check_text_zone(R: Report, path: Path, rect, dna: dict | None, text_color: str | None):
-    """F/02: плотность краёв зоны и скрим под текст (p99,9 → проверка F83 по худшему пикселю)."""
+    """Плотность краёв зоны и скрим под текст (p99,9 → проверка F83 по худшему пикселю)."""
     th = R.th
     tz = mod("text_zone")
     img = tz.load(str(path), 1280)
@@ -1377,7 +1355,7 @@ def audit_cutout(R: Report, path: Path, facts, a, ctx):
     translucent = float(((al_ > 25) & (al_ < 230)).sum() / max(1, (al_ > 25).sum()))
     if (halo.get("halo_px") or 0) > R.th("cutout.halo_px_max", 2.0):
         # на полупрозрачном (стекло, дым, ткань) «ядро» alpha_check мало, и кайма законно отличается от него — ореол по этой
-        # эвристике ложный (K: эталонный рендер матового флакона H/00 → 12 px); смотреть на контрастном фоне глазами
+        # эвристике ложный (эталонный рендер матового флакона → 12 px); смотреть на контрастном фоне глазами
         glassy = getattr(a, "object", None) == "glass" or translucent > 0.25
         R.defect("QA-ALPHA-HALO", "info" if glassy else "warn",
                  f"ореол {halo.get('halo_px')} px (кайма цвета фона) — " + ("полупрозрачный объект: эвристика ненадёжна, смотреть на "
@@ -1417,7 +1395,7 @@ def audit_cutout(R: Report, path: Path, facts, a, ctx):
 
 
 def diff_mask(orig: Path, edited: Path, thr: float = 5.0, min_frac: float = 0.0005):
-    """Маска изменений для безмасочной правки (D2: edit_check её не строит): подгонка цвета по «устойчивым» пикселям,
+    """Маска изменений для безмасочной правки (edit_check её не строит): подгонка цвета по «устойчивым» пикселям,
     ΔE00 > thr, открытие 3×3 и закрытие 5×5, компоненты ≥ min_frac кадра. Возвращает (маска bool, отчёт)."""
     import numpy as np
     from scipy import ndimage as ndi
@@ -1458,7 +1436,7 @@ def local_shift(orig: Path, edited: Path, target_mask: str | None, mask_mode: st
     """Локальный сдвиг вне цели после робастной подгонки цвета (своя проверка K поверх edit_check.py): подгонка по
     пикселям «вне цели» в 2 прохода (второй — без пикселей с остатком ΔE00 > 3), затем связные области ΔE00 > de_thr
     площадью ≥ min_frac «вне цели». Зачем: глобальная --match-color убирает общий сдвиг модели, и локальная утечка слабее
-    ΔE00 5 перестаёт быть видна порогом edit_check (H/03 leak: 0,131 без подгонки → 0,0001 с подгонкой)."""
+    ΔE00 5 перестаёт быть видна порогом edit_check (утечка 0,131 без подгонки → 0,0001 с подгонкой, ai-media 08/02)."""
     import numpy as np
     from scipy import ndimage as ndi
     ec = mod("edit_check")
@@ -1747,11 +1725,11 @@ def audit_video(R: Report, path: Path, facts, a, ctx, alpha=False, once=False):
                      f"(< {need('video.motion_vs_control_min')}) — статичный коллапс",
                      metric="loop.motion_vs_control", value=m["motion_vs_control"], th_key="video.motion_vs_control_min")
     elif loop_like:
-        R.defect("QA-LOOP-NO-CONTROL", "info", "нет i2v-контроля (--control): равномерно слабое движение метрикой не видно (I/02)")
+        R.defect("QA-LOOP-NO-CONTROL", "info", "нет i2v-контроля (--control): равномерно слабое движение метрикой не видно (ai-media 09/01)")
     if "motion_keep" in m and m["motion_keep"] < need("video.motion_keep_min"):
         R.defect("QA-ENCODE-MOTION", "warn", f"сжатие съело движение: motion_keep {m['motion_keep']} к мастеру "
                  f"(< {need('video.motion_keep_min')}) — CRF ниже "
-                 "(J/05: AV1 CRF 36 тихих петель 0,24–0,77; AV1 24–28, H.264 18–20)", metric="loop.motion_keep", value=m["motion_keep"],
+                 "(AV1 CRF 36 тихих петель 0,24–0,77; AV1 24–28, H.264 18–20)", metric="loop.motion_keep", value=m["motion_keep"],
                  th_key="video.motion_keep_min")
     if loop_like and not montage and m["cam_shift_max_px"] >= need("video.cam_shift_max_px") and not getattr(a, "camera_move", False):
         R.defect("QA-VIDEO-CAM-CREEP", "warn", f"кадр ползёт на {m['cam_shift_max_px']} px — «ползущая камера» ломает шов",
@@ -1825,20 +1803,20 @@ def audit_svg(R: Report, path: Path, facts, a, ctx):
     if si["has_text"]:
         R.defect("QA-SVG-TEXT", "warn", "в SVG есть <text> — зависит от шрифтов; перевести в кривые или HTML")
     if si["preserveAspectRatio_none"]:
-        R.defect("QA-SVG-ROOT", "warn", 'корень с preserveAspectRatio="none" — искажение при другой пропорции (G/02)')
+        R.defect("QA-SVG-ROOT", "warn", 'корень с preserveAspectRatio="none" — искажение при другой пропорции (ai-media 07/02)')
     if not si.get("viewBox"):
         R.defect("QA-SVG-ROOT", "warn", "нет viewBox — не масштабируется")
     first = re.search(r"<svg\b[^>]*>\s*(?:<[^>]+>\s*)?<(rect|path)\b([^>]*)>", txt)
     if first and first.group(1) == "rect" and re.search(r'width="100%"|width="' + re.escape(str(si.get("width") or "")) + '"', first.group(2) or ""):
-        R.defect("QA-SVG-BG", "warn", "первым идёт прямоугольник во весь холст — фон: удалить до svgo (G/02)")
+        R.defect("QA-SVG-BG", "warn", "первым идёт прямоугольник во весь холст — фон: удалить до svgo (ai-media 07/02)")
     if si.get("recraft_signature"):
-        R.defect("QA-SVG-SIGNATURE", "info", "подпись провенанса Recraft — не удалять при svgo (конфиг keep-signature, G/02; L)")
+        R.defect("QA-SVG-SIGNATURE", "info", "подпись провенанса Recraft — не удалять при svgo (конфиг keep-signature, ai-media 07/02)")
     light = any(c in ("#fff", "#ffffff", "white", "#fefefe") for c in si["colors_all"])
     dark = any(c in ("#000", "#000000", "black") or (c.startswith("#") and len(c) in (4, 7) and int(c[1:2], 16) < 4)
                for c in si["colors_all"])
     if si["style"] == "filled" and light and dark:
         R.defect("QA-SVG-PAINTED-HOLES", "warn", "светлые фигуры поверх тёмных — «дырки» нарисованы цветом фона: в тёмной теме "
-                 "и с currentColor будет пятно (G/02: 3 из 5 иконок Recraft) — проверить рендер на тёмном фоне")
+                 "и с currentColor будет пятно (3 из 5 иконок Recraft, ai-media 07/02) — проверить рендер на тёмном фоне")
     kb = info["bytes"] / 1024
     lim = R.th("svg.icon_kb_max", 10) if ctx["slot"] in ("icon", None) else R.th("svg.illustration_kb_max", 100)
     if kb > lim:
@@ -1848,7 +1826,7 @@ def audit_svg(R: Report, path: Path, facts, a, ctx):
         etalon = [x for k, v in (("--stroke", getattr(a, "icon_stroke", None)), ("--viewbox", getattr(a, "icon_viewbox", None)),
                                  ("--conventions", getattr(a, "conventions", None))) if v is not None for x in (k, str(v))]
         check_icons(R, path, getattr(a, "icon_set", None), tuple(etalon))
-    R.ask_human("Узнаётся ли метафора иконки за 5 секунд без подписи?", "новые метафоры узнаются 2 из 5 (G/01); геометрию код "
+    R.ask_human("Узнаётся ли метафора иконки за 5 секунд без подписи?", "новые метафоры узнаются 2 из 5 (ai-media 07/01); геометрию код "
                 "проверяет, смысл — человек или VLM с контролем (G-06)")
     return R
 
@@ -1884,7 +1862,7 @@ def check_icons(R: Report, path: Path, icon_set: str | None = None, etalon: tupl
         code = {"шапка": "QA-SVG-HEADER", "цвет": "QA-SVG-COLOR", "поле<1": "QA-SVG-MARGIN", "зазор": "QA-SVG-GAP",
                 "узко": "QA-SVG-NARROW", "вес": "QA-SVG-WEIGHT", "центр": "QA-SVG-CENTER", "сетка": "QA-SVG-GRID"}.get(key, "QA-SVG-FLAG")
         lvl = levels.get(key) or ("fail" if key == "цвет" or (key == "шапка" and is_lucide(icon_set)) else "warn")
-        msg = f"check_icons: {f} (пороги по Lucide 1.47, G/01)"
+        msg = f"check_icons: {f} (пороги по Lucide 1.47, ai-media 07/01)"
         if key == "шапка":
             hr = res.get("header_rules") or {}
             msg = (f"check_icons: шапка не по спецификации Lucide ({', '.join(res.get('header_bad') or [])}; правило — "
@@ -2128,7 +2106,7 @@ def audit_series(paths: list[Path], th: Th, a, out_dir: Path, dna: dict | None) 
             "verdict": {0: "pass", 1: "warn", 2: "needs_human", 3: "fail"}[lvl], "defects": defects,
             "human": ["Серия рядом в одном размере, размыть: одинаковы ли пятна по весу; стиль, свет и линия одни? (цвет метрики "
                       "видят, стиль — нет: CSD ρ 0,565 с людьми, F-src-series)"],
-            "thresholds_note": "F/06: одна съёмка 5,7° / 0,038; четыре локации 104° / 0,091; пороги — фото, для иллюстраций пересчитать"}
+            "thresholds_note": "ai-media 06/02: одна съёмка 5,7° / 0,038; четыре локации 104° / 0,091; пороги — фото, для иллюстраций пересчитать"}
 
 
 # ================================================================ главный проход

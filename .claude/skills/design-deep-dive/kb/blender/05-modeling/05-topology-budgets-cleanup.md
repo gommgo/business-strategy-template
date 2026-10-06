@@ -38,7 +38,7 @@ three r186. Все блоки `python` выполнены в напечатан�
 
 ```python
 # Blender 5.2.2 — [проверено] вогнутая грань → GLB → треугольники покрывают её без перекрытий
-import sys, os, json, math, struct, tempfile; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, os, json, math, struct, tempfile; sys.path.insert(0, "../../scripts/blender")
 import numpy as np, bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 star = [(math.cos(2 * math.pi * i / 10) * (0.05 if i % 2 == 0 else 0.019),
@@ -133,7 +133,7 @@ D1 для кода — по эксперименту D1/03 (решётка 7 × 
 
 ```python
 # Blender 5.2.2 — [проверено] «голые» булевы против EXACT с очисткой
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 def plate_and_cutter(tag):
@@ -196,7 +196,7 @@ Origin = точка вращения и масштабирования в three 
 
 ```python
 # Blender 5.2.2 — [проверено] применить поворот и масштаб, не трогая pivot; pivot на ось
-import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, math; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 ob = bpyx.primitive("cube", "Door", size=1.0)
@@ -284,7 +284,7 @@ culling выключен → вывернутые грани не видны, а
 
 ```python
 # Blender 5.2.2 — [проверено] чистота меша (D1) + preflight() агента E перед экспортом
-import sys, json, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, json, math; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_hero")
@@ -303,7 +303,7 @@ def mesh_checks(ob):
     return {"nonmanifold": nonman, "curved_ngons": curved_ngons, "scale_applied": st["scale_applied"],
             "gltf_verts": D.gltf_vertex_estimate(ob)["gltf_verts_est"]}
 rep = {o.name: mesh_checks(o) for o in C.objects if o.type == "MESH"}
-exec(open("/home/mm/Документы/app-design/blender-research/99-raw/experiments/E/26-doc-snippets/preflight_block.py").read())
+exec(open("../../scripts/blender/preflight_block.py").read())
 pf = [(lvl, code, obn) for lvl, code, obn, msg in preflight()]          # функция агента E (08-export-gltf/04 §5)
 print(json.dumps(rep), pf)
 assert rep["Body"]["nonmanifold"] == 0 and rep["Logo"]["nonmanifold"] == 0

@@ -404,8 +404,8 @@ style, accent hue) `[практика]` `[проверено: A/01 n1]`:
    подача 43 секций трёх примеров site) `[проверено]`.
 3. Паспорт визуала ai-media получает `character`, `one_bold_move`, запретные полосы, маркеры, `abstract`, `video`
    (проверено подсхемами `visual-dna.schema.json`: 5 из 5 примеров без ошибок) `[проверено]`.
-4. Пакет kimi — `design_system.style`, `direction.*`, `decisions.motion.*`, `--allow` (таблица —
-   `drafts-for-site/site-brief-creative-fields.yaml` `kimi_crosswalk`).
+4. Бриф холста — `direction.*`, `design_system.bans`, `design_system.allow` (ключи `--allow` утилиты макета),
+   `decisions.motion.*` (поле → поле — ключ `x-canvas-map` схемы `../09-ai-execution-evaluation/art-direction.v1.schema.json`).
 
 ## 8. Выражение бренда на сайте
 

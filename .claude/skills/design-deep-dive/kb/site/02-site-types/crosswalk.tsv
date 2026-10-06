@@ -1,136 +1,136 @@
 source_base	source_file	source_section	source_vocab	source_term	namespace	our_id	relation	note
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	landing	page_type		none	жанр text; у site — поле page_type.genre=landing (все landing-*)
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	site-page	page_type		none	жанр text; у site — поле page_type.genre=site-page
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	article	page_type		none	жанр text; у site — поле page_type.genre=article (article-page, seo-landing-page, alternatives-page, blog-index-page)
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	meta	slot		none	жанр текста без типа страницы; слоты meta-* со scope: page
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	geo	slot		none	жанр текста; слоты geo-answer, definition, article-summary
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	genres	genre	email-form	slot		none	жанр текста; слоты email-*; механика писем — site F
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-lead-services	page_type	landing-lead-services	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-saas	page_type	landing-saas	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-product	page_type	landing-product	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-campaign	page_type	landing-campaign	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-event	page_type	landing-event	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-course	page_type	landing-course	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-app	page_type	landing-app	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	landing-waitlist	page_type	landing-waitlist	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	home-multipage	page_type	home-multipage	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	service-page	page_type	service-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	about-page	page_type	about-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	case-page	page_type	case-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	pricing-page	page_type	pricing-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	careers-page	page_type	careers-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	contacts-page	page_type	contacts-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	portfolio-page	page_type	portfolio-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	article-page	page_type	article-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	page_types	page_type	seo-landing-page	page_type	seo-landing-page	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	hero	section_role	hero	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	problem	section_role	problem	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	solution	section_role	solution	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	benefits	section_role	benefits	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	how-it-works	section_role	how-it-works	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	product-demo	section_role	product-demo	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	proof-logos	section_role	proof-logos	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	proof-stats	section_role	proof-stats	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	testimonials	section_role	testimonials	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	case-studies	section_role	case-studies	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	awards-press	section_role	awards-press	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	comparison	section_role	comparison	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	pricing	section_role	pricing	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	guarantee	section_role	guarantee	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	objections	section_role	objections	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	faq	section_role	faq	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	about	section_role	about	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	team	section_role	team	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	portfolio	section_role	portfolio	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	integrations	section_role	integrations	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	event-program	section_role	event-program	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	cta-band	section_role	cta-band	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	lead-form	section_role	lead-form	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	final-cta	section_role	final-cta	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	contacts	section_role	contacts	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	footer	section_role	footer	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	article-body	section_role	article-body	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	section_roles	section_role	related	section_role	related	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	meta-title	slot	meta-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	meta-description	slot	meta-description	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	og-title	slot	og-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	og-description	slot	og-description	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	og-image-alt	slot	og-image-alt	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	eyebrow	slot	eyebrow	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	headline	slot	headline	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	subheadline	slot	subheadline	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	hero-proof	slot	hero-proof	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	cta-label	slot	cta-label	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	cta-secondary-label	slot	cta-secondary-label	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	cta-note	slot	cta-note	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	section-title	slot	section-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	section-lead	slot	section-lead	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	body	slot	body	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	list-item	slot	list-item	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	card-title	slot	card-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	card-body	slot	card-body	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	step-title	slot	step-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	step-body	slot	step-body	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	stat-value	slot	stat-value	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	stat-label	slot	stat-label	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	logos-caption	slot	logos-caption	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	testimonial-quote	slot	testimonial-quote	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	testimonial-attribution	slot	testimonial-attribution	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	case-title	slot	case-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	case-summary	slot	case-summary	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	case-result	slot	case-result	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-plan-name	slot	pricing-plan-name	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-plan-summary	slot	pricing-plan-summary	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-price	slot	pricing-price	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-price-note	slot	pricing-price-note	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	pricing-feature	slot	pricing-feature	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	badge	slot	badge	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	guarantee-text	slot	guarantee-text	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	objection-answer	slot	objection-answer	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	comparison-row	slot	comparison-row	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	faq-q	slot	faq-q	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	faq-a	slot	faq-a	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-title	slot	form-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-lead	slot	form-lead	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-next-steps	slot	form-next-steps	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-consent	slot	form-consent	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	form-success	slot	form-success	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	nav-label	slot	nav-label	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	footer-tagline	slot	footer-tagline	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	footer-legal	slot	footer-legal	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-title	slot	article-title	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-lead	slot	article-lead	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-summary	slot	article-summary	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-heading	slot	article-heading	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-paragraph	slot	article-paragraph	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	article-author	slot	article-author	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	geo-answer	slot	geo-answer	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	definition	slot	definition	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-subject	slot	email-subject	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-preheader	slot	email-preheader	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-heading	slot	email-heading	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-body	slot	email-body	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-cta-label	slot	email-cta-label	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	email-footer	slot	email-footer	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	image-alt	slot	image-alt	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	slot_types	slot_type	in-image-text	slot	in-image-text	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	unaware	awareness	unaware	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	problem-aware	awareness	problem-aware	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	solution-aware	awareness	solution-aware	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	product-aware	awareness	product-aware	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	awareness	awareness	most-aware	awareness	most-aware	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.temperature	traffic	cold	traffic_temperature	cold	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.temperature	traffic	warm	traffic_temperature	warm	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.temperature	traffic	hot	traffic_temperature	hot	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	search-problem	traffic_source	search-problem	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	search-category	traffic_source	search-category	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	search-brand	traffic_source	search-brand	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	paid-social	traffic_source	paid-social	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	paid-search	traffic_source	paid-search	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	ai-answer	traffic_source	ai-answer	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	referral	traffic_source	referral	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	email	traffic_source	email	equal	id взят как есть
-text	../text/99-raw/notes/temp-vocabulary-v0.yaml	traffic.sources	traffic	direct	traffic_source	direct	equal	id взят как есть
+text	временный словарь text v0	genres	genre	landing	page_type		none	жанр text; у site — поле page_type.genre=landing (все landing-*)
+text	временный словарь text v0	genres	genre	site-page	page_type		none	жанр text; у site — поле page_type.genre=site-page
+text	временный словарь text v0	genres	genre	article	page_type		none	жанр text; у site — поле page_type.genre=article (article-page, seo-landing-page, alternatives-page, blog-index-page)
+text	временный словарь text v0	genres	genre	meta	slot		none	жанр текста без типа страницы; слоты meta-* со scope: page
+text	временный словарь text v0	genres	genre	geo	slot		none	жанр текста; слоты geo-answer, definition, article-summary
+text	временный словарь text v0	genres	genre	email-form	slot		none	жанр текста; слоты email-*; механика писем — site 05
+text	временный словарь text v0	page_types	page_type	landing-lead-services	page_type	landing-lead-services	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	landing-saas	page_type	landing-saas	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	landing-product	page_type	landing-product	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	landing-campaign	page_type	landing-campaign	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	landing-event	page_type	landing-event	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	landing-course	page_type	landing-course	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	landing-app	page_type	landing-app	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	landing-waitlist	page_type	landing-waitlist	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	home-multipage	page_type	home-multipage	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	service-page	page_type	service-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	about-page	page_type	about-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	case-page	page_type	case-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	pricing-page	page_type	pricing-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	careers-page	page_type	careers-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	contacts-page	page_type	contacts-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	portfolio-page	page_type	portfolio-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	article-page	page_type	article-page	equal	id взят как есть
+text	временный словарь text v0	page_types	page_type	seo-landing-page	page_type	seo-landing-page	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	hero	section_role	hero	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	problem	section_role	problem	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	solution	section_role	solution	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	benefits	section_role	benefits	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	how-it-works	section_role	how-it-works	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	product-demo	section_role	product-demo	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	proof-logos	section_role	proof-logos	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	proof-stats	section_role	proof-stats	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	testimonials	section_role	testimonials	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	case-studies	section_role	case-studies	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	awards-press	section_role	awards-press	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	comparison	section_role	comparison	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	pricing	section_role	pricing	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	guarantee	section_role	guarantee	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	objections	section_role	objections	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	faq	section_role	faq	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	about	section_role	about	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	team	section_role	team	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	portfolio	section_role	portfolio	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	integrations	section_role	integrations	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	event-program	section_role	event-program	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	cta-band	section_role	cta-band	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	lead-form	section_role	lead-form	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	final-cta	section_role	final-cta	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	contacts	section_role	contacts	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	footer	section_role	footer	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	article-body	section_role	article-body	equal	id взят как есть
+text	временный словарь text v0	section_roles	section_role	related	section_role	related	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	meta-title	slot	meta-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	meta-description	slot	meta-description	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	og-title	slot	og-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	og-description	slot	og-description	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	og-image-alt	slot	og-image-alt	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	eyebrow	slot	eyebrow	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	headline	slot	headline	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	subheadline	slot	subheadline	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	hero-proof	slot	hero-proof	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	cta-label	slot	cta-label	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	cta-secondary-label	slot	cta-secondary-label	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	cta-note	slot	cta-note	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	section-title	slot	section-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	section-lead	slot	section-lead	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	body	slot	body	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	list-item	slot	list-item	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	card-title	slot	card-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	card-body	slot	card-body	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	step-title	slot	step-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	step-body	slot	step-body	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	stat-value	slot	stat-value	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	stat-label	slot	stat-label	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	logos-caption	slot	logos-caption	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	testimonial-quote	slot	testimonial-quote	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	testimonial-attribution	slot	testimonial-attribution	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	case-title	slot	case-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	case-summary	slot	case-summary	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	case-result	slot	case-result	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	pricing-plan-name	slot	pricing-plan-name	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	pricing-plan-summary	slot	pricing-plan-summary	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	pricing-price	slot	pricing-price	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	pricing-price-note	slot	pricing-price-note	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	pricing-feature	slot	pricing-feature	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	badge	slot	badge	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	guarantee-text	slot	guarantee-text	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	objection-answer	slot	objection-answer	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	comparison-row	slot	comparison-row	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	faq-q	slot	faq-q	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	faq-a	slot	faq-a	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	form-title	slot	form-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	form-lead	slot	form-lead	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	form-next-steps	slot	form-next-steps	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	form-consent	slot	form-consent	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	form-success	slot	form-success	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	nav-label	slot	nav-label	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	footer-tagline	slot	footer-tagline	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	footer-legal	slot	footer-legal	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	article-title	slot	article-title	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	article-lead	slot	article-lead	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	article-summary	slot	article-summary	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	article-heading	slot	article-heading	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	article-paragraph	slot	article-paragraph	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	article-author	slot	article-author	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	geo-answer	slot	geo-answer	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	definition	slot	definition	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	email-subject	slot	email-subject	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	email-preheader	slot	email-preheader	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	email-heading	slot	email-heading	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	email-body	slot	email-body	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	email-cta-label	slot	email-cta-label	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	email-footer	slot	email-footer	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	image-alt	slot	image-alt	equal	id взят как есть
+text	временный словарь text v0	slot_types	slot_type	in-image-text	slot	in-image-text	equal	id взят как есть
+text	временный словарь text v0	awareness	awareness	unaware	awareness	unaware	equal	id взят как есть
+text	временный словарь text v0	awareness	awareness	problem-aware	awareness	problem-aware	equal	id взят как есть
+text	временный словарь text v0	awareness	awareness	solution-aware	awareness	solution-aware	equal	id взят как есть
+text	временный словарь text v0	awareness	awareness	product-aware	awareness	product-aware	equal	id взят как есть
+text	временный словарь text v0	awareness	awareness	most-aware	awareness	most-aware	equal	id взят как есть
+text	временный словарь text v0	traffic.temperature	traffic	cold	traffic_temperature	cold	equal	id взят как есть
+text	временный словарь text v0	traffic.temperature	traffic	warm	traffic_temperature	warm	equal	id взят как есть
+text	временный словарь text v0	traffic.temperature	traffic	hot	traffic_temperature	hot	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	search-problem	traffic_source	search-problem	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	search-category	traffic_source	search-category	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	search-brand	traffic_source	search-brand	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	paid-social	traffic_source	paid-social	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	paid-search	traffic_source	paid-search	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	ai-answer	traffic_source	ai-answer	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	referral	traffic_source	referral	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	email	traffic_source	email	equal	id взят как есть
+text	временный словарь text v0	traffic.sources	traffic	direct	traffic_source	direct	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	eyebrow	slot	eyebrow	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	headline	slot	headline	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	subheadline	slot	subheadline	equal	id взят как есть
@@ -138,7 +138,7 @@ text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	hero-proof	sl
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	cta-label	slot	cta-label	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	cta-secondary-label	slot	cta-secondary-label	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	cta-note	slot	cta-note	equal	id взят как есть
-text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	promise	slot	promise	equal	предложение E text (proposal) — принято, status: proposed
+text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	promise	slot	promise	equal	предложение text (proposal) — принято, status: proposed
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	section-title	slot	section-title	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	section-lead	slot	section-lead	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	body	slot	body	equal	id взят как есть
@@ -196,11 +196,11 @@ text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	email-footer	
 text	../text/04-copy-by-block/04-form-emails-notifications.md	§3.3 «Имя отправителя» (предложение к словарю)	proposal	email-sender-name	slot	email-sender-name	equal	id взят как есть; правила имени отправителя — text 04/04 §3.3
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	image-alt	slot	image-alt	equal	id взят как есть
 text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	in-image-text	slot	in-image-text	equal	id взят как есть
-text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	stat-source	slot	stat-source	equal	предложение E text (proposal) — принято, status: proposed
-text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	price-old	slot	price-old	equal	предложение E text (proposal) — принято, status: proposed
-text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	spec-row	slot	spec-row	equal	предложение E text (proposal) — принято, status: proposed
-text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	image-caption	slot	image-caption	equal	предложение E text (proposal) — принято, status: proposed
-text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	announcement	slot	announcement	equal	предложение E text (proposal) — принято, status: proposed
+text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	stat-source	slot	stat-source	equal	предложение text (proposal) — принято, status: proposed
+text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	price-old	slot	price-old	equal	предложение text (proposal) — принято, status: proposed
+text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	spec-row	slot	spec-row	equal	предложение text (proposal) — принято, status: proposed
+text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	image-caption	slot	image-caption	equal	предложение text (proposal) — принято, status: proposed
+text	../text/04-copy-by-block/copy-slots.yaml	slot_types	slot_type	announcement	slot	announcement	equal	предложение text (proposal) — принято, status: proposed
 text	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	headline	broader	составной слот text: заголовок + подзаголовок + кнопки + строка у кнопки + микродоказательство ≤ 40 слов — правило text; наш слот — часть
 text	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	subheadline	broader	то же
 text	../text/04-copy-by-block/copy-slots.yaml	composites	slot_type	hero-core	slot	cta-label	broader	то же
@@ -220,19 +220,19 @@ text	../text/03-corpus-measured/corpus.tsv	колонка page_type	page_type	la
 text	../text/03-corpus-measured/corpus.tsv	колонка page_type	page_type	portfolio-page	page_type	portfolio-page	equal	в корпусе это главные студий (ideo.com, artlebedev.ru, bureau.ru) — у site: portfolio-page ИЛИ home-multipage + site_type portfolio-site
 text	../text/03-corpus-measured/corpus.tsv	колонка page_type	page_type	pricing-page	page_type	pricing-page	equal	id взят как есть
 text	../text/03-corpus-measured/corpus.tsv	колонка page_type	page_type	service-page	page_type	service-page	equal	id взят как есть
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	retargeting	traffic_source	retargeting	equal	предложение B1 text — принято
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	maps-local	traffic_source	maps-local	equal	предложение B1 text — принято
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	social-organic	traffic_source	social-organic	equal	предложение B1 text — принято
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	marketplace	traffic_source	marketplace	equal	предложение B1 text — принято; + агрегаторы услуг (Авито, Профи)
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	messenger	traffic_source	messenger	equal	предложение B1 text — принято
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	offline	traffic_source	offline	equal	предложение B1 text — принято
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	specs	section_role	specs	equal	предложение B2 text — принято
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	spec-row	slot	spec-row	equal	предложение B2 text — принято (proposed)
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	price-old	slot	price-old	equal	предложение B2 text — принято (proposed); право цены «до скидки» — I
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	stat-source	slot	stat-source	equal	предложение B2 text — принято (proposed)
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	article-date	slot	article-date	equal	предложение G text — принято (proposed)
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	article-sources	slot	article-sources	equal	предложение G text — принято (proposed)
-text	../text/99-raw/notes/orchestrator-notes.md	«Для X», строка 19 (предложения к словарю)	proposal	ux_role: meta	slot		none	предложение C и G text — поле ux_role text, не пространство site; принято как поле text; у site мета-слоты — scope: page
+text	предложения text к словарю site	предложения к словарю	proposal	retargeting	traffic_source	retargeting	equal	предложение text — принято
+text	предложения text к словарю site	предложения к словарю	proposal	maps-local	traffic_source	maps-local	equal	предложение text — принято
+text	предложения text к словарю site	предложения к словарю	proposal	social-organic	traffic_source	social-organic	equal	предложение text — принято
+text	предложения text к словарю site	предложения к словарю	proposal	marketplace	traffic_source	marketplace	equal	предложение text — принято; + агрегаторы услуг (Авито, Профи)
+text	предложения text к словарю site	предложения к словарю	proposal	messenger	traffic_source	messenger	equal	предложение text — принято
+text	предложения text к словарю site	предложения к словарю	proposal	offline	traffic_source	offline	equal	предложение text — принято
+text	предложения text к словарю site	предложения к словарю	proposal	specs	section_role	specs	equal	предложение text — принято
+text	предложения text к словарю site	предложения к словарю	proposal	spec-row	slot	spec-row	equal	предложение text — принято (proposed)
+text	предложения text к словарю site	предложения к словарю	proposal	price-old	slot	price-old	equal	предложение text — принято (proposed); право цены «до скидки» — site 08
+text	предложения text к словарю site	предложения к словарю	proposal	stat-source	slot	stat-source	equal	предложение text — принято (proposed)
+text	предложения text к словарю site	предложения к словарю	proposal	article-date	slot	article-date	equal	предложение text — принято (proposed)
+text	предложения text к словарю site	предложения к словарю	proposal	article-sources	slot	article-sources	equal	предложение text — принято (proposed)
+text	предложения text к словарю site	предложения к словарю	proposal	ux_role: meta	slot		none	предложение text — поле ux_role text, не пространство site; принято как поле text; у site мета-слоты — scope: page
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Hero	section_role	hero	related	слот ai-media = секция + её визуал; визуал — slot hero-visual
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Hero	slot	hero-visual	related	главный визуал первого экрана
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Логотипы клиентов	block	logo-wall	related	блок; ассет — slot logo (не генерировать)
@@ -259,7 +259,7 @@ ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Key visual кампании	slot	hero-visual	narrower	страница — landing-campaign
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	Инфографика карточки маркетплейса (RU)	slot		none	вне рамок site (маркетплейс)
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§2.1	слот ассета (рус.)	404, пустые состояния, онбординг	page_type	not-found-page	related	пустые состояния и онбординг — сервисы (ux, ui), не site
-ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.1 Лендинг SaaS и ИИ-продукта	page_type	landing-saas	equal	порядок секций там — наблюдение по ассетам, порядок — C
+ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.1 Лендинг SaaS и ИИ-продукта	page_type	landing-saas	equal	порядок секций там — наблюдение по ассетам, порядок — site 03
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.2 Продуктовая страница «как у Apple»	page_type	landing-product	equal	
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.3 E-commerce: главная и карточка товара	page_type	ecommerce-catalog-page	related	вне рамок
 ai-media	../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md	§3	тип страницы (анатомия)	3.3 E-commerce: главная и карточка товара	page_type	ecommerce-product-page	related	вне рамок
@@ -448,7 +448,7 @@ ai-media	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 �
 ai-media	../ai-media/01-web-assets-landscape/sites.csv	колонка type (52 строки)	type	ecom-campaign	page_type	landing-campaign	related	
 claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§7 (поля брифа): project.type	type	landing	site_type	landing-site	broader	у брифа холста landing — любой сайт-страница; у site тип сайта + page_type
 claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§7 (поля брифа): project.type	type	webapp	site_type	web-app	equal	вне рамок site
-claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§7 (поля брифа): direction.macrostructure	группа формы	grid-led	macrostructure	bento-grid	broader	группа Hallmark (SKILL.md стр. 286: «grid-led like Bento»); полный состав — поле layout_mode (C)
+claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§7 (поля брифа): direction.macrostructure	группа формы	grid-led	macrostructure	bento-grid	broader	группа Hallmark (SKILL.md стр. 286: «grid-led like Bento»); полный состав — поле layout_mode (site 03)
 claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§7 (поля брифа): direction.macrostructure	группа формы	document-led	macrostructure	long-document	broader	«document-led like Long Document»
 claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§7 (поля брифа): direction.macrostructure	группа формы	poster-led	macrostructure	manifesto	broader	«poster-led like Manifesto»
 claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§7 (поля брифа): site.sections[].id	section id	hero	section_role	hero	equal	поле свободное; предложение брифу холста: id секции = section_role (или block), job — строка
@@ -461,7 +461,7 @@ jack-roberts	https://www.youtube.com/watch?v=weoV4dm-X1A (YouTube, 2026-07-27; �
 jack-roberts	https://www.youtube.com/watch?v=weoV4dm-X1A (YouTube, 2026-07-27; мнение автора)	карточка брифа скилла	тип сайта	Other	page_type		none	
 jack-roberts	https://www.youtube.com/watch?v=weoV4dm-X1A (YouTube, 2026-07-27; мнение автора)	карточка брифа скилла	результат	Purchase	action	purchase	equal	
 jack-roberts	https://www.youtube.com/watch?v=weoV4dm-X1A (YouTube, 2026-07-27; мнение автора)	карточка брифа скилла	результат	Join waitlist	action	join-waitlist	equal	
-jack-roberts	https://www.youtube.com/watch?v=weoV4dm-X1A (YouTube, 2026-07-27; мнение автора)	карточка брифа скилла	результат	Remember brand	action		none	цель осведомлённости, не действие; измеряется иначе (P)
+jack-roberts	https://www.youtube.com/watch?v=weoV4dm-X1A (YouTube, 2026-07-27; мнение автора)	карточка брифа скилла	результат	Remember brand	action		none	цель осведомлённости, не действие; измеряется иначе (site 07)
 jack-roberts	https://www.youtube.com/watch?v=weoV4dm-X1A (YouTube, 2026-07-27; мнение автора)	карточка брифа скилла	результат	Trust the work	action		none	цель доверия (портфолио); действие — lead-request или message
 claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§2 (признаки описания)	тип приложения	«сайт + личный кабинет»	site_type	saas-marketing-site	related	два пакета с общим DESIGN.md: сайт (site) + web-app (ux, ui)
 claude-design	../claude-design/06-design-process/01-brief-and-questions.md	§2 (признаки описания)	тип приложения	«сайт-история, кино-скролл, 3D-мир»	macrostructure	scroll-story	related	у брифа холста: landing + decisions.motion: cinematic; уровень — L2 (creative)
@@ -481,28 +481,28 @@ blender	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цел
 blender	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цель страницы)	цель	Бренд/SaaS без физического товара	page_type	landing-saas	related	
 blender	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цель страницы)	цель	Кампания, запуск, портфолио студии (опыт и есть продукт)	page_type	landing-campaign	related	
 blender	../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md	§7 (цель страницы)	цель	Кампания, запуск, портфолио студии (опыт и есть продукт)	site_type	portfolio-site	related	
-ux	../ux/01-foundations/03-frameworks-domain-to-screens.md	§4 (CTA-матрица OOUX)	CTA	CTA (роль × объект × действие)	action		none	омоним: на сайте CTA — призыв (slot cta-primary), действия посетителя — пространство action (PLAN, поправка 9)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	01 · Bento Grid	macrostructure	bento-grid	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	02 · Long Document	macrostructure	long-document	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	03 · Marquee Hero	macrostructure	marquee-hero	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	04 · Stat-Led	macrostructure	stat-led	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	05 · Workbench	macrostructure	workbench	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	06 · Conversational FAQ	macrostructure	conversational-faq	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	07 · Manifesto	macrostructure	manifesto	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	08 · Photographic	macrostructure	photographic	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	09 · Quote-Led	macrostructure	quote-led	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	10 · Specimen	macrostructure	specimen	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	11 · Catalogue	macrostructure	catalogue	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	12 · Letter	macrostructure	letter	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	13 · Index-First	macrostructure	index-first	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	14 · Narrative Workflow	macrostructure	narrative-workflow	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	15 · Split Studio	macrostructure	split-studio	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	16 · Feature Stack	macrostructure	feature-stack	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	17 · Type Specimen	macrostructure	type-specimen	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	18 · Portfolio Grid	macrostructure	portfolio-grid	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	19 · Map / Diagram	macrostructure	map-diagram	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	20 · Ecosystem Index	macrostructure	ecosystem-index	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	21 · Component Playground	macrostructure	component-playground	equal	MIT; id — kebab-case названия; свод и «когда брать» — C
+ux	../ux/01-foundations/03-frameworks-domain-to-screens.md	§4 (CTA-матрица OOUX)	CTA	CTA (роль × объект × действие)	action		none	омоним: на сайте CTA — призыв (slot cta-primary), действия посетителя — пространство action
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	01 · Bento Grid	macrostructure	bento-grid	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	02 · Long Document	macrostructure	long-document	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	03 · Marquee Hero	macrostructure	marquee-hero	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	04 · Stat-Led	macrostructure	stat-led	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	05 · Workbench	macrostructure	workbench	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	06 · Conversational FAQ	macrostructure	conversational-faq	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	07 · Manifesto	macrostructure	manifesto	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	08 · Photographic	macrostructure	photographic	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	09 · Quote-Led	macrostructure	quote-led	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	10 · Specimen	macrostructure	specimen	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	11 · Catalogue	macrostructure	catalogue	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	12 · Letter	macrostructure	letter	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	13 · Index-First	macrostructure	index-first	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	14 · Narrative Workflow	macrostructure	narrative-workflow	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	15 · Split Studio	macrostructure	split-studio	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	16 · Feature Stack	macrostructure	feature-stack	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	17 · Type Specimen	macrostructure	type-specimen	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	18 · Portfolio Grid	macrostructure	portfolio-grid	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	19 · Map / Diagram	macrostructure	map-diagram	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	20 · Ecosystem Index	macrostructure	ecosystem-index	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/macrostructures.md)	The 21 macrostructures — index	macrostructure	21 · Component Playground	macrostructure	component-playground	equal	MIT; id — kebab-case названия; свод и «когда брать» — site 03/01 §4
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/structure.md)	Domain → trio (стр. 133–152)	домен	podcast, audio, music	site_type	personal-brand-site	related	трио Photographic·Quote-Led·Letter
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/structure.md)	Domain → trio (стр. 133–152)	домен	shop, store, product, commerce	site_type	ecommerce-store	related	вне рамок; промо — landing-product
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/structure.md)	Domain → trio (стр. 133–152)	домен	docs, CLI, SDK, API	site_type	docs-site	related	вне рамок
@@ -539,45 +539,45 @@ hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/compone
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	T3 Single huge quote	block	testimonial-single	narrower	
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	T4 Numbered stat strip	block	stat-strip	narrower	
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N12 Announcement banner + retracting nav	block	announcement-bar	related	и header
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S1 Left margin numbered	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S2 Hanging	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S3 Sticky pinned	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S4 Inline no break	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S5 Bottom anchored	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (E), подача — creative
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S1 Left margin numbered	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (site 04), подача — creative
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S2 Hanging	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (site 04), подача — creative
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S3 Sticky pinned	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (site 04), подача — creative
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S4 Inline no break	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (site 04), подача — creative
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	S5 Bottom anchored	block		none	заголовок секции — слоты eyebrow, section-title любого блока; раскладка — вариант (site 04), подача — creative
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	C1 Outlined chip	slot	cta-primary	related	визуал кнопки — creative; слот — cta-primary
 hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	C3 Typographic link	slot	cta-secondary	related	ссылка-призыв
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft1 Mast headed	block	footer	narrower	вариант подвала (E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft2 Inline rule single line	block	footer	narrower	вариант подвала (E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft3 Index style category list	block	footer	narrower	вариант подвала (E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft4 Dense typographic	block	footer	narrower	вариант подвала (E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft5 Statement	block	footer	narrower	вариант подвала (E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft6 Letter close	block	footer	narrower	вариант подвала (E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft7 Newsletter first	block	footer	narrower	вариант подвала (E); Ft7 содержит email-capture
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft8 Marquee scroll	block	footer	narrower	вариант подвала (E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N1a Wordmark 2 links	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N1b Canonical SaaS three-section	block	header	narrower	архетип шапки выбирается по типу сайта в site-map (G); N1b = «AI nav» гейта 42
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N2 Floating chip	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N3 Side rail	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N4 Hidden behind k	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N5 Floating pill	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N6 Newspaper masthead	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N7 Brutal slab	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N8 Terminal command	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N9 Edge aligned minimal	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N10 Floating on scroll morph	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N11 Mega-menu panel	block	header	narrower	вариант шапки (G, E, creative)
-hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N13 Inline cmdK search pill	block	header	narrower	вариант шапки (G, E, creative)
-ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	hero-features-cta	macrostructure		none	шаблонный порядок «hero → фичи → CTA» (гейт 8 Hallmark) — не форма, а дефект по умолчанию (C)
-ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	hero-testimonials-cta	macrostructure		none	порядок секций, не форма (C)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft1 Mast headed	block	footer	narrower	вариант подвала (site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft2 Inline rule single line	block	footer	narrower	вариант подвала (site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft3 Index style category list	block	footer	narrower	вариант подвала (site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft4 Dense typographic	block	footer	narrower	вариант подвала (site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft5 Statement	block	footer	narrower	вариант подвала (site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft6 Letter close	block	footer	narrower	вариант подвала (site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft7 Newsletter first	block	footer	narrower	вариант подвала (site 04); Ft7 содержит email-capture
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	Ft8 Marquee scroll	block	footer	narrower	вариант подвала (site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N1a Wordmark 2 links	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N1b Canonical SaaS three-section	block	header	narrower	архетип шапки выбирается по типу сайта в site-map (site 06); N1b = «AI nav» гейта 42
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N2 Floating chip	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N3 Side rail	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N4 Hidden behind k	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N5 Floating pill	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N6 Newspaper masthead	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N7 Brutal slab	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N8 Terminal command	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N9 Edge aligned minimal	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N10 Floating on scroll morph	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N11 Mega-menu panel	block	header	narrower	вариант шапки (site 06, site 04, creative)
+hallmark	https://github.com/Nutlope/hallmark (skills/hallmark/references/component-cookbook.md)	Archetype index	архетип	N13 Inline cmdK search pill	block	header	narrower	вариант шапки (site 06, site 04, creative)
+ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	hero-features-cta	macrostructure		none	шаблонный порядок «hero → фичи → CTA» (гейт 8 Hallmark) — не форма, а дефект по умолчанию (site 03)
+ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	hero-testimonials-cta	macrostructure		none	порядок секций, не форма (site 03)
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	product-demo-features	macrostructure	workbench	related	
-ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	minimal-single-column	macrostructure		none	короткая страница — вопрос длины (C)
-ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	funnel-3-step-conversion	macrostructure		none	сюжетный каркас PAS (C)
+ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	minimal-single-column	macrostructure		none	короткая страница — вопрос длины (site 03/02)
+ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	funnel-3-step-conversion	macrostructure		none	сюжетный каркас PAS (site 03)
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	comparison-table-cta	macrostructure	comparison-led	related	страница — comparison-page
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	lead-magnet-form	page_type	landing-lead-magnet	equal	
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	pricing-page-cta	page_type	pricing-page	equal	
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	video-first-hero	block	hero-media	narrower	вариант hero с видео
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	scroll-triggered-storytelling	macrostructure	scroll-story	equal	
-ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	ai-personalization-landing	macrostructure		none	приём подстановки под сегмент (message match — C)
+ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	ai-personalization-landing	macrostructure		none	приём подстановки под сегмент (message match — site 03/02)
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	waitlist-coming-soon	page_type	landing-waitlist	equal	
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	comparison-table-focus	macrostructure	comparison-led	equal	
 ui-ux-pro-max	https://github.com/nextlevelbuilder/ui-ux-pro-max-skill (src/ui-ux-pro-max/data/landing.csv)	Pattern ID (34 паттерна)	pattern	pricing-focused-landing	macrostructure	pricing-first	equal	
@@ -667,7 +667,7 @@ tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024
 tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Истории успеха	section_role	case-studies	equal	
 tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Портфолио	section_role	portfolio	equal	
 tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Вдохновляющая фраза	section_role	story	related	блок prose
-tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Счётчик	block	promo-offer	related	таймер — честная срочность (F)
+tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Счётчик	block	promo-offer	related	таймер — честная срочность (site 05)
 tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Всплывающие окна	block	capture-popup	related	по умолчанию выключены
 tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Виджеты обратной связи	block	chat-widget	related	и callback-request
 tilda	https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024)	«Функциональные блоки лендинга» (25)	блок	Меню	block	header	equal	
@@ -678,14 +678,14 @@ schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More 
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	CollectionPage	page_type	case-list-page	broader	
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	CollectionPage	page_type	services-index-page	broader	
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	ContactPage	page_type	contacts-page	equal	
-schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	FAQPage	page_type	faq-page	equal	разметка FAQ и её выдача — H
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	FAQPage	page_type	faq-page	equal	разметка FAQ и её выдача — site 07
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	ItemPage	page_type	service-page	broader	и case-page, feature-page
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	MedicalWebPage	page_type	service-page	related	отраслевой подтип
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	ProfilePage	page_type	team-page	related	профиль человека
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	QAPage	page_type		none	вопрос-ответ сообщества
 schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	RealEstateListing	page_type		none	объявление недвижимости — вне рамок
-schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	SearchResultsPage	page_type		none	поиск по сайту — G
-schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Event	page_type	landing-event	related	разметка — H
+schema.org	https://schema.org/WebPage (dev, проверено 2026-09-24)	More specific Types	@type	SearchResultsPage	page_type		none	поиск по сайту — site 06
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Event	page_type	landing-event	related	разметка — site 07
 schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Course	page_type	landing-course	related	
 schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	MobileApplication	page_type	landing-app	related	
 schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Product	page_type	landing-product	related	
@@ -693,7 +693,7 @@ schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	�
 schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Article	page_type	article-page	related	и BlogPosting
 schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	JobPosting	page_type	careers-page	related	
 schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	LocalBusiness	site_type	services-site	related	
-schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Organization	page_type	about-page	related	сущность сайта — H
+schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	Organization	page_type	about-page	related	сущность сайта — site 07
 schema.org	https://schema.org/<Type> (проверено 2026-09-24, HTTP 200)	типы сущностей	@type	EducationalOrganization	site_type	school-site	related	
 unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Click-through landing page	action	read-more	related	призыв ведёт на следующий шаг (регистрация, оформление)
 unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Lead capture landing page (squeeze)	page_type	landing-lead-services	related	и landing-lead-magnet
@@ -705,6 +705,6 @@ unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обнов
 unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Video landing page	block	hero-media	related	видео — вариант hero или video-showcase
 unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Pre-launch landing page	page_type	landing-waitlist	equal	
 unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Lead magnet landing page	page_type	landing-lead-magnet	equal	
-unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Referral landing page	page_type		none	реферальная программа — кандидат в v1 (J)
+unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Referral landing page	page_type		none	реферальная программа — кандидат в v1
 unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	404 landing page	page_type	not-found-page	equal	
 unbounce	https://unbounce.com/landing-pages/7-types-of-landing-page/ (обновлено 2024-06-07; мнение вендора)	13 types of landing pages	тип	Thank you landing page	page_type	thank-you-page	equal	

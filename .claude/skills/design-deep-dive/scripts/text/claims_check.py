@@ -52,10 +52,10 @@
           (вход — copy deck или привязка --deck). Снятое — value (число фрагмента находки) и fragment (слово или
           фраза фрагмента находки целиком); без них запись снимает все находки своего правила на своём месте. У
           единицы без привязки — запись с тем же фрагментом (fragment).
-          exit 0 — нет error; 2 — есть error; 1 — ошибка входа или утилиты
+          exit 0 — нет error; 1 — есть error; 2 — ошибка вызова, входа или окружения
   lint-facts FACTS [--today …] [--final] — проверка самого инвентаря (вывод без основания, истёкшие, без разрешений,
           id мест use по словарю site, демо-данные); разрешение pending и демо-данные — warning, с --final (ворота
-          публикации) — error; exit 0/2/1
+          публикации) — error; exit 0/1/2
   --selftest — офлайн-тесты извлечения, сопоставления, правил, калибровок и ложных срабатываний; exit 0/1
 
 Обслуживание базы (в маршруте этапов проекта не участвует):
@@ -2734,7 +2734,7 @@ def cmd_check(a):
         for f in F:
             if f['level'] == 'error' or a.verbose:
                 print(f"  {f['level'].upper():7} {f['rule']:26} {loc_str(f['location'])[:40]:40} «{str(f['fragment'])[:50]}» — {f['message'][:110]}")
-    return 2 if res['summary']['error'] else 0
+    return 1 if res['summary']['error'] else 0
 
 
 def cmd_inventory(a):
@@ -2847,7 +2847,7 @@ def cmd_lint_facts(a):
         print(f"lint-facts: {s['error']} error, {s['warning']} warning, {s['info']} info")
         for f in F:
             print(f"  {f['level'].upper():7} {f['rule']:22} {f['unit']:34} {f['message'][:120]}")
-    return 2 if res['summary']['error'] else 0
+    return 1 if res['summary']['error'] else 0
 
 
 def load_vocab():
@@ -3088,7 +3088,7 @@ def _selftest_legal(check):
         code = main(['check', pin, '--legal-only', '--quiet', '--json', pout, '--today', '2026-09-24'])
         with open(pout, encoding='utf-8') as f:
             res = json.load(f)
-        check('право: CLI --legal-only: только COPY-L, код 2, блок legal', code == 2 and res['findings'] and all(x['rule'].startswith('COPY-L-') for x in res['findings']) and res['legal']['jurisdiction'] == 'ru', (code, res.get('legal'), [x['rule'] for x in res['findings']]))
+        check('право: CLI --legal-only: только COPY-L, код 1, блок legal', code == 1 and res['findings'] and all(x['rule'].startswith('COPY-L-') for x in res['findings']) and res['legal']['jurisdiction'] == 'ru', (code, res.get('legal'), [x['rule'] for x in res['findings']]))
         check('право: одно нарушение — одна находка права', [(x['rule'], x['level']) for x in res['findings']] == [('COPY-L-SUP-01', 'error')], [(x['rule'], x['level']) for x in res['findings']])
 
 
@@ -3134,7 +3134,7 @@ def _selftest_binding(check, facts):
         check('копия артборда с --deck: текст слота сверяется как слот (страница, секция, тип, fact_ids), текст вне copy deck — без привязки',
               res['binding'] and res['binding']['bound'] == 3 and res['binding']['unbound'] == 1
               and ('COPY-F-CLASS', 'note', 'error') in bound and not [x for x in bound if x[1] == 'sub' and x[2] == 'error']
-              and lv(res, 'COPY-F-NUM') == ['info'] and code == 2, (code, res.get('binding'), sorted(bound, key=str)))
+              and lv(res, 'COPY-F-NUM') == ['info'] and code == 1, (code, res.get('binding'), sorted(bound, key=str)))
         ap = os.path.join(td, 'allowed.json')
         with open(ap, 'w', encoding='utf-8') as fo:
             json.dump({'allowed': [{'rule': 'COPY-F-CLASS', 'where': 'home/hero/note', 'reason': 'зарплата — строка сметы, не доход клиента', 'by': 'заказчик', 'scope': 'slot'},
@@ -3159,12 +3159,12 @@ def _selftest_binding(check, facts):
         code_t0, res_t0 = run(tp)
         code_t, res_t = run(tp, '--allow', ap)
         check('--allow у текста без слотов: обход по фрагменту записи; без файла находка есть',
-              code_t0 == 2 and lv(res_t0, 'COPY-F-CLASS') == ['error'] and code_t == 0 and lv(res_t, 'COPY-F-CLASS') == ['info'], (code_t0, code_t, res_t['findings']))
+              code_t0 == 1 and lv(res_t0, 'COPY-F-CLASS') == ['error'] and code_t == 0 and lv(res_t, 'COPY-F-CLASS') == ['info'], (code_t0, code_t, res_t['findings']))
         with open(ap, 'w', encoding='utf-8') as fo:
             json.dump([{'rule': 'COPY-F-CLASS', 'where': 'home/hero/note', 'reason': 'строка сметы', 'by': 'аналитик'}], fo, ensure_ascii=False)
         code_t, res_t = run(tp, '--allow', ap)
         check('--allow у текста без слотов: записи слота без фрагмента не находится места — находка остаётся',
-              code_t == 2 and res_t['allow']['applied'] == 0 and any('без места' in x for x in res_t['allow']['notes']), (code_t, res_t['allow']))
+              code_t == 1 and res_t['allow']['applied'] == 0 and any('без места' in x for x in res_t['allow']['notes']), (code_t, res_t['allow']))
         # место и снятое записи обхода: мета, число value, id находки, фрагмент; запись без scope — по виду where
         deck_m = {'copy_deck': {'version': 0, 'pages': [{'page_id': 'home', 'page_type': 'landing-waitlist',
                                                          'meta': {'title': 'Лампа для чтения — 12 лет работы'}, 'sections': [
@@ -3255,7 +3255,7 @@ USE_WARNINGS_MAX = 8   # COPY-F-USE на 8 примерах copy deck с мес�
 
 
 def _selftest_calibration(check, facts, schema):
-    """Калибровки сверки (text X §7: К17–К27) и демо-данные: числа, варианты, «рядом», подпись, классы, языки, слепые зоны."""
+    """Калибровки сверки и демо-данные: числа, варианты, «рядом», подпись, классы, языки, слепые зоны."""
     today = dt.date(2026, 9, 24)
 
     def run(units_, facts_=facts, **kw):
@@ -3271,24 +3271,24 @@ def _selftest_calibration(check, facts, schema):
                 'permission': {'status': 'not-required'}, 'lang': 'ru'}
         base.update(fact)
         return Facts(dict({'facts': [base], 'never_claim_defaults': 'none'}, **extra), schema, False)
-    # К18: разделитель тысяч по языку, «20-летний», числительные словами
+    # разделитель тысяч по языку, «20-летний», числительные словами
     fen = fx({'id': 'price-m2', 'kind': 'price', 'claim_class': ['price-discount'], 'verbatim': ['₽9,800 per m²'], 'canonical': 'From ₽9,800 per m².',
               'values': [{'value': 9800, 'unit': 'RUB', 'what': 'price per m2', 'comparator': 'gte'}], 'lang': 'en'})
-    check('К18: «₽9,800» в английском тексте и факте — 9 800 ₽, подтверждено', not rules(run([unit('e', 'Renovation from ₽9,800 per m²')], fen), 'error'),
+    check('«₽9,800» в английском тексте и факте — 9 800 ₽, подтверждено', not rules(run([unit('e', 'Renovation from ₽9,800 per m²')], fen), 'error'),
           run([unit('e', 'Renovation from ₽9,800 per m²')], fen))
     fen2 = fx({'id': 'flats-en', 'verbatim': ['1,380 apartments'], 'canonical': '1,380 apartments.', 'values': [{'value': 1380, 'unit': 'pcs', 'what': 'apartments'}], 'lang': 'en'})
-    check('К18: «1,380 apartments» — тысячи, а не 1,38', not rules(run([unit('e', 'We have renovated 1,380 apartments')], fen2), 'error'))
+    check('«1,380 apartments» — тысячи, а не 1,38', not rules(run([unit('e', 'We have renovated 1,380 apartments')], fen2), 'error'))
     f20 = fx({'id': 'exp-20', 'verbatim': ['20 лет в ремонте'], 'canonical': '20 лет в ремонте.', 'values': [{'value': 20, 'unit': 'years', 'what': 'опыт'}]})
-    check('К18: «20-летний опыт» — число с единицей лет, подтверждено', not rules(run([unit('r', 'Бригада с 20-летним опытом')], f20), 'error'),
+    check('«20-летний опыт» — число с единицей лет, подтверждено', not rules(run([unit('r', 'Бригада с 20-летним опытом')], f20), 'error'),
           run([unit('r', 'Бригада с 20-летним опытом')], f20))
     fg5 = fx({'id': 'guar-5', 'kind': 'guarantee', 'claim_class': ['guarantee'], 'verbatim': ['Гарантия 5 лет по договору'], 'canonical': 'Гарантия 5 лет по договору.',
               'values': [{'value': 5, 'unit': 'years', 'what': 'гарантия'}], 'source': {'type': 'contract', 'who': 'заказчик', 'date': '2026-01-15', 'document': 'dogovor.pdf'}})
     F_ = run([unit('r', 'Гарантия пять лет по договору')], fg5)
-    check('К18: «пять лет» словами — подтверждено фактом, но COPY-F-NUM-WORDS (пишите цифрами)', 'COPY-F-NUM-WORDS' in rules(F_, 'warning') and not rules(F_, 'error'), F_)
+    check('«пять лет» словами — подтверждено фактом, но COPY-F-NUM-WORDS (пишите цифрами)', 'COPY-F-NUM-WORDS' in rules(F_, 'warning') and not rules(F_, 'error'), F_)
     F_ = run([unit('r', 'Гарантия семь лет по договору')], fg5)
-    check('К18: «семь лет» без факта — error, как цифрами', rules(F_, 'error') & {'COPY-F-NUM', 'COPY-F-NUM-MISMATCH'}, F_)
-    check('К18: счёт без утверждения («два шага») — без находок', not run([unit('r', 'Два шага до заявки')], fg5))
-    # К19: невыбранные варианты — не текст «рядом»
+    check('«семь лет» без факта — error, как цифрами', rules(F_, 'error') & {'COPY-F-NUM', 'COPY-F-NUM-MISMATCH'}, F_)
+    check('счёт без утверждения («два шага») — без находок', not run([unit('r', 'Два шага до заявки')], fg5))
+    # невыбранные варианты — не текст «рядом»
     fnear = fx({'id': 'rating-x', 'kind': 'rating', 'claim_class': ['rating'], 'verbatim': ['4,8 из 5 на Яндекс Картах'], 'canonical': 'Рейтинг 4,8 из 5.',
                 'values': [{'value': 4.8, 'unit': 'stars', 'scale': 5, 'count': 214, 'as_of': '2026-09-01'}], 'valid': {'until': '2026-12-01'},
                 'source': {'type': 'platform', 'who': 'Яндекс Карты', 'date': '2026-09-01', 'url': 'https://example.org'},
@@ -3298,76 +3298,76 @@ def _selftest_calibration(check, facts, schema):
             {'id': 'a', 'text': 'Рейтинг 4,8 из 5', 'status': 'draft'}, {'id': 'b', 'text': 'Рейтинг 4,8 из 5 по данным Яндекс Карт', 'status': 'draft'}]}]}]}]}}
     us, _ = load_deck(deck, all_variants=True)
     F_ = run(us, fnear)
-    check('К19: соседний вариант слота не закрывает «рядом» у выбранного', any(f['rule'] == 'COPY-F-NEARBY' and f['location'].get('variant') == 'a' for f in F_)
+    check('соседний вариант слота не закрывает «рядом» у выбранного', any(f['rule'] == 'COPY-F-NEARBY' and f['location'].get('variant') == 'a' for f in F_)
           and not any(f['rule'] == 'COPY-F-NEARBY' and f['location'].get('variant') == 'b' for f in F_), [(f['rule'], f['location'].get('variant')) for f in F_])
-    # К20: канонические формулировки демо-фактов проходят своё «рядом» («или», признак источника)
+    # канонические формулировки демо-фактов проходят своё «рядом» («или», признак источника)
     b2p = os.path.join(ROOT, '02-strategy-messaging', 'examples', 'facts-service-renovation.yaml')
     if os.path.exists(b2p):
         fb2 = load_facts(b2p, schema)
         for fid in ('rating-yandex-maps', 'estimate-free'):
             f = fb2.by_id.get(fid)
             F_ = run([unit('c', f['canonical'], fact_ids=[fid], section='s', page='p')], fb2) if f else [{'rule': 'нет факта'}]
-            check(f'К20: canonical {fid} проходит своё requires_nearby', f is not None and 'COPY-F-NEARBY' not in rules(F_), [(x['rule'], x['message'][:80]) for x in F_])
-    # К21: подпись отзыва против permission.shows
+            check(f'canonical {fid} проходит своё requires_nearby', f is not None and 'COPY-F-NEARBY' not in rules(F_), [(x['rule'], x['message'][:80]) for x in F_])
+    # подпись отзыва против permission.shows
     fatt = fx({'id': 'rev-anna', 'kind': 'testimonial', 'claim_class': ['testimonial-quote'], 'verbatim': ['«Сдали вовремя»'], 'canonical': 'Анна: «Сдали вовремя».',
                'attribution': {'name': 'Анна Кузнецова', 'role': 'генеральный директор'}, 'original_ref': 'x',
                'permission': {'status': 'granted', 'subject': 'Анна', 'form': 'written-email', 'shows': ['first-name']}})
     F_ = run([unit('a', 'Анна Кузнецова, генеральный директор', slot_type='testimonial-attribution', fact_ids=['rev-anna'])], fatt)
-    check('К21: подпись с фамилией и должностью при shows [first-name] → COPY-F-PERMISSION', any(f['rule'] == 'COPY-F-PERMISSION' and 'full-name' in f['message'] and 'position' in f['message'] for f in F_), F_)
+    check('подпись с фамилией и должностью при shows [first-name] → COPY-F-PERMISSION', any(f['rule'] == 'COPY-F-PERMISSION' and 'full-name' in f['message'] and 'position' in f['message'] for f in F_), F_)
     F_ = run([unit('a', 'Анна', slot_type='testimonial-attribution', fact_ids=['rev-anna'])], fatt)
-    check('К21: подпись в пределах разрешения — без находки', not any(f['rule'] == 'COPY-F-PERMISSION' for f in F_), F_)
-    # К22: обещание дохода в будущем без числа, английская превосходная степень
-    check('К22: «удвоит выручку» — класс forecast (маркер)', 'forecast' in find_markers('Сервис удвоит вашу выручку'))
-    check('К22: «the hottest sauce you\'ll ever taste» — превосходная степень', 'superlative' in find_markers("The hottest sauce you'll ever taste"))
-    # К23: вопрос, ипотека в ситуации клиента, падежи имён, площадки, своя шкала
+    check('подпись в пределах разрешения — без находки', not any(f['rule'] == 'COPY-F-PERMISSION' for f in F_), F_)
+    # обещание дохода в будущем без числа, английская превосходная степень
+    check('«удвоит выручку» — класс forecast (маркер)', 'forecast' in find_markers('Сервис удвоит вашу выручку'))
+    check('«the hottest sauce you\'ll ever taste» — превосходная степень', 'superlative' in find_markers("The hottest sauce you'll ever taste"))
+    # вопрос, ипотека в ситуации клиента, падежи имён, площадки, своя шкала
     F_ = run([unit('q', 'Какая гарантия на работы? Спросите прораба.', slot_type='faq-a')])
-    check('К23: маркер в вопросе FAQ — не утверждение (info)', not rules(F_, 'error'), F_)
-    check('К23: «ипотека» в ситуации клиента — не маркер дохода', 'income-finance' not in find_markers('Аренда и ипотека идут одновременно, бюджет ограничен'))
-    check('К23: «ипотека от 5,9 %» — предложение денег, маркер', 'income-finance' in find_markers('Ипотека от 5,9 % на новостройки'))
+    check('маркер в вопросе FAQ — не утверждение (info)', not rules(F_, 'error'), F_)
+    check('«ипотека» в ситуации клиента — не маркер дохода', 'income-finance' not in find_markers('Аренда и ипотека идут одновременно, бюджет ограничен'))
+    check('«ипотека от 5,9 %» — предложение денег, маркер', 'income-finance' in find_markers('Ипотека от 5,9 % на новостройки'))
     fname = Facts({'facts': [{'id': 'foreman', 'kind': 'person', 'claim_class': ['fact-property'], 'verbatim': ['Прораб Сергей Лапин'], 'canonical': 'Прораб Сергей Лапин.',
                               'source': {'type': 'customer-message', 'who': 'заказчик', 'date': '2026-09-24'}, 'verification': {'status': 'stated'},
                               'permission': {'status': 'granted', 'subject': 'Сергей Лапин', 'form': 'written-email', 'shows': ['full-name', 'position']}, 'lang': 'ru'}],
                    'entities': [{'id': 'p-lapin', 'type': 'person', 'names': ['Сергей Лапин'], 'fact_id': 'foreman'}], 'never_claim_defaults': 'none'}, schema, False)
     F_ = run([unit('n', 'Работу принимает у Сергея Лапина технадзор')], fname)
-    check('К23: имя в падеже («Сергея Лапина») — известно', not any(f['rule'] == 'COPY-F-NAME' for f in F_), F_)
-    check('К23: площадка CamelCase («RuStore») — не имя клиента', not any(f['rule'] == 'COPY-F-NAME' for f in run([unit('n', 'Приложение есть в RuStore и Google Play')])))
-    check('К23: своя шкала бренда («острота 5 из 5») — не рейтинг', not any(f['rule'] == 'COPY-F-RATING' for f in run([unit('n', 'Острота 5 из 5, соус на хабанеро')])))
-    # К24: перевод факта с объектом счёта и оговоркой; запрет на языке страницы
+    check('имя в падеже («Сергея Лапина») — известно', not any(f['rule'] == 'COPY-F-NAME' for f in F_), F_)
+    check('площадка CamelCase («RuStore») — не имя клиента', not any(f['rule'] == 'COPY-F-NAME' for f in run([unit('n', 'Приложение есть в RuStore и Google Play')])))
+    check('своя шкала бренда («острота 5 из 5») — не рейтинг', not any(f['rule'] == 'COPY-F-RATING' for f in run([unit('n', 'Острота 5 из 5, соус на хабанеро')])))
+    # перевод факта с объектом счёта и оговоркой; запрет на языке страницы
     ftr = fx({'id': 'flats', 'verbatim': ['1 146 квартир'], 'canonical': '1 146 квартир.', 'values': [{'value': 1146, 'unit': 'pcs', 'what': 'квартиры', 'as_of': '2026-09'}],
               'use': {'requires_nearby': '«по данным CRM»'},
               'translations': {'en': {'verbatim': ['1,146 apartments handed over'], 'what': 'apartments', 'requires_nearby': '«as of September 2026»'}}})
     F_ = run([unit('e', '1,146 apartments handed over, as of September 2026', fact_ids=['flats'], section='s', page='p')], ftr)
-    check('К24: английский текст — объект счёта и «рядом» из translations.en', not rules(F_, 'error') and 'COPY-F-NEARBY' not in rules(F_), F_)
+    check('английский текст — объект счёта и «рядом» из translations.en', not rules(F_, 'error') and 'COPY-F-NEARBY' not in rules(F_), F_)
     F_ = run([unit('e', '1,146 apartments handed over', fact_ids=['flats'], section='s', page='p')], ftr)
-    check('К24: без английской оговорки — COPY-F-NEARBY с требованием translations.en', any(f['rule'] == 'COPY-F-NEARBY' and 'as of' in f['message'] for f in F_), F_)
+    check('без английской оговорки — COPY-F-NEARBY с требованием translations.en', any(f['rule'] == 'COPY-F-NEARBY' and 'as of' in f['message'] for f in F_), F_)
     fnv = Facts({'facts': [], 'never_claim_defaults': 'none', 'never_claim': [
         {'id': 'nc-eyes', 'text': 'обещания про зрение', 'claim_class': ['health'], 'patterns': ['глаз', 'зрени'], 'lang': 'ru', 'lift': 'never',
          'translations': {'en': {'text': 'eye promises', 'patterns': ['\\beye']}}}]}, schema, False)
-    check('К24: запрет на языке страницы — английский перевод ловит «eye strain»', 'COPY-F-NEVER' in rules(run([unit('e', 'No more eye strain in the evening')], fnv), 'error'))
-    check('К24: русский запрет не ищется в английском тексте', 'COPY-F-NEVER' not in rules(run([unit('e', 'Glazed ceramic tiles')], Facts({'facts': [], 'never_claim_defaults': 'none', 'never_claim': [
+    check('запрет на языке страницы — английский перевод ловит «eye strain»', 'COPY-F-NEVER' in rules(run([unit('e', 'No more eye strain in the evening')], fnv), 'error'))
+    check('русский запрет не ищется в английском тексте', 'COPY-F-NEVER' not in rules(run([unit('e', 'Glazed ceramic tiles')], Facts({'facts': [], 'never_claim_defaults': 'none', 'never_claim': [
         {'id': 'nc-x', 'text': 'x', 'patterns': ['glaz'], 'lang': 'ru', 'lift': 'never'}]}, schema, False))))
-    # К25: безглагольное обещание, пересказ запрета с придаточным
-    check('К25: «Каждый вечер. Без исключений.» — обещание (класс guarantee)', 'guarantee' in find_markers('Фото. Каждый вечер. Без исключений.'))
+    # безглагольное обещание, пересказ запрета с придаточным
+    check('«Каждый вечер. Без исключений.» — обещание (класс guarantee)', 'guarantee' in find_markers('Фото. Каждый вечер. Без исключений.'))
     fpar = Facts({'facts': [], 'never_claim_defaults': 'none', 'never_claim': [{'id': 'nc-budget', 'text': 'смета никогда не меняется', 'claim_class': ['guarantee'],
                                                                                 'patterns': ['смет\\w*\\s+не\\s+вырос'], 'lift': 'never'}]}, schema, False)
-    check('К25: пересказ запрета с придаточным («смета, которую мы составили, не выросла») → COPY-F-NEVER',
+    check('пересказ запрета с придаточным («смета, которую мы составили, не выросла») → COPY-F-NEVER',
           'COPY-F-NEVER' in rules(run([unit('p', 'Смета, которую мы составили, не выросла ни разу')], fpar), 'error'))
-    # К26, К27: правила права
+    # правила права
     rs, _e = load_rules([RULES_PATH])
     R = {r['id']: r for r in rs}
     if R:
         empty = Facts({'facts': [], 'never_claim_defaults': 'none'}, schema, False)
         F_ = run([unit('f', 'Замер и смета — бесплатно в черте города')], empty, rules=[R['COPY-L-FREE-01']], ctx=legal_ctx())
-        check('К26: «бесплатно в черте города» — условие рядом, COPY-L-FREE-01 молчит', 'COPY-L-FREE-01' not in rules(F_), F_)
-        check('К27: COPY-L-RET-02 — error', R['COPY-L-RET-02']['level'] == 'error')
+        check('«бесплатно в черте города» — условие рядом, COPY-L-FREE-01 молчит', 'COPY-L-FREE-01' not in rules(F_), F_)
+        check('COPY-L-RET-02 — error', R['COPY-L-RET-02']['level'] == 'error')
         u_srv = unit('o', 'Информация на сайте не является публичной офертой', page_type='landing-lead-services')
         u_prd = unit('o', 'Информация на сайте не является публичной офертой', page_type='landing-product')
-        check('К27: COPY-L-OFFER-01 не на услугах, на товарах — сигнал',
+        check('COPY-L-OFFER-01 не на услугах, на товарах — сигнал',
               'COPY-L-OFFER-01' not in rules(run([u_srv], empty, rules=[R['COPY-L-OFFER-01']], ctx=legal_ctx()))
               and 'COPY-L-OFFER-01' in rules(run([u_prd], empty, rules=[R['COPY-L-OFFER-01']], ctx=legal_ctx())))
-        check('К27: COPY-L-JOB-01 — вакансия с полом, возрастом, пропиской → error', 'COPY-L-JOB-01' in rules(run([unit('j', 'Требуется девушка до 35 лет с пропиской', page_type='careers-page')], empty,
+        check('COPY-L-JOB-01 — вакансия с полом, возрастом, пропиской → error', 'COPY-L-JOB-01' in rules(run([unit('j', 'Требуется девушка до 35 лет с пропиской', page_type='careers-page')], empty,
                                                                                                                  rules=[R['COPY-L-JOB-01']], ctx=legal_ctx()), 'error'))
-        check('К27: COPY-L-JOB-01 не на странице другого типа', 'COPY-L-JOB-01' not in rules(run([unit('j', 'Требуется девушка до 35 лет с пропиской', page_type='landing-product')], empty,
+        check('COPY-L-JOB-01 не на странице другого типа', 'COPY-L-JOB-01' not in rules(run([unit('j', 'Требуется девушка до 35 лет с пропиской', page_type='landing-product')], empty,
                                                                                                     rules=[R['COPY-L-JOB-01']], ctx=legal_ctx())))
     # демо-данные (example: true) — без --final сигнал, с --final error
     fdemo = fx({'id': 'demo-n', 'verbatim': ['120 клиентов'], 'canonical': '120 клиентов.', 'values': [{'value': 120, 'unit': 'pcs', 'what': 'клиенты'}], 'example': True})
@@ -3377,7 +3377,7 @@ def _selftest_calibration(check, facts, schema):
           any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'info' for f in F0) and any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'error' for f in F1), (F0, F1))
     fdemo_file = fx({'id': 'n', 'verbatim': ['120 клиентов'], 'canonical': '120 клиентов.', 'values': [{'value': 120, 'unit': 'pcs', 'what': 'клиенты'}]}, example=True)
     check('демо-файл фактов (example у файла) — --final error', any(f['rule'] == 'COPY-F-EXAMPLE' and f['level'] == 'error' for f in run([unit('d', '120 клиентов', fact_ids=['n'])], fdemo_file, final=True)))
-    # К17: места use — ориентир; x-use-always; 8 примеров copy deck
+    # места use — ориентир; x-use-always; 8 примеров copy deck
     fuse = fx({'id': 'g3', 'kind': 'guarantee', 'claim_class': ['guarantee'], 'verbatim': ['гарантия 3 года'], 'canonical': 'Гарантия 3 года.',
                'values': [{'value': 3, 'unit': 'years', 'what': 'гарантия'}], 'source': {'type': 'contract', 'who': 'заказчик', 'date': '2026-01-15', 'document': 'd.pdf'},
                'use': {'section_roles': ['guarantee'], 'slot_types': ['guarantee-text']}})
@@ -3560,7 +3560,7 @@ def cmd_selftest(_a=None):
     us, _ = load_deck(deck)
     check('copy deck v0: берётся chosen', [u['text'] for u in us] == ['B'], us)
     us, _ = load_deck(deck, all_variants=True)
-    check('copy deck --all-variants: живые варианты, отклонённый не сверяется, невыбранные помечены (К19)',
+    check('copy deck --all-variants: живые варианты, отклонённый не сверяется, невыбранные помечены',
           [(u['text'], u['alt']) for u in us] == [('A', True), ('B', False)], [(u['text'], u['alt']) for u in us])
     us = load_html('<html><head><title>Кварц</title><meta name="description" content="Лампа за 8 900 ₽"></head><body><h1>Лампа</h1><p>Цена 8 900 ₽</p><blockquote>Отличная лампа, всем советую</blockquote><script>var x=5</script></body></html>')
     check('HTML: title, description, h1, p, blockquote; без script', [u['slot_type'] for u in us] == ['meta-title', 'meta-description', 'headline', 'body', 'testimonial-quote'], [(u['slot_type'], u['text']) for u in us])
@@ -3649,14 +3649,14 @@ def main(argv=None):
         if cmd == 'lint-facts':
             return cmd_lint_facts(a)
     except SystemExit as e:
-        if isinstance(e.code, str):
+        if isinstance(e.code, str):             # текст вместо кода — ошибка вызова, входа или окружения
             print('claims_check:', e.code, file=sys.stderr)
-            return 1
+            return 2
         raise
     except (OSError, ValueError) as e:
         print('claims_check:', e, file=sys.stderr)
-        return 1
-    return 1
+        return 2
+    return 2
 
 
 if __name__ == '__main__':

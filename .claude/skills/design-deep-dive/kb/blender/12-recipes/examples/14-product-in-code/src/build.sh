@@ -19,8 +19,8 @@ if [ "${1:-}" = "kb" ]; then
   "$C3/build.sh" "$OUT/kb/no-world" --no-world > /dev/null
   "$C3/build.sh" "$OUT/kb/no-post" --no-post > /dev/null
   "$C3/build.sh" "$OUT/kb/no-detail" --no-detail > /dev/null
-  "$C3/build.sh" "$OUT/kb/no-beam" --no-beam > /dev/null                 # CD3: приём 8 (лучи; живёт в чанке поста)
-  "$C3/build.sh" "$OUT/kb/no-trail" --no-trail > /dev/null               # CD3: приём 10 (след)
+  "$C3/build.sh" "$OUT/kb/no-beam" --no-beam > /dev/null                 # приём 8 (лучи; живёт в чанке поста)
+  "$C3/build.sh" "$OUT/kb/no-trail" --no-trail > /dev/null               # приём 10 (след)
   "$C3/build.sh" "$OUT/kb/no-beam-trail" --no-beam --no-trail > /dev/null
   "$C3/build.sh" "$OUT/kb/none" --no-studio --no-ik --no-world --no-post --no-detail --no-beam --no-trail > /dev/null
   "$PY" - "$OUT/kb" <<'EOF'

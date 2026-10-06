@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""recipe_check.py — проверка рецептов 10-recipes/recipes/*.recipe.yaml (creative-research · J · волна 3 · 2026-09-25).
+"""recipe_check.py — проверка рецептов страниц kb/creative/10-recipes/recipes/*.recipe.yaml.
 
-Запуск: 99-raw/tools/venv-J/bin/python 99-raw/experiments/J/03-recipes-check/recipe_check.py 10-recipes/recipes/*.recipe.yaml [--ledger OUT.md]
-Проверяет: (1) схему recipe.schema.json; (2) block:<id> — есть в ../site-research/04-blocks/blocks.yaml; role — section_role словаря site;
-page_type — page_type словаря; (3) effect:<id> — есть в 06-effects-catalog/effects.yaml; (4) cliche:<id> — в cliche-registry.yaml H;
-(5) EG-… — в effect-gates.yaml K; (6) уровень секции ≤ уровня страницы, конверсия (lead-form, pricing, calculator, quiz, pricing-*, email-capture,
-booking-widget) — L0; пиков по уровню (L0 0, L1 ≤ 2, L2 2–4); эффект секции не выше уровня секции (level_min F);
-(7) журнал вариативности: каждая пара рецептов подряд различается ≥ 4 из 8 осей (H 02 §3.2), таблица всех пар — в --ledger.
-Код выхода 0 — ошибок нет; 1 — есть ошибки.
+Запуск (от корня скилла): python3 scripts/creative/recipe_check.py kb/creative/10-recipes/recipes/*.recipe.yaml [--ledger OUT.md]
+Проверяет: (1) схему 10-recipes/recipes/recipe.schema.json; (2) block:<id> — есть в kb/site/04-blocks/blocks.yaml; role —
+section_role словаря site; page_type — page_type словаря; (3) effect:<id> — есть в 06-effects-catalog/effects.yaml;
+(4) cliche:<id> — в 08-uniqueness-anti-slop/cliche-registry.yaml; (5) EG-… — в 09-ai-execution-evaluation/effect-gates.yaml;
+(6) уровень секции ≤ уровня страницы, конверсия (lead-form, pricing, calculator, quiz, pricing-*, email-capture,
+booking-widget) — L0; пиков по уровню (L0 0, L1 ≤ 2, L2 2–4); эффект секции не выше уровня секции (level_min каталога
+эффектов); (7) журнал вариативности: каждая пара рецептов подряд различается ≥ 4 из 8 осей (08-uniqueness-anti-slop,
+статья 02 §3.2), таблица всех пар — в --ledger.
+Код выхода 0 — ошибок нет; 1 — есть ошибки; 2 — ошибка вызова.
 """
 import argparse
 import itertools
@@ -18,7 +20,7 @@ import sys
 import yaml
 from jsonschema import Draft202012Validator
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('creative'))
 SITE = str(kbpaths.kb('site'))
@@ -110,7 +112,7 @@ def main():
     close = [x for x in rows if x[2] < 4]
     if a.ledger:
         with open(a.ledger, 'w', encoding='utf-8') as fh:
-            fh.write('# Журнал вариативности рецептов (8 осей H) · recipe_check.py · 2026-09-25\n\n')
+            fh.write('# Журнал вариативности рецептов (8 осей) · recipe_check.py\n\n')
             fh.write('| Рецепт | ' + ' | '.join(AXES) + ' |\n|' + '---|' * (len(AXES) + 1) + '\n')
             for n, r in recs:
                 fh.write(f'| {n.replace(".recipe.yaml", "")} | ' + ' | '.join(str(ax(r, k)).replace('|', '/') for k in AXES) + ' |\n')

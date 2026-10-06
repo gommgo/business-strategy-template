@@ -1,4 +1,4 @@
-# Сгенерировано K/01 из 12-recipes/12-model-viewer-ar.md — блоки python в напечатанном виде, по порядку.
+# Сгенерировано run_recipes.py из 12-recipes/12-model-viewer-ar.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 38
 # Blender 5.2.2 — [проверено] рецепт 12: AR-GLB (лимиты Scene Viewer) + USDZ (Quick Look)

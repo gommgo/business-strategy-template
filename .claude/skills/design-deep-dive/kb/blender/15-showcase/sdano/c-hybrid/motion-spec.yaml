@@ -1,7 +1,7 @@
-# motion-spec v1 — «Сдано», вариант C (Blender + «фонарик инженера», L1). 15-showcase · дорожка SD · фаза 2 (SD2) · 2026-09-25.
+# motion-spec v1 — «Сдано», вариант C (Blender + «фонарик инженера», L1).
 # Основа — motion-spec B; отличие: ветка L1 — момент fonarik (WebGL2, переосвещение кадра Blender по его проходам светом за курсором;
 # телефон — касание), только по вводу посетителя, 0 кадров в покое; остальное — как B (L0).
-# Проверка схемой: creative-research/99-raw/tools/venv-I/bin/python scripts/creative/spec_check.py spec <файл>
+# Проверка схемой: $DDD_HOME/venv/bin/python scripts/creative/spec_check.py spec <файл>
 # Сверка сборки: python3 scripts/creative/motion_check.py <index.html> --level L0 --spec <этот файл>
 motion_spec_version: "1.0"
 id: sdano-c-hybrid
@@ -25,9 +25,9 @@ page:
   scroll: {smooth: false, tail_ms_max: 0, jacking: never}
   transitions: {kind: none}
   properties_allowed: [transform, opacity, scale, translate, background-color, rotate]
-  # SD4 (26.09 05:45): бюджет петель 0 → 1. Однократный показ фонаря на телефоне (fonarik-tour, 2,24 с после прокрутки
-  # посетителя) motion_check считает «движением в видимой зоне» в паузе после шага прокрутки (EG-A11Y-17 mob = 1 при 0 по
-  # этой спеке — fail_S прогона SD3 04:55). Одно движение за раз = норма L1 для телефона (effect-gates: L1 desktop 2 / mobile 1);
+  # Бюджет петель — 1: однократный показ фонаря на телефоне (fonarik-tour, 2,24 с после прокрутки
+  # посетителя) motion_check считает «движением в видимой зоне» в паузе после шага прокрутки (EG-A11Y-17 mob = 1; при бюджете 0
+  # в этой спеке — fail_S). Одно движение за раз = норма L1 для телефона (effect-gates: L1 desktop 2 / mobile 1);
   # петель нет, на десктопе без ввода — 0. motion_check читает только loops_in_view_max (одно число на оба режима).
   budget: {loops_in_view_max: 1, loops_in_view_max_mobile: 1, first_screen_scene_ms_max: 600, js_kb_br_effects_max: 8, long_frames_pct_max: 2, cls_scroll_max: 0.1}
   never:
@@ -123,7 +123,7 @@ sections:
         lcp: not-lcp
         reduce: {strategy: static-poster, describe: "WebGL не создаётся — показа нет, светлый кадр B"}
         mobile: {strategy: same, describe: "только телефон (hover: none) и только после прокрутки посетителя (scrollY > 40, план ≥ 70 % в кадре): первый экран при загрузке неподвижен; касание прерывает показ; на десктопе показа нет — фонарь по наведению"}
-        note: "решение оркестратора SD3 (2): однократный короткий показ, чтобы на телефоне было видно, что план «живой»; < 5 с и без петли — кнопка паузы не нужна (WCAG 2.2.2); находит 3 из 4 дефектов, подсказка зовёт коснуться плана и найти остальные"
+        note: "однократный короткий показ, чтобы на телефоне было видно, что план «живой»; < 5 с и без петли — кнопка паузы не нужна (WCAG 2.2.2); находит 3 из 4 дефектов, подсказка зовёт коснуться плана и найти остальные"
     storyboard:
       frames:
         - {id: hero-t0, at: {time_ms: 0}, viewport: desktop, describe: "H1 и кадр изометрии на месте, номеров нет, лид почти прозрачен", check: "H1 и кадр видимы в первом кадре"}
@@ -150,7 +150,7 @@ sections:
         trigger: {type: in-view, threshold: 0.6, once: true}
         model: time
         tracks:
-          - {property: opacity, from: 0.01, to: 1, unit_note: "видимый результат — оттиск «СДАНО» на акте; движение штампа — внутри клипа Blender 38 кадров @24 = 1,58 с (VP9 webm 54 КБ, запас H.264 mp4 55 КБ), без loop; последний кадр = постер WebP; ошибка декодера или клип не доиграл за 4,5 с — сразу кадр конца (SD3)"}
+          - {property: opacity, from: 0.01, to: 1, unit_note: "видимый результат — оттиск «СДАНО» на акте; движение штампа — внутри клипа Blender 38 кадров @24 = 1,58 с (VP9 webm 54 КБ, запас H.264 mp4 55 КБ), без loop; последний кадр = постер WebP; ошибка декодера или клип не доиграл за 4,5 с — сразу кадр конца"}
         duration: {share: 2.83}
         easing: {token: motion.marketing.easing.out-expo}
         repeat: once

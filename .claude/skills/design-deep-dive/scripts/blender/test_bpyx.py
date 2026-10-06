@@ -372,7 +372,7 @@ def t18_camera_light_frame():
     assert len(lights) == 3 and all(l.type == "LIGHT" and l.data.type == "AREA" for l in lights)
     sun = bpyx.add_light("SUN", energy=3.0, size=0.5)
     assert approx(sun.data.angle, 0.5)
-    # орто 16:9 (исправлено FX 26.09 по T22): брус 11,5 м целиком в кадре при любом прежнем ortho_scale (было 10,0 и 5,9 — обрезка)
+    # орто 16:9: брус 11,5 м целиком в кадре при любом исходном ortho_scale (10,0 и 5,9 резали модель)
     sc = bpy.context.scene
     sc.render.resolution_x, sc.render.resolution_y = 1920, 1080
     beam = bpyx.primitive("cube", "Beam", size=1.0, location=(0, 5, 1.5)); beam.scale = (11.5, 1.0, 3.0)

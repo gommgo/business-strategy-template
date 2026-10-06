@@ -34,8 +34,9 @@ marketing_audit:<id>; у cliche:<id> — сама запись, если она 
 Прогоны по умолчанию (ширины — kb/common/acceptance-widths.yaml): первая ширина набора × 900 (светлая схема); телефон —
 самая широкая ширина набора ниже первого брейкпоинта, тач (цели ≥ 24 везде — F1, зона нажатия ≥ 44 на таче — F3);
 та же первая ширина с prefers-reduced-motion: reduce; вылет на overflow_only (320). --acceptance — все ширины набора.
-Браузер — Chromium Playwright под блокировками kbpaths.lock_path (общая и creative; ждёт MemAvailable ≥ 3 ГБ); --no-lock —
-только если блокировки уже держит вызывающий. Локальный файл раздаётся встроенным HTTP-сервером (CSSOM у file:// закрыт).
+Браузер — Chromium Playwright под замками браузера, общим и creative (kbpaths.lock), и при MemAvailable ≥ 3 ГБ: утилита
+берёт замки сама, вложенный вызов из процесса, который их уже держит, не ждёт; --no-lock — прогон без замков. Локальный
+файл раздаётся встроенным HTTP-сервером (CSSOM у file:// закрыт).
 
 Ограничения: движение по времени (пауза на 6-й секунде, вспышки, reduce всей страницы, петли под текстом, LCP) здесь не
 проверяется — это motion_check.py; контраст на медиа по F83 — page_accept.py (ai-media); стили кросс-доменных CSS не
@@ -44,7 +45,7 @@ marketing_audit:<id>; у cliche:<id> — сама запись, если она 
 from __future__ import annotations
 
 import argparse
-import fcntl
+import contextlib
 import functools
 import http.server
 import io
@@ -52,7 +53,6 @@ import json
 import math
 import os
 import re
-import signal
 import socketserver
 import sys
 import threading
@@ -72,7 +72,7 @@ LEVELS_YAML = os.path.join(ROOT, "01-creative-direction", "ambition-levels.yaml"
 REGISTRY_YAML = os.path.join(ROOT, "08-uniqueness-anti-slop", "cliche-registry.yaml")
 ANALYZERS_YAML = str(kbpaths.kb("text", "06-anti-slop", "lexicon", "analyzers.yaml"))
 COPY_CHECKLIST_YAML = str(kbpaths.kb("text", "09-ai-generation-evaluation", "copy-checklist.yaml"))
-LOCKS = [kbpaths.lock_path("browser"), kbpaths.lock_path("browser", "creative")]
+LOCKS = (("browser", None), ("browser", "creative"))   # замки браузера прогона: общий, затем creative
 VERSION = "marketing_audit.py 0.2"
 
 kbpaths.use("ui")  # ui_audit.py — scripts/ui, color.py — scripts/lib
@@ -776,41 +776,32 @@ def add_mkt(rep, data, extra, ctx, level, allow, fonts, shot_png=None, narrow=No
 # 7. Прогон: сервер, блокировки, браузер
 # =====================================================================================================================
 class Locks:
-    """Две блокировки (общая тройки, затем наша) блокирующим flock с тревогой 900 с; память ≥ 3 ГБ."""
+    """Замки браузера на время прогона: общий, затем creative — kbpaths.lock, ожидание каждого до timeout с; затем
+    память ≥ 3 ГБ. Замок, который уже держит этот процесс или его предок, повторно не берётся и не ждётся."""
     def __init__(self, enabled=True, timeout=900):
-        self.enabled, self.fds, self.timeout = enabled, [], timeout
+        self.enabled, self.timeout, self.stack = enabled, timeout, None
 
     def __enter__(self):
         if not self.enabled:
             return self
-        for p in LOCKS:
-            os.makedirs(os.path.dirname(p), exist_ok=True)
-            fd = open(p, "a")
-
-            def _alarm(signum, frame, p=p):
-                raise TimeoutError(f"блокировка {p} занята дольше {self.timeout} с")
-            old = signal.signal(signal.SIGALRM, _alarm)
-            signal.alarm(self.timeout)
-            t0 = time.time()
-            try:
-                fcntl.flock(fd, fcntl.LOCK_EX)
-            finally:
-                signal.alarm(0)
-                signal.signal(signal.SIGALRM, old)
-            if time.time() - t0 > 5:
-                print(f"  блокировка {p}: ждали {time.time() - t0:.0f} с", file=sys.stderr, flush=True)
-            self.fds.append(fd)
-        wait_memory()
+        self.stack = contextlib.ExitStack()
+        try:
+            for name, dom in LOCKS:
+                t0 = time.time()
+                path = self.stack.enter_context(kbpaths.lock(name, dom, timeout=self.timeout))
+                if time.time() - t0 > 5:
+                    print(f"  блокировка {path}: ждали {time.time() - t0:.0f} с", file=sys.stderr, flush=True)
+            wait_memory()
+        except BaseException:
+            self.stack.close()
+            self.stack = None
+            raise
         return self
 
     def __exit__(self, *a):
-        for fd in reversed(self.fds):
-            try:
-                fcntl.flock(fd, fcntl.LOCK_UN)
-                fd.close()
-            except Exception:
-                pass
-        self.fds = []
+        if self.stack is not None:
+            self.stack.close()
+            self.stack = None
 
 
 def mem_available_gb():
@@ -850,7 +841,7 @@ def serve_dir(root):
 
 
 def local_root_for(page_path, root=None):
-    """Корень раздачи: --root или подъём на глубину самых длинных ссылок «../» в HTML (лаборатория F: ../_shared, ../_vendor)."""
+    """Корень раздачи: --root или подъём на глубину самых длинных ссылок «../» в HTML (общие папки вида ../_shared, ../_vendor)."""
     d = os.path.dirname(page_path)
     if root:
         return os.path.abspath(root)
@@ -1235,6 +1226,26 @@ def selftest():
     check("приметы без повторов: caps-eyebrow одной записью", "caps-eyebrow" in summ and len(summ["caps-eyebrow"]["checks"]) == 1, True)
     txt = fix_text("synthetic", U.merge_reports([rm]))
     check("fix.txt: формат «→»", txt.count("→") >= 3, True)
+    import tempfile
+    home0, wm = os.environ.get("DDD_HOME"), globals()["wait_memory"]
+    with tempfile.TemporaryDirectory() as td:   # замки — во временном $DDD_HOME, без ожидания памяти: чужой прогон не ждём
+        os.environ["DDD_HOME"] = td
+        globals()["wait_memory"] = lambda *a, **k: None
+        try:
+            with Locks(timeout=5):
+                held = (kbpaths.lock_held("browser"), kbpaths.lock_held("browser", "creative"))
+                t0 = time.time()
+                with Locks(timeout=5):
+                    nested = time.time() - t0
+            check("замки прогона: общий и creative взяты через kbpaths.lock", held, (True, True))
+            check("замки прогона: вложенный вход под взятыми замками не ждёт", nested < 1, True)
+            check("замки прогона: после выхода свободны", kbpaths.lock_held("browser") or kbpaths.lock_held("browser", "creative"), False)
+        finally:
+            globals()["wait_memory"] = wm
+            if home0 is None:
+                os.environ.pop("DDD_HOME", None)
+            else:
+                os.environ["DDD_HOME"] = home0
     print(f"\n{VERSION}: профиль {len(TABLE)} строк; ui_audit групп {len(U.GROUP_ORDER)}")
     return 0 if ok else 1
 

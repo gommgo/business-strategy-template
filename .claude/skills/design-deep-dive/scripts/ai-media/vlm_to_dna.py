@@ -273,7 +273,7 @@ def lint(dna, dna_path=None):
                          "`alpha_check.py fake`); в блоке — ровный фон цвета секции, альфа — вырезом или векторизацией (поле "
                          "`illustration.background` паспорта — про поставку, не про промт)")
         if re.match(r"^\s*series style", block, re.I):
-            warns.append(f"style_blocks.{k}: начинается с ярлыка «Series style» — компилятор D2 добавит свой, будет дубль")
+            warns.append(f"style_blocks.{k}: начинается с ярлыка «Series style» — компилятор добавит свой, будет дубль")
         low = block.lower()
         hits = [w for w in banned if re.search(r"(?<![a-z])" + re.escape(w) + r"(?![a-z])", low)]
         if hits:
@@ -320,7 +320,7 @@ def lint(dna, dna_path=None):
                      "отклоняет; объект — в стороне от центральной полосы текста")
     acc = dna.get("acceptance", {})
     if acc.get("text_zone_percentile", 99.9) < 99:
-        warns.append("acceptance.text_zone_percentile < 99: скрим по p95 оставил нечитаемыми 14 из 64 комбинаций (F/02)")
+        warns.append("acceptance.text_zone_percentile < 99: скрим по p95 оставил нечитаемыми 14 из 64 комбинаций (ai-media 06/03)")
     nw = pal.get("neutral_wb")
     if nw and nw["target_b"] > 0.008 and "IMG-M04" in dna.get("exclusions", {}).get("forbidden_markers", []):
         warns.append("IMG-M04 (тёплый сдвиг) в запретах, а баланс белого бренда тёплый: сдвиг — стиль, проверять к neutral_wb")

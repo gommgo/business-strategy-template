@@ -7,7 +7,7 @@
       "checked_at": "2026-09-24",
       "owner": "creative · 04-visual-language",
       "fluid_range_px": [360, 1440],
-      "wcag_1_4_4_rule": "every fluid text size has max <= 2.5 x min (Barvian 2023; verified by zoom emulation 99-raw/experiments/D/01-clamp-display/zoom_chromium.json)",
+      "wcag_1_4_4_rule": "every fluid text size has max <= 2.5 x min (Barvian 2023; verified by zoom emulation)",
       "docs": ["01-display-typography.md", "02-composition-rhythm-sections.md", "03-color-surfaces-product.md"]
     }
   },
@@ -173,7 +173,7 @@
       "$value": {"colorSpace": "srgb", "components": [1, 1, 1], "alpha": 0.72, "hex": "#ffffff"},
       "$description": "Glass layer on busy content: >= 72 % opacity with blur >= 12 px (ui 11/01 §6).",
       "$extensions": {"org.design-deep-dive.css": {"backdrop-filter": "blur(16px) saturate(180%)", "border": "1px solid rgb(255 255 255 / .35)", "fallback": "@supports not (backdrop-filter: blur(1px)) { background: rgb(255 255 255 / .92) }", "reduced-transparency": "@media (prefers-reduced-transparency: reduce) { background: #fff; backdrop-filter: none }"},
-        "org.design-deep-dive.llm": {"usage": ["glass-panel", "sticky-header-scrolled"], "rules": "Use for 1-2 layers per viewport as a performance budget (cost measured by F); text on glass MUST pass 4.5:1 against the worst backdrop. Do NOT use glass on the sticky header while it is transparent over the hero."}}
+        "org.design-deep-dive.llm": {"usage": ["glass-panel", "sticky-header-scrolled"], "rules": "Use for 1-2 layers per viewport as a performance budget (cost — creative 06/03); text on glass MUST pass 4.5:1 against the worst backdrop. Do NOT use glass on the sticky header while it is transparent over the hero."}}
     },
     "glass-dark": {
       "$type": "color",
@@ -212,8 +212,8 @@
   },
   "motion": {
     "marketing": {
-      "$description": "Marketing motion tokens: durations by presentation role, stagger, easings, distances, scales, scroll scene lengths, loop speeds and loop loudness; the attention budget by ambition level lives in ../01-creative-direction/ambition-levels.yaml#levels.motion_hints. Interface feedback of controls stays on ui-research 08-motion tokens; these tokens drive presentation (scenes, reveals, loops, scroll). Every token carries its prefers-reduced-motion value in $extensions.org.design-deep-dive.reduce (resolver modifier 'motion: reduced', ui 08/03 §5.3). CSS: --mm-* in marketing-tokens.css.",
-      "$extensions": {"org.design-deep-dive.meta": {"owner": "E", "status": "draft", "version": "0.1", "checked_at": "2026-09-24",
+      "$description": "Marketing motion tokens: durations by presentation role, stagger, easings, distances, scales, scroll scene lengths, loop speeds and loop loudness; the attention budget by ambition level lives in ../01-creative-direction/ambition-levels.yaml#levels.motion_hints. Interface feedback of controls stays on ui 08-motion tokens; these tokens drive presentation (scenes, reveals, loops, scroll). Every token carries its prefers-reduced-motion value in $extensions.org.design-deep-dive.reduce (resolver modifier 'motion: reduced', ui 08/03 §5.3). CSS: --mm-* in marketing-tokens.css.",
+      "$extensions": {"org.design-deep-dive.meta": {"owner": "creative · 05-motion", "status": "draft", "version": "0.1", "checked_at": "2026-09-24",
         "docs": ["../05-motion/01-motion-principles-and-access.md §7", "../05-motion/02-choreography-scroll-transitions.md", "../05-motion/03-micro-motion-and-performance.md"],
         "reduce_rule": "reduce, not remove: spatial values -> 0 or 1, stagger -> 0, reveal and scene durations -> crossfade 180 ms or instant, loops paused, scroll-linked -> stations or final state"}},
       "duration": {
@@ -223,7 +223,7 @@
         "reveal": {"$value": {"value": 560, "unit": "ms"}, "$description": "One-time reveal of an element on scroll. Range 400-700 ms.", "$extensions": {"org.design-deep-dive.reduce": {"value": 0, "unit": "ms"}, "org.design-deep-dive.llm": {"usage": ["scroll-reveal", "support-section"], "rules": "Fire once; start from opacity .01 (never 0) and translateY(shift-reveal); content visible without JS; not on the LCP element."}}},
         "split-line": {"$value": {"value": 800, "unit": "ms"}, "$description": "One line or word of a split display heading. Range 600-900 ms.", "$extensions": {"org.design-deep-dive.reduce": {"value": 0, "unit": "ms"}, "org.design-deep-dive.llm": {"usage": ["split-text-reveal"], "rules": "Display roles only, never the LCP heading; total with stagger <= split-total-max."}}},
         "split-total-max": {"$value": {"value": 1000, "unit": "ms"}, "$description": "Ceiling for a whole split heading reveal including stagger."},
-        "hero-scene": {"$value": {"value": 900, "unit": "ms"}, "$description": "Whole first-screen entrance scene (all elements). Range 600-1200 ms.", "$extensions": {"org.design-deep-dive.reduce": {"value": 0, "unit": "ms"}, "org.design-deep-dive.llm": {"usage": ["hero-entrance-once"], "rules": "LCP element (H1 or poster) has no animation or transform only (99-raw/experiments/E/01-lcp-reveal)."}}},
+        "hero-scene": {"$value": {"value": 900, "unit": "ms"}, "$description": "Whole first-screen entrance scene (all elements). Range 600-1200 ms.", "$extensions": {"org.design-deep-dive.reduce": {"value": 0, "unit": "ms"}, "org.design-deep-dive.llm": {"usage": ["hero-entrance-once"], "rules": "LCP element (H1 or poster) has no animation or transform only."}}},
         "hero-scene-max": {"$value": {"value": 1200, "unit": "ms"}, "$description": "Ceiling for the first-screen scene."},
         "state": {"$value": {"value": 320, "unit": "ms"}, "$description": "In-page state change, same-document View Transition. Range 250-400 ms.", "$extensions": {"org.design-deep-dive.reduce": {"value": 180, "unit": "ms"}}},
         "page": {"$value": {"value": 400, "unit": "ms"}, "$description": "Page transition (SPA View Transitions, Barba, Swup). Range 300-500 ms; multipage repeats 250-400 ms.", "$extensions": {"org.design-deep-dive.reduce": {"value": 0, "unit": "ms"}}},
@@ -232,7 +232,7 @@
         "intro-max": {"$value": {"value": 3000, "unit": "ms"}, "$description": "Ceiling of an L2-campaign intro; Skip visible from the first second; none on repeat visits and in reduce."},
         "crossfade-reduce": {"$value": {"value": 180, "unit": "ms"}, "$description": "Opacity-only crossfade used instead of spatial motion under reduce (<= 200 ms)."},
         "loop-autostop": {"$value": {"value": 4000, "unit": "ms"}, "$description": "A loop without a pause button stops after this plus the end of its cycle (WCAG 2.2.2 stops-within-5s)."},
-        "settle-max": {"$value": {"value": 1000, "unit": "ms"}, "$description": "Max scroll settle tail per wheel step with smooth scrolling (C measured 800-1400 ms on Lenis sites)."},
+        "settle-max": {"$value": {"value": 1000, "unit": "ms"}, "$description": "Max scroll settle tail per wheel step with smooth scrolling (creative 03: 800-1400 ms on Lenis sites)."},
         "breathe-period": {"$value": {"value": 12000, "unit": "ms"}, "$description": "Default period of a breathing background or floating object. The forbidden band, the minimum period and what counts as a large object are gate thresholds: ../09-ai-execution-evaluation/effect-gates.yaml#EG-A11Y-18.", "$extensions": {"org.design-deep-dive.reduce": {"value": 0, "unit": "ms"}}},
         "vt-timeout-chrome": {"$value": {"value": 4000, "unit": "ms"}, "$description": "Reference only: Chrome skips a cross-document View Transition if navigation takes longer (TimeoutError)."}
       },
@@ -272,7 +272,7 @@
         "pin-l2-max-vh": {"$value": 400, "$description": "L2: max scroll length of one pinned section in vh. Canonical pin limit of the level: the steps share this length (steps x step length <= this value); the effects catalog and the checks refer to this token.", "$extensions": {"org.design-deep-dive.css": "400vh"}},
         "parallax-ratio-max": {"$value": 0.4, "$description": "Max speed difference between parallax layers; background <= 24vh per 100vh of scroll; text never.", "$extensions": {"org.design-deep-dive.reduce": 0}},
         "scrub-smoothing-s": {"$value": 0.6, "$description": "ScrollTrigger scrub catch-up in seconds (0.5-1).", "$extensions": {"org.design-deep-dive.reduce": 0}},
-        "lenis-lerp": {"$value": 0.15, "$description": "Lenis lerp for L2 smooth scrolling. Measured wheel-step tail (motion_check.py 0.1.3, desktop Chromium 153, S1 2026-09-25): 0.10 -> 1.28 s, 0.12 -> 1.09-1.13 s (fails the 1.0 s gate), 0.15 -> 0.90 s, 0.20 -> 0.72 s; the 99 % formula (0.6 s at 0.12) underestimates. Lenis disables itself under reduce (respectReducedMotion)."}
+        "lenis-lerp": {"$value": 0.15, "$description": "Lenis lerp for L2 smooth scrolling. Measured wheel-step tail (motion_check.py 0.1.3, desktop Chromium 153, 2026-09-25): 0.10 -> 1.28 s, 0.12 -> 1.09-1.13 s (fails the 1.0 s gate), 0.15 -> 0.90 s, 0.20 -> 0.72 s; the 99 % formula (0.6 s at 0.12) underestimates. Lenis disables itself under reduce (respectReducedMotion)."}
       },
       "loop": {
         "marquee-speed": {"$type": "number", "$value": 40, "$description": "Default marquee speed in px/s, within the effect limits (../06-effects-catalog/effects.yaml#marquee-logos: speed_px_s_min..speed_px_s_max). Period = track width / speed.", "$extensions": {"org.design-deep-dive.reduce": 0, "org.design-deep-dive.limits": "../06-effects-catalog/effects.yaml#marquee-logos.limits"}},
@@ -280,8 +280,8 @@
       },
       "budget": {
         "$type": "number",
-        "breathe-pixels-pct-max": {"$value": 2.5, "$description": "Share of viewport pixels changing per second of idle for a breathing layer allowed under display text (C: 0.4-2.4 %)."},
-        "loud-pixels-pct": {"$value": 5, "$description": "Above this a loop is loud: first screen of L2 only, pause visible, no text without scrim (C: Squarespace 9.5 %)."}
+        "breathe-pixels-pct-max": {"$value": 2.5, "$description": "Share of viewport pixels changing per second of idle for a breathing layer allowed under display text (creative 03/02: 0.4-2.4 %)."},
+        "loud-pixels-pct": {"$value": 5, "$description": "Above this a loop is loud: first screen of L2 only, pause visible, no text without scrim (creative 03/02: Squarespace 9.5 %)."}
       }
     }
   }

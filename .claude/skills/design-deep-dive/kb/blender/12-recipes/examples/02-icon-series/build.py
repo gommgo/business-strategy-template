@@ -1,7 +1,7 @@
-# Сгенерировано K/01 из 12-recipes/02-icon-series.md — блоки python в напечатанном виде, по порядку.
+# Сгенерировано run_recipes.py из 12-recipes/02-icon-series.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 35
-# Blender 5.2.2 — [проверено] рецепт 02: серия из 3 иконок (формы D1/04, паспорт D2/04)
+# Blender 5.2.2 — [проверено] рецепт 02: серия из 3 иконок (формы — blender 05/04 §3, паспорт — blender 06/02 §6)
 import sys, math, bpy
 from mathutils import Matrix, Vector
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender

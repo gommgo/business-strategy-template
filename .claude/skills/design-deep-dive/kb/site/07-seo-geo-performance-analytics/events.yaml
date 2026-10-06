@@ -1,19 +1,19 @@
-# events.yaml — словарь событий и целей сайта (site-research · агент P · v0; v1 — K/J)
-# Пространство `action` словаря B (02-site-types/vocabulary.yaml, 23 id) → события; вехи процесса (начал форму, шаг
-# квиза) — события, а не action (B, NN/g «Macro vs. Micro Conversions»). Ссылка из page-plan: `event:<id>`
-# (схема E: ^event:[a-z0-9-]+$). Человеческое описание, UTM, атрибуция, A/B — 04-analytics-experiments.md.
+# events.yaml — словарь событий и целей сайта (site)
+# Пространство `action` словаря (02-site-types/vocabulary.yaml, 23 id) → события; вехи процесса (начал форму, шаг
+# квиза) — события, а не action (site 02, NN/g «Macro vs. Micro Conversions»). Ссылка из page-plan: `event:<id>`
+# (схема page-plan: ^event:[a-z0-9-]+$). Человеческое описание, UTM, атрибуция, A/B — 04-analytics-experiments.md.
 version: 0
 checked: 2026-09-24
 status: draft
-owner: "site-research · P (волна 2); правовые условия аналитики — I (08-legal-trust-a11y); тексты целей — не нужны"
+owner: "site; правовые условия аналитики — 08-legal-trust-a11y; тексты целей — не нужны"
 defaults:
-  systems: [yandex-metrica]            # решение заказчика 15: Метрика по умолчанию, GA4 — по запросу
+  systems: [yandex-metrica]            # Метрика по умолчанию, GA4 — по запросу
   consent: "счётчики и пиксели — после согласия (SG-LEGAL-01; позиция I по умолчанию для РФ [спорно]); до согласия — только события без cookie и ПД в свой RUM или ничего"
 naming:
   id: "kebab-case латиницей, глагол в конце: lead-submit, form-start (ссылка в page-plan — event:<id>)"
   ga4: "snake_case ≤ 40 символов; рекомендованное имя Google, если есть (generate_lead, sign_up, purchase, qualify_lead …)"
   metrica_goal: "идентификатор цели «JavaScript-событие» = имя GA4 (ym(ID, 'reachGoal', '<goal>', {params}))"
-  params: "snake_case; без ПД (телефон, email, имя, текст сообщения — никогда); значения — id словаря B и плана"
+  params: "snake_case; без ПД (телефон, email, имя, текст сообщения — никогда); значения — id словаря и плана"
 rules:
   - "Макро-событие шлётся после успешного ответа сервера (2xx), не по клику и не по submit: цель Метрики «Отправка формы» засчитывает и неуспешные попытки (справка Метрики)"
   - "Одно действие — одно событие: защита от двойной отправки (id заявки в параметре submission_id; повтор с тем же id не шлётся)"
@@ -21,9 +21,9 @@ rules:
   - "Поле источника качества лида — CRM: lead_id связывает событие сайта и сделку (офлайн-конверсии)"
   - "Страница «спасибо» — дубль цели по URL только как страховка; основная цель — JS-событие"
 common_params:   # список {name, desc}: ключи-имена параметров, а не id словаря
-  - {name: page_type, desc: "id page_type словаря B"}
+  - {name: page_type, desc: "id page_type словаря"}
   - {name: page_id, desc: "id страницы из site-map / page-plan"}
-  - {name: section_role, desc: "роль секции, где случилось событие (section_role B)"}
+  - {name: section_role, desc: "роль секции, где случилось событие (section_role словаря)"}
   - {name: block, desc: "id блока blocks.yaml (block:…) без префикса"}
   - {name: cta_id, desc: "id слота действия в page-plan"}
   - {name: cta_position, desc: "header | hero | after-proof | pricing | final | sticky | inline"}
@@ -33,7 +33,7 @@ common_params:   # список {name, desc}: ключи-имена параме
   - {name: experiment_id, desc: "id эксперимента (реестр A/B)"}
   - {name: variant_id, desc: "id варианта"}
   - {name: release, desc: "версия выкладки"}
-  - {name: traffic_source, desc: "id traffic_source словаря B, вычисленный по UTM и реферу (attribution ниже)"}
+  - {name: traffic_source, desc: "id traffic_source словаря, вычисленный по UTM и реферу (attribution ниже)"}
 events:
   # ------------------------------------------------------------ макро: завершение действия (action)
   - {id: lead-submit, action: lead-request, kind: macro, trigger: submit, when: "сервер принял заявку (2xx)", ga4: {event: generate_lead, key_event: true, params: [lead_type=request, form_id, form_type, "value (опц.)", "currency (опц.)"]}, metrica: {goal: lead_submit, type: js-event}, dedup: submission_id}
@@ -44,14 +44,14 @@ events:
   - {id: chat-message-sent, action: message, kind: macro, trigger: submit, when: "первое сообщение в чат-виджете сайта", ga4: {event: chat_message, key_event: true}, metrica: {goal: chat_message, type: js-event}, note: "виджет — фасадом по нажатию (SG-PERF-09)"}
   - {id: booking-complete, action: booking, kind: macro, trigger: submit, when: "запись подтверждена системой записи", ga4: {event: generate_lead, key_event: true, params: [lead_type=booking, "service_id (опц.)"]}, metrica: {goal: booking_complete, type: js-event}, dedup: booking_id}
   - {id: demo-request-submit, action: request-demo, kind: macro, trigger: submit, when: "запрос демо принят", ga4: {event: generate_lead, key_event: true, params: [lead_type=demo]}, metrica: {goal: demo_request, type: js-event}}
-  - {id: sign-up-complete, action: sign-up, kind: macro, trigger: submit, when: "аккаунт создан (ответ продукта)", ga4: {event: sign_up, key_event: true, params: [method]}, metrica: {goal: sign_up, type: js-event}, note: "событие шлёт продукт или сайт после ответа; дальше — пакет сервиса (ux-research)"}
+  - {id: sign-up-complete, action: sign-up, kind: macro, trigger: submit, when: "аккаунт создан (ответ продукта)", ga4: {event: sign_up, key_event: true, params: [method]}, metrica: {goal: sign_up, type: js-event}, note: "событие шлёт продукт или сайт после ответа; дальше — пакет сервиса (ux)"}
   - {id: trial-start, action: start-trial, kind: macro, trigger: submit, when: "пробный период активирован", ga4: {event: trial_start, key_event: true, params: [plan]}, metrica: {goal: trial_start, type: js-event}}
   - {id: purchase, action: purchase, kind: macro, trigger: submit, when: "оплата подтверждена платёжным шлюзом", ga4: {event: purchase, key_event: true, params: [transaction_id, value, currency, items]}, metrica: {goal: purchase, type: "js-event + электронная коммерция"}, dedup: transaction_id}
   - {id: preorder-submit, action: preorder, kind: macro, trigger: submit, when: "предзаказ оформлен (с оплатой — как purchase с preorder=true)", ga4: {event: preorder_submit, key_event: true, params: ["value (опц.)", "currency (опц.)"]}, metrica: {goal: preorder_submit, type: js-event}}
   - {id: waitlist-join, action: join-waitlist, kind: macro, trigger: submit, when: "почта принята (двойное подтверждение — отдельной вехой)", ga4: {event: generate_lead, key_event: true, params: [lead_type=waitlist]}, metrica: {goal: waitlist_join, type: js-event}}
   - {id: event-register, action: event-registration, kind: macro, trigger: submit, when: "регистрация на событие принята", ga4: {event: event_register, key_event: true, params: [event_id, "ticket_type (опц.)"]}, metrica: {goal: event_register, type: js-event}}
-  - {id: lead-magnet-download, action: download, kind: macro, trigger: click, when: "материал выдан (после формы — после 2xx; без формы — клик по файлу)", ga4: {event: generate_lead, key_event: true, params: [lead_type=lead-magnet, file_name]}, metrica: {goal: download, type: "js-event (автоцель скачивания — страховка)"}, note: "на SaaS-сайте download — микро (B): key_event false"}
-  - {id: newsletter-subscribe, action: subscribe, kind: macro, trigger: submit, when: "подписка принята (2xx)", ga4: {event: newsletter_subscribe, key_event: true}, metrica: {goal: subscribe, type: js-event}, note: "галочка рассылки — отдельная от согласия ПД (I)"}
+  - {id: lead-magnet-download, action: download, kind: macro, trigger: click, when: "материал выдан (после формы — после 2xx; без формы — клик по файлу)", ga4: {event: generate_lead, key_event: true, params: [lead_type=lead-magnet, file_name]}, metrica: {goal: download, type: "js-event (автоцель скачивания — страховка)"}, note: "на SaaS-сайте download — микро (site 02): key_event false"}
+  - {id: newsletter-subscribe, action: subscribe, kind: macro, trigger: submit, when: "подписка принята (2xx)", ga4: {event: newsletter_subscribe, key_event: true}, metrica: {goal: subscribe, type: js-event}, note: "галочка рассылки — отдельная от согласия ПД (site 08)"}
   - {id: app-store-click, action: install-app, kind: macro, trigger: click, when: "переход в магазин приложений", ga4: {event: app_store_click, key_event: true, params: [store]}, metrica: {goal: app_store_click, type: js-event}, note: "установка — данные магазина/MMP, не сайта"}
   - {id: job-apply-submit, action: apply-job, kind: macro, trigger: submit, when: "отклик принят", ga4: {event: job_apply, key_event: true, params: [vacancy_id]}, metrica: {goal: job_apply, type: js-event}}
   - {id: route-click, action: visit-location, kind: macro, trigger: click, when: "«Построить маршрут» / переход в карты", ga4: {event: route_click, key_event: true}, metrica: {goal: route_click, type: js-event}, note: "визит — офлайн (CRM, кассы)"}
@@ -62,7 +62,7 @@ events:
   - {id: read-more-click, action: read-more, kind: micro, trigger: click, when: "переход к подробностям услуги, кейса, функции", ga4: {event: select_content, params: [content_type, item_id]}, metrica: {goal: read_more_click, type: js-event}}
   - {id: login-click, action: log-in, kind: system, trigger: click, when: "переход ко входу в продукт", ga4: {event: login_click}, metrica: {goal: login_click, type: js-event}, note: "не конверсия страницы; исключать из OEC"}
   # ------------------------------------------------------------ вехи процесса (не action)
-  - {id: cta-click, kind: milestone, trigger: click, when: "клик по любому CTA плана (главному и второстепенному)", ga4: {event: cta_click, params: [cta_id, cta_position, section_role]}, metrica: {goal: cta_click, type: js-event}, note: "место CTA в сюжете — F; нужен для воронки «CTA → форма → заявка»"}
+  - {id: cta-click, kind: milestone, trigger: click, when: "клик по любому CTA плана (главному и второстепенному)", ga4: {event: cta_click, params: [cta_id, cta_position, section_role]}, metrica: {goal: cta_click, type: js-event}, note: "место CTA в сюжете — site 05; нужен для воронки «CTA → форма → заявка»"}
   - {id: form-view, kind: milestone, trigger: view, when: "форма ≥ 50 % в экране (или открыта в окне по нажатию)", ga4: {event: form_view, params: [form_id]}, metrica: {goal: form_view, type: js-event}}
   - {id: form-start, kind: milestone, trigger: start, when: "первый ввод в поле формы (не фокус)", ga4: {event: form_start, params: [form_id]}, metrica: {goal: form_start, type: js-event}, note: "GA4 «улучшенная статистика» тоже шлёт form_start — выключить её или не дублировать"}
   - {id: form-step, kind: milestone, trigger: step, when: "шаг многошаговой формы или квиза пройден", ga4: {event: form_step, params: [form_id, step, total_steps]}, metrica: {goal: form_step, type: js-event}}
@@ -85,14 +85,14 @@ events:
   # ------------------------------------------------------------ системные
   - {id: consent-choice, kind: system, trigger: click, when: "выбор в баннере cookie: accept_all | reject_all | custom", ga4: {event: consent_choice, params: [choice]}, metrica: {goal: consent_choice, type: "js-event после согласия; иначе — счётчик без cookie"}, note: "доля согласий — guardrail тестов баннера (I предлагает A/B вариантов баннера)"}
   - {id: experiment-exposure, kind: system, trigger: view, when: "первый показ изменённого элемента варианту (не момент назначения)", ga4: {event: experiment_exposure, params: [experiment_id, variant_id]}, metrica: {goal: experiment_exposure, type: "параметры визита"}, note: "база для SRM и триггерного анализа (Fabijan 2019)"}
-  - {id: web-vitals, kind: system, trigger: view, when: "LCP, INP, CLS при visibilitychange → hidden (web-vitals, attribution-сборка)", ga4: {event: web_vitals, params: [metric_name, value, rating, "element (опц.)", page_type, variant_id]}, metrica: {goal: null, type: "параметры визита"}, note: "свой RUM без cookie допустим до согласия — позиция права — I; выборка 10–100 % по трафику"}
+  - {id: web-vitals, kind: system, trigger: view, when: "LCP, INP, CLS при visibilitychange → hidden (web-vitals, attribution-сборка)", ga4: {event: web_vitals, params: [metric_name, value, rating, "element (опц.)", page_type, variant_id]}, metrica: {goal: null, type: "параметры визита"}, note: "свой RUM без cookie допустим до согласия — позиция права — site 08; выборка 10–100 % по трафику"}
   - {id: js-error, kind: system, trigger: error, when: "window.onerror / unhandledrejection", ga4: {event: js_error, params: [message_hash, source]}, metrica: {goal: null, type: "параметры визита"}, note: "guardrail выкладки и A/B"}
 
 # ---------------------------------------------------------------- атрибуция
 attribution:
   utm: {required: [utm_source, utm_medium, utm_campaign], optional: [utm_content, utm_term], case: "нижний регистр, латиница, дефис вместо пробела"}
   click_ids: {yclid: "Яндекс Директ (автоматическая разметка)", gclid: "Google Ads", note: "параметры не должны ломать кэш CDN (SG-PERF-12) и canonical"}
-  traffic_source_map:          # id traffic_source словаря B → utm_medium и правило распознавания
+  traffic_source_map:          # id traffic_source словаря → utm_medium и правило распознавания
     search-problem: {detect: "органика: реферер yandex.*, google.*, bing.* без utm", utm_medium: organic}
     search-category: {detect: "органика; категория — по посадочной странице или запросу (Вебмастер, Search Console)", utm_medium: organic}
     search-brand: {detect: "органика с брендовым запросом (Вебмастер, Search Console)", utm_medium: organic}
@@ -100,7 +100,7 @@ attribution:
     paid-social: {detect: "utm_medium=paid_social", utm_medium: paid_social}
     paid-display: {detect: "utm_medium=display (РСЯ, медийка)", utm_medium: display}
     retargeting: {detect: "utm_medium=retargeting", utm_medium: retargeting}
-    influencer: {detect: "utm_medium=influencer; erid — у креатива (I)", utm_medium: influencer}
+    influencer: {detect: "utm_medium=influencer; erid — у креатива (site 08)", utm_medium: influencer}
     social-organic: {detect: "реферер соцсети без utm | utm_medium=social", utm_medium: social}
     messenger: {detect: "utm_medium=messenger (ссылки в каналах и ботах всегда с utm — реферера нет)", utm_medium: messenger}
     email: {detect: "utm_medium=email", utm_medium: email}
@@ -112,9 +112,9 @@ attribution:
     direct: {detect: "нет реферера и utm", utm_medium: "(none)"}
     internal: {detect: "реферер — свой домен", utm_medium: internal, note: "не новая сессия источника"}
   ai_referrers:
-    - {source: chatgpt.com, signal: "utm_source=chatgpt.com в ссылках ответов ChatGPT Search", status: "[документация] OpenAI Help Center «Publishers and Developers — FAQ», help.openai.com/en/articles/12627856: «ChatGPT automatically includes the UTM parameter utm_source=chatgpt.com in referral URLs» (снято браузером H2 2026-09-24; правка K по поручению оркестратора)"}
-    - {source: "perplexity.ai, www.perplexity.ai, copilot.microsoft.com, gemini.google.com, claude.ai, chat.deepseek.com, meta.ai", signal: "реферер (если браузер его передаёт)", status: "[не проверено] передача реферера; список доменов — H2 (99-raw/notes/wave2/H-notes.md «## Для K», 2026-09-24); AI Overviews и AI Mode — внутри органики Google, Алиса AI — внутри органики Яндекса, отдельным источником не различить (07/02 §6.1)"}
-    - {source: "Алиса, Нейро (Яндекс)", signal: "реферер ya.ru / yandex.ru — неотличим от поиска без отдельного отчёта", status: "Вебмастер «Показы в Алисе AI» — H"}
+    - {source: chatgpt.com, signal: "utm_source=chatgpt.com в ссылках ответов ChatGPT Search", status: "[документация] OpenAI Help Center «Publishers and Developers — FAQ», help.openai.com/en/articles/12627856: «ChatGPT automatically includes the UTM parameter utm_source=chatgpt.com in referral URLs» (снято браузером 2026-09-24)"}
+    - {source: "perplexity.ai, www.perplexity.ai, copilot.microsoft.com, gemini.google.com, claude.ai, chat.deepseek.com, meta.ai", signal: "реферер (если браузер его передаёт)", status: "[не проверено] передача реферера; список доменов — на 2026-09-24; AI Overviews и AI Mode — внутри органики Google, Алиса AI — внутри органики Яндекса, отдельным источником не различить (07/02 §6.1)"}
+    - {source: "Алиса, Нейро (Яндекс)", signal: "реферер ya.ru / yandex.ru — неотличим от поиска без отдельного отчёта", status: "Вебмастер «Показы в Алисе AI» — site 07/02"}
   model: "решения — по сквозной модели заказчика (Метрика: «последний значимый переход»); A/B — только рандомизация, не атрибуция"
 
 # ---------------------------------------------------------------- покрытие словаря действий (проверка: все 23 action)

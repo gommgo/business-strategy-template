@@ -105,7 +105,7 @@ ignore the stack order» (руководство 5.2 — через заметк
 
 ```python
 # Blender 5.2.2 — [проверено] стек hard-surface с явными значениями и порядком
-import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, math; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_block")
@@ -179,7 +179,7 @@ assert len(res["faces"]) > 0 and len(me.polygons) > 6 * 5      # скошены 
 
 ```python
 # Blender 5.2.2 — [проверено] база и крышка из одного тела: разрез с зазором 0,3 мм
-import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, math; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_case")
@@ -222,7 +222,7 @@ print(bpyx.object_stats(base)["tris"], bpyx.object_stats(lid)["tris"], tuple(rou
 
 ```python
 # Blender 5.2.2 — [проверено] сосуд по профилю и лента по узлу с закрутом
-import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, math; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_demo")
@@ -250,7 +250,7 @@ POLY; `extrude = depth/2 − bevel`, `bevel_depth = bevel`, `offset = −bevel` 
 
 ```python
 # Blender 5.2.2 — [проверено] контур с отверстиями через заливку кривой + сварка
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_plate")
@@ -305,7 +305,7 @@ bevel с `offset`, конвертирует, сваривает и ставит 
 
 ```python
 # Blender 5.2.2 — [проверено] SVG → меш заданной ширины и 3D-текст с бюджетом
-import sys, os, tempfile; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, os, tempfile; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 svg = os.path.join(tempfile.mkdtemp(), "mark.svg")

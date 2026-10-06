@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-media-research.local/06-art-direction-consistency/visual-dna.schema.json",
+  "$id": "urn:app-design:ai-media:visual-dna:0.1",
   "title": "Visual DNA passport (паспорт визуала бренда) v0.1",
   "description": "Числа и правила изображений бренда: из токенов и стиля UI (derived_from_ui), эталонов (references), разбора сетки брендовых фото сессией Opus (provenance) или арт-дирекции сайта (provenance.art_direction). Куда идёт каждое поле: → промт (style_blocks, palette.image_palette, light, camera, composition, subject_matter, materials, exclusions, references); → постобработка (grade, post); → приёмка (acceptance); иллюстрации — поля системы ui 07/02 и список метафор (его читают экраны кабинета); 3D-серия — материал и доля акцента здесь, камера и свет — паспорт 3D-серии blender 06/02 §6. Проверка: scripts/ai-media/vlm_to_dna.py validate FILE. Описание полей: 06-art-direction-consistency/01-visual-dna-from-ui.md.",
   "type": "object",
@@ -103,7 +103,7 @@
     "derived_from_ui": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Откуда выведено: карточка стиля ui-research 11/01, токены DTCG (09/04), семь ручек (11/02 §3, 09/04 §8).",
+      "description": "Откуда выведено: карточка стиля ui 11/01, токены DTCG (09/04), семь ручек (11/02 §3, 09/04 §8).",
       "properties": {
         "style_card": {
           "type": "string",
@@ -213,7 +213,7 @@
         },
         "one_bold_move": {
           "type": "string",
-          "description": "Единственный смелый приём страницы (A 01/03 §7.1 «сдержанность»)."
+          "description": "Единственный смелый приём страницы (ai-media 01/03 §7.1 «сдержанность»)."
         }
       }
     },
@@ -333,7 +333,7 @@
           "required": [
             "hex"
           ],
-          "description": "Цвет секции страницы, на которой стоит ассет (W5 §8): фон и рефлексы 3D-сцены, фон выреза и контактной тени — иначе ореол и «наклеенность» (IMG-M25). → промт (фон 3D и иконок), постобработка (композит выреза).",
+          "description": "Цвет секции страницы, на которой стоит ассет: фон и рефлексы 3D-сцены, фон выреза и контактной тени — иначе ореол и «наклеенность» (IMG-M25). → промт (фон 3D и иконок), постобработка (композит выреза).",
           "properties": {
             "hex": {
               "$ref": "#/$defs/hex"
@@ -546,7 +546,7 @@
         "max_elements",
         "asymmetry"
       ],
-      "description": "→ промт и → приёмка (F/02, F/03, F/04).",
+      "description": "→ промт и → приёмка (ai-media 06/03, 06/04).",
       "properties": {
         "subject_region": {
           "enum": [
@@ -622,7 +622,7 @@
             "crop",
             "outpaint"
           ],
-          "description": "Телефонный кадр 4:5–9:16: отдельный мастер, кроп или аутпейнт (F/03)."
+          "description": "Телефонный кадр 4:5–9:16: отдельный мастер, кроп или аутпейнт (ai-media 06/03)."
         },
         "note": {
           "type": "string"
@@ -637,7 +637,7 @@
         "people_policy",
         "product_policy"
       ],
-      "description": "→ промт: сюжеты из предметной области вместо клише (A 01/03 §5.4).",
+      "description": "→ промт: сюжеты из предметной области вместо клише (ai-media 01/03 §5.4).",
       "properties": {
         "domain_props": {
           "type": "array",
@@ -668,7 +668,7 @@
             "real-plus-ai-environment",
             "background-silhouettes"
           ],
-          "description": "Слоты-доказательства (люди, отзывы, команда) не генерировать (A 01/03 §1–§2)."
+          "description": "Слоты-доказательства (люди, отзывы, команда) не генерировать (ai-media 01/03 §1–§2)."
         },
         "product_policy": {
           "enum": [
@@ -1040,7 +1040,7 @@
             "type": "string",
             "pattern": "^(IMG|VID)-M[0-9]{2}$"
           },
-          "description": "Коды маркеров A 01/03 §5.2–§5.3 — для приёмки и VLM-вопросов."
+          "description": "Коды маркеров ai-media 01/03 §5.2–§5.3 — для приёмки и VLM-вопросов."
         },
         "banned_words": {
           "type": "array",
@@ -1136,14 +1136,14 @@
         },
         "focal_required": {
           "type": "boolean",
-          "description": "Каждый ассет хранит focal {x, y} → object-position (F/03)."
+          "description": "Каждый ассет хранит focal {x, y} → object-position (ai-media 06/03 §3.2)."
         }
       }
     },
     "acceptance": {
       "type": "object",
       "additionalProperties": false,
-      "description": "→ приёмка: пороги откалиброваны в опытах F/02–F/06 (фото одной съёмки); для иллюстраций пересчитать на эталоне.",
+      "description": "→ приёмка: пороги откалиброваны на фото одной съёмки (ai-media 06/02–06/04); для иллюстраций пересчитать на эталоне.",
       "properties": {
         "palette_dE_max": {
           "type": "number",
@@ -1213,7 +1213,7 @@
           "type": "integer",
           "minimum": 0,
           "maximum": 25,
-          "description": "Маркеров A §5.2 в ключевом слоте."
+          "description": "Маркеров ai-media 01/03 §5.2 в ключевом слоте."
         }
       }
     },

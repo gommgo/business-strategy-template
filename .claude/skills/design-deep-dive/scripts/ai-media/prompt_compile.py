@@ -90,7 +90,7 @@ DIALECTS = ROOT / "05-prompting/dialects.yaml"
 ROUTING = ROOT / "13-routing-matrix/routing.yaml"
 CHANNEL_CATALOGS = {"routerai": ("ROUTERAI_CATALOG", "api-v1-models.json")}   # канал → (переменная снимка, файл)
 
-# оценочные слова без видимого содержания (v1; расширенный список — dialects.yaml defaults.slop_words)
+# оценочные слова без видимого содержания (базовый список; расширенный — dialects.yaml defaults.slop_words)
 SLOP_WORDS = {"luminous", "radiant", "vibrant", "lush", "dynamic", "glowing", "gorgeous", "stunning", "breathtaking",
               "mesmerizing", "masterpiece", "8k", "ultra-detailed", "hyperrealistic", "epic", "cinematic"}
 SHOT_WORDS = {"extreme-close-up": "extreme close-up", "close-up": "close-up", "medium": "medium shot",
@@ -131,7 +131,7 @@ CYR = re.compile(r"[А-Яа-яЁё]")
 DESCRIPTIVE_PATHS = ("subject", "composition", "camera", "light", "palette", "materials", "style", "mood",
                      "exclusions", "motion", "product", "series", "edit", "references")
 FRAME_ROLES = ("first_frame", "last_frame", "mask", "edit_source")
-# X2: первые слова элемента edit.keep, перед которыми «the» не ставится («Keep all other objects unchanged»)
+# первые слова элемента edit.keep, перед которыми «the» не ставится («Keep all other objects unchanged»)
 KEEP_OWN_DETERMINERS = {"its", "their", "his", "her", "our", "your", "this", "these", "those", "all", "every", "each", "both",
                         "any", "everything"}
 
@@ -293,7 +293,7 @@ def words_in(text, words):
 # ---------------------------------------------------------------- проверки спецификации
 
 def validate_spec(spec, model_id=None, dialects=None, catalog=None, *, channel=None, options=None, spec_path=None):
-    """Возвращает (errors, warnings). Совместимо с v1: validate_spec(spec, model_id, dialects, catalog).
+    """Возвращает (errors, warnings). Вызов: validate_spec(spec, model_id, dialects, catalog).
     spec_path — файл спецификации: от его папки считаются пути картинок входа при сверке их размера. Спецификация,
     которая не проходит схему и на которой смысловые проверки обрываются (нет обязательного поля, не тот тип значения),
     получает ошибку строкой, а не исключение."""
@@ -347,7 +347,7 @@ def _meaning_checks(spec, model_id, dialects, catalog, errors, warnings, *, chan
     for z in comp.get("safe_zones", []):
         if fp and not _inside(fp, z["keep_rect"]):
             errors.append(f"фокусная точка вне безопасной зоны {z['ratio']}")
-    # противоречия движения (BFL prompt-doctor, 01 §5.9) + D2
+    # противоречия движения (BFL prompt-doctor, 01 §5.9)
     mo = spec.get("motion")
     if mo:
         move = mo["camera"]["move"]
@@ -501,7 +501,7 @@ def input_size_check(spec, fam, model_id, spec_path, errors, warnings):
 
 
 def _point(p):
-    """Фокусная точка {"x", "y"} или None (X2: список [x, y] ронял validate_spec TypeError вместо ошибки схемы)."""
+    """Фокусная точка {"x", "y"} или None (список [x, y] — ошибка схемы, а не TypeError)."""
     return p if isinstance(p, dict) and isinstance(p.get("x"), (int, float)) and isinstance(p.get("y"), (int, float)) else None
 
 
@@ -509,7 +509,7 @@ def _inside(p, r):
     return r[0] <= p["x"] <= r[2] and r[1] <= p["y"] <= r[3]
 
 
-# ---------------------------------------------------------------- фразы из полей (v1 — без изменений текста)
+# ---------------------------------------------------------------- фразы из полей
 
 def pct(x):
     return f"{round(x * 100)} percent"
@@ -570,9 +570,9 @@ def text_zone_phrase(spec, fam, style="base", short=False):
         return None
     frac = _zone_frac(tz)
     side = SIDE_WORDS[tz["side"]]
-    # D2b: поверхность — без артикля («an empty, uncluttered a long lawn» — F2, F/07)
+    # поверхность — без артикля («an empty, uncluttered a long lawn»)
     surface = re.sub(r"^(a|an|the)\s+", "", tz.get("surface", "plain background").strip(), flags=re.I)
-    # X2: «empty»/«uncluttered» в начале поверхности уже есть во фразе → «an empty, uncluttered empty wall» (M, демо 14-recipes)
+    # «empty»/«uncluttered» в начале поверхности уже есть во фразе → «an empty, uncluttered empty wall» (демо 14-recipes)
     surface = re.sub(r"^(?:(?:empty|uncluttered)(?:\s*,\s*|\s+and\s+|\s+))+", "", surface, flags=re.I) or surface
     tone = tz.get("tone", "even and low in contrast")
     positive_only = (fam.get("negative") or {}).get("object") == "positive"
@@ -713,7 +713,7 @@ def exclusion_sentences(spec, fam, warnings, negation="family", edit=False):
                 out.append(f"Do not include {what}.")
             else:
                 warnings.append(f"запрет «{what}» опущен: нужна позитивная замена replace_with")
-    return _dedupe(positive), _dedupe(out)   # D2b: без повтора («clean unmarked surfaces» ×2 — F2, F/07)
+    return _dedupe(positive), _dedupe(out)   # без повтора («clean unmarked surfaces» ×2)
 
 
 def _dedupe(items):
@@ -750,7 +750,7 @@ def text_sentences(spec, fam, dfl=None):
         out.append(", ".join(bits) + ".")
     if tf.get("exactly_once"):
         out.append("Render each text exactly once, clearly and legibly.")
-    if t.get("strict_spelling"):   # D2: блок типографики продукта [V:XLHTLJhzDyQ 03:05]
+    if t.get("strict_spelling"):   # блок типографики продукта [V:XLHTLJhzDyQ 03:05]
         ss = (dfl or {}).get("strict_spelling") or {}
         positive = (fam.get("negative") or {}).get("service") == "positive"
         out.append(ss.get("positive" if positive else "sentence", "No misspellings, no extra letters, and no warped glyphs."))
@@ -758,7 +758,7 @@ def text_sentences(spec, fam, dfl=None):
     return out
 
 
-# ---------------------------------------------------------------- D2: референсы, продукт, серия, против «среднего»
+# ---------------------------------------------------------------- референсы, продукт, серия, против «среднего»
 
 def ref_syntax(fam):
     return ((fam.get("references") or {}).get("syntax")) or "Image {n}"
@@ -819,7 +819,7 @@ def references_phrase(spec, fam, dfl, mode, start_index=1):
     out, i, k = [], start_index, 0
     while k < len(refs):
         r, note = refs[k], _ref_note(refs[k])
-        j = k + 1          # D2b: подряд идущие референсы одной роли с одной заметкой — одной фразой (F2, F/07)
+        j = k + 1          # подряд идущие референсы одной роли с одной заметкой — одной фразой
         while j < len(refs) and refs[j]["role"] == r["role"] and _ref_note(refs[j]) == note:
             j += 1
         n = j - k
@@ -840,7 +840,7 @@ PEOPLE_WORDS = re.compile(r"\b(person|people|woman|women|man|men|girl|boy|child|
 
 
 def anti_average_phrase(spec, dfl):
-    """D2b: «против среднего» по частям — взгляд только у людей, несовершенства только у фото (F2: «gaze» у предмета)."""
+    """«Против среднего» по частям — взгляд только у людей, несовершенства только у фото («gaze» у предмета)."""
     parts = dfl.get("anti_average_parts")
     if not parts:
         return dfl.get("anti_average")
@@ -878,7 +878,7 @@ def _join(items):
     return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1] if items else ""
 
 
-# ---------------------------------------------------------------- движение (v1 + D2: фон, неподвижное, запреты, темп, планы)
+# ---------------------------------------------------------------- движение (фон, неподвижное, запреты, темп, планы)
 
 def _ordinal(n):
     n = int(round(n))
@@ -894,7 +894,7 @@ def motion_sentences(spec, fam, warnings, dfl=None, fname=None):
     fcam = fam.get("camera") or {}
     out = []
     if cam["move"] == "static":
-        target = cam.get("target") or "the subject"    # D2b: Kling «The camera remains fixed on {target}»
+        target = cam.get("target") or "the subject"    # Kling «The camera remains fixed on {target}»
         out.append(sentence(fcam.get("static", "Locked camera. The camera remains still.")
                             .replace("{target}", target).replace(" as …", ".")))
     elif fname == "minimax-h3":
@@ -905,7 +905,7 @@ def motion_sentences(spec, fam, warnings, dfl=None, fname=None):
         amp = f" with {cam['amplitude']} amplitude" if cam.get("amplitude") else ""
         spd = f" at {cam['speed']} speed" if cam.get("speed") else ""
         out.append(f"The camera {MOVE_WORDS[cam['move']]}{amp}{spd}.")
-    if mo.get("subject_motion"):          # X2: с заглавной («… still. the beans turn» — M)
+    if mo.get("subject_motion"):          # с заглавной («… still. the beans turn»)
         out.append(cap(mo["subject_motion"].rstrip(".") + "."))
     if mo.get("environment_motion"):
         out.append(cap(mo["environment_motion"].rstrip(".") + "."))
@@ -921,14 +921,14 @@ def motion_sentences(spec, fam, warnings, dfl=None, fname=None):
     ts = fam.get("timestamps") or {}
     tpl = fam.get("timestamps_template")
     tl = sorted(mo.get("timeline", []), key=lambda x: x["t0"])
-    if tl and ts.get("supported") and ts.get("unit_s"):   # D2b: Seedance 2.5 — целые секунды, без разрывов [27][31]
+    if tl and ts.get("supported") and ts.get("unit_s"):   # Seedance 2.5 — целые секунды, без разрывов [27][31]
         u = float(ts["unit_s"])
         if any(abs(x / u - round(x / u)) > 1e-6 for b in tl for x in (b["t0"], b["t1"])):
             warnings.append(f"таймлайн {fname}: границы не кратны {u:g} с — вендор: «Do not claim precision to 0.5 seconds»")
         if ts.get("no_gaps") and any(abs(tl[i + 1]["t0"] - tl[i]["t1"]) > 1e-6 for i in range(len(tl) - 1)):
             warnings.append(f"таймлайн {fname}: разрывы или наложения между отрезками — вендор: «avoid gaps such as 0-3s… 5-6s»")
     for b in mo.get("timeline", []):
-        beat = _period(b["beat"])     # D2b: отрезки — законченными предложениями (иначе «…cup [00:02-00:04] the curtain…»)
+        beat = _period(b["beat"])     # отрезки — законченными предложениями (иначе «…cup [00:02-00:04] the curtain…»)
         if ts.get("supported"):
             if tpl:
                 out.append(tpl.format(t0=b["t0"], t1=b["t1"], beat=beat, t0_ord=_ordinal(b["t0"])))
@@ -948,7 +948,7 @@ def motion_sentences(spec, fam, warnings, dfl=None, fname=None):
                 words = ", ".join(x for x in (s.get("framing"), s.get("camera"), s["action"]) if x)
                 if ms.get("cut_word") and n > 1:
                     words = f"{ms['cut_word']} {words[:1].lower() + words[1:]}"
-                if ms["template"].rstrip().endswith("{words}"):   # D2b: точка в конце плана (у Kling — «;» в шаблоне)
+                if ms["template"].rstrip().endswith("{words}"):   # точка в конце плана (у Kling — «;» в шаблоне)
                     words = _period(words)
                 parts.append(ms["template"].format(n=n, m=s["t1"] - s["t0"], t0=s["t0"], t1=s["t1"], words=words))
             out.append(ms.get("joiner", " ").join(parts))
@@ -1011,7 +1011,6 @@ def blocks(spec, fam, warnings, opts=None, dfl=None, fname=None, mode="t2i"):
         "motion": " ".join(motion_sentences(spec, fam, warnings, dfl, fname)) or None,
         "positive_constraints": (cap(", ".join(positive_excl)) + ".") if positive_excl else None,
         "constraints": " ".join(neg_sentences) or None,
-        # D2
         "references": references_phrase(spec, fam, dfl, mode) if opts.get("refs", "declare") == "declare" else None,
         "product": product,
         "product_colors": product_colors,
@@ -1029,7 +1028,7 @@ ORDER_MAP = {"subject": ["subject"], "scene": ["environment", "culture"], "envir
              "constraints": ["positive_constraints", "constraints"]}
 PROSE_ORDER = ["series_block", "subject", "environment", "culture", "composition", "text_zone", "motion", "light",
                "camera", "palette", "materials", "style", "mood", "text", "positive_constraints", "constraints"]
-# D2: где стоят новые блоки относительно якорей (у спецификаций v0.1 они пусты — текст не меняется)
+# где стоят новые блоки относительно якорей (у спецификаций v0.1 они пусты — текст не меняется)
 NEW_BLOCK_ANCHORS = [("effect_block", "after", "series_block"), ("references", "after", "effect_block"),
                      ("product", "after", "subject"), ("anti_average", "after", "composition"),
                      ("product_colors", "after", "palette"), ("quality", "before", "positive_constraints")]
@@ -1069,12 +1068,12 @@ def ordered_keys(fam, opts=None):
             continue
         i = keys.index(anchor) if anchor in keys else len(keys) - 1
         keys.insert(i + 1 if where == "after" else i, new)
-    # D2b: у видео-семейств запреты — в конце (у Omni блоки вне order вставали после «No text.»); у картинок порядок v1
-    # не трогаю (146 случаев регресса, задания A/B и стенд E) — предложение для N/X в отчёте D2b
+    # у видео-семейств запреты — в конце (иначе у Omni блоки вне order встают после «No text.»); у картинок — порядок
+    # order семейства: на нём держатся регрессионные случаи тестов компилятора и задания стенда
     if fam.get("video"):
         tail = [k for k in ("quality", "positive_constraints", "constraints") if k in keys]
         keys = [k for k in keys if k not in tail] + tail
-    if order == "shuffled":   # W5-7: те же блоки вперемешку (серия и ограничения — на месте)
+    if order == "shuffled":   # те же блоки вперемешку (серия и ограничения — на месте)
         fixed_head = [k for k in keys if k in ("series_block", "effect_block", "references")]
         fixed_tail = [k for k in keys if k in ("positive_constraints", "constraints")]
         mid = [k for k in keys if k not in fixed_head and k not in fixed_tail]
@@ -1104,7 +1103,7 @@ def to_sections(b, fam, opts=None):
             label = labels.get(k)
             if label and k in ("series_block", "effect_block") and \
                     b[k].lower().startswith(label.split("(")[0].strip().lower()):
-                label = None       # D2b: блок сам начинается с «Series style…» — без второй метки (F2, F/07)
+                label = None       # блок сам начинается с «Series style…» — без второй метки
             lines.append(b[k] if label is None else f"{label}: {b[k]}")
     return "\n".join(lines)
 
@@ -1159,7 +1158,7 @@ def to_json(spec, b):
     cons = " ".join(filter(None, [b.get("positive_constraints"), b.get("constraints")]))
     if cons:
         obj["constraints"] = cons
-    # D2: только при наличии новых полей
+    # только при наличии новых полей
     for k in ("series_block", "effect_block", "references", "product", "product_colors", "anti_average", "quality"):
         if b.get(k):
             obj[k] = b[k]
@@ -1198,7 +1197,7 @@ REGION_RECT = {"left-third": [0, 0, 0.34, 1], "right-third": [0.66, 0, 1, 1], "c
 
 def to_ideogram_json(spec, b):
     """Ideogram 4: HLD → style_description → compositional_deconstruction (01 §11.4). Вне polza.
-    D2: bbox [y_min, x_min, y_max, x_max] 0–1000 из зоны текста и области субъекта; photo из камеры."""
+    bbox [y_min, x_min, y_max, x_max] 0–1000 из зоны текста и области субъекта; photo из камеры."""
     comp = spec["composition"]
     style = {"aesthetics": b["style"].rstrip(".") if b.get("style") else "", "lighting": (b.get("light") or "").rstrip("."),
              "medium": (spec.get("style") or {}).get("medium", "photograph"),
@@ -1332,7 +1331,7 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
         out.append(f"Preserve the original composition of {src_label} but render it as {changes[0]['to'] if changes else spec['subject']['summary']}.")
     elif len(changes) > 1 and op in ("replace", "recolor", "add", "remove") and any(ch.get("op") for ch in changes):
         # явный op хотя бы у одного изменения → формула «make only these changes» (одинаковая во всех порциях цепочки)
-        # D2b: смешанная правка — у каждого изменения свой глагол («change the sill to a fern» заменило бы подоконник)
+        # смешанная правка — у каждого изменения свой глагол («change the sill to a fern» заменило бы подоконник)
         items = []
         for ch in changes:
             cop = ch.get("op") or op
@@ -1357,11 +1356,11 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
         out.append(f"{lead}: {'; '.join(items)}.")
         out.append("Keep their positions and sizes exactly the same.")
     else:
-        replaced_object = False          # X2: «Keep its position…» — только после «Change only the X to Y»
+        replaced_object = False          # «Keep its position…» — только после «Change only the X to Y»
         for ch in changes:
             where = f" {ch['where']}" if ch.get("where") else ""
             val = f" ({ch['value']})" if ch.get("value") else ""
-            cop = ch.get("op") or op     # D2b: одиночное изменение со своей операцией
+            cop = ch.get("op") or op     # одиночное изменение со своей операцией
             if cop == "remove":
                 out.append(f"Remove {_the(ch['target'])}{where}; in its place the frame shows {ch['to']}.")
             elif cop == "add":
@@ -1378,7 +1377,7 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
                 prefix = "Using the provided image, change only" if fname == "nano-banana" and len(out) == 0 and src_label == "the provided image" else "Change only"
                 out.append(f"{prefix} the {ch['target']}{where} to {ch['to']}{val}.")
                 replaced_object = True
-        # D2b: у «add»/«remove» прежнего места нет; X2: у relight / background_swap / текста — тоже (M-06: свет «replace»)
+        # у «add»/«remove» прежнего места нет; у relight / background_swap / текста — тоже (свет — «replace»)
         if replaced_object:
             out.append(e.get("keep_position", "Keep its position and size exactly the same."))
     refs = references_phrase(spec, fam, dfl, "edit", start_index=2) if opts.get("refs", "declare") == "declare" else None
@@ -1386,7 +1385,7 @@ def edit_prompt(spec, fam, fname, dfl, opts, warnings, changes=None):
         out.insert(0, refs)
     if ed.get("visible_after"):
         out.append(sentence(f"After the change, the frame shows {ed['visible_after']}"))
-    if ed.get("keep"):                  # X2: артикль/местоимение в первом элементе — без своего «the» («Keep the the cup» — M)
+    if ed.get("keep"):                  # артикль/местоимение в первом элементе — без своего «the» («Keep the the cup»)
         keep = list(ed["keep"])
         first = keep[0].split()[0].lower() if keep and keep[0].split() else ""
         if first in ("the", "a", "an"):
@@ -1471,7 +1470,7 @@ def build_params(spec, model_id, fam, catalog, errors, warnings, mode=None, opts
                 pick = _nearest(vals, res)
                 warnings.append(f"{model_id}: {key} {res} нет в {vals}, беру {pick}")
                 out[key] = pick
-            elif vals:   # D2: ценовой параметр — явно, самая дешёвая ступень
+            elif vals:   # ценовой параметр — явно, самая дешёвая ступень
                 out[key] = min(vals, key=_res_num)
     rmap = pcat.RESOLUTION_MAP.get(model_id)
     if res and not any(k in cp for k in ("image_resolution", "resolution")) and not (rmap and rmap[0] in cp):
@@ -1502,7 +1501,7 @@ def build_params(spec, model_id, fam, catalog, errors, warnings, mode=None, opts
             if key in cp:
                 out[key] = "true" if mo.get("audio") else "false"
         if not mo.get("audio") and not any(k in cp for k in ("generate_audio", "sound")):
-            # D2b: Veo (Gemini API «Always on»), Omni, Wan 2.5/2.6 («Only wan2.2 and wan2.1… silent»), Grok, H3 Max
+            # Veo (Gemini API «Always on»), Omni, Wan 2.5/2.6 («Only wan2.2 and wan2.1… silent»), Grok, H3 Max
             warnings.append(f"{model_id}: звук параметром не выключается (в каталоге нет generate_audio/sound) — дорожку "
                             f"снимать при кодировании (-an); словами — только уточнения (No dialogue. No music.)")
         if "fixed_lens" in cp:
@@ -1541,7 +1540,7 @@ def build_params(spec, model_id, fam, catalog, errors, warnings, mode=None, opts
             out["seed"] = int(seed)
         elif "seeds" in cp:
             out["seeds"] = 10000 + int(seed) % 90000
-    # D2b: ступени нет в модели и ближайшая ниже запрошенной — если ступень ≥ запрошенной стоит столько же, берём её
+    # ступени нет в модели и ближайшая ниже запрошенной — если ступень ≥ запрошенной стоит столько же, берём её
     # (GA Omni: 360p = 720p = 1080p = 48 ₽ за 4 с; запрос 480p → 720p, а не 360p)
     for key in ("resolution", "image_resolution"):
         vals = (cp.get(key) or {}).get("values") or []
@@ -1854,9 +1853,9 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
     dropped = []
     limit_list = []
     info = (fam["models"].get(model_id) or {}) if fam.get("models") else {}
-    frames_via = info.get("frames_via")        # D2b: GA Omni — кадры полями *_url, теги preview не пишутся
+    frames_via = info.get("frames_via")        # GA Omni — кадры полями *_url, теги preview не пишутся
     ms_cfg = fam.get("multishot") or {}
-    if mo.get("shots") and ms_cfg:             # D2b: Kling API — n = 1–6, words ≤ 512, в мульти-шоте только стартовый кадр
+    if mo.get("shots") and ms_cfg:             # Kling API — n = 1–6, words ≤ 512, в мульти-шоте только стартовый кадр
         if ms_cfg.get("max_shots") and len(mo["shots"]) > ms_cfg["max_shots"]:
             errors.append(f"мульти-шот {fname}: {len(mo['shots'])} планов > {ms_cfg['max_shots']}")
         for n_, s_ in enumerate(mo["shots"], 1):
@@ -1875,7 +1874,7 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
             return edit_prompt(spec, fam, fname, dfl, opts, warnings)
         try:
             p = render(spec, bb, fam, fname, dialect, opts)
-        except (AttributeError, TypeError, KeyError) as e:   # v1 падал на JSON + motion у моделей картинок
+        except (AttributeError, TypeError, KeyError) as e:   # JSON + motion у моделей картинок — ошибка, а не падение
             errors.append(f"диалект {dialect} не собирается для этой спецификации ({type(e).__name__}: {e})")
             return ""
         refs_cfg = fam.get("references") or {}
@@ -1909,12 +1908,12 @@ def compile_prompt(spec, model_id, dialect=None, dialects=None, catalog=None, *,
     refs_doc = fam.get("references") or {}
     if mode == "flf" and not (refs_doc.get("first_last") or refs_doc.get("last_frame")):
         if fname in ("seedance-2", "seedance-2-5"):
-            warnings.append(f"{fname}: images — «референсы», строгий первый/последний кадр не гарантирован (тест B-6 фазы 0)")
+            warnings.append(f"{fname}: images — «референсы», строгий первый/последний кадр не гарантирован")
         else:
             warnings.append(f"{fname}: последний кадр в polza не документирован — i2v по первому кадру, петля — постобработкой")
             mode = "i2v"
             rules.append("flf_undocumented_to_i2v")
-    if mode == "flf":   # D2: модель без последнего кадра (images ≤ 1) — i2v по первому кадру, петля — постобработкой
+    if mode == "flf":   # модель без последнего кадра (images ≤ 1) — i2v по первому кадру, петля — постобработкой
         mimg = (((catalog.get(model_id) or {}).get("parameters") or {}).get("images") or {}).get("max") \
             if channel == "polza" else info.get("max_refs")
         if mimg is not None and mimg < 2:
@@ -2009,7 +2008,7 @@ def price_hint(fam, model_id, params):
     return None
 
 
-# ---------------------------------------------------------------- D2: варианты соотношений
+# ---------------------------------------------------------------- варианты соотношений
 
 def _ratio(r):
     a, b = (float(x) for x in r.split(":"))
@@ -2018,7 +2017,7 @@ def _ratio(r):
 
 def crop_box(master_ratio, target_ratio, focal, keep):
     """Прямоугольник кадра target внутри мастера (доли мастера) с фокусом по центру, внутри keep; None — не влезает.
-    keep=None — ограничения нет, кадр по фокусной точке (X2: раньше [0, 0, 1, 1] — любой кроп становился «аутпейнтом»)."""
+    keep=None — ограничения нет, кадр по фокусной точке (не [0, 0, 1, 1]: иначе любой кроп — «аутпейнт»)."""
     r0, r1 = _ratio(master_ratio), _ratio(target_ratio)
     if abs(r0 - r1) < 1e-6:
         return [0.0, 0.0, 1.0, 1.0]
@@ -2055,7 +2054,7 @@ def ratio_variants(spec):
     safe = {z["ratio"]: z["keep_rect"] for z in comp.get("safe_zones", [])}
     plans = {v["ratio"]: v for v in out.get("variants", [])}
     ratios = list(out.get("aspect_ratios") or [master])
-    ratios += [r for r in plans if r not in ratios]          # X2: соотношения из output.variants тоже (M: 4:5 generate)
+    ratios += [r for r in plans if r not in ratios]          # соотношения из output.variants тоже (4:5 generate)
     tz = (comp.get("text_zone") or {}).get("rect")
     fp = _point(comp.get("focal_point"))
     res = []
@@ -2064,7 +2063,7 @@ def ratio_variants(spec):
         strat = v.get("strategy") or ("generate" if r == master else "crop")
         box, with_tz = None, False
         if strat == "crop" and r not in safe and tz:
-            # X2: без safe_zone — сначала зона текста вместе с фокусом (телефонный мастер: текст сверху), не влезает — только фокус
+            # без safe_zone — сначала зона текста вместе с фокусом (телефонный мастер: текст сверху), не влезает — только фокус
             union = [min(tz[0], fp["x"]), min(tz[1], fp["y"]), max(tz[2], fp["x"]), max(tz[3], fp["y"])] if fp else list(tz)
             box = crop_box(master, r, fp, union)
             with_tz = box is not None
@@ -2077,7 +2076,7 @@ def ratio_variants(spec):
         elif strat == "crop" and r not in safe:
             note = ("нет safe_zone для соотношения — кадр по " + ("фокусной точке" if fp else "центру")
                     + (" и зоне текста" if with_tz else ""))
-        if strat == "crop" and box and tz and _kept_share(tz, box) < 0.9 - 1e-6:   # X2: потеря зоны текста — видна, а не молча
+        if strat == "crop" and box and tz and _kept_share(tz, box) < 0.9 - 1e-6:   # потеря зоны текста — видна, а не молча
             note = (note + "; " if note else "") + (f"в кадре {int(_kept_share(tz, box) * 100)} % зоны текста — "
                                                     "текст шаблоном или отдельная генерация")
         if strat == "crop" and r not in safe and comp.get("focal_point") is not None and _point(comp["focal_point"]) is None:

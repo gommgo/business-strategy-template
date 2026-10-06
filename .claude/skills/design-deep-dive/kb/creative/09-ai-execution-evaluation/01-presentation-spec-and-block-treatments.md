@@ -21,7 +21,7 @@
 11. **Визуальный вариант блока — из `block-treatments.yaml`** (84 блока site): `visual_variant` + `structural` должен совпасть с `variant` плана. → §3 `[проверено]`
 12. **Семейство блока задаёт потолок**: конверсия, FAQ, контакты, курс — L0; proof, offer, about, event, footer — ≤ L1; hero, value, портфолио — до L2. → §3.2 `[не проверено]`
 13. **Не бери эффект вне списка блока** без решения art-direction: предупреждение TR-12 — сигнал «приём не из жанра блока». → §3.3 `[практика]`
-14. **treatment v1 совместима с v0**: 69 известных документов проходят; site подключает v1 сменой `$ref` на `:1` и пути в `site_validate.py`. → §2.6 `[проверено]`
+14. **treatment v1 совместима с v0**: 69 известных документов проходят; page-plan site ссылается на `:1`, `site_validate.py` грузит схему v1. → §2.6 `[проверено]`
 15. **В примерах базы treatment — overlay по id секций**, склейка с планом site и проверка — `spec_check.py plan`. → §2.7 `[проверено]`
 16. **art-direction v1 = v0 + эмоциональная цель, money idea, мотив из бренда, характер и примитивы движения, статус прототипа главного эффекта,
     журнал вариативности, блок «чего не ставить»**; гарнитуры — из `cyrillic-display-fonts.yaml` (Oswald — нет, Nunito — средне). → §5 `[практика: W2, W3, H, D]`
@@ -64,6 +64,7 @@
 | `flash_check {method, result, checked_at}` | не было | WCAG 2.3.1 для видео, секвенций, прелоадера | E `05/01` §3.4 |
 | `lcp_note`, `storyboard_ref` | не было | элемент LCP и способ появления; раскадровка вне спецификации | E `05/02` §10 |
 | `background.kind` + `sequence` | не было | видео-скраб и секвенция как фон сцены | F |
+| `viewer {effect, target, note}` | не было | наложение-просмотр секции: окно кадра или работы поверх страницы (`effect:overlay-viewer`) | `06-effects-catalog` |
 | page: `motion_spec_ref`, `accents`, `signature_sections`, `motion_system.primitives`, `.character`, `library` + `stack:<id>` | не было | сверка счёта, система появления E, характер (Val Head), стек G | E, W1, G |
 
 ### 2.2. Обязательное и умолчания
@@ -109,7 +110,7 @@ L2 → `cinematic` только с роликом, секвенцией или �
 | TR-04 | пиков по уровню | 0 / 0–2 / 2–4 |
 | TR-05 | акцентов по уровню; на L0 акцент — только hero | ≤ 1 / ≤ 3 / ≤ 4 |
 | TR-06 | секций с `signature` | ≤ 1 / ≤ 2 / ≤ 4 |
-| TR-07, TR-08 | `page.peaks`, `accents`, `signature_sections` = фактическим | — |
+| TR-07, TR-08 | `page.peaks`, `accents`, `signature_sections` — необязательная сводка, выводится из секций; записанный список, разошедшийся с секциями, — предупреждение | — |
 | TR-09 | цель эффекта найдена в плане (слот, группа, anatomy, `fx-`) | — |
 | TR-10, TR-11 | эффект есть в каталоге; `level_min` ≤ уровня секции | — |
 | TR-12 | эффект в списке блока (`block-treatments.yaml`) — предупреждение | — |
@@ -140,10 +141,9 @@ L2 → `cinematic` только с роликом, секвенцией или �
 
 - 69 treatment v0 (27 в примерах site v1, 42 в опыте A/02) валидны по v1; первая версия v1 давала 2 регрессии (обязательный
   `mobile.note`) — перенесено в предупреждение TR-17 `[проверено: I/01 compat_check.py]`.
-- `site_validate.py` грузит treatment по пути A (`01-creative-direction/drafts-for-site/treatment.v0.schema.json`), `page-plan` v1 ссылается
-  на `urn:…:treatment:0` — **v1 у site заработает после двух правок**: путь `P['treatment']` → `09-ai-execution-evaluation/treatment.schema.json`,
-  `$ref` → `urn:…:treatment:1` (предложение site, отчёт I §6). До правки план с полями v1 не пройдёт site (v0 — `additionalProperties: false`).
-- `spec_check.py plan` валидирует план схемой page-plan v1 с подменой `:0` → v1 — «как будто site переключился» `[проверено]`.
+- `site_validate.py` грузит treatment v1 (`P['treatment']` — `creative/09-ai-execution-evaluation/treatment.schema.json`), `page-plan` v1 ссылается
+  на `urn:…:treatment:1` — план с полями v1 проходит site.
+- `spec_check.py plan` валидирует план схемой page-plan v1 с подсхемой `treatment` v1 `[проверено]`.
 
 ### 2.7. Пример: «Отвес», главная (L1)
 
@@ -176,7 +176,10 @@ how-it-works:
 
 Файл — `09-ai-execution-evaluation/block-treatments.yaml` 1.0: 16 семейств (`families`, по `family` блоков site) и 84 блока (`blocks`, все id
 `blocks.yaml` 1.0). Поля: `level_max`, `roles`, `signature`, `effects {L0, L1, L2}` (накопительно), `visual_variants[{id, structural, composition,
-display_role, background, levels, note}]`, `mobile {strategy, note}`, `a11y[]`, `avoid[cliche:<id>]`. Блок наследует поля семейства.
+display_role, background, levels, note, level_max, roles, signature}]`, `mobile {strategy, note}`, `a11y[]`, `avoid[cliche:<id>]`. Блок наследует
+поля семейства; вариант со своими `level_max`, `roles`, `signature` меняет потолок и роли только для себя (`routes-scene` у `audience-grid` —
+секция-маршрут главной многостраничника, потолок L2); `grid-quiet` у `portfolio-grid` — роль `calm`: обложки и подписи стоят, появления,
+каскада и эффекта наведения нет.
 Проверка: `spec_check.py blocks` (84 ↔ 84 id, эффекты есть и по уровню, клише есть, `structural` — варианты site) и `vocab_lint.py` site
 (168 id — 0 ошибок) `[проверено]`.
 
@@ -186,7 +189,7 @@ display_role, background, levels, note}]`, `mobile {strategy, note}`, `a11y[]`, 
 |---|---|---|---|---|
 | hero | L2 | accent, peak, pause | да | L0: hero-entrance-once, mask-reveal, mesh-gradient-css, cinemagraph; L1: split-text-reveal, shader-bg, video-loop-hero, 3d-object, scroll-mask-expand; L2: 3d-scene, video-scrub, image-sequence |
 | value | L2 | все | да | L0: scroll-driven-progress, sticky-stack; L1: pin-scrub-story, svg-line-draw, parallax-layers, view-transition; L2: horizontal-scroll, 3d-scene |
-| portfolio-gallery | L2 | support, accent, peak, pause | да | L1: hover-distort-dom, view-transition, page-transition (нативный VT; решение X-21, S1 2026-09-25); L2: horizontal-scroll, custom-cursor |
+| portfolio-gallery | L2 | support, calm, accent, peak, pause | да | L1: hover-distort-dom, view-transition, page-transition (нативный VT; решение X-21, S1 2026-09-25); L2: horizontal-scroll, custom-cursor |
 | proof, offer, about-team, event, cta, footer, resources-blog | L1 | по семейству | about — да, прочие — нет | counter-up, marquee-logos (proof), scroll-reveal-system, scroll-text-highlight |
 | conversion, faq, contacts, course, utility, header-nav | L0 | calm / chrome | нет | только отклик; `motion-toggle` в шапке |
 
@@ -357,7 +360,7 @@ Nunito → Commissioner или Golos Text; поле `type.cyrillic_checked: true
 - [S9] creative E, `../05-motion/02-choreography-scroll-transitions.md` — роли §1.2, хореография §1.4, примитивы §2.2, pin §4, LCP §10.
 - [S10] creative D, `../04-visual-language/01-display-typography.md` §2, `02-composition-rhythm-sections.md` §2.1, `marketing-tokens.json/.css`.
 - [S11] creative D, `../04-visual-language/cyrillic-display-fonts.yaml` — замены Oswald и Nunito.
-- [S12] creative F, `../06-effects-catalog/effects.yaml` 0.1 и `effects.schema.json` — 49 id, `level_min`, `limits`, `id_map`.
+- [S12] creative F, `../06-effects-catalog/effects.yaml` 0.1 и `effects.schema.json` — 49 id, `level_min`, `limits`.
 - [S13] creative G, `../07-stack-implementation/02-implementation-patterns.md` §2, §6 — модуль эффекта, режим, загрузчик.
 - [S14] creative H, `../08-uniqueness-anti-slop/01-cliche-policy.md` §3, §6; `02-uniqueness-and-variation.md` §3–4; `cliche-registry.yaml` 0.1.
 - [S15] creative B, `../02-references-moodboards/03-moodboard-and-handoff.md` §3–5 — Take / Do not take, передача исполнителю.

@@ -1,4 +1,4 @@
-# ru-kvarts-preorder.yaml — пример copy deck v1 (10-templates-recipes, J3, 2026-09-24): основа — E3 deck-kvarts-preorder-v0.yaml; тексты ai-self (E3, правки J3).
+# ru-kvarts-preorder.yaml — пример copy deck v1 (10-templates-recipes); тексты ai-self.
 # Факты — 02-strategy-messaging/examples/facts-kvarts.yaml (вымышленные / ДЕМО, не публиковать). Проверки — 02-examples-ru.md §3.
 copy_deck:
   version: 1
@@ -14,8 +14,8 @@ copy_deck:
   legal_category:
   - general
   authors:
-  - E3 (ai-self, 2026-09-24)
-  - J3 (upgrade, пути, голос F; 2026-09-24)
+  - агент (ai-self, 2026-09-24)
+  - агент (правки путей и голоса, 2026-09-24)
   pages:
   - page_id: kvarts-problem-aware
     page_type: landing-waitlist
@@ -24,7 +24,7 @@ copy_deck:
     primary_action: Забронировать за 990 ₽
     cta_primary: kvarts-problem-aware/hero/cta
     notes: 'Трафик — пост книжного канала о свете для вечернего чтения (message match: тема вечера с книгой, не характеристики). Отзывов, прессы,
-      счётчика «осталось N» нет — never_claim B2.'
+      счётчика «осталось N» нет — never_claim.'
     promise:
       variants:
       - id: a
@@ -34,7 +34,7 @@ copy_deck:
       chosen: a
       fact_ids:
       - auto-light
-      basis: hierarchy.core_message (B1); урок «Кварца» — обещание про глаза в product.goal (01 §8)
+      basis: hierarchy.core_message; урок «Кварца» — обещание про глаза в product.goal (01 §8)
     meta:
       title: Настольная лампа «Кварц» для вечернего чтения — предзаказ
       description: Лампа сама подстраивает оттенок и яркость света под книгу и время суток. Первые 300 ламп — 8 900 ₽, бронь 990 ₽ входит в цену.
@@ -142,7 +142,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: 'ситуация вместо «проблемы»; боль — допущение B1 (q-why-buy): подтвердить у заказчика'
+        notes: 'ситуация вместо «проблемы»; боль — допущение смысла (q-why-buy): подтвердить у заказчика'
       - slot_id: body
         slot_type: body
         variants:
@@ -200,7 +200,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: 'механизм — пробел B2 light-mechanism с fallback rewrite-without (правка 4, COPY-D-FALLBACK): без заглушки и без «датчика» (must_not_say
+        notes: 'механизм — пробел фактов light-mechanism с fallback rewrite-without (правка 4, COPY-D-FALLBACK): без заглушки и без «датчика» (must_not_say
           иерархии)'
     - section_id: specs
       section_role: product-demo
@@ -438,7 +438,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: блокирующий пробел B2 (H DIST-01)
+        notes: блокирующий пробел фактов (COPY-L-DIST-01)
       - slot_id: q2
         slot_type: faq-q
         group: faq-2
@@ -471,7 +471,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: блокирующий пробел B2
+        notes: блокирующий пробел фактов
     - section_id: final
       section_role: final-cta
       question: Бронировать сейчас?
@@ -547,7 +547,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: город компании ≠ место сборки (B2 §1.2)
+        notes: город компании ≠ место сборки (text 02/03 §1.2)
       - slot_id: legal
         slot_type: footer-legal
         variants:
@@ -565,9 +565,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: блокирующие пробелы B2 (H DIST-01)
+        notes: блокирующие пробелы фактов (COPY-L-DIST-01)
     status: draft
-  notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-kvarts-preorder-v0.yaml (ai-self E3, 0 error),
-    upgrade v0 → v1 copydeck.py; правки J3 — в notes слотов и в 02-examples-ru.md. voice_ref: профиль F «Графа» (сдержанный B2B, «вы») как ближайший
-    — своего профиля голоса у бренда нет (E, F: профилей SaaS и товара нет); у E3 было: ''черновик: на «вы», спокойно, с одной сценой на экран;
-    профиля голоса F для «Кварца» нет''.'
+  notes: 'Правки примера — в notes слотов и в 02-examples-ru.md. voice_ref: профиль «Графа» (сдержанный B2B, «вы») как ближайший
+    — своего профиля голоса у бренда нет (профилей SaaS и товара в базе нет).'

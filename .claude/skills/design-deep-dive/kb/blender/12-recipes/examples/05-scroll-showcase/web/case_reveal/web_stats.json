@@ -1,5 +1,5 @@
 {
- "model": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/05-scroll-showcase/case_reveal.glb",
+ "model": "case_reveal.glb",
  "file_kb": 26.3,
  "config": {
   "ver": "0.186.0",
@@ -49,28 +49,28 @@
    "el": 20,
    "calls": 6,
    "triangles": 3856,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/05-scroll-showcase/web/case_reveal/web_view_0_az35_el20.png"
+   "file": "web/case_reveal/web_view_0_az35_el20.png"
   },
   {
    "az": 0,
    "el": 5,
    "calls": 6,
    "triangles": 3856,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/05-scroll-showcase/web/case_reveal/web_view_1_az0_el5.png"
+   "file": "web/case_reveal/web_view_1_az0_el5.png"
   },
   {
    "az": 90,
    "el": 5,
    "calls": 6,
    "triangles": 3856,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/05-scroll-showcase/web/case_reveal/web_view_2_az90_el5.png"
+   "file": "web/case_reveal/web_view_2_az90_el5.png"
   },
   {
    "az": 200,
    "el": 35,
    "calls": 6,
    "triangles": 3856,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/05-scroll-showcase/web/case_reveal/web_view_3_az200_el35.png"
+   "file": "web/case_reveal/web_view_3_az200_el35.png"
   }
  ],
  "frame_time": {
@@ -79,5 +79,5 @@
   "frames": 120
  },
  "console": [],
- "sheet": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/05-scroll-showcase/web/case_reveal/web_sheet.png"
+ "sheet": "web/case_reveal/web_sheet.png"
 }

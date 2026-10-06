@@ -92,7 +92,7 @@ tot = dict(tris=0, verts=0, ngons=0, nonmanifold_edges=0, boundary_edges=0, loos
 for o in geo_objs:
     oe = o.evaluated_get(dg)
     # Габариты: по вершинам вычисленного меша в мире (точно для мешей, текста, кривых, GN). bound_box у
-    # oe для FONT/CURVE в 5.2.2 не учитывает extrude/bevel (находка агента B) — он только запасной путь,
+    # oe для FONT/CURVE в 5.2.2 не учитывает extrude/bevel — он только запасной путь,
     # и берётся у ОРИГИНАЛА после вычисления depsgraph (как bpyx.world_bbox).
     _bb_done = False
     try:

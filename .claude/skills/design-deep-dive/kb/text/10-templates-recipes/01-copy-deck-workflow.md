@@ -39,7 +39,9 @@ Copy deck — единственное место текста страницы.
 15. **Два пути линтера расходятся на мета**: `copy_lint.py` на copy deck не читает `meta.fact_ids` (число в title —
     ложный `an-number-without-fact`), `copydeck.py lint` читает и пишет, сколько таких находок снял. Ворота — `copydeck.py check`. `[проверено]` {meta} → §2.2
 16. **Длина — сигнал, не ворота**: `COPY-D-LEN` (E) и ядро первого экрана > 40 слов (`COPY-D-HERO-CORE`) — warning;
-    чаще это слот не того типа (число и подпись в одном `stat-value`). `[проверено]` {landing} → §2.1
+    чаще это слот не того типа (число и подпись в одном `stat-value`). Заголовок, равный имени сущности фактов
+    (`entities[].names`: модель, услуга, марка), короче нормы длины находкой `COPY-D-LEN` не считается; верхняя
+    граница действует. `[проверено]` {landing} → §2.1
 17. **Обещание первого экрана — текст страницы**: поле `promise` (свои варианты или `from` на слот) уходит в
     `product.goal` kimi → «Promise:» в TASK.md; сверяется как подзаголовок hero. Без обещания лендинг не выгружается. `[проверено]` {landing} → §7
 18. **Поля брифа — тоже текст**: `goal`, `primary_action`, `description`, `cta.label` сверяются как страница (error);
@@ -65,7 +67,7 @@ Copy deck — единственное место текста страницы.
 
 | Переход | Кто | Команда | Обязательно до перехода | Что блокирует |
 |---|---|---|---|---|
-| — → `draft` | модель (P4, P5 цепочки I), агент ai-self, редактор, импорт | `import-kimi`, `upgrade` (v0 → v1), скелет I `make_skeleton.py` | `slot_id`, `slot_type`, `variants[{id, text, status}]`; при 2+ вариантах — `chosen` | — |
+| — → `draft` | модель (P4, P5 цепочки I), агент ai-self, редактор, импорт | `skeleton` (каркас из плана страницы), `import-copy` (правка текста с холста) | `slot_id`, `slot_type`, `variants[{id, text, status}]`; `chosen` при 2+ вариантах — когда вариант вышел из `draft` (§4.3) | — |
 | `draft → checked` | утилита | `check DECK --update OUT --promote` | 0 error claims и lint у текста; записи `lint`, `claims` с `text_hash`; факты находятся и публикуемы | error сверки (факты, право), error линтера, `COPY-D-FACT-REQUIRED` у checked |
 | `checked → approved` | человек (заказчик, редактор) | `approve DECK --page ID --by КТО -o OUT` | все выбранные тексты checked, актуальный `text_hash`, 0 `[PLACEHOLDER]`, `meta.title` и `description` | заглушка, устаревшая запись, пустая мета |
 | вариант → `rejected` | человек или правка по находкам (код I `apply-edits`) | правка YAML (`status: rejected`, `reason`) | `reason` (v1: без него — error `COPY-D-REJECTED`) | выбранный отклонённый вариант — error |
@@ -83,6 +85,10 @@ Copy deck — единственное место текста страницы.
   `check --update` заново.
 - `review` у варианта: при `--promote` — `{by: "copydeck.py check --promote", at}`; при `approve` — роль или имя
   человека. Утилита не может утвердить: validate отличает эти записи.
+- Запись файла: команды записи (`check --update`, `approve`, `import-copy`, `apply-selection`, `select`) ставят
+  `copy_deck.date` и шапку о файле: без даты и пути, со строкой всех утверждённых страниц. Относительные ссылки
+  считаются от папки исходного файла и при записи не меняются; файл, записанный в другую папку, возвращают на место
+  исходного.
 
 ### 1.3. Пробелы и fallback (B2)
 
@@ -106,8 +112,8 @@ Copy deck — единственное место текста страницы.
 | 2. lint | `copy_lint.py` (C, 336 правил) через `lint_text` по слоту + проход страницы | штампы, пустые эпитеты, артефакты чат-бота, «не X, а Y», ритм, плотность тире и маркеров, надзаголовки, `an-number-without-fact` без `fact_ids`, правила мета и GEO G | факты, право, смысл |
 | 3. validate | `copydeck.py validate` | схема, id, статусы и `text_hash`, словарь, пробелы и `fallback`, обещание, главная кнопка, мета (G `meta-x-…`), длины и `fact_required` (E), голос (F `vocabulary.avoid`, обращение), флаги права (H), язык, ассеты | качество текста |
 
-Коды выхода всех команд: 0 — нет error, 2 — есть error, 1 — ошибка входа. Уровни: error — ворота; warning — прочитать и
-решить; info — справка.
+Коды выхода всех команд: 0 — нет error, 1 — есть error, 2 — ошибка вызова или входа; у `claims` и `check` 3 — сверка
+фактов не отработала (находка `COPY-D-TOOL`). Уровни: error — ворота; warning — прочитать и решить; info — справка.
 
 ### 2.2. Два пути до одного результата
 
@@ -136,6 +142,11 @@ Copy deck — единственное место текста страницы.
 | утверждение | голос, естественность, «интересно»; нет warning в headline, subheadline, cta-label, мета | `approve --by` → `approval`, `review` | C-11, C-30, C-31 |
 | публикация | 0 заглушек; флаги права высокого риска — юрист; макет 1440 и 390 px | `validate --final`; `export-kimi --strict`; сверка собранной страницы (§9) | C-04, C-33, C-34 |
 
+У страницы одна иерархия сообщений — под уровень `page.awareness`. Вторая иерархия — только у вариантной страницы:
+варианты первого экрана — `page.first_screen.variant_map` плана. У страницы без вариантов план одной строкой называет,
+как уровни сведены в один: `page.awareness_basis.rule`. Иначе `copydeck.py validate` — warning COPY-D-HIERARCHY,
+каркас (`copydeck.py skeleton`) — заметка.
+
 Люди из аудитории (5-секундный тест, cloze, тест сообщения — C-40…42) и A/B (C-43) — живая фаза, после публикации.
 
 ## 4. Варианты и слепой выбор
@@ -152,9 +163,9 @@ Copy deck — единственное место текста страницы.
 
 ### 4.2. Проверка вариантов до выбора
 
-`check DECK --all-variants --update OUT`: выбранные тексты — как обычно (записи слота, статусы); каждый живой
-невыбранный вариант и альтернатива мета сверяются копией страницы с одной заменой (соседний вариант не закрывает
-`requires_nearby`, отклонённые не сверяются), итоги — в `variant.checks {claims, lint}` того варианта. До правки J3
+`check DECK --all-variants`: каждый живой невыбранный вариант и альтернатива мета сверяются копией страницы с одной
+заменой (соседний вариант не закрывает `requires_nearby`, отклонённые не сверяются); итоги — в отчёте (`--json`:
+`slots.<путь>.claims.variants`, `.lint.variants`). С `--update` в файл пишутся только записи выбранных текстов. До правки J3
 режим сверял отклонённые варианты и суммировал их находки в статус выбранного (I/04: 4 error, из них 3 — на `rejected`);
 после — 1 error на варианте с чужими фактами, 0 — с `variant.fact_ids`. `[проверено]`
 
@@ -166,11 +177,15 @@ Copy deck — единственное место текста страницы.
    `--include-failed` — показать).
 2. Человек выбирает (заказчик — COPY-C-32; попарно — порядок меняется между показами). Судья после калибровки — только
    сигнал (C-22: согласие с заказчиком ≥ 0,8).
-3. Запись — правкой YAML: `chosen: <id>`, `selection {method: customer | human-pairwise | editor | judge-pairwise,
-   by, at, compared: [ids], tally: {id: голоса}, ref: <путь к листу и ключу>, rationale}`; для мета — выбранный текст в
-   `meta.<поле>`. Команды, которая вернёт голоса в deck, нет (пробел `apply-selection`).
+3. Запись — `apply-selection DECK --key KEY.yaml (--votes VOTES.yaml | --sheet SHEET.md) --by КТО -o OUT
+   [--method M]`: `chosen: <id>`, `selection {method: customer | human-pairwise | editor | judge-pairwise, by, at,
+   compared: [ids], tally: {id: голоса}, ref: <путь к листу и ключу>}`; для мета — выбранный текст в `meta.<поле>`.
 4. Невыбранные варианты остаются `draft` (можно вернуться); `rejected` — только с причиной («проиграл слепой выбор 1:5»).
 5. После выбора — `check --update --promote`: выбор сменил текст слота, прежние записи недействительны (`COPY-D-HASH`).
+
+Открытый выбор — `copydeck.py select DECK --page ID --slot СЕКЦИЯ/СЛОТ --variant ID --by КТО -o OUT`: ставит `chosen` и
+`selection`. Пока все варианты слота — `draft`, выбор не требуется; вариант вышел из `draft` — без `chosen` warning
+COPY-D-CHOSEN.
 
 ## 5. Правка по находкам
 
@@ -259,18 +274,19 @@ template_text {kicker, title}}`. Правила текста: строка в к
 ## 10. Сквозной пример — одна страница
 
 ```bash
-# из корня базы; страница — пример кейса, факты — набор B2 «Отвес»; копии deck в out/ — пути переписываются сами
-T=../../scripts/text/copydeck.py; D=10-templates-recipes/examples/ru-otves-case.yaml; P=case-sormovo-54; O=out
+# из корня базы; страница — пример кейса, факты — набор B2 «Отвес»; копии deck пишутся в папку исходного файла (W):
+# относительные ссылки считаются от неё и при записи не меняются; листы, пакет и план ассетов — в out/
+T=../../scripts/text/copydeck.py; D=10-templates-recipes/examples/ru-otves-case.yaml; P=case-sormovo-54; W=10-templates-recipes/examples; O=out
 F=02-strategy-messaging/examples/facts-service-renovation.yaml
 python3 ../../scripts/text/claims_check.py check $D --facts $F --legal-category general --today 2026-09-24   # 1. факты и право
 python3 ../../scripts/text/copy_lint.py $D                                                                    # 2. стиль (контроль)
-python3 $T check $D --today 2026-09-24 --update $O/d.checked.yaml --promote                            # 3. всё + draft → checked
-python3 $T check $D --all-variants --update $O/d.variants.yaml                                          # варианты с checks
-python3 $T export-variants $O/d.variants.yaml -o $O/sheet.md --key $O/key.yaml --seed 1                 # лист выбора
-python3 $T approve $O/d.checked.yaml --page $P --by "заказчик" -o $O/d.approved.yaml                   # человек
-python3 $T validate $O/d.approved.yaml --final                                                          # перед публикацией
-python3 $T export-kimi $O/d.approved.yaml --page $P --strict --out $O/pkg --merge-into brief.yaml      # пакет
-python3 $T export-assets $O/d.approved.yaml --page $P -o $O/assets-plan.yaml                            # ассеты
+python3 $T check $D --today 2026-09-24 --update $W/d.checked.yaml --promote                            # 3. всё + draft → checked
+python3 $T check $D --all-variants                                                                      # варианты — отчётом
+python3 $T export-variants $W/d.checked.yaml -o $O/sheet.md --key $O/key.yaml --seed 1                  # лист выбора
+python3 $T approve $W/d.checked.yaml --page $P --by "заказчик" -o $W/d.approved.yaml                   # человек
+python3 $T validate $W/d.approved.yaml --final                                                          # перед публикацией
+python3 $T export-kimi $W/d.approved.yaml --page $P --strict --out $O/pkg --merge-into brief.yaml      # пакет
+python3 $T export-assets $W/d.approved.yaml --page $P -o $O/assets-plan.yaml                            # ассеты
 ```
 
 Настоящие прогоны примеров — `02-examples-ru.md` §3–§6 и `03-examples-en.md` §4–§5; пакет kimi — опыт J/08
@@ -316,7 +332,6 @@ python3 $T export-assets $O/d.approved.yaml --page $P -o $O/assets-plan.yaml    
 ## Открытые вопросы и противоречия
 
 - **`verify-page` не написана** (§9) — COPY-C-33 I ссылается на неё; до команды сверка глазами.
-- **Команды выбора нет**: голоса слепого выбора переносятся в `chosen` и `selection` правкой YAML (пробел `apply-selection`).
 - **`COPY-F-USE` на мета, OG, FAQ, how-it-works** — формат `use` фактов B2 не знает этих мест: warning остаются на
   законных текстах (I/04 — 14 из 18, E/04 — 4–7 на страницу). Предложение B2: места мета и FAQ в `use`.
 - **`claims_check.py --all-variants` у B2** по-прежнему сверяет отклонённые варианты и считает соседние варианты текстом

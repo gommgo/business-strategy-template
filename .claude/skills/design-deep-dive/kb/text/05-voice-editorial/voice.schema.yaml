@@ -1,27 +1,26 @@
 # voice.schema.yaml — профиль голоса (voice.yaml): как бренд звучит в текстах сайта, писем вокруг форм и статей; той же
 # схемой пишется профиль голоса продукта (voice.product.yaml): интерфейс, письма и уведомления продукта
-# text-research · волна 2 · агент F · 2026-09-24 · версия формата 1
 #
-# Что это. JSON Schema (draft 2020-12), записанная в YAML (формат — как meaning.schema.yaml B1). Экземпляр — файл
-# `voice.yaml` проекта; на него ссылаются `meaning.voice_ref` (B1), `copy_deck.voice_ref` (J), промты генерации (I).
+# Что это. JSON Schema (draft 2020-12), записанная в YAML (формат — как meaning.schema.yaml). Экземпляр — файл
+# `voice.yaml` проекта; на него ссылаются `meaning.voice_ref`, `copy_deck.voice_ref`, промты генерации (text 09).
 # Как заполнять — `01-brand-voice.md` §3 (процедура «бриф → голос»); таблица стиля и редполитика — `02-editorial-policy.md`,
 # `redpolicy-template.md`; истории и конкретика — `03-storytelling-and-concreteness.md`.
 #
 # Главные решения формата.
-# 1. Голос выражают, а не придумывают: у голоса есть основание (`derived_from.basis`) — бриф, голос клиента (B2), страницы
+# 1. Голос выражают, а не придумывают: у голоса есть основание (`derived_from.basis`) — бриф, голос клиента (voc.yaml), страницы
 #    бренда и конкурентов, интервью; прилагательные заказчика — сырьё, а не принципы (Ross [V:cqnZtGXGwsw 04:03–06:06]).
 # 2. Принцип без исполнения — ошибка схемы: у каждого принципа ≥ 2 проверяемых правила `execution` и «каким не бывает»
 #    `is_not` (Ross [V:cqnZtGXGwsw 11:11, 14:15]; NN/g anti-tone words).
 # 3. «Мы / мы не» — пары, где «мы не» — соседний перегиб, а не антоним («по делу, но не сухо»; Mailchimp «weird but not
-#    inappropriate»; GOV.UK «brisk, but not terse»). Обещания («мы не гарантируем…») живут в `never_claim` фактов (B2),
+#    inappropriate»; GOV.UK «brisk, but not terse»). Обещания («мы не гарантируем…») живут в `never_claim` фактов (facts.yaml),
 #    здесь — только ссылка `claims_boundaries_ref`.
 # 4. Оси тона NN/g — точка 1–5 на каждой из четырёх; тон меняется по ситуации (`tone_map`), голос — нет.
-# 5. Словарь «не говорим» (`vocabulary.avoid`) записан в формате `words` линтера C (06-anti-slop/02 §2.1: `*` — продолжение
-#    основы, «ё» = [её]); конвертер `99-raw/experiments/F/03-schema-lint/voice_to_lint.py` делает из профиля файл правил
-#    для `copy_lint.py --rules` и профиль с `level_overrides` для `--profiles/--profile` (предложение C: ключ `--voice`).
-# 6. Образцы строк — по `slot_type` словаря site (длины слотов — E, `copy-slots.yaml`), у голоса продукта — по роли
-#    строки интерфейса `role` (ux 07/06 §7.2); числа и имена — только `fact_ids` из facts.yaml (B2); английский —
-#    адаптация, а не перевод (решение заказчика п. 16).
+# 5. Словарь «не говорим» (`vocabulary.avoid`) записан в формате `words` линтера (06-anti-slop/02 §2.1: `*` — продолжение
+#    основы, «ё» = [её]); соответствие полей профиля правилам линтера — `x-lint-map` ниже, линтер читает профиль ключом
+#    `copy_lint.py --voice`.
+# 6. Образцы строк — по `slot_type` словаря site (длины слотов — `copy-slots.yaml`), у голоса продукта — по роли
+#    строки интерфейса `role` (ux 07/06 §7.2); числа и имена — только `fact_ids` из facts.yaml; английский —
+#    адаптация, а не перевод.
 # 7. Проекции: одна строка `projections.tone_of_voice` → `design_system.tone_of_voice` брифа холста (x-canvas-map);
 #    `projections.brand_voice` — коротко «говорим / не говорим» для людей; `prompt_brief` — короткая «методичка» для
 #    промта генератора (опыт Т—Ж: короткая методичка для авторов, полная редполитика — для редакторов).
@@ -44,11 +43,11 @@ description: >-
   исполнения, пары «мы / мы не», точки на четырёх осях тона, обращение, словарь «говорим / не говорим», эмодзи,
   восклицания, юмор (где да, где нет), карта тона по ситуациям, табу, образцы строк по типам слотов (у голоса продукта —
   по ролям строк интерфейса) на русском и английском, проекции во вход холста. Не платформа бренда (вне рамок базы) и не
-  правила длины слотов (E).
+  правила длины слотов (copy-slots.yaml).
 date: "2026-09-29"
 x-version: 1
 x-status: "v1.1: совместима с v1 — ситуации интерфейса, роль строки у образца, жанр interface и типы слотов словаря site добавлены"
-x-owner: "text-research · 05-voice-editorial · F (контракт тройки v2 §2: бренд — выражение у creative, голос у text)"
+x-owner: "text · 05-voice-editorial (kb/common/owners.md § Темы: бренд — выражение у creative, голос у text)"
 x-doc: ["05-voice-editorial/01-brand-voice.md", "05-voice-editorial/02-editorial-policy.md", "05-voice-editorial/03-storytelling-and-concreteness.md"]
 
 type: object
@@ -80,10 +79,10 @@ properties:
     properties:
       name: {type: string, description: "Имя бренда, как на сайте («Отвес», «Кварц»)."}
       site: {$ref: "#/$defs/id", description: "slug проекта — как в meaning.yaml, facts.yaml и copy deck."}
-      category: {type: string, description: "Категория словами клиента (meaning.positioning.market_category.name, B1)."}
-      meaning_ref: {type: string, description: "Путь к meaning.yaml (B1)."}
-      facts_ref: {type: string, description: "Путь к facts.yaml (B2): числа, имена и цитаты образцов — только оттуда."}
-      voc_ref: {type: string, description: "Путь к voc.yaml (B2): слова клиента для словаря «говорим»."}
+      category: {type: string, description: "Категория словами клиента (meaning.positioning.market_category.name)."}
+      meaning_ref: {type: string, description: "Путь к meaning.yaml."}
+      facts_ref: {type: string, description: "Путь к facts.yaml: числа, имена и цитаты образцов — только оттуда."}
+      voc_ref: {type: string, description: "Путь к voc.yaml: слова клиента для словаря «говорим»."}
       parent_voice_ref: {type: string, description: "Для суббренда — путь к профилю материнского бренда (ядро голоса общее)."}
 
   scope:
@@ -100,7 +99,7 @@ properties:
       surfaces:
         type: array
         minItems: 1
-        description: "Поверхности и чей на них голос: бренд (маркетинг), продукт (интерфейс, ux 07/01 §6), нейтрально-юридический (H)."
+        description: "Поверхности и чей на них голос: бренд (маркетинг), продукт (интерфейс, ux 07/01 §6), нейтрально-юридический (text 08/01)."
         items:
           type: object
           additionalProperties: false
@@ -111,7 +110,7 @@ properties:
                      legal, social, ads, offline]
             voice:
               enum: [brand, product, neutral-legal]
-              description: "brand — этот профиль целиком; product — профиль голоса продукта (ux 07/01 §6–8); neutral-legal — точность прежде голоса (оферта, согласия, реквизиты — H)."
+              description: "brand — этот профиль целиком; product — профиль голоса продукта (ux 07/01 §6–8); neutral-legal — точность прежде голоса (оферта, согласия, реквизиты — text 08/01)."
             note: {type: string}
       product_voice_ref:
         type: string
@@ -225,7 +224,7 @@ properties:
     type: object
     additionalProperties: false
     required: [ru_form, capital_vy, self_reference]
-    description: "Обращение и кто говорит. По умолчанию базы — «вы» со строчной (решение заказчика п. 16; ux 07/03 §1.1–1.2)."
+    description: "Обращение и кто говорит. По умолчанию базы — «вы» со строчной (ux 07/03 §1.1–1.2)."
     properties:
       ru_form:
         enum: [vy, ty, impersonal]
@@ -256,7 +255,7 @@ properties:
     type: object
     additionalProperties: false
     required: [avoid]
-    description: "Словарь «говорим / не говорим». avoid читает линтер C как словарь бренда (формат words)."
+    description: "Словарь «говорим / не говорим». avoid читает линтер как словарь бренда (формат words)."
     properties:
       use:
         type: array
@@ -313,7 +312,7 @@ properties:
         additionalProperties: false
         required: [policy]
         properties:
-          policy: {enum: [never, rare, allowed], description: "never — по умолчанию; rare — только в разрешённых слотах; allowed — по голосу, но не в заголовках, CTA и мета (C: ru-pun-emoji-heading)."}
+          policy: {enum: [never, rare, allowed], description: "never — по умолчанию; rare — только в разрешённых слотах; allowed — по голосу, но не в заголовках, CTA и мета (правило линтера ru-pun-emoji-heading)."}
           allowed_slot_types: {type: array, items: {$ref: "#/$defs/slot-type"}}
           max_per_block: {type: integer, minimum: 0, maximum: 3}
           never_in: {type: array, items: {$ref: "#/$defs/situation"}}
@@ -331,10 +330,10 @@ properties:
         description: "Т—Ж: риторических вопросов нет в заголовках; абзацы из вопросов в начале — запрещены; FAQ — законный вопрос."
       caps:
         const: never
-        description: "Капс — решение вёрстки (creative); в copy deck — обычный регистр (C: COPY-M-PUN-09)."
+        description: "Капс — решение вёрстки (creative); в copy deck — обычный регистр (COPY-M-PUN-09)."
       dash:
         const: grammar
-        description: "Тире — по грамматике; плотность пунктуационных тире — порог жанра (C §5.1, H)."
+        description: "Тире — по грамматике; плотность пунктуационных тире — порог жанра (text 06/02 §5.1, text 08/02)."
 
   humor:
     type: object
@@ -390,18 +389,18 @@ properties:
         id: {$ref: "#/$defs/id"}
         what: {type: string}
         why: {type: string}
-        refs: {type: array, items: {type: string}, description: "never_claim:<id>, copy-rule:<id> H или C, ux 07/06 §…"}
+        refs: {type: array, items: {type: string}, description: "never_claim:<id>, copy-rule:<id> из правил text 08 или text 06, ux 07/06 §…"}
 
   claims_boundaries_ref:
     type: string
-    description: "Ссылка на never_claim фактов (facts.yaml#never_claim): «мы не обещаем …» живёт там, не здесь (B2)."
+    description: "Ссылка на never_claim фактов (facts.yaml#never_claim): «мы не обещаем …» живёт там, не здесь."
 
   samples:
     type: array
     minItems: 1
     description: >-
       Образцы строк по slot_type: показывают голос генератору и судье. Для профиля проекта — 8–10 типов слотов на каждый
-      язык; числа и имена — только fact_ids; нет факта — [PLACEHOLDER: …]. Длину слота задаёт E (copy-slots.yaml).
+      язык; числа и имена — только fact_ids; нет факта — [PLACEHOLDER: …]. Длину слота задаёт copy-slots.yaml.
     items: {$ref: "#/$defs/sample"}
 
   style_sheet:
@@ -436,12 +435,12 @@ properties:
   lint:
     type: object
     additionalProperties: false
-    description: "Как профиль подключается к copy_lint.py (C): базовый профиль жанра и поправки уровней по голосу."
+    description: "Как профиль подключается к copy_lint.py: базовый профиль жанра и поправки уровней по голосу."
     properties:
       base_profile: {$ref: "#/$defs/genre"}
       level_overrides:
         type: object
-        description: "Шаблон id правила → уровень (спецификация C §4): эмодзи в прозе разрешены голосом → «ru-pun-emoji-body»: \"off\"."
+        description: "Шаблон id правила → уровень (text 06/02 §4): эмодзи в прозе разрешены голосом → «ru-pun-emoji-body»: \"off\"."
         additionalProperties: {enum: [error, warning, info, "off"]}
       address_rule: {type: boolean, default: true, description: "Сгенерировать правило «обращение не по профилю» (формы «ты» при ru_form: vy и наоборот)."}
 
@@ -517,7 +516,7 @@ $defs:
     description: "Жанры текстов: сайт (landing, site-page, article, meta, geo, email-form) и интерфейс продукта (interface — строки экранов, бота, мобильного; профиль линтера — copy_lint.py)."
 
   slot-type:
-    description: "Слоты словаря site вида text (../site/02-site-types/vocabulary.yaml); правила текста — copy-slots.yaml (E). validate_voice.py сверяет перечень со словарём."
+    description: "Слоты словаря site вида text (../site/02-site-types/vocabulary.yaml); правила текста — copy-slots.yaml. validate_voice.py сверяет перечень со словарём."
     enum: [meta-title, meta-description, og-title, og-description, og-image-alt, eyebrow, headline, subheadline, hero-proof,
            cta-label, cta-secondary-label, cta-note, section-title, section-lead, body, list-item, card-title, card-body,
            step-title, step-body, stat-value, stat-label, logos-caption, testimonial-quote, testimonial-attribution,
@@ -614,7 +613,7 @@ $defs:
         type: array
         uniqueItems: true
         items: {enum: [copy_lint, claims_check, judge, human]}
-        description: "Кто ловит нарушение: линтер C, сверка B2/H, ИИ-судья (I), только человек (01 §4)."
+        description: "Кто ловит нарушение: линтер, сверка claims_check.py, ИИ-судья, только человек (01 §4)."
 
   pair:
     type: object
@@ -665,7 +664,7 @@ $defs:
       note: {type: string}
       lint_allow:
         type: array
-        description: "Законное исключение из правила линтера с причиной (как lint_allow слота copy deck — C §9 п. 8): ложное срабатывание или норма голоса."
+        description: "Законное исключение из правила линтера с причиной (как lint_allow слота copy deck — text 06/02 §9 п. 8): ложное срабатывание или норма голоса."
         items:
           type: object
           additionalProperties: false
@@ -697,13 +696,13 @@ $defs:
 
 # ───────────────────────── Проекции и связи ─────────────────────────
 x-meaning-map:
-  meaning.voice_ref: "путь к voice.yaml (эта схема); до профиля — строка-описание со словом «черновик» (B1)"
+  meaning.voice_ref: "путь к voice.yaml (эта схема); до профиля — строка-описание со словом «черновик»"
   meaning.brand_character: "прилагательные брифа → derived_from.brief_adjectives (сырьё, не принципы)"
   meaning.positioning.market_category.name: "brand.category и vocabulary.category_name"
 
 x-copy-deck-map:
-  copy_deck.voice_ref: "путь к voice.yaml (J, copy-deck.schema.json)"
-  slot.variants[].text: "проверка голоса: vocabulary.avoid, address, punctuation — copy_lint.py с правилами из профиля; принципы — судья (I)"
+  copy_deck.voice_ref: "путь к voice.yaml (copy-deck.schema.json)"
+  slot.variants[].text: "проверка голоса: vocabulary.avoid, address, punctuation — copy_lint.py с правилами из профиля; принципы — судья"
 
 x-canvas-map:
   # Голос во входе холста — проекция профиля (references/claude-design.md § 6): одна строка тона в брифе холста; свой
@@ -729,8 +728,8 @@ x-lint-map:
   address.ru_form: "vy → правило «формы ты» (ты, тебя, тебе, твой… и частые повелительные на -и/-й без -те), warning; ty → правило «формы вы», info"
   address.capital_vy: "false → «Вы/Ваш» в середине предложения — warning (Контур, Т—Ж)"
   punctuation.emoji.policy: "never → ru-pun-emoji-body: warning; allowed → ru-pun-emoji-body: off (заголовки и CTA остаются warning)"
-  punctuation.exclamation.policy: "never → правило «!» во всех слотах, warning; rare/allowed — правила C без изменений"
-  lint.level_overrides: "как есть → профиль <base_profile>-<voice_id> в копии profiles.yaml (конвертер F); в C — ключ --voice (предложение)"
+  punctuation.exclamation.policy: "never → правило «!» во всех слотах, warning; rare/allowed — правила линтера без изменений"
+  lint.level_overrides: "как есть → профиль <base_profile>-<voice_id> в копии profiles.yaml; в copy_lint.py — ключ --voice"
 
 x-checks:
   copy_lint: "словарь «не говорим», единое написание, обращение ты/вы, «Вы» с заглавной, эмодзи, «!», капс, рубленый драматизм, плотность маркеров, сверхкоррекция"
@@ -778,7 +777,7 @@ x-tone-words-ru:
   witty: "остроумный"
 
 x-vocabulary-proposals:
-  situations: "список situation — ситуации карты тона сайта (25, предложение F) и интерфейса (15, ux 07/01 §7.1); site ролей тона не задаёт"
+  situations: "список situation — ситуации карты тона сайта (25, предложение text) и интерфейса (15, ux 07/01 §7.1); site ролей тона не задаёт"
 
 x-situations:
   # Ситуации интерфейса — матрица ux 07/01 §7.1: влияние на пользователя и тип сообщения задают тон.

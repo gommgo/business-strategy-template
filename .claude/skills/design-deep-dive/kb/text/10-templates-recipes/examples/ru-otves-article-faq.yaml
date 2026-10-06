@@ -1,6 +1,6 @@
-# ru-otves-article-faq.yaml — пример copy deck v1.1 (10-templates-recipes, J3, 2026-09-24): статья с блоком «коротко» и FAQ
-# (article-page). Тексты — ai-self J3. Факты — ../../02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленная
-# студия B2, не публиковать). Мета — по шаблону G article-page, два варианта title с планом теста; бриф статьи — page.article (G 07/02 §1.1).
+# ru-otves-article-faq.yaml — пример copy deck v1.1 (10-templates-recipes): статья с блоком «коротко» и FAQ
+# (article-page). Тексты — ai-self. Факты — ../../02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленная
+# студия, не публиковать). Мета — по шаблону article-page (07-seo-geo-copy/meta-rules.yaml), два варианта title с планом теста; бриф статьи — page.article (text 07/02 §1.1).
 copy_deck:
   version: 1
   date: '2026-09-24'
@@ -12,13 +12,13 @@ copy_deck:
   copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
   jurisdiction: ru
   legal_category: [general]
-  authors: ['J3 (ai-self, 2026-09-24)']
+  authors: ['агент (ai-self, 2026-09-24)']
   notes: >-
-    Статья отвечает на вопрос сделки фактами (G 07/02): цена «от» с условием рядом, смета, срок на примере одного кейса с
-    рамкой, гарантия. Блок «коротко» — первым после лида (40–80 слов, G 07/03 §3.1), FAQ — ответ первой фразой
+    Статья отвечает на вопрос сделки фактами (text 07/02): цена «от» с условием рядом, смета, срок на примере одного кейса с
+    рамкой, гарантия. Блок «коротко» — первым после лида (40–80 слов, text 07/03 §3.1), FAQ — ответ первой фразой
     (COPY-GEO-14). Подпись автора — только после того, как Сергей Лапин прочитал и одобрил текст (ИИ-текст не
-    подписывается чужим именем — H, F); до этого страница — draft. article.serp_scan не заполнен: живой выдачи в опыте
-    нет (сеть не использовалась) — перед публикацией 3–5 материалов {url, note, date} (G «осмотрись»).
+    подписывается чужим именем — text 08, text 05); до этого страница — draft. article.serp_scan не заполнен: живой выдачи в примере
+    нет — перед публикацией 3–5 материалов {url, note, date} («осмотрись»).
   pages:
   - page_id: article-turnkey-price
     page_type: article-page
@@ -45,9 +45,9 @@ copy_deck:
         title:
         - {id: a, text: 'Сколько стоит ремонт квартиры под ключ — Нижний Новгород, 2026', status: assumed, source: ai-self}
         - {id: b, text: 'Цена ремонта под ключ в Нижнем Новгороде: что входит в метр', status: assumed, source: ai-self}
-      test_plan: 'Вебмастер и Search Console: 4 недели на варианте a, затем 4 недели на b; метрика — CTR по запросу main_query (G 07/02 §4.3).'
+      test_plan: 'Вебмастер и Search Console: 4 недели на варианте a, затем 4 недели на b; метрика — CTR по запросу main_query (text 07/02 §4.3).'
       review_by: '2027-01-15'
-      notes: 'Шаблон G article-page: title «{ответ или вопрос читателя} — {уточнение: где, год-если-данные}»; description «{вывод}. {источник данных, дата}».'
+      notes: 'Шаблон article-page (meta-rules.yaml): title «{ответ или вопрос читателя} — {уточнение: где, год-если-данные}»; description «{вывод}. {источник данных, дата}».'
     sections:
     - section_id: article
       section_role: article-body
@@ -75,7 +75,7 @@ copy_deck:
         chosen: a
         fact_ids: [price-from-per-m2, estimate-free, guarantee-3-years, case-two-room-47-days]
         claim_flags: [price-discount, guarantee, fact-number]
-        notes: 'Блок «коротко» (GEO): самодостаточный ответ 40–80 слов, каждое число — факт; не отдельная «LLM-версия» страницы (G).'
+        notes: 'Блок «коротко» (GEO): самодостаточный ответ 40–80 слов, каждое число — факт; не отдельная «LLM-версия» страницы (text 07/03).'
       - slot_id: h2-price
         slot_type: article-heading
         variants:

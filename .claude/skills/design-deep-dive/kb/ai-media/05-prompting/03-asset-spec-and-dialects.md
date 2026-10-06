@@ -76,7 +76,7 @@
 |---|---|---|---|---|
 | `id`, `spec_version`, `checked_at`, `brief_language` | учёт и версии | нет | схема | — |
 | `task` | код задачи из таксономии `_common.md` | нет | enum из 32 кодов | — |
-| `role` (`page_type`, `section`, `slot`, `purpose`, `priority`, `series_id`) | место на странице, серия | нет | — | план ассетов (агент A) |
+| `role` (`page_type`, `page_class`, `section`, `slot`, `purpose`, `priority`, `series_id`) | место на странице, серия | только слово контекста: `role.page_class`; `role.page_type` — id типа страницы словаря site, в промт не идёт | — | план ассетов (агент A) |
 | `subject.summary` | сюжет одной фразой | да, первым | ≤ 240 символов; слова без видимого содержания — предупреждение | Google: «Describe the scene» [S4]; Ideogram — запрет «stunning» [S5] |
 | `subject.elements[]` | объекты: что, сколько, признаки, связь, позиция, действие | да | ≤ 8 | Seedream — перечень по местам [S6]; GenEval — счёт и позиция слабы [S7] |
 | `subject.environment` | место и контекст | да | — | формулы Google, BFL [S4][S8] |
@@ -216,7 +216,7 @@
 | Ключ | Что значит | Пример |
 |---|---|---|
 | `class` | класс входа по `01` §1.1: A (LLM-фронт), B (языковой энкодер), C (T5/CLIP), D (обучена на структуре) | `nano-banana: A`, `minimax-h3: D` |
-| `models.{id}` | лимит промта (`max_prompt_chars`), референсы (`max_refs`), цена, `seed`, маска, звук по умолчанию | `wan/2.5: {max_prompt_chars: 800, negative_field: {…}}` |
+| `models.{id}` | лимит промта (`max_prompt_chars`), референсы (`max_refs`), цена, `seed`, маска, звук по умолчанию; `min_input_px` — меньшая сторона входной картинки, px: вход меньше — ошибка компилятора до вызова | `wan/2.5: {max_prompt_chars: 800, negative_field: {…}}` |
 | `safe_max_prompt_chars` | меньший из лимитов документации и каталога | Veo — 2 000; Seedance 2 — 1 536 |
 | `format`, `alt_formats` | форма по умолчанию и допустимые для A/B | `flux2: prose`, `[sections, json]` |
 | `order` | порядок смысловых блоков | FLUX.2: subject → action → style → environment … |

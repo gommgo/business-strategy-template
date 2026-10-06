@@ -33,10 +33,10 @@
 ## 3. Код: иконки → паспорт → рендер с альфой → GLB
 
 ```python
-# Blender 5.2.2 — [проверено] рецепт 02: серия из 3 иконок (формы D1/04, паспорт D2/04)
+# Blender 5.2.2 — [проверено] рецепт 02: серия из 3 иконок (формы — blender 05/04 §3, паспорт — blender 06/02 §6)
 import sys, math, bpy
 from mathutils import Matrix, Vector
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "02-icon-series"
@@ -165,7 +165,7 @@ rk.save(SLUG, passport=PASSPORT, series=S)
 # run: system — Python 3 + Pillow — [проверено] PNG 512² → AVIF/WebP 1×/2× + страница-сетка
 import os
 from PIL import Image
-EX = "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series"
+EX = os.path.dirname(os.path.abspath(__file__))  # перенос: папка примера
 
 
 def encode_web(png_path, out_dir, css_px, avif_q=60, webp_q=80):

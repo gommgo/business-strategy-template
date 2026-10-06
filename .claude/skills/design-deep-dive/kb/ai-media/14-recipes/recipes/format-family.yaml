@@ -1,7 +1,6 @@
-# format-family.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/02-series-product-recipes.md#5; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+# format-family.yaml — машиночитаемый рецепт; текст — 14-recipes/02-series-product-recipes.md#5; схема — recipe.schema.json
 recipe_version: 1
 checked_at: '2026-09-25'
-author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
 id: format-family
 title: Семейство форматов из мастера с защитой продукта
 doc: 14-recipes/02-series-product-recipes.md#5
@@ -38,17 +37,10 @@ spec:
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
 compile: scripts/ai-media/prompt_compile.py ratios <spec>
-phase5:
-  jobs:
-  - 99-raw/phase5/jobs/H-08-outpaint.jsonl
-  reuse:
-  - H-08
-  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
 steps:
 - id: outpaint-check
   cmd: python3 ../../scripts/ai-media/edit_check.py outpaint src.png extended.png --composite --feather 6 --out out/
   status: checked
-  evidence: 99-raw/experiments/H/03-edit-check
 accept:
   thresholds:
   - edit.outpaint_edge_sharpness_min
@@ -58,11 +50,11 @@ provenance:
   dst: composite
   visible_label: false
 numbers:
-  phase5_h08_9x16: 'Sunburst 4 ₽ и NB2 4,8 ₽ — REGENERATED: SSIM центра 0,94 / 0,98, ΔE00 1,15 / 0,97, резкость краёв 0,14 / 0,56 < 0,85 → композит — 99-raw/phase5/runs/4-edits/H-08-check/'
-  phase5_h08_21x9: 'аутпейнт 16:9 → 21:9 не запускался — отменено заказчиком 25.09'
+  live_h08_9x16: 'Sunburst 4 ₽ и NB2 4,8 ₽ — REGENERATED: SSIM центра 0,94 / 0,98, ΔE00 1,15 / 0,97, резкость краёв 0,14 / 0,56 < 0,85 → композит'
+  live_h08_21x9: 'аутпейнт 16:9 → 21:9 не запускался'
 status:
   local: checked
   generation: checked
 sources:
-- 91-videos/digests/AxV8TR3BdqI.md
-- 91-videos/digests/BVMuRw8BgJg.md
+- '[V:AxV8TR3BdqI]'
+- '[V:BVMuRw8BgJg]'

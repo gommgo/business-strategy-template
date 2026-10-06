@@ -1,7 +1,6 @@
-# marketplace-infographic.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/03-vector-text-og-recipes.md#6; схема — recipe.schema.json
+# marketplace-infographic.yaml — машиночитаемый рецепт; текст — 14-recipes/03-vector-text-og-recipes.md#6; схема — recipe.schema.json
 recipe_version: 1
 checked_at: '2026-09-24'
-author: агент M, волна 3
 id: marketplace-infographic
 title: Инфографика карточки маркетплейса с кириллицей шаблоном
 doc: 14-recipes/03-vector-text-og-recipes.md#6
@@ -22,28 +21,18 @@ route:
   - role: товар
     model: настоящий вырез
     price_rub: 0.0
-phase5:
-  jobs: []
-  reuse:
-  - E-10
-  estimate: не нужно (0 ₽)
 steps:
 - id: layout
-  cmd: flock -w 900 $DDD_HOME/locks/browser.lock python3 ../../scripts/ai-media/layout_check.py
+  cmd: python3 ../../scripts/ai-media/layout_check.py <шаблон.html> <вырез.png>
   status: checked
-  evidence: 99-raw/experiments/M/06-og-marketplace/results_layout.json
 - id: render
-  cmd: flock -w 900 $DDD_HOME/locks/browser.lock python3 99-raw/experiments/M/06-og-marketplace/render.py
   status: checked
-  evidence: 99-raw/experiments/M/06-og-marketplace/results_og_mp.json
 - id: ocr-textlayer
   cmd: python3 ../../scripts/ai-media/asset_audit.py audit marketplace_textlayer.png --slot product --expect "<каждая подпись целиком>" --out audit_textlayer/
   status: checked
-  evidence: 99-raw/experiments/M/06-og-marketplace/audit_mp_textlayer
 - id: eye
   cmd: глазом итоговую карточку с товаром на 100 % и 200 % (OCR склеивает строки колонки с этикеткой на той же высоте)
   status: checked
-  evidence: 99-raw/experiments/M/06-og-marketplace/audit_mp
 accept:
   thresholds:
   - encoding.ssimulacra2_hero_min
@@ -70,4 +59,4 @@ spec:
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E5.spec.json
 sources:
-- 91-videos/transcripts/12pQ0W2bCDE.md
+- '[V:12pQ0W2bCDE]'

@@ -37,7 +37,7 @@ Iris Xe) · сквозной прогон: [проверено] · пример:
 ```python
 # Blender 5.2.2 — [проверено] рецепт 01: кейс наушников → постер Blender + GLB для hero
 import sys, math, bpy, bmesh
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "01-hero-product"
@@ -47,7 +47,7 @@ P = dict(W=0.064, D=0.024, H=0.050, corner=0.0115, edge=0.0095, power=2.6, seam_
 
 
 def split_by_z(ob, z, keep_above):
-    """Разрез меша плоскостью z с заливкой среза — две замкнутые детали (D1/03)."""
+    """Разрез меша плоскостью z с заливкой среза — две замкнутые детали (blender 05/04 §1)."""
     bm = bmesh.new(); bm.from_mesh(ob.data)
     res = bmesh.ops.bisect_plane(bm, geom=bm.verts[:] + bm.edges[:] + bm.faces[:], plane_co=(0, 0, z),
                                  plane_no=(0, 0, 1), clear_inner=keep_above, clear_outer=not keep_above)

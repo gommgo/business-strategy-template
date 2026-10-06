@@ -1,21 +1,21 @@
-# typography-rules.yaml — нормы набора маркетинговых текстов для copy_lint.py (C): внешний файл правил H.
-# text-research · волна 2 · агент H · 2026-09-24. Не юридическое заключение (правила набора; право — claims-rules.yaml).
+# typography-rules.yaml — нормы набора маркетинговых текстов для copy_lint.py: внешний файл правил.
+# Не юридическое заключение (правила набора; право — claims-rules.yaml).
 #
-# Подключение: 06-anti-slop/profiles.yaml → external_rules (C) — линтер читает файл сам; разово — `--rules`.
-# Формат — 06-anti-slop/02-linter-spec-and-profiles.md §2 (C): id `typo-…`, marker_id `COPY-T-NN`, group EXT,
+# Подключение: 06-anti-slop/profiles.yaml → external_rules — линтер читает файл сам; разово — `--rules`.
+# Формат — 06-anti-slop/02-linter-spec-and-profiles.md §2: id `typo-…`, marker_id `COPY-T-NN`, group EXT,
 # count_as_marker: false (набор — не слоп и в плотность маркеров не входит), mask_quotes: false (набор проверяется и
-# внутри кавычек: правка пунктуации в цитате допустима — B2 edits.type: punctuation).
-# Зона H — только то, чего нет у C (ru-punct.yaml, artifacts.yaml) и что не частота тире: неразрывные пробелы, висячие
+# внутри кавычек: правка пунктуации в цитате допустима — edits.type: punctuation, 02-strategy-messaging/facts.schema.yaml).
+# Здесь — только то, чего нет в словарях 06-anti-slop/lexicon/ (ru-punct.yaml, artifacts.yaml) и что не частота тире: неразрывные пробелы, висячие
 # предлоги в заголовках, диапазоны, минус, проценты, валюта, разряды, кавычки второго уровня и точка после «ёлочки»,
 # ® и ™, английский набор, числа и единицы, двойные пробелы и пробелы у знаков (правила ux-6-5-07…09 переходят сюда).
 # Решение о тире — 02-typography-for-marketing.md §1: тире по грамматике; «—» с пробелами (перед — неразрывный);
 # диапазон чисел — «–» без пробелов («—» без пробелов, как у Контура и ux 07/03, — допустимо, не ошибка); минус «−»;
-# дефис — внутри слов. Плотность пунктуационных тире в прозе — анализатор C с порогами D, не здесь.
+# дефис — внутри слов. Плотность пунктуационных тире в прозе — анализатор линтера (06-anti-slop) с порогами 03-corpus-measured, не здесь.
 # Уровни: warning — явная ошибка набора (правится текстом); info — то, что обычно ставит автотипограф при сборке
 # (неразрывные пробелы, узкие знаки): в copy deck — сигнал, в финальном HTML — проверить.
 date: "2026-09-24"
 version: 1
-owner: "H (волна 2) · text-research/08-russian-legal-typography"
+owner: "text/08-russian-legal-typography"
 defaults:
   group: EXT
   count_as_marker: false
@@ -138,7 +138,7 @@ rules:
     message: "Точка или запятая перед закрывающей «ёлочкой»: в русском знак ставится после кавычек («…дней».); внутри остаются только «?», «!», «…»."
     replacement: "«Сдали за 47 дней»."
     examples: {bad: "Анна пишет: «Сдали за 47 дней.»", good: "Анна пишет: «Сдали за 47 дней»."}
-    source: "русская пунктуация при цитатах (Розенталь; через Лебедев § 97 — «см. Дитмара Эльяшевича») [практика]; B2 03 §5 (цитата — дословно, пунктуация — допустимая правка)"
+    source: "русская пунктуация при цитатах (Розенталь; через Лебедев § 97 — «см. Дитмара Эльяшевича») [практика]; text 02/03 §5 (цитата — дословно, пунктуация — допустимая правка)"
     evidence: "[практика]"
 
   - id: typo-trademark-space
@@ -189,7 +189,7 @@ rules:
     message: "Два и больше пробела подряд между словами."
     replacement: "один пробел"
     examples: {bad: "Ремонт  под ключ", good: "Ремонт под ключ"}
-    source: "ux 07/06 §6.5 (ux-6-5-07 — переходит сюда по решению C); ux 07/03 §6"
+    source: "ux 07/06 §6.5 (ux-6-5-07 — переходит сюда); ux 07/03 §6"
 
   - id: typo-space-before-punct
     marker_id: COPY-T-17
@@ -198,7 +198,7 @@ rules:
     message: "Пробел перед знаком препинания."
     replacement: "«Звоните, ответим»"
     examples: {bad: "Звоните , ответим за 15 минут", good: "Звоните, ответим за 15 минут"}
-    source: "ux 07/06 §6.5 (ux-6-5-08 — переходит сюда по решению C)"
+    source: "ux 07/06 §6.5 (ux-6-5-08 — переходит сюда)"
 
   - id: typo-no-space-after-punct
     marker_id: COPY-T-18
@@ -208,7 +208,7 @@ rules:
     message: "Нет пробела после запятой, точки с запятой или конца предложения."
     replacement: "«Звоните, ответим»"
     examples: {bad: "Звоните,ответим за 15 минут", good: "Звоните, ответим за 15 минут"}
-    source: "ux 07/06 §6.5 (ux-6-5-09 — переходит сюда по решению C; узкий вариант: без дробей, адресов, сокращений «т. е.»)"
+    source: "ux 07/06 §6.5 (ux-6-5-09 — переходит сюда; узкий вариант: без дробей, адресов, сокращений «т. е.»)"
 
   - id: typo-phone-brackets
     marker_id: COPY-T-19
@@ -268,7 +268,7 @@ rules:
     message: "Decimal comma in English copy: use a decimal point (4.8); commas separate thousands (10,000)."
     replacement: "Rated 4.8 out of 5"
     examples: {bad: "Rated 4,8 out of 5", good: "Rated 4.8 out of 5"}
-    source: "Mailchimp Content Style Guide, Grammar and Mechanics (Decimals: 1.375, 47.2); GOV.UK A–Z style guide, Numbers (0.75, 0.45); ux 07/03 §6.7; адаптация, а не перевод (решение заказчика п. 16)"
+    source: "Mailchimp Content Style Guide, Grammar and Mechanics (Decimals: 1.375, 47.2); GOV.UK A–Z style guide, Numbers (0.75, 0.45); ux 07/03 §6.7; адаптация, а не перевод"
     evidence: "[документация]"
 
   - id: typo-en-space-thousands
@@ -280,7 +280,7 @@ rules:
     message: "Russian-style thousands separator in English copy: use commas (10,000)."
     replacement: "10,000"
     examples: {bad: "Over 10 000 downloads", good: "Over 10,000 downloads"}
-    source: "Mailchimp Content Style Guide («Numbers over 3 digits get commas»: 1,000); GOV.UK A–Z style guide, Numbers (over 999 — comma: 9,000); адаптация EN-страницы (решение заказчика п. 16)"
+    source: "Mailchimp Content Style Guide («Numbers over 3 digits get commas»: 1,000); GOV.UK A–Z style guide, Numbers (over 999 — comma: 9,000); адаптация EN-страницы"
     evidence: "[консенсус]"
 
   - id: typo-en-percent-space

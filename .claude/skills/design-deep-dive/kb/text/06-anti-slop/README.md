@@ -33,5 +33,5 @@
 8. Сверхкоррекция («текст хуманайзера») — отдельный вердикт `overcorrected`: вернуть связки, а не добавить приёмы.
 9. Балл детектора ИИ — не ворота и не цель правки: детекторы ошибаются на аккуратном тексте и обходятся перефразом.
 10. Пороги — `03-corpus-measured/thresholds.yaml` v2 (D2); правила мета и GEO — G (`07-seo-geo-copy/meta-rules.yaml`,
-    `geo-rules.yaml`), право и набор — H (`08-russian-legal-typography/claims-rules.yaml`, `typography-rules.yaml`),
-    подключены через `profiles.yaml`.
+    `geo-rules.yaml`), набор — `../08-russian-legal-typography/typography-rules.yaml`, подключены через `profiles.yaml`;
+    право — только `claims_check.py`.

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""alpha_check.py — проверка прозрачности (вырез, нативная альфа модели, матирование). Агент H, волна 2, 23.09.2026.
+"""alpha_check.py — проверка прозрачности (вырез, нативная альфа модели, матирование).
 Python 3.13 + numpy + scipy + Pillow (системные).
 
 Команды:
@@ -9,7 +9,7 @@ Python 3.13 + numpy + scipy + Pillow (системные).
                                           (цвет каймы ближе к исходному фону, чем к объекту) → halo_px; критерий ≤ 2 px
   fake    IMG                             «нарисованная шахматка вместо прозрачности» (OpenAI: «checkerboard is not
                                           transparency»): альфа непрозрачна + периодические квадраты двух серых
-Выход — JSON в stdout. [проверено: 99-raw/experiments/H/01-background-removal]
+Выход — JSON в stdout.
 """
 import argparse, json, sys
 import numpy as np

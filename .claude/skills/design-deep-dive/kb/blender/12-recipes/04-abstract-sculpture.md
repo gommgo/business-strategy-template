@@ -34,10 +34,10 @@
 ## 3. Код: build(P) → два варианта паспорта → рендеры → GLB
 
 ```python
-# Blender 5.2.2 — [проверено] рецепт 04: лента по узлу (D1/06), два варианта паспорта
+# Blender 5.2.2 — [проверено] рецепт 04: лента по узлу (blender 05/04 §5), два варианта паспорта
 import sys, math, bpy
 from mathutils import Matrix
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "04-abstract-sculpture"

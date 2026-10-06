@@ -22,15 +22,17 @@ MODEL.glb — экспортированный файл, который груз
   3. Метрики на каждую пару: IoU силуэтов (альфа > 0.5), средняя |ΔRGB| (0–255), ΔE2000 среднее и p95, доля пикселей
      с ΔE2000 > 5, SSIM по L* — внутри общей маски (обе альфы > 0.95). OUT_DIR/diff_metrics.json, OUT_DIR/diff_sheet.png
      (строки — ракурсы; столбцы: Blender | three | тепловая карта ΔE2000, 0…20).
-Ориентиры (калибровка E/02: тот же файл в EEVEE «Standard» и three NoToneMapping даёт ΔE2000 3.1, IoU 0.996): ΔE2000 среднее
+Ориентиры (калибровка: тот же файл в EEVEE «Standard» и three NoToneMapping даёт ΔE2000 3.1, IoU 0.996): ΔE2000 среднее
 ≤ 3.5 и IoU ≥ 0.99 — «совпадает»; металлы и блики — до ≈ 5; > 6 или IoU < 0.95 — поломка (потеря текстуры, цветовое
 пространство, нормали, масштаб). Стекло/анизотропия/плёнка — сравнивать с --engine cycles.
 EEVEE даёт затенение (AO/horizon scan) и тени от мира, которых нет у чистого IBL в three: вогнутые места темнее в Blender.
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву
+процессов — утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 import json, math, os, shutil, subprocess, sys, tempfile, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 DEFAULT_HDRI = str(kbpaths.data("blender", "studio_small_09_1k.hdr"))
 FOV = 40.0
@@ -64,7 +66,7 @@ for inst in dg.object_instances:   # включает GN-инстансы и и�
         continue
     if inst.is_instance and inst.parent and inst.parent.original.hide_render:
         continue
-    # у вычисленных FONT/CURVE/SURFACE bound_box не учитывает extrude/bevel (агент B, эксп. B/09) — брать у оригинала
+    # у вычисленных FONT/CURVE/SURFACE bound_box не учитывает extrude/bevel — брать у оригинала
     bb = ob.original.bound_box if (ob.type in ("FONT", "CURVE", "SURFACE") and not inst.is_instance) else ob.bound_box
     for c in bb:
         w = inst.matrix_world @ Vector(c)
@@ -248,7 +250,7 @@ def run_three(glb, out, cam, cfg):
     httpd, port = serve(tmp)
     res = {"views": [], "console": []}
     try:
-        with sync_playwright() as pw:
+        with kbpaths.lock("browser"), sync_playwright() as pw:
             b = pw.chromium.launch(headless=True, args=GPU_ARGS[cfg["gpu"]])
             p = b.new_page(viewport={"width": cfg["size"], "height": cfg["size"]})
             p.on("console", lambda m: res["console"].append(f"{m.type}: {m.text}") if m.type in ("error", "warning") else None)

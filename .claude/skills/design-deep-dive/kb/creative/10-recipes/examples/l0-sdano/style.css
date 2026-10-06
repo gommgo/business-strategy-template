@@ -1,4 +1,4 @@
-/* style.css · L0 «Сдано» · агент J · 2026-09-25 · Chromium 153 / WebKit 26.6
+/* style.css · L0 «Сдано» · Chromium 153 / WebKit 26.6
    Концепция «акт осмотра»: белая бумага, чёрная тушь, одна красная пометка дефекта; смелость — в плане квартиры и типографике,
    не в эффектах. Движение: отклик 120–200 мс и одно появление первого экрана ≤ 600 мс (L0, ambition-levels.yaml). */
 :root {
@@ -24,7 +24,7 @@ a { color: inherit; }
 .skip { position: absolute; left: 12px; top: -60px; background: var(--c-ink); color: #fff; padding: 10px 14px; z-index: 10; }
 .skip:focus { top: 12px; }
 
-/* кнопки: чёрная «печать», радиус 0 — язык документа; отклик по токенам E */
+/* кнопки: чёрная «печать», радиус 0 — язык документа; отклик по токенам motion.marketing */
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: var(--size-cta-hero-h);
   padding: 0 1.6em; background: var(--c-ink); color: #fff; font: 600 var(--type-cta-hero)/1.2 var(--font-text);
   text-decoration: none; border: 0; border-radius: 0; cursor: pointer;
@@ -47,7 +47,7 @@ a { color: inherit; }
 .hero__in { max-width: var(--size-container); margin: 0 auto; padding: clamp(28px, 5vw, 72px) var(--space-page-x) clamp(32px, 5vw, 80px);
   display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 64px); align-items: center; min-height: var(--size-hero-min-offer); }
 .hero__eyebrow { color: var(--c-muted); margin: 0 0 18px; }
-/* H1 30 знаков: роль display-l ограничена 72 px — ≤ 3 строки на 1440 и ≤ 3 на 390 (kimi T8: ≤ 2–4 строки); трекинг не туже −0,03 em (Golos: касание −0,04) */
+/* H1 30 знаков: роль display-l ограничена 72 px — ≤ 3 строки на 1440 и ≤ 3 на 390 (creative 04/01: ≤ 2–4 строки); трекинг не туже −0,03 em (Golos: касание −0,04) */
 .hero__title { font: 800 clamp(2.5rem, 1.5rem + 3.9vw, 4.5rem)/0.98 var(--font-display); letter-spacing: -0.03em; margin: 0 0 var(--space-stack-display); text-wrap: balance; }
 .hero__lead { font-size: var(--type-lead-hero); line-height: var(--lh-lead); max-width: var(--size-measure-lead); margin: 0 0 14px; color: var(--c-ink-2); }
 .hero__proof { font-weight: 600; margin: 0 0 28px; padding-left: 14px; border-left: 3px solid var(--c-mark); }
@@ -65,7 +65,7 @@ a { color: inherit; }
 .plan__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; }
 .plan__list b { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: 8px; border-radius: 50%; background: var(--c-mark); color: #fff; font-size: 12px; }
 
-/* одно появление первого экрана: CSS без JS, LCP-заголовок не анимируется (E 05/02 §10); ≤ 600 мс */
+/* одно появление первого экрана: CSS без JS, LCP-заголовок не анимируется (creative 05/02 §10); ≤ 600 мс */
 @media (prefers-reduced-motion: no-preference) {
   .hero__lead, .hero__proof, .hero__actions { animation: rise var(--mm-dur-reveal) var(--mm-ease-out-expo) both; }
   .hero__lead { animation-delay: 60ms; }
@@ -123,7 +123,7 @@ a { color: inherit; }
 .doc__table td:first-child { color: var(--c-mark); font-weight: 700; }
 
 /* FAQ: <details>. Высоту не анимируем (свойство раскладки: MKT-M2, схема motion-spec v1 его не допускает) — ответ проявляется
-   opacity + сдвиг 4 px за --mm-dur-state; стрелка поворачивается. interpolate-size (W1: I/O 2025) — осознанно не взят. */
+   opacity + сдвиг 4 px за --mm-dur-state; стрелка поворачивается. interpolate-size (I/O 2025) — осознанно не взят. */
 .faq__in { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 64px); }
 .faq__list { border-top: 2px solid var(--c-ink); }
 .faq details { border-bottom: 1px solid var(--c-line); }

@@ -102,7 +102,7 @@ print(encode_web(src, os.path.join(d, "web"), css_px=256))
 ```python
 # Blender 5.2.2 — [проверено] секвенция поворота: пустышка-родитель, кадры f_0000.png
 import sys, os, math, tempfile, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 def render_turntable(objects, out_dir, frames=48, size=512, samples=32):
@@ -185,7 +185,7 @@ AV1 40, HEVC 28, H.264 23, VP9 40.
 ```python
 # Blender 5.2.2 — [проверено] кадр + глубина + нормали в многослойный EXR
 import sys, os, tempfile, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 def render_with_passes(path, size=256):
@@ -221,7 +221,7 @@ print(r["bytes"], i, [c for c in ch if "Depth" in c or "Normal" in c])   # 3 ч�
 ```python
 # Blender 5.2.2 — [проверено: 99-raw/experiments/D2/99-doc-snippets (выполнение)] matcap-сфера для MeshMatcapMaterial
 import sys, os, tempfile, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 def render_matcap(path, base="#C65D3B", roughness=0.35, size=256):

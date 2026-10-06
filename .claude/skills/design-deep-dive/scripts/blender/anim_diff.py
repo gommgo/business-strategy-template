@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""anim_diff.py (агент H) — анимация «как в Blender» против «как в three r186» в ОДНИ И ТЕ ЖЕ моменты.
+"""anim_diff.py — анимация «как в Blender» против «как в three r186» в ОДНИ И ТЕ ЖЕ моменты.
 
     python3 anim_diff.py SCENE.blend OUT_DIR --glb MODEL.glb --frames 1,31,61,91 [--fps 30] [--start 1]
         [--clip NAME] [--scene-camera] [--size 512] [--tone standard|neutral|agx] [--hdri FILE|none] [--strength 1]
@@ -10,10 +10,12 @@ Blender (фон): кадр f → frame_set(f) → рендер EEVEE (камер
 three (Chromium): тот же HDRI, та же камера (или экспортированная камера glTF с тем же именем, анимированная клипом),
 mixer.clipAction(clip).play(); action.time = (f − start)/fps; mixer.update(0) — клип экспортирован с export_anim_slide_to_zero=True.
 Метрики на кадр (gltf_diff.compare): IoU силуэтов, ΔE2000 среднее/p95, SSIM L*. Лист: Blender | three | ΔE.
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву
+процессов — утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 import json, os, shutil, subprocess, sys, tempfile, time
 
-TOOLS = os.path.dirname(os.path.abspath(__file__))  # перенос: gltf_diff.py — рядом
+TOOLS = os.path.dirname(os.path.abspath(__file__))  # gltf_diff.py — рядом
 sys.path.insert(0, TOOLS)
 import gltf_diff as GD  # compare, sheet, serve, b2t, GPU_ARGS, DEFAULT_HDRI
 
@@ -199,7 +201,7 @@ def main():
     httpd, port = GD.serve(tmp)
     res = {"frames": [], "console": []}
     try:
-        with sync_playwright() as pw:
+        with GD.kbpaths.lock("browser"), sync_playwright() as pw:
             b = pw.chromium.launch(headless=True, args=GD.GPU_ARGS["gl"])
             p = b.new_page(viewport={"width": cfg["size"], "height": cfg["size"]})
             p.on("console", lambda m: res["console"].append(f"{m.type}: {m.text}") if m.type in ("error", "warning") else None)

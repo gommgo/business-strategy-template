@@ -5,7 +5,7 @@ source_md: "12-evaluation-checklists/02-master-checklist.md"
 source_md_meta: "Машиночитаемый свод правил базы: **434 пунктов в 20 блоках** (APP — четыре подблока по типу приложения). Каждый пункт имеет идентификатор, формулировку «да/нет», серьёзность,"
 items_count: 434
 severity_scale: {B: блокер, S: серьёзно, D: желательно}
-severity_note_default: "серьёзность назначена агентом I (волна 3) по свёртке шкалы Нильсена 0–4; для блоков CNS-07…29 и APP — агентом S1 (волна 4); не измерена (см. 02-master-checklist.md, «Открытые вопросы» п.2)"
+severity_note_default: "серьёзность — оценка по свёртке шкалы Нильсена 0–4, не замер (см. 02-master-checklist.md, «Открытые вопросы» п.2)"
 check_method_codes: {DOM: dom, LNT: script, AXE: script, SCR: scenario, IMG: visual, JDG: visual, HUM: human}
 check_method_note: "коды файла: DOM — разбор DOM/кода страницы; LNT — линтер по исходникам; AXE — axe-core/Lighthouse; SCR — сценарий в headless-браузере; IMG — анализ скриншота; JDG — мультимодальный судья по рубрике; HUM — только человек. JDG и HUM не ставят автоматических ворот"
 blocks:
@@ -36,7 +36,7 @@ items:
     text: "Описаны пользователи: роль, экспертиза, частота использования, условия работы"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -50,7 +50,7 @@ items:
     text: "Названа одна главная задача каждого экрана и **одно ключевое действие**"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -64,7 +64,7 @@ items:
     text: "Выводы исследований записаны как ограничения («пользователи бросают, когда…»), а не как инсайты"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -78,7 +78,7 @@ items:
     text: "Выбрана постура (суверенная / транзитная / вспомогательная) и из неё выведена плотность"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -92,7 +92,7 @@ items:
     text: "Есть объектная модель: сущности, поля, действия, права"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -106,7 +106,7 @@ items:
     text: "Карта экранов закрыта: список маршрутов + матрица переходов + явный запрет создавать маршруты вне списка"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -120,7 +120,7 @@ items:
     text: "Перечислено, какое состояние переживает переход между экранами (фильтры, черновики, выбор, корзина)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -134,7 +134,7 @@ items:
     text: "Все обязательные состояния перечислены **поимённо** по уровням: экран, коллекция, форма, элемент, данные"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -148,7 +148,7 @@ items:
     text: "Дизайн-система подана **кодом компонентов**, а не только документацией; задано правило заземления («нет подтверждения источником — не использовать»)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -162,7 +162,7 @@ items:
     text: "Есть реалистичный набор данных с граничными случаями: пусто, одна запись, 500, очень длинное имя, отсутствующее поле, ноль, отрицательное"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -176,7 +176,7 @@ items:
     text: "Есть глоссарий домена и список запрещённых слов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -190,7 +190,7 @@ items:
     text: "Есть эталонный экран **кодом** и текстовое описание взаимодействий (V + T)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -204,7 +204,7 @@ items:
     text: "Словарь запретов включён **только** для достаточно сильной модели (у слабых он ухудшает результат)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -218,7 +218,7 @@ items:
     text: "Для каждой таблицы и списка объявлен ожидаемый объём данных (строк, колонок) — от него зависит обязательный набор инструментов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -232,7 +232,7 @@ items:
     text: "Для каждой формы заполнен контракт поля: тип контрола, обязательность, формат, правило валидации, текст ошибки, значение по умолчанию, `autocomplete`"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -246,7 +246,7 @@ items:
     text: "Для каждой плитки показателя заполнен шаблон (вопрос роли, величина, база сравнения, направление «хорошо», пороги, период, куда ведёт, что при отсутствии данных)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -260,7 +260,7 @@ items:
     text: "Для каждого изменяющего действия указано: обратимо ли, каким механизмом, какая ступень защиты"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -274,7 +274,7 @@ items:
     text: "Целевой уровень доступности объявлен явно (WCAG 2.2 AA), вместе с запретом hover-only, требованием видимого фокуса и минимальными размерами целей"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -288,7 +288,7 @@ items:
     text: "Производственная сборка проходит без ошибок"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -302,7 +302,7 @@ items:
     text: "Домашний маршрут рендерит непустой осмысленный контент"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -316,7 +316,7 @@ items:
     text: "Нет импортов несуществующих модулей и компонентов"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -330,7 +330,7 @@ items:
     text: "Все маршруты из карты зарегистрированы в роутере (100 %)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -344,7 +344,7 @@ items:
     text: "Ни один `href` не ведёт на незарегистрированный маршрут"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -359,7 +359,7 @@ items:
     text: "Каждый экран из карты достижим из корня по видимой навигации"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, HUM]
     check_method_class: [scenario, human]
     check_method_main: scenario
@@ -373,7 +373,7 @@ items:
     text: "Нет экранов, которых нет в карте (галлюцинированных страниц)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -387,7 +387,7 @@ items:
     text: "Каждый интерактивный элемент что-то делает при активации (нет кнопок без обработчика, `href` и `type`)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, SCR]
     check_method_class: [dom, scenario]
     check_method_main: dom
@@ -402,7 +402,7 @@ items:
     text: "Нет компонентов вне заявленной дизайн-системы"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -416,7 +416,7 @@ items:
     text: "Нет произвольных значений отступов и цветов вне шкалы токенов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -430,7 +430,7 @@ items:
     text: "Правка не вышла за объявленную область (diff по файлам)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -444,7 +444,7 @@ items:
     text: "Нет экрана без исходящего перехода и без блока «что дальше» (нет тупиков)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -458,7 +458,7 @@ items:
     text: "Контраст текста ≥ 4,5:1 (крупного ≥ 3:1) **в обеих темах**"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -472,7 +472,7 @@ items:
     text: "У каждого информативного изображения есть осмысленный alt; декоративные имеют `alt=\"\"`"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE, HUM]
     check_method_class: [script, human]
     check_method_main: script
@@ -486,7 +486,7 @@ items:
     text: "У каждого поля формы есть видимая подпись, связанная программно"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -500,7 +500,7 @@ items:
     text: "Нет пустых ссылок и пустых кнопок (у каждой есть доступное имя)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -514,7 +514,7 @@ items:
     text: "`<html lang>` задан и соответствует языку контента"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -528,7 +528,7 @@ items:
     text: "Ровно один `<h1>`; уровни заголовков не пропущены"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -542,7 +542,7 @@ items:
     text: "Весь видимый контент внутри лендмарков; `<main>` ровно один"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -556,7 +556,7 @@ items:
     text: "Skip-ссылка есть, первая по фокусу, видна при фокусе, цель существует"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, SCR]
     check_method_class: [dom, scenario]
     check_method_main: dom
@@ -570,7 +570,7 @@ items:
     text: "Индикатор фокуса виден на каждом элементе и на каждом фоне; нет `outline: none` без замены"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -584,7 +584,7 @@ items:
     text: "Каждый сценарий проходится **только с клавиатуры** от начала до конца"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, HUM]
     check_method_class: [scenario, human]
     check_method_main: scenario
@@ -598,7 +598,7 @@ items:
     text: "Порядок фокуса совпадает с визуальным; нет `tabindex` > 0; нет ловушек фокуса"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -612,7 +612,7 @@ items:
     text: "Ни один фокусируемый элемент не перекрыт липкой панелью, футером, чатом или баннером (2.4.11)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -626,7 +626,7 @@ items:
     text: "Каждый статус, ошибка, выделение и сортировка кодируются **не только цветом**"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, HUM]
     check_method_class: [visual, human]
     check_method_main: visual
@@ -640,7 +640,7 @@ items:
     text: "Каждая цель ≥ 24×24 px или имеет зазор; основные и деструктивные ≥ 44×44"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -654,7 +654,7 @@ items:
     text: "Ничего не доступно только по наведению; у каждого перетаскивания есть альтернатива **кликами** (2.5.7)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -668,7 +668,7 @@ items:
     text: "Статусные сообщения объявляются без перевода фокуса; живых областей не больше двух, обе в DOM с загрузки (4.1.3)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -682,7 +682,7 @@ items:
     text: "Зум 200 % ничего не обрезает; при 400 % (эквивалент 320 px) нет горизонтальной прокрутки"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -696,7 +696,7 @@ items:
     text: "Введённые данные сохраняются после ошибки; ничего не спрашивается дважды в одном процессе (3.3.7)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -710,7 +710,7 @@ items:
     text: "Видимый текст подписи входит в доступное имя (2.5.3)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -724,7 +724,7 @@ items:
     text: "Текст ссылки понятен вне контекста (нет «подробнее», «click here»)"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -738,7 +738,7 @@ items:
     text: "ARIA применяется только там, где нет нативного решения; нет `aria-hidden` на предках фокусируемых элементов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -752,7 +752,7 @@ items:
     text: "Ссылка «Помощь» стоит в одном и том же месте DOM на всех страницах набора (3.2.6)"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -766,7 +766,7 @@ items:
     text: "Для каждого экрана заполнены все **пять базовых состояний** UI Stack: идеальное, пустое, загрузка, частичное, ошибка"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -780,7 +780,7 @@ items:
     text: "Различены три вида пустоты: «ещё не создано», «ничего не найдено по фильтру», «данные не отдаются»"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -794,7 +794,7 @@ items:
     text: "В пустом состоянии есть заголовок, объяснение и **одно** первичное действие"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -808,7 +808,7 @@ items:
     text: "Пустое состояние заменяет элемент **целиком** (у таблицы убрана шапка колонок)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -822,7 +822,7 @@ items:
     text: "«Пусто» не показывается, пока идёт загрузка"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -836,7 +836,7 @@ items:
     text: "В состоянии «ничего не найдено» виден исходный запрос и есть способ его изменить или сбросить"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -850,7 +850,7 @@ items:
     text: "При повторной загрузке прежние данные остаются видимыми (нет мигания в пустоту)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -864,7 +864,7 @@ items:
     text: "Раскладка не прыгает при подстановке данных (CLS ≤ 0,1)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -878,7 +878,7 @@ items:
     text: "Ошибка называет причину из перечня и следующий шаг; есть интерактивный выход"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, JDG]
     check_method_class: [scenario, visual]
     check_method_main: scenario
@@ -892,7 +892,7 @@ items:
     text: "«Нет прав» отличается от «нет данных» и от ошибки сервера"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -906,7 +906,7 @@ items:
     text: "Блоки с разными источниками данных падают независимо; частичный отказ показывает и успешные, и неуспешные результаты"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -920,7 +920,7 @@ items:
     text: "Ввод пользователя сохраняется при **любой** ошибке"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -934,7 +934,7 @@ items:
     text: "Для каждого блока продуманы три количества: мало, расчётное, много; прогнан перечень крайних случаев"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -948,7 +948,7 @@ items:
     text: "У каждого интерактивного элемента описаны девять состояний (default, hover, focus-visible, active, disabled, selected, loading, error, read-only)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -962,7 +962,7 @@ items:
     text: "Состояния заведены как варианты компонента, а не нарисованы на конкретном экране"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -976,7 +976,7 @@ items:
     text: "В фикстурах нет выдуманных метрик, отзывов и имён"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -991,7 +991,7 @@ items:
     text: "Учтены состояния, задаваемые средой: тема, `prefers-reduced-motion`, forced-colors, зум"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1005,7 +1005,7 @@ items:
     text: "Сняты скриншоты трёх режимов API: пусто, задержка 3 с, ошибка 500"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1019,7 +1019,7 @@ items:
     text: "Верхний уровень навигации выведен из объектов и задач пользователя, а не из фич и не из шаблона"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, JDG]
     check_method_class: [human, visual]
     check_method_main: human
@@ -1034,7 +1034,7 @@ items:
     text: "Набор и порядок пунктов навигации одинаковы на всех экранах"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1048,7 +1048,7 @@ items:
     text: "Ни один пункт не встречается и в верхней панели, и в сайдбаре"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1062,7 +1062,7 @@ items:
     text: "Текущий раздел помечен минимум двумя визуальными признаками и `aria-current`"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1076,7 +1076,7 @@ items:
     text: "В сайдбаре не больше двух уровней вложенности; подменю раскрываются по клику"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1090,7 +1090,7 @@ items:
     text: "Вся навигация верхнего уровня видима на десктопе без раскрытия"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1104,7 +1104,7 @@ items:
     text: "Хлебные крошки есть только при иерархии от трёх уровней; текущая страница последняя и не ссылка"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1118,7 +1118,7 @@ items:
     text: "Крошки и кнопка «Назад» не соседствуют (или ведут в разные места, и это видно из подписей)"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1132,7 +1132,7 @@ items:
     text: "Вкладок не больше 7, в один ряд, подписи 1–2 слова, не CAPS; вкладки не используются для шагов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1146,7 +1146,7 @@ items:
     text: "Логотип вверху слева и ведёт на главную; есть явный путь на главную"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1160,7 +1160,7 @@ items:
     text: "Утилиты вверху справа; иконки утилит открывают панели, а не переходят"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1174,7 +1174,7 @@ items:
     text: "Липких панелей не больше одной по вертикали"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1188,7 +1188,7 @@ items:
     text: "Ни одно действие не доступно из двух мест **под разными именами**"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1202,7 +1202,7 @@ items:
     text: "Определена мобильная трансформация каркаса и она не создаёт дублей"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -1216,7 +1216,7 @@ items:
     text: "Поиск не компенсирует плохую навигацию (проверено: есть ли раздел, который находят только поиском)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, JDG]
     check_method_class: [human, visual]
     check_method_main: human
@@ -1230,7 +1230,7 @@ items:
     text: "Самый заметный элемент экрана — главная задача экрана; можно назвать один элемент, к которому глаз идёт первым"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, JDG]
     check_method_class: [visual, visual]
     check_method_main: visual
@@ -1245,7 +1245,7 @@ items:
     text: "На экране ровно **одна** primary-кнопка уровня страницы (или по одной на независимую секцию)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1259,7 +1259,7 @@ items:
     text: "У каждого экрана есть шапка страницы с H1 и путём назад (кроме входа и полноэкранного канваса)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1273,7 +1273,7 @@ items:
     text: "Squint-тест при 20 px оставляет одну точку входа"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1287,7 +1287,7 @@ items:
     text: "Иерархия сохраняется при переводе макета в оттенки серого"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1301,7 +1301,7 @@ items:
     text: "Все отступы принадлежат одной шкале; между группами пространства больше, чем внутри групп"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, IMG]
     check_method_class: [script, visual]
     check_method_main: script
@@ -1315,7 +1315,7 @@ items:
     text: "Ни одна рамка не дублирует разделение, уже созданное пространством"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1329,7 +1329,7 @@ items:
     text: "Длина строки текста в пределах 45–75 знаков"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1343,7 +1343,7 @@ items:
     text: "Размеров текста не больше трёх; вариантов контраста не больше трёх; крупных элементов не больше двух"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1357,7 +1357,7 @@ items:
     text: "Красный используется только для ошибок и деструктивного"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -1371,7 +1371,7 @@ items:
     text: "Панелей одновременно не больше трёх"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1385,7 +1385,7 @@ items:
     text: "Нет ложного дна: видно, что ниже есть контент"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1399,7 +1399,7 @@ items:
     text: "На экране не больше одного постоянно движущегося элемента"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, SCR]
     check_method_class: [visual, scenario]
     check_method_main: visual
@@ -1413,7 +1413,7 @@ items:
     text: "Счётчиков-бейджей не больше 2–3, и каждый требует действия"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1427,7 +1427,7 @@ items:
     text: "Постоянный баннер один или его нет; на странице не больше одного баннера"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1441,7 +1441,7 @@ items:
     text: "Ни одно действие не представлено на экране дважды; заголовок страницы не повторяется внутри контента"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1455,7 +1455,7 @@ items:
     text: "Кнопки формы внизу, выровнены по левому краю полей; порядок кнопок в диалогах одинаков во всём приложении"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, IMG]
     check_method_class: [dom, visual]
     check_method_main: dom
@@ -1469,7 +1469,7 @@ items:
     text: "Всё, что нужно для решения задачи, видно на 1366×768 без прокрутки, либо есть явный сигнал прокрутки"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1483,7 +1483,7 @@ items:
     text: "Форма обёрнута в `<form>`; у каждого поля есть связанная видимая подпись"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1497,7 +1497,7 @@ items:
     text: "У каждого поля о пользователе есть `autocomplete`"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1511,7 +1511,7 @@ items:
     text: "Отправка пустой формы даёт сообщение и переводит фокус на сводку"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1525,7 +1525,7 @@ items:
     text: "Отправка заведомо невалидной формы даёт сообщение **у каждого** проблемного поля"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1539,7 +1539,7 @@ items:
     text: "Введённое сохраняется после ошибки валидации, отказа сервера, «Назад» браузера и обновления страницы"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1553,7 +1553,7 @@ items:
     text: "Кнопка отправки активна до первого нажатия и блокируется после него; двойное нажатие не создаёт второй запрос"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, SCR]
     check_method_class: [dom, scenario]
     check_method_main: dom
@@ -1567,7 +1567,7 @@ items:
     text: "Форма в одну колонку; исключение — только поля, образующие одно значение"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1581,7 +1581,7 @@ items:
     text: "Ширина каждого поля отражает ожидаемую длину ввода"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -1595,7 +1595,7 @@ items:
     text: "Подписи над полями; плейсхолдер не дублирует подпись и не несёт информации, нужной после начала ввода"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1609,7 +1609,7 @@ items:
     text: "Обязательность видна до нажатия кнопки; паттерн пометки одинаков во всём продукте"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1623,7 +1623,7 @@ items:
     text: "Ввод принимается в любом разумном формате и нормализуется системой; вставка не блокируется; `maxlength` не режет молча"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1637,7 +1637,7 @@ items:
     text: "Момент проверки выбран **по типу поля**, а не один на всю форму; валидация по сабмиту — умолчание, инлайн — там, где ответ неочевиден и проверка дешевле ошибки"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -1651,7 +1651,7 @@ items:
     text: "Ошибка показана у поля, видна, пока человек чинит, и кодируется не только цветом"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1665,7 +1665,7 @@ items:
     text: "Сводка ошибок вверху есть для длинной формы; формулировки в сводке и у поля совпадают дословно; каждая строка — ссылка на поле"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, SCR]
     check_method_class: [dom, scenario]
     check_method_main: dom
@@ -1679,7 +1679,7 @@ items:
     text: "Ошибка не появляется до окончания ввода (не по мере набора в пустом поле)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1693,7 +1693,7 @@ items:
     text: "На форме одна кнопка отправки; её подпись называет действие и совпадает с именем действия в тосте и в статусе"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1707,7 +1707,7 @@ items:
     text: "Кнопок «Очистить» и Reset нет"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1721,7 +1721,7 @@ items:
     text: "Порядок табуляции совпадает с визуальным"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1735,7 +1735,7 @@ items:
     text: "На шаге не больше 6–7 полей ввода (или есть обоснование)"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1749,7 +1749,7 @@ items:
     text: "Форма в модалке — менее пяти полей, без прокрутки, без аккордеонов и вкладок"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1763,7 +1763,7 @@ items:
     text: "Тип контрола выбран по таблице «число вариантов × число выборов», а не по привычке; нет `<select multiple>`"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, DOM]
     check_method_class: [human, dom]
     check_method_main: human
@@ -1777,7 +1777,7 @@ items:
     text: "Нигде нет селекта там, где вариантов два-три; булевы фильтры не упакованы в дропдаун"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1791,7 +1791,7 @@ items:
     text: "Каждый переключатель применяет изменение немедленно; на экране с переключателями нет относящейся к ним кнопки «Сохранить»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, SCR]
     check_method_class: [dom, scenario]
     check_method_main: dom
@@ -1805,7 +1805,7 @@ items:
     text: "Чекбокс согласия или подписки пустой по умолчанию"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1819,7 +1819,7 @@ items:
     text: "Различены `disabled` и `read-only`; недоступное приглушено и объясняет причину, а не удалено"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1833,7 +1833,7 @@ items:
     text: "Капчи нет либо есть альтернатива без когнитивного теста"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1847,7 +1847,7 @@ items:
     text: "Перед отправкой длинного необратимого процесса есть страница проверки ответов со ссылками «Изменить»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1861,7 +1861,7 @@ items:
     text: "Для формы входа: сообщение не раскрывает, что именно неверно; пароль не теряется при неудаче; вставка работает"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -1875,7 +1875,7 @@ items:
     text: "Обоснован выбор представления (таблица / список / карточки / master-detail / сравнение) по задаче экрана"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -1889,7 +1889,7 @@ items:
     text: "Строк больше 50 → есть пагинация или «показать ещё» **и** поиск или фильтр по таблице"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1903,7 +1903,7 @@ items:
     text: "Размер страницы по умолчанию — 20 строк"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1917,7 +1917,7 @@ items:
     text: "Колонок больше 8 → липкий заголовок, липкая первая колонка, управление колонками с индикатором «скрыто N»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1931,7 +1931,7 @@ items:
     text: "Строк больше 1000 → серверные сортировка, фильтрация и пагинация; виртуализация включается по числу узлов DOM (Lighthouse: > 800 предупреждение, > 1 400 ошибка), а не по числу строк"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -1945,7 +1945,7 @@ items:
     text: "Первая колонка — человекочитаемый идентификатор, а не сгенерированный ID"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1959,7 +1959,7 @@ items:
     text: "Каждая сортируемая колонка имеет `aria-sort`, и он стоит только на одной колонке"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -1973,7 +1973,7 @@ items:
     text: "Сортировка по умолчанию осмысленна для этого типа данных и записана с обоснованием"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -1987,7 +1987,7 @@ items:
     text: "Клик по строке — настоящая ссылка на карточку объекта"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2001,7 +2001,7 @@ items:
     text: "Числа выровнены вправо табличными цифрами; пустые ячейки пусты, `null` нигде нет"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2015,7 +2015,7 @@ items:
     text: "Проходят все **14 проверок контракта фильтрации** (поиск меняет набор, запрос в URL, чипы, сброс, счётчик, ноль результатов с действием, комбинация, переживание перехода, пагинация, клавиатура)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2029,7 +2029,7 @@ items:
     text: "Активные условия видны чипами над результатами и снимаются по одному; есть глобальный сброс"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2043,7 +2043,7 @@ items:
     text: "Фильтры, сортировка, страница, размер страницы и набор колонок живут в URL"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2058,7 +2058,7 @@ items:
     text: "Позиция и состояние списка восстанавливаются при возврате из карточки"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2072,7 +2072,7 @@ items:
     text: "Панель массовых действий появляется только при выборе, стоит над таблицей, показывает число выбранных; различены «выбрать всё на странице» и «выбрать все N»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2086,7 +2086,7 @@ items:
     text: "Модалка не используется для правки строки таблицы"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -2100,7 +2100,7 @@ items:
     text: "У каждой плитки показателя есть база сравнения, и по ней понятно, хорошо это или плохо"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, JDG]
     check_method_class: [human, visual]
     check_method_main: human
@@ -2114,7 +2114,7 @@ items:
     text: "Плиток в верхнем ряду 3–6, и 1–2 визуально доминируют; каждая ведёт туда, где видно, из чего сложилось число"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, DOM]
     check_method_class: [visual, dom]
     check_method_main: visual
@@ -2128,7 +2128,7 @@ items:
     text: "Все величины закодированы длиной или 2D-позицией; нет круговых, кольцевых, радарных, спидометров, tree map, stacked bar и 3D (или каждое исключение обосновано)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, HUM]
     check_method_class: [visual, human]
     check_method_main: visual
@@ -2142,7 +2142,7 @@ items:
     text: "Цвет кодирует категорию, а не величину, и не является единственным каналом; у каждого графика есть текстовая альтернатива"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -2156,7 +2156,7 @@ items:
     text: "Типов уникальных индикаторов на запись не больше 2–3; индикаторов на экране не больше 5–6"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2170,7 +2170,7 @@ items:
     text: "Каждый статус кодируется минимум тремя каналами из четырёх; есть единый словарь статусов, совпадающий на всех экранах"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, HUM]
     check_method_class: [dom, human]
     check_method_main: dom
@@ -2184,7 +2184,7 @@ items:
     text: "В шапке экрана объекта: путь назад, имя объекта, статус сразу после имени, одна primary-кнопка"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2198,7 +2198,7 @@ items:
     text: "Объект выглядит одинаково в списке, карточке, поиске и уведомлении (порядок и состав атрибутов)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, JDG]
     check_method_class: [human, visual]
     check_method_main: human
@@ -2213,7 +2213,7 @@ items:
     text: "Таблица проверена на 0, 1, 500 и 5000 строк и на граничных данных (очень длинное имя, отрицательное число, отсутствующее поле, все строки в одном статусе)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2227,7 +2227,7 @@ items:
     text: "Контейнер выбран по таблице критериев (инлайн / поповер / модалка / панель / шторка / страница), а не по умолчанию"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -2241,7 +2241,7 @@ items:
     text: "Ни один оверлей не открывается без действия человека (норма — ноль)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2255,7 +2255,7 @@ items:
     text: "Ни в одной модалке не нужно сверяться с данными под ней"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -2269,7 +2269,7 @@ items:
     text: "Ни одна модалка не прокручивается"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2283,7 +2283,7 @@ items:
     text: "Модалок внутри модалок нет (кроме одного согласованного исключения)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2297,7 +2297,7 @@ items:
     text: "Esc закрывает каждый оверлей; фокус возвращается на элемент-триггер; ловушка фокуса работает; фон инертен"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2311,7 +2311,7 @@ items:
     text: "Фокус при открытии ставится на первое поле ввода (или на primary-кнопку, если полей нет)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2325,7 +2325,7 @@ items:
     text: "Клик по подложке не закрывает диалог с несохранёнными изменениями"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2339,7 +2339,7 @@ items:
     text: "В диалоге не больше двух действий; кнопки называют результат; «Отмена» не является дефолтной"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2353,7 +2353,7 @@ items:
     text: "Валидация происходит до закрытия диалога; при ошибке диалог остаётся открытым, ошибки показаны у полей"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2367,7 +2367,7 @@ items:
     text: "Тултипы стоят только на интерактивных элементах и не содержат ничего критичного; на тач-устройстве всё доступно иначе"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2381,7 +2381,7 @@ items:
     text: "На маршруте топ-задачи одновременно не появляется больше одного оверлея"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2395,7 +2395,7 @@ items:
     text: "Ни одна ошибка и ни одно критичное сообщение не показываются тостом"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2409,7 +2409,7 @@ items:
     text: "Все тосты появляются в одном углу приложения; в стопке не больше 2–3"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -2423,7 +2423,7 @@ items:
     text: "Тост без действия живёт 4–10 с; тост с действием не исчезает сам; каждый автоисчезающий тост продублирован видимым инлайн-изменением или записью в центре уведомлений"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2437,7 +2437,7 @@ items:
     text: "Тост не перекрывает навигацию, primary-кнопку, изменившийся элемент и элемент в фокусе"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -2451,7 +2451,7 @@ items:
     text: "Ни одно событие не показано в двух формах одновременно (тост и модалка об одном событии)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2465,7 +2465,7 @@ items:
     text: "Критичный баннер не закрывается, пока проблема не устранена; для каждого баннера решено, закрываемый ли он"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2479,7 +2479,7 @@ items:
     text: "Каждый заявленный сценарий проходится автотестом от начала до конца"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2493,7 +2493,7 @@ items:
     text: "Кнопка «Назад» браузера работает на каждом шаге и возвращает состояние; на оверлее закрывает оверлей, а не уводит на два шага"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2507,7 +2507,7 @@ items:
     text: "Каждый шаг адресуем: URL меняется, скопированная ссылка открывается в то же состояние"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2521,7 +2521,7 @@ items:
     text: "Проходит **тест переживания перехода из семи шагов** (фильтр+сортировка+прокрутка+выделение → уход → назад браузером → назад по навигации → обновление → новая вкладка → перезапуск)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2535,7 +2535,7 @@ items:
     text: "На каждом шаге видно, что за процесс, над каким объектом, что сделано и что осталось"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -2549,7 +2549,7 @@ items:
     text: "Есть выход с сохранением на любом шаге, названный «Сохранить и вернуться позже», а не «Отмена»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2563,7 +2563,7 @@ items:
     text: "Незавершённое сохраняется при закрытии вкладки и истечении сессии; «Продолжить» возвращает на шаг остановки"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2577,7 +2577,7 @@ items:
     text: "Ни одно значение не спрашивается дважды в одном процессе (WCAG 3.3.7)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2591,7 +2591,7 @@ items:
     text: "Форма выбрана обоснованно: мастер / плотная страница / список задач — по критериям, а не по привычке"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -2605,7 +2605,7 @@ items:
     text: "Заголовки шагов уникальны; общее число шагов достоверно, если индикатор показан"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2619,7 +2619,7 @@ items:
     text: "Есть страница подтверждения с номером, «что дальше и когда» и способом сохранить запись; завершение не дублируется тостом"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2633,7 +2633,7 @@ items:
     text: "Для каждого конечного состояния назван «что дальше» (2–3 действия)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2647,7 +2647,7 @@ items:
     text: "Можно создать недостающий связанный объект, не теряя черновик основной задачи, и вернуться туда же с выбранным объектом"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2661,7 +2661,7 @@ items:
     text: "Каркас приложения сохраняется на экранах 403 / 404 / 500; есть минимум два пути выхода, один из них ведёт в рабочее состояние"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2675,7 +2675,7 @@ items:
     text: "Система предупреждает об истечении сессии заранее и даёт продлить; повторный вход не теряет данные и возвращает на ту же страницу"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2689,7 +2689,7 @@ items:
     text: "Виден постоянный признак режима (редактирование, черновик, тестовая среда, работа от имени другого)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2703,7 +2703,7 @@ items:
     text: "Что полезного новый пользователь получает за первые 10 секунд — записано и проверено"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -2717,7 +2717,7 @@ items:
     text: "Нет модального тура при первом запуске, попапа при входе и «What's New» модалкой"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2731,7 +2731,7 @@ items:
     text: "Есть выход «Настрою позже», ведущий в работающий продукт; прерванная настройка сохраняется"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2745,7 +2745,7 @@ items:
     text: "Число прерываний на маршруте топ-задачи посчитано и минимально"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2759,7 +2759,7 @@ items:
     text: "Для каждого действия заполнен контракт: имя, объект, роли, уровень, результат, состояния, обратимость"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -2773,7 +2773,7 @@ items:
     text: "Имя действия одинаково в кнопке, заголовке диалога, сообщении и статусе объекта"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2787,7 +2787,7 @@ items:
     text: "Подписи — 2–4 слова, глагол или глагол+существительное, описывают будущее состояние; нет «OK», «Да», «Подтвердить» в подтверждениях"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2801,7 +2801,7 @@ items:
     text: "В каждом меню меньше 10–12 пунктов; порядок по частоте; деструктивные внизу за разделителем; подменю не глубже одного уровня"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2815,7 +2815,7 @@ items:
     text: "Недоступные действия приглушены и объясняют причину; скрыто только то, чего у роли нет в принципе"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2829,7 +2829,7 @@ items:
     text: "Ни одно деструктивное действие не является primary-кнопкой экрана и не является кнопкой по умолчанию в диалоге"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -2843,7 +2843,7 @@ items:
     text: "Каждое деструктивное действие либо обратимо (undo, корзина, версия), либо защищено подтверждением с конкретикой"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2857,7 +2857,7 @@ items:
     text: "Подтверждение называет имя объекта или точное число объектов и перечисляет последствия, включая каскадные"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2871,7 +2871,7 @@ items:
     text: "Отмена видна в момент действия, а не только в меню; после обратимого действия в течение 5 с появляется видимая отмена"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2885,7 +2885,7 @@ items:
     text: "Между деструктивной и безопасной кнопкой есть расстояние не меньше ширины меньшей из них"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -2899,7 +2899,7 @@ items:
     text: "Подтверждений нет у частых обратимых действий; подтверждение — только для редких необратимых"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2913,7 +2913,7 @@ items:
     text: "Одно подтверждение на массовую операцию, а не на элемент; показано число и первые имена"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2927,7 +2927,7 @@ items:
     text: "Массовая операция даёт прогресс с числами, возможность прервать, отчёт с причинами по каждому неудавшемуся элементу и «повторить только неудавшиеся»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2941,7 +2941,7 @@ items:
     text: "Кнопка защищена от двойного нажатия, запрос идемпотентен"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2955,7 +2955,7 @@ items:
     text: "Есть экран с удалёнными объектами (корзина) с поиском и сроком хранения, либо явно сказано, что удаление окончательное"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2969,7 +2969,7 @@ items:
     text: "Сочетания клавиш: общеизвестные не переопределены; одиночные буквенные отключаемы; каждое показано минимум в двух местах; ни одно действие не доступно только с клавиатуры"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, LNT]
     check_method_class: [dom, script]
     check_method_main: dom
@@ -2983,7 +2983,7 @@ items:
     text: "Командная палитра не является единственным путём ни к одному действию; у неё спроектированы пустое состояние, загрузка и отказ"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -2997,7 +2997,7 @@ items:
     text: "У каждого перетаскивания есть альтернатива кнопками **и** клавиатурой"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -3011,7 +3011,7 @@ items:
     text: "Для каждой настройки есть ответ, почему для неё нельзя выбрать хороший дефолт"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3025,7 +3025,7 @@ items:
     text: "Разделены личные настройки, личные настройки в организации и настройки организации; видно, на кого влияет настройка"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3039,7 +3039,7 @@ items:
     text: "Разделов верхнего уровня не больше 8–9; раздела «Разное» нет; каждый раздел имеет свой URL"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3053,7 +3053,7 @@ items:
     text: "Поиск по настройкам есть, если настроек больше ~25–30"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3067,7 +3067,7 @@ items:
     text: "Модель сохранения одинакова внутри секции; мгновенные и отложенные контролы не смешаны в одной форме"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3081,7 +3081,7 @@ items:
     text: "Результат мгновенного сохранения виден; отказ показывает причину, а не молча откатывает"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3095,7 +3095,7 @@ items:
     text: "Опасная зона есть, стоит внизу, отделена рамкой и расстоянием; каждое действие в ней описано"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, IMG]
     check_method_class: [dom, visual]
     check_method_main: dom
@@ -3109,7 +3109,7 @@ items:
     text: "Необратимое действие защищено лестницей подтверждений с вводом имени объекта; названо окно восстановления и что не восстанавливается"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3123,7 +3123,7 @@ items:
     text: "Смена email, пароля, второго фактора и платёжных данных требует повторной аутентификации и уведомления"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3137,7 +3137,7 @@ items:
     text: "Показан итоговый **эффективный** набор прав человека, а не только назначенные роли"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3151,7 +3151,7 @@ items:
     text: "Владельцев не меньше двух; продукт предупреждает, когда владелец остаётся один"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3165,7 +3165,7 @@ items:
     text: "Аудит-лог пишет кто, что, над чем, когда и откуда; фильтруется, экспортируется, не редактируется"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3179,7 +3179,7 @@ items:
     text: "Имперсонация: постоянная полоса, ограниченный набор действий, запись в аудит обеих сторон, уведомление или согласие владельца, автозавершение по времени"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3193,7 +3193,7 @@ items:
     text: "Секретный ключ показывается один раз; у ключа есть имя, дата создания, дата последнего использования и права; ротация даёт окно совместимости"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3207,7 +3207,7 @@ items:
     text: "Отмена и понижение тарифа доступны в том же канале и за сопоставимое число шагов, что и подключение"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3221,7 +3221,7 @@ items:
     text: "Текущая организация видна на каждом экране; опасные контексты (продакшн/песочница, имперсонация, чужая организация) различаются постоянным видимым элементом"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3235,7 +3235,7 @@ items:
     text: "Видимая реакция на нажатие появляется в пределах 100 мс"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3249,7 +3249,7 @@ items:
     text: "При операции короче 1 с индикатор не показывается; применён парный механизм «отложенный показ + минимальное время показа»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3263,7 +3263,7 @@ items:
     text: "Выбран правильный индикатор: скелетон — страница, спиннер — модуль, прогресс — процесс; скелетон повторяет структуру контента"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -3277,7 +3277,7 @@ items:
     text: "Спиннер не крутится дольше 10 с; при ожидании дольше 10 с есть оценка и кнопка прерывания"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3291,7 +3291,7 @@ items:
     text: "Показано то, что известно точно (объём, шаги), а не выдуманные проценты; прогресс не замедляется к концу"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3305,7 +3305,7 @@ items:
     text: "Операции дольше 30 с уведены в фон; у фоновой задачи есть запуск, статус, отмена, уведомление и результат; статус переживает перезагрузку"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3319,7 +3319,7 @@ items:
     text: "Оптимистичное обновление применено только там, где отказ редок и откат дёшев; откат объясняется и предлагает повтор"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3333,7 +3333,7 @@ items:
     text: "Подтверждение результата даётся одним каналом, а не двумя сразу"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3347,7 +3347,7 @@ items:
     text: "Новое не вставляется в видимую область без спроса; позиция прокрутки сохраняется при обновлении и догрузке"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3361,7 +3361,7 @@ items:
     text: "У автообновления есть пауза или управление частотой (WCAG 2.2.2); есть метка свежести рядом с данными"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3375,7 +3375,7 @@ items:
     text: "Каждая анимация отвечает одному из четырёх назначений; если убрать анимацию, интерфейс остаётся понятным"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3389,7 +3389,7 @@ items:
     text: "Длительности в диапазоне 100–400 мс; выход короче входа; ease-out на входе, ease-in на выходе, не linear"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -3403,7 +3403,7 @@ items:
     text: "Есть блок `prefers-reduced-motion`, написанный через `no-preference`; JS-анимации слушают изменение настройки"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -3417,7 +3417,7 @@ items:
     text: "Нет анимаций появления при прокрутке, hover-эффекта на каждой карточке, бесконечных градиентов и пульсаций"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, IMG]
     check_method_class: [script, visual]
     check_method_main: script
@@ -3432,7 +3432,7 @@ items:
     text: "Ничего не мигает чаще трёх раз в секунду (WCAG 2.3.1); нет автовоспроизведения видео, звука, каруселей"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -3446,7 +3446,7 @@ items:
     text: "Поток вывода ИИ-функции имеет признак незавершённости и кнопку остановки; действия над частичным результатом заблокированы или помечены; сгенерированное помечено"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3460,7 +3460,7 @@ items:
     text: "Для каждой развилки «дать / не дать» число действий, заметность, каналы и время симметричны"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, IMG]
     check_method_class: [scenario, visual]
     check_method_main: scenario
@@ -3474,7 +3474,7 @@ items:
     text: "Отмена доступна тем же каналом и за не большее число шагов, чем подключение; на пути к отмене нет удерживающих экранов"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3488,7 +3488,7 @@ items:
     text: "Все согласия выключены по умолчанию; согласие на обработку персональных данных — отдельный элемент"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3502,7 +3502,7 @@ items:
     text: "«Принять все» и «Отклонить все» равнодоступны и одинаково заметны (площадь, контраст, размер шрифта, позиция в DOM)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, DOM]
     check_method_class: [visual, dom]
     check_method_main: visual
@@ -3516,7 +3516,7 @@ items:
     text: "Каждый таймер соответствует реальному дедлайну и не сбрасывается при перезагрузке"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3530,7 +3530,7 @@ items:
     text: "Каждое сообщение об остатке опирается на реальные данные (нет детерминированно убывающих «осталось 3»)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3544,7 +3544,7 @@ items:
     text: "Нет выдуманных отзывов, рейтингов и сообщений об активности"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3559,7 +3559,7 @@ items:
     text: "Полная стоимость видна там, где принимается решение; сумма на первом экране совпадает с итоговой"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3573,7 +3573,7 @@ items:
     text: "Нет уничижительных подписей отказа (confirmshaming) и двойных отрицаний"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3587,7 +3587,7 @@ items:
     text: "Существенные условия набраны основным кеглем и контрастом; отказ не приглушён и не замаскирован под неактивный"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -3601,7 +3601,7 @@ items:
     text: "Нет повторных просьб о том, что уже отклонено; у каждой просьбы есть окончательный отказ"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3615,7 +3615,7 @@ items:
     text: "Ничего не просится до получения ценности; нет exit-intent попапов и подмены заголовка вкладки"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3629,7 +3629,7 @@ items:
     text: "Реклама и промо помечены"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3643,7 +3643,7 @@ items:
     text: "Сгенерированное ИИ помечено; ассистент не выдаёт себя за человека; согласие на обучение на данных отдельное и выключено"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3657,7 +3657,7 @@ items:
     text: "Нет текстов-заглушек: `lorem`, «Текст», «Название», «Feature 1», «Coming soon», «TODO», «John Doe», «10k+», «Trusted by», «Welcome back, John»"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3672,7 +3672,7 @@ items:
     text: "Каждое число на экране имеет источник в наборе данных"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3687,7 +3687,7 @@ items:
     text: "Термины совпадают со словарём домена; нет внутреннего жаргона и нет выдуманных синонимов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3701,7 +3701,7 @@ items:
     text: "Всё, что обещает текст интерфейса, реализовано (нет кнопок к несуществующим функциям)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3716,7 +3716,7 @@ items:
     text: "Каждый раздел выводится из задачи пользователя, а не из шаблона «как у всех»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, JDG]
     check_method_class: [human, visual]
     check_method_main: human
@@ -3731,7 +3731,7 @@ items:
     text: "Нет одинаковых карточек с одним радиусом и одной тенью, ALL-CAPS eyebrow над каждым заголовком, градиентных заливок как декора"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -3746,7 +3746,7 @@ items:
     text: "Интерактивный элемент не сгенерирован «в вакууме» (Isolation Error): кнопка есть, а содержимого, которым она управляет, нет"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3760,7 +3760,7 @@ items:
     text: "Страница не пустая при непустом коде (Blank Page)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3774,7 +3774,7 @@ items:
     text: "Изображение не ломает раскладку (Abnormal Image Size)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -3788,7 +3788,7 @@ items:
     text: "Нет горизонтальной прокрутки на 360 px"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3802,7 +3802,7 @@ items:
     text: "Состояние переживает переход между маршрутами (самый слабый уровень у всех моделей: S3 = 0,0 у трёх из шести)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3817,7 +3817,7 @@ items:
     text: "Сгенерировано k вариантов, и выбран лучший **по метрике**, а не по виду"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3831,7 +3831,7 @@ items:
     text: "Визуальный регресс прогнан по всем маршрутам после каждой правки"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -3846,7 +3846,7 @@ items:
     text: "Отчёт ревьюера привязан к наблюдённым событиям, а не к общим словам"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -3860,7 +3860,7 @@ items:
     text: "Каждая кнопка называет результат нажатия без чтения окружающего текста; нет «OK», «Подтвердить», «Да/Нет» в подтверждениях"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3874,7 +3874,7 @@ items:
     text: "Имя действия одинаково в кнопке, заголовке диалога, кнопке диалога, сообщении и статусе"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3888,7 +3888,7 @@ items:
     text: "Сообщение об ошибке отвечает на «что случилось», «почему», «что сделать»; нет «Что-то пошло не так», «Неверно», «Недопустимо», кода как текста"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, DOM]
     check_method_class: [scenario, dom]
     check_method_main: scenario
@@ -3902,7 +3902,7 @@ items:
     text: "Ни одно сообщение не обвиняет пользователя; извинение стоит только там, где виноват сервис; нет шуток там, где человек не достиг цели"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -3916,7 +3916,7 @@ items:
     text: "У каждого поля видимая подпись из 1–3 слов без двоеточия; плейсхолдер — только пример и не дублирует подпись"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3930,7 +3930,7 @@ items:
     text: "Ни одной ссылки «здесь», «тут», «подробнее», «click here»; в предложении залинкован только фрагмент, называющий назначение"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -3944,7 +3944,7 @@ items:
     text: "Для каждой из четырёх причин пустоты написан свой текст; в каждом пустом состоянии есть заголовок и (кроме «всё сделано») одно действие"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3958,7 +3958,7 @@ items:
     text: "«Ничего не найдено» повторяет запрос и перечисляет применённые фильтры"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3972,7 +3972,7 @@ items:
     text: "Заголовок подтверждения — вопрос с именем объекта; тело — одна строка с конкретным последствием"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -3986,7 +3986,7 @@ items:
     text: "Один объект называется одним словом на всех экранах; нет пар-синонимов («аккаунт» и «профиль»)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4000,7 +4000,7 @@ items:
     text: "Все статусы одного объекта в одной грамматической форме; все пункты одного меню отвечают на один вопрос"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4014,7 +4014,7 @@ items:
     text: "Предложения ≤ 15 слов (≤ 20 в пояснениях), абзацы ≤ 50 слов; ключевое слово в первых двух словах заголовка и пункта списка"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4028,7 +4028,7 @@ items:
     text: "Нет канцелярита («осуществить», «данный», «является», отглагольные существительные, цепочки родительных) и слов-паразитов результата («успешно», «автоматически», «вручную»)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4042,7 +4042,7 @@ items:
     text: "Типографика: кавычки-ёлочки, длинное тире, нет точек в заголовках, кнопках, тостах и подписях, нет Title Case и капса"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4056,7 +4056,7 @@ items:
     text: "Ни одно прошедшее время и ни одно причастие не требует знать пол пользователя; строки с числами проходят через ICU plural с ветками `one/few/many/other`"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4070,7 +4070,7 @@ items:
     text: "Ни одна подстановка не стоит после предлога, требующего косвенного падежа; конкатенации строк нет"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4084,7 +4084,7 @@ items:
     text: "Числа, валюты, даты, время форматируются через `Intl`; формат одинаков по всему продукту; сумма в месте принятия решения не сокращена"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4098,7 +4098,7 @@ items:
     text: "Инструкции не опираются на «справа», «выше», «красным», «круглая кнопка» (WCAG 1.3.3)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4112,7 +4112,7 @@ items:
     text: "Доступное имя каждой иконочной кнопки = действие + объект"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4126,7 +4126,7 @@ items:
     text: "Нет confirmshaming, двойных отрицаний и обратной логики в подписях отказа"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4141,7 +4141,7 @@ items:
     text: "Нет заглушек, артефактов копипаста, невидимых символов, выдуманных чисел и «Добро пожаловать, {Имя}»"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4156,7 +4156,7 @@ items:
     text: "Сообщения об ошибке проходят рубрику NN/g хотя бы на **B** (среднее ≥ 2,5 из 4 по 12 критериям)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -4170,7 +4170,7 @@ items:
     text: "Пройден банановый тест: назначение экрана и кнопок читается при замене всего текста одним словом"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -4184,7 +4184,7 @@ items:
     text: "Нет горизонтальной прокрутки на 320 и 360 px и при зуме 400 %; скриншоты сняты на всём наборе ширин (320/360/390–430/600/768/840/1024–1280/1440/1920)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4198,7 +4198,7 @@ items:
     text: "Зум не заблокирован (`user-scalable`, `maximum-scale` не заданы); есть `meta viewport width=device-width`"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4212,7 +4212,7 @@ items:
     text: "Цели навигации, primary и деструктивные ≥ 44×44; плотные вспомогательные ≥ 24 с зазором; цель — весь контейнер, а не иконка"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4226,7 +4226,7 @@ items:
     text: "Ключевые цели лежат в средней половине–двух третях экрана; навигация и главное действие у нижней кромки, но не вплотную к краю"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -4240,7 +4240,7 @@ items:
     text: "В радиусе ~12 мм от деструктивной цели нет рутинного действия"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4254,7 +4254,7 @@ items:
     text: "Нижняя панель навигации: 3–5 пунктов с подписями, состав и позиции фиксированы, ничего не прячется по контексту"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4268,7 +4268,7 @@ items:
     text: "Порядок и названия разделов совпадают с десктопом; нет двух меню с пересекающимся содержимым"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4282,7 +4282,7 @@ items:
     text: "Системный «Назад» закрывает верхний оверлей, а не уводит со страницы; каждое состояние, ощущаемое как экран, имеет запись в истории"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4296,7 +4296,7 @@ items:
     text: "Возврат из детали восстанавливает список, прокрутку, фильтры и выделение; проверен сценарий «свернуть браузер на 10 минут и вернуться»"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4311,7 +4311,7 @@ items:
     text: "У каждого жеста есть видимая альтернатива (кнопка или пункт меню); перетаскивание имеет альтернативу одним указателем; свайп по строке — только для деструктивного и с отменой"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -4325,7 +4325,7 @@ items:
     text: "Все прижатые к краям элементы используют `env(safe-area-inset-*)` с фолбэком; полноэкранные блоки используют `svh`/`dvh`, а не `vh`; нигде нет `width: 100vw`"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4339,7 +4339,7 @@ items:
     text: "Липкая панель действий проверена при открытой клавиатуре на iOS и Android; сфокусированное поле прокручивается в середину экрана; ошибки полей видны при открытой клавиатуре"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4353,7 +4353,7 @@ items:
     text: "Кегль всех полей ≥ 16 px (иначе iOS зумит при фокусе)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4367,7 +4367,7 @@ items:
     text: "Каждому полю проставлены `type`, `inputmode`, `autocomplete`, `enterkeyhint`"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4381,7 +4381,7 @@ items:
     text: "Сообщения об ошибках полей стоят **над** полями; видны подпись, подсказка, ввод и ошибка одновременно"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -4395,7 +4395,7 @@ items:
     text: "Мобильные пороги таблиц: больше 3–4 колонок (или любая многословная) → строка-карточка; больше 20 объектов → фильтр и поиск; больше 200–300 строк → виртуализация; размер страницы 10–20 строк с «Показать ещё»; не более 2 типов индикаторов на запись"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4409,7 +4409,7 @@ items:
     text: "Область горизонтальной прокрутки таблицы: `role=\"region\"` + `aria-labelledby` + `tabindex=\"0\"` + видимый фокус; нет вложенных областей прокрутки"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4423,7 +4423,7 @@ items:
     text: "Hover-стили обёрнуты в `@media (hover: hover)`; всё, что доступно по наведению, доступно по тапу и с клавиатуры"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4437,7 +4437,7 @@ items:
     text: "Ориентация не заблокирована; экран проверен в ландшафте телефона (~360 px высоты)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4451,7 +4451,7 @@ items:
     text: "Автоопределение телефонов, дат и адресов отключено там, где цифры — идентификаторы"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4465,7 +4465,7 @@ items:
     text: "Бюджеты LCP ≤ 2,5 с, INP ≤ 200 мс, CLS ≤ 0,1 заданы отдельно для мобильных и проверены на замедленном CPU и медленной сети"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4479,7 +4479,7 @@ items:
     text: "Пройден мобильный протокол доступности из восьми шагов (VoiceOver, TalkBack, зум 200 %, вьюпорт 320, внешняя клавиатура, ландшафт, линейка, axe на каждом брейкпоинте)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, SCR]
     check_method_class: [human, scenario]
     check_method_main: human
@@ -4493,7 +4493,7 @@ items:
     text: "Пройден десятиминутный прогон одного экрана на реальном устройстве (14 пунктов §7.5), включая in-app браузер"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4507,7 +4507,7 @@ items:
     text: "В продукте нет «пластырей» — обучающих оверлеев, объясняющих жест"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4521,7 +4521,7 @@ items:
     text: "Одинаковые объекты выглядят одинаково во всех контекстах, разные — по-разному"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, JDG]
     check_method_class: [visual, visual]
     check_method_main: visual
@@ -4535,7 +4535,7 @@ items:
     text: "Инвентарь интерфейса собран: все экземпляры кнопок, полей, иконок, таблиц, оверлеев — и в каждой категории нет необъяснённых вариантов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4549,7 +4549,7 @@ items:
     text: "Форматы дат, чисел и валют одинаковы на всех экранах"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4564,7 +4564,7 @@ items:
     text: "Один и тот же компонент не реализован двумя разными способами (фильтр чипами на одном экране и селектами на другом)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4579,7 +4579,7 @@ items:
     text: "Конвенции размещения (где навигация, где основное действие, где вторичные) одинаковы на всех экранах"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -4593,7 +4593,7 @@ items:
     text: "Каждое осознанное нарушение конвенции записано и обосновано"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4607,7 +4607,7 @@ items:
     text: "Для каждого объекта заполнена таблица представлений (список, карточка, поиск, селект, уведомление, крошка, ссылка, тост); представления переиспользуются, а не рисуются заново на каждом экране"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, DOM]
     check_method_class: [human, dom]
     check_method_main: human
@@ -4621,7 +4621,7 @@ items:
     text: "Порядок первых трёх атрибутов объекта одинаков во всех представлениях (нет shape-shifter)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4635,7 +4635,7 @@ items:
     text: "Разные типы объектов различимы без чтения подписи — маркер типа есть в каждом представлении (нет masked object)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, DOM]
     check_method_class: [visual, dom]
     check_method_main: visual
@@ -4649,7 +4649,7 @@ items:
     text: "Один примитив на потребность: нет двух дейтпикеров, двух способов выбрать из списка, двух тостов; компоненты — только из инвентаря, посторонних импортов ноль"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4663,7 +4663,7 @@ items:
     text: "Одно действие — одно имя во всём продукте; подписи кнопки, тоста и записи журнала согласованы («Опубликовать» → «Опубликовано»)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4677,7 +4677,7 @@ items:
     text: "Порядок кнопок формы и диалога, место основного действия, тостов, пагинации и сообщения об ошибке зафиксированы один раз и совпадают на всех маршрутах (DOM-порядок; координаты в пределах шага сетки)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, IMG]
     check_method_class: [dom, visual]
     check_method_main: dom
@@ -4691,7 +4691,7 @@ items:
     text: "Набор состояний одного компонента полон на всех экранах; способ вызова и раскрытия один (строка не раскрывается инлайн на одном экране и модалкой на другом)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -4705,7 +4705,7 @@ items:
     text: "Единый словарь: глоссарий объектов с одним каноническим именем, словарь действий с прошедшим временем и запрещёнными синонимами, закрытый список статусов с фиксированными подписями"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4719,7 +4719,7 @@ items:
     text: "Плотность зафиксирована по типам зон (таблица, форма, мастер) и одинакова во всех экземплярах зоны; отступы и высота строки одинаковы у элементов одного класса"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM, IMG]
     check_method_class: [dom, visual]
     check_method_main: dom
@@ -4733,7 +4733,7 @@ items:
     text: "Правило обрезки длинного текста и отображение пустого значения одни на весь продукт"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4747,7 +4747,7 @@ items:
     text: "Нет произвольных значений цвета, отступа, радиуса, длительности — только токены; проверяется линтером по коду"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4761,7 +4761,7 @@ items:
     text: "Правило заземления: каждый компонент, проп и токен подтверждается источником (репозиторий или пакет); неподтверждённое не используется"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -4775,7 +4775,7 @@ items:
     text: "Для каждой потребности выбран ровно один источник компонентов, смесь систем запрещена; репозиторий источника не архивирован; записаны дата снятия документации и лицензии кода и документации"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4789,7 +4789,7 @@ items:
     text: "Инвентарь примитивов и страничных композиций составлен до генерации; проверенный стартер зафиксирован как эталон палитры, типографики, кнопок и отступов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4803,7 +4803,7 @@ items:
     text: "Именованные диапазоны ширин — словарь правил перестроения, а не список устройств: перестроение происходит на объявленных границах, проверка выполнена на 8–12 произвольных ширинах внутри диапазона без горизонтальной прокрутки"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, IMG]
     check_method_class: [scenario, visual]
     check_method_main: scenario
@@ -4817,7 +4817,7 @@ items:
     text: "Внешняя консистентность: стандартные элементы (логотип, поиск, аккаунт, помощь) на ожидаемых местах; терминология сверена с 5–10 продуктами категории; каждое отклонение от конвенции — в журнале решений с обоснованием"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, HUM]
     check_method_class: [visual, human]
     check_method_main: visual
@@ -4831,7 +4831,7 @@ items:
     text: "Намеренные отличия только в четырёх случаях — деструктивное действие, критичное предупреждение, смена режима, смена контекста; деструктивные действия выглядят одинаково между собой; отличий «ради разнообразия» нет"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG, JDG]
     check_method_class: [visual, visual]
     check_method_main: visual
@@ -4845,7 +4845,7 @@ items:
     text: "Смена режима и смена контекста (организация, среда) имеют постоянный видимый признак"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4859,7 +4859,7 @@ items:
     text: "Нет дублей: один путь к разделу (нет дублирующих пунктов навигации), нет дублирующих действий на одном экране, нет повторяющихся секций с одинаковым содержимым"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -4873,7 +4873,7 @@ items:
     text: "Визуальный регресс по всем маршрутам гоняется после каждой правки (правка одного экрана ломает соседние)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -4888,7 +4888,7 @@ items:
     text: "Аудит на дрейф встроен в цикл генерации: результат сверяется со спецификацией и инвентарём, при несоответствии дальше не пропускается; доля узлов из системы («глубина принятия») измеряется против порога, заданного командой"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, DOM]
     check_method_class: [script, dom]
     check_method_main: script
@@ -4902,7 +4902,7 @@ items:
     text: "Происхождение каждого паттерна известно (что содержит, куда включён); инвентарь интерфейса делался не позже года назад"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4916,7 +4916,7 @@ items:
     text: "Проверка соответствия системе запускается после поиска решения, а не вместо него; валидность по системе не считается качеством экрана"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4931,7 +4931,7 @@ items:
     text: "Для каждой роли определены постура, плотность и набор ускорителей; в исследовании и приёмке представлены три типа пользователей («наследник», «легенда», «ученик»)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4946,7 +4946,7 @@ items:
     text: "Записано, что относится к essential, а что к accidental сложности; обходные пути и зомби-функции зафиксированы (или отмечено, что доступа к пользователям нет)"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -4961,7 +4961,7 @@ items:
     text: "Главный экран каждой роли — её рабочая очередь, а не дашборд; дашборд допустим, только если обоснован вопросами роли"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -4976,7 +4976,7 @@ items:
     text: "Меню различается по ролям; недоступное приглушено с объяснением, а не активно; скрыто только то, чего у роли нет в принципе"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -4991,7 +4991,7 @@ items:
     text: "Навигация выдержит удвоение числа разделов без перекладки зон"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5006,7 +5006,7 @@ items:
     text: "С карточки объекта достижимы все связанные объекты и соседние записи списка"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5021,7 +5021,7 @@ items:
     text: "Состояние списка (фильтры, сортировка, страница, колонки) живёт в URL; у каждого списка есть экспорт того, что видно; есть сохранённые виды с именем и владельцем"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5037,7 +5037,7 @@ items:
     text: "Для каждого действия контейнер выбран по таблице; модалка не используется для правки строки"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5052,7 +5052,7 @@ items:
     text: "Массовые действия — панель над выделением с числом выделенных плюс действия строки; подтверждения в массовой операции отложены в конец"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5067,7 +5067,7 @@ items:
     text: "Для каждого деструктивного действия выбран уровень лестницы защиты; есть undo там, где действие обратимо, и срок восстановления там, где нет"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5082,7 +5082,7 @@ items:
     text: "Ограничение области доступа отражено в составе списков; есть экран «нет прав» с запросом доступа"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5097,7 +5097,7 @@ items:
     text: "Аудит-лог отвечает на пять вопросов (кто, что, над чем, когда, откуда), фильтруется по полям, экспортируется, имеет срок хранения; у объекта есть история изменений с «вернуть как было»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5112,7 +5112,7 @@ items:
     text: "Имперсонация видима, ограничена по времени и правам, записана в аудит, с уведомлением владельцу"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5127,7 +5127,7 @@ items:
     text: "Текущий контекст организации и среда (рабочая / тестовая) видны всегда"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [IMG]
     check_method_class: [visual]
     check_method_main: visual
@@ -5142,7 +5142,7 @@ items:
     text: "Экран разбит на блоки с независимыми источниками данных; отказ одного сервиса не убивает страницу; состояние интеграций видно на рабочем экране, а не только в настройках"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5157,7 +5157,7 @@ items:
     text: "Импорт реализован в пять стадий (загрузка → сопоставление → проверка → предпросмотр → применение) с фильтром «только строки с ошибками»"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5172,7 +5172,7 @@ items:
     text: "Сокращения показаны рядом с пунктами меню и в тостах; есть экран «все сокращения»; подсказки о быстрых способах даются в контексте"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5187,7 +5187,7 @@ items:
     text: "Пустые состояния работают как онбординг: причина, что появится, одно действие"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -5202,7 +5202,7 @@ items:
     text: "До проектирования выбраны design KPI (время до первого успеха, время исправления ошибки, ошибки конфигурации, доля задач вне системы) и зафиксированы базовые значения; у каждого диалога подтверждения есть метрика доли отказов"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5217,7 +5217,7 @@ items:
     text: "Постура определена по ролям; для ежедневных ролей выбран смешанный режим"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5232,7 +5232,7 @@ items:
     text: "Подписи развёрнутые, иконок без подписей в навигации нет; основная навигация видима на десктопе, а не спрятана за гамбургер"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5247,7 +5247,7 @@ items:
     text: "Нет вложенных модалок и второго уровня оверлеев"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5262,7 +5262,7 @@ items:
     text: "Главный экран отвечает на «что происходит» и «что дальше»; есть блок «требует действия», и он пуст, когда ничего не требуется"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -5277,7 +5277,7 @@ items:
     text: "У каждой заявки и операции видны статус, следующий шаг, ответственная сторона и срок; сроки честные, нет процента, замирающего на 99 %"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5292,7 +5292,7 @@ items:
     text: "Обязательные сценарии самообслуживания реализованы (§7.1): число шагов отмены ≤ числу шагов подключения, тот же канал, удерживающих экранов нет; понижение и повышение тарифа равнодоступны, последствия перечислены"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5307,7 +5307,7 @@ items:
     text: "Лимит показывается до того, как в него упереться"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5322,7 +5322,7 @@ items:
     text: "Итоговая сумма видна там, где принимается решение; любое регулярное списание называет сумму, период и дату первого списания до подтверждения"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5337,7 +5337,7 @@ items:
     text: "История операций и документы доступны и экспортируются; у каждого объекта есть человекочитаемый номер для разговора с поддержкой"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5352,7 +5352,7 @@ items:
     text: "Есть список активных сессий и устройств с завершением; смена email, пароля и отключение 2FA требуют повторной аутентификации и уведомления на старый адрес"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5367,7 +5367,7 @@ items:
     text: "Вход не блокирует вставку, капчи-головоломки нет; истечение сессии предупреждает заранее и сохраняет введённое"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5382,7 +5382,7 @@ items:
     text: "Для длинного или условного процесса выбран список задач со статусами, а не мастер с индикатором; перед началом показан список того, что понадобится; есть «сохранить и выйти» с возвратом к списку"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5397,7 +5397,7 @@ items:
     text: "Есть страница проверки ответов и страница подтверждения с номером; введённое сохраняется при ошибке, уходе и истечении сессии"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5412,7 +5412,7 @@ items:
     text: "Каналы и частота уведомлений настраиваются; транзакционные помечены как неотключаемые; у любой просьбы есть окончательный отказ, повторов после него нет"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5427,7 +5427,7 @@ items:
     text: "Механизм помощи в одном и том же месте на всех экранах (WCAG 3.2.6); обращение имеет номер, статус и срок ответа"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5442,7 +5442,7 @@ items:
     text: "Согласие на обработку персональных данных — отдельный элемент; предотмеченных чекбоксов нет; «Принять все» и «Отклонить все» равнодоступны"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5457,7 +5457,7 @@ items:
     text: "Нет таймеров и остатков без реальных данных; есть удаление аккаунта и выгрузка данных до удаления"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5472,7 +5472,7 @@ items:
     text: "Целевой уровень WCAG 2.2 AA задан и проверен на каждом маршруте; есть заявление о доступности с честным списком проблем и датой"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE, HUM]
     check_method_class: [script, human]
     check_method_main: script
@@ -5487,7 +5487,7 @@ items:
     text: "Сценарии проходятся на узком экране; контейнеры трансформированы по таблице; ошибка показана над полем"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5502,7 +5502,7 @@ items:
     text: "Заполнен паспорт функции (задача, частота, сложность, риск, требуемая точность); проверено, что правило или эвристика не решают задачу проще; решено, автоматизация это или аугментация, и почему"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5517,7 +5517,7 @@ items:
     text: "Есть путь выполнить задачу без ИИ"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5532,7 +5532,7 @@ items:
     text: "Точка входа названа глаголом результата, а не «ИИ»; показаны 2–3 примера запросов; вместо пустого поля — подсказки, шаблоны или примеры"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5547,7 +5547,7 @@ items:
     text: "Видно, какой контекст используется, и его можно убрать; предложение отклоняется одним движением"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5562,7 +5562,7 @@ items:
     text: "Отклик на отправку ≤ 100 мс; во время потока есть признак незавершённости и кнопка остановки; действия над частичным результатом заблокированы или помечены"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5577,7 +5577,7 @@ items:
     text: "Автопрокрутка прекращается, если человек ушёл читать выше; ошибка в середине потока сохраняет полученное"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5592,7 +5592,7 @@ items:
     text: "Решено, показывать ли уверенность, и выбрана форма; при низкой уверенности система предлагает, а не действует"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -5607,7 +5607,7 @@ items:
     text: "Есть объяснение «почему так» — частичное, структурированное, адресованное роли читателя; каждое число ведёт к источнику, допущения помечены"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [JDG]
     check_method_class: [visual]
     check_method_main: visual
@@ -5622,7 +5622,7 @@ items:
     text: "Объяснено, какие данные используются: scope, reach, removal"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5637,7 +5637,7 @@ items:
     text: "Для изменяющих действий реализована лестница план → предпросмотр → подтверждение → применение → журнал → отмена; агент останавливается перед деструктивным шагом, у прерывания есть обработчик разрешения"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5652,7 +5652,7 @@ items:
     text: "Критичные элементы интерфейса заданы инструкцией, а не оставлены модели"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -5667,7 +5667,7 @@ items:
     text: "Результат можно отредактировать на месте, перегенерировать и вернуть предыдущий вариант; исправление неверного результата занимает не больше двух действий"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5682,7 +5682,7 @@ items:
     text: "Собираются поведенческие сигналы, а не только «палец вверх/вниз»; ответ на обратную связь называет область и срок влияния; локальная обратная связь и глобальные настройки разведены"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5697,7 +5697,7 @@ items:
     text: "Видно, что система помнит; память можно удалить, сбросить и работать без неё; заметные изменения поведения объявляются"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5712,7 +5712,7 @@ items:
     text: "Сгенерированное помечено единым компонентом маркировки из дизайн-системы; ассистент не выдаёт себя за человека"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [DOM]
     check_method_class: [dom]
     check_method_main: dom
@@ -5727,7 +5727,7 @@ items:
     text: "Согласия на использование данных отдельные и отзываемые; в уязвимых контекстах человек в цикле по умолчанию"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5742,7 +5742,7 @@ items:
     text: "Чат-бот отдаёт человека по первой явной просьбе; при неявном провале предлагает человека после трёх неудачных попыток"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5757,7 +5757,7 @@ items:
     text: "Оценка: набор представительных входов и несколько прогонов на каждый; формат вывода и запреты проверяются программно, а не промтом; ссылки на источники проверяются автоматически; границы данных обеспечены правами, а не инструкцией"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, LNT]
     check_method_class: [scenario, script]
     check_method_main: scenario
@@ -5772,7 +5772,7 @@ items:
     text: "Заложен бюджет на проверку, а не только на выпуск"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5787,7 +5787,7 @@ items:
     text: "Записано, что именно заказано (экраны / прототип / спецификация / код); все допущения помечены словом «допущение» и вынесены в отдельный список; выбран плейбук и записаны его значения по умолчанию"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5802,7 +5802,7 @@ items:
     text: "Разделены essential и accidental сложность; у каждой роли определены постура и плотность"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5817,7 +5817,7 @@ items:
     text: "Каждый объект имеет экземпляры, атрибуты и адресуемость ссылкой; коллекции и представления отсеяны; атрибуты ранжированы, первые три позволяют узнать экземпляр"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5832,7 +5832,7 @@ items:
     text: "Есть глоссарий объектов и словарь действий с запрещёнными синонимами; заполнены nested object matrix, CTA-матрица, CRUD-матрица и таблица представлений объекта по восьми контекстам"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, HUM]
     check_method_class: [script, human]
     check_method_main: script
@@ -5847,7 +5847,7 @@ items:
     text: "Для каждой задачи-хаба заполнена спецификация сценария с ветвлениями, ошибками на каждом шаге и конечными состояниями; для многоролевых сценариев записано «чей ход» и что происходит при бездействии"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5862,7 +5862,7 @@ items:
     text: "Есть набор фикстур со всеми граничными случаями; заполнена таблица «что переживает переход», и для каждой строки есть проверка"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -5877,7 +5877,7 @@ items:
     text: "Карта экранов содержит объект, роль, тип шаблона и одно ключевое действие; реестр маршрутов закрыт с запретом на маршруты вне списка; матрица переходов проверена на тупики"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -5893,7 +5893,7 @@ items:
     text: "Таблица навигации различается по ролям, а не одинаковое меню с выключенными пунктами; решение о разделении админки и клиентской части принято и обосновано"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5908,7 +5908,7 @@ items:
     text: "Составлен инвентарь примитивов «один примитив на потребность» и инвентарь страничных композиций; для каждого действия выбран контейнер, для каждого события — форма сообщения по таблицам"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM, LNT]
     check_method_class: [human, script]
     check_method_main: human
@@ -5924,7 +5924,7 @@ items:
     text: "Для каждого экрана выписан контракт состояний поимённо (S01–S22); перечислены служебные экраны (403, 404, 500, офлайн, сессия, лимиты)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -5939,7 +5939,7 @@ items:
     text: "Для каждого сложного компонента описаны два потока — мышь и клавиатура; заданы карта лендмарков, порядок табуляции и управление фокусом; заполнена таблица мобильной трансформации по типам шаблонов"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5954,7 +5954,7 @@ items:
     text: "Отправлен бриф на визуальный слой в `../../ui/` (токены, плотность, шкала)"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5969,7 +5969,7 @@ items:
     text: "Контракт генерации собран из артефактов, а не написан заново; каркас генерируется один раз и фиксируется; запланированы k вариантов и метрика отбора"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5984,7 +5984,7 @@ items:
     text: "Ведётся журнал решений с тройкой «проблема → влияние → альтернатива»"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -5999,7 +5999,7 @@ items:
     text: "Прогнаны все автоматические проверки соответствия артефактам; пройдены lookalike test и проверка на одинаковость структуры экранов; собран пакет артефактов целиком"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом S1 (волна 4), не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, IMG]
     check_method_class: [scenario, visual]
     check_method_main: scenario
@@ -6013,7 +6013,7 @@ items:
     text: "Сборка проходит; главный маршрут рендерит непустой контент"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT, SCR]
     check_method_class: [script, scenario]
     check_method_main: script
@@ -6027,7 +6027,7 @@ items:
     text: "Все объявленные ограничения соблюдены — **проверено, а не заявлено**"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
@@ -6041,7 +6041,7 @@ items:
     text: "axe прогнан на каждом маршруте × две темы × четыре ширины; прогнан второй аудитор"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -6055,7 +6055,7 @@ items:
     text: "Ворота доступности выполнены: 0 Critical, 0 Serious, IR ≤ 0,15, Lighthouse a11y ≥ 95"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [AXE]
     check_method_class: [script]
     check_method_main: script
@@ -6069,7 +6069,7 @@ items:
     text: "Все сценарии проходятся автотестом, включая возврат на предыдущий экран"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -6083,7 +6083,7 @@ items:
     text: "Проверено сохранение состояния между маршрутами"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -6097,7 +6097,7 @@ items:
     text: "Все шесть ручных проходов доступности выполнены"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -6111,7 +6111,7 @@ items:
     text: "Проверены пять критериев WCAG 2.2, которые автоматика не видит (2.4.11, 2.5.7, 3.2.6, 3.3.7, 3.3.8)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR, HUM]
     check_method_class: [scenario, human]
     check_method_main: scenario
@@ -6125,7 +6125,7 @@ items:
     text: "Core Web Vitals в норме: LCP ≤ 2,5 с, INP ≤ 200 мс, CLS ≤ 0,1 (75-й процентиль)"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [SCR]
     check_method_class: [scenario]
     check_method_main: scenario
@@ -6139,7 +6139,7 @@ items:
     text: "Сгенерировано k вариантов и выбран лучший по метрике"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -6153,7 +6153,7 @@ items:
     text: "Судья прогнан несколько раз с перестановкой позиций; шаблон рубрики не менялся с последнего замера"
     severity: S
     severity_label: "серьёзно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -6167,7 +6167,7 @@ items:
     text: "Проверка нашла хотя бы одну проблему (ноль находок = неудавшийся прогон)"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -6181,7 +6181,7 @@ items:
     text: "Человек проверил уместность решения задаче, приоритет содержимого и доверие"
     severity: B
     severity_label: "блокер"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human
@@ -6195,7 +6195,7 @@ items:
     text: "Записано, какие правила базы конфликтовали и какой выбор сделан"
     severity: D
     severity_label: "желательно"
-    severity_note: "назначено агентом I, не измерено"
+    severity_note: "оценка, не замер"
     check_method: [HUM]
     check_method_class: [human]
     check_method_main: human

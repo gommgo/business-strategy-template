@@ -98,13 +98,17 @@
 python3 ../../scripts/ai-media/asset_audit.py audit 99-raw/experiments/_polza/E/2026-10-01 --out out/audit   # папка с паспортами
 python3 ../../scripts/ai-media/asset_audit.py audit hero.png --slot hero --dna 06-art-direction-consistency/examples/dna-strict-saas.json
 python3 ../../scripts/ai-media/asset_audit.py audit banner.png --expect "Весенняя распродажа" --expect "Скидки до −30 %" --slot og
+python3 ../../scripts/ai-media/asset_audit.py audit banner.png --expect "Скидка{×2}" --slot og         # строка стоит на картинке дважды
 python3 ../../scripts/ai-media/asset_audit.py audit edited.png --orig src.png --mask target.png --mask-mode white [--protect product_alpha.png]
 python3 ../../scripts/ai-media/asset_audit.py audit edited.png --orig src.png --changes 2        # безмасочная правка
 python3 ../../scripts/ai-media/asset_audit.py audit hero_9x16.png --orig hero_16x9.png          # аутпейнт (пропорция другая)
 python3 ../../scripts/ai-media/asset_audit.py audit loop_mezz.mp4 --control i2v_control.mp4 --mezzanine [--mask still_zones.png]
+python3 ../../scripts/ai-media/asset_audit.py audit loop_mezz.mp4 --control i2v_control.mp4 --fade-event   # объявленное затемнение
+python3 ../../scripts/ai-media/asset_audit.py audit intro.mp4 --mode video-once                     # разовый ролик (вступление)
 python3 ../../scripts/ai-media/asset_audit.py audit cells/*.png --mode series [--ref brand_ref1.jpg --ref brand_ref2.jpg]
 python3 ../../scripts/ai-media/asset_audit.py audit grid_2x2.png --mode series --grid 2x2       # сетка одним вызовом (F-02)
 python3 ../../scripts/ai-media/asset_audit.py audit hero.avif --master hero_master.png --slot hero --stage web   # производная
+python3 ../../scripts/ai-media/asset_audit.py audit hero.avif --stage web --plan asset-plan.yaml --slot hero-visual [--variant mobile]   # бюджет — max_kb слота плана
 python3 ../../scripts/ai-media/asset_audit.py ocr banner.png --expect "Цена 2 490 ₽" [--transcripts-out t.json]
 python3 ../../scripts/ai-media/asset_audit.py thresholds --check
 python3 ../../scripts/ai-media/tests/test_asset_audit.py [--ocr] [-v]                            # 55/55, ≈ 50 с
@@ -119,7 +123,8 @@ python3 ../../scripts/ai-media/tests/test_asset_audit.py [--ocr] [-v]           
 | `edit` | `--orig` или `IMG-EDIT`/`IMG-OUTPAINT` в паспорте | аутпейнт по пропорции; утечка, дрейф, NO_EDIT, геометрия, защита товара, локальный сдвиг; маска из разницы | edit_check 0.2 (H), своё K |
 | `texture` | `IMG-TEXTURE` | шов тайла | tile_check (H2) |
 | `series` | `--mode series` или `--series` | оттенок, ΔE палитр, светлота, pHash, `--grid`, `--ref` | series_metrics, split_grid (F/06) |
-| `video-loop` | .mp4/.webm/.mov | шов на мезонине, живость к контролю, склейка, угасание, статичность, пинг-понг, камера, цвет, мерцание, звук, длина, бюджет, синемаграф | video_loop_check 0.2 (I), своё K |
+| `video-loop` | .mp4/.webm/.mov | шов по файлу как есть (порог — по стадии файла), живость к контролю, склейка, угасание, повторы кадров, вспышки, статичность, пинг-понг, камера, цвет, мерцание, звук, длина, бюджет, синемаграф | video_loop_check 0.2 (I), своё K |
+| `video-once` | `--mode video-once` | разовый ролик (вступление): склейки, повторы кадров, вспышки, звук, вес — как у петли; без шва, угасания, длины петли и «ползущей камеры» | video_loop_check (I) |
 | `video-alpha` | `VID-ALPHA` или `--key` | однородность ключа, дрейф объекта, `yuva` | video_loop_check chroma (I) |
 | `svg-icon` | .svg | линия: `check_icons.py` (Lucide); цвет: гигиена Recraft | G, mp_client.svg_info (B2) |
 | `og` | `--slot og` | всё из `image` + 1200×630, PNG/JPEG, ≤ 300 КБ | A 01/01 |
@@ -165,7 +170,7 @@ diff_mask.png}`; для видео — `<файл>_sheet.jpg`.
 | перенасыщение | colorfulness / sat_share / hdr_index / clip_hi без эталона | > 54,5 / 0,075 / 0,35 / 0,14 | c | QA-COLOR-OVERSAT, -HDR, -CLIP warn, IMG-M03 | A 01/03 §6.1.1 (A/04: 51 фото) |
 | к бренду | colorfulness к эталонам паспорта; hdr_index | × 1,2; + 0,1 | p | то же | F/04 README |
 | «Instagram-фильтр» | colorfulness и hdr_index к эталону | > × 1,5 и > + 0,1 | c | QA-FILTER-INSTAGRAM warn | F/04: фильтр даёт × 1,9–2,2 и +0,12…+0,18 |
-| тёплый сдвиг | b* нейтралей | > + 4 | c | QA-COLOR-WARM warn (нейтральный белый в паспорте или без паспорта) / info | A 01/03 IMG-M04: у 9/51 фото лидеров это стиль |
+| тёплый сдвиг | b* нейтралей | > + 4 | c | QA-COLOR-WARM warn (нейтральный белый в паспорте) / info (без паспорта и при другом белом) | A 01/03 IMG-M04: у 9/51 фото лидеров это стиль |
 | пурпур | доля 270–320° OKLCH среди хроматических | > 0,5 без пурпура в паспорте | p | QA-COLOR-PURPLE warn, IMG-M05 | A 01/03 §6.1 |
 | «строго по центру» | \|centroid_x − 0,5\| при зоне текста | < 0,08 | p | QA-COMP-CENTER warn, IMG-M09 | F/04 |
 | сторона объекта | centroid_x при `subject_region` паспорта | ≥ 0,62 (правая треть) | p | QA-COMP-SIDE warn | F/04 (судья F-04) |
@@ -174,11 +179,12 @@ diff_mask.png}`; для видео — `<файл>_sheet.jpg`.
 | зона текста | плотность краёв в зоне | ≤ 0,06 | c | QA-ZONE-BUSY warn | F/02 |
 | плашка | альфа скрима для F83 (лучший из белого и почти чёрного) | ≤ 0,55 | p | QA-ZONE-SCRIM warn | F/02: медиана 0,48, p90 0,53 |
 | палитра | цветов паспорта в ΔE OKLab ≤ 0,05 | ≥ 3 из 5 | p | QA-PALETTE-OFF warn | F-05, vlm_to_dna |
-| текст | OCR против `--expect` | §4 | c | QA-TEXT-MISMATCH fail / QA-TEXT-CHECK needs_human | K/01 |
+| текст | OCR против `--expect` (число вхождений — «строка{×N}») | §4 | c | QA-TEXT-MISMATCH fail / QA-TEXT-CHECK needs_human / QA-TEXT-SMALL warn (расхождение в строке ниже 16 px) | K/01 |
 | незаказанный текст | строк ≥ 2 букв, уверенность ≥ 0,6 | 0 | c | QA-TEXT-UNREQUESTED warn, IMG-M12 | K/01 (23/23 без ложных) |
 | производная | SSIMULACRA2 к `--master` | ≥ 80 hero/товар, ≥ 70 прочее | c | QA-ENCODE-QUALITY fail | H 08/04 §1.2 |
-| бюджет (`--stage web`) | КБ | hero 150, секция 120, товар 150, OG 300, текстура 30 | c | QA-BUDGET warn | A 01/01 §2 |
-| провенанс | C2PA, IPTC DigitalSourceType, AIGC, подпись Recraft; метка в углах (`--corners`) | флаг эвристики L; метка есть (web) | — | QA-PROV-VISIBLE-MARK needs_human, QA-PROV-NO-MARK warn, QA-FILE-CHANGED info | L `provenance_check.py`, 04 §5; H/04b |
+| резкость источника (`--master`) | SSIMULACRA2 кадра к своей копии, уменьшенной в 2 раза и возвращённой к размеру | ≥ 80 — копия неотличима, деталей на свой размер нет | u | QA-SOURCE-SOFT info (гладкий сюжет даёт то же число — смотреть на 100 %) | H 08/02 §1.2 |
+| бюджет (`--stage web`) | КБ | `max_kb` варианта слота плана ассетов (`--plan`, `--slot`); без плана — hero 150, секция 120, товар 150, OG 300, текстура 30 | c | QA-BUDGET warn | A 01/01 §2 |
+| провенанс | C2PA, IPTC DigitalSourceType, AIGC, подпись Recraft; метка в углах (`--corners`) | флаг эвристики L; метка есть (web) | — | QA-PROV-VISIBLE-MARK info и вопрос человеку по листу углов, QA-PROV-NO-MARK warn, QA-FILE-CHANGED info | L `provenance_check.py`, 04 §5; H/04b |
 
 Зона текста — из `--text-zone x0,y0,x1,y1`, спецификации (`composition.text_zone.rect`) или паспорта (`text_zone_default`:
 сторона и доля). Для рендеров на белом (хрома < 0,005 и пересвет > 0,1) пороги фото не применяются (A/04 вывод 5).
@@ -243,15 +249,17 @@ H 08/02 §2.4). Уровни: LEAK → warn (лечится композитом
 линия, обработка) цвет-метрики не видят — вопросы VLM по сетке и голоса (`02`). `--grid 2x2` режет сетку одной генерации
 (`split_grid`, желоба σ < 4 или равное деление; проверено F2 — пиксельно точно).
 
-### 3.6 Видео (`video-loop`, `video-alpha`)
+### 3.6 Видео (`video-loop`, `video-once`, `video-alpha`)
 
 | Проверка | Порог | С | Код | Источник |
 |---|---|---|---|---|
-| шов петли после среза | `seam_ratio_local_after` ≤ 1,5 | p | QA-LOOP-SEAM fail (мезонин) / needs_human (сжатый файл тихой петли) | I 09/01 §1.1, §1.3 |
+| шов петли по файлу как есть | `seam_ratio_local` ≤ 1,5 у мезонина и выхода модели, ≤ 2,5 у файла после кодирования (`--stage web` или сжатый финал) | p | QA-LOOP-SEAM fail / needs_human (сжатый файл тихой петли) | I 09/01 §1.1, §1.3 |
 | дубль кадра, мёртвые концы | `trim` > 0 | p | QA-LOOP-TRIM info → `video_loop_check.py trim --auto` | I 09/01 §3.1 |
 | склейка | локальный `cut_ratio` ≥ 10 | p | QA-LOOP-CUT fail | I |
 | событие в петле | `cut_ratio` 3–10 | u | QA-LOOP-EVENT info (VID-M18) | K/03 |
-| угасание | длинный мёртвый конец / head, tail < 0,5 | p | QA-LOOP-COLLAPSE fail / QA-LOOP-FADE warn | I |
+| угасание | длинный мёртвый конец / head, tail < 0,5 | p | QA-LOOP-COLLAPSE fail (с `--fade-event` — warn) / QA-LOOP-FADE warn | I |
+| повторы кадров | «мёртвые» пары внутри ролика между живыми соседями; кадр держится дольше шага по таймкодам | > 0 | p | QA-VIDEO-DUP-FRAMES warn | I 09/01 §1.1 |
+| вспышки (WCAG 2.3.1) | больше 3 вспышек за секунду на 25 % поля 341×256 CSS px (ширина на странице — `--css-width`) | c | QA-VIDEO-FLASH warn | I 09/01 §1.1 |
 | статичность | `static_frac` > 0,3 | p | QA-LOOP-STATIC warn | I (относительный, v0.2) |
 | живость | к i2v-контролю ≥ 0,5 | p | QA-LOOP-WEAK-MOTION fail; без `--control` — QA-LOOP-NO-CONTROL info | I, C2 |
 | пинг-понг | `mirror_ratio` < 0,25 | p | QA-LOOP-PINGPONG warn | I |
@@ -262,8 +270,11 @@ H 08/02 §2.4). Уровни: LEAK → warn (лечится композитом
 | синемаграф (`--mask`) | drift < 1,0, ΔE00 < 2, камера < 1 px | c | QA-CINEMAGRAPH-DRIFT warn | I 09/02 §3 |
 | длина | 4–10 с | p | QA-LOOP-LENGTH info | I 09/01 §4, A 01/01 |
 | хромакей | фон в ΔE00 ≤ 5 ≥ 0,95 кадров; объект ≤ 2 % ширины | p | QA-CHROMA-BG fail, QA-CHROMA-DRIFT warn | I 09/02 §1.5 |
-| бюджет (`--stage web`) | 1080p ≤ 1,5 МБ, 720p ≤ 600 КБ | c | QA-BUDGET warn | A 01/01 п. 13 |
+| бюджет (`--stage web`) | `max_kb` слота плана ассетов (`--plan`, `--slot`); без плана — 1080p ≤ 1,5 МБ, 720p ≤ 600 КБ | c | QA-BUDGET warn | A 01/01 п. 13 |
 | сохранение движения (`--master` мезонин) | `motion_keep` = motion_med финала / мастера ≥ 0,75 | p | QA-ENCODE-MOTION warn → CRF ниже | J 10/02 §6.1 (AV1 CRF 36: 0,24–0,77); K: H.264 CRF 35 — 0,67 |
+
+Разовый ролик (`video-once`, вступление): шов, угасание, длина петли и «ползущая камера» не судятся; склейки, повторы
+кадров, вспышки, звук и вес — как у петли.
 
 Шов — на мезонине без потерь (x264 `-qp 0`, 4:4:4) или выходе модели до перекодирования; мезонин — профиль 4:4:4 / `yuv444p`,
 `--mezzanine` или ≥ 15 Мбит/с [K/03: чистая петля 0,96 в мезонине, 2,08 в CRF 10, 5,48 в CRF 23]. На 13 роликах K/03 (12 поломок
@@ -354,7 +365,7 @@ RapidOCR 3.9.2 (Apache-2.0, ONNX Runtime 1.30, CPU): детектор `PP-OCRv6_
 | QA-COMP-CENTER / -SIDE / -CLUTTER / -NO-AIR | image | warn | центр, не та сторона, перегруз, нет воздуха | кроп, аутпейнт, блок композиции F |
 | QA-ZONE-BUSY / -SCRIM | image | warn | зона текста шумная; нужна плотная плашка | композиция, цвет текста по зоне, градиентный скрим |
 | QA-PALETTE-OFF | image | warn | цвета паспорта не найдены | LUT, референсы, «палитра кодом» |
-| QA-TEXT-MISMATCH / -CHECK / -UNREQUESTED | image, og | fail / needs_human / warn | текст не тот; читать глазами; лишний текст | HTML-слой; перегенерация; правка надписи |
+| QA-TEXT-MISMATCH / -CHECK / -UNREQUESTED / -SMALL | image, og | fail / needs_human / warn / warn | текст не тот; читать глазами; лишний текст; мелкие буквы | HTML-слой; перегенерация; правка надписи; мелкие — прочитать глазами на 200 % |
 | QA-ENCODE-QUALITY / -MOTION / QA-BUDGET | image, video | fail / warn / warn | сжато заметно; движение «заморожено»; тяжело | `avif_pick.sh`; CRF по `motion_keep` (J 10/02 §6.1) |
 | QA-ALPHA-FAKE / -MISSING / -IOU | cutout | fail | шахматка; нет альфы; не совпала с эталоном | вырез по типу объекта (H 08/01 §1.2) |
 | QA-ALPHA-HALO / -MARGIN / -GLASS / -FIBERS / -EDGE / -LITTLE | cutout | warn/info | ореол, поле, мутное стекло, стриженые волосы | деконтаминация, хромакей, поле ≥ 2 % |
@@ -364,15 +375,17 @@ RapidOCR 3.9.2 (Apache-2.0, ONNX Runtime 1.30, CPU): детектор `PP-OCRv6_
 | QA-PROTECT-CHANGED | edit | fail | товар изменён | вставить оригинал по альфе |
 | QA-TILE-SEAM | texture | fail/warn | шов тайла | `tile_check.py cut` |
 | QA-SERIES-BREAK / -HUE / -PALETTE / -LIGHTNESS / -DUP | series | fail/warn | распад серии, дубль | эталон, блок стиля, LUT (F 06/02) |
-| QA-LOOP-SEAM / -CUT / -COLLAPSE / -WEAK-MOTION | video | fail (шов на сжатом — needs_human) | разрыв, склейка, угасание, «фото» | срез, кроссфейд, перегенерация (I 09/01 §3) |
+| QA-LOOP-SEAM / -CUT / -COLLAPSE / -WEAK-MOTION | video | fail (шов на сжатом — needs_human; угасание с `--fade-event` — warn) | разрыв, склейка, угасание, «фото» | срез, кроссфейд, перегенерация (I 09/01 §3) |
 | QA-LOOP-FADE / -STATIC / -PINGPONG / -COLOR, QA-VIDEO-CAM-CREEP / -AUDIO | video | warn | слабеет, заморозки, разворот, цвет, камера, звук | `fixed_lens`; `-an` |
+| QA-VIDEO-DUP-FRAMES / -FLASH | video | warn | повтор кадра — рывок; вспышки по WCAG 2.3.1 | кодировать с постоянной частотой без размножения кадров; вспышки на странице останавливают ворота эффектов |
 | QA-LOOP-TRIM / -EVENT / -NO-CONTROL / -LENGTH, QA-VIDEO-FLICKER | video | info | срезать кадры; событие; нет контроля; длина; мерцание | по сообщению |
 | QA-CINEMAGRAPH-DRIFT, QA-CHROMA-BG / -DRIFT | video | warn / fail | плывут неподвижные зоны; ключ неоднороден | заморозка по маске; ключ по объекту (I 09/02) |
 | QA-SVG-HEADER / -COLOR / -RASTER / -INVALID | svg | fail | шапка, цвет, растр, не SVG | переписать по спецификации; potrace |
 | QA-SVG-* прочие | svg | warn/info | геометрия, фон, корень, «дырки», вес, подпись | svgo keep-signature, чистка G/02 |
 | QA-OG-SIZE / -FORMAT / -WEIGHT | og | fail/warn | размер, формат, вес | шаблон 1200×630 PNG/JPEG |
 | QA-SLOP-CLUSTER | все | needs_human | ≥ 2–3 подозрения маркеров | подтвердить глазом или VLM (`02`) |
-| QA-PROV-VISIBLE-MARK / -NO-MARK | картинка, видео | needs_human / warn | метка в углу (эвристика L: ≈ половина надписей, ≈ 1 ложное из 10 фото; фаза 5 — 4 ложных из 4 на фактурных углах VAR); у ИИ-файла для страницы нет C2PA/XMP/AIGC | смотреть `*_corners.jpg`, метку вендора не вырезать без решения заказчика; `provenance_check.py stamp` (L 04 §5 п. 7–8) |
+| QA-SOURCE-SOFT | image (`--master`) | info | источник мягкий: деталей на свой размер нет | посмотреть на 100 % |
+| QA-PROV-VISIBLE-MARK / -NO-MARK | картинка, видео | info и вопрос человеку / warn | метка в углу (эвристика L: ≈ половина надписей, ≈ 1 ложное из 10 фото; фаза 5 — 4 ложных из 4 на фактурных углах VAR); у ИИ-файла для страницы нет C2PA/XMP/AIGC | смотреть `*_corners.jpg`, метку вендора не вырезать без решения заказчика; `provenance_check.py stamp` (L 04 §5 п. 7–8) |
 | QA-FILE-CHANGED | все | info | файл изменён после скачивания | мастер-оригинал хранить (C2PA — L) |
 
 ## 6. Калибровка порогов

@@ -1,7 +1,7 @@
-/* marketing-tokens.css · creative-research 04-visual-language · D · 2026-09-24 · Chromium 153 / WebKit 26.6 (Playwright)
+/* marketing-tokens.css · Chromium 153 / WebKit 26.6 (Playwright)
    Компиляция marketing-tokens.json (DTCG 2025.10) в CSS-переменные. Fluid 360 → 1440 px; у текста max ≤ 2,5 × min (WCAG 1.4.4).
-   [проверено: 99-raw/experiments/D/01-clamp-display (строки, зум), D/03-font-swap-cls (метрический фолбэк)]
-   Бренд (гарнитуры, цвета) — умолчания; переопределяет art-direction.tokens_extension. Движение — E (волна 2). */
+   [проверено: строки, зум, метрический фолбэк]
+   Бренд (гарнитуры, цвета) — умолчания; переопределяет art-direction.tokens_extension. */
 
 :root {
   /* гарнитуры: display — из cyrillic-display-fonts.yaml; метрический фолбэк обязателен (см. ниже) */
@@ -26,7 +26,7 @@
   --lh-display-caps: 1.12;
   --lh-lead: 1.45;
 
-  /* трекинг display (em): не туже tracking_touch + 0.005 гарнитуры (тест «ухо», D/02) */
+  /* трекинг display (em): не туже tracking_touch + 0.005 гарнитуры (тест «ухо») */
   --tr-display-xl: -0.015em;
   --tr-display-l: -0.015em;
   --tr-display-m: -0.01em;
@@ -136,8 +136,8 @@ html, body { overflow-x: clip; }  /* полный вылет без горизо
   .section-inverse, .glass { background: Canvas; color: CanvasText; border-color: CanvasText; }
 }
 
-/* ── motion.marketing · E (волна 2) · 2026-09-24 · Chromium 153 / WebKit 26 ─────────────────────────────────────────────
-   Движение подачи: сцены, появления, петли, прокрутка. Отклик контролов — токены ui-research 08-motion.
+/* ── motion.marketing · Chromium 153 / WebKit 26 ─────────────────────────────────────────────
+   Движение подачи: сцены, появления, петли, прокрутка. Отклик контролов — токены ui 08-motion.
    Правила — 05-motion/01 §4, §7; LCP-заголовок без анимации или только transform [проверено].
    Reduce: пространственное → 0 / 1, стаггер → 0, сцены → мгновенно; переключатель сайта [data-motion] побеждает ОС в обе стороны. */
 :root {

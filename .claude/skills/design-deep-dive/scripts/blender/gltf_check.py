@@ -10,15 +10,16 @@
       материалы, текстуры (размер, формат, вес), анимации;
     - сводка-подсказка: несжатая геометрия (нет Draco/Meshopt), текстуры > 2048, PNG вместо WebP/KTX2,
       нет индексов, число мешей/материалов (оценка draw calls), тяжёлый файл (> 5 МБ).
-Инструменты лежат в 99-raw/tools/node (npm): gltf-transform 4.5, gltfpack 1.2, gltf-validator, meshoptimizer, draco3dgltf.
-Прямой вызов: cd 99-raw/tools/node && npx gltf-transform <команда> …  |  npx gltfpack -i in.glb -o out.glb -cc
+Инструменты — npm-пакеты в $DDD_HOME/node (install.sh --npm-groups 3d): gltf-transform 4.5, gltfpack 1.2, gltf-validator,
+meshoptimizer, draco3dgltf. Прямой вызов: cd $DDD_HOME/node && npx gltf-transform <команда> …  |  npx gltfpack -i in.glb
+-o out.glb -cc
 """
 import json, os, re, subprocess, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
-NODE_DIR = str(kbpaths.node_home())  # перенос: npm-зависимости — $DDD_HOME/node
+NODE_DIR = str(kbpaths.node_home())  # npm-зависимости — $DDD_HOME/node
 NODE_BIN = os.path.dirname(kbpaths.node())
 ENV = dict(os.environ, PATH=NODE_BIN + ":" + os.environ.get("PATH", ""))
 

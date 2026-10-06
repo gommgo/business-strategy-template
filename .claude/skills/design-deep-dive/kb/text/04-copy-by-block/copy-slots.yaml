@@ -12,32 +12,32 @@ copy_slots_version: 1
 date: '2026-09-24'
 status: draft
 owner: text · 04-copy-by-block
-description: "Правила текста по типам слотов (slot_type): назначение, роли секций, длины RU и EN по замеру D, структура, формулы A, запреты, профиль линтера C, нужен ли факт B2, юридические правила H, примеры «плохо / хорошо» (ai-self, проверены claims_check.py и copy_lint.py). Ключ — slot_type: id слота вида text словаря site."
+description: "Правила текста по типам слотов (slot_type): назначение, роли секций, длины RU и EN по замеру корпуса, структура, формулы, запреты, профиль линтера, нужен ли факт, юридические правила, примеры «плохо / хорошо» (ai-self, проверены claims_check.py и copy_lint.py). Ключ — slot_type: id слота вида text словаря site."
 doc: "04-copy-by-block/01-hero-and-cta.md, 02-section-blocks.md, 03-page-types.md, 04-form-emails-notifications.md"
-lengths_source: "D thresholds.yaml v2 (03-corpus-measured/thresholds.yaml → genres.<жанр>.slots, 03-thresholds-by-genre.md §4; лидеры, выборка «marketing» = лендинги + страницы сайта; сообщение оркестратора 2026-09-24)"
-length_rule: "min = floor(p10 лидеров), target = round(p50), max = ceil(p90); RU — в знаках (primary: chars), EN — в словах; hard_* — грубый выход D (error_low/high); provisional — n < 12 страниц лидеров или лидеры + средний рынок; длина — сигнал (warning/info), не ворота: вне диапазона на 10 страницах лидеров 52 % — ошибки разметки, 47 % — законные формы (опыт E/01)"
+lengths_source: "thresholds.yaml v2 (03-corpus-measured/thresholds.yaml → genres.<жанр>.slots, 03-thresholds-by-genre.md §4; лидеры, выборка «marketing» = лендинги + страницы сайта)"
+length_rule: "min = floor(p10 лидеров), target = round(p50), max = ceil(p90); RU — в знаках (primary: chars), EN — в словах; hard_* — грубый выход по порогам корпуса (error_low/high); provisional — n < 12 страниц лидеров или лидеры + средний рынок; длина — сигнал (warning/info), не ворота: вне диапазона на 10 страницах лидеров 52 % — ошибки разметки, 47 % — законные формы"
 fact_required_values:
   always: "в слоте всегда факт (fact_ids) или [PLACEHOLDER]"
   if-claim: "факт нужен, если в тексте число, имя, дата, цитата, рейтинг, цена, гарантия, превосходная степень"
   never: "текст без утверждений (кнопка-навигация, пункт меню)"
-examples_rule: "RU и EN, метка ai-self; факты — 02-strategy-messaging/examples/facts-*.yaml (otves, kvarts) и 99-raw/experiments/E/facts-demo-saas-okoshko.yaml (okoshko, ДЕМО); проверка — 99-raw/experiments/E/02-copy-slots/test_examples.py (claims_check.py → copy_lint.py)"
+examples_rule: "RU и EN, метка ai-self; факты — 02-strategy-messaging/examples/facts-*.yaml (otves, kvarts) и 10-templates-recipes/examples/facts/facts-demo-saas-okoshko.yaml (okoshko, ДЕМО); проверка — claims_check.py → copy_lint.py"
 vocabulary: "../site/02-site-types/vocabulary.yaml (слоты вида text; id типа слота = id слота site)"
 renames: {}
 proposals: [promise, stat-source, price-old, spec-row, image-caption, announcement]
 composites:
   hero-core:
-    definition: "ядро первого экрана = headline + subheadline + cta-label + cta-note + hero-proof (по одному экземпляру первой секции; D §2.5)"
+    definition: "ядро первого экрана = headline + subheadline + cta-label + cta-note + hero-proof (по одному экземпляру первой секции; text 03/02 §2.5)"
     max_words: 40
-    rule: "не больше 40 слов: у лидеров RU — 100 % страниц (медиана 16–19,5), EN — 88–92 % (медиана 26); ai-self — медиана 36, p10 28 (D §2.5)"
+    rule: "не больше 40 слов: у лидеров RU — 100 % страниц (медиана 16–19,5), EN — 88–92 % (медиана 26); ai-self — медиана 36, p10 28 (text 03/02 §2.5)"
     lengths:
       ru:
         words: {p10: 6.0, p50: 19.5, p90: 34.2}
         n_pages: 14
-        source: D thresholds.yaml v2 · genres.landing.slots.hero-core
+        source: thresholds.yaml v2 · genres.landing.slots.hero-core
       en:
         words: {p10: 5.7, p50: 26.0, p90: 37.5}
         n_pages: 24
-        source: D thresholds.yaml v2 · genres.landing.slots.hero-core
+        source: thresholds.yaml v2 · genres.landing.slots.hero-core
     check: "сумма слов слотов первой секции; превышение — warning (длинный подзаголовок сокращает остальное)"
 slot_types:
 - id: eyebrow
@@ -57,7 +57,7 @@ slot_types:
       ai_p50_chars: 21.0
       primary: chars
       n_pages: 14
-      source: D thresholds.yaml v2 · genres.landing.slots.eyebrow.ru
+      source: thresholds.yaml v2 · genres.landing.slots.eyebrow.ru
     en:
       words: {min: 1, target: 3, max: 6}
       hard_words: [1, 9]
@@ -67,13 +67,13 @@ slot_types:
       ai_p50_chars: 17.0
       primary: words
       n_pages: 15
-      source: D thresholds.yaml v2 · genres.landing.slots.eyebrow.en
+      source: thresholds.yaml v2 · genres.landing.slots.eyebrow.en
     exceptions:
     - "Мероприятие: дата, город и формат в надзаголовке — до 8 слов («24 октября, Казань, офлайн»)."
   structure: "Именная группа без глагола: категория («Студия ремонта»), сегмент («Для барбершопов»), дата и место события, рубрика."
   formula_ids: []
   rules:
-  - "Не чаще чем у каждой третьей секции страницы, первый экран считается (taste; у лидеров D медиана 0, p90 — 0,28 секции)."
+  - "Не чаще чем у каждой третьей секции страницы, первый экран считается (taste; у лидеров корпуса медиана 0, p90 — 0,28 секции)."
   - "Несёт информацию, которой нет в заголовке: кто, для кого, где и когда; повтор заголовка или жанра секции — удалить."
   - "В copy deck — обычный регистр; капс, разрядка и моноширинный шрифт — CSS (creative)."
   - "Для product-aware — имя бренда или студии; для problem-aware — сегмент или ситуация, не бренд."
@@ -85,7 +85,7 @@ slot_types:
   claim_classes: [company-details, award-press]
   legal_rules: [COPY-L-SUP-01, COPY-L-AWARD-01]
   lint_markers: [COPY-M-STR-10, COPY-M-MKT-11, COPY-M-MKT-08]
-  voice: "Словарь бренда F: как компания называет свою категорию; табу голоса."
+  voice: "Словарь бренда: как компания называет свою категорию; табу голоса."
   examples:
     ru:
       facts: otves
@@ -107,7 +107,7 @@ slot_types:
   date: '2026-09-24'
 - id: headline
   name: Заголовок первого экрана (H1)
-  purpose: "Что это и чем ценно для этого посетителя; тип задаёт уровень осведомлённости (hero_approach B1): сделка, продукт с превосходством, решение против альтернатив, узнаваемая ситуация, идентичность."
+  purpose: "Что это и чем ценно для этого посетителя; тип задаёт уровень осведомлённости (hero_approach иерархии сообщений): сделка, продукт с превосходством, решение против альтернатив, узнаваемая ситуация, идентичность."
   section_roles: [hero, story, not-found, product-demo, proof-stats, testimonials, lead-form]
   genres: [landing, site-page]
   genre: landing
@@ -122,7 +122,7 @@ slot_types:
       ai_p50_chars: 48.5
       primary: chars
       n_pages: 22
-      source: D thresholds.yaml v2 · genres.landing.slots.headline.ru
+      source: thresholds.yaml v2 · genres.landing.slots.headline.ru
     en:
       words: {min: 2, target: 7, max: 15}
       hard_words: [1, 23]
@@ -132,16 +132,16 @@ slot_types:
       ai_p50_chars: 28.0
       primary: words
       n_pages: 26
-      source: D thresholds.yaml v2 · genres.landing.slots.headline.en
+      source: thresholds.yaml v2 · genres.landing.slots.headline.en
     exceptions:
-    - "Манифест, письмо (Hallmark H5 Letter), кино-hero: до 25 слов EN и 20 RU — у Oatly 21 слово (опыт E/01); подзаголовка тогда нет."
+    - "Манифест, письмо (Hallmark H5 Letter), кино-hero: до 25 слов EN и 20 RU — у Oatly 21 слово; подзаголовка тогда нет."
     - "Название категории как hero для most-aware и страницы услуги: 1–2 слова («Поддерживающая уборка») — законно."
     - "Число-заголовок (Hallmark H4 Stat led): число + объект счёта, 2–5 слов, факт обязателен."
     viewport:
       desktop: "не больше 2 строк при 1440 px; размер кегля — creative"
       mobile: не больше 4 строк при 390 px
   length_by_page_type:
-    note: "люди (лидеры + средний рынок) D tables.md; p50 [p10–p90] слов, страниц"
+    note: "люди (лидеры + средний рынок), замер корпуса; p50 [p10–p90] слов, страниц"
     ru:
       landing-lead-services: "6 [2–9,2] 23"
       landing-saas: "4 [2,8–8,6] 9"
@@ -155,12 +155,12 @@ slot_types:
   structure: "direct-offer: «[услуга] — [цена или условие]»; product-benefit: «[имя или категория] + [превосходство с фактом]»; solution-vs-alternatives: «[категория словами клиента] + [чем лучше привычного способа]»; problem-story: «[узнаваемая ситуация] + [намёк на выход]»; identity: «[для кого]»."
   formula_ids: [category-statement, four-u, three-questions-dry, caples-headline-qualities, four-p]
   rules:
-  - "Суть — в первых двух-трёх словах: у лидеров RU первые два слова укладываются в 11 знаков лишь в трети заголовков, поэтому ориентир — первые 2–3 слова, а не 11 знаков (D §2.5, A/02)."
+  - "Суть — в первых двух-трёх словах: у лидеров RU первые два слова укладываются в 11 знаков лишь в трети заголовков, поэтому ориентир — первые 2–3 слова, а не 11 знаков (text 03/02 §2.5, text 01/01 §1.4)."
   - "Глагол и результат в заголовке оффера допустимы («Сдаём ремонт по договору…»): правило ux 07/02 §4.1 написано для экранов приложения."
-  - "Продолжает обещание источника трафика смыслом, не обязательно дословно (message match, B1 §1.6)."
-  - "Каждое обещание заголовка находится на странице: заголовок не сильнее содержания и фактов ([V:y0iIV5meaB4 31:52], B2 §4.4)."
-  - "Вопрос — только тот, который посетитель уже задаёт себе, и с «вы»; по умолчанию утверждение (Fang & Wheeler 2026, A/02 §7)."
-  - "«X, который Y» — только с фактическим Y («Лампа, которая сама подбирает свет»); пустое Y («сервис, который понимает ваш бизнес») — переписать (D: у лидеров RU 1,5 % заголовков, 4 из 6 — фактические)."
+  - "Продолжает обещание источника трафика смыслом, не обязательно дословно (message match, text 02/02 §1.6)."
+  - "Каждое обещание заголовка находится на странице: заголовок не сильнее содержания и фактов ([V:y0iIV5meaB4 31:52], text 02/03 §4.4)."
+  - "Вопрос — только тот, который посетитель уже задаёт себе, и с «вы»; по умолчанию утверждение (Fang & Wheeler 2026, text 01/02 §7)."
+  - "«X, который Y» — только с фактическим Y («Лампа, которая сама подбирает свет»); пустое Y («сервис, который понимает ваш бизнес») — переписать (корпус: у лидеров RU 1,5 % заголовков, 4 из 6 — фактические)."
   bans:
   - "Запрещённые первые фразы: «Откройте для себя», «Добро пожаловать в мир…», «нового поколения», Unleash, Where X meets Y (COPY-M-MKT-08 — error)."
   - "Превосходная степень без критерия и источника в самом тексте (COPY-L-SUP-01 — error, 135-ФЗ ст. 14.3 и вне рекламы)."
@@ -169,7 +169,7 @@ slot_types:
   claim_classes: [superlative, comparison, fact-number, price-discount, guarantee, health, income-finance]
   legal_rules: [COPY-L-SUP-01, COPY-L-UNIQ-01, COPY-L-CMP-01, COPY-L-FREE-01, COPY-L-GUAR-01, COPY-L-HEALTH-01, COPY-L-EDU-01]
   lint_markers: [COPY-M-MKT-08, COPY-M-MKT-09, COPY-M-MKT-04, COPY-M-MKT-13, COPY-M-MKT-10, COPY-M-PUN-09]
-  voice: "Оси голоса F (формальность, серьёзность); табу; образцы строк F для headline."
+  voice: "Оси голоса (формальность, серьёзность); табу; образцы строк для headline."
   examples:
     ru:
       facts: otves
@@ -187,7 +187,6 @@ slot_types:
   - "02-strategy-messaging/02 §1.2, §1.6, §2.3"
   - "03-corpus-measured/02 §2.1, §7"
   - 01-foundations/02 §7
-  - 99-raw/experiments/E/01-slot-lengths
   - Hallmark copy.md (banned opening lines)
   - "[V:F_urkVueszI 07:07]"
   date: '2026-09-24'
@@ -208,7 +207,7 @@ slot_types:
       ai_p50_chars: 140.0
       primary: chars
       n_pages: 15
-      source: D thresholds.yaml v2 · genres.landing.slots.subheadline.ru
+      source: thresholds.yaml v2 · genres.landing.slots.subheadline.ru
     en:
       words: {min: 8, target: 16, max: 32}
       hard_words: [4, 74]
@@ -218,14 +217,14 @@ slot_types:
       ai_p50_chars: 152.0
       primary: words
       n_pages: 19
-      source: D thresholds.yaml v2 · genres.landing.slots.subheadline.en
+      source: thresholds.yaml v2 · genres.landing.slots.subheadline.en
     exceptions:
-    - "Ядро первого экрана (заголовок + подзаголовок + кнопка + строка у кнопки + микродоказательство) — не больше 40 слов: у лидеров RU 100 % страниц, EN 88 % (D §2.5); длинный подзаголовок сокращает остальное."
-    - "Норма taste «subtext ≤ 20 слов» режет треть подзаголовков лидеров (RU 0,67–0,69, EN 0,64–0,68 — опыт E/01): не применять как ворота."
+    - "Ядро первого экрана (заголовок + подзаголовок + кнопка + строка у кнопки + микродоказательство) — не больше 40 слов: у лидеров RU 100 % страниц, EN 88 % (text 03/02 §2.5); длинный подзаголовок сокращает остальное."
+    - "Норма taste «subtext ≤ 20 слов» режет треть подзаголовков лидеров (RU 0,67–0,69, EN 0,64–0,68): не применять как ворота."
     viewport:
       mobile: "3–4 строки при 390 px; длиннее — сократить, а не уменьшать кегль (решение creative)"
   length_by_page_type:
-    note: "люди (лидеры + средний рынок) D tables.md; p50 [p10–p90] слов, страниц"
+    note: "люди (лидеры + средний рынок), замер корпуса; p50 [p10–p90] слов, страниц"
     ru:
       landing-lead-services: "13 [6–45] 17"
       landing-saas: "12 [9–29] 4"
@@ -238,10 +237,10 @@ slot_types:
   structure: "1–2 предложения: механизм или результат + доказательство или снятие главного возражения («[утверждение], даже если [возражение]»)."
   formula_ids: [four-p, even-if-objection, category-statement, three-questions-dry, fact-scenario]
   rules:
-  - "Отвечает на то, что заголовок оставил открытым: как работает, для кого, чем подтверждено (B1 §2.3: что, для кого, результат, отличие, шаг)."
+  - "Отвечает на то, что заголовок оставил открытым: как работает, для кого, чем подтверждено (text 02/02 §2.3: что, для кого, результат, отличие, шаг)."
   - "Числа и имена — только с fact_ids; нет факта — [PLACEHOLDER: что именно]."
   - "Первое слово не повторяет первое слово заголовка; первое предложение — не пересказ заголовка другими словами."
-  - "Снимает главный блокер, если он снимается фактом: «…даже если [возражение]» (Wiebe; B1 §4.3)."
+  - "Снимает главный блокер, если он снимается фактом: «…даже если [возражение]» (Wiebe; text 02/02 §4.3)."
   bans:
   - "Самопохвала без числа: «команда профессионалов», «индивидуальный подход» (COPY-M-MKT-01)."
   - "Универсальная выгода «экономьте время и деньги» (COPY-M-MKT-05); тройки оценок (COPY-M-SYN-…)."
@@ -250,7 +249,7 @@ slot_types:
   claim_classes: [fact-number, fact-property, guarantee, price-discount, comparison]
   legal_rules: [COPY-L-FREE-01, COPY-L-GUAR-02, COPY-L-CMP-01, COPY-L-PRICE-03]
   lint_markers: [COPY-M-MKT-01, COPY-M-MKT-05, COPY-M-MKT-09, COPY-M-LEX-05]
-  voice: Оси голоса F; образцы строк F для subheadline.
+  voice: Оси голоса; образцы строк для subheadline.
   examples:
     ru:
       facts: otves
@@ -267,7 +266,6 @@ slot_types:
   sources:
   - "02-strategy-messaging/02 §2.3, §4.3"
   - "03-corpus-measured/02 §2.1, §2.5"
-  - 99-raw/experiments/E/01-slot-lengths
   - "[V:F_urkVueszI 07:07]"
   date: '2026-09-24'
 - id: hero-proof
@@ -288,8 +286,8 @@ slot_types:
       primary: chars
       n_pages: 8
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.hero-proof.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.hero-proof.ru
     en:
       words: {min: 4, target: 6, max: 9}
       hard_words: [2, 14]
@@ -300,18 +298,18 @@ slot_types:
       primary: words
       n_pages: 11
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.hero-proof.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.hero-proof.en
   structure: "[значение] + [объект или площадка] + [дата или источник]; источник можно вынести в соседний слот stat-source."
   formula_ids: [fact-scenario, three-questions-dry]
   rules:
-  - "Только факт из facts.yaml; источник и дата — в той же строке или в слоте stat-source рядом (B2 §1.3; requires_nearby факта)."
-  - "Одно доказательство на первый экран: product-aware и most-aware — рейтинг, счётчик, гарантия; problem-aware — механизм в подзаголовке, рейтинг ниже по странице (B1 §1.4, опыт B1/02)."
+  - "Только факт из facts.yaml; источник и дата — в той же строке или в слоте stat-source рядом (text 02/03 §1.3; requires_nearby факта)."
+  - "Одно доказательство на первый экран: product-aware и most-aware — рейтинг, счётчик, гарантия; problem-aware — механизм в подзаголовке, рейтинг ниже по странице (text 02/02 §1.4)."
   - "Число, которое меняет решение, а не фактоид («450 работ»): срок, рейтинг с числом оценок, гарантия ([V:1UVkeqxuNRs 09:12, 24:49])."
   - "Поправка к taste («no trust micro-strip in hero»): одна строка доказательства допустима, если иерархия product-aware и у строки есть факт."
   bans:
   - "«Тысячи довольных клиентов», «10 000+», «№ 1» без записи в facts.yaml (COPY-M-CNT-…, COPY-L-SUP-01)."
-  - "Рейтинг 5,0 без числа оценок; «отзывов» вместо «оценок» у Яндекс Карт (B2 §5.2)."
+  - "Рейтинг 5,0 без числа оценок; «отзывов» вместо «оценок» у Яндекс Карт (text 02/03 §5.2)."
   fact_required: always
   claim_classes: [rating, fact-number, client-logo, award-press, guarantee]
   legal_rules: [COPY-L-SUP-01, COPY-L-REV-01, COPY-L-AWARD-01, COPY-L-GUAR-02]
@@ -332,7 +330,7 @@ slot_types:
       good: "Rated 4.7 out of 5 on RuStore, 860 ratings as of 1 September 2026"
       fact_ids: [rating-rustore]
       allow_warn: [COPY-F-NAME]
-      note: "площадка, число оценок и дата снимка; COPY-F-NAME на «RuStore» — ложное срабатывание эвристики имён (передано B2)"
+      note: "площадка, число оценок и дата снимка; COPY-F-NAME на «RuStore» — ложное срабатывание эвристики имён"
   sources:
   - "02-strategy-messaging/03 §1.3–1.4, §5.2"
   - 02-strategy-messaging/02 §1.4
@@ -356,7 +354,7 @@ slot_types:
       ai_p50_chars: 16.0
       primary: chars
       n_pages: 20
-      source: D thresholds.yaml v2 · genres.landing.slots.cta-label.ru
+      source: thresholds.yaml v2 · genres.landing.slots.cta-label.ru
     en:
       words: {min: 2, target: 2, max: 4}
       hard_words: [1, 7]
@@ -366,20 +364,20 @@ slot_types:
       ai_p50_chars: 15.0
       primary: words
       n_pages: 25
-      source: D thresholds.yaml v2 · genres.landing.slots.cta-label.en
+      source: thresholds.yaml v2 · genres.landing.slots.cta-label.en
     exceptions:
     - "Кнопка в одну строку на любом вьюпорте: не длиннее 25 знаков RU и 21 EN (p90 лидеров); не помещается — менять формулировку, а не переносить (ux 07/02 §1.1)."
     - "Липкая кнопка на телефоне (Hallmark C4): 1–3 слова, та же формулировка, что у главной; строка снятия риска — отдельно, cta-note до 40 знаков."
     viewport:
-      mobile: "одна строка; кнопка во всю ширину 343 px вмещает ≈ 30 знаков при 16 px — расчёт E [мнение], проверка — creative"
+      mobile: "одна строка; кнопка во всю ширину 343 px вмещает ≈ 30 знаков при 16 px — расчёт базы [мнение], проверка — creative"
   structure: "RU: инфинитив совершенного вида + объект («Вызвать замерщика», «Посмотреть программу»); EN: глагол + объект или первое лицо («Show me my schedule») — развилка RU/EN."
   formula_ids: [question-proof-action]
   rules:
   - "Кнопка — следствие нажатия или ценность заголовка: «Preview the agenda» вместо «Sign up for free webcast» (+83 %, [кейс]) [V:F_urkVueszI 23:37]."
   - "Не обещает работу: «Заполнить анкету», «Add it to WordPress» проигрывают низкопороговым глаголам [V:F_urkVueszI 11:14–14:17]."
-  - "Русская кнопка — инфинитив совершенного вида, без «Жми», «Сохраните», существительного-процесса (ux 07/02 §1.3); у лидеров RU инфинитив в двух третях кнопок (D §7)."
+  - "Русская кнопка — инфинитив совершенного вида, без «Жми», «Сохраните», существительного-процесса (ux 07/02 §1.3); у лидеров RU инфинитив в двух третях кнопок (text 03/02 §7)."
   - "Одна формулировка главного действия на всю страницу: hero, липкая кнопка и финальный призыв называют одно и то же."
-  - "«Бесплатно», «попробовать бесплатно» — только если условие видно рядом (cta-note), 38-ФЗ ст. 5 ч. 7 (H)."
+  - "«Бесплатно», «попробовать бесплатно» — только если условие видно рядом (cta-note), 38-ФЗ ст. 5 ч. 7 (text 08/01 §4.1)."
   bans:
   - "«Отправить», «Подробнее», «Узнать больше», «Submit», «Learn more», «Click here» (COPY-M-MKT-07, ux 07/02 §1.4)."
   - "Стрелка «→» и эмодзи в тексте кнопки (иконку решает creative); капс; восклицание."
@@ -387,7 +385,7 @@ slot_types:
   claim_classes: [price-discount, purchase-terms]
   legal_rules: [COPY-L-FREE-01, COPY-L-FREE-02]
   lint_markers: [COPY-M-MKT-07, COPY-M-PUN-07]
-  voice: Обращение F (вы / ты); глагольный словарь бренда.
+  voice: Обращение (вы / ты); глагольный словарь бренда.
   examples:
     ru:
       facts: otves
@@ -409,7 +407,7 @@ slot_types:
   date: '2026-09-24'
 - id: cta-secondary-label
   name: Подпись второстепенной кнопки или ссылки
-  purpose: "Путь для не готового действовать: посмотреть пример, цены, программу, переслать смету — вторая цель страницы (B1 goal.secondary_goal)."
+  purpose: "Путь для не готового действовать: посмотреть пример, цены, программу, переслать смету — вторая цель страницы (goal.secondary_goal)."
   section_roles: [hero, pricing, final-cta, case-studies, story, confirmation, solution, product-demo, audience, integrations, testimonials, portfolio, team, services, cross-sell, objections, faq, cta-band, lead-form, about, contacts, event-program, article-body, related, utility, footer]
   genres: [landing, site-page]
   genre: landing
@@ -424,7 +422,7 @@ slot_types:
       ai_p50_chars: 16.5
       primary: chars
       n_pages: 21
-      source: "D thresholds.yaml v2 · genres.landing.slots.cta-secondary-label.ru"
+      source: "thresholds.yaml v2 · genres.landing.slots.cta-secondary-label.ru"
     en:
       words: {min: 2, target: 2, max: 4}
       hard_words: [1, 6]
@@ -434,7 +432,7 @@ slot_types:
       ai_p50_chars: 15.0
       primary: words
       n_pages: 24
-      source: "D thresholds.yaml v2 · genres.landing.slots.cta-secondary-label.en"
+      source: "thresholds.yaml v2 · genres.landing.slots.cta-secondary-label.en"
   structure: "Глагол + объект, который откроется: «Посмотреть пример сметы», «See pricing»."
   formula_ids: []
   rules:
@@ -454,7 +452,7 @@ slot_types:
       bad: Подробнее
       good: Посмотреть пример сметы
       fact_ids: []
-      note: "вторая цель: сохранить и переслать домашним (иерархия B1)"
+      note: "вторая цель: сохранить и переслать домашним (иерархия сообщений)"
     en:
       facts: okoshko
       bad: Learn more
@@ -484,23 +482,23 @@ slot_types:
       primary: chars
       n_pages: 8
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.cta-note.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.cta-note.ru
     en:
       words: {min: 4, target: 9, max: 18}
       provisional: true
-      source: "правило E: у лидеров EN замера нет; по RU (3–7–11 слов) с запасом на условие"
+      source: "правило базы: у лидеров EN замера нет; по RU (3–7–11 слов) с запасом на условие"
     exceptions:
-    - "Условие «бесплатно», скидки, пробного периода, возврата удлиняет строку до 20 слов: условие не режется ради длины (38-ФЗ ст. 5 ч. 7; опыт E/01 — законные длинные строки с условиями)."
+    - "Условие «бесплатно», скидки, пробного периода, возврата удлиняет строку до 20 слов: условие не режется ради длины (38-ФЗ ст. 5 ч. 7; длинные строки с условиями у лидеров законны)."
   structure: "Что будет дальше + цена или срок + что не обязывает: «[следующий шаг] — [стоимость/срок]; [условие]»; или «[утверждение], даже если [возражение]»."
   formula_ids: [even-if-objection, question-proof-action, four-p]
   rules:
-  - "Отвечает на один вопрос из трёх: что будет после нажатия, сколько это стоит, что если передумаю (B1 §4.3)."
-  - "Условия «бесплатно», скидки, пробного периода — в той же строке, тем же кеглем (H: COPY-L-FREE-01, TERMS-01)."
+  - "Отвечает на один вопрос из трёх: что будет после нажатия, сколько это стоит, что если передумаю (text 02/02 §4.3)."
+  - "Условия «бесплатно», скидки, пробного периода — в той же строке, тем же кеглем (COPY-L-FREE-01, TERMS-01)."
   - "Время и стоимость шага называются числом, если они есть в фактах (GOV.UK: стоимость и примерное время, ux 05/01 §7.5)."
-  - "Блокер основного сегмента снимается здесь, а не в FAQ (B1 §4.3, валидатор B1)."
+  - "Блокер основного сегмента снимается здесь, а не в FAQ (text 02/02 §4.3, validate_meaning.py)."
   bans:
-  - "Пустое «Гарантия качества», «Надёжно и безопасно», «Без скрытых платежей» без условия договора (H COPY-L-GUAR-05; B1 частые ошибки)."
+  - "Пустое «Гарантия качества», «Надёжно и безопасно», «Без скрытых платежей» без условия договора (COPY-L-GUAR-05; text 02/02, частые ошибки)."
   - "«Подробности уточняйте у менеджера» вместо условия (COPY-L-TERMS-01)."
   - "Ложная срочность «Осталось 3 места», таймер без реальной даты (COPY-M-MKT-12, ux 06/04 §8.1)."
   fact_required: if-claim
@@ -528,7 +526,7 @@ slot_types:
   date: '2026-09-24'
 - id: promise
   name: Обещание первого экрана
-  purpose: "Одна фраза главного обещания для исполнителя (K3 ставит её в первый экран); сверяется с фактами как текст страницы."
+  purpose: "Одна фраза главного обещания для исполнителя макета (он ставит её в первый экран); сверяется с фактами как текст страницы."
   proposal: true
   proposal_note: "предложение к словарю site (схема copy-deck v1): обещание первого экрана — отдельный слот, сверяется как подзаголовок hero"
   lint_as: subheadline
@@ -540,16 +538,16 @@ slot_types:
     ru:
       words: {min: 6, target: 14, max: 30}
       provisional: true
-      source: "правило E: как подзаголовок (D: RU 6–29, EN 8–32 слова); одна фраза"
+      source: "правило базы: как подзаголовок (корпус: RU 6–29, EN 8–32 слова); одна фраза"
     en:
       words: {min: 6, target: 16, max: 32}
       provisional: true
-      source: "правило E: как подзаголовок (D: RU 6–29, EN 8–32 слова); одна фраза"
-  structure: "Главное сообщение иерархии (core_message B1) без внутренних пометок: что + для кого + главное отличие с фактом."
+      source: "правило базы: как подзаголовок (корпус: RU 6–29, EN 8–32 слова); одна фраза"
+  structure: "Главное сообщение иерархии (core_message) без внутренних пометок: что + для кого + главное отличие с фактом."
   formula_ids: [category-statement, four-p]
   rules:
-  - "Выводится из core_message иерархии B1, только утверждения с доказательством."
-  - "Проходит claims_check.py как текст страницы: обещание здоровья, дохода, «без усталости глаз» здесь так же запрещено («Кварц», B2/02)."
+  - "Выводится из core_message иерархии, только утверждения с доказательством."
+  - "Проходит claims_check.py как текст страницы: обещание здоровья, дохода, «без усталости глаз» здесь так же запрещено («Кварц»)."
   - "Не больше, чем подтверждено: если опора в missing — обещание без неё."
   bans:
   - "Любое утверждение классов health и income-finance без документа (nc-health, nc-income)."
@@ -572,11 +570,10 @@ slot_types:
       note: обещание дохода (nc-revenue-growth) заменено механизмом
   sources:
   - "02-strategy-messaging/03 §7 (Promise:)"
-  - 99-raw/notes/wave3/J-notes.md (slot_type promise)
   date: '2026-09-24'
 - id: section-title
   name: Заголовок секции (H2)
-  purpose: "Ответ на вопрос посетителя, который закрывает секция (sections[].question иерархии B1); заголовки секций вместе пересказывают страницу."
+  purpose: "Ответ на вопрос посетителя, который закрывает секция (sections[].question иерархии); заголовки секций вместе пересказывают страницу."
   section_roles: [problem, solution, benefits, how-it-works, case-studies, testimonials, proof-stats, comparison, pricing, guarantee, objections, faq, about, team, final-cta, specs, audience, story, services, offer, promo, awards-press, cross-sell, related, seo-text, product-demo, integrations, proof-logos, portfolio, cta-band, lead-form, contacts, event-program, article-body]
   genres: [landing, site-page, article]
   genre: landing
@@ -591,7 +588,7 @@ slot_types:
       ai_p50_chars: 21.0
       primary: chars
       n_pages: 23
-      source: D thresholds.yaml v2 · genres.landing.slots.section-title.ru
+      source: thresholds.yaml v2 · genres.landing.slots.section-title.ru
     en:
       words: {min: 2, target: 6, max: 11}
       hard_words: [1, 17]
@@ -601,15 +598,15 @@ slot_types:
       ai_p50_chars: 26.0
       primary: words
       n_pages: 25
-      source: D thresholds.yaml v2 · genres.landing.slots.section-title.en
+      source: thresholds.yaml v2 · genres.landing.slots.section-title.en
     exceptions:
-    - "Заголовок-предложение в EN (утверждение с условием или числом) — до 18 слов (Pilot, опыт E/01)."
+    - "Заголовок-предложение в EN (утверждение с условием или числом) — до 18 слов (Pilot)."
     - "Одно слово-метка («Changelog», «Цены») — законно в навигационных секциях многостраничника."
   structure: "По умолчанию — ответ-утверждение: «[что получает посетитель] + [чем подтверждено]»; вопрос — только словами клиента и с ответом первой фразой секции."
   formula_ids: [question-proof-action, even-if-objection, three-questions-dry]
   rules:
-  - "Outline-тест лендинга инвертирован: прочитать подряд только H2 — должен сложиться сюжет страницы (C §10; A: заголовки секций пересказывают страницу)."
-  - "Вопрос посетителя из иерархии превращается в ответ: «Почему ремонты затягиваются?» → «Ремонт затягивается, когда мастера ждут друг друга» (решение E: ответ по умолчанию, вопрос — в FAQ и секциях возражений)."
+  - "Outline-тест лендинга инвертирован: прочитать подряд только H2 — должен сложиться сюжет страницы (text 06/01 §10; text 01: заголовки секций пересказывают страницу)."
+  - "Вопрос посетителя из иерархии превращается в ответ: «Почему ремонты затягиваются?» → «Ремонт затягивается, когда мастера ждут друг друга» (решение базы: ответ по умолчанию, вопрос — в FAQ и секциях возражений)."
   - "Соседние заголовки начинаются по-разному (ux 07/02 §4.2; обход строк с одинаковым началом, NN/g)."
   - "Число или имя в заголовке — с fact_ids; обещание заголовка раскрывается в первой фразе секции."
   bans:
@@ -619,7 +616,7 @@ slot_types:
   claim_classes: [fact-number, guarantee, superlative, comparison]
   legal_rules: [COPY-L-SUP-01, COPY-L-CMP-01, COPY-L-GUAR-02]
   lint_markers: [COPY-M-MKT-11, COPY-M-MKT-04, COPY-M-MKT-10]
-  voice: Образцы строк F для section-title.
+  voice: Образцы строк для section-title.
   examples:
     ru:
       facts: otves
@@ -657,7 +654,7 @@ slot_types:
       ai_p50_chars: 80.7
       primary: chars
       n_pages: 22
-      source: D thresholds.yaml v2 · genres.landing.slots.section-lead.ru
+      source: thresholds.yaml v2 · genres.landing.slots.section-lead.ru
     en:
       words: {min: 8, target: 19, max: 41}
       hard_words: [4, 97]
@@ -667,14 +664,14 @@ slot_types:
       ai_p50_chars: 132.9
       primary: words
       n_pages: 23
-      source: D thresholds.yaml v2 · genres.landing.slots.section-lead.en
+      source: thresholds.yaml v2 · genres.landing.slots.section-lead.en
     exceptions:
-    - "Лид секции формы или тарифов объясняет, что будет после отправки, — до 35 слов (Эльба, опыт E/01)."
+    - "Лид секции формы или тарифов объясняет, что будет после отправки, — до 35 слов (Эльба)."
   structure: "Ответ на вопрос секции первой фразой → факт или механизм → (необязательно) переход к карточкам."
   formula_ids: [inverted-pyramid, question-proof-action, pas, bab, problem-transformation-outcome]
   rules:
   - "Первая фраза — ответ на вопрос секции; не пересказ заголовка другими словами."
-  - "PAS — без нормализации потери («80 % компаний теряют…») и без запугивания; в медицине и финансах не брать (A formulas.yaml)."
+  - "PAS — без нормализации потери («80 % компаний теряют…») и без запугивания; в медицине и финансах не брать (formulas.yaml)."
   - "Одна мысль: второе сообщение — вторая секция."
   bans:
   - "Штамп вступления («В современном мире…», «In today's fast-paced world») — error в лиде; «не только…, но и» (COPY-M-SYN-01)."
@@ -713,11 +710,11 @@ slot_types:
     ru:
       words: {min: 12, target: 30, max: 60}
       provisional: true
-      source: "правило E: у D «body» — сборная категория фрагментов (RU 1–4–16,5 слова) и не норма абзаца; ориентир — абзац статьи D (RU 24 [7–49], EN 27 [6–64]); длинные абзацы при дорогом решении законны (опыт E/01)"
+      source: "правило базы: в корпусе «body» — сборная категория фрагментов (RU 1–4–16,5 слова) и не норма абзаца; ориентир — абзац статьи в корпусе (RU 24 [7–49], EN 27 [6–64]); длинные абзацы при дорогом решении законны"
     en:
       words: {min: 12, target: 35, max: 70}
       provisional: true
-      source: "правило E: у D «body» — сборная категория фрагментов (RU 1–4–16,5 слова) и не норма абзаца; ориентир — абзац статьи D (RU 24 [7–49], EN 27 [6–64]); длинные абзацы при дорогом решении законны (опыт E/01)"
+      source: "правило базы: в корпусе «body» — сборная категория фрагментов (RU 1–4–16,5 слова) и не норма абзаца; ориентир — абзац статьи в корпусе (RU 24 [7–49], EN 27 [6–64]); длинные абзацы при дорогом решении законны"
     exceptions:
     - "Дорогое и тревожное решение (франшиза, ремонт, B2B-внедрение): абзацы до 60 слов RU законны — длина следует из числа сомнений (MECLABS [V:gMzwsAWipNo 19:21])."
   structure: "Факт → «и что с того?» → ситуация клиента; история — из фактов (company, person, case), без выдуманных деталей."
@@ -725,17 +722,17 @@ slot_types:
   rules:
   - "Не пиши выводы, которые должен сделать читатель, — давай факты, из которых он их сделает ([V:1UVkeqxuNRs 21:46])."
   - "Каждому факту — сценарий из голоса клиента или брифа («консультант 24/7» → «платёжка 31 декабря в 23:55») [V:_jwKQ6ZCeAI 26:34]; сценарий не выдумывать."
-  - "Ритм лендинга ровнее эссе: у лидеров RU средняя разница длин соседних предложений 4 слова, не 6 — не рубить текст ради «живости» (D §3)."
+  - "Ритм лендинга ровнее эссе: у лидеров RU средняя разница длин соседних предложений 4 слова, не 6 — не рубить текст ради «живости» (text 03/02 §3)."
   - "О компании — что получает клиент, а не миссия и ценности ([V:_jwKQ6ZCeAI 20:24])."
   bans:
   - "Самопохвала и внутренняя кухня: «ценим каждого клиента», «собираем обратную связь» ([V:1UVkeqxuNRs 16:26], COPY-M-MKT-01)."
   - "Связки «является», «представляет собой»; деепричастные хвосты «…, подчёркивая статус» (COPY-M-LEX-…, SYN-…)."
-  - "Сверхкоррекция: фразы по 1–3 слова подряд, ноль связок (вердикт overcorrected, C §13)."
+  - "Сверхкоррекция: фразы по 1–3 слова подряд, ноль связок (вердикт overcorrected, text 06/01 §13)."
   fact_required: if-claim
   claim_classes: [fact-number, fact-property, company-details, guarantee]
   legal_rules: [COPY-L-SUP-01, COPY-L-GUAR-02]
   lint_markers: [COPY-M-MKT-01, COPY-M-TON-08, COPY-M-STR-06]
-  voice: "Голос бренда F: оси, «мы / мы не», словарь; истории — поле F «сторителлинг» только из фактов."
+  voice: "Голос бренда: оси, «мы / мы не», словарь; истории — поле «сторителлинг» только из фактов."
   examples:
     ru:
       facts: otves
@@ -749,7 +746,7 @@ slot_types:
       bad: "We are passionate about empowering beauty professionals to unlock their full potential and deliver exceptional experiences."
       good: "Ruslan, who owns a barbershop in Kazan, used to spend his evenings calling everyone booked for the next day. Now reminders go out on their own, and he calls only the clients who haven't confirmed."
       fact_ids: [review-ruslan, reminders]
-      note: пересказ отзыва без кавычек честно передаёт опыт (B2 §5.1)
+      note: пересказ отзыва без кавычек честно передаёт опыт (text 02/03 §5.1)
   sources:
   - "[V:1UVkeqxuNRs 21:46]"
   - "[V:_jwKQ6ZCeAI 22:30–26:34]"
@@ -774,8 +771,8 @@ slot_types:
       primary: chars
       n_pages: 26
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.list-item.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.list-item.ru
     en:
       words: {min: 1, target: 6, max: 21}
       hard_words: [1, 56]
@@ -785,13 +782,13 @@ slot_types:
       ai_p50_chars: 36.0
       primary: words
       n_pages: 16
-      source: D thresholds.yaml v2 · genres.landing.slots.list-item.en
+      source: thresholds.yaml v2 · genres.landing.slots.list-item.en
   structure: "Параллельная грамматика внутри списка: все пункты — существительные или все — глаголы; сначала суть, потом условие."
   formula_ids: [fab, four-u]
   rules:
-  - "Пункты начинаются по-разному: сканирующий читатель пропускает строки с одинаковым началом (NN/g, A/01)."
+  - "Пункты начинаются по-разному: сканирующий читатель пропускает строки с одинаковым началом (NN/g, text 01/01)."
   - "Число, срок, цена — с fact_ids; условие пишется в том же пункте."
-  - "Три пункта — не правило: список такой длины, сколько фактов (у ai-self RU ровно три карточки в 42 % секций, у лидеров — 0; D §7)."
+  - "Три пункта — не правило: список такой длины, сколько фактов (у ai-self RU ровно три карточки в 42 % секций, у лидеров — 0; text 03/02 §7)."
   bans:
   - "Пункты-оценки: «Качество», «Надёжность», «Профессионализм» (COPY-M-SYN тройки, MKT-01)."
   - "Запрещённые первые фразы и «Seamless integration» (COPY-M-MKT-08)."
@@ -835,7 +832,7 @@ slot_types:
       ai_p50_chars: 17.0
       primary: chars
       n_pages: 18
-      source: D thresholds.yaml v2 · genres.landing.slots.card-title.ru
+      source: thresholds.yaml v2 · genres.landing.slots.card-title.ru
     en:
       words: {min: 2, target: 3, max: 8}
       hard_words: [1, 12]
@@ -845,9 +842,9 @@ slot_types:
       ai_p50_chars: 17.4
       primary: words
       n_pages: 21
-      source: D thresholds.yaml v2 · genres.landing.slots.card-title.en
+      source: thresholds.yaml v2 · genres.landing.slots.card-title.en
     exceptions:
-    - "Карточка-оффер с условием («Эльба за 0 ₽ в месяц со счётом в Контур. Банке», «первые 25 документов бесплатно») — 8–12 слов законны: условие не режется (опыт E/01)."
+    - "Карточка-оффер с условием («Эльба за 0 ₽ в месяц со счётом в Контур. Банке», «первые 25 документов бесплатно») — 8–12 слов законны: условие не режется."
   structure: "Именная группа или глагол + объект: возможность, выгода с числом, название услуги."
   formula_ids: [fab, three-questions-dry, fact-scenario]
   rules:
@@ -896,7 +893,7 @@ slot_types:
       ai_p50_chars: 78.1
       primary: chars
       n_pages: 17
-      source: D thresholds.yaml v2 · genres.landing.slots.card-body.ru
+      source: thresholds.yaml v2 · genres.landing.slots.card-body.ru
     en:
       words: {min: 2, target: 12, max: 35}
       hard_words: [1, 60]
@@ -906,12 +903,12 @@ slot_types:
       ai_p50_chars: 78.0
       primary: words
       n_pages: 19
-      source: D thresholds.yaml v2 · genres.landing.slots.card-body.en
+      source: thresholds.yaml v2 · genres.landing.slots.card-body.en
     exceptions:
-    - "Дорогое решение с долгим выбором (франшиза, внедрение B2B): карточки 20–45 слов законны (Додо Франшиза, 25 из 120 «выбросов» опыта E/01)."
-    - "Ровные по длине карточки — норма раскладки; ровные по шаблону предложения во всех карточках — примета наивного ИИ (CV длины 0,18 против 0,4 у людей, D §7)."
+    - "Дорогое решение с долгим выбором (франшиза, внедрение B2B): карточки 20–45 слов законны (Додо Франшиза, 25 из 120 «выбросов» замера)."
+    - "Ровные по длине карточки — норма раскладки; ровные по шаблону предложения во всех карточках — примета наивного ИИ (CV длины 0,18 против 0,4 у людей, text 03/02 §7)."
   length_by_page_type:
-    note: "люди (лидеры + средний рынок) D tables.md; p50 [p10–p90] слов, страниц"
+    note: "люди (лидеры + средний рынок), замер корпуса; p50 [p10–p90] слов, страниц"
     ru:
       landing-lead-services: "6 [2–28,6] 20"
       landing-saas: "10 [2–18,9] 7"
@@ -925,7 +922,7 @@ slot_types:
   formula_ids: [fab, fact-scenario, question-proof-action]
   rules:
   - "Первая фраза объясняет заголовок фактом, а не повторяет его: не «Более 8 лет разрабатываем…» под «Дешевле и быстрее» ([V:1UVkeqxuNRs 20:38])."
-  - "FAB — от задачи клиента (B1 value_themes), а не список свойств ради списка; FAB [спорно] в сложных B2B-продажах."
+  - "FAB — от задачи клиента (value_themes смысла), а не список свойств ради списка; FAB [спорно] в сложных B2B-продажах."
   - "Тревогу снимают конкретной деталью, а не новыми выгодами («More features create actually anxiety» [V:xQV7HVyAJjc 11:38])."
   bans:
   - "«Мы предлагаем…», «Наша команда…» первыми словами; превосходная степень без критерия."
@@ -934,7 +931,7 @@ slot_types:
   claim_classes: [fact-number, fact-property, guarantee, price-discount, superlative]
   legal_rules: [COPY-L-SUP-01, COPY-L-FREE-01, COPY-L-GUAR-02]
   lint_markers: [COPY-M-MKT-09, COPY-M-MKT-01, COPY-M-MKT-05]
-  voice: Образцы строк F для card-body.
+  voice: Образцы строк для card-body.
   examples:
     ru:
       facts: otves
@@ -954,7 +951,6 @@ slot_types:
   - "[V:xQV7HVyAJjc 11:38]"
   - 01-foundations/formulas.yaml (fab)
   - 03-corpus-measured/02 §7
-  - 99-raw/experiments/E/01-slot-lengths
   date: '2026-09-24'
 - id: step-title
   name: Заголовок шага «как это работает»
@@ -967,11 +963,11 @@ slot_types:
     ru:
       words: {min: 2, target: 4, max: 7}
       provisional: true
-      source: "правило E: у D нет замера шагов; по card-title (RU 1–3–6, EN 2–3–8 слов) + глагол"
+      source: "правило базы: в корпусе нет замера шагов; по card-title (RU 1–3–6, EN 2–3–8 слов) + глагол"
     en:
       words: {min: 2, target: 4, max: 8}
       provisional: true
-      source: "правило E: у D нет замера шагов; по card-title (RU 1–3–6, EN 2–3–8 слов) + глагол"
+      source: "правило базы: в корпусе нет замера шагов; по card-title (RU 1–3–6, EN 2–3–8 слов) + глагол"
   structure: "Глагол действия + объект («Замер и смета», «Договор с этапами»); нумерация — вёрстка, не текст."
   formula_ids: [question-proof-action]
   rules:
@@ -999,7 +995,7 @@ slot_types:
       note: действие клиента с объектом
   sources:
   - "[V:1UVkeqxuNRs 04:04]"
-  - "ux 91-videos b2VdPF9svEU [34:40]"
+  - "[V:b2VdPF9svEU 34:40]"
   - 02-strategy-messaging/02 §2.4 (how-it-works)
   date: '2026-09-24'
 - id: step-body
@@ -1013,11 +1009,11 @@ slot_types:
     ru:
       words: {min: 5, target: 12, max: 25}
       provisional: true
-      source: "правило E: у D нет замера; по card-body (RU 2,6–8–19, EN 2–12–35 слов)"
+      source: "правило базы: в корпусе нет замера; по card-body (RU 2,6–8–19, EN 2–12–35 слов)"
     en:
       words: {min: 6, target: 14, max: 30}
       provisional: true
-      source: "правило E: у D нет замера; по card-body (RU 2,6–8–19, EN 2–12–35 слов)"
+      source: "правило базы: в корпусе нет замера; по card-body (RU 2,6–8–19, EN 2–12–35 слов)"
   structure: "Кто делает → что получает клиент → срок или условие (из фактов)."
   formula_ids: [question-proof-action, problem-transformation-outcome, fact-scenario]
   rules:
@@ -1036,7 +1032,7 @@ slot_types:
       good: "Замерщик приезжает на объект и составляет смету; замер и смета бесплатны в черте города."
       fact_ids: [estimate-free]
       allow_warn: [COPY-F-USE]
-      note: "условие «бесплатно» в том же предложении; COPY-F-USE — use факта B2 не включает how-it-works, хотя иерархия B1 ставит estimate-free в эту секцию (передано B2)"
+      note: "условие «бесплатно» в том же предложении; COPY-F-USE — use факта не включает how-it-works, хотя иерархия ставит estimate-free в эту секцию"
     en:
       facts: okoshko
       bad: Our team will get in touch shortly and make everything easy.
@@ -1044,7 +1040,7 @@ slot_types:
       fact_ids: [import-free]
       note: срок из регламента вместо «shortly»
   sources:
-  - "ux 91-videos b2VdPF9svEU [38:46]"
+  - "[V:b2VdPF9svEU 38:46]"
   - "06-anti-slop/01 §11 (легко, быстро)"
   date: '2026-09-24'
 - id: stat-value
@@ -1064,7 +1060,7 @@ slot_types:
       ai_p50_chars: 4.0
       primary: chars
       n_pages: 14
-      source: D thresholds.yaml v2 · genres.landing.slots.stat-value.ru
+      source: thresholds.yaml v2 · genres.landing.slots.stat-value.ru
     en:
       words: {min: 1, target: 2, max: 3}
       hard_words: [1, 5]
@@ -1074,13 +1070,13 @@ slot_types:
       ai_p50_chars: 6.0
       primary: words
       n_pages: 13
-      source: D thresholds.yaml v2 · genres.landing.slots.stat-value.en
+      source: thresholds.yaml v2 · genres.landing.slots.stat-value.en
   structure: "[число][единица] — «1 146», «4,8 из 5», «47 дней»; 3–5 чисел в ряду (Hallmark T4)."
   formula_ids: [fact-scenario]
   rules:
-  - "Только из facts.yaml с as_of; округление — только в безопасную сторону («Более 1 100» при 1 146; «1 200+» нельзя) (B2 §4.4)."
+  - "Только из facts.yaml с as_of; округление — только в безопасную сторону («Более 1 100» при 1 146; «1 200+» нельзя) (text 02/03 §4.4)."
   - "Число выбирают по тому, меняет ли оно решение: срок, гарантия, рейтинг с числом оценок, а не «450 работ» ([V:1UVkeqxuNRs 09:12, 24:49])."
-  - "Маленькое для категории число работает против — лучше кейс или отзыв (B2 §1.4)."
+  - "Маленькое для категории число работает против — лучше кейс или отзыв (text 02/03 §1.4)."
   bans:
   - "«10 000+», «99,9 %», «x10» без факта — «идеальные» числа (COPY-M-CNT-…)."
   fact_required: always
@@ -1104,7 +1100,7 @@ slot_types:
       companions:
       - {slot_type: stat-label, text: salons and barbershops on paid plans as of 1 September 2026}
       known_false: [COPY-F-NUM-MISMATCH]
-      note: "объект счёта и дата в подписи; «1,380» claims_check читает как 1,38 — ложное (передано B2)"
+      note: "объект счёта и дата в подписи; «1,380» claims_check читает как 1,38 — ложное"
   sources:
   - "02-strategy-messaging/03 §1.2, §1.4, §4.4"
   - "[V:1UVkeqxuNRs 09:12]"
@@ -1128,8 +1124,8 @@ slot_types:
       primary: chars
       n_pages: 11
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.stat-label.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.stat-label.ru
     en:
       words: {min: 1, target: 3, max: 8}
       hard_words: [1, 12]
@@ -1140,15 +1136,15 @@ slot_types:
       primary: words
       n_pages: 11
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.stat-label.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.stat-label.en
     exceptions:
-    - "Подпись с объектом счёта и периодом — до 14 слов законна («Выплатили клиентам, пострадавшим из-за отзыва лицензии у банка…» — Точка, опыт E/01)."
+    - "Подпись с объектом счёта и периодом — до 14 слов законна («Выплатили клиентам, пострадавшим из-за отзыва лицензии у банка…» — Точка)."
   structure: "Что считали + за какой период или на какую дату; оценочные прилагательные («довольных») — только если измерены."
   formula_ids: []
   rules:
-  - "Объект счёта — ровно тот, что в факте: «квартир сдали по акту», а не «довольных клиентов» (B2 §4.4: не о другом объекте)."
-  - Скоропортящееся число — с датой рядом (B2 §1.3).
+  - "Объект счёта — ровно тот, что в факте: «квартир сдали по акту», а не «довольных клиентов» (text 02/03 §4.4: не о другом объекте)."
+  - Скоропортящееся число — с датой рядом (text 02/03 §1.3).
   bans:
   - "«довольных клиентов», «успешных проектов» без измерения; «лет на рынке» без года основания в фактах."
   fact_required: always
@@ -1181,7 +1177,6 @@ slot_types:
       note: "объект счёта и дата; «1,380» — ложное COPY-F-NUM-MISMATCH (разделитель разрядов EN)"
   sources:
   - "02-strategy-messaging/03 §4.4, §1.3"
-  - 99-raw/experiments/E/01-slot-lengths
   date: '2026-09-24'
 - id: logos-caption
   name: Подпись ряда логотипов («Нам доверяют»)
@@ -1199,16 +1194,16 @@ slot_types:
       primary: words
       n_pages: 6
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.logos-caption.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.logos-caption.en
     ru:
       words: {min: 2, target: 5, max: 9}
       provisional: true
-      source: "правило E: у лидеров RU замера нет; EN — D (n < 12)"
+      source: "правило базы: у лидеров RU замера нет; EN — корпус (n < 12)"
   structure: "Кто эти компании для нас: «Салоны, которые разрешили показать свой логотип», «Интеграции с кассами», «Клиенты с договором 2026 года»."
   formula_ids: []
   rules:
-  - "Логотип — только реальная связь, файл от клиента и письменное согласие (B2 §1.5, 38-ФЗ ст. 5 ч. 3 п. 10); нет согласий — блок не выводится (fallback omit-block)."
+  - "Логотип — только реальная связь, файл от клиента и письменное согласие (text 02/03 §1.5, 38-ФЗ ст. 5 ч. 3 п. 10); нет согласий — блок не выводится (fallback omit-block)."
   - "Подпись называет связь и, если есть, период; «Нам доверяют» разрешено только при fact_ids (поправка к ux 07/06 §5.2)."
   bans:
   - "«Нам доверяют лидеры рынка», «Trusted by industry leaders» без фактов (COPY-M-CNT-…, ux-5-2-*)."
@@ -1231,7 +1226,7 @@ slot_types:
       fact_ids: []
       allow_warn: [art-placeholder, COPY-F-PLACEHOLDER]
       note: то же для EN
-  sources: [02-strategy-messaging/03 §1.5, PLAN «Поправки к правилам соседей» (ux 07/06 §5.2), Hallmark component-cookbook T2]
+  sources: [02-strategy-messaging/03 §1.5, 06-anti-slop/01 §11 (поправка к ux 07/06 §5.2), Hallmark component-cookbook T2]
   date: '2026-09-24'
 - id: testimonial-quote
   name: Текст отзыва
@@ -1251,8 +1246,8 @@ slot_types:
       primary: chars
       n_pages: 16
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-quote.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.testimonial-quote.ru"
     en:
       words: {min: 13, target: 24, max: 29}
       hard_words: [6, 89]
@@ -1263,26 +1258,26 @@ slot_types:
       primary: words
       n_pages: 10
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-quote.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.testimonial-quote.en"
     exceptions:
-    - "Длину отзыва не правят ради макета: сокращение — только многоточием по журналу edits с согласия автора (B2 §5.1); длинный — делить на крупную цитату и полный текст."
+    - "Длину отзыва не правят ради макета: сокращение — только многоточием по журналу edits с согласия автора (text 02/03 §5.1); длинный — делить на крупную цитату и полный текст."
   structure: "Цитата в «ёлочках» (EN — “…”); крупно — фрагмент о типичной трудной ситуации ([V:1UVkeqxuNRs 38:01]), полный текст рядом."
   formula_ids: [star-story-solution]
   rules:
-  - "Дословно: опечатки и пунктуация — можно, слова и смысл — нет; многоточие — только по edits (B2 §5.1, ГК ст. 1266)."
-  - "Подборка подписана («последние отзывы с Яндекс Карт»), не только лучшие, 5★ не первыми по умолчанию (B2 §5.2)."
-  - "Отзыв о ключевом свойстве (срок, бюджет, результат) — рядом обычный результат или рамка «так было у…»; «результаты индивидуальны» не работает (B2 §5.4)."
-  - "Крупно выносить отзыв о типичной трудной ситуации, а не самый восторженный (поправка к Ильяхову [V:1UVkeqxuNRs 29:54] по B2 §5.2)."
+  - "Дословно: опечатки и пунктуация — можно, слова и смысл — нет; многоточие — только по edits (text 02/03 §5.1, ГК ст. 1266)."
+  - "Подборка подписана («последние отзывы с Яндекс Карт»), не только лучшие, 5★ не первыми по умолчанию (text 02/03 §5.2)."
+  - "Отзыв о ключевом свойстве (срок, бюджет, результат) — рядом обычный результат или рамка «так было у…»; «результаты индивидуальны» не работает (text 02/03 §5.4)."
+  - "Крупно выносить отзыв о типичной трудной ситуации, а не самый восторженный (поправка к Ильяхову [V:1UVkeqxuNRs 29:54] по text 02/03 §5.2)."
   - "Стиль отзыва линтер не правит (роль user-content); обещание из отзыва голосом компании не повторяется (COPY-F-NEVER)."
   bans:
-  - "Выдуманный или сгенерированный отзыв, склейка двух отзывов, ИИ-лицо (B2, H §7; 38-ФЗ ст. 5 ч. 3 п. 10)."
-  - "В медицине и БАД — отзывы-благодарности в рекламе (H: COPY-L-MED-02)."
+  - "Выдуманный или сгенерированный отзыв, склейка двух отзывов, ИИ-лицо (text 02/03 §5, text 08/01 §7; 38-ФЗ ст. 5 ч. 3 п. 10)."
+  - "В медицине и БАД — отзывы-благодарности в рекламе (COPY-L-MED-02)."
   fact_required: always
   claim_classes: [testimonial-quote]
   legal_rules: [COPY-L-MED-02, COPY-L-US-01, COPY-L-EU-03]
   lint_markers: []
-  voice: "Голос клиента, не бренда: F не правит."
+  voice: "Голос клиента, не бренда: профиль голоса не правит."
   examples:
     ru:
       facts: otves
@@ -1290,7 +1285,7 @@ slot_types:
       good: "«Сдали двушку за 47 рабочих дней — на три дня раньше, чем в договоре. Прораб каждый вечер присылал фото… Смета не выросла ни на рубль»"
       fact_ids: [review-anna-k]
       allow_warn: [COPY-F-TYPICALITY]
-      note: "дословно с многоточием по edits; TYPICALITY — по замыслу B2: рядом нужна рамка опыта одного клиента или договорное правило о смете"
+      note: "дословно с многоточием по edits; TYPICALITY — по замыслу сверки: рядом нужна рамка опыта одного клиента или договорное правило о смете"
     en:
       facts: okoshko
       bad: "“Best booking app ever! It totally transformed our business!”"
@@ -1324,8 +1319,8 @@ slot_types:
       primary: chars
       n_pages: 12
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-attribution.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.testimonial-attribution.ru"
     en:
       words: {min: 1, target: 2, max: 4}
       hard_words: [1, 8]
@@ -1336,16 +1331,16 @@ slot_types:
       primary: words
       n_pages: 12
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.testimonial-attribution.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.testimonial-attribution.en"
     exceptions:
-    - "Длинная должность («Директор департамента по работе с корпоративным сегментом») — законна, не сокращать без согласия (опыт E/01)."
+    - "Длинная должность («Директор департамента по работе с корпоративным сегментом») — законна, не сокращать без согласия."
   structure: "Имя (или имя с инициалом) + город или роль + вид заказа и год: «Анна К., Нижний Новгород, ремонт двухкомнатной квартиры, 2026»."
   formula_ids: []
   rules:
   - "Поля — по permission.shows: полное имя и фото — только с согласием на ПДн и изображение (152-ФЗ ст. 10.1, ГК ст. 152.1)."
-  - "Сотрудник, партнёр, подарок или скидка за отзыв — раскрыть рядом (B2 §5.3, FTC 255.5)."
-  - Вид заказа и год помогают примерить опыт на себя (B2 §5.3).
+  - "Сотрудник, партнёр, подарок или скидка за отзыв — раскрыть рядом (text 02/03 §5.3, FTC 255.5)."
+  - Вид заказа и год помогают примерить опыт на себя (text 02/03 §5.3).
   bans:
   - "Стоковые имена «Иван Иванов», «John Smith», «Jane Doe»; должность, которой нет в факте."
   fact_required: always
@@ -1384,16 +1379,16 @@ slot_types:
       primary: chars
       n_pages: 6
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.case-title.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.case-title.ru
     en:
       words: {min: 5, target: 10, max: 16}
       provisional: true
-      source: "правило E: у лидеров EN замера нет; по RU (n < 12)"
+      source: "правило базы: у лидеров EN замера нет; по RU (n < 12)"
   structure: "[объект или клиент] + [задача словами клиента] + [результат числом]: «Двушка 54 м² в Сормове: 47 рабочих дней при 50 по договору»."
   formula_ids: [star-story-solution, bab]
   rules:
-  - "Результат — число из факта (акт, CRM, договор), с объектом и сроком; лучший кейс не выдаётся за типичный (B2 §5.4)."
+  - "Результат — число из факта (акт, CRM, договор), с объектом и сроком; лучший кейс не выдаётся за типичный (text 02/03 §5.4)."
   - "Задача клиента — его словами: «прорекламировать продукт, у которого 20 конкурентов» ([V:1UVkeqxuNRs 39:02])."
   bans:
   - "«Кейс: успешный проект», «История успеха», «+300 %» без базы и срока."
@@ -1429,15 +1424,15 @@ slot_types:
     ru:
       words: {min: 20, target: 45, max: 90}
       provisional: true
-      source: "правило E: у D нет замера; 2–4 предложения по 12–22 слова (абзац статьи D RU 24 [7–49])"
+      source: "правило базы: в корпусе нет замера; 2–4 предложения по 12–22 слова (абзац статьи в корпусе RU 24 [7–49])"
     en:
       words: {min: 20, target: 50, max: 100}
       provisional: true
-      source: "правило E: у D нет замера; 2–4 предложения по 12–22 слова (абзац статьи D RU 24 [7–49])"
+      source: "правило базы: в корпусе нет замера; 2–4 предложения по 12–22 слова (абзац статьи в корпусе RU 24 [7–49])"
   structure: "Ситуация (объект, срок, ограничения) → задача словами клиента → решение (что сделали иначе) → переход к результату."
   formula_ids: [star-story-solution, bab, problem-transformation-outcome]
   rules:
-  - "Все числа — из одного кейса-факта; разрешение клиента — permission (B2)."
+  - "Все числа — из одного кейса-факта; разрешение клиента — permission факта."
   - "Герой — клиент, не бренд (formulas.yaml star-story-solution avoid_when)."
   bans:
   - "«Клиент обратился к нам с задачей…», «Наша команда справилась на отлично»."
@@ -1445,7 +1440,7 @@ slot_types:
   claim_classes: [fact-number]
   legal_rules: []
   lint_markers: [COPY-M-MKT-01]
-  voice: Сторителлинг F — только из фактов.
+  voice: Сторителлинг — только из фактов.
   examples:
     ru:
       facts: otves
@@ -1465,7 +1460,7 @@ slot_types:
   date: '2026-09-24'
 - id: case-result
   name: Результат кейса (число из фактов)
-  purpose: "Результат клиента числом с базой и сроком — и рядом обычный результат (B2 §5.4)."
+  purpose: "Результат клиента числом с базой и сроком — и рядом обычный результат (text 02/03 §5.4)."
   section_roles: [case-studies, hero, portfolio]
   genres: [landing, site-page]
   genre: landing
@@ -1474,16 +1469,16 @@ slot_types:
     ru:
       words: {min: 3, target: 10, max: 20}
       provisional: true
-      source: "правило E: у D нет замера; число + объект + срок + обычный результат"
+      source: "правило базы: в корпусе нет замера; число + объект + срок + обычный результат"
     en:
       words: {min: 3, target: 10, max: 20}
       provisional: true
-      source: "правило E: у D нет замера; число + объект + срок + обычный результат"
+      source: "правило базы: в корпусе нет замера; число + объект + срок + обычный результат"
   structure: "«с [база] до [результат] за [срок]» + «в среднем у [выборка] — [обычный результат]»."
   formula_ids: [fact-scenario]
   rules:
-  - "База и срок обязательны: «−8 п. п. за три месяца», не «+300 %» (B2 §1.1)."
-  - "Рядом — обычный результат с основанием: иначе результат одного клиента читается как типичный (FTC 255.2(b), B2 §5.4)."
+  - "База и срок обязательны: «−8 п. п. за три месяца», не «+300 %» (text 02/03 §1.1)."
+  - "Рядом — обычный результат с основанием: иначе результат одного клиента читается как типичный (FTC 255.2(b), text 02/03 §5.4)."
   bans:
   - "Рост выручки, дохода, «окупилось за месяц» — класс income-finance без документа (nc-income)."
   fact_required: always
@@ -1525,8 +1520,8 @@ slot_types:
       primary: chars
       n_pages: 19
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-name.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-plan-name.ru"
     en:
       words: {min: 2, target: 3, max: 6}
       hard_words: [1, 9]
@@ -1537,12 +1532,12 @@ slot_types:
       primary: words
       n_pages: 9
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-name.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-plan-name.en"
   structure: "Имя по размеру клиента или сценарию; при необходимости через двоеточие — объём («Салон: до 5 мастеров»)."
   formula_ids: []
   rules:
-  - "Название отвечает на «это для меня?»: размер команды, объём, сценарий (у ai-self RU тариф — 1 слово «Базовый», D §2.1)."
+  - "Название отвечает на «это для меня?»: размер команды, объём, сценарий (у ai-self RU тариф — 1 слово «Базовый», text 03/02 §2.1)."
   - "Соседние тарифы сравнимы: одинаковый набор строк, цены в одинаковом составе (ux 06/04 §8.2)."
   bans:
   - "«Самый выгодный», «Лучший выбор», «Оптимальный» без основания (COPY-L-SUP-01); Title Case в EN."
@@ -1585,8 +1580,8 @@ slot_types:
       primary: chars
       n_pages: 14
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-summary.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-plan-summary.ru"
     en:
       words: {min: 2, target: 23, max: 75}
       hard_words: [1, 112]
@@ -1597,8 +1592,8 @@ slot_types:
       primary: words
       n_pages: 6
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-plan-summary.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-plan-summary.en"
   structure: "«Для [кого, размер]: [что входит главное]»; граница — «если больше N мастеров — тариф „Сеть“»."
   formula_ids: [fab, question-proof-action]
   rules:
@@ -1645,8 +1640,8 @@ slot_types:
       primary: chars
       n_pages: 10
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.pricing-price.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.pricing-price.ru
     en:
       words: {min: 1, target: 2, max: 5}
       hard_words: [1, 8]
@@ -1657,8 +1652,8 @@ slot_types:
       primary: words
       n_pages: 9
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.pricing-price.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.pricing-price.en
   structure: "«[от ]N ₽ [за единицу] [в период]»; валюта кроме рублей — только дополнительно: «2 490 ₽ в месяц ($29)»."
   formula_ids: []
   rules:
@@ -1712,8 +1707,8 @@ slot_types:
       primary: chars
       n_pages: 8
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-price-note.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-price-note.ru"
     en:
       words: {min: 2, target: 3, max: 7}
       hard_words: [1, 11]
@@ -1724,10 +1719,10 @@ slot_types:
       primary: words
       n_pages: 9
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-price-note.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-price-note.en"
     exceptions:
-    - "Условие не режется ради длины: «Стоимость поддерживающей уборки квартиры с одним санузлом без дополнительных услуг при отсутствии повышенного спроса» (14 слов, Qlean — законно, опыт E/01)."
+    - "Условие не режется ради длины: «Стоимость поддерживающей уборки квартиры с одним санузлом без дополнительных услуг при отсутствии повышенного спроса» (14 слов, Qlean — законно)."
   structure: "Что входит / не входит + условие акции (срок с датой, для кого, на что) + что будет после пробного периода."
   formula_ids: [question-proof-action]
   rules:
@@ -1756,7 +1751,7 @@ slot_types:
       fact_ids: [annual-discount]
       section_role: pricing
       note: условие скидки в той же строке
-  sources: [08-russian-legal-typography/01 §4.1–4.3, ux 06/04 §8.1, 99-raw/experiments/E/01-slot-lengths]
+  sources: [08-russian-legal-typography/01 §4.1–4.3, ux 06/04 §8.1]
   date: '2026-09-24'
 - id: pricing-feature
   name: Пункт состава тарифа
@@ -1776,8 +1771,8 @@ slot_types:
       primary: chars
       n_pages: 10
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-feature.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-feature.ru"
     en:
       words: {min: 2, target: 8, max: 20}
       hard_words: [1, 30]
@@ -1788,8 +1783,8 @@ slot_types:
       primary: words
       n_pages: 5
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.landing.slots.pricing-feature.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.landing.slots.pricing-feature.en"
   structure: "Возможность + ограничение или цена сверх тарифа («SMS — 4 ₽ за сообщение сверх тарифа»)."
   formula_ids: [fab]
   rules:
@@ -1830,12 +1825,12 @@ slot_types:
       words: {min: 1, target: 2, max: 4}
       chars: {min: 3, target: 12, max: 24}
       provisional: true
-      source: "правило E: одна строка на карточке; у D RU — 1 слово (n 5, provisional) — не норма: бейдж с числом («−17 % за год») законен, условие — в pricing-price-note"
+      source: "правило базы: одна строка на карточке; в корпусе RU — 1 слово (n 5, provisional) — не норма: бейдж с числом («−17 % за год») законен, условие — в pricing-price-note"
     en:
       words: {min: 1, target: 2, max: 4}
       chars: {min: 3, target: 12, max: 24}
       provisional: true
-      source: "правило E: одна строка на карточке; у D RU — 1 слово (n 5, provisional) — не норма: бейдж с числом («−17 % за год») законен, условие — в pricing-price-note"
+      source: "правило базы: одна строка на карточке; в корпусе RU — 1 слово (n 5, provisional) — не норма: бейдж с числом («−17 % за год») законен, условие — в pricing-price-note"
   structure: "Число или признак: «−17 % за год», «Новое в 2026», «Выбирают 6 из 10 салонов» (при факте)."
   formula_ids: []
   rules:
@@ -1880,18 +1875,18 @@ slot_types:
     ru:
       words: {min: 10, target: 25, max: 50}
       provisional: true
-      source: "правило E: у D нет замера; предмет + срок + порядок + документ — 1–3 предложения"
+      source: "правило базы: в корпусе нет замера; предмет + срок + порядок + документ — 1–3 предложения"
     en:
       words: {min: 10, target: 28, max: 55}
       provisional: true
-      source: "правило E: у D нет замера; предмет + срок + порядок + документ — 1–3 предложения"
+      source: "правило базы: в корпусе нет замера; предмет + срок + порядок + документ — 1–3 предложения"
   structure: "Предмет гарантии → срок → что делаем, если… → документ (пункт договора, оферта); для возврата — срок и порядок."
   formula_ids: [fact-scenario, even-if-objection]
   rules:
   - "Гарантия — условие договора с документом: на что, срок, случай, где условия (COPY-L-GUAR-02); вернуть деньги — срок, случай, порядок (GUAR-03)."
   - "Гарантия результата, дохода, топа, излечения — нельзя (COPY-L-GUAR-01); общая «гарантия качества» — пустая (GUAR-05)."
   - "Возврат при дистанционной продаже — не позже 10 дней с требования (ЗоЗПП ст. 26.1; COPY-L-RET-02)."
-  - "Малоизвестному бренду с дорогим продуктом щедрой гарантии не верят без подкрепления: документ, реквизиты, отзыв о возврате (B1 §4.4)."
+  - "Малоизвестному бренду с дорогим продуктом щедрой гарантии не верят без подкрепления: документ, реквизиты, отзыв о возврате (text 02/02 §4.4)."
   bans:
   - "«100 % гарантия», «гарантируем качество», «Try it risk-free» без условий; «возврат невозможен» (RET-01)."
   fact_required: always
@@ -1926,16 +1921,16 @@ slot_types:
     ru:
       words: {min: 12, target: 30, max: 60}
       provisional: true
-      source: "правило E: у D нет замера; по faq-a (RU 3–22–43, EN 3–22–46) + место для границы"
+      source: "правило базы: в корпусе нет замера; по faq-a (RU 3–22–43, EN 3–22–46) + место для границы"
     en:
       words: {min: 12, target: 32, max: 65}
       provisional: true
-      source: "правило E: у D нет замера; по faq-a (RU 3–22–43, EN 3–22–46) + место для границы"
+      source: "правило базы: в корпусе нет замера; по faq-a (RU 3–22–43, EN 3–22–46) + место для границы"
   structure: "«[возражение словами клиента]» → факт или условие → что делать, если случай особый; или «[утверждение], даже если [возражение]»."
   formula_ids: [even-if-objection, question-proof-action]
   rules:
-  - "Тревогу снимают доказательством и снятием риска, привычку — маленьким обратимым шагом (перенос данных, бесплатный первый шаг, отмена) — не новыми выгодами (B1 §4.1; [V:xQV7HVyAJjc 11:38])."
-  - "Возражение — из голоса клиента (voc.yaml), не придуманное; блокер — до кнопки, не в конце FAQ (B1 §4.3)."
+  - "Тревогу снимают доказательством и снятием риска, привычку — маленьким обратимым шагом (перенос данных, бесплатный первый шаг, отмена) — не новыми выгодами (text 02/02 §4.1; [V:xQV7HVyAJjc 11:38])."
+  - "Возражение — из голоса клиента (voc.yaml), не придуманное; блокер — до кнопки, не в конце FAQ (text 02/02 §4.3)."
   - "Честное «не подходит, если…» — законный ответ (answer_kind boundary)."
   bans:
   - "«Не волнуйтесь», «это просто», «надёжно и прозрачно» без факта; обесценивание возражения."
@@ -1943,7 +1938,7 @@ slot_types:
   claim_classes: [purchase-terms, guarantee, price-discount, fact-property]
   legal_rules: [COPY-L-FREE-01, COPY-L-GUAR-02]
   lint_markers: [COPY-M-TON-…]
-  voice: Тон F для тревожных ситуаций.
+  voice: Тон для тревожных ситуаций.
   examples:
     ru:
       facts: okoshko
@@ -1974,17 +1969,17 @@ slot_types:
     ru:
       words: {min: 3, target: 10, max: 18}
       provisional: true
-      source: "правило E: у D нет замера; критерий + наш подход + альтернатива"
+      source: "правило базы: в корпусе нет замера; критерий + наш подход + альтернатива"
     en:
       words: {min: 3, target: 10, max: 18}
       provisional: true
-      source: "правило E: у D нет замера; критерий + наш подход + альтернатива"
+      source: "правило базы: в корпусе нет замера; критерий + наш подход + альтернатива"
   structure: "«[критерий] — [наш подход] / [альтернативный подход]»; значения — из фактов о себе и из определения подхода, а не из оценок чужих."
   formula_ids: [question-proof-action]
   rules:
   - "Сравнение по подходам без имён (Dunford [V:1DxQddmWqzQ 23:26]); по имени конкурента — только с фактом, критерием, методом и датой (COPY-L-CMP-01, CMP-03)."
   - "Негатив о конкурентах без проверяемого факта порочит репутацию (COPY-L-CMP-02)."
-  - "Строка «когда подходит альтернатива» — честная граница; одинаковые плюсы у всех вариантов — спам по Яндексу ([V:XoStBfaV9Gw 1:21:48], G COPY-GEO-15)."
+  - "Строка «когда подходит альтернатива» — честная граница; одинаковые плюсы у всех вариантов — спам по Яндексу ([V:XoStBfaV9Gw 1:21:48], COPY-GEO-15)."
   bans:
   - "«В 2 раза быстрее конкурентов», «10x faster than any other app» без базы (COPY-L-CMP-01, CMP-03 — error)."
   fact_required: always
@@ -2029,8 +2024,8 @@ slot_types:
       primary: chars
       n_pages: 25
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.faq-q.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.faq-q.ru
     en:
       words: {min: 3, target: 8, max: 11}
       hard_words: [1, 17]
@@ -2041,13 +2036,13 @@ slot_types:
       primary: words
       n_pages: 12
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.faq-q.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.faq-q.en
   structure: "Вопрос от первого лица клиента или с вопросительным словом в начале: «Сколько стоит выезд замерщика?»"
   formula_ids: [question-proof-action]
   rules:
-  - "Вопросы — из тем голоса клиента (voc.yaml B2) и запросов (G: Wordstat, Search Console); остаток после секций — не блокеры (B1 §4.3)."
-  - "Формат «вопрос — ответ» для поиска и GEO (FAQPage, ответ первым) — G COPY-GEO-14; текст — здесь."
+  - "Вопросы — из тем голоса клиента (voc.yaml) и запросов (text 07/01: Wordstat, Search Console); остаток после секций — не блокеры (text 02/02 §4.3)."
+  - "Формат «вопрос — ответ» для поиска и GEO (FAQPage, ответ первым) — COPY-GEO-14; текст — здесь."
   bans:
   - "«Почему стоит выбрать именно нас?», «Чем мы лучше?» (COPY-M-MKT-06)."
   fact_required: never
@@ -2089,8 +2084,8 @@ slot_types:
       primary: chars
       n_pages: 15
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.faq-a.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.faq-a.ru
     en:
       words: {min: 3, target: 22, max: 46}
       hard_words: [1, 122]
@@ -2101,14 +2096,14 @@ slot_types:
       primary: words
       n_pages: 10
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.faq-a.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.faq-a.en
   structure: "Ответ (1 предложение) → условие или факт → что делать дальше (при необходимости)."
   formula_ids: [inverted-pyramid, question-proof-action]
   rules:
-  - "Первая фраза отвечает на вопрос; 1–3 предложения с фактом (G COPY-GEO-14; geo-evasive-answer, geo-pronoun-lead)."
-  - "Каноническая формулировка факта совпадает с canonical facts.yaml и разметкой (B2 §4.2)."
-  - "Условия «бесплатно», сроки, цены — с условием в том же ответе (H)."
+  - "Первая фраза отвечает на вопрос; 1–3 предложения с фактом (COPY-GEO-14; geo-evasive-answer, geo-pronoun-lead)."
+  - "Каноническая формулировка факта совпадает с canonical facts.yaml и разметкой (text 02/03 §4.2)."
+  - "Условия «бесплатно», сроки, цены — с условием в том же ответе (text 08/01 §4.1)."
   bans:
   - "«Мы стараемся…», «Свяжитесь с нами, и мы всё расскажем» вместо ответа; ответ, который начинается с «Это»/«Он»."
   fact_required: if-claim
@@ -2123,7 +2118,7 @@ slot_types:
       fact_ids: [estimate-free]
       section_role: faq
       allow_warn: [COPY-F-USE]
-      note: "ответ первым словом и условие; COPY-F-USE — use факта B2 не включает faq-a (передано B2)"
+      note: "ответ первым словом и условие; COPY-F-USE — use факта не включает faq-a"
     en:
       facts: okoshko
       bad: "We do our best to make every client happy. Contact us to learn more!"
@@ -2144,11 +2139,11 @@ slot_types:
     ru:
       words: {min: 2, target: 5, max: 9}
       provisional: true
-      source: "правило E: у D нет замера; как заголовок секции (RU 2–4–8, EN 2–6–11)"
+      source: "правило базы: в корпусе нет замера; как заголовок секции (RU 2–4–8, EN 2–6–11)"
     en:
       words: {min: 2, target: 5, max: 10}
       provisional: true
-      source: "правило E: у D нет замера; как заголовок секции (RU 2–4–8, EN 2–6–11)"
+      source: "правило базы: в корпусе нет замера; как заголовок секции (RU 2–4–8, EN 2–6–11)"
   structure: "Результат или следующий шаг: «Вызов замерщика», «Смета до договора», «Set up your booking link»."
   formula_ids: [question-proof-action]
   rules:
@@ -2195,18 +2190,18 @@ slot_types:
       primary: chars
       n_pages: 8
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.form-lead.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.form-lead.ru
     en:
       words: {min: 7, target: 11, max: 18}
       provisional: true
-      source: "правило E: у лидеров EN замера нет; по RU (7–9–14,5, n 8)"
+      source: "правило базы: у лидеров EN замера нет; по RU (7–9–14,5, n 8)"
   structure: "Результат → стоимость и время → условие; лид-магнит: «[что] на [N страниц / минут], [состав], [кто автор]»."
   formula_ids: [four-p, question-proof-action]
   rules:
   - "Стоимость и примерное время — числом, если есть в фактах (GOV.UK: стоимость и время прохождения, ux 05/01 §7.5)."
-  - "Описание материала за контакт — объём, состав, автор, формат; без «уникальный гайд» ([V:gMzwsAWipNo], W1)."
-  - Условие «бесплатно» — в той же фразе (H).
+  - "Описание материала за контакт — объём, состав, автор, формат; без «уникальный гайд» ([V:gMzwsAWipNo])."
+  - Условие «бесплатно» — в той же фразе (text 08/01 §4.1).
   bans:
   - "«Мы свяжемся с вами в ближайшее время» вместо ценности; «уникальный чек-лист», «секретная методика»."
   fact_required: if-claim
@@ -2228,7 +2223,7 @@ slot_types:
       fact_ids: [trial-14-days]
       section_role: lead-form
       note: "срок, условие и первый шаг"
-  sources: [ux 05/01 §7.5, 91-videos/digests/gMzwsAWipNo.md, 08-russian-legal-typography/01 §4.1]
+  sources: [ux 05/01 §7.5, "[V:gMzwsAWipNo]", 08-russian-legal-typography/01 §4.1]
   date: '2026-09-24'
 - id: form-next-steps
   name: Что будет после отправки
@@ -2241,11 +2236,11 @@ slot_types:
     ru:
       words: {min: 8, target: 18, max: 35}
       provisional: true
-      source: "правило E: у D нет замера; 1–2 предложения: кто, когда, как, что подготовить"
+      source: "правило базы: в корпусе нет замера; 1–2 предложения: кто, когда, как, что подготовить"
     en:
       words: {min: 8, target: 20, max: 38}
       provisional: true
-      source: "правило E: у D нет замера; 1–2 предложения: кто, когда, как, что подготовить"
+      source: "правило базы: в корпусе нет замера; 1–2 предложения: кто, когда, как, что подготовить"
   structure: "«[Кто] [свяжется / пришлёт] [когда] [каким каналом]; [что подготовить]»."
   formula_ids: [question-proof-action]
   rules:
@@ -2257,7 +2252,7 @@ slot_types:
   claim_classes: [purchase-terms, fact-number]
   legal_rules: []
   lint_markers: [COPY-M-LEX-13]
-  voice: "Тон F: спокойно, без восклицаний."
+  voice: "Тон: спокойно, без восклицаний."
   examples:
     ru:
       facts: okoshko
@@ -2293,19 +2288,19 @@ slot_types:
       primary: chars
       n_pages: 18
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.landing.slots.form-consent.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.landing.slots.form-consent.ru
     en:
       words: {min: 8, target: 16, max: 28}
       provisional: true
-      source: "правило E: у лидеров EN замера нет; по шаблону H 01 §8.1"
+      source: "правило базы: у лидеров EN замера нет; по шаблону text 08/01 §8.1"
   structure: "Две строки у двух пустых галочек: «Согласен на обработку персональных данных для [цель]. Условия — в политике обработки персональных данных.» и «Хочу получать письма о [чём] (необязательно; отписка — ссылкой в каждом письме)»."
   formula_ids: []
   rules:
-  - "Согласие на ПДн — отдельно от иных документов, конкретное и предметное (152-ФЗ ст. 9 ч. 1, ред. 156-ФЗ; H 01 §8.1 — COPY-L-CONS-01)."
+  - "Согласие на ПДн — отдельно от иных документов, конкретное и предметное (152-ФЗ ст. 9 ч. 1, ред. 156-ФЗ; text 08/01 §8.1 — COPY-L-CONS-01)."
   - "Согласие на рекламу — отдельная необязательная галочка (38-ФЗ ст. 18 ч. 1; Пленум ВАС № 58 п. 15 — COPY-L-CONS-01/02)."
-  - "Галочки не предотмечены; отказ равного веса (ux 06/04 §8.1 п. 2–3, 5); механика и ссылки на документы — site I."
-  - "Текст полного согласия и политики пишет юрист; в copy deck — строки у формы по шаблону H."
+  - "Галочки не предотмечены; отказ равного веса (ux 06/04 §8.1 п. 2–3, 5); механика и ссылки на документы — site 08/01."
+  - "Текст полного согласия и политики пишет юрист; в copy deck — строки у формы по шаблону text 08/01 §8.1."
   bans:
   - "«Нажимая кнопку, вы соглашаетесь с Политикой…» (COPY-L-CONS-02), согласие на рекламу внутри согласия на ПДн, двойные отрицания."
   fact_required: never
@@ -2319,14 +2314,14 @@ slot_types:
       good: "Согласен на обработку персональных данных для ответа на заявку. Условия — в политике обработки персональных данных."
       fact_ids: []
       section_role: lead-form
-      note: шаблон H 01 §8.1; реклама — отдельной галочкой
+      note: шаблон text 08/01 §8.1; реклама — отдельной галочкой
     en:
       facts: okoshko
       bad: "By clicking Submit, you agree to our Privacy Policy and to receive marketing emails"
       good: "I agree to the processing of my personal data to reply to this request. Details are in the personal data policy."
       fact_ids: []
       section_role: lead-form
-      note: адаптация шаблона H; сайт российской компании — 152-ФЗ
+      note: адаптация шаблона text 08/01 §8.1; сайт российской компании — 152-ФЗ
   sources: [08-russian-legal-typography/01 §8.1–8.2, ux 06/04 §8.1, ../ux/07-ux-writing/02-microcopy-by-component.md §3]
   date: '2026-09-24'
 - id: form-success
@@ -2340,16 +2335,16 @@ slot_types:
     ru:
       words: {min: 8, target: 22, max: 45}
       provisional: true
-      source: "правило E: у D нет замера (экран после отправки не снимался); 2–3 предложения"
+      source: "правило базы: в корпусе нет замера (экран после отправки не снимался); 2–3 предложения"
     en:
       words: {min: 8, target: 24, max: 48}
       provisional: true
-      source: "правило E: у D нет замера (экран после отправки не снимался); 2–3 предложения"
+      source: "правило базы: в корпусе нет замера (экран после отправки не снимался); 2–3 предложения"
   structure: "Статус («Заявка принята») → что дальше (кто, когда) → одно действие сейчас (посмотреть пример, добавить в календарь) → при необходимости — что делать, если не пришло письмо."
   formula_ids: [question-proof-action]
   rules:
   - "Первое слово — статус, не «Спасибо!»; благодарность — по голосу бренда, без восклицаний подряд."
-  - "Одно следующее действие — вторая цель страницы (B1 goal.secondary_goal); не повторять форму."
+  - "Одно следующее действие — вторая цель страницы (goal.secondary_goal); не повторять форму."
   - "Двойная подписка: прямо сказать, что письмо с подтверждением отправлено и что без него подписки нет (04 §2)."
   bans:
   - "«Спасибо! Ваша заявка успешно отправлена!» без следующего шага; «Мы обязательно свяжемся»."
@@ -2357,7 +2352,7 @@ slot_types:
   claim_classes: [purchase-terms]
   legal_rules: []
   lint_markers: [COPY-M-PUN-09]
-  voice: "Тон F после действия пользователя (ux 07/01 §6: тон зависит от ситуации)."
+  voice: "Тон после действия пользователя (ux 07/01 §6: тон зависит от ситуации)."
   examples:
     ru:
       facts: otves
@@ -2387,12 +2382,12 @@ slot_types:
       words: {min: 1, target: 1, max: 3}
       chars: {min: 4, target: 8, max: 20}
       provisional: true
-      source: "правило E: пункт меню — 1–2 слова; у D не нормируется"
+      source: "правило базы: пункт меню — 1–2 слова; в корпусе не нормируется"
     en:
       words: {min: 1, target: 1, max: 3}
       chars: {min: 4, target: 8, max: 18}
       provisional: true
-      source: "правило E: пункт меню — 1–2 слова; у D не нормируется"
+      source: "правило базы: пункт меню — 1–2 слова; в корпусе не нормируется"
   structure: "Существительное — название раздела: «Услуги», «Цены», «Кейсы», «Контакты»; на лендинге — якоря по содержанию («Как проходит ремонт»)."
   formula_ids: []
   rules:
@@ -2421,7 +2416,7 @@ slot_types:
       fact_ids: []
       section_role: footer
       note: то же
-  sources: [PLAN «Поправки к правилам соседей» (ux 07/06 §3.2), ux 07/02 §12, 06-anti-slop/01 §11]
+  sources: [поправка к ux 07/06 §3.2, ux 07/02 §12, 06-anti-slop/01 §11]
   date: '2026-09-24'
 - id: footer-tagline
   name: Строка бренда в подвале
@@ -2434,11 +2429,11 @@ slot_types:
     ru:
       words: {min: 3, target: 8, max: 15}
       provisional: true
-      source: "правило E: у D нет замера; одна строка категории"
+      source: "правило базы: в корпусе нет замера; одна строка категории"
     en:
       words: {min: 3, target: 8, max: 15}
       provisional: true
-      source: "правило E: у D нет замера; одна строка категории"
+      source: "правило базы: в корпусе нет замера; одна строка категории"
   structure: "Категория + для кого или где + с какого года (факт): формула category-statement."
   formula_ids: [category-statement]
   rules:
@@ -2449,7 +2444,7 @@ slot_types:
   claim_classes: [company-details, superlative]
   legal_rules: [COPY-L-SUP-01]
   lint_markers: [COPY-M-MKT-01]
-  voice: Слоган и словарь бренда F.
+  voice: Слоган и словарь бренда.
   examples:
     ru:
       facts: otves
@@ -2475,13 +2470,13 @@ slot_types:
   genre: landing
   ux_role: caption
   length:
-    note: "длина не нормируется: состав задаёт закон (38-ФЗ ст. 8; ЗоЗПП ст. 26.1 п. 2 — через site I)"
+    note: "длина не нормируется: состав задаёт закон (38-ФЗ ст. 8; ЗоЗПП ст. 26.1 п. 2 — через site 08/01)"
   structure: "«[Полное наименование], ОГРН [..], ИНН [..], [адрес]» · «Политика обработки персональных данных» · «Публичная оферта» или «Договор (образец)» · © [год] [бренд]."
   formula_ids: []
   rules:
   - "Реквизиты — только из facts.yaml (company-details); нет — [PLACEHOLDER: реквизиты ООО], публикация заблокирована (missing blocking у «Отвеса» и «Кварца»)."
-  - "Блок «продавец» — на любой странице с оплатой или бронью (H: COPY-L-DIST-01)."
-  - "Отраслевые оговорки (медицина, БАД, финансы) — дословно по шаблону H 01 §6, тем же кеглем, что текст, к которому относятся."
+  - "Блок «продавец» — на любой странице с оплатой или бронью (COPY-L-DIST-01)."
+  - "Отраслевые оговорки (медицина, БАД, финансы) — дословно по шаблону text 08/01 §6, тем же кеглем, что текст, к которому относятся."
   bans:
   - "«© Все права защищены» вместо реквизитов; вымышленные ИНН, ОГРН и адреса (claims_check: число без факта)."
   fact_required: always
@@ -2512,7 +2507,7 @@ slot_types:
 - id: meta-title
   name: "<title>"
   purpose: "Название страницы в выдаче и вкладке: что на странице и чья она; ключевая фраза — в первых 55 знаках."
-  rules_owner: "G — 07-seo-geo-copy/meta-rules.yaml (limits.meta-title, правила meta-title-*), 02-seo-pages-articles-meta.md"
+  rules_owner: "07-seo-geo-copy/meta-rules.yaml (limits.meta-title, правила meta-title-*), 02-seo-pages-articles-meta.md"
   genres: [meta]
   genre: meta
   ux_role: ''
@@ -2520,16 +2515,16 @@ slot_types:
     ru:
       chars: {min: 40, target: 60, max: 70}
       provisional: true
-      source: "G meta-rules.yaml limits.meta-title.write (RU 40–70, EN 35–60 знаков); корпус D: RU лидеры 32–69–118, EN 28–50–73 (03 §5)"
+      source: "meta-rules.yaml limits.meta-title.write (RU 40–70, EN 35–60 знаков); корпус: RU лидеры 32–69–118, EN 28–50–73 (03 §5)"
     en:
       chars: {min: 35, target: 50, max: 60}
       provisional: true
-      source: "G meta-rules.yaml limits.meta-title.write (RU 40–70, EN 35–60 знаков); корпус D: RU лидеры 32–69–118, EN 28–50–73 (03 §5)"
+      source: "meta-rules.yaml limits.meta-title.write (RU 40–70, EN 35–60 знаков); корпус: RU лидеры 32–69–118, EN 28–50–73 (03 §5)"
   structure: "«[что на странице] — [бренд]»; главная — «[бренд] — [категория]»."
   formula_ids: [four-u, caples-headline-qualities, benefit-prism]
   rules:
-  - "Правила — G (meta-rules.yaml): не общий («Главная»), без набивки и перечня городов, без кликбейта; год — только если содержание этого года."
-  - "Факты в title — те же, что на странице, с fact_ids (B2)."
+  - "Правила — text 07 (meta-rules.yaml): не общий («Главная»), без набивки и перечня городов, без кликбейта; год — только если содержание этого года."
+  - "Факты в title — те же, что на странице, с fact_ids."
   bans:
   - "«Главная», «Home», «Услуги» как title (meta-title-generic — error); три и больше «|»."
   fact_required: if-claim
@@ -2556,7 +2551,7 @@ slot_types:
 - id: meta-description
   name: meta description
   purpose: "Сниппет: что получит человек на странице, с фактом; главное — в первых 120 знаках."
-  rules_owner: "G — meta-rules.yaml (limits.meta-description, meta-desc-*)"
+  rules_owner: "meta-rules.yaml (limits.meta-description, meta-desc-*)"
   genres: [meta]
   genre: meta
   ux_role: ''
@@ -2564,15 +2559,15 @@ slot_types:
     ru:
       chars: {min: 110, target: 150, max: 180}
       provisional: true
-      source: "G meta-rules.yaml limits.meta-description.write (RU 110–180, EN 100–160); корпус D: RU лидеры 130–182–276, EN 93–138–167"
+      source: "meta-rules.yaml limits.meta-description.write (RU 110–180, EN 100–160); корпус: RU лидеры 130–182–276, EN 93–138–167"
     en:
       chars: {min: 100, target: 130, max: 160}
       provisional: true
-      source: "G meta-rules.yaml limits.meta-description.write (RU 110–180, EN 100–160); корпус D: RU лидеры 130–182–276, EN 93–138–167"
+      source: "meta-rules.yaml limits.meta-description.write (RU 110–180, EN 100–160); корпус: RU лидеры 130–182–276, EN 93–138–167"
   structure: "1–2 предложения: что это и для кого + факт + условие или следующий шаг."
   formula_ids: [category-statement, benefit-prism]
   rules:
-  - "Правила — G: предложение, а не список ключей; без капса; условие «бесплатно» — рядом (H)."
+  - "Правила — text 07: предложение, а не список ключей; без капса; условие «бесплатно» — рядом (text 08/01 §4.1)."
   bans:
   - "Список ключевых слов через запятую (meta-desc-keyword-list); «по лучшим ценам» без критерия."
   fact_required: if-claim
@@ -2587,7 +2582,7 @@ slot_types:
       good: "Ремонт квартир под ключ с 2014 года: 1 146 квартир сдали по акту, гарантия на работы 3 года по договору."
       fact_ids: [company-since-2014, flats-completed, guarantee-3-years]
       allow_warn: [COPY-F-USE]
-      note: "факты вместо набивки; COPY-F-USE — в use фактов B2 нет мета-слотов (передано B2)"
+      note: "факты вместо набивки; COPY-F-USE — в use фактов нет мета-слотов"
     en:
       facts: okoshko
       genre: meta
@@ -2600,7 +2595,7 @@ slot_types:
 - id: og-title
   name: "og:title"
   purpose: "Заголовок превью ссылки в мессенджерах и соцсетях: как title, но без бренда или короче; не кликбейт."
-  rules_owner: "G — meta-rules.yaml (limits.og-title); превью — ai-media 10/01 §7"
+  rules_owner: "meta-rules.yaml (limits.og-title); превью — ai-media 10/01 §7"
   genres: [meta]
   genre: meta
   ux_role: ''
@@ -2612,7 +2607,7 @@ slot_types:
       hard_chars: [8, 175]
       primary: chars
       n_pages: 27
-      source: D thresholds.yaml v2 · genres.meta.slots.og-title.ru
+      source: thresholds.yaml v2 · genres.meta.slots.og-title.ru
     en:
       words: {min: 4, target: 7, max: 10}
       hard_words: [1, 17]
@@ -2622,13 +2617,13 @@ slot_types:
       ai_p50_chars: 34.0
       primary: words
       n_pages: 32
-      source: D thresholds.yaml v2 · genres.meta.slots.og-title.en
+      source: thresholds.yaml v2 · genres.meta.slots.og-title.en
   structure: Главное сообщение страницы коротко; может повторять H1.
   formula_ids: [four-u]
   rules:
-  - "Правила — G; ИИ-страницы пишут og:title реже и не совпадающим с title (D: 57 % против 94–96 % у людей) — заполнять всегда."
+  - "Правила — text 07; ИИ-страницы пишут og:title реже и не совпадающим с title (корпус: 57 % против 94–96 % у людей) — заполнять всегда."
   bans:
-  - "Восклицания и капс (примета ai-self в мета, D §5)."
+  - "Восклицания и капс (примета ai-self в мета, text 03/02 §5)."
   fact_required: if-claim
   claim_classes: [superlative, fact-number]
   legal_rules: [COPY-L-SUP-01]
@@ -2653,7 +2648,7 @@ slot_types:
 - id: og-description
   name: "og:description"
   purpose: "Одно предложение превью: что получит человек, открыв ссылку."
-  rules_owner: G — meta-rules.yaml (limits.og-description)
+  rules_owner: meta-rules.yaml (limits.og-description)
   genres: [meta]
   genre: meta
   ux_role: ''
@@ -2665,7 +2660,7 @@ slot_types:
       hard_chars: [17, 426]
       primary: chars
       n_pages: 29
-      source: D thresholds.yaml v2 · genres.meta.slots.og-description.ru
+      source: thresholds.yaml v2 · genres.meta.slots.og-description.ru
     en:
       words: {min: 14, target: 21, max: 28}
       hard_words: [7, 42]
@@ -2675,11 +2670,11 @@ slot_types:
       ai_p50_chars: 93.0
       primary: words
       n_pages: 31
-      source: D thresholds.yaml v2 · genres.meta.slots.og-description.en
+      source: thresholds.yaml v2 · genres.meta.slots.og-description.en
   structure: Факт или механизм одной фразой.
   formula_ids: [fact-scenario]
   rules:
-  - "Правила — G; при повторе description находки линтера удваиваются (H) — лучше своя фраза."
+  - "Правила — text 07; при повторе description находки линтера удваиваются — лучше своя фраза."
   bans:
   - "«Откройте для себя…», «Discover the future of…» (COPY-M-MKT-08 — error в мета)."
   fact_required: if-claim
@@ -2694,7 +2689,7 @@ slot_types:
       good: "1 146 квартир сдали по акту с 2014 года. Гарантия на работы — 3 года по договору."
       fact_ids: [flats-completed, guarantee-3-years]
       allow_warn: [COPY-F-USE]
-      note: "факты вместо штампа; COPY-F-USE — в use фактов B2 нет мета-слотов"
+      note: "факты вместо штампа; COPY-F-USE — в use фактов нет мета-слотов"
     en:
       facts: okoshko
       genre: meta
@@ -2702,12 +2697,12 @@ slot_types:
       good: "Clients book themselves, and reminders go out in Telegram 24 hours and 2 hours before the visit."
       fact_ids: [self-booking-link, reminders]
       note: механизм одной фразой
-  sources: [07-seo-geo-copy/meta-rules.yaml, 08-russian-legal-typography (отчёт H §4 G)]
+  sources: [07-seo-geo-copy/meta-rules.yaml, 08-russian-legal-typography]
   date: '2026-09-24'
 - id: og-image-alt
   name: "og:image:alt"
   purpose: "Что на картинке превью ссылки — для читалок и сервисов без картинок."
-  rules_owner: "ai-media — ../ai-media/10-web-integration/01-images-delivery.md §7–8; G — meta-rules.yaml limits.og-image-alt"
+  rules_owner: "ai-media — ../ai-media/10-web-integration/01-images-delivery.md §7–8; meta-rules.yaml limits.og-image-alt"
   genres: [meta]
   genre: meta
   ux_role: alt
@@ -2715,15 +2710,15 @@ slot_types:
     ru:
       words: {min: 3, target: 8, max: 16}
       provisional: true
-      source: "правило E по ai-media 10/01 §8: одно предложение о содержании картинки"
+      source: "правило базы по ai-media 10/01 §8: одно предложение о содержании картинки"
     en:
       words: {min: 3, target: 8, max: 16}
       provisional: true
-      source: "правило E по ai-media 10/01 §8: одно предложение о содержании картинки"
+      source: "правило базы по ai-media 10/01 §8: одно предложение о содержании картинки"
   structure: "«Обложка: [заголовок на картинке]» или что изображено."
   formula_ids: []
   rules:
-  - "Описывает содержание картинки; текст, запечённый в картинку, передаётся дословно (ai-media 10/01 §8) — через двоеточие, без «ёлочек»: claims_check.py принимает кавычки за цитату отзыва (COPY-F-QUOTE, ложное для alt — передано B2)."
+  - "Описывает содержание картинки; текст, запечённый в картинку, передаётся дословно (ai-media 10/01 §8) — через двоеточие, без «ёлочек»: claims_check.py принимает кавычки за цитату отзыва (COPY-F-QUOTE, ложное для alt)."
   bans:
   - "«Картинка», «image», «фото счастливого клиента» для сгенерированного кадра."
   fact_required: if-claim
@@ -2751,7 +2746,7 @@ slot_types:
 - id: article-title
   name: Заголовок статьи (H1)
   purpose: Кто читатель и какую пользу получит; не сильнее содержания.
-  rules_owner: "G — 07-seo-geo-copy/02-seo-pages-articles-meta.md; кликбейт — meta-clickbait (G)"
+  rules_owner: "07-seo-geo-copy/02-seo-pages-articles-meta.md; кликбейт — meta-clickbait"
   section_roles: [article-body, legal]
   genres: [article]
   genre: article
@@ -2767,8 +2762,8 @@ slot_types:
       primary: chars
       n_pages: 9
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.article.slots.article-title.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.article.slots.article-title.ru
     en:
       words: {min: 6, target: 10, max: 14}
       hard_words: [3, 20]
@@ -2779,19 +2774,19 @@ slot_types:
       primary: words
       n_pages: 9
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.article.slots.article-title.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.article.slots.article-title.en
   structure: "Польза + кому + ограничение (Ильяхов: кто и какая польза → сузить → ценность формата → бирка) [V:y0iIV5meaB4 27:42]."
   formula_ids: [benefit-prism, four-u, caples-headline-qualities]
   rules:
-  - "Правила — G; обещание заголовка находится в тексте (обманутое ожидание — [V:y0iIV5meaB4 31:52])."
+  - "Правила — text 07; обещание заголовка находится в тексте (обманутое ожидание — [V:y0iIV5meaB4 31:52])."
   bans:
-  - "Кликбейт («Номер 3 вас удивит»), негатив ради клика на странице бренда (A/02 §7)."
+  - "Кликбейт («Номер 3 вас удивит»), негатив ради клика на странице бренда (text 01/02 §7)."
   fact_required: if-claim
   claim_classes: [fact-number]
   legal_rules: []
   lint_markers: [COPY-M-MKT-08]
-  voice: Допустимые рычаги заголовка — поле голоса F.
+  voice: Допустимые рычаги заголовка — поле профиля голоса.
   examples:
     ru:
       facts: otves
@@ -2815,7 +2810,7 @@ slot_types:
 - id: article-lead
   name: Лид статьи
   purpose: "Кому статья и что он узнает; ответ на главный вопрос — первыми фразами."
-  rules_owner: "G — 07-seo-geo-copy/02, 03"
+  rules_owner: "07-seo-geo-copy/02, 03"
   section_roles: [article-body]
   genres: [article]
   genre: article
@@ -2831,8 +2826,8 @@ slot_types:
       primary: chars
       n_pages: 11
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.article.slots.article-lead.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.article.slots.article-lead.ru
     en:
       words: {min: 5, target: 29, max: 72}
       hard_words: [2, 108]
@@ -2843,12 +2838,12 @@ slot_types:
       primary: words
       n_pages: 9
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.article.slots.article-lead.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.article.slots.article-lead.en
   structure: Ситуация читателя → что узнает → опыт автора (E-E-A-T).
   formula_ids: [inverted-pyramid, benefit-prism]
   rules:
-  - "Правила — G; первые пять слов — о читателе, а не об авторе ([V:_jwKQ6ZCeAI 04:05])."
+  - "Правила — text 07; первые пять слов — о читателе, а не об авторе ([V:_jwKQ6ZCeAI 04:05])."
   bans:
   - "«В этой статье мы расскажем…», «Давайте разберёмся» (анонс), разгон «В современном мире…»."
   fact_required: if-claim
@@ -2877,7 +2872,7 @@ slot_types:
 - id: article-summary
   name: «Коротко» в начале статьи
   purpose: "Ответ на вопрос статьи в 40–80 словах с 2–3 фактами — для читателя и для ответов нейросетей."
-  rules_owner: "G — geo-checklist.yaml (COPY-GEO-08…10, «коротко» 40–80 слов), 03-geo-copy.md §3"
+  rules_owner: "geo-checklist.yaml (COPY-GEO-08…10, «коротко» 40–80 слов), 03-geo-copy.md §3"
   section_roles: [article-body]
   genres: [article, geo]
   genre: geo
@@ -2886,14 +2881,14 @@ slot_types:
     ru:
       words: {min: 40, target: 60, max: 80}
       provisional: true
-      source: "G geo-checklist.yaml: «коротко» и абзац-ответ — 40–80 слов, не длиннее 100 (Pew 2025: медиана ИИ-сводки Google 67 слов)"
+      source: "geo-checklist.yaml: «коротко» и абзац-ответ — 40–80 слов, не длиннее 100 (Pew 2025: медиана ИИ-сводки Google 67 слов)"
     en:
       words: {min: 40, target: 60, max: 80}
       provisional: true
-      source: "G geo-checklist.yaml: «коротко» и абзац-ответ — 40–80 слов, не длиннее 100 (Pew 2025: медиана ИИ-сводки Google 67 слов)"
+      source: "geo-checklist.yaml: «коротко» и абзац-ответ — 40–80 слов, не длиннее 100 (Pew 2025: медиана ИИ-сводки Google 67 слов)"
   structure: "Ответ → 2–3 факта с датой и источником → условие применимости."
   formula_ids: [inverted-pyramid]
-  rules: [Правила — G; факты — canonical из facts.yaml (B2 §4.2).]
+  rules: [Правила — text 07; факты — canonical из facts.yaml (text 02/03 §4.2).]
   bans: [Пересказ оглавления вместо ответа; «Подводя итог».]
   fact_required: always
   claim_classes: [fact-number, price-discount, guarantee]
@@ -2908,7 +2903,7 @@ slot_types:
       good: "Ремонт квартиры под ключ в студии «Отвес» стоит от 9 800 ₽ за м² без материалов (прайс на 2026 год). Точную сумму показывает смета: замер и смета бесплатны в черте города. На выполненные работы действует гарантия 3 года по договору подряда, пункт 7.2. Двушку 54 м² в Сормове в 2026 году сдали за 47 рабочих дней при сроке по договору 50."
       fact_ids: [price-from-per-m2, estimate-free, guarantee-3-years, case-two-room-47-days]
       allow_warn: [COPY-F-USE]
-      note: "canonical-формулировки фактов; COPY-F-USE — у фактов B2 нет article-body в use (для статей use расширить — B2)"
+      note: "canonical-формулировки фактов; COPY-F-USE — у фактов нет article-body в use (для статей use расширить)"
     en:
       facts: okoshko
       genre: geo
@@ -2922,7 +2917,7 @@ slot_types:
 - id: article-heading
   name: "Подзаголовок статьи (H2, H3)"
   purpose: "Вопрос или тезис раздела — так, как его ищут; разделы по смыслу, не по чанкам для ИИ."
-  rules_owner: "G — 07-seo-geo-copy/02, 03 (COPY-GEO-09, -10)"
+  rules_owner: "07-seo-geo-copy/02, 03 (COPY-GEO-09, -10)"
   section_roles: [article-body, legal]
   genres: [article]
   genre: article
@@ -2938,8 +2933,8 @@ slot_types:
       primary: chars
       n_pages: 11
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.article.slots.article-heading.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.article.slots.article-heading.ru"
     en:
       words: {min: 3, target: 6, max: 10}
       hard_words: [1, 15]
@@ -2950,12 +2945,12 @@ slot_types:
       primary: words
       n_pages: 8
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.article.slots.article-heading.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.article.slots.article-heading.en"
   structure: "Вопрос читателя или тезис: «Какие работы чаще всего забывают в смете»."
   formula_ids: [question-proof-action]
   rules:
-  - "Правила — G; Google против дробления на «bite-sized chunks» ради LLM ([V:i4jDc58ofH4])."
+  - "Правила — text 07; Google против дробления на «bite-sized chunks» ради LLM ([V:i4jDc58ofH4])."
   bans:
   - "«Введение», «Заключение», «Подводя итоги» как H2."
   fact_required: never
@@ -2984,7 +2979,7 @@ slot_types:
 - id: article-paragraph
   name: Абзац статьи
   purpose: "Одна мысль с фактом или примером из опыта; абзац понятен без соседних."
-  rules_owner: G — 07-seo-geo-copy/02; ритм и маркеры — C (профиль article)
+  rules_owner: 07-seo-geo-copy/02; ритм и маркеры — линтер (профиль article)
   section_roles: [article-body, legal]
   genres: [article]
   genre: article
@@ -3000,8 +2995,8 @@ slot_types:
       primary: chars
       n_pages: 12
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.article.slots.article-paragraph.ru"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.article.slots.article-paragraph.ru"
     en:
       words: {min: 5, target: 23, max: 63}
       hard_words: [2, 95]
@@ -3012,14 +3007,14 @@ slot_types:
       primary: words
       n_pages: 9
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: "D thresholds.yaml v2 · genres.article.slots.article-paragraph.en"
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: "thresholds.yaml v2 · genres.article.slots.article-paragraph.en"
   structure: "Тезис → факт или пример из опыта автора → вывод для читателя."
   formula_ids: [inverted-pyramid, fact-scenario]
   rules:
-  - "Правила — G и C (article: ритм «≥ 6» у лидеров статей работает — D §3); опыт из первых рук — E-E-A-T."
+  - "Правила — text 07 и линтер (article: ритм «≥ 6» у лидеров статей работает — text 03/02 §3); опыт из первых рук — E-E-A-T."
   bans:
-  - "Абзацы «под копирку» (CV длины абзацев у ai-self 0,36 против 0,54–0,61 у людей, D §3)."
+  - "Абзацы «под копирку» (CV длины абзацев у ai-self 0,36 против 0,54–0,61 у людей, text 03/02 §3)."
   fact_required: if-claim
   claim_classes: [fact-number, price-discount]
   legal_rules: []
@@ -3044,7 +3039,7 @@ slot_types:
 - id: article-author
   name: "Автор, его опыт (E-E-A-T)"
   purpose: "Кто пишет и почему ему можно верить: должность, опыт в годах и объектах — только из фактов."
-  rules_owner: "G — 07-seo-geo-copy/03 §3.5 (COPY-GEO-05, -19)"
+  rules_owner: "07-seo-geo-copy/03 §3.5 (COPY-GEO-05, -19)"
   section_roles: [article-body, story, hero, team, about]
   genres: [article]
   genre: article
@@ -3053,15 +3048,15 @@ slot_types:
     ru:
       words: {min: 4, target: 10, max: 20}
       provisional: true
-      source: "правило E: у D нет замера; имя + роль + опыт одной строкой"
+      source: "правило базы: в корпусе нет замера; имя + роль + опыт одной строкой"
     en:
       words: {min: 4, target: 10, max: 20}
       provisional: true
-      source: "правило E: у D нет замера; имя + роль + опыт одной строкой"
+      source: "правило базы: в корпусе нет замера; имя + роль + опыт одной строкой"
   structure: "«[Имя], [роль], [опыт числом]» — из факта person с согласием."
   formula_ids: []
   rules:
-  - "Только реальный человек с согласием (B2 person); ИИ-текст под именем человека — недостоверная рекомендация (H §7, Яндекс [V:AbqU-GxAYs8 48:57])."
+  - "Только реальный человек с согласием (факт person); ИИ-текст под именем человека — недостоверная рекомендация (text 08/01 §7, Яндекс [V:AbqU-GxAYs8 48:57])."
   bans:
   - "«Эксперт с многолетним опытом», выдуманный автор, сгенерированное фото."
   fact_required: always
@@ -3090,7 +3085,7 @@ slot_types:
 - id: geo-answer
   name: Самодостаточный абзац-ответ для цитирования нейросетью
   purpose: "Ответ на один вопрос, понятный без окружения: сущность названа, факт с датой и источником."
-  rules_owner: "G — 07-seo-geo-copy/geo-checklist.yaml, geo-rules.yaml, 03-geo-copy.md"
+  rules_owner: "07-seo-geo-copy/geo-checklist.yaml, geo-rules.yaml, 03-geo-copy.md"
   section_roles: [faq, about, article-body, pricing, story, seo-text, problem, solution]
   genres: [geo]
   genre: geo
@@ -3099,15 +3094,15 @@ slot_types:
     ru:
       words: {min: 40, target: 60, max: 80}
       provisional: true
-      source: "G geo-checklist.yaml: абзац-ответ 40–80 слов, не длиннее 100"
+      source: "geo-checklist.yaml: абзац-ответ 40–80 слов, не длиннее 100"
     en:
       words: {min: 40, target: 60, max: 80}
       provisional: true
-      source: "G geo-checklist.yaml: абзац-ответ 40–80 слов, не длиннее 100"
+      source: "geo-checklist.yaml: абзац-ответ 40–80 слов, не длиннее 100"
   structure: "«[Сущность] — [категория], [главное отличие с фактом]. [Факт 2 с датой]. [Условие]»."
   formula_ids: [inverted-pyramid, category-statement]
   rules:
-  - "Правила — G (ответ первым, абзац самодостаточен, canonical, без местоимения в начале — geo-pronoun-lead)."
+  - "Правила — text 07 (ответ первым, абзац самодостаточен, canonical, без местоимения в начале — geo-pronoun-lead)."
   bans:
   - "«Мы» без названия сущности; «как известно», «эксперты считают» (размытая атрибуция — error в geo)."
   fact_required: always
@@ -3123,7 +3118,7 @@ slot_types:
       good: "Студия «Отвес» ремонтирует квартиры под ключ в Нижнем Новгороде с 2014 года. С 2014 по сентябрь 2026 года студия сдала 1 146 квартир (данные CRM на 1 сентября 2026 года). На выполненные работы действует гарантия 3 года по договору подряда, пункт 7.2."
       fact_ids: [company-since-2014, flats-completed, guarantee-3-years]
       allow_warn: [COPY-F-USE]
-      note: "сущность названа, факты — canonical; COPY-F-USE — у гарантии B2 нет about в use"
+      note: "сущность названа, факты — canonical; COPY-F-USE — у гарантии нет about в use"
     en:
       facts: okoshko
       genre: geo
@@ -3138,7 +3133,7 @@ slot_types:
 - id: definition
   name: Определение термина или сущности
   purpose: "«X — это Y, который Z» одной-двумя фразами: для глоссария, FAQ и ответов нейросетей."
-  rules_owner: "G — geo-rules.yaml (geo-definition-form), 03-geo-copy.md §3.6"
+  rules_owner: "geo-rules.yaml (geo-definition-form), 03-geo-copy.md §3.6"
   section_roles: [faq, article-body, about, story, seo-text, problem, solution]
   genres: [geo, article]
   genre: geo
@@ -3147,15 +3142,15 @@ slot_types:
     ru:
       words: {min: 12, target: 25, max: 45}
       provisional: true
-      source: "правило E по G: определение — 1–2 предложения"
+      source: "правило базы по text 07/03: определение — 1–2 предложения"
     en:
       words: {min: 12, target: 25, max: 45}
       provisional: true
-      source: "правило E по G: определение — 1–2 предложения"
+      source: "правило базы по text 07/03: определение — 1–2 предложения"
   structure: "«[Термин] — [род], [видовое отличие]; [пример или условие]»."
   formula_ids: [category-statement]
   rules:
-  - "Правила — G; определение не рекламирует: без «лучший», «уникальный»."
+  - "Правила — text 07; определение не рекламирует: без «лучший», «уникальный»."
   bans:
   - "Определение через само слово («Ремонт под ключ — это ремонт под ключ»); оценки вместо признаков."
   fact_required: if-claim
@@ -3192,12 +3187,12 @@ slot_types:
       words: {min: 2, target: 5, max: 8}
       chars: {min: 15, target: 35, max: 50}
       provisional: true
-      source: "ux 07/02 §16.1: суть в первых двух словах, ≤ 50 знаков; D писем не мерил (живая фаза)"
+      source: "ux 07/02 §16.1: суть в первых двух словах, ≤ 50 знаков; писем в корпусе нет"
     en:
       words: {min: 2, target: 6, max: 9}
       chars: {min: 15, target: 35, max: 50}
       provisional: true
-      source: "ux 07/02 §16.1: суть в первых двух словах, ≤ 50 знаков; D писем не мерил (живая фаза)"
+      source: "ux 07/02 §16.1: суть в первых двух словах, ≤ 50 знаков; писем в корпусе нет"
   structure: "«[Событие или действие]: [деталь]» — «Заявка на замер принята», «Подтвердите адрес — пробный период начнётся сразу»."
   formula_ids: [four-u, benefit-prism]
   rules:
@@ -3240,12 +3235,12 @@ slot_types:
       words: {min: 5, target: 10, max: 16}
       chars: {min: 35, target: 70, max: 100}
       provisional: true
-      source: "правило E [не проверено]: видимая длина зависит от почтового клиента; проверка — живая фаза"
+      source: "правило базы [не проверено]: видимая длина зависит от почтового клиента; проверка — на живых письмах"
     en:
       words: {min: 5, target: 11, max: 18}
       chars: {min: 35, target: 70, max: 100}
       provisional: true
-      source: "правило E [не проверено]: видимая длина зависит от почтового клиента; проверка — живая фаза"
+      source: "правило базы [не проверено]: видимая длина зависит от почтового клиента; проверка — на живых письмах"
   structure: "Следующий шаг или условие: «Замерщик позвонит, чтобы договориться о времени»."
   formula_ids: []
   rules:
@@ -3285,11 +3280,11 @@ slot_types:
     ru:
       words: {min: 2, target: 5, max: 9}
       provisional: true
-      source: "правило E: как заголовок формы"
+      source: "правило базы: как заголовок формы"
     en:
       words: {min: 2, target: 5, max: 10}
       provisional: true
-      source: "правило E: как заголовок формы"
+      source: "правило базы: как заголовок формы"
   structure: "Статус или действие: «Заявка на замер принята», «Подтвердите адрес»."
   formula_ids: []
   rules:
@@ -3327,11 +3322,11 @@ slot_types:
     ru:
       words: {min: 25, target: 60, max: 120}
       provisional: true
-      source: "правило E [не проверено]: 2–5 коротких абзацев; писем в корпусе D нет (живая фаза)"
+      source: "правило базы [не проверено]: 2–5 коротких абзацев; писем в корпусе нет"
     en:
       words: {min: 25, target: 65, max: 130}
       provisional: true
-      source: "правило E [не проверено]: 2–5 коротких абзацев; писем в корпусе D нет (живая фаза)"
+      source: "правило базы [не проверено]: 2–5 коротких абзацев; писем в корпусе нет"
   structure: "Статус → что дальше (кто, когда, каким каналом) → одно действие → условие или реквизит; для рассылки — подпись человека."
   formula_ids: [inverted-pyramid, four-p, pas, bab]
   rules:
@@ -3344,7 +3339,7 @@ slot_types:
   claim_classes: [price-discount, purchase-terms, fact-number, guarantee]
   legal_rules: [COPY-L-FREE-01, COPY-L-SUP-01, COPY-L-GUAR-02]
   lint_markers: [COPY-M-MKT-01, COPY-M-MKT-14]
-  voice: "Голос F: письма «робота» и «команды» различаются (ux 07/02 §16.1)."
+  voice: "Голос: письма «робота» и «команды» различаются (ux 07/02 §16.1)."
   examples:
     ru:
       facts: otves
@@ -3384,8 +3379,8 @@ slot_types:
       primary: chars
       n_pages: 22
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.email-form.slots.cta-label.ru
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.email-form.slots.cta-label.ru
     en:
       words: {min: 2, target: 2, max: 4}
       hard_words: [1, 7]
@@ -3396,8 +3391,8 @@ slot_types:
       primary: words
       n_pages: 26
       provisional: true
-      note: "provisional у D: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
-      source: D thresholds.yaml v2 · genres.email-form.slots.cta-label.en
+      note: "provisional в замере корпуса: меньше 12 страниц лидеров или лидеры + средний рынок — ориентир, не норма"
+      source: thresholds.yaml v2 · genres.email-form.slots.cta-label.en
   structure: "Инфинитив совершенного вида + объект (RU); глагол + объект или первое лицо (EN)."
   formula_ids: []
   rules:
@@ -3437,15 +3432,15 @@ slot_types:
     ru:
       words: {min: 10, target: 25, max: 45}
       provisional: true
-      source: "правило E: причина + отписка + отправитель"
+      source: "правило базы: причина + отписка + отправитель"
     en:
       words: {min: 10, target: 25, max: 45}
       provisional: true
-      source: "правило E: причина + отписка + отправитель"
+      source: "правило базы: причина + отписка + отправитель"
   structure: "«Письмо пришло, потому что [действие человека]. [Отписка — одной ссылкой, если рассылка]. [Реквизиты отправителя]»."
   formula_ids: []
   rules:
-  - "Рекламная рассылка — только с предварительного согласия и с отпиской в каждом письме (38-ФЗ ст. 18 ч. 1; H §8.2); отписка тем же каналом, без входа (ux 06/04 §8.1 п. 15)."
+  - "Рекламная рассылка — только с предварительного согласия и с отпиской в каждом письме (38-ФЗ ст. 18 ч. 1; text 08/01 §8.2); отписка тем же каналом, без входа (ux 06/04 §8.1 п. 15)."
   - "Транзакционное письмо говорит, что оно не рассылка, и не содержит рекламы."
   bans:
   - "«Чтобы отписаться, свяжитесь с менеджером», «отписка в личном кабинете после входа» (obstruction, ux 06/04 §3.8)."
@@ -3484,15 +3479,15 @@ slot_types:
     ru:
       words: {min: 3, target: 10, max: 20}
       provisional: true
-      source: "правило E по ai-media 10/01 §8: одно предложение; декоративная — пустой alt"
+      source: "правило базы по ai-media 10/01 §8: одно предложение; декоративная — пустой alt"
     en:
       words: {min: 3, target: 10, max: 20}
       provisional: true
-      source: "правило E по ai-media 10/01 §8: одно предложение; декоративная — пустой alt"
+      source: "правило базы по ai-media 10/01 §8: одно предложение; декоративная — пустой alt"
   structure: "Кто или что + действие или состояние + деталь, важная для страницы; декоративная картинка — пустой alt."
   formula_ids: []
   rules:
-  - "Правила — ai-media 10/01 §8; люди и объекты на фото — только настоящие, с согласием (B2 person, H §7)."
+  - "Правила — ai-media 10/01 §8; люди и объекты на фото — только настоящие, с согласием (факт person, text 08/01 §7)."
   bans:
   - "«Изображение», «фото», «картинка»; alt-реклама («лучший ремонт в городе»)."
   fact_required: if-claim
@@ -3540,7 +3535,7 @@ slot_types:
   - "Правила — ai-media 05/03 §7; текст — HTML поверх фона там, где можно (ai-media 01/01 §2.1: OG — шаблон)."
   - "Сверяется claims_check.py как текст страницы; alt картинки повторяет надпись дословно."
   bans:
-  - "Превосходная степень и цены без условия (в картинке оговорку не видно — H, ст. 5 ч. 7)."
+  - "Превосходная степень и цены без условия (в картинке оговорку не видно — 38-ФЗ ст. 5 ч. 7)."
   fact_required: if-claim
   claim_classes: [price-discount, superlative]
   legal_rules: [COPY-L-SUP-01, COPY-L-FREE-01, COPY-L-PRICE-03]
@@ -3566,9 +3561,9 @@ slot_types:
   date: '2026-09-24'
 - id: stat-source
   name: "Источник и дата числа, рейтинга, подборки отзывов"
-  purpose: "Короткая строка «кто посчитал и когда» рядом с числом: делает доказательство проверяемым (на живых лендингах источник виден у 25 % доказательных утверждений — B2/04)."
+  purpose: "Короткая строка «кто посчитал и когда» рядом с числом: делает доказательство проверяемым (на живых лендингах источник виден у 25 % доказательных утверждений — text 02/03 §6)."
   proposal: true
-  proposal_note: "предложение B2 (x-vocabulary-proposals), принято E: источник и дата числа, рейтинга, подборки отзывов — requires_nearby фактов"
+  proposal_note: "предложение text к словарю site (x-vocabulary-proposals): источник и дата числа, рейтинга, подборки отзывов — requires_nearby фактов"
   lint_as: stat-label
   section_roles: [proof-stats, hero, testimonials, case-studies, pricing, comparison]
   genres: [landing, site-page]
@@ -3578,15 +3573,15 @@ slot_types:
     ru:
       words: {min: 2, target: 4, max: 8}
       provisional: true
-      source: "правило E: площадка или документ + дата"
+      source: "правило базы: площадка или документ + дата"
     en:
       words: {min: 2, target: 4, max: 8}
       provisional: true
-      source: "правило E: площадка или документ + дата"
+      source: "правило базы: площадка или документ + дата"
   structure: "«[площадка или документ], [дата]»: «Яндекс Карты, 01.09.2026», «CRM, акты на 01.09.2026», «Подборка: последние 6 отзывов с Яндекс Карт»."
   formula_ids: []
   rules:
-  - "Ставится у каждого скоропортящегося числа и у подборки отзывов (B2 §1.3, §5.2); ссылка на карточку площадки — лучше (внешнее сильнее своего)."
+  - "Ставится у каждого скоропортящегося числа и у подборки отзывов (text 02/03 §1.3, §5.2); ссылка на карточку площадки — лучше (внешнее сильнее своего)."
   - "Текст совпадает с requires_nearby факта (claims_check COPY-F-NEARBY)."
   bans:
   - "«По данным исследований», «по мнению экспертов», «according to experts» — размытая атрибуция."
@@ -3629,7 +3624,7 @@ slot_types:
   name: Прежняя (зачёркнутая) цена
   purpose: "Цена, по которой товар или услугу реально продавали в указанный период; без такого факта слот не заполняется."
   proposal: true
-  proposal_note: "предложение B2, принято E: зачёркнутая «старая» цена — отдельный слот, чтобы use.not_in: [price-old] и правило H COPY-L-PRICE-04 работали"
+  proposal_note: "предложение text к словарю site: зачёркнутая «старая» цена — отдельный слот, чтобы use.not_in: [price-old] и правило COPY-L-PRICE-04 работали"
   lint_as: pricing-price
   section_roles: [pricing, hero, offer, promo]
   genres: [landing, site-page]
@@ -3639,15 +3634,15 @@ slot_types:
     ru:
       words: {min: 1, target: 2, max: 4}
       provisional: true
-      source: "правило E: как pricing-price"
+      source: "правило базы: как pricing-price"
     en:
       words: {min: 1, target: 2, max: 4}
       provisional: true
-      source: "правило E: как pricing-price"
+      source: "правило базы: как pricing-price"
   structure: "«[N] ₽» + период продаж по этой цене — в pricing-price-note."
   formula_ids: []
   rules:
-  - "Только цена, реально действовавшая (факт с valid.from и периодом); ЕС — минимальная за 30 дней до снижения (H §11)."
+  - "Только цена, реально действовавшая (факт с valid.from и периодом); ЕС — минимальная за 30 дней до снижения (text 08/01 §11)."
   - "«Цена после предзаказа» — не старая цена: зачёркивать нельзя («Кварц», use.not_in: [price-old] — COPY-F-USE error)."
   bans:
   - "Зачёркнутая цена товара, который ещё не продавался; «было 11 900 ₽» без периода."
@@ -3681,7 +3676,7 @@ slot_types:
   name: "Строка характеристик: параметр — значение"
   purpose: "Измеримое свойство товара или сервиса в табличной форме — для продуктовой страницы и сравнения тарифов."
   proposal: true
-  proposal_note: "предложение B2 (specs, spec-row), принято E: строка характеристик для продуктовой страницы (Hallmark F3 Tabular spec sheet); роль секции specs — предложение к section_roles (site)"
+  proposal_note: "предложение text к словарю site (specs, spec-row): строка характеристик для продуктовой страницы (Hallmark F3 Tabular spec sheet); роль секции specs — предложение к section_roles (site)"
   lint_as: list-item
   section_roles: [solution, pricing, comparison, product-demo, specs, offer]
   genres: [landing, site-page]
@@ -3691,15 +3686,15 @@ slot_types:
     ru:
       words: {min: 2, target: 5, max: 10}
       provisional: true
-      source: "правило E: параметр + значение с единицей; у D метки характеристик («Zigbee», «LED-дисплей») размечены как card-body (опыт E/01)"
+      source: "правило базы: параметр + значение с единицей; в корпусе метки характеристик («Zigbee», «LED-дисплей») размечены как card-body"
     en:
       words: {min: 2, target: 5, max: 10}
       provisional: true
-      source: "правило E: параметр + значение с единицей; у D метки характеристик («Zigbee», «LED-дисплей») размечены как card-body (опыт E/01)"
+      source: "правило базы: параметр + значение с единицей; в корпусе метки характеристик («Zigbee», «LED-дисплей») размечены как card-body"
   structure: "«[параметр] — [значение с единицей]»: «Цветовая температура — 2700–5000 K»."
   formula_ids: []
   rules:
-  - "Значение и единица — из факта; диапазон «2700–5000 K» — с коротким тире без пробелов (H)."
+  - "Значение и единица — из факта; диапазон «2700–5000 K» — с коротким тире без пробелов (text 08/02 §1.3)."
   - "Технические характеристики для экспертов — таблицей без сценария (formulas.yaml fact-scenario: avoid_when)."
   bans:
   - "«Инновационная система», «AI-powered» без механизма (fact-property без выдержки — COPY-F-PROPERTY)."
@@ -3725,13 +3720,12 @@ slot_types:
   sources:
   - "02-strategy-messaging/facts.schema.yaml (x-vocabulary-proposals)"
   - Hallmark component-cookbook F3
-  - 99-raw/experiments/E/01-slot-lengths
   date: '2026-09-24'
 - id: image-caption
   name: Подпись к изображению
   purpose: "Что на фото или скриншоте, где и когда, какая задача клиента — видимая подпись, в отличие от alt."
   proposal: true
-  proposal_note: "предложение E (вслед за J: asset_ref image-caption в схеме copy-deck v1): подпись к фото работы, объекта, скриншоту; alt — отдельный слот"
+  proposal_note: "предложение text к словарю site (asset_ref image-caption в схеме copy-deck): подпись к фото работы, объекта, скриншоту; alt — отдельный слот"
   lint_as: stat-label
   section_roles: [portfolio, case-studies, product-demo, team, story, seo-text, problem, solution, about, article-body]
   genres: [landing, site-page, article]
@@ -3741,15 +3735,15 @@ slot_types:
     ru:
       words: {min: 3, target: 8, max: 16}
       provisional: true
-      source: "правило E: одна строка подписи"
+      source: "правило базы: одна строка подписи"
     en:
       words: {min: 3, target: 8, max: 16}
       provisional: true
-      source: "правило E: одна строка подписи"
+      source: "правило базы: одна строка подписи"
   structure: "«[объект], [место или задача], [дата]»; для портфолио — задача клиента его словами ([V:1UVkeqxuNRs 39:02])."
   formula_ids: []
   rules:
-  - "Фото — настоящее, от заказчика, с согласием на показ (B2: asset, permission); сгенерированное — с меткой (ai-media 12/02 §7)."
+  - "Фото — настоящее, от заказчика, с согласием на показ (факт: asset, permission); сгенерированное — с меткой (ai-media 12/02 §7)."
   - "Подпись не дублирует alt: alt — что видно, подпись — контекст (где, когда, зачем)."
   bans:
   - "«Наша работа», «Our amazing work», стоковое фото с подписью о «клиенте»."
@@ -3781,7 +3775,7 @@ slot_types:
   name: Строка объявления над навигацией
   purpose: "Короткое объявление на всех страницах: акция с датой окончания, событие, важное изменение условий."
   proposal: true
-  proposal_note: "предложение E: строка объявления над навигацией (Hallmark N12 Announcement banner) — акция с датой, событие, изменение; как баннер — реклама с пометкой (H §8.3)"
+  proposal_note: "предложение text к словарю site: строка объявления над навигацией (Hallmark N12 Announcement banner) — акция с датой, событие, изменение; как баннер — реклама с пометкой (text 08/01 §8.3)"
   lint_as: cta-note
   section_roles: [hero, header]
   genres: [landing, site-page]
@@ -3791,15 +3785,15 @@ slot_types:
     ru:
       words: {min: 4, target: 9, max: 16}
       provisional: true
-      source: "правило E: одна строка на телефоне (≈ 40–45 знаков) допускает перенос на две"
+      source: "правило базы: одна строка на телефоне (≈ 40–45 знаков) допускает перенос на две"
     en:
       words: {min: 4, target: 9, max: 16}
       provisional: true
-      source: "правило E: одна строка на телефоне (≈ 40–45 знаков) допускает перенос на две"
+      source: "правило базы: одна строка на телефоне (≈ 40–45 знаков) допускает перенос на две"
   structure: "«[что] + [условие] + [до какой даты]»; ссылка — на условия."
   formula_ids: [four-u]
   rules:
-  - "Срок — реальная дата из факта, условия — в той же строке (H COPY-L-PROMO-02, FREE-01); после даты строка снимается."
+  - "Срок — реальная дата из факта, условия — в той же строке (COPY-L-PROMO-02, FREE-01); после даты строка снимается."
   - "Баннер или промо-строка чужого товара — реклама: пометка «Реклама» и рекламодатель (38-ФЗ ст. 18.1; COPY-L-AD-01)."
   bans:
   - "«Успейте!», «Только сегодня!», таймер без реального дедлайна (ux 06/04 §8.1 п. 10)."
@@ -3835,33 +3829,33 @@ slot_types:
   genre: landing
   ux_role: caption
   lint_as: footer-legal
-  rules_owner: "H — 08-russian-legal-typography (оговорки у утверждений: claims-rules.yaml, 01-advertising-law-claims.md)"
+  rules_owner: "08-russian-legal-typography (оговорки у утверждений: claims-rules.yaml, 01-advertising-law-claims.md)"
   fact_required: if-claim
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
   - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
 - id: ad-marking
   name: Маркировка рекламы
-  purpose: "«Реклама», рекламодатель, токен erid у рекламного блока (38-ФЗ ст. 18.1 — I)"
+  purpose: "«Реклама», рекламодатель, токен erid у рекламного блока (38-ФЗ ст. 18.1 — site 08/01)"
   section_roles: [proof-logos, integrations, promo, related]
   genres: [landing, site-page, email-form]
   genre: landing
   ux_role: caption
   lint_as: footer-legal
-  rules_owner: "H — 08-russian-legal-typography (маркировка рекламы, 38-ФЗ ст. 18.1; строки права — site legal-requirements.yaml)"
+  rules_owner: "08-russian-legal-typography (маркировка рекламы, 38-ФЗ ст. 18.1; строки права — site legal-requirements.yaml)"
   fact_required: always
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
   - "../site/04-blocks/blocks.yaml#text_slot_defaults (класс факта)"
 - id: cookie-text
   name: Текст баннера cookie
-  purpose: "Что за cookie и зачем; кнопки выбора (право — I)"
+  purpose: "Что за cookie и зачем; кнопки выбора (право — site 08/01)"
   section_roles: [utility]
   genres: [landing, site-page]
   genre: landing
   ux_role: checkbox-label
   lint_as: form-consent
-  rules_owner: "H — 08-russian-legal-typography (текст согласия; право — site legal-requirements.yaml)"
+  rules_owner: "08-russian-legal-typography (текст согласия; право — site legal-requirements.yaml)"
   fact_required: never
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3874,7 +3868,7 @@ slot_types:
   genre: article
   ux_role: caption
   lint_as: article-author
-  rules_owner: "G — 07-seo-geo-copy/03-geo-copy.md (дата публикации и обновления статьи)"
+  rules_owner: "07-seo-geo-copy/03-geo-copy.md (дата публикации и обновления статьи)"
   fact_required: always
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3887,7 +3881,7 @@ slot_types:
   genre: article
   ux_role: marketing
   lint_as: list-item
-  rules_owner: "G — 07-seo-geo-copy/03-geo-copy.md (источники статьи)"
+  rules_owner: "07-seo-geo-copy/03-geo-copy.md (источники статьи)"
   fact_required: always
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3900,7 +3894,7 @@ slot_types:
   genre: landing
   ux_role: hint
   lint_as: cta-note
-  rules_owner: "E — 04-copy-by-block (строка «когда, где, формат» события)"
+  rules_owner: "04-copy-by-block (строка «когда, где, формат» события)"
   fact_required: always
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3912,7 +3906,7 @@ slot_types:
   genre: landing
   ux_role: section-title
   lint_as: faq-q
-  rules_owner: "E — 04-copy-by-block (квиз)"
+  rules_owner: "04-copy-by-block (квиз)"
   fact_required: never
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3924,7 +3918,7 @@ slot_types:
   genre: landing
   ux_role: marketing
   lint_as: list-item
-  rules_owner: "E — 04-copy-by-block (квиз)"
+  rules_owner: "04-copy-by-block (квиз)"
   fact_required: never
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3937,7 +3931,7 @@ slot_types:
   genre: landing
   ux_role: inline-message
   lint_as: form-success
-  rules_owner: "E — 04-copy-by-block/04-form-emails-notifications.md (итог квиза или калькулятора)"
+  rules_owner: "04-copy-by-block/04-form-emails-notifications.md (итог квиза или калькулятора)"
   fact_required: if-claim
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3950,7 +3944,7 @@ slot_types:
   genre: landing
   ux_role: caption
   lint_as: footer-legal
-  rules_owner: "E — 04-copy-by-block (контакты текстом); набор телефона и адреса — typography-rules.yaml"
+  rules_owner: "04-copy-by-block (контакты текстом); набор телефона и адреса — typography-rules.yaml"
   fact_required: always
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3962,7 +3956,7 @@ slot_types:
   genre: email-form
   ux_role: email
   lint_as: email-subject
-  rules_owner: "E — 04-copy-by-block/04-form-emails-notifications.md §3.3 (имя отправителя)"
+  rules_owner: "04-copy-by-block/04-form-emails-notifications.md §3.3 (имя отправителя)"
   fact_required: never
   sources:
   - "../site/02-site-types/vocabulary.yaml#slot (имя и назначение)"
@@ -3973,7 +3967,7 @@ slot_types:
   genres: [email-form]
   genre: email-form
   ux_role: user-content
-  rules_owner: "E — 04-copy-by-block (готовое сообщение мессенджера); ссылки мессенджеров — ../site/05-conversion-funnels/01-cta-and-lead-capture.md"
+  rules_owner: "04-copy-by-block (готовое сообщение мессенджера); ссылки мессенджеров — ../site/05-conversion-funnels/01-cta-and-lead-capture.md"
   structure: "От первого лица посетителя: приветствие и просьба — что человек хочет (записаться, узнать цену, задать вопрос) и о какой услуге или странице речь."
   rules:
   - "Короткое: приветствие и просьба без абзацев и списков — человек дочитывает сообщение перед отправкой и правит под себя."
@@ -4044,7 +4038,7 @@ crosswalk:
       text_slots: [headline, subheadline, cta-label, cta-note]
     - archetype: H3 Quote led
       text_slots: [testimonial-quote, testimonial-attribution, stat-source]
-      note: "цитата — только дословная, с разрешением (B2)"
+      note: "цитата — только дословная, с разрешением (text 02/03)"
     - archetype: H4 Stat led
       text_slots: [stat-value, stat-label, stat-source]
     - archetype: H5 Letter hero
@@ -4056,7 +4050,7 @@ crosswalk:
       text_slots: [headline, subheadline, cta-label, image-alt]
     - archetype: S1 Left margin numbered
       text_slots: [eyebrow, section-title]
-      note: "номера «01 —» база не пишет в текст (taste, C STR-10): нумерация — вёрстка"
+      note: "номера «01 —» база не пишет в текст (taste, STR-10): нумерация — вёрстка"
     - archetype: S2–S5 Section heads
       text_slots: [section-title, section-lead]
     - archetype: F1 Bento / F2 Sticky scroll

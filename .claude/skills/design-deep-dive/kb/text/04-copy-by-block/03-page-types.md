@@ -112,7 +112,7 @@
 | `careers-page` | 0 | соискатели | — | работа, условия, с кем | 565-ФЗ ст. 53 ч. 3 | 4.7 |
 | `article-page` | 0 | информационный поиск → problem-aware | — | ответ первым | → G `07-seo-geo-copy/02` | G |
 
-**Профиль типа по корпусу** (опыт E/03: `03-corpus-measured/measurements.tsv`, люди 2026 — лидеры и средний рынок;
+**Профиль типа по корпусу** (опыт E/03: корпус, люди 2026 — лидеры и средний рынок;
 медиана [p10–p90]; доли — страниц, где блок есть):
 
 | Тип | n RU / EN | Слов на странице RU / EN | Секций RU | FAQ / отзывы / hero-proof, RU | Ядро первого экрана RU | Кнопок RU |
@@ -512,7 +512,7 @@ B1 §4.2) [данные].
   28.11.2025), КонсультантПлюс, снято 2026-09-24 —
   https://www.consultant.ru/document/cons_doc_LAW_464093/151df305f73e727be3bf36a447c90c7c84f22219/ ; кэш
   `99-raw/cache/www.consultant.ru_document_cons_doc_LAW_464093_151df305…_b31fda2f.md`. [стандарт]
-- [S20] Корпус D: `03-corpus-measured/measurements.tsv` (copy_metrics 0.3.2), `99-raw/experiments/D/03-measure/tables.md`
+- [S20] Корпус D: `99-raw/experiments/D/03-measure/tables.md`
   («Длины ключевых слотов по типам страниц»); пересчёт по типам — опыт E/03. [данные]
 - Файлы базы: B1 `02-strategy-messaging/02` §1.3, §1.5–1.6, §3, §4.2–4.3; B2 `03` §1.2, §4.2, §4.5, §5.4; G
   `07-seo-geo-copy/01` §3, §5.3, `02` §3, `03` §3.3, §4; H `08-russian-legal-typography/01` §4.3–4.4, §5.2, §6; D

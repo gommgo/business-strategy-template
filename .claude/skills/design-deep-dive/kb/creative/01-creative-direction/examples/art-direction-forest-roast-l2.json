@@ -46,7 +46,7 @@
     "source": "claude",
     "budget_profile": "landing-campaign@L2",
     "motion_cap": "cinematic",
-    "rationale": "Учебное сравнение уровней (опыт A/01): кампания — умолчание L2 (решение п. 13). Та же концепция утра, но как сюжет на прокрутке; «вау» догружается после LCP; блок подписки и формы — L0.",
+    "rationale": "Учебное сравнение уровней: кампания — умолчание L2. Та же концепция утра, но как сюжет на прокрутке; «вау» догружается после LCP; блок подписки и формы — L0.",
     "by_section_role": [
       {
         "role": "pricing",
@@ -251,7 +251,7 @@
         "text": "Golos Text",
         "cyrillic_checked": false,
         "license": "OFL",
-        "note": "замена X 2026-09-25: Oswald → Sofia Sans Condensed (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"
+        "note": "Sofia Sans Condensed вместо Oswald (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"
       },
       "signature_move": {
         "what": "SVG-кривая обжарки рисуется прокруткой, этапы отмечаются на ней",
@@ -669,7 +669,7 @@
         "version": "0.1",
         "date": "2026-09-24",
         "change": "учебный вариант L2 к демо ai-media (сравнение с forest-roast-l0)",
-        "by": "Claude (пример A/01)"
+        "by": "Claude (пример)"
       }
     ],
     "review_by": "2027-03-24",

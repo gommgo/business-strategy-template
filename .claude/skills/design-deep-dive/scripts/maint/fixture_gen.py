@@ -95,7 +95,8 @@ def dump_manifest(path: Path, head: str, m: dict):
 
 
 def run(domain: str, tool: str, *args):
-    """Утилита скилла Python окружения; код 0 или 1 (находки) — норма, прочее — ошибка рецепта."""
+    """Утилита скилла Python окружения; код 0 или 1 (есть `error`) — норма, 2 (ошибка вызова или окружения) и особые
+    исходы от 3 — ошибка рецепта."""
     cmd = [kbpaths.python(), str(kbpaths.scripts(domain, tool)), *map(str, args)]
     r = subprocess.run(cmd, capture_output=True, text=True)
     if r.returncode not in (0, 1):
@@ -141,8 +142,9 @@ def seed(files: Path, rel: str, find: str, to: str):
 
 
 def unmarked(files: Path, base: list[str]) -> Block:
-    """Файлы основы, формат которых не несёт пометку иллюстрации, — пути для ключа unmarked манифеста. Файлы, которые
-    написал рецепт, сюда не попадают: их пометку сверяет самопроверка сборщика."""
+    """Файлы основы, формат которых не несёт пометку иллюстрации, — пути для ключа unmarked манифеста. Список идёт по
+    путям основы: файл рецепта на месте файла основы (copy deck, голос с посевом) в него попадает; новые файлы рецепта
+    не попадают — их пометку сверяет самопроверка сборщика."""
     return Block(f"files/{rel}" for rel in base
                  if (files / rel).is_file() and fixture_project.mark_issue(files / rel))
 

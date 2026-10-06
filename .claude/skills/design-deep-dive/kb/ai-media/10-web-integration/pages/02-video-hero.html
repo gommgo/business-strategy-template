@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- 02 · Видео-hero: картинка-постер (кадр 0 финального AV1) — LCP; видео-слой после load + простоя; AV1 первым, H.264 запасом;
      телефон — свой ролик 4:5 720×900; reduce, Save-Data, 2G → видео не запрашивается; кнопка паузы (WCAG 2.2.2); пауза вне экрана.
-     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/04-video-page и 06-pages-measure (Chromium 153). -->
+     Проверено: Chromium 153. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -20,7 +20,7 @@
   .hero--light .media-toggle { border-color: rgb(17 20 24 / .35); background: rgb(243 239 231 / .55); color: #111418; }
   @media (max-width: 699px) { .hero__media { background: #c6c2bd; } .hero__copy { padding-top: 56px; } .hero__lead { max-width: 27ch; }
     .nav a.link:not(:last-child) { display: none; } }
-  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (J/06) */
+  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (ai-media 10/03) */
   .hero--light .hero__scrim { background: linear-gradient(90deg, rgb(243 239 231 / .46) 0%, rgb(243 239 231 / .34) 40%, rgb(243 239 231 / 0) 64%); }
   @media (max-width: 699px) { .hero--light .hero__scrim { background: linear-gradient(180deg, rgb(243 239 231 / .40) 0%, rgb(243 239 231 / .28) 55%, rgb(243 239 231 / 0) 75%); } }
 </style>

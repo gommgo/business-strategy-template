@@ -6,7 +6,7 @@
   "date": "2026-09-30",
   "x-version": 1,
   "x-status": "v1.2: совместима с v1 — поля и статусы v0 на месте, новые значения и поля необязательны; процесс — 01-copy-deck-workflow.md, примеры — examples/ (02, 03)",
-  "x-owner": "text-research · 10-templates-recipes · J (контракт тройки v2 §3 п.8)",
+  "x-owner": "text · 10-templates-recipes",
   "x-doc": ["10-templates-recipes/README.md", "../../scripts/text/README.md#copydeck"],
   "x-tool": "../../scripts/text/copydeck.py (skeleton, validate, claims, lint, check, approve, export, import-copy, export-assets, export-variants, apply-selection, select, before-after, --selftest)",
 
@@ -32,12 +32,12 @@
     "date": {
       "type": "string",
       "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$",
-      "description": "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ, строкой в кавычках (как в facts.schema.yaml B2)."
+      "description": "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ, строкой в кавычках (как в facts.schema.yaml)."
     },
     "lang": {"type": "string", "pattern": "^[a-z]{2}(-[A-Z]{2})?$"},
     "genre": {
       "enum": ["landing", "site-page", "article", "meta", "geo", "email-form"],
-      "description": "Жанр базы (PLAN.md «Жанры — ось базы») = профиль линтера copy_lint.py по умолчанию."
+      "description": "Жанр базы = профиль линтера copy_lint.py по умолчанию."
     },
     "status": {
       "enum": ["draft", "assumed", "checked", "approved", "rejected"],
@@ -51,7 +51,7 @@
     "fact-ref": {
       "type": "string",
       "pattern": "^(fact:)?[A-Za-z0-9]+([._-][A-Za-z0-9]+)*$",
-      "description": "id факта facts.yaml (B2): «rating-yandex-maps» или «fact:rating-yandex-maps»; принимаются алиасы факта (aliases) — как в claims_check.py. Пробел missing:<id> сюда не ставится: он живёт в тексте как [PLACEHOLDER: …] и в missing_ids."
+      "description": "id факта facts.yaml: «rating-yandex-maps» или «fact:rating-yandex-maps»; принимаются алиасы факта (aliases) — как в claims_check.py. Пробел missing:<id> сюда не ставится: он живёт в тексте как [PLACEHOLDER: …] и в missing_ids."
     },
     "missing-ref": {
       "type": "string",
@@ -91,7 +91,7 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {"^x-": {}},
-      "description": "Итог claims_check.py (B2 + право H) по слоту. Записывает copydeck.py check --update.",
+      "description": "Итог claims_check.py (сверка с фактами + право) по слоту. Записывает copydeck.py check --update.",
       "properties": {
         "errors": {"type": "integer", "minimum": 0},
         "warnings": {"type": "integer", "minimum": 0},
@@ -105,7 +105,7 @@
     },
     "lint-allow": {
       "type": "array",
-      "description": "Видимые исключения линтера (C, спецификация §9 п.8): находка правила уходит в notes с причиной. Артефакты (ART) и данные (CNT) не подавляются; находки страницы — только lint_allow страницы. Находки сверки (COPY-F-…, право COPY-L-…) и формата (COPY-D-…) lint_allow не снимает: у эвристик сверки COPY-F-CLASS и COPY-F-NUM — свой обход claims_allow, остальную ложную находку сверки лечат правкой текста или facts.yaml.",
+      "description": "Видимые исключения линтера (06-anti-slop/02-linter-spec-and-profiles.md §9 п.8): находка правила уходит в notes с причиной. Артефакты (ART) и данные (CNT) не подавляются; находки страницы — только lint_allow страницы. Находки сверки (COPY-F-…, право COPY-L-…) и формата (COPY-D-…) lint_allow не снимает: у эвристик сверки COPY-F-CLASS и COPY-F-NUM — свой обход claims_allow, остальную ложную находку сверки лечат правкой текста или facts.yaml.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -150,7 +150,7 @@
           "type": "object",
           "additionalProperties": false,
           "patternProperties": {"^x-": {}},
-          "description": "След генерации для цепочки I (09-ai-generation-evaluation): модель, промт, дата, параметры.",
+          "description": "След генерации для цепочки 09-ai-generation-evaluation: модель, промт, дата, параметры.",
           "properties": {
             "model": {"type": "string"},
             "channel": {"type": "string", "description": "Канал вызова: polza, routerai, gen-api, direct; агент сам — «none (ai-self)»."},
@@ -158,28 +158,28 @@
             "run_id": {"type": "string"},
             "date": {"$ref": "#/$defs/date"},
             "params": {"type": "object"},
-            "technique": {"type": "string", "description": "Приём или формула как инструмент (formulas.yaml A: pas, bab, 4u…)."}
+            "technique": {"type": "string", "description": "Приём или формула как инструмент (01-foundations/formulas.yaml: pas, bab, 4u…)."}
           }
         },
         "fact_ids": {
           "type": "array",
           "uniqueItems": true,
           "items": {"$ref": "#/$defs/fact-ref"},
-          "description": "v1.1 (I3): свои факты варианта, если варианты одного слота опираются на разные факты. Заменяет fact_ids слота для этого варианта (не дополняет). copydeck.py сверяет и линтует вариант по ним; check --update переносит факты выбранного варианта в fact_ids слота (claims_check.py и copy_lint.py на copy deck читают только слот)."
+          "description": "Свои факты варианта, если варианты одного слота опираются на разные факты. Заменяет fact_ids слота для этого варианта (не дополняет). copydeck.py сверяет и линтует вариант по ним; check --update переносит факты выбранного варианта в fact_ids слота (claims_check.py и copy_lint.py на copy deck читают только слот)."
         },
         "review": {"$ref": "#/$defs/review"},
         "checks": {
           "type": "object",
           "additionalProperties": false,
           "patternProperties": {"^x-": {}},
-          "description": "Итоги проверок этого варианта (для сравнения вариантов до выбора; предложение I): claims и lint — форма записей слота, rubric — формат рубрики I (09-ai-generation-evaluation/copy-rubric.yaml). copydeck.py это поле не пишет: check --all-variants сверяет каждый живой вариант «как если бы выбран» и отдаёт итоги отчётом, записи check --update — у выбранного текста слота; export-variants не выносит на лист вариант, у которого здесь записан error для его текста.",
+          "description": "Итоги проверок этого варианта (для сравнения вариантов до выбора): claims и lint — форма записей слота, rubric — формат рубрики (09-ai-generation-evaluation/copy-rubric.yaml). copydeck.py это поле не пишет: check --all-variants сверяет каждый живой вариант «как если бы выбран» и отдаёт итоги отчётом, записи check --update — у выбранного текста слота; export-variants не выносит на лист вариант, у которого здесь записан error для его текста.",
           "properties": {
             "claims": {"$ref": "#/$defs/claims-record"},
             "lint": {"$ref": "#/$defs/lint-record"},
-            "rubric": {"type": "object", "description": "Оценка судьи или людей по критериям COPY-R-… (I): версия, судья, прогоны, баллы."}
+            "rubric": {"type": "object", "description": "Оценка судьи или людей по критериям COPY-R-…: версия, судья, прогоны, баллы."}
           }
         },
-        "reason": {"type": "string", "description": "Почему отклонён (обязательно при rejected) — вход I и before-after.tsv."},
+        "reason": {"type": "string", "description": "Почему отклонён (обязательно при rejected) — вход цепочки 09-ai-generation-evaluation и before-after.tsv."},
         "notes": {"type": "string"}
       }
     },
@@ -188,13 +188,13 @@
       "additionalProperties": false,
       "patternProperties": {"^x-": {}},
       "required": ["method"],
-      "description": "Как выбран chosen: единственный вариант, редактор, заказчик, попарный слепой выбор, судья (I). Запись ставят copydeck.py select и apply-selection.",
+      "description": "Как выбран chosen: единственный вариант, редактор, заказчик, попарный слепой выбор, судья. Запись ставят copydeck.py select и apply-selection.",
       "properties": {
         "method": {"enum": ["single", "editor", "customer", "pairwise", "judge", "ab-test", "human-pairwise", "judge-pairwise"]},
         "by": {"type": "string"},
         "at": {"$ref": "#/$defs/date"},
         "compared": {"type": "array", "items": {"$ref": "#/$defs/local-id"}},
-        "tally": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}, "description": "Сводка голосов по вариантам {b: 5, a: 1} (I)."},
+        "tally": {"type": "object", "additionalProperties": {"type": "integer", "minimum": 0}, "description": "Сводка голосов по вариантам {b: 5, a: 1}."},
         "ref": {"type": "string", "description": "Протокол выбора: путь к tally, странице выбора, отчёту A/B."},
         "votes": {
           "type": "array",
@@ -232,13 +232,13 @@
         "selection": {"$ref": "#/$defs/selection"},
         "fact_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/fact-ref"}, "description": "Факты, на которых стоит текст (v0). Каждое число, имя, дата, цитата, логотип, рейтинг, цена, гарантия — факт."},
         "missing_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/missing-ref"}, "description": "Пробелы facts.yaml, которые закрывают [PLACEHOLDER] этого слота."},
-        "claim_flags": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"}, "description": "Классы утверждений B2 (x-claim-classes: superlative, health…), id правил H (COPY-L-…) и юридические флаги (38fz-5-3-1) (v0)."},
+        "claim_flags": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"}, "description": "Классы утверждений (x-claim-classes: superlative, health…), id правил права (COPY-L-…) и юридические флаги (38fz-5-3-1) (v0)."},
         "lint": {"$ref": "#/$defs/lint-record"},
         "claims": {"$ref": "#/$defs/claims-record"},
         "lint_allow": {"$ref": "#/$defs/lint-allow"},
         "edit_log": {
           "type": "array",
-          "description": "Протокол правки по находкам (C, спецификация §9: ≤ 5 кластеров на проход, ≤ 3 прохода) — предложение I.",
+          "description": "Протокол правки по находкам (06-anti-slop/02-linter-spec-and-profiles.md §9: ≤ 5 кластеров на проход, ≤ 3 прохода).",
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -284,7 +284,7 @@
       "allOf": [{"$ref": "#/$defs/slot-core"}],
       "properties": {
         "from": {"$ref": "#/$defs/copy-path", "description": "Взять выбранный текст слота этой страницы (hero/lead)."},
-        "basis": {"type": "string", "description": "Откуда смысл: meaning.value_proposition.core, hierarchy.core_message (B1)."},
+        "basis": {"type": "string", "description": "Откуда смысл: meaning.value_proposition.core, hierarchy.core_message."},
         "variants": true, "chosen": true, "selection": true, "fact_ids": true, "missing_ids": true,
         "claim_flags": true, "lint": true, "claims": true, "lint_allow": true, "edit_log": true, "notes": true
       }
@@ -293,18 +293,18 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {"^x-": {}},
-      "description": "Мета и OG страницы (v0: title, description, og_title, og_description — строки: их читают claims_check.py и copy_lint.py с профилем meta). Правила длины и шаблона — G (07-seo-geo-copy/meta-rules.yaml); поля fact_ids, variants, review_by — предложение G.",
+      "description": "Мета и OG страницы (v0: title, description, og_title, og_description — строки: их читают claims_check.py и copy_lint.py с профилем meta). Правила длины и шаблона — 07-seo-geo-copy/meta-rules.yaml.",
       "properties": {
         "title": {"type": "string", "description": "Выбранный title (v0)."},
         "description": {"type": "string"},
         "og_title": {"type": "string"},
         "og_description": {"type": "string"},
         "og_image_alt": {"type": "string", "description": "og:image:alt (ai-media 10/01 §7)."},
-        "fact_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/fact-ref"}, "description": "Факты, на которых стоят тексты мета (G: без них число в title даёт an-number-without-fact)."},
+        "fact_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/fact-ref"}, "description": "Факты, на которых стоят тексты мета (без них число в title даёт an-number-without-fact)."},
         "variants": {
           "type": "object",
           "additionalProperties": false,
-          "description": "Альтернативы мета (G 07/02 §4.3: 2–3 варианта title с планом теста); выбранный текст — в поле выше.",
+          "description": "Альтернативы мета (text 07/02 §4.3: 2–3 варианта title с планом теста); выбранный текст — в поле выше.",
           "properties": {
             "title": {"type": "array", "items": {"$ref": "#/$defs/variant"}},
             "description": {"type": "array", "items": {"$ref": "#/$defs/variant"}},
@@ -312,8 +312,8 @@
             "og_description": {"type": "array", "items": {"$ref": "#/$defs/variant"}}
           }
         },
-        "test_plan": {"type": "string", "description": "План теста вариантов title (G: Вебмастер, Search Console, 4 недели, метрика CTR)."},
-        "review_by": {"$ref": "#/$defs/date", "description": "Когда пересмотреть title и description (G: раз в 12–24 месяца, [мнение] G)."},
+        "test_plan": {"type": "string", "description": "План теста вариантов title (Вебмастер, Search Console, 4 недели, метрика CTR)."},
+        "review_by": {"$ref": "#/$defs/date", "description": "Когда пересмотреть title и description (раз в 12–24 месяца, [мнение])."},
         "claims_allow": {"$ref": "#/$defs/claims-allow", "description": "Обходы эвристик сверки для текстов мета (title, description, og_*): место обхода уже страницы — число в слотах страницы запись не снимает."},
         "notes": {"type": "string"}
       }
@@ -322,20 +322,20 @@
       "type": "object",
       "additionalProperties": false,
       "patternProperties": {"^x-": {}},
-      "description": "Поля брифа статьи и SEO-страницы (предложение G 07/02 §1.1 к page-plan site и copy deck): интент, запрос, «осмотрись», нетиповой угол, автор, пересмотр.",
+      "description": "Поля брифа статьи и SEO-страницы (text 07/02 §1.1): интент, запрос, «осмотрись», нетиповой угол, автор, пересмотр.",
       "properties": {
-        "intent": {"type": "string", "description": "Интент запроса (07/01 G)."},
+        "intent": {"type": "string", "description": "Интент запроса (text 07/01)."},
         "main_query": {"type": "string"},
         "serp_scan": {
           "type": "array",
-          "description": "3–5 материалов выдачи и что у них есть (G: «осмотрись», Сливинский).",
+          "description": "3–5 материалов выдачи и что у них есть («осмотрись», Сливинский).",
           "items": {"type": "object", "additionalProperties": false, "required": ["url"], "properties": {"url": {"type": "string"}, "note": {"type": "string"}, "date": {"$ref": "#/$defs/date"}}}
         },
         "unique_angle": {
           "type": "object",
           "additionalProperties": false,
           "required": ["text"],
-          "description": "Чего нет в выдаче: свои данные, опыт, кейс (G: non-commodity) — с фактами.",
+          "description": "Чего нет в выдаче: свои данные, опыт, кейс (non-commodity) — с фактами.",
           "properties": {"text": {"type": "string"}, "fact_ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/fact-ref"}}}
         },
         "author": {"$ref": "#/$defs/fact-ref", "description": "Автор — факт вида person с разрешением (E-E-A-T; COPY-GEO-19)."},
@@ -369,8 +369,8 @@
         "section_role": {"$ref": "#/$defs/vocab-id", "description": "Роль секции = role секции плана: section_role словаря site (claims_check.py читает это поле)."},
         "site_section_id": {"type": "string", "description": "id секции плана (= section_id)."},
         "genre": {"$ref": "#/$defs/genre", "description": "Жанр слотов секции, если он отличается от жанра страницы (GEO-блок на лендинге — geo)."},
-        "question": {"type": "string", "description": "Вопрос посетителя, который закрывает секция (иерархия B1 sections[].question)."},
-        "message": {"type": "string", "description": "Опора иерархии B1 одной фразой (v0; x-copy-deck-map: sections[].message)."},
+        "question": {"type": "string", "description": "Вопрос посетителя, который закрывает секция (иерархия сообщений: sections[].question)."},
+        "message": {"type": "string", "description": "Опора иерархии сообщений одной фразой (v0; x-copy-deck-map: sections[].message)."},
         "carries": {"type": "array", "items": {"type": "string", "pattern": "^(core|[a-z0-9]+(-[a-z0-9]+)*)$"}, "description": "Какие опоры иерархии (id) или главное сообщение (core) несёт секция."},
         "notes": {"type": "string"},
         "slots": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/slot"}}
@@ -389,8 +389,8 @@
         "status": {"$ref": "#/$defs/status", "description": "Статус страницы (по умолчанию draft)."},
         "approval": {"$ref": "#/$defs/review", "description": "Кто утвердил страницу целиком (обязательно при approved)."},
         "reason": {"type": "string", "description": "Почему страница отклонена (при rejected)."},
-        "hierarchy_ref": {"type": "string", "description": "Файл иерархии сообщений B1, по которой написана страница, — одна на страницу. Вторая иерархия плана (refs.hierarchy) уместна у вариантной страницы (page.first_screen.variant_map плана); у страницы без вариантов план называет правило сведения уровней — page.awareness_basis.rule, иначе validate — warning COPY-D-HIERARCHY."},
-        "awareness": {"enum": ["unaware", "problem-aware", "solution-aware", "product-aware", "most-aware"], "description": "Уровень осведомлённости трафика этой версии страницы (B1)."},
+        "hierarchy_ref": {"type": "string", "description": "Файл иерархии сообщений, по которой написана страница, — одна на страницу. Вторая иерархия плана (refs.hierarchy) уместна у вариантной страницы (page.first_screen.variant_map плана); у страницы без вариантов план называет правило сведения уровней — page.awareness_basis.rule, иначе validate — warning COPY-D-HIERARCHY."},
+        "awareness": {"enum": ["unaware", "problem-aware", "solution-aware", "product-aware", "most-aware"], "description": "Уровень осведомлённости трафика этой версии страницы."},
         "promise": {"$ref": "#/$defs/promise"},
         "cta_primary": {"$ref": "#/$defs/copy-path", "description": "Главная кнопка страницы (путь слота cta-label) → site.cta.label брифа холста; по умолчанию — первый cta-label секции hero."},
         "primary_action": {"type": "string", "description": "Одно целевое действие страницы (глагол + объект) словами страницы; сверяется как текст (урок «Кварца»: «бронь на лампу из первой партии» — вывод без факта)."},
@@ -419,23 +419,23 @@
         "adaptation": {
           "type": "object",
           "additionalProperties": false,
-          "description": "Как сделан второй язык: адаптация под свою аудиторию, а не дословный перевод (решение заказчика п. 16).",
+          "description": "Как сделан второй язык: адаптация под свою аудиторию, а не дословный перевод.",
           "properties": {
             "mode": {"enum": ["adaptation", "translation", "original"]},
-            "audience_note": {"type": "string", "description": "Чем аудитория языка отличается: альтернативы, осведомлённость, категория, возражения (meaning.languages[].audience_note)."}, "voice_line": {"type": "string", "description": "Строка голоса на языке этого deck, если проекция tone_of_voice профиля голоса F есть только на исходном языке (выгрузка берёт её вместо проекции)."}
+            "audience_note": {"type": "string", "description": "Чем аудитория языка отличается: альтернативы, осведомлённость, категория, возражения (meaning.languages[].audience_note)."}, "voice_line": {"type": "string", "description": "Строка голоса на языке этого deck, если проекция tone_of_voice профиля голоса есть только на исходном языке (выгрузка берёт её вместо проекции)."}
           }
         },
-        "voice_ref": {"type": "string", "description": "Профиль голоса (v0): путь к voice.yaml или voice.product.yaml (F) либо строка-описание."},
+        "voice_ref": {"type": "string", "description": "Профиль голоса (v0): путь к voice.yaml или voice.product.yaml либо строка-описание."},
         "facts_ref": {"type": "string", "description": "Путь к facts.yaml (v0), от папки copy deck."},
-        "meaning_ref": {"type": "string", "description": "Путь к meaning.yaml (B1)."},
-        "copy_slots_ref": {"type": "string", "description": "Путь к copy-slots.yaml (E); по умолчанию 04-copy-by-block/copy-slots.yaml базы."},
+        "meaning_ref": {"type": "string", "description": "Путь к meaning.yaml."},
+        "copy_slots_ref": {"type": "string", "description": "Путь к copy-slots.yaml; по умолчанию 04-copy-by-block/copy-slots.yaml базы."},
         "page_plan_ref": {"type": "string", "description": "Путь к плану страницы (page-plan) от папки copy deck: каркас deck строится из плана (copydeck.py skeleton), стык сверяет copydeck.py validate (x-site-map)."},
         "jurisdiction": {"enum": ["ru", "eu", "us", "other"], "description": "Право для claims_check.py (по умолчанию из facts.yaml или ru)."},
         "legal_category": {
           "type": "array",
           "uniqueItems": true,
           "items": {"enum": ["finance", "medical", "dietary-supplements", "alcohol", "education", "real-estate", "other", "general"]},
-          "description": "Отраслевой режим правил H (как meaning.legal_category B1)."
+          "description": "Отраслевой режим правил права (как meaning.legal_category)."
         },
         "authors": {"type": "array", "items": {"type": "string"}, "description": "Кто пишет и ведёт deck: роли или имена."},
         "projection": {"enum": ["meaning"], "description": "Файл — не тексты страницы, а проекция смысла и иерархий для сверки до текстов (chain_inputs.py meaning-claims). Формулировки сверяются с фактами и правом; места фактов (use — на каких страницах и в каких секциях факт уместен) copydeck.py claims на проекции не сверяет: проекция не страница."},
@@ -446,7 +446,7 @@
   },
 
   "x-v0-fields": {
-    "description": "Поля черновика v0 (PLAN.md) — в v1 не удалены и не переименованы (T2). copydeck.py --selftest сверяет этот список со схемой.",
+    "description": "Поля черновика v0 — в v1 не удалены и не переименованы. copydeck.py --selftest сверяет этот список со схемой.",
     "paths": [
       "copy_deck", "copy_deck.version", "copy_deck.date", "copy_deck.site", "copy_deck.lang", "copy_deck.source_lang",
       "copy_deck.voice_ref", "copy_deck.facts_ref", "copy_deck.pages",

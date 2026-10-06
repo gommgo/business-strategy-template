@@ -482,7 +482,7 @@
     },
     "library": {
      "type": "string",
-     "description": "Библиотека референсов (creative B)."
+     "description": "Библиотека референсов (creative 02)."
     },
     "visual_dna": {
      "type": "string",
@@ -490,7 +490,7 @@
     },
     "tokens": {
      "type": "string",
-     "description": "marketing-tokens.json проекта (creative D, E)."
+     "description": "marketing-tokens.json проекта (creative 04 и 05)."
     },
     "brand": {
      "type": "string",
@@ -614,7 +614,7 @@
     "budget_profile": {
      "type": "string",
      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$",
-     "description": "Профиль бюджета <page_type>@<уровень> (page-plan site; числа — ambition-levels.yaml и budgets.yaml site P)."
+     "description": "Профиль бюджета <page_type>@<уровень> (page-plan site; числа — ambition-levels.yaml и budgets.yaml site)."
     },
     "motion_cap": {
      "$ref": "#/$defs/motion-level"
@@ -744,7 +744,7 @@
     "emotional_goal": {
      "type": "string",
      "maxLength": 160,
-     "description": "Как человек должен себя почувствовать на пике страницы (W2)."
+     "description": "Как человек должен себя почувствовать на пике страницы."
     },
     "money_idea": {
      "type": "string",
@@ -975,7 +975,7 @@
   "moodboard": {
    "type": "array",
    "maxItems": 12,
-   "description": "Референсы выбранного направления: записи библиотеки B (ref:<id>) или URL; роль и «что взять / чего не брать»; один референс — одна секция.",
+   "description": "Референсы выбранного направления: записи библиотеки референсов (ref:<id>) или URL; роль и «что взять / чего не брать»; один референс — одна секция.",
    "items": {
     "$ref": "#/$defs/reference"
    }
@@ -983,7 +983,7 @@
   "visual_language": {
    "type": "object",
    "additionalProperties": false,
-   "description": "Решения визуального языка выбранного направления; нормы и числа — D (04-visual-language/), токены — marketing-tokens.json.",
+   "description": "Решения визуального языка выбранного направления; нормы и числа — 04-visual-language/, токены — marketing-tokens.json.",
    "properties": {
     "color_strategy": {
      "enum": [
@@ -1009,7 +1009,7 @@
      "items": {
       "type": "string"
      },
-     "description": "Принципы композиции (асимметрия, вылет, текст ↔ медиа, сетка) — ссылки на D."
+     "description": "Принципы композиции (асимметрия, вылет, текст ↔ медиа, сетка) — ссылки на 04-visual-language/."
     },
     "surfaces": {
      "type": "array",
@@ -1073,7 +1073,7 @@
      "items": {
       "type": "string"
      },
-     "description": "Ссылки на разделы D, по которым приняты решения."
+     "description": "Ссылки на разделы 04-visual-language/, по которым приняты решения."
     }
    }
   },
@@ -1119,7 +1119,7 @@
     "thesis",
     "level"
    ],
-   "description": "Система движения страницы; нормы — E (05-motion/), спецификация — motion-spec I.",
+   "description": "Система движения страницы; нормы — 05-motion/, спецификация — motion-spec.",
    "properties": {
     "thesis": {
      "type": "string",
@@ -1675,7 +1675,7 @@
      }
     }
    },
-   "description": "Запись журнала вариативности H 08/02 §3.2 (8 осей; проекты подряд — ≥ 4 отличий)."
+   "description": "Запись журнала вариативности creative 08/02 §3.2 (8 осей; проекты подряд — ≥ 4 отличий)."
   }
  },
  "allOf": [
@@ -1851,7 +1851,7 @@
     },
     "license": {
      "type": "string",
-     "description": "OFL по умолчанию (решение заказчика п. 13); платные — опция."
+     "description": "OFL по умолчанию; платные — опция."
     },
     "note": {
      "type": "string"
@@ -2013,7 +2013,7 @@
       },
       "concept_link": {
        "type": "string",
-       "description": "Связь с концепцией одной фразой без слов «современно», «красиво» (критерий 1 H)."
+       "description": "Связь с концепцией одной фразой без слов «современно», «красиво» (проверка «концепция», creative 08/01 §1.1)."
       }
      }
     },
@@ -2214,7 +2214,7 @@
       "epoch",
       "singularity"
      ],
-     "description": "Пять проверок «приём или клише» (PLAN §2, H): pass | fail | na.",
+     "description": "Пять проверок «приём или клише» (creative 08/01 §1): pass | fail | na.",
      "properties": {
       "concept": {
        "$ref": "#/$defs/criterion"

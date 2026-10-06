@@ -12,7 +12,7 @@
 | `l1-sverka/` «Сверка» — SaaS для бухгалтеров | `../02-saas-l1.md` | L1 | sticky-книга сверки на CSS scroll-driven | 0 КБ | 0,236 МБ | **B 0, S 0, D 0** |
 | `l2-zveno/` «Звено» — модульный манипулятор | `../03-product-launch-l2.md` | L2 | сборка из модулей и скан сустава (three.js кодом; сцена v2 — световой проход J2) | 2,8 КБ + 123,3 КБ 3D | 0,37 МБ | **B 0, S 0, D 0** (0.1.3, J2; на 0.1 — S 4 ложные) |
 
-## Как прогнать ворота (из корня `creative/`; утилиты берут обе блокировки сами)
+## Как прогнать ворота (из корня `creative/`; утилита берёт замок браузера сама)
 
 ```bash
 python3 ../../scripts/creative/motion_check.py 10-recipes/examples/l1-sverka/index.html --level L1 \
@@ -20,8 +20,6 @@ python3 ../../scripts/creative/motion_check.py 10-recipes/examples/l1-sverka/ind
 python3 ../../scripts/creative/marketing_audit.py 10-recipes/examples/l0-sdano/index.html --level L0 \
   --out 99-raw/experiments/J/01-l0-sdano/audit2 --name l0-sdano                                               # профиль marketing
 99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l2-zveno/motion-spec.yaml
-flock -w 900 /home/mm/Документы/app-design/.locks/browser.lock flock -w 900 99-raw/tools/.locks/browser.lock \
-  timeout 280 python3 ../../scripts/creative/idle_probe.py OUT.json                                  # холст в покое
 ```
 
 ## Результаты по воротам (главное; полные таблицы — `gates.md` в папках ниже)

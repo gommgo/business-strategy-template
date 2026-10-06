@@ -32,7 +32,7 @@ Markdown (анкета доказательств, шаблон редполит
 типов страниц, ролей секций и слотов — временный словарь `99-raw/notes/temp-vocabulary-v0.yaml` (site `vocabulary.yaml`
 ещё не выпустил). Два места базы расходятся — действует `CONTRADICTIONS.md`; одна норма в нескольких файлах — канон по
 таблице дублей (`99-raw/reports/wave4-X-audit.md` §6). Утилиты запускаются из корня базы системным `python3` с PyYAML;
-jsonschema — venv `99-raw/tools/venv-{B1,B2,F,J}`; сеть и модели не нужны.
+jsonschema — Python окружения скилла (`~/.cache/design-deep-dive/venv/bin/python`); сеть и модели не нужны.
 
 ### Сценарий 1. Написать тексты новой страницы
 
@@ -44,12 +44,12 @@ jsonschema — venv `99-raw/tools/venv-{B1,B2,F,J}`; сеть и модели н
    §2, §4; голос клиента — `02/04` и `02/voc.schema.yaml`.
 3. **Смысл.** `prompts/p2-meaning.md` → `meaning.yaml` по `02/meaning.schema.yaml`; читать `02/01` (позиционирование).
 4. **Иерархия под трафик.** `prompts/p3-hierarchy.md` → одна иерархия на уровень осведомлённости
-   (`02/message-hierarchy.schema.yaml`, `02/02` §1–§4). Проверка: `99-raw/tools/venv-B1/bin/python
+   (`02/message-hierarchy.schema.yaml`, `02/02` §1–§4). Проверка: `~/.cache/design-deep-dive/venv/bin/python
    ../../scripts/text/validate_any.py meaning.yaml hierarchy.yaml`; сверка с фактами до текста —
    `python3 ../../scripts/text/chain_inputs.py meaning-claims --meaning meaning.yaml --hierarchy
    hierarchy.yaml -o mc.yaml` → `python3 ../../scripts/text/copydeck.py claims mc.yaml --facts facts.yaml`.
 5. **Голос.** `voice.yaml` по `05/voice.schema.yaml` (образцы `05/examples/voice-*.yaml`, вывод голоса — `05/01` §3);
-   `99-raw/tools/venv-F/bin/python ../../scripts/text/validate_voice.py voice.yaml`; редполитика —
+   `~/.cache/design-deep-dive/venv/bin/python ../../scripts/text/validate_voice.py voice.yaml`; редполитика —
    `05/redpolicy-template.md`.
 6. **Тексты по слотам.** `prompts/p4-section-copy.md` (секция за вызов) по правилам `04/copy-slots.yaml` и `04/01–02`;
    тип страницы — `04/03`; письма вокруг формы — `04/04`; истории — `05/03`; мета, OG и FAQ — `prompts/p5-meta-geo.md`,
@@ -60,14 +60,15 @@ jsonschema — venv `99-raw/tools/venv-{B1,B2,F,J}`; сеть и модели н
 ```bash
 T=../../scripts/text/copydeck.py
 python3 $T check deck.yaml --facts facts.yaml                           # claims → lint → validate; error → сценарий 3
-python3 $T check deck.yaml --all-variants --update out/d.var.yaml         # каждый живой вариант «как выбранный» → variant.checks
-python3 $T export-variants out/d.var.yaml -o out/sheet.md --key out/key.yaml --seed 1   # слепой лист A/B/C для человека
-# выбор человека — правкой YAML: chosen + selection {method, by, at, compared, tally, ref} (команды apply-selection нет)
-python3 $T check out/d.var.yaml --update out/d.checked.yaml --promote    # draft → checked при 0 error, text_hash
-python3 $T approve out/d.checked.yaml --page PAGE --by "заказчик" -o out/d.approved.yaml   # только человек
-python3 $T validate out/d.approved.yaml --final                          # 0 заглушек, мета заполнена, approved
-python3 $T export-kimi out/d.approved.yaml --page PAGE --strict --out out/pkg --merge-into brief.yaml
-python3 $T export-assets out/d.approved.yaml --page PAGE -o out/assets-plan.yaml   # alt, подписи, строки в картинке
+python3 $T check deck.yaml --all-variants                                # каждый живой вариант «как выбранный» — отчётом
+python3 $T export-variants deck.yaml -o out/sheet.md --key out/key.yaml --seed 1   # слепой лист A/B/C для человека
+python3 $T apply-selection deck.yaml --sheet out/sheet.md --key out/key.yaml --by "заказчик" -o d.sel.yaml   # выбор человека; открыто — select
+# копии deck — в папке исходного: относительные ссылки считаются от неё и при записи не меняются
+python3 $T check d.sel.yaml --update d.checked.yaml --promote            # draft → checked при 0 error, text_hash
+python3 $T approve d.checked.yaml --page PAGE --by "заказчик" -o d.approved.yaml   # только человек
+python3 $T validate d.approved.yaml --final                              # 0 заглушек, мета заполнена, approved
+python3 $T export-kimi d.approved.yaml --page PAGE --strict --out out/pkg --merge-into brief.yaml
+python3 $T export-assets d.approved.yaml --page PAGE -o out/assets-plan.yaml   # alt, подписи, строки в картинке
 ```
 
    Пакет kimi дальше — `build_package.py build` и `check` в копии шаблонов kimi (`10/01` §7; Kimi не запускается).
@@ -84,7 +85,7 @@ python3 $T export-assets out/d.approved.yaml --page PAGE -o out/assets-plan.yaml
    `--jurisdiction eu|us`). Error — блокер. `copy.md` kimi — сначала `python3 ../../scripts/text/copydeck.py import-kimi copy.md
    -o deck.yaml --brief brief.yaml`.
 3. `python3 ../../scripts/text/copy_lint.py page.md --genre landing --md` (жанр — один из шести; у copy deck — из `page_type`;
-   морфология — интерпретатором `99-raw/tools/venv-C/bin/python`). **Вердикт на целой странице без copy deck строже,
+   морфология — интерпретатором `~/.cache/design-deep-dive/venv/bin/python`). **Вердикт на целой странице без copy deck строже,
    чем по слотам**: пороги D сняты по слотам (у лидеров корпуса `rewrite` — 16 из 24 EN и 11 из 14 RU); аудит страницы
    — сигнал, а не приговор (калибровка К5 аудита X).
 4. Copy deck — всё сразу: `python3 ../../scripts/text/copydeck.py check deck.yaml` (+ `--all-variants`); прямые прогоны п. 2–3
@@ -332,22 +333,19 @@ python3 $T export-assets out/d.approved.yaml --page PAGE -o out/assets-plan.yaml
 ## Утилиты
 
 Самотесты перезапущены аудитором X2 24.09.2026 — все сошлись с приёмками (`99-raw/reports/wave4-X2-checks.md` §2).
-Описание и ключи — `../../scripts/text/README.md` (разделы авторов). Коды выхода проверок: 0 — нет error, 2 — есть error,
-1 — ошибка входа.
+Описание и ключи — `../../scripts/text/README.md` (разделы авторов). Коды выхода проверок: 0 — нет error,
+1 — есть error, 2 — ошибка вызова или входа.
 
 | Утилита | Что делает | Главные команды | Вход → выход | Самотест (X2) | Где описано |
 |---|---|---|---|---|---|
 | `../../scripts/text/claims_check.py` (B2 + правовой модуль H 2.0) | сверка текста с `facts.yaml`, `never_claim`, заглушками; 66 правил права `COPY-L-…` (error 26, warning 32, info 8) | `check <вход> --facts F [--legal-category …] [--jurisdiction ru\|eu\|us] [--legal-only] [--strict] [--json\|--md OUT]`; `lint-facts F`; `inventory <стр.>`; `import-kimi facts.md -o F` | copy deck, `copy.md`, Markdown, HTML, текст → находки `COPY-F-…`, `COPY-L-…` | 93 PASS | `02/03` §7; `08/01` §12 |
 | `../../scripts/text/copy_lint.py` 0.9.3 (C) | линтер слопа и набора по жанру: 336 правил словарей C + внешние G и H — 455 из 16 файлов; пороги D v2 по жанру и языку | `<файл> --genre <жанр> [--json\|--md] [--final] [--metrics-only]`; `venv-C` — морфология | текст, Markdown, HTML, copy deck → находки, метрики, вердикт `clean`/`review`/`rewrite`/`fail`/`overcorrected` | OK, 455 правил | `06/02`; `06/profiles.yaml`; `03/thresholds.yaml` |
-| `../../scripts/text/copydeck.py` 1.1 (J) | copy deck: проверки в порядке claims → lint → validate, статусы, варианты, слепой лист, утверждение, выгрузка | `check [--all-variants] [--update OUT --promote]`, `validate [--final]`, `claims`, `lint`, `export-variants`, `approve`, `export-kimi --strict`, `export-assets`, `import-kimi`, `upgrade` | copy deck v0/v1 → находки `COPY-D-…`, deck со статусами, пакет `copy.md` + `facts.md` + `brief-fragment.yaml`, план ассетов | 111 OK (112 с jsonschema, `venv-J`) | `10/README.md`; `10/01` |
-| `99-raw/tools/before_after_build.py` 1.1 (J) | пары «до / после» из таблиц базы, опытов и отклонённых вариантов | `[--out] [--sources …] [--stats] [--exclude FILE]` | файлы базы → `10/before-after.tsv` (540 пар) | 18 OK | `../../scripts/text/README.md` |
-| `../../scripts/text/copy_extract.py` (D) | страница → текст по слотам (hero, секции, отзывы, FAQ, мета, JSON-LD) браузером под блокировками | `URL -o out.json --md out.md --lock`; `--batch targets.tsv`; `--html saved.html` | URL или HTML → JSON и Markdown | OK | `03/01` §4 |
-| `99-raw/tools/copy_metrics.py` 0.3.2 (D) | метрики по слотам и жанрам | `--dir PAGES --corpus corpus.tsv --out measurements.tsv`; `--slots-md text.md --genre landing -o page.json` | JSON извлечения → `measurements.tsv` | OK | `03/01` §5 |
+| `../../scripts/text/copydeck.py` 1.1 (J) | copy deck: проверки в порядке claims → lint → validate, статусы, варианты, слепой лист, утверждение, выгрузка | `skeleton PLAN -o DECK`, `check [--all-variants] [--update OUT --promote]`, `validate [--final]`, `claims`, `lint`, `select`, `export-variants`, `apply-selection`, `approve`, `export DECK --page ID --stage …`, `import-copy`, `export-assets`, `before-after [--write\|--check]` | copy deck v0/v1 → находки `COPY-D-…`, deck со статусами, вход холста (`…/copy.md`, `…/facts.md`), план ассетов | 111 OK (112 с jsonschema, `venv-J`) | `10/README.md`; `10/01` |
 | `../../scripts/text/ux_dict_to_yaml.py` (C) | словари `ux 07/06` → `06/lexicon/ux-07-06.yaml` | `[--check]` (код 3 — у ux изменилось) | Markdown ux → YAML | актуален | `06/02` §2.4 |
 | валидаторы схем (venv) | B1 — смысл и иерархии; `validate_any.py` (I) — те же проверки для любых файлов; B2 — факты и голос клиента; F — профиль голоса | `venv-B1/bin/python ../../scripts/text/validate_meaning.py`; `venv-B1/bin/python ../../scripts/text/validate_any.py FILE…`; `venv-B2/bin/python ../../scripts/text/validate_facts.py`; `venv-F/bin/python ../../scripts/text/validate_voice.py [FILE]` | YAML → ошибки схемы и смысла | B1 — 0 ошибок, 14 из 14 отрицательных; B2 — 36 PASS (19 отрицательных); F — 22 из 22 мутаций | `02/README.md`; `05/README.md` |
 | `build_copy_slots.py` (E) | сборка `04/copy-slots.yaml` из источников E (руками не править) | `python3 99-raw/experiments/E/02-copy-slots/build_copy_slots.py [--check]` | источники → YAML (69 типов слотов) | 69 записей, 0 ошибок | `04/README.md` |
 | `chain_inputs.py`, `check_intake.py` (I) | проекции входов промтов P2–P7, сверка смысла до текста, балл судьи; проверка выхода P1 | `../../scripts/text/chain_inputs.py meaning-claims\|section-input\|edit-input\|judge-input\|judge-score\|assemble\|apply-edits …`; `check_intake.py intake.yaml --brief brief.txt` | YAML смысла и deck → проекции, баллы | `--selftest` у обоих | `09/README.md`; `99-raw/experiments/I/04-chain-manual/README.md` |
-| `../../scripts/maint/orch_check.py` | приёмка папки: разделы формата, YAML и JSON, метки, штампы, самотесты утилит | `orch_check.py <папка>\|all [--selftest-tools]` | папка → отчёт | `all --selftest-tools` — 132 файла, 0 ошибок | код утилиты |
+| `../../scripts/maint/accept.py` | приёмка правки: файлы по маскам, разбор, ссылки, следы, смоук | `accept.py --base REF --mask GLOB [--smoke ПАПКА]` | правка → отчёт | `--selftest` | код утилиты |
 | `../../scripts/maint/check_links.py` (X2) | пути, `→ §`, `[S#]`, ролики `V:<id>`, `[проверено: …]`, README против диска | см. шапку утилиты; `--selftest` | база → отчёт ссылок | 27 случаев | `../../scripts/text/README.md` («Утилиты волны 4»); отчёт X2 §1 |
 | `99-raw/tools/sources_collect.py` (S1b) | библиография из «Источников» папок 01–10 и дайджестов; дедупликация по URL; у 106 внешних нет URL | без ключей — пересборка; `--check`; `--stats`; `--unparsed` | файлы базы → `90-sources/sources.tsv` (355) и автоблок README | 28 проверок | шапка утилиты; `90-sources/README.md` |
 
@@ -396,7 +394,7 @@ X, раздел 9 его отчёта).
   строже, чем по слотам (К5); `COPY-F-USE` — шум формата фактов (56 на 8 примерах, X11, К17); сверка не разбирает
   запятую тысяч в EN и числительные словами (X12, X13, К18); прямой `claims_check.py --all-variants` сверяет отклонённые
   варианты (К19, обход — `copydeck.py`); прямой `copy_lint.py` на copy deck не читает `meta.fact_ids` (К9); утверждения
-  без чисел ловит только судья или шумный `--strict`; `verify-page` и `apply-selection` не написаны (К29).
+  без чисел ловит только судья или шумный `--strict`; `verify-page` не написана (К29).
 - **Стыки**: поля `site_*` copy deck пусты; id временного словаря site взял в словарь v1 без переименований (контракты v1
   site — 24.09 17:56, сверка — точка S2); профили голоса F — только русские, профилей SaaS и товара нет.
 - **Ссылки и метки**: скриптом X2 проверено 1 605 путей, 2 552 ссылки на разделы, 1 039 `[S#]`, 115 ссылок на ролики,
@@ -473,7 +471,7 @@ X2) — H и юрист; X41 (выбор модели) — LT-01; X45 (секц�
 | **`03-corpus-measured/`** (D, D2) `01-corpus-method.md` (398) | выборка (лидеры, средний рынок, архив 2021, живой ИИ EN, ai-self), извлечение, метрики, этика |
 | `02-measurements.md` (451) | длины слотов RU и EN, ядро ≤ 40, мета, ритм, маркеры, тире, конкретика, надзаголовки, кнопки, архив 2021 → 2026 |
 | `03-thresholds-by-genre.md` (329) | как выведены пороги, пороги по жанрам и языкам, длины для E, мета для G, provisional |
-| `thresholds.yaml` · `corpus.tsv` · `measurements.tsv` | пороги v2 (жанры, языки, слоты, строки с основанием); страницы корпуса; метрики (30 047 строк) |
+| `thresholds.yaml` | пороги v2 (жанры, языки, слоты, строки с основанием) |
 | **`04-copy-by-block/`** (E) `01-hero-and-cta.md` (354) | первый экран: пять ответов, ядро, тип заголовка, длины, подзаголовок, микродоказательство, надзаголовок, кнопка, строка у кнопки, обещание |
 | `02-section-blocks.md` (352) | проблема, решение, выгоды, шаги, доказательства, сравнение, тарифы, гарантии, FAQ, финальный призыв, подвал |
 | `03-page-types.md` (515) | 18 типов страниц: от лидогенерации и SaaS до предзаказа; главная, услуга, «О компании», кейс, тарифы, контакты, вакансии |
@@ -516,7 +514,7 @@ X2) — H и юрист; X41 (выбор модели) — LT-01; X45 (секц�
 | Данные о чтении лендингов и русского веба | живая фаза: A-1 (5-секундный тест ядра ≤ 40 слов) |
 | Сверка с контрактами v1 site (`site-brief`, `vocabulary.yaml`, `blocks.yaml`, `page-plan` — вышли 24.09 в 17:56); температура трафика (X7), FAQ как блок (X43), первый экран кейса (X44) | text и site — точка S2 контракта после волн 4 site и creative; строки для site — `99-raw/handoff-to-neighbours.md` |
 | Формат copy deck у creative (T2) не принят — creative прошёл волну 1, на T2 не ответил | creative (точка S2) |
-| `verify-page`, `apply-selection`; `why` у 112 пар `before-after.tsv` | J (калибровка К29) |
+| `verify-page` | J (калибровка К29) |
 | Калибровка утилит К1–К31 (ложные и пропущенные находки линтера, сверки, правил G и H) | заказчик: отдельная задача (S1 калибровку не делал) |
 | Профили голоса SaaS и товара, английские словари профилей; «ты / вы» по-русски | F; живая фаза J-5, F-1 |
 | Отраслевое право глубже общего уровня; X33 (пометка «Реклама» в письмах); не открыты КС РФ № 7-П и др. | H по отраслям заказчика; юрист |
@@ -545,6 +543,6 @@ LT-09. Первый заход — LT-01 (модели на русском), LT-
 Новый источник, файл, дайджест, правило линтера или сверки, перезамер порогов, метки, библиография и пары «до / после» —
 процедуры в `PLAN.md`, раздел «Как расширять базу». Коротко: правила — в YAML (`06/lexicon/`, `07/*-rules.yaml`,
 `08/claims-rules.yaml`, `08/typography-rules.yaml`) с парой примеров и `source`, после — `copy_lint.py --selftest` и
-`claims_check.py --selftest`; пороги — перезамером D (`99-raw/experiments/D/03-measure/run_final.sh`), не руками;
-`04/copy-slots.yaml` и `10/before-after.tsv` — только скриптами; приёмка — `python3 ../../scripts/maint/orch_check.py all
---selftest-tools` и `../../scripts/maint/check_links.py`; скоропортящееся — с датой рядом.
+`claims_check.py --selftest`; пороги `03/thresholds.yaml` — из замера корпуса, руками не подгоняются; в
+`10/before-after.tsv` пустой `why` заполняет `copydeck.py before-after --write`, остальное — данные; приёмка —
+`../../scripts/maint/accept.py` и `../../scripts/maint/check_links.py`; скоропортящееся — с датой рядом.

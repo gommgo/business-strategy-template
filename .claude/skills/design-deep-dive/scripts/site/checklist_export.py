@@ -3,9 +3,9 @@
 
 Читает строки таблиц `09-ai-generation-evaluation/02-site-checklist.md`:
   | SITE-<БЛОК>-<NN> | проверка | B|S|D | DOM, SCR, … | источник |      — пункты чек-листа
-  | DEF-<NN> | дефект | step:… | ловят | маркер |                         — каталог дефектов для процедуры J
-и пишет `09-ai-generation-evaluation/site-checklist.yaml`. Правки — только в Markdown; YAML — производный артефакт
-(PLAN.md: «YAML, выводимый из Markdown, генерируется скриптом и руками не правится»). Образец —
+  | DEF-<NN> | дефект | step:… | ловят | маркер |                         — каталог дефектов процедуры «бриф → страницы»
+и пишет `09-ai-generation-evaluation/site-checklist.yaml`. Правки — только в Markdown; YAML — производный артефакт:
+генерируется скриптом и руками не правится. Образец —
 `scripts/ux/checklist_export.py` (формат ux `12-evaluation-checklists/master-checklist.yaml`). Источник, которого нет в
 скилле, остаётся в `source_file` с пометкой «?».
 
@@ -27,7 +27,7 @@ import sys
 import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('site'))
 MD_DEFAULT = os.path.join(ROOT, '09-ai-generation-evaluation', '02-site-checklist.md')
@@ -63,7 +63,7 @@ def base_files():
         if os.path.isdir(p) and re.match(r'^\d\d-', d):
             for f in sorted(os.listdir(p)):
                 out.setdefault(f, f'{d}/{f}')
-    tools = str(kbpaths.scripts('site'))  # перенос: утилиты site — scripts/site
+    tools = str(kbpaths.scripts('site'))
     if os.path.isdir(tools):
         for f in sorted(os.listdir(tools)):
             out.setdefault(f, os.path.relpath(os.path.join(tools, f), ROOT))
@@ -200,13 +200,13 @@ def validate(d, markers_path=MARKERS):
 def render(d, md_path, now=None):
     now = now or datetime.datetime.now().strftime('%Y-%m-%d %H:%M')
     rel_md = os.path.relpath(md_path, ROOT)
-    out = [f'# Машиночитаемая версия {rel_md} (сводный чек-лист сайта, агент K).',
+    out = [f'# Машиночитаемая версия {rel_md} (сводный чек-лист сайта).',
            '# Сгенерировано scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.',
            f'version: {q("1.0")}', f'generated_at: {q(now)}', f'checked: {q(now[:10])}',
            f'source_md: {q(rel_md)}', f'source_md_meta: {q(d["meta"])}',
            f'items_count: {len(d["items"])}', f'defects_count: {len(d["defects"])}',
            'severity_scale: {B: блокер, S: серьёзно, D: желательно}',
-           'severity_note: ' + q('серьёзность на маршруте «визит → действие» (поправка PLAN №10), назначена агентом K, не измерена; [спорно] — не выше S'),
+           'severity_note: ' + q('серьёзность на маршруте «визит → действие» — оценка, не замер; [спорно] — не выше S'),
            'check_method_codes: {DOM: dom, LNT: script, AXE: script, SCR: scenario, IMG: visual, JDG: judge, HUM: human}',
            'check_method_note: ' + q('первый способ — основной; JDG и HUM не ставят автоматических ворот (auto_gate: false)'),
            'steps: [' + ', '.join(STEPS) + ']',

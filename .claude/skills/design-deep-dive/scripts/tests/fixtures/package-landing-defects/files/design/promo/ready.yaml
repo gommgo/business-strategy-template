@@ -12,14 +12,14 @@ status: not-ready
 sources:
   - {path: design/brand.yaml, status: none, sha256: c5f1c1f718ff90d66caf785c5d75fdb671ba3baa4345a2f0da3117463053e633}
   - {path: design/promo/art-direction.json, status: proposed, sha256: 974ba01d631e84bb61e305705524a9466d7cc8435414f338751b9d497f9cefd8}
-  - {path: design/promo/motion/home.motion-spec.yaml, status: proposed, sha256: e5482fb41559a60870e3a300abca7fbf45d191057b68463a683371cee15e8033}
+  - {path: design/promo/motion/home.motion-spec.yaml, status: proposed, sha256: 2d791b0eda243fef16492868e673e5faaca4977d7774a0bb7bd623855adcf876}
   - {path: design/system.yaml, status: approved, sha256: c414ca2e032febbd863cba39ec74aa6cbc4e6601e702fa8fca70037fca899091}
-  - {path: facts.yaml, status: draft, sha256: 83043b89823c201309b5e3a8f6883e32c4816a24624d7d3f701913fdd2a1a610}
+  - {path: facts.yaml, status: draft, sha256: 5f1e166a55b557b3377ccc9828acf28c74985c4f6c7dfe5220ebb591fa775a66}
   - {path: site/promo/copy/spasibo.yaml, status: draft, sha256: 2581080140d75c4969637d8e93f5b0219bc1a3726a56d9b8c26e800aeec891e8}
-  - {path: site/promo/plans/home.yaml, status: proposed, sha256: 5584feff2c6b6716f4c364ef46e8373eb4039bffe91064efb2f46f95b1651943}
-  - {path: site/promo/plans/spasibo.yaml, status: approved, sha256: 44b0cfe94c6a1200e64b7bee9e08367b663b21e196203b75d723443100aabb8e}
-  - {path: site/promo/site-brief.yaml, status: proposed, sha256: 49f01bcd854f6caf4f9d7c75145be4b72cd935ec34a1417e19089b835db05643}
-  - {path: voice.yaml, status: draft, sha256: b5da5e0a52608d3c9ccf51e506f61cd8a3b20b13419d3e25b2e597a95b3eb029}
+  - {path: site/promo/plans/home.yaml, status: proposed, sha256: 1bb60b6f62be0eaad7e743e713e1268c2f2140db1d948065aaf7168fe6ca0f10}
+  - {path: site/promo/plans/spasibo.yaml, status: approved, sha256: 4fb04f0202822e37d0d64735e58dfb13b048db12c880a8bf6d50799d3e8a6afa}
+  - {path: site/promo/site-brief.yaml, status: proposed, sha256: e96c451f482846cea92603ccd748af12c0ce63038663bc16a432cf4f66604aa9}
+  - {path: voice.yaml, status: draft, sha256: 2da95520c1c7fdd48839600e677adef8a1b0fd0ea0c42103b388ef6596803c76}
 
 units:
   - id: home

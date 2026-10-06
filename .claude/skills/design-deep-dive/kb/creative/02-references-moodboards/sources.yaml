@@ -1,13 +1,13 @@
-# Паспорт площадок референсов · creative-research · волна 1 · агент B · 2026-09-24
+# Паспорт площадок референсов.
 # Подробно и дословно — 01-sources-landscape.md; клиент — 02-refs-client-and-library.md.
 version: sources/1
 checked_at: '2026-09-24'
-owner: creative-research B (волна 1)
+owner: creative · 02-references-moodboards
 legend:
   value: 'ценность для базы: 3 — основной источник, 2 — полезен в своей роли, 1 — редко'
   client.mode: search/assistant/off — сервисы со входом (решение заказчика); public — галерея без входа (robots.txt + 10 с);
     manual — только ссылки заказчика; api — через API
-  alive: как проверено и когда; [B/01] — зонд браузером без подмены UA, [B/06]/[B/07] — живые запросы клиента
+  alive: как проверено и когда; зонд браузером — без подмены UA
 sources:
 - id: dribbble
   name: Dribbble
@@ -59,7 +59,7 @@ sources:
   name: Behance
   group: portfolio-shots
   url: https://www.behance.net/
-  alive: жив по разведке оркестратора; curl и безголовый без cookie → 403 JS-челлендж Fastly
+  alive: жив; curl и безголовый без cookie → 403 JS-челлендж Fastly
   value: 2
   useful_for:
   - кейсы с процессом
@@ -72,7 +72,7 @@ sources:
     paging: первая страница — серверный HTML, дальше POST /v3/graphql
   api:
     exists: false
-    access: новых ключей API не выдают (сообщество Adobe, 03.2026 — по заданию B)
+    access: новых ключей API не выдают (сообщество Adobe, 03.2026)
     limits: —
   login:
     needed: Adobe ID (бесплатный)
@@ -143,7 +143,7 @@ sources:
   alive: 'жив: браузер 200 за 5,7 с (зонд 18:08), HTTP 200 за 0,7 с (17:02); в 16:00 — тайм-аут 40 с (VPN)'
   value: 3
   useful_for:
-  - выборка живых наградных сайтов (C)
+  - выборка живых наградных сайтов (creative 03/01)
   - критерии жюри
   search:
     url_templates:
@@ -171,7 +171,7 @@ sources:
     - «Websites featured on our site remain the intellectual property of their creators»
   client:
     mode: public
-    adapter: 'адаптер есть (B/02): `search awwwards sotd`; вживую 20/20 (18:00); на SOTD — невидимый reCAPTCHA v3 форм, клиент
+    adapter: 'адаптер есть: `search awwwards sotd`; вживую 20/20 (18:00); на SOTD — невидимый reCAPTCHA v3 форм, клиент
       отличает его от вызова'
   rate: 10 с между страницами; 40 в сутки
   notes: 'Оценка: Design 40 %, Usability 30 %, Creativity 20 %, Content 10 % (about-evaluation).'
@@ -180,7 +180,7 @@ sources:
   name: CSS Design Awards
   group: site-galleries
   url: https://www.cssdesignawards.com/
-  alive: 'жив: 200, 3,9 с в безголовом Brave [B/01]; честному UA — 403 (и robots.txt) [B/02]'
+  alive: 'жив: 200, 3,9 с в безголовом Brave; честному UA — 403 (и robots.txt)'
   value: 3
   useful_for:
   - WOTD, Special Kudos, номинанты — прямые ссылки на сайты
@@ -207,9 +207,9 @@ sources:
       This includes … website screenshots, website descriptions, designer information…»
   client:
     mode: public
-    adapter: 'адаптер есть (B/02): `search cssda wotd`; вживую 18/18 (18:00)'
+    adapter: 'адаптер есть: `search cssda wotd`; вживую 18/18 (18:00)'
   rate: 10 с; 40 в сутки
-  notes: WOTD — средний балл > 8,0 (фундамент).
+  notes: WOTD — средний балл > 8,0.
   checked_at: '2026-09-24'
 - id: fwa
   name: FWA
@@ -243,7 +243,7 @@ sources:
       web pages» [спорно]
   client:
     mode: hold
-    adapter: 'адаптер есть (B/02): вживую 19/19 до hold; hold до решения заказчика (условия II.4)'
+    adapter: 'адаптер есть: вживую 19/19 до hold; hold до решения заказчика (условия II.4)'
     since: 2026-09-24 18:11
   rate: 10 с; 40 в сутки
   notes: 'В JSON агентств — почты и соцсети: клиент берёт только имя.'
@@ -277,7 +277,7 @@ sources:
     clauses: []
   client:
     mode: public
-    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search recent latest`; офлайн 20/20: сайт, дата, теги стека; вживую
+    adapter: 'адаптер есть: `search recent latest`; офлайн 20/20: сайт, дата, теги стека; вживую
       20/20 (дата и теги — из серверного HTML)'
   rate: 10 с; 40 в сутки
   notes: 'godly.website → recent.design/?ref=godly, у сайтов — ?ref=godly: это прежний Godly [данные]. Раздел /websites: последняя
@@ -312,7 +312,7 @@ sources:
     clauses: []
   client:
     mode: public
-    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search godly websites`; офлайн 40/40: сайт; дат нет; вживую 20/20'
+    adapter: 'адаптер есть: `search godly websites`; офлайн 40/40: сайт; дат нет; вживую 20/20'
   rate: 10 с
   notes: 'Другой сайт, не Recent: ссылки на сайты с ?ref=saaspo.com; в ленте — посты X, логотипы, OG-картинки.'
   checked_at: '2026-09-24'
@@ -320,7 +320,7 @@ sources:
   name: Land-book
   group: site-galleries
   url: https://land-book.com/
-  alive: 'антибот: безголовому браузеру — челлендж Cloudflare [B/01]; обычный HTTP пускает (условия прочитаны fetch.py, 2026-09-24)'
+  alive: 'антибот: безголовому браузеру — челлендж Cloudflare; обычный HTTP пускает (условия прочитаны fetch.py, 2026-09-24)'
   value: 2
   useful_for:
   - секции и лендинги по категориям
@@ -355,7 +355,7 @@ sources:
   name: Lapa Ninja
   group: site-galleries
   url: https://www.lapa.ninja/
-  alive: 'антибот: безголовому браузеру — Cloudflare «Attention Required!» 403 [B/01]; обычный HTTP — 200'
+  alive: 'антибот: безголовому браузеру — Cloudflare «Attention Required!» 403; обычный HTTP — 200'
   value: 2
   useful_for:
   - лендинги по категориям
@@ -389,7 +389,7 @@ sources:
   name: SiteInspire
   group: site-galleries
   url: https://www.siteinspire.com/
-  alive: 'жив в браузере: 200, 4,1 с [B/01]; не-браузеру — 429 «Vercel Security Checkpoint» (JS-проверка) [B/02]'
+  alive: 'жив в браузере: 200, 4,1 с; не-браузеру — 429 «Vercel Security Checkpoint» (JS-проверка)'
   value: 2
   useful_for:
   - редакционные сайты по стилю и типу
@@ -413,7 +413,7 @@ sources:
     clauses: []
   client:
     mode: public
-    adapter: 'адаптер есть (B/02): `search siteinspire latest`; вживую 20/20 с адресом сайта'
+    adapter: 'адаптер есть: `search siteinspire latest`; вживую 20/20 с адресом сайта'
   rate: 10 с; 40 в сутки
   notes: ''
   checked_at: '2026-09-24'
@@ -453,7 +453,7 @@ sources:
   name: Httpster
   group: site-galleries
   url: https://httpster.net/
-  alive: 'жив: 200, 11 с [B/01]; последняя запись 2025-05-26 — не обновляется [B/02]; robots.txt 404 (24.09 и сетевой сбой)'
+  alive: 'жив (зонд браузером): 200, 11 с; последняя запись 2025-05-26 — не обновляется; robots.txt 404 (24.09 и сетевой сбой)'
   value: 1
   useful_for:
   - редакционные сайты
@@ -478,7 +478,7 @@ sources:
     clauses: []
   client:
     mode: public
-    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search httpster latest`; офлайн 23/23: сайт, дата; вживую 20/20'
+    adapter: 'адаптер есть: `search httpster latest`; офлайн 23/23: сайт, дата; вживую 20/20'
   rate: 10 с
   notes: ''
   checked_at: '2026-09-24'
@@ -486,7 +486,7 @@ sources:
   name: Minimal Gallery
   group: site-galleries
   url: https://minimal.gallery/
-  alive: 'жив: 200, 20 с [B/01]'
+  alive: 'жив (зонд браузером): 200, 20 с'
   value: 1
   useful_for:
   - минималистичные сайты
@@ -514,7 +514,7 @@ sources:
     - «Limited personal use (e.g., viewing and bookmarking for inspiration) is permitted»
   client:
     mode: public
-    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search minimal latest`; офлайн 23/23: сайт, дата; вживую 20/20;
+    adapter: 'адаптер есть: `search minimal latest`; офлайн 23/23: сайт, дата; вживую 20/20;
       --shots 3 — наши снимки'
   rate: 10 с
   notes: ''
@@ -523,7 +523,7 @@ sources:
   name: Landingfolio
   group: site-galleries
   url: https://www.landingfolio.com/
-  alive: 'жив: 200, 26 с [B/01]'
+  alive: 'жив (зонд браузером): 200, 26 с'
   value: 2
   useful_for:
   - секции лендингов, шаблоны
@@ -549,7 +549,7 @@ sources:
     - «You agree to not copy, duplicate or otherwise reproduce any part of our website»
   client:
     mode: public
-    adapter: 'адаптер есть (опыт B/02, продолжатель B2): `search landingfolio latest`; офлайн 80/80: сайт, дата, отрасль,
+    adapter: 'адаптер есть: `search landingfolio latest`; офлайн 80/80: сайт, дата, отрасль,
       палитра; вживую 20/20'
   rate: 10 с
   notes: ''
@@ -558,7 +558,7 @@ sources:
   name: Refero
   group: ui-flows
   url: https://refero.design/
-  alive: 'жив: 200, 11 с [B/01]'
+  alive: 'жив (зонд браузером): 200, 11 с'
   value: 2
   useful_for:
   - экраны продуктов, веб-страницы, потоки
@@ -593,7 +593,7 @@ sources:
   name: Mobbin
   group: ui-flows
   url: https://mobbin.com/
-  alive: 'жив: 200, 10 с [B/01]'
+  alive: 'жив (зонд браузером): 200, 10 с'
   value: 2
   useful_for:
   - экраны приложений и веба, потоки
@@ -627,7 +627,7 @@ sources:
   name: Page Flows
   group: ui-flows
   url: https://pageflows.com/
-  alive: 'жив: 200, 9 с [B/01]'
+  alive: 'жив (зонд браузером): 200, 9 с'
   value: 1
   useful_for:
   - видео и скриншоты сценариев
@@ -659,7 +659,7 @@ sources:
   name: Codrops
   group: effects-code
   url: https://tympanus.net/codrops/
-  alive: 'жив (curl 200 — фундамент); зонд B/01 2026-09-24 18:08–18:11: 200, 5,7 с'
+  alive: 'жив (curl 200); зонд браузером 2026-09-24 18:08–18:11: 200, 5,7 с'
   value: 3
   useful_for:
   - эффекты с кодом и разбором
@@ -694,7 +694,7 @@ sources:
   name: CodePen
   group: effects-code
   url: https://codepen.io/
-  alive: 'для не-браузера 403 (фундамент, robots, /legal/tos); зонд B/01 2026-09-24 18:08–18:11: 403 в безголовом браузере'
+  alive: 'для не-браузера 403 (robots, /legal/tos); зонд браузером 2026-09-24 18:08–18:11: 403 в безголовом браузере'
   value: 3
   useful_for:
   - эффекты с кодом
@@ -728,7 +728,7 @@ sources:
   name: Витрина GSAP
   group: effects-code
   url: https://gsap.com/showcase/
-  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 27,7 с'
+  alive: 'жив (robots 200); зонд браузером 2026-09-24 18:08–18:11: 200, 27,7 с'
   value: 2
   useful_for:
   - сайты на GSAP
@@ -760,7 +760,7 @@ sources:
   name: Форум three.js, раздел Showcase
   group: effects-code
   url: https://discourse.threejs.org/c/showcase/7
-  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 14 с'
+  alive: 'жив (robots 200); зонд браузером 2026-09-24 18:08–18:11: 200, 14 с'
   value: 2
   useful_for:
   - WebGL-проекты с обсуждением
@@ -791,7 +791,7 @@ sources:
   name: Shadertoy
   group: effects-code
   url: https://www.shadertoy.com/
-  alive: 'для не-браузера 403 или тайм-аут (фундамент, robots); зонд B/01 2026-09-24 18:08–18:11: 403 в безголовом браузере'
+  alive: 'для не-браузера 403 или тайм-аут (robots); зонд браузером 2026-09-24 18:08–18:11: 403 в безголовом браузере'
   value: 2
   useful_for:
   - шейдеры
@@ -824,7 +824,7 @@ sources:
   name: Vimeo
   group: motion
   url: https://vimeo.com/
-  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 9,9 с'
+  alive: 'жив (robots 200); зонд браузером 2026-09-24 18:08–18:11: 200, 9,9 с'
   value: 2
   useful_for:
   - ролики кейсов студий, записи сайтов
@@ -851,15 +851,15 @@ sources:
     - запрет обхода rate-limiting
   client:
     mode: manual
-    adapter: нет; видео — трек V
+    adapter: нет
   rate: —
-  notes: Видео ищет только агент V (решение 6).
+  notes: —
   checked_at: '2026-09-24'
 - id: lottiefiles
   name: LottieFiles
   group: motion
   url: https://lottiefiles.com/
-  alive: 'для не-браузера 403 (фундамент, robots, terms); зонд B/01 2026-09-24 18:08–18:11: 403 в безголовом браузере'
+  alive: 'для не-браузера 403 (robots, terms); зонд браузером 2026-09-24 18:08–18:11: 403 в безголовом браузере'
   value: 2
   useful_for:
   - Lottie-анимации
@@ -894,7 +894,7 @@ sources:
   name: Rive (маркетплейс, сообщество)
   group: motion
   url: https://rive.app/marketplace
-  alive: 'жив (фундамент: marketplace и community/files 200; /community 404); зонд B/01 2026-09-24 18:08–18:11: 200, 6,2 с'
+  alive: 'жив (marketplace и community/files 200; /community 404); зонд браузером 2026-09-24 18:08–18:11: 200, 6,2 с'
   value: 2
   useful_for:
   - интерактивные анимации .riv
@@ -926,7 +926,7 @@ sources:
   name: Fonts In Use
   group: typography
   url: https://fontsinuse.com/
-  alive: 'жив (robots 200, 10 именованных агентов); зонд B/01 2026-09-24 18:08–18:11: 200, 4,3 с'
+  alive: 'жив (robots 200, 10 именованных агентов); зонд браузером 2026-09-24 18:08–18:11: 200, 4,3 с'
   value: 3
   useful_for:
   - шрифты в реальном применении, в т. ч. кириллица
@@ -958,7 +958,7 @@ sources:
   name: Typewolf
   group: typography
   url: https://www.typewolf.com/
-  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: тайм-аут 40 с (перемерить)'
+  alive: 'жив (robots 200); зонд браузером 2026-09-24 18:08–18:11: тайм-аут 40 с (перемерить)'
   value: 2
   useful_for:
   - пары шрифтов, сайты по шрифтам
@@ -989,7 +989,7 @@ sources:
   name: Are.na
   group: moodboards
   url: https://www.are.na/
-  alive: 'жив; API v3 прочитан (OpenAPI 3.0.0); зонд B/01 2026-09-24 18:08–18:11: 200, 5,8 с'
+  alive: 'жив; API v3 прочитан (OpenAPI 3.0.0); зонд браузером 2026-09-24 18:08–18:11: 200, 5,8 с'
   value: 3
   useful_for:
   - хранилище мудбордов заказчика
@@ -1024,7 +1024,7 @@ sources:
   name: Pinterest
   group: moodboards
   url: https://www.pinterest.com/
-  alive: 'жив; robots.txt закрыт для «*» (309 именованных агентов); зонд B/01 2026-09-24 18:08–18:11: 200, стена «зарегистрируйтесь»'
+  alive: 'жив; robots.txt закрыт для «*» (309 именованных агентов); зонд браузером 2026-09-24 18:08–18:11: 200, стена «зарегистрируйтесь»'
   value: 1
   useful_for:
   - доски заказчика
@@ -1058,7 +1058,7 @@ sources:
   name: Savee
   group: moodboards
   url: https://savee.com/
-  alive: 'жив (savee.it → savee.com); robots — URLError; зонд B/01 2026-09-24 18:08–18:11: 200, 10,8 с'
+  alive: 'жив (savee.it → savee.com); robots — URLError; зонд браузером 2026-09-24 18:08–18:11: 200, 10,8 с'
   value: 2
   useful_for:
   - визуальные закладки дизайнеров
@@ -1090,7 +1090,7 @@ sources:
   name: Cosmos
   group: moodboards
   url: https://www.cosmos.so/
-  alive: 'жив (robots 200, 12 именованных агентов); зонд B/01 2026-09-24 18:08–18:11: 200, 5,2 с'
+  alive: 'жив (robots 200, 12 именованных агентов); зонд браузером 2026-09-24 18:08–18:11: 200, 5,2 с'
   value: 2
   useful_for:
   - визуальные коллекции
@@ -1124,7 +1124,7 @@ sources:
   name: Milanote
   group: moodboards
   url: https://milanote.com/
-  alive: 'жив (robots 200); зонд B/01 2026-09-24 18:08–18:11: 200, 12,2 с'
+  alive: 'жив (robots 200); зонд браузером 2026-09-24 18:08–18:11: 200, 12,2 с'
   value: 1
   useful_for:
   - инструмент досок, не источник
@@ -1155,7 +1155,7 @@ sources:
   name: Рейтинг Рунета
   group: russian
   url: https://ratingruneta.ru/
-  alive: 'жив (robots 200); итоги премий — awards.ratingruneta.ru (кэш других агентов); зонд B/01 2026-09-24 18:08–18:11:
+  alive: 'жив (robots 200); итоги премий — awards.ratingruneta.ru; зонд браузером 2026-09-24 18:08–18:11:
     200, 6,7 с'
   value: 2
   useful_for:
@@ -1188,7 +1188,7 @@ sources:
   name: Золотой сайт
   group: russian
   url: https://goldensite.ru/
-  alive: 'жив (robots 200); итоги — goldensite.ru/results (кэш других агентов); зонд B/01 2026-09-24 18:08–18:11: 200, 2,9
+  alive: 'жив (robots 200); итоги — goldensite.ru/results; зонд браузером 2026-09-24 18:08–18:11: 200, 2,9
     с'
   value: 2
   useful_for:
@@ -1220,7 +1220,7 @@ sources:
   name: Tagline
   group: russian
   url: https://tagline.ru/
-  alive: 'жив (curl 200 за 16 с); robots — URLError для urllib; зонд B/01 2026-09-24 18:08–18:11: 200, 4 с'
+  alive: 'жив (curl 200 за 16 с); robots — URLError для urllib; зонд браузером 2026-09-24 18:08–18:11: 200, 4 с'
   value: 2
   useful_for:
   - премия Tagline Awards

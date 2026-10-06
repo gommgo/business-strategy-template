@@ -52,7 +52,7 @@ Blender 5.2.2 LTS, three 0.186.0.
 # Blender 5.2.2 — [проверено: 99-raw/experiments/D2/99-doc-snippets; та же логика — D2/_lib/d2lib.py, эксп. D2/04]
 import sys, math, bpy
 from mathutils import Vector
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 RIGS = {   # имя: (азимут°, угол места°, доля E_key, размер в r)
@@ -145,7 +145,7 @@ def world_hdri(path, strength=1.0, rotation_deg=0.0, sun_threshold=0.0):
     w.sun_threshold = sun_threshold          # 0 — без «солнца» EEVEE (сравнение с three); 10 — умолчание
     return w
 
-w = world_hdri("/home/mm/Документы/app-design/blender-research/99-raw/experiments/E/_assets/studio_small_09_1k.hdr", 1.0, 30)
+w = world_hdri("../../scripts/blender/data/studio_small_09_1k.hdr", 1.0, 30)
 print(w.name, w.sun_threshold)
 ```
 
@@ -167,7 +167,7 @@ print(w.name, w.sun_threshold)
 ```python
 # Blender 5.2.2 — [проверено: 99-raw/experiments/D2/99-doc-snippets; режим — эксп. D2/04] прозрачный фон + ловец теней
 import sys, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 def shadow_catcher(size=6.0, z=0.0):
@@ -213,7 +213,7 @@ print(shadow_catcher().is_shadow_catcher, bpy.context.scene.render.film_transpar
 import sys, math, bpy
 from mathutils import Vector
 from bpy_extras.object_utils import world_to_camera_view
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 FORMATS = {"hero_16x9": (1920, 1080, 1.30, -0.17), "mobile_9x16": (1080, 1920, 1.25, 0.0), "icon_1x1": (1024, 1024, 1.30, 0.0)}
@@ -275,7 +275,7 @@ print(round(u, 2), round(v, 2))                        # ≈ 0.67 — центр
 # Blender 5.2.2 — [проверено] применить паспорт серии к ассету
 import sys, math, bpy
 from mathutils import Vector
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 PASSPORT = {"radius": 0.5, "lens": 85, "az": 35, "el": 25, "margin": 1.35, "E_key": 2.0, "world": ("#F4F4F6", 0.25),

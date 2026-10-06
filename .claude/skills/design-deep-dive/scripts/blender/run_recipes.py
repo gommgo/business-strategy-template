@@ -6,7 +6,8 @@
 «# run: system» собираются в examples/<slug>/post.py и идут Python окружения скилла после Blender.
 
     python3 run_recipes.py РЕЦЕПТ.md [ещё.md …] [--no-web]     # путь рецепта — от рабочей папки или полный
-    python3 run_recipes.py --selftest                           # без Blender и браузера: разбор блоков, пути утилит и результата
+    python3 run_recipes.py --selftest                           # без Blender и браузера: разбор блоков, пути утилит и
+                                                                # результата, пути numbers.json (rk.portable)
 
 Утилиты зовутся из scripts/blender/ (пути — scripts/lib/kbpaths.py), рабочая папка вызовов — корень базы kb/blender.
 Собранный образец рецепта (build.py, post.py, GLB, числа, web/<name>/) лежит в examples/<slug>/ базы; результат прогона —
@@ -14,7 +15,7 @@ $DDD_HOME/out/blender/run_recipes/result.json (по slug: код выхода, �
 Код выхода: 0 — прогон выполнен (коды рецептов — в result.json и в итоговой строке stdout), 2 — ошибка вызова."""
 import glob, json, os, re, subprocess, sys, time
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("blender"))
 TOOLS = str(kbpaths.scripts("blender"))
@@ -46,7 +47,8 @@ def run(cmd, timeout=600):
 
 
 def selftest():
-    """Без Blender и браузера: разбор блоков рецепта (пропуски, системные блоки, номера строк), пути утилит и результата."""
+    """Без Blender и браузера: разбор блоков рецепта (пропуски, системные блоки, номера строк), пути утилит и результата,
+    пути numbers.json — rk.portable (функция берётся из исходника rk.py: модуль импортирует bpy)."""
     import tempfile
     ok = True
 
@@ -76,6 +78,21 @@ def selftest():
     rc = {k: subprocess.run([sys.executable, me] + a, capture_output=True, text=True).returncode
           for k, a in (("help", ["--help"]), ("none", []), ("flag", ["--no-web"]), ("lost", [os.path.join(td, "none.md")]))}
     check("вызов: --help — код 0; без рецептов и с несуществующим файлом — код 2", rc == {"help": 0, "none": 2, "flag": 2, "lost": 2})
+    import ast
+    tree = ast.parse(open(tool("rk.py"), encoding="utf-8").read())
+    fn = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "portable")
+    ns = {"os": os, "kbpaths": kbpaths}
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), tool("rk.py"), "exec"), ns)
+    with tempfile.TemporaryDirectory() as td:
+        num = {"passport": {"glb": f"{ROOT}/12-recipes/examples/04-sample/form_raw.glb", "dims_m": [0.1, 0.2]},
+               "renders": [os.path.join(td, "shot.png")], "sec_total": 1.5}
+        p = os.path.join(td, "numbers.json")
+        json.dump(ns["portable"](num, f"{ROOT}/12-recipes/examples/90-sample"), open(p, "w"), ensure_ascii=False)
+        text = open(p, encoding="utf-8").read()
+        back = json.loads(text)
+    check("rk.save: пути numbers.json — внутри скилла от папки примера, вне скилла — имя файла; абсолютных путей нет",
+          back == {"passport": {"glb": "../04-sample/form_raw.glb", "dims_m": [0.1, 0.2]}, "renders": ["shot.png"],
+                   "sec_total": 1.5} and ROOT not in text and td not in text)
     print("run_recipes selftest:", "OK" if ok else "FAIL")
     return 0 if ok else 1
 

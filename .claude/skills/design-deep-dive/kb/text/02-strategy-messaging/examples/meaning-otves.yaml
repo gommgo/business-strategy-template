@@ -1,11 +1,11 @@
 # meaning-otves.yaml — пример 1: смысл для лидогенерации услуги (ремонт квартир под ключ), приоритет 1 заказчика
-# text-research · B1 · 2026-09-24 · формат: ../meaning.schema.yaml (meaning_version 1)
+# Формат: ../meaning.schema.yaml (meaning_version 1)
 #
-# ВЫМЫШЛЕННАЯ студия «Отвес» (Нижний Новгород) — та же, что в ../examples/facts-service-renovation.yaml (B2): факты и
-# их id — оттуда. Вход — сообщение заказчика (ai-self, 99-raw/experiments/B1/01-briefs-to-meaning/README.md §3).
+# ВЫМЫШЛЕННАЯ студия «Отвес» (Нижний Новгород) — та же, что в ../examples/facts-service-renovation.yaml: факты и
+# их id — оттуда. Вход — сообщение заказчика (ai-self).
 # Что показывает пример: вывод позиционирования из короткого брифа; basis у каждого утверждения; допущения → вопросы;
 # уникальное свойство без документа — needs-proof; возражения с доказательствами из facts.yaml и с missing, которых в
-# инвентаре ещё нет (предложения B2 — x-missing-proposals). Иерархии страниц — hierarchy-otves-*.yaml.
+# инвентаре ещё нет (предложения в инвентарь — x-missing-proposals). Иерархии страниц — hierarchy-otves-*.yaml.
 
 meaning_version: 1
 date: "2026-09-24"
@@ -17,7 +17,7 @@ offering_summary:
     Ремонт квартир под ключ в Нижнем Новгороде: замер и смета бесплатно, работы по договору подряда с гарантией 3 года,
     объект от замера до сдачи ведёт один прораб. Цена работ — от 9 800 ₽ за м² без материалов.
   kind: service
-  basis: {kind: brief, ref: "сообщение заказчика, 2026-09-24 (experiments/B1/01 §3)"}
+  basis: {kind: brief, ref: "сообщение заказчика, 2026-09-24"}
 
 audience:
   - id: busy-owners
@@ -215,7 +215,7 @@ objections:
     where: [{section_role: how-it-works}, {section_role: guarantee}, {section_role: faq}]
     awareness_stage: solution-aware
     status: needs-proof
-    basis: {kind: fact, ref: "fact:review-anna-k; never_claim B2 nc-no-extra-cost-promise"}
+    basis: {kind: fact, ref: "fact:review-anna-k; never_claim nc-no-extra-cost-promise"}
   - id: obj-delays
     text: "Затянут срок, а у меня аренда"
     type: time
@@ -312,14 +312,14 @@ boundaries:
     - "нужна косметика одной комнаты"
     - "главное — самая низкая цена за метр, договор не нужен"
   not_promised:
-    - {text: "«смета никогда не меняется» как гарантия всем", claim_class: guarantee, why: "в договоре такого пункта нет (B2 nc-no-extra-cost-promise)"}
-    - {text: "«лучший ремонт в городе», «№ 1»", claim_class: superlative, why: "нет независимого рейтинга (B2 nc-best-in-city)"}
+    - {text: "«смета никогда не меняется» как гарантия всем", claim_class: guarantee, why: "в договоре такого пункта нет (never_claim nc-no-extra-cost-promise)"}
+    - {text: "«лучший ремонт в городе», «№ 1»", claim_class: superlative, why: "нет независимого рейтинга (never_claim nc-best-in-city)"}
 
 message_hierarchy_ref: ["hierarchy-otves-problem-aware.yaml", "hierarchy-otves-product-aware.yaml"]
-voice_ref: "черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — F (волна 2)"
+voice_ref: "черновик: спокойно и по делу, на «вы», без восклицаний"
 proof_ref: "facts-service-renovation.yaml"
 legal_category: [general]
-legal_note: "Бытовой подряд (ГК, ЗоЗПП): цена «от», скидка с датой, гарантия — формулировки проверяет H; реквизиты — site I."
+legal_note: "Бытовой подряд (ГК, ЗоЗПП): цена «от», скидка с датой, гарантия — формулировки — по правилам text 08/01; реквизиты — site 08/01."
 languages:
   - {lang: ru, role: primary}
 
@@ -332,7 +332,7 @@ open_questions:
   - {id: q-min-job, q: "С какого объёма работ вы берёте заказ?", why: "Честный ответ на «возьмётесь ли за ванную»", options: ["от квартиры целиком", "от одной комнаты с полной отделкой", "от санузла"], default: "В FAQ: «делаем полный ремонт квартиры; отдельные помещения — уточните при звонке»", affects: [objections, boundaries], priority: 3, asked: true}
 
 x-missing-proposals:
-  # missing:<id>, которых нет в facts-service-renovation.yaml (B2): предложения B2 добавить в missing[] (смысл выявил пробел)
+  # missing:<id>, которых нет в facts-service-renovation.yaml: предложения добавить в missing[] (смысл выявил пробел)
   - {id: foreman-per-object, what: "правило «объект от замера до сдачи ведёт один прораб» — заказчик это сказал (бриф), но в инвентаре нет; записать фактом со словами заказчика (verification: stated)", for: "attr-one-foreman, pl-foreman"}
   - {id: photo-report-process, what: "правило фотоотчёта прораба: как часто, где, пример без адреса", for: "attr-photo-reports, obj-same-as-others"}
   - {id: estimate-change-policy, what: "пункт договора о том, когда и как меняется смета", for: "obj-budget-grows, val-predictable"}

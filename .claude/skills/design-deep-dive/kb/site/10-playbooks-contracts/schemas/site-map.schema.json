@@ -479,11 +479,11 @@
               "L1",
               "L2"
             ],
-            "description": "Уровень амбиций шаблона: копия ambition.by_page брифа или defaults_by_page_type creative (решение 20); не выше ambition.level сайта (валидатор)."
+            "description": "Уровень амбиций шаблона: копия ambition.by_page брифа или defaults_by_page_type creative; не выше ambition.level сайта (валидатор)."
           },
           "level_why": {
             "type": "string",
-            "description": "Причина подъёма внутренней страницы выше умолчания (решение 20: только с причиной в брифе)."
+            "description": "Причина подъёма внутренней страницы выше умолчания (только с причиной в брифе)."
           }
         },
         "allOf": [

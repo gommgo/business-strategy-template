@@ -1,4 +1,4 @@
-# Сгенерировано K/01 из 12-recipes/09-glass-product.md — блоки python в напечатанном виде, по порядку.
+# Сгенерировано run_recipes.py из 12-recipes/09-glass-product.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 41
 # Blender 5.2.2 — [проверено] рецепт 09: стеклянный флакон (transmission + volume) + сцена за ним

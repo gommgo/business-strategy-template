@@ -238,7 +238,7 @@ still. No zoom. No spin. Do not reposition the subject. One continuous shot, sam
 | `kling/v3` | `images: [A, A]` — только одноплановый («start frame (multi-shot)») | не документирована; далёкие кадры «may cause a lens switch» [S18] | 30 ₽ (std, 3 с) |
 | `google/veo3_fast`, `google/veo3` | `generationType: FIRST_AND_LAST_FRAMES_2_VIDEO` + `images` | не документирована | 45 / 187,5 ₽ (8 с, 720p) |
 | `minimax/hailuo-3-max` | `images: [A, A]` + строка FL2VA (§5.1) | не документирована; «FL2VA generally favors a single shot» [S29] | 47,30 ₽ (480p, 5 с) |
-| `google/gemini-omni-1.1-flash` (GA, с 27.08.2026) | `first_frame_url` + `last_frame_url` — **URL**: `polza.py` загружает только `images`, `videos`, `mask_url` → сначала `polza.py upload <файл> --live` | документирована: одна картинка на двух концах — «creating a video that loops» [S7] | 48 ₽ (4 с; 360p = 720p = 1080p) |
+| `google/gemini-omni-1.1-flash` (GA, с 27.08.2026) | `first_frame_url` + `last_frame_url` — путь файла или URL: локальный файл в поле `polza.py` загружает в хранилище сам перед отправкой | документирована: одна картинка на двух концах — «creating a video that loops» [S7] | 48 ₽ (4 с; 360p = 720p = 1080p) |
 | `gemini-omni-video` (preview, снимается 30.09.2026) | `images` + теги `[# Sources <FIRST_FRAME>@Image1 <LAST_FRAME>@Image1]` | та же; дойдут ли теги через KIE — `[не проверено]` | 35 ₽ (4 с, 720p) |
 | `bytedance/seedance-2`, `-2-fast`, `-2-mini`, `-2-5` | `images` — «референсные»; роли кадров словами (§3.3) | — | Mini 2,565 ₽/с (480p) |
 | `wan/2.5`, `wan/2.6`, `alibaba/wan-3.0*`, `alibaba/happyhorse-*`, `grok-imagine-video-1-5` | только первый кадр (`images` ≤ 1; у Grok FLF — только в API xAI) → i2v, петля — постобработкой (I) | — | Grok 1,62 ₽/с (480p); Wan 2.5 — 45 ₽ (720p, 5 с) |
@@ -491,8 +491,8 @@ $P $C compile 99-raw/phase5/inputs/D2/briefs/V2.spec.json --model grok-imagine-v
 - Путать locked-on (камера едет с субъектом) и locked-off (штатив); zoom и dolly; pan и truck.
 - Давать [A,A] модели без последнего кадра (Wan 2.5/2.6/3.0, HappyHorse, Grok): второй кадр — ошибка 400 или игнор; петля —
   постобработкой (I).
-- Отправлять GA Omni кадры в `images` или тегами preview: у GA — `first_frame_url`/`last_frame_url`, и это URL (`polza.py
-  upload` до запуска); `first_frame_url` не сочетается с `images`.
+- Отправлять GA Omni кадры в `images` или тегами preview: у GA — `first_frame_url`/`last_frame_url` (путь файла или URL:
+  локальный файл `polza.py` загружает сам); `first_frame_url` не сочетается с `images`.
 - Вкладывать однонаправленное событие в петлю [A,A] («the balloon drifts away»).
 - Писать таймкоды модели, которая их не держит (Seedance 1.5, 2.0), или с разрывами у Seedance 2.5; ставить время первому плану
   H3.

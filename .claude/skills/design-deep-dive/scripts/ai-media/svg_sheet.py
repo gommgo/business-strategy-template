@@ -35,8 +35,8 @@ import cairosvg
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))  # перенос: edit_check.py — рядом
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # edit_check.py — рядом
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 from edit_check import de2000, srgb_to_lab  # noqa: E402
 

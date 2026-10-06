@@ -2,7 +2,7 @@
 <!-- 03 · Hero с парящим объектом: подложка AVIF + прозрачное видео объекта (stacked alpha → WebGL2; AV1 → HEVC → H.264) +
      HTML-текст + параллакс слоёв по прокрутке (scroll-driven animations) + слой тени (multiply). Движение объекта ≤ 5 с, затем
      стоп на кадре 0 (WCAG 2.2.2 без кнопки), повтор — по наведению/фокусу; reduce → статичный AVIF с альфой, без параллакса.
-     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure (Chromium 153). -->
+     Проверено: Chromium 153. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -25,7 +25,7 @@
   .shadow { position: absolute; left: calc(62% - 2vw); top: calc(18% + clamp(150px, 16vw, 230px) * 1.75); width: clamp(190px, 20vw, 290px);
     height: 44px; border-radius: 50%; background: radial-gradient(closest-side, rgb(0 0 0 / .55), rgb(0 0 0 / 0)); mix-blend-mode: multiply; }
   @media (max-width: 699px) {
-    /* телефон: текст сверху по яркому небу — скрим сверху вниз (альфа из проверки F83 по буквам, J/06); флакон — слева от дерева */
+    /* телефон: текст сверху по яркому небу — скрим сверху вниз (альфа из проверки F83 по буквам, ai-media 10/03); флакон — слева от дерева */
     .layer--back::after { background: linear-gradient(180deg, rgb(20 18 16 / .80) 0%, rgb(20 18 16 / .66) 48%, rgb(20 18 16 / .15) 70%, rgb(20 18 16 / 0) 82%); }
     .object { left: 14%; top: auto; bottom: 9%; width: 112px; }
     .shadow { left: 9%; top: auto; bottom: 6%; width: 150px; }

@@ -1,7 +1,7 @@
 # Конвейер, CLI, MCP-серверы и онлайн-сервисы: версии, ключи, лицензии, живость
 
 Волна 3, агент L, 23.09.2026. Источников: 13 (живые запросы + файлы базы разделами). Экспериментов: 2
-(`99-raw/experiments/L/00-atlas-collect`, `L/01-addon-checks`) + прогон `atlas_collect.py`. Версии: gltf-transform
+(`99-raw/experiments/L/00-atlas-collect`, `L/01-addon-checks`). Версии: gltf-transform
 4.5.0, gltfpack 1.2, toktx/KTX-Software 4.4.2, gltf-validator 2.0.0-dev.3.10, mcp-for-blender 2.0.3, Blender Lab MCP
 1.0.3. Полная таблица — `13-tools-atlas/atlas.tsv` (категории `cli`, `mcp-server`, `service-asset`,
 `service-generator`, `service-web-tool`, `pypi`, `agent-skill`, `procedural-generator`).
@@ -13,7 +13,7 @@
    2.0.0-dev.3.10 → §1.
 2. **`gltf-transform prune` в 4.5 по умолчанию `keepLeaves: false, keepExtras: false`** — удаляет пустышки-метки и
    `userData`; если метки/extras нужны для JS — явно `--keep-leaves --keep-extras` или отдельный шаг без `prune`
-   → §1 [I §4].
+   → §1 (`../08-export-gltf/03-compression-textures-budgets.md §1.2, §4`).
 3. **`gltfpack -ke` не сохраняет extras мешей** (только `-kn`/`-km` для имён/материалов); без `-ke` теряются любые
    свои данные на меше (например, `_WAVE`-атрибут или JSON-паспорт в extras) → §1 [I §4, E/28].
 4. **mcp-for-blender 2.0.3 — 3 неисправленные CVE, не 2**: CVE-2026-10661 (CVSS v3.1 4.3), **CVE-2026-10662** —
@@ -23,8 +23,8 @@
 5. **Официальный Blender Lab MCP 1.0.3 (GPL-3.0-or-later, Forgejo `lab/blender_mcp`)** — работает в фоне
    (`--command blender_mcp`), документированный путь для постоянного агента; mcp-for-blender — только с окном →
    §3.
-6. **GitHub API без токена = 60 запросов/час** — сначала ungh.cc (звёзды/дата пуша, без лимита) и собственный кэш;
-   `atlas_collect.py` устроен именно так → §3, метод сбора.
+6. **GitHub API без токена = 60 запросов/час** — сначала ungh.cc (звёзды/дата пуша, без лимита) и собственный кэш
+   → §3, метод сбора.
 7. **Poly Haven — единственная библиотека без ключа и с однозначной CC0**: «use for any purpose, including
    commercial work», можно редистрибутировать даже внутри продаваемого продукта → §6.
 8. **Hunyuan3D-2/2.1 лицензия не действует в ЕС, Великобритании, Южной Корее** — проверять регион заказчика перед

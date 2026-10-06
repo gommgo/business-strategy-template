@@ -68,7 +68,7 @@ UA = "polza_catalog.py/1.0 (catalog snapshot)"
 # ---------------------------------------------------------------------------------------------------------------
 
 # Курс, по которому polza переводит долларовые цены токенных провайдеров (openai, google-*, openrouter, Alibaba):
-# 3 модели дают ровно 117.992 (B-notes §3; 99-raw/experiments/B/05-polza-vs-kie-fx). Курс ЦБ 23.09.2026 — 84.0657.
+# 3 модели дают ровно 117.992. Курс ЦБ 23.09.2026 — 84.0657.
 FX_POLZA_USD_RUB = 117.992
 
 # Выходные image-токены за картинку (для токенных провайдеров). Источники: Gemini API pricing
@@ -827,7 +827,7 @@ def validate(model: dict, inp: dict, *, provider: str | None = None, providers: 
     # --- перекрёстные правила по моделям (описания параметров каталога, гайды, документация KIE) ---
     ar = inp.get("aspect_ratio")
     res = inp.get("image_resolution")
-    # Flare: id до 25.09.2026 — gpt-image-2-5-flare, с 25.09.2026 — openai/gpt-image-2.5-flare (снимок 2026-09-25_1411; агент U)
+    # Flare: id до 25.09.2026 — gpt-image-2-5-flare, с 25.09.2026 — openai/gpt-image-2.5-flare (снимок 2026-09-25_1411)
     if mid in ("openai/gpt-image-2.5-sunburst", "openai/gpt-image-2.5-flare", "gpt-image-2-5-flare", "openai/gpt-5.4-image-2") and name == "mie":
         if (ar in (None, "auto")) and as_str(res) not in (None, "1K"):
             add("error", "image_resolution", "при aspect_ratio=auto или без него доступен только 1K (описание каталога)")

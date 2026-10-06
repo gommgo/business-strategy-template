@@ -1,6 +1,6 @@
 # motion-spec v1 — рабочий пример L1 «Сверка» (лендинг SaaS, «продукт в движении»). Рецепт 10-recipes/02-saas-l1.md.
-# creative-research · 10-recipes · агент J · волна 3 · 2026-09-25. Демо: сервис, банки и суммы вымышлены.
-# Проверка схемой: 99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l1-sverka/motion-spec.yaml
+# Демо: сервис, банки и суммы вымышлены.
+# Проверка схемой: $DDD_HOME/venv/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l1-sverka/motion-spec.yaml
 # Сверка сборки: python3 ../../scripts/creative/motion_check.py 10-recipes/examples/l1-sverka/index.html --level L1 --spec <этот файл>
 motion_spec_version: "1.0"
 id: sverka-home
@@ -71,7 +71,7 @@ sections:
       length_vh: 150
       length_vh_mobile: 130
       stations:
-        # sticky-сцена: якорь (книга) стоит на месте всю сцену — зонд DOM «край цели» не про неё (прогон 1: +674 px, 99-raw/experiments/J/03-l1-sverka/motion);
+        # sticky-сцена: якорь (книга) стоит на месте всю сцену — зонд DOM «край цели» не про неё (+674 px);
         # станции — доли at, сверка кадром станции
         - {id: s1, at: 0.24, describe: "первая пара сошлась: строка 1 зелёная, линия 1 нарисована, счётчик 1"}
         - {id: s2, at: 0.54, describe: "три пары сошлись, четвёртый счёт в пути"}
@@ -91,7 +91,7 @@ sections:
           - {property: translate, from: "0 calc(var(--from) * 100%)", to: "0 0", unit_note: "строка счёта из перемешанного слота к своей паре; пара i — окно contain (8 + 15i) % … (24 + 15i) %, движение в первых 70 % окна"}
           - {property: background-color, from: "var(--c-surface)", to: "var(--c-match)", unit_note: "в последних 28 % окна пары"}
           - {property: stroke-dashoffset, from: 1, to: 0, unit_note: "линия пары — во второй половине окна"}
-          - {property: opacity, from: 0, to: 1, unit_note: "счётчик: цифры 0–5 стопкой, видна одна — 0 до 22 %, k на 22+15(k−1)…22+15k %, 5 с 82 % (середина позеленения пары); было @property <integer> — WebKit 26.6 не обновлял counter() (J2, J/05)"}
+          - {property: opacity, from: 0, to: 1, unit_note: "счётчик: цифры 0–5 стопкой, видна одна — 0 до 22 %, k на 22+15(k−1)…22+15k %, 5 с 82 % (середина позеленения пары); @property <integer> не годится — WebKit 26.6 не обновляет counter()"}
         easing: {none: true}
         scrub: {smoothing_s: 0, snap: none}
         interrupt: follow-input
@@ -135,4 +135,4 @@ sections:
     mobile: {strategy: same, describe: "то же"}
     budget: {js_kb_br: 0, loops_in_view: 0, load: eager}
 open_questions:
-  - "Сцена задана долями одного view-timeline и var(--i) в animation-range (calc) — проверено в Chromium 153 и кадрами WebKit 26.6 Playwright (J2, 99-raw/experiments/J/05-webkit/: работает; счётчик на @property — нет, заменён стопкой цифр); Safari на устройстве — живая фаза."
+  - "Сцена задана долями одного view-timeline и var(--i) в animation-range (calc) — проверено в Chromium 153 и кадрами WebKit 26.6 Playwright (работает; счётчик на @property — нет, стоит стопка цифр); Safari на устройстве — живая фаза."

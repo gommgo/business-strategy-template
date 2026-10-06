@@ -1,31 +1,28 @@
 #!/usr/bin/env python3
-"""lint_agent_code.py — самопроверка текста скрипта агента регулярными выражениями до отправки в Blender (агент U,
-волна 4 — CLI из кода lint_agent_code() в 02-blender-workflow/03-patterns-antipatterns.md §6, код ниже как напечатан
-там, без изменений; идея и правила — I, `02/03 §6`).
+"""lint_agent_code.py — самопроверка текста скрипта агента регулярными выражениями до отправки в Blender: CLI из кода
+lint_agent_code() в kb/blender/02-blender-workflow/03-patterns-antipatterns.md §6, код ниже — как напечатан там, без
+изменений.
 
   python3 lint_agent_code.py script.py [script2.py …]     # свои файлы
   python3 lint_agent_code.py -                             # или без аргументов вовсе — то же: текст со stdin
 
 Печатает в stdout JSON {путь: [[код, уровень, совет], …]} (путь "-" — для stdin). Код выхода: 0 — замечаний нет ни в
 одном файле, 1 — есть хотя бы одно (ERROR или WARN). Это дешёвый фильтр текста скрипта до его исполнения в Blender
-(регулярки ловят текст, не смысл) — не заменяет проверку результата после запуска (B `04-llm-failure-modes… §3`).
+(регулярки ловят текст, не смысл) — не заменяет проверку результата после запуска (blender `03-bpy-api/04-llm-failure-modes… §3`).
 Уровни: ERROR — не отправлять в сцену человека; WARN — допустимо в своём фоновом файле агента (`orphans_purge`,
 настройки рендера своей сцены превью — см. `SCENE_SETTINGS`).
 
-Проверено на 24 скриптах «первой попытки» 99-raw/experiments/C1/11-naive-first-try/{haiku,sonnet,opus}/*.py: те же
-срабатывания на файл, что и у 99-raw/experiments/I/04-doc-blocks/lint_c1_result.json (I гонял тот же блок кода прямо
-из .md регулярным извлечением ```python).
+Проверено на 24 скриптах «первой попытки» трёх моделей: срабатывания на файл совпадают с прогоном того же блока кода,
+извлечённого из статьи регулярным выражением.
 
-Исправлено FX 26.09.2026 по T25 (реестр противоречий корневого README): OLD_API ловил любое `.fcurves`, в том числе
-правильный `channelbag.fcurves` Blender 5.x (дрейф № 68) — ERROR на верном коде. Теперь `.fcurves` — ошибка, только если
-получатель не channelbag и не NLA-полоса (см. OLD_FCURVES); тот же код — в `02/03 §6`. Тест —
-99-raw/notes/trial/FX/t25_lint_test.py.
+`.fcurves` — ошибка, только если получатель не channelbag и не NLA-полоса (OLD_FCURVES): правильный `channelbag.fcurves`
+Blender 5.x (дрейф № 68) не ловится; тот же код — в `02/03 §6`.
 """
 import json
 import re
 import sys
 
-# `.fcurves` в Blender 5.2 есть только у ActionChannelbag и NlaStrip (проверено FX: t25_rna_fcurves.py); у Action удалён в 5.0.
+# `.fcurves` в Blender 5.2 есть только у ActionChannelbag и NlaStrip (проверено по RNA Blender 5.2); у Action удалён в 5.0.
 # Ловим `.fcurves` после любого получателя, кроме: имени с «bag»/«cb…»/«nla» (channelbag, cb, bag, channel_bag, nla_strip),
 # вызова `…channelbag…(…)` (`strip.channelbag(slot)`, `anim_utils.action_get_channelbag_for_slot(act, slot)`) и функции
 # помощника `x.fcurves(…)` (`animx.fcurves(ob)`). Ловится: action.fcurves, act.fcurves.new(…), ob.animation_data.action.fcurves,

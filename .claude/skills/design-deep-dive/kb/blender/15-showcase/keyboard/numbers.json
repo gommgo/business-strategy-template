@@ -460,7 +460,7 @@
   }
  },
  "A_code": {
-  "frame": "05-code-a/a_H1_v6.png",
+  "frame": "a_H1_v6.png",
   "metrics": {
    "obj_L": {
     "p5": 0.0,
@@ -2005,7 +2005,7 @@
     }
    },
    "atlas_webp_vs_ktx2": {
-    "what": "атлас надписей C на десктопе: KTX2 ETC1S (gltfpack -tc -tq 8, KB2) против WebP (-tw, KB3)",
+    "what": "атлас надписей C на десктопе: KTX2 ETC1S (gltfpack -tc -tq 8) против WebP (-tw)",
     "kb_br": {
      "kb_desk_ktx2.glb": 176.2,
      "basis_transcoder.js": 13.4,
@@ -2017,9 +2017,6 @@
     },
     "saving_kb_br": 229.4,
     "color": "ETC1S: модификаторы #D3D6D8 и белые PBT уходят в сиреневый (видно глазами; -tq 10 не лечит); WebP — как у A/B",
-    "evidence": [
-     "10-check/kb3_atlas_ktx2_q8_q10_webp.jpg"
-    ],
     "model_chunk_kb_min": {
      "with_KTX2Loader": 132.3,
      "without": 74.3
@@ -2594,7 +2591,7 @@
    }
   },
   "loaf_probe_KB3": {
-   "probe": "10-check/loaf_probe.py — как motion_check: покой 6 с, шаги колеса 0,8 экрана, пауза 2,1 с; LoAF фазы прокрутки",
+   "probe": "как motion_check: покой 6 с, шаги колеса 0,8 экрана, пауза 2,1 с; LoAF фазы прокрутки",
    "date": "2026-09-26 01:40",
    "viewport": "1440x900",
    "before_KB2_motion_check_c_desk": {
@@ -2602,7 +2599,6 @@
     "loaf_ms": 843,
     "loaf_pct": 4.2,
     "span_s": 20.1,
-    "src": "11-gates/c_kb2/motion/results.json",
     "trigger": "whenNear(stage-type, 10%) — three грузился посреди прокрутки"
    },
    "after_KB3": {
@@ -2640,8 +2636,7 @@
      "three_trigger_ms": 3941,
      "three_ready_ms": 1464,
      "first3d_ms": 6875
-    },
-    "src": "10-check/dev3e_{c-hybrid,a-code}/drive_log.json"
+    }
    }
   },
   "gates": {

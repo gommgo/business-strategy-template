@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
-"""F/04 composition_metrics.py — маркеры «среднего вида» и пригодности кадра под веб, кодом.
-Python 3.13, numpy, scipy, Pillow. Цвет (colorfulness, hdr_index, warm_b, purple_share) — из A/04 image_metrics.metrics.
+"""composition_metrics.py — маркеры «среднего вида» и пригодности кадра под веб, кодом.
+Python 3.13, numpy, scipy, Pillow. Цвет (colorfulness, hdr_index, warm_b, purple_share) — из image_metrics.metrics.
 Метрики:
   centroid_x/y   — центр масс карты значимости (spectral residual, Hou & Zhang 2007) в долях кадра;
   center_offset  — |centroid − 0,5| по x (маркер IMG-M09 «строго в центре»: < 0,08);
   mirror_sym     — корреляция левой и зеркальной правой половины яркости (симметрия, 1 = зеркально);
-  empty_share    — доля клеток сетки 16×9 с плотностью краёв ≤ 0,06 (спокойные зоны; «40 % negative space» W2-12);
+  empty_share    — доля клеток сетки 16×9 с плотностью краёв ≤ 0,06 (спокойные зоны; «40 % negative space»);
   zone_edge      — плотность краёв в заданной зоне текста (по умолчанию левые 45 %);
   blobs          — число связных «пятен» значимости > 0,5·max (прокси числа объектов, «≤ 3 элемента»).
-CLI: python3 composition_metrics.py IMG [IMG…]  → JSON-строки. [проверено: 99-raw/experiments/F/04-slop-metrics]"""
+CLI: python3 composition_metrics.py IMG [IMG…]  → JSON-строки."""
 import sys, os, json, numpy as np
 from PIL import Image
 from scipy import ndimage
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # перенос: image_metrics.py — рядом
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # image_metrics.py — рядом
 from image_metrics import metrics as color_metrics
 def gray(im, w=512):
     im = im.convert("L"); h = round(im.height * w / im.width); return np.asarray(im.resize((w, h), Image.LANCZOS)).astype(np.float32) / 255

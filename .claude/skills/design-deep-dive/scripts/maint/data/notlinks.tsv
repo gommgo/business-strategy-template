@@ -1,0 +1,55 @@
+# Имена и пути, которые тексты пишут в обратных кавычках, но которые не файлы этого репозитория: файлы и папки проекта
+# (форка) и рабочей памяти скиллов, выходы утилит, пути соседних репозиториев и чекаутов, значения через «/». Читает
+# scripts/maint/refcheck.py: путь, которого в репозитории нет, не битая ссылка, если один из его сегментов равен имени
+# (имя из нескольких сегментов — начало пути). Путь от корня скилла (`kb/`, `scripts/`, `references/`, `assets/`, папки
+# баз) сверяется всегда. Вид `sibling` — имя соседнего чекаута орги: путь `../<имя>/…` не ссылка, только когда папки
+# с таким именем на его месте нет. Новое имя — строка данных, а не код.
+# Колонки через табуляцию: kind (project | state | output | neighbor | sibling | value), name, what — где это живёт.
+# Строка с «#» в начале — комментарий.
+kind	name	what
+project	kit.json	манифест кадров статичных копий холста — производное, в git не хранится
+project	page.yaml	файл страницы шаблона в проекте холста
+project	domains	домены сервиса проекта: `services/<svc>/domains/`
+project	events	события домена: `domains/<ctx>/events/`
+project	use-cases	use-case'ы домена: `domains/<ctx>/use-cases/`
+project	flows	потоки экранов: `screens/<surface>/flows/`
+project	integrations	клиенты интеграций: `services/_shared/integrations/`
+state	service--crm--orders.md	пример имени заметки state по ref `service:crm/orders`
+project	master-detail-figma.png	пример имени ассета экрана
+project	competitor-linear-list.png	пример имени ассета экрана
+project	competitor-bot-menu.png	пример имени ассета окна бота
+project	booking-confirm-mockup.png	пример имени ассета окна бота
+state	state	рабочая память оркестраторов: `.claude/skills/entrypoint/state/`, `.claude/skills/entrypoint-for-business/state/`
+state	audit-state	память аудита: `.claude/skills/<аудит>/audit-state/`
+state	threads	открытые нити оркестратора: `state/threads/`
+state	_interview	ветка сырья интервью: `state/ajtbd/_interview/`
+state	transcripts	транскрипты интервью: `_interview/transcripts/`
+state	candidates	кандидаты из интервью: `_interview/candidates/`
+state	prep.md	подготовка интервью: `_interview/prep.md`
+state	channels.md	каналы рекрута: `_interview/channels.md`
+state	hypotheses.md	гипотезы сегментов: ветка `ajtbd/` state
+state	research	выгрузки роя исследования: ветка `ajtbd/research/` state
+state	_frame.md	рамка мобильного приложения: ветка поверхности state
+state	architecture/architecture.md	заметка singleton'а сервисного слоя: ветка state
+state	_session-log	журнал сессии клиентского режима
+state	client-handoff	упаковка передачи клиентского режима
+output	sheet.png	выход `ai-media/svg_sheet.py`: лист
+output	metrics.md	выход `ai-media/svg_sheet.py`: метрики
+output	clean	выход `ai-media/svg_sheet.py`: очищенные SVG
+neighbor	docs/reference	справочник код-репо и хаба (`<org>/backend`, `<org>/mobile`, `<org>/infra`)
+neighbor	docs/stack	стек код-репо
+neighbor	.claude/plans	программы сквозных задач хаба `<org>/infra`
+neighbor	shared	общий код `<org>/mobile`
+neighbor	androidApp	код Android `<org>/mobile`
+neighbor	iosApp	код iOS `<org>/mobile`
+neighbor	deep-links.md	stack `<org>/mobile`
+neighbor	push.md	stack `<org>/mobile`
+neighbor	stit-core	организация шаблонов: `stit-core/<шаблон>` — адрес репозитория
+sibling	strategy	`<org>/strategy`
+sibling	infra	`<org>/infra`
+sibling	backend	`<org>/backend`
+sibling	frontend	`<org>/frontend`
+sibling	site	`<org>/site`
+sibling	mobile	`<org>/mobile`
+value	N/A	«не применимо» в ячейке таблицы
+value	draft/stable	пара статусов артефакта

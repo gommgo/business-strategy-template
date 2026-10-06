@@ -1,4 +1,4 @@
-# Python 3.10+ (без bpy) — [проверено: 99-raw/experiments/E/26-doc-snippets/glb_lint_result.json, run_md04.py] проверка готового GLB:
+# Python 3.10+ (без bpy) — [проверено] проверка готового GLB:
 # расширения и декодеры, вызовы, треугольники, текстуры и память GPU, прозрачность, UV, свет, анимация
 import json, struct
 

@@ -37,7 +37,7 @@
 ```python
 # Blender 5.2.2 — [проверено] рецепт 08: вращение 360° импортированного GLB → PNG RGBA
 import sys, math, os, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "08-sequence-video-alpha"
@@ -74,10 +74,10 @@ rk.save(SLUG, frames=P["frames"], sec_per_frame=round(sum(secs) / len(secs), 2),
 ## 4. Кодирование: WebP/AVIF-секвенция, VP9 с альфой, stacked AV1
 
 ```python
-# run: system — Python 3 + Pillow + ffmpeg — [проверено] команды A/06 (encode.py) на кадрах рецепта
+# run: system — Python 3 + Pillow + ffmpeg — [проверено] команды кодирования (blender 06/04 §2–3) на кадрах рецепта
 import glob, json, os, subprocess
 from PIL import Image
-EX = "/home/mm/Документы/app-design/blender-research/12-recipes/examples/08-sequence-video-alpha"
+EX = os.path.dirname(os.path.abspath(__file__))  # перенос: папка примера
 frames = sorted(glob.glob(f"{EX}/seq/f_*.png")); os.makedirs(f"{EX}/web/seq", exist_ok=True)
 kb = lambda p: round(os.path.getsize(p) / 1024, 1)  # noqa: E731
 tot = {"png": 0, "webp_q80": 0, "avif_q55": 0}

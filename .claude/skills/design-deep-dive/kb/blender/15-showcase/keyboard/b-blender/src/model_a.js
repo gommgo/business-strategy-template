@@ -1,5 +1,5 @@
 // model_a.js — вариант A: клавиатура «Ё» целиком кодом (three r186) по тому же паспорту, что у Blender (passport.json, метры,
-// оси Blender внутри группы, повёрнутой в Y-вверх). Фаза 2: горизонтальное дно, пескоструй 0,52 + зерно (тайловые карты
+// оси Blender внутри группы, повёрнутой в Y-вверх). Горизонтальное дно, пескоструй 0,52 + зерно (тайловые карты
 // canvas), латунная плита 200 × 40 × 6 мм и полоса, «esc» на верхней грани Ё, пластина с вырезами, свитчи — инстансы
 // простых форм, слои разборки по нормали деки (тот же закон, что kbb.apply_explode).
 // Все 68 колпачков — одна геометрия и один материал (1 вызов): у вершины индекс клавиши, нажатие — сдвиг в вершинном
@@ -291,7 +291,7 @@ export async function buildModelA({ phone, quality, idle = async () => {} }) {
     sheen: 0.04, sheenRoughness: 0.8, sheenColor: new Color('#ffffff'), ior: 1.54 });
   keyMat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, U);
-    // KB3: верх нажатой клавиши чуть светлее (как подсветка обвода у B) — эмиссия по глубине нажатия 0…3,8 мм
+    // верх нажатой клавиши чуть светлее (как подсветка обвода у B) — эмиссия по глубине нажатия 0…3,8 мм
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute float kIdx;\nuniform float uPress[68];\nuniform float uYoIdx;\nvarying float vYo;\nvarying float vPress;')
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat kbP = uPress[int(kIdx + 0.5)];\ntransformed.z -= kbP;\nvPress = clamp(kbP / 0.0038, 0.0, 1.0);\nvYo = abs(kIdx - uYoIdx) < 0.5 ? 1.0 : 0.0;');
@@ -361,7 +361,7 @@ export async function buildModelA({ phone, quality, idle = async () => {} }) {
     // в разборке тени поднятых слоёв рвутся краем карты — без них; в наборе ключ низкий (16°) → длинная жёсткая тень с прямыми
     // краями (PCFSoft не размывает) — вдвое слабее, форму держит мягкая контактная тень
     setStage(n) { if (sf) { sf.visible = n !== 'x'; sf.material.opacity = n === 'type' ? 0.13 : 0.28; } },
-    // шток свитча идёт вниз вместе с колпачком (KB3: иначе при нажатии крестик штока проступает сквозь верх колпачка) —
+    // шток свитча идёт вниз вместе с колпачком (иначе при нажатии крестик штока проступает сквозь верх колпачка) —
     // сдвигается весь экземпляр свитча, как у C; корпус свитча под колпачком не виден
     setKeyOffset(id, d) {
       const i = idToIdx.get(id);

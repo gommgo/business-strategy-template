@@ -647,5 +647,4 @@ copy_deck:
           warnings: 0
         notes: блокирующий пробел B2 (H DIST-01)
     status: draft
-  notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-otves-lead-v0.yaml (ai-self E3, 0 error), upgrade
-    v0 → v1 copydeck.py; правки J3 — в notes слотов и в 02-examples-ru.md.'
+  notes: 'Правки примера — в notes слотов и в 02-examples-ru.md.'

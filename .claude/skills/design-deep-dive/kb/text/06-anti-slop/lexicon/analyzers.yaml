@@ -1,9 +1,9 @@
 # Анализаторы без регулярных выражений: объявления для copy_lint.py (id, маркер, сообщение, правка, источник).
-# Пороги — в 06-anti-slop/profiles.yaml (стартовые, provisional: true) и в 03-corpus-measured/thresholds.yaml (D).
+# Пороги — в 06-anti-slop/profiles.yaml (стартовые, provisional: true) и в 03-corpus-measured/thresholds.yaml.
 # Уровень здесь — справочный: фактический уровень задаёт профиль жанра (analyzers.<имя>.level).
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   kind: analyzer
   lang: any
@@ -17,7 +17,7 @@ rules:
     message: "Плотность маркеров слопа на 100 слов выше порога жанра: править кластерами, начиная с семей с наибольшим числом находок."
     replacement: "удалить → заменить фактом → переписать проще; не заменять синонимом"
     source: "humanizer-ru scripts/lint.py (вердикт по сумме находок); Kobak и др. 2025 (плотность, а не вхождение); WP:AISIGNS «AI vocabulary»: «lots of them, lots of times»"
-    evidence: "[практика] + [исследование]; пороги [не проверено] до замера D"
+    evidence: "[практика] + [исследование]; пороги [не проверено] до замера корпуса"
     threshold_ref: "03-corpus-measured/thresholds.yaml#genres.<жанр>.analyzers.marker_density"
   - id: an-rhythm-monotone
     marker_id: COPY-M-STR-06
@@ -54,7 +54,7 @@ rules:
     message: "Тире в прозе чаще порога жанра. Не заменять дефисом и не выбрасывать обязательные: перестроить часть фраз (глагол-связка, «не», сравнительный союз, точка, запятая с придаточным)."
     replacement: "гайд заказчика §C, приёмы 1–10; обязательное тире оставить"
     source: "гайд заказчика §C; impeccable em-dash-overuse (≥ 8 и ≥ 1 на 500 знаков, advisory); Gesso --marketing (em dash — «defensible choice» в лонгриде); The Economist 2026-07-30 через WP:AISIGNS (из моделей чаще профессионалов тире ставит только Claude)"
-    evidence: "[спорно]: для русского тире местами обязательно; порог [не проверено] до замера D"
+    evidence: "[спорно]: для русского тире местами обязательно; порог [не проверено] до замера корпуса"
     threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.dash_density"
   - id: an-low-concreteness
     marker_id: COPY-M-CNT-01
@@ -63,7 +63,7 @@ rules:
     message: "Мало конкретики в прозе: чисел, дат, имён, названий на 100 слов меньше порога."
     replacement: "оценку заменить характеристикой из facts.yaml («быстро» → «за 15 минут»); нет факта — удалить оценку"
     source: "гайд заказчика §C, §D; AINL-Eval 2025 (в человеческих аннотациях цифр в 10 раз больше, чем в сгенерированных); Russell и др. 2025 (эксперты: у людей много конкретных проверяемых утверждений)"
-    evidence: "[исследование] для научного жанра; для маркетинга [не проверено] до замера D"
+    evidence: "[исследование] для научного жанра; для маркетинга [не проверено] до замера корпуса"
     threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.concreteness"
   - id: an-verb-repeat
     marker_id: COPY-M-SYN-12
@@ -81,7 +81,7 @@ rules:
     message: "Сверхкоррекция: нарочитая рваность, ноль связок, разговорные вставки при чистой грамматике — след хуманайзера."
     replacement: "вернуть связки и нормальные предложения; рваность — точечно, в 1–2 местах, где нужен акцент"
     source: "гайд заказчика §F «Предупреждение о сверхкоррекции»; humanizer-ru SKILL.md detect-режим п.4, v1.7; Russell и др. 2025 (гуманизация не убирает подпись)"
-    evidence: "[практика]; пороги калиброваны на 5 абзацах ai-self (99-raw/experiments/C/04-overcorrection) [проверено]"
+    evidence: "[практика]; пороги калиброваны на 5 абзацах ai-self [проверено]"
     threshold_ref: "thresholds.yaml#genres.<жанр>.analyzers.overcorrection"
   - id: an-not-x-but-y-density
     marker_id: COPY-M-SYN-03
@@ -126,8 +126,8 @@ rules:
     per_sections: 3           # число владельца COPY-C-18: надзаголовок не чаще одного на N секций с заголовком (H1, H2)
     message: "Надзаголовок чаще, чем у каждой третьей секции."
     replacement: "оставить надзаголовок только там, где он несёт информацию (категория, дата, этап); остальные удалить"
-    source: "PLAN.md поправка к ux 07/06 §5.3 и AC-TXT-13; taste EYEBROW RESTRAINT (≤ 1 на 3 секции); ui 11/04 маркер 30; kimi 05/03 (эйбрау над H2 ≈ 12/15 работ K3)"
-    evidence: "[практика] + [проверено kimi E/03]"
+    source: "поправка к ux 07/06 §5.3 и AC-TXT-13; taste EYEBROW RESTRAINT (≤ 1 на 3 секции); ui 11/04 маркер 30; разбор LLM-вёрстки (эйбрау над H2 ≈ 12/15 работ)"
+    evidence: "[практика] + [проверено]"
   - id: an-lists-of-three
     marker_id: COPY-M-STR-08
     level: info
@@ -143,8 +143,8 @@ rules:
     count_as_marker: false
     message: "Число, рейтинг или соцдоказательство без ссылки на факт."
     replacement: "в copy deck — fact_ids на запись facts.yaml; нет записи — [PLACEHOLDER] и строка в missing"
-    source: "PLAN.md риск 3 и поправка к ux 07/06 §5.2 / AC-TXT-02; kimi facts.md (never_claim); эталон провала «Кварц» (kimi F/03)"
-    evidence: "[практика]; проверка — claims_check.py (B2), линтер только сигналит"
+    source: "поправка к ux 07/06 §5.2 / AC-TXT-02; facts.md входа холста («Нельзя утверждать»); эталон провала «Кварц» (02-strategy-messaging/examples/facts-kvarts.yaml)"
+    evidence: "[практика]; проверка — claims_check.py, линтер только сигналит"
   - id: an-cards-uniform
     marker_id: ""
     level: info

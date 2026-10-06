@@ -3,7 +3,7 @@
  "title": "Продукт в движении, движение камеры",
  "version": "1.1",
  "checked_at": "2026-09-23",
- "author": "агент K, волна 3",
+ "author": "ai-media",
  "applies_to": [
   "VID-I2V-PRODUCT",
   "VID-CAMERA",
@@ -49,7 +49,7 @@
     "type": "text"
    }
   ],
-  "checklist_note": "вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат 99-raw/phase5/inputs/D2/questions_v2.json); общие — только если брифа нет",
+  "checklist_note": "вопросы по пунктам конкретного брифа — атомарные, позитивные, с depends (формат — ai-media 11/02); общие — только если брифа нет",
   "defect_questions": [
    {
     "code": "RUB-DUP-SUBJECT",
@@ -61,13 +61,13 @@
     "code": "RUB-LEGAL-FACE",
     "q": "Is there a human face large and sharp enough to be recognized (close-up or medium shot)?",
     "vlm": "yes",
-    "source": "L 12-legal-provenance/04 §5 п. 3 (узнаваемые люди, двойники) — решает человек"
+    "source": "ai-media 12/04 §5 п. 3 (узнаваемые люди, двойники) — решает человек"
    },
    {
     "code": "RUB-LEGAL-MARK",
     "q": "Apart from the main product (if any), is there a real brand logo, trademark or recognizable branded packaging?",
     "vlm": "yes",
-    "source": "L 12-legal-provenance/04 §5 п. 4 (чужие знаки, упаковка) — решает человек; текст — OCR K"
+    "source": "ai-media 12/04 §5 п. 4 (чужие знаки, упаковка) — решает человек; текст — OCR"
    }
   ],
   "defect_questions_screen_only": [
@@ -111,12 +111,12 @@
    {
     "what": "анатомия: руки, пальцы, зубы, глаза, лишние конечности (IMG-M11, RUB-EXTRA-LIMBS)",
     "why": "o3 назвал уродливую руку «mostly natural» [V:h5ItAJuB3Fc 00:01]; VLM ≈ случай в назывании артефактов (Artifact-Bench, 9,8 %)",
-    "instead": "человек: зум 200 % по сетке 3×3; людей в hero не генерировать (A 01/03 §1)"
+    "instead": "человек: зум 200 % по сетке 3×3; людей в hero не генерировать (ai-media 01/03 §1)"
    },
    {
     "what": "точный текст на картинке (IMG-M12 — чтение)",
     "why": "VQA-совпадение по тексту 13,7 % (DSG); VLM «догадывается» по языку",
-    "instead": "asset_audit.py ocr (PP-OCRv5 eslav) + чтение по буквам человеком в ключевом слоте (K/01)"
+    "instead": "asset_audit.py ocr (PP-OCRv5 eslav) + чтение по буквам человеком в ключевом слоте (ai-media 11/01)"
    },
    {
     "what": "счёт предметов",
@@ -125,7 +125,7 @@
    },
    {
     "what": "точный цвет и палитра (hex, «оттенок бренда»)",
-    "why": "VLM «придумывает» цвета: заглушка «golden yellow 30 %» покрывает 0,1 % пикселей (F/07)",
+    "why": "VLM «придумывает» цвета: заглушка «golden yellow 30 %» покрывает 0,1 % пикселей (ai-media 06/01)",
     "instead": "asset_audit.py: палитра OKLab, покрытие цвета (vlm_to_dna.palette_check)"
    },
    {
@@ -140,7 +140,7 @@
    },
    {
     "what": "сходство с оригиналом (персонаж, товар, знаменитость)",
-    "why": "судит тот, кто знает оригинал (W2; bH2nP-aCFjk); знаменитость — правовой риск (L)",
+    "why": "судит тот, кто знает оригинал [V:bH2nP-aCFjk]; знаменитость — правовой риск (ai-media 12/03)",
     "instead": "заказчик; для товара — SSIM/ΔE области товара к референсу (edit_check --protect)"
    },
    {
@@ -179,24 +179,24 @@
  },
  "human": [
   "Покадрово: форма, логотип, число деталей товара («запечённый» свет — блики стоят при повороте, VID-M08)",
-  "Хромакей: отсвет ключа на металле (despill не снимает, I/03)"
+  "Хромакей: отсвет ключа на металле (despill не снимает)"
  ],
  "decision": {
   "fail": "любой fail автоматической проверки (asset_audit) → перегенерировать или чинить по подсказке (композит, срез, кроссфейд)",
-  "cluster": "≥ 3 подтверждённых маркеров (метрика + глаз или VLM с «где»), в ключевом слоте ≥ 2 → не публиковать (A 01/03 §5.1)",
+  "cluster": "≥ 3 подтверждённых маркеров (метрика + глаз или VLM с «где»), в ключевом слоте ≥ 2 → не публиковать (ai-media 01/03 §5.1)",
   "vlm_defect": "VLM нашёл маркер с «где» → показать человеку этот фрагмент (needs_human), а не браковать сам",
   "pass": "автоматика без fail + VLM без подтверждённых маркеров → ручная приёмка ≈ 2 мин по чек-листу 03",
   "choice": "из нескольких годных — слепые попарные голоса заказчика; VLM-попарный — только если K-01 показал ≥ 0,8 согласия",
-  "legal": "RUB-LEGAL-FACE / RUB-LEGAL-MARK «да» с «где» → ворота L (12-legal-provenance/04 §5 п. 3–4): человек решает — перегенерировать без людей и знаков или согласие; автоматически не fail"
+  "legal": "RUB-LEGAL-FACE / RUB-LEGAL-MARK «да» с «где» → ворота перед публикацией (ai-media 12/04 §5 п. 3–4): человек решает — перегенерировать без людей и знаков или согласие; автоматически не fail"
  },
  "notes": [],
  "sources": [
-  "A 01-web-assets-landscape/03-ai-fit-trust-and-slop.md §5–§6",
-  "E-helper-judging §7–§12, «Рекомендации» 16–18",
+  "ai-media 01/03 §5–§6",
+  "ai-media 11/02",
   "DSG arXiv 2310.18235; TIIF-Bench 2506.02161; NegBench 2501.09425; GEditBench v2 2603.28547; Artifact-Bench 2605.18984",
   "дайджесты b_PmGocP4rc, KLDdXOw6jIc, h5ItAJuB3Fc, H6ZXujE1qBA, bH2nP-aCFjk",
-  "L 12-legal-provenance/04 §5 (ворота перед публикацией: люди, знаки, метки вендора — provenance_check.py scan --corners)",
-  "I 09-video-pipeline/02, 04",
+  "ai-media 12/04 §5 (ворота перед публикацией: люди, знаки, метки вендора — provenance_check.py scan --corners)",
+  "ai-media 09/02, 04",
   "C2 (облёт ≤ 45°)"
  ]
 }

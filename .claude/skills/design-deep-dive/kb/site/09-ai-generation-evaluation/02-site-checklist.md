@@ -532,7 +532,7 @@ treatment, план ассетов, 3D), `step:plan-check` (блок PRE), `step
 `ux-marketing-profile.tsv` — решение по каждому из 434 пунктов `UX-*` сводного чек-листа ux
 (`../../ux/12-evaluation-checklists/02-master-checklist.md`, 20 блоков): как пункт действует на маркетинговой
 странице. Колонки: `ux_id block ux_text_short site_action site_replacement reason source`. Генератор и сверка —
-`../../../scripts/site/build_profile.py` (`--check`: TSV совпадает с решениями; каждый SITE-* есть в
+`../../../scripts/site/build_profile.py` (`--check`: профиль и `ac-profile.tsv` совпадают со сборкой; каждый SITE-* есть в
 `site-checklist.yaml`, COPY-* — у text, CRV-* — у creative; ложные блокеры аудита UX §4 не могут остаться `keep`).
 
 ### 5.1. Действия
@@ -547,7 +547,7 @@ treatment, план ассетов, 3D), `step:plan-check` (блок PRE), `step
 Почти целиком переносятся доступность (A11: keep 18 из 22), формы (FRM: 20 из 28), телефон (MOB: 15 из 24), окна (OVL: 12
 из 18); почти целиком выключены SET (16 из 16), APP (53 из 72), DAT (18 из 25), ACT (13 из 18). Пункты ux серьёзности B:
 keep 48, modify 31, off 27, replaced 18. Автопроверки AC-* ux (246) наследуют действие закрываемого пункта — `ac-profile.tsv`
-того же опыта: keep 99, modify 47, off 43, replaced 31, n/a 26. Пример строки: `UX-OVL-02 · replaced · SITE-CTA-07, SITE-CTA-08,
+рядом с профилем: keep 99, modify 47, off 43, replaced 31, n/a 26. Пример строки: `UX-OVL-02 · replaced · SITE-CTA-07, SITE-CTA-08,
 SITE-LEGAL-06, SITE-A11Y-14` — обязательный баннер cookie законен, проверяются его равные кнопки и незакрытый фокус.
 
 ### 5.2. Ложные срабатывания до и после профиля (опыт K/02)

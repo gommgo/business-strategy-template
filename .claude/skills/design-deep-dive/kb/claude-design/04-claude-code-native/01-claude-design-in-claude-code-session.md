@@ -313,13 +313,14 @@ Anthropic: ниже пересказ, не копия; в наши скиллы 
 
 ```bash
 # kit · [проверено]
-K=../../scripts/claude-design/kit; P=design; L=$DDD_HOME/locks/browser.lock
-flock $L python3 $K/shot.py $P review/iter-01 --tiles --iteration iter-01 --min-free-gb 2          # кадры, холст, marks.json
-flock $L python3 $K/shot.py $P review/iter-02 --tiles --prev review/iter-01/marks.json --min-free-gb 2
+# замок браузера shot.py и export.py берут сами
+K=../../scripts/claude-design/kit; P=design
+python3 $K/shot.py $P review/iter-01 --tiles --iteration iter-01 --min-free-gb 2                   # кадры, холст, marks.json
+python3 $K/shot.py $P review/iter-02 --tiles --prev review/iter-01/marks.json --min-free-gb 2
 python3 $K/diffshots.py review/iter-01 review/iter-02 --expect 16,22,37,38 --strict                 # 0 неожиданных — код 0
-flock $L python3 $K/shot.py $P review/try --set "color-accent=#0B6E4F;radius-md=4px" --prev review/iter-02/marks.json
+python3 $K/shot.py $P review/try --set "color-accent=#0B6E4F;radius-md=4px" --prev review/iter-02/marks.json
 python3 $K/diffshots.py review/iter-02 review/try --expect all                                      # «радиус» правки токенов
-flock $L python3 $K/export.py all $P export --min-free-gb 2                                         # PDF, PNG 2×, standalone, zip
+python3 $K/export.py all $P export --min-free-gb 2                                                  # PDF, PNG 2×, standalone, zip
 python3 $K/shot.py serve $P --port 8765                                                             # живой холст для браузера
 ```
 

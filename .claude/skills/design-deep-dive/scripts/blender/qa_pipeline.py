@@ -23,12 +23,12 @@ kb/blender 11-evaluation-qa/03 §2.2.
 """
 import json, os, re, shutil, struct, subprocess, sys, tempfile, time
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("blender"))
 TOOLS = str(kbpaths.scripts("blender"))
-E26 = TOOLS  # перенос: preflight_block, glb_lint_block — scripts/blender
-SERVE_BR = TOOLS  # перенос: serve_br — scripts/blender
+E26 = TOOLS  # preflight_block, glb_lint_block — scripts/blender
+SERVE_BR = TOOLS  # serve_br — scripts/blender
 RANK = {"pass": 0, "review": 1, "fail": 2}             # порядок вердиктов для worst(); коды выхода — exit_code()
 STRICT_CODE = {"pass": 0, "fail": 1, "review": 3}     # выход по находкам (--strict): есть ERROR — 1, только WARN — 3
 

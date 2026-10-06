@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""F/02 text_zone.py — контраст HTML-текста поверх картинки по зоне и минимальный скрим.
-Python 3.13, numpy, Pillow 11.3. [проверено: 99-raw/experiments/F/02-text-zone]
+"""text_zone.py — контраст HTML-текста поверх картинки по зоне и минимальный скрим.
+Python 3.13, numpy, Pillow 11.3.
 Библиотека: zone_stats(img, rect), zone_contrast(img, rect, text_hex), scrim_alpha(img, rect, text_hex, target, q),
 glyph_true(img, rect, text_hex, text) — «истинный» контраст под буквами (фон под маской глифов).
 CLI: python3 text_zone.py IMG x0 y0 x1 y1 [#fff|#111] — rect в долях кадра."""

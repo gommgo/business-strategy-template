@@ -3,12 +3,12 @@
 Волна 1 · агент A · 2026-09-24 · прочитано целиком 16 источников (контракт, kimi, ux, text, creative, словарь B) · опыты
 `99-raw/experiments/A/01-schema-validate/` (схема и 16 отрицательных случаев), `A/02-kimi-projection/` (сборка пакета kimi),
 `A/03-coverage/` (покрытие полей). Файлы формата: `site-brief.schema.json` (JSON Schema 2020-12, v0),
-`site-brief.example.yaml` (лидогенерация услуг в РФ, вымышленная студия «Отвес»), `site-brief.kimi-map.tsv` (189 строк).
+пример — `../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml` (лидогенерация услуг в РФ, вымышленная
+студия «Отвес»).
 
 ## Выжимка для агента
 
-1. **Бриф сайта — один YAML-файл по `site-brief.schema.json`**, надмножество `brief.yaml` kimi; в kimi уходит проекция по
-   `site-brief.kimi-map.tsv`, а не сам бриф: `lint_brief` отвергает чужие ключи верхнего уровня. → §1, §7 `[проверено]`
+1. **Бриф сайта — один YAML-файл по `site-brief.schema.json`**. → §1, §7 `[проверено]`
 2. **Поля смысла — блок `meaning` по схеме text** (`$ref: urn:app-design:text:meaning:1`), доказательства — только
    ссылка `proof.facts_ref` на `facts.yaml` text; свои определения аудитории, возражений и фактов не заводить. → §2.6, §2.7
    `[проверено]`
@@ -91,7 +91,8 @@ site-brief.yaml (site)                         brief.yaml kimi (проекция
 
 ## 2. Разделы брифа
 
-Полная схема — `site-brief.schema.json` (25 блоков верхнего уровня, 14 условий `allOf`); пример — `site-brief.example.yaml`.
+Полная схема — `site-brief.schema.json` (25 блоков верхнего уровня, 14 условий `allOf`); пример —
+`../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`.
 Пометки: **владелец** — кто определяет поле; **заполнение** — кто вписывает значение (`x-fill` в схеме).
 
 ### 2.1. Паспорт и тип
@@ -347,7 +348,8 @@ other, general). `cms`, `stack`, `hosting` (важно для локализац
 ## 8. Для сестёр (S0)
 
 Путь схемы — `01-foundations/site-brief.schema.json` (`$id urn:app-design:site:site-brief:0`), пример —
-`site-brief.example.yaml`. Поля, ждущие определений сестёр (в v0 есть тип и пометка владельца):
+`../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`. Поля, ждущие определений сестёр (в v0 есть тип
+и пометка владельца):
 - **text**: весь блок `meaning` (через `$ref` на их схему — определения их); `proof.facts_ref` и виды фактов (ссылка на
   `facts.schema.yaml`); `constraints.legal_category` (их перечень); `meaning.voice_ref` и `brand.voice` — профиль голоса
   (волна 2 text); `traffic.sources[].promise_of_source` — как писать продолжение обещания; банк вопросов §5 — слова.

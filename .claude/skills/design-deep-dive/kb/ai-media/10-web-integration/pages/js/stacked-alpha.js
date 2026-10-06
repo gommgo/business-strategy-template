@@ -1,6 +1,6 @@
-// stacked-alpha.js — прозрачное видео «двойной высоты» (сверху RGB, снизу альфа) → WebGL2-canvas (агент J, волна 3).
+// stacked-alpha.js — прозрачное видео «двойной высоты» (сверху RGB, снизу альфа) → WebGL2-canvas.
 // Один файл играет везде, где есть WebGL2 и кодек (AV1 → HEVC → H.264 в <source>): VP9-alpha Safari не показывает,
-// HEVC-alpha кодируется только на macOS (I/03, blender A/06). Проверено: Chromium 153, альфа 0/255 в углу/центре (J/06).
+// HEVC-alpha кодируется только на macOS (ai-media 09/02). Проверено: Chromium 153, альфа 0/255 в углу/центре.
 // Фильтрация LINEAR с отступом полтекселя от середины кадра — без «перетекания» альфы в цвет (NEAREST ступенчат при масштабе).
 const RM = matchMedia('(prefers-reduced-motion: reduce)');
 

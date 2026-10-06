@@ -8,7 +8,7 @@ Playwright (Chromium), ffmpeg, numpy, Pillow, PyYAML. VLM движения не 
 
 Режимы (каждый — отдельный браузер на тихой машине, партия ≤ 5 мин; анализ видео — после снятия замков):
   desk  Chromium 1440×900, DPR 1, запись 960×600: сеть по фазам (первый экран = load + окно первого экрана budgets.yaml site,
-        сессия = после прокрутки), LCP (элемент, H1 выпал из LCP — метод E/01), CLS загрузки и прокрутки, TBT, LoAF и rAF при
+        сессия = после прокрутки), LCP (элемент, H1 выпал из LCP), CLS загрузки и прокрутки, TBT, LoAF и rAF при
         прокрутке, хвост прокрутки, перехват прокрутки (путь колеса), движение на 6-й секунде, прелоадер или входной экран
         (заставка на весь экран в первые секунды: «Пропустить», длительность), петли в видимой зоне по паузам, петли под
         читаемым текстом, бегущая строка (px/с), колебания крупных и мелких объектов, петли через 6 с после показа, кнопка
@@ -75,7 +75,7 @@ from urllib.parse import urlparse, unquote
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 kbpaths.use("site")
 import page_gates as PG  # noqa: E402  профиль страницы, условия замера, тишина машины
@@ -460,7 +460,8 @@ def br_size(path):
 
 class Locks:
     """Тихая машина на время режима (budgets.yaml conditions.quiet): общий тяжёлый замок, замок браузера и замок creative
-    (page_gates.heavy_lock; удержанное обёрткой slot_run.py или flock повторно не берётся), затем — свободная память."""
+    (page_gates.heavy_lock — kbpaths.lock; замок, который уже держит этот процесс или его предок, повторно не берётся и не
+    ждётся), затем — свободная память."""
     def __init__(self, enabled=True, timeout=900):
         self.enabled, self.timeout, self._cm = enabled, timeout, None
 
@@ -714,7 +715,7 @@ def resolve_target_sel(target, hint=None, moment_id=None):
 
 
 def local_root_for(page_path, root=None):
-    """Корень раздачи: --root или подъём на глубину самых длинных ссылок «../» в HTML (лаборатория F: ../_shared, ../_vendor)."""
+    """Корень раздачи: --root или подъём на глубину самых длинных ссылок «../» в HTML (общие папки вида ../_shared, ../_vendor)."""
     d = os.path.dirname(page_path)
     if root:
         return os.path.abspath(root)
@@ -912,7 +913,7 @@ def run_mode(pw, mode, url, a, net_ctx, tmpdir, spec_ms):
     page.evaluate("() => { const M = window.__mc; if (M) M.rafOn = false; }")
     mc2 = page.evaluate("() => { const M = window.__mc || {}; return {cls: M.cls || [], loaf: M.loaf || [], raf: M.raf || [], tScroll: M.tScroll || 0, now: performance.now(), lt: M.lt || [], err: M.err || [], gl: M.gl ? {ctx: M.gl.ctx, calls: M.gl.calls} : null}; }")
     res["scroll"] = scroll_metrics(mc2, wheel)
-    res["cls"] = cls_block(mc2.get("cls") or [])      # сумма, окно сессии, атрибуция (метод cls_sources.py лаборатории F)
+    res["cls"] = cls_block(mc2.get("cls") or [])      # сумма, окно сессии, атрибуция источников сдвига
     res["windows"] = windows
     res["wheel"] = wheel
     res["snaps"] = [{k: v for k, v in s_.items() if k != "loopsAll"} for s_ in snaps]
@@ -1167,8 +1168,8 @@ def pause_test(page, pg):
 
 
 def motion_sample(page):
-    """Движение первого экрана за 1 с — % пикселей (как F effect_bench idle_motion_pct_s: порог 12/255 по каналу),
-    вызовы WebGL за эту секунду, бегущие бесконечные анимации, играющие видео, html[data-motion], LAB.info лаборатории F."""
+    """Движение первого экрана за 1 с — % пикселей (порог 12/255 по каналу), вызовы WebGL за эту секунду, бегущие
+    бесконечные анимации, играющие видео, html[data-motion], объект LAB.info страницы, если он есть."""
     page.evaluate(MEASURE_JS, "prime")
     s1 = page.screenshot(type="png")
     page.wait_for_timeout(1000)
@@ -1208,7 +1209,7 @@ def toggle_test(page, pg, mode, out_dir=None):
     return out
 
 
-# контраст текста над живым фоном — метод лаборатории F (F/14 contrast.py): текст выбранных элементов
+# контраст текста над живым фоном: текст выбранных элементов
 # прозрачен, фон снимается в нескольких кадрах (время и положения указателя), под рамкой строк (Range) — перцентиль яркости
 CONTRAST_PREP_JS = r"""
 (sels) => { const cv = document.createElement('canvas'); cv.width = cv.height = 1; const cx = cv.getContext('2d', {willReadFrequently: true});
@@ -1587,7 +1588,7 @@ def flash_scan(vpath, res, off, fps=25, width=256):
     css_per_px = vp_w / width
     win_w = max(2, int(round(341 / css_per_px)))
     win_h = max(2, int(round(256 / css_per_px)))
-    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-threads", "4", "-i", vpath, "-vf", f"fps={fps},scale={width}:{h}",
+    cmd = [kbpaths.ffmpeg(), "-hide_banner", "-loglevel", "error", "-threads", "4", "-i", vpath, "-vf", f"fps={fps},scale={width}:{h}",
            "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE)
     fsz = width * h * 3
@@ -2121,11 +2122,11 @@ def selftest():
     line0 = {"moment": "line", "found": True, "kind": "geometry", "edge": "bottom", "edge_offset": 0, "edge_bottom_offset": 0, "reduce": "final-state"}
     mark_ok = {"moment": "marker", "found": True, "kind": "state", "changed": 2, "passed": 2, "mismatch": 0, "n_visible": 4, "n": 4, "reduce": "final-state"}
     st2 = station_rows([{**base, "targets": [line0, mark_ok, {"moment": "bob", "found": True, "hidden": True, "n": 1}]}], "desk")
-    check("станция: линия 0 px, маркеры 2 = 2, грузик скрыт → PASS (I/02 v1.1)", st2[0]["verdict"], "PASS")
+    check("станция: линия 0 px, маркеры 2 = 2, грузик скрыт → PASS", st2[0]["verdict"], "PASS")
     st2b = station_rows([{**base, "targets": [{**line0, "edge_offset": -0.0, "edge_bottom_offset": -0.0}]}], "desk")
     check("станция: край −0.0 (float из JS) не ломает формат → PASS", st2b[0]["verdict"], "PASS")
     st3 = station_rows([{**base, "targets": [{**line0, "edge_offset": -28}, mark_ok]}], "desk")
-    check("станция: конец линии −28 px → FAIL (I/02 v1.0 s2)", st3[0]["verdict"], "FAIL")
+    check("станция: конец линии −28 px → FAIL", st3[0]["verdict"], "FAIL")
     st4 = station_rows([{**base, "targets": [{**mark_ok, "passed": 3, "mismatch": 1}]}], "desk")
     check("станция: маркер залит не там, где линия → FAIL", st4[0]["verdict"], "FAIL")
     st5 = station_rows([{**base, "place": "at", "anchor": "at 0.5", "targets": [{"moment": "scene", "found": True, "kind": "frame", "tag": "canvas", "n": 1}]}], "desk")
@@ -2190,13 +2191,13 @@ def selftest():
     finally:
         shutil.rmtree(tmp2, ignore_errors=True)
     # вспышки: синтетическое видео 25 к/с, 2 с мигания 10 Гц на весь кадр → провал; 1 Гц → норма
-    if shutil.which("ffmpeg"):
+    if kbpaths.find("ffmpeg"):
         tmp = tempfile.mkdtemp(prefix="mc_selftest_")
         try:
             for hz, want in ((10, True), (1, False)):
                 path = os.path.join(tmp, f"f{hz}.webm")
                 expr = f"if(lt(mod(T*{hz}*2,2),1),255,20)"
-                subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "color=c=black:s=320x200:r=25:d=3",
+                subprocess.run([kbpaths.ffmpeg(), "-hide_banner", "-loglevel", "error", "-f", "lavfi", "-i", "color=c=black:s=320x200:r=25:d=3",
                                 "-vf", f"geq=lum='{expr}':cb=128:cr=128", "-c:v", "libvpx", "-b:v", "1M", "-threads", "2", path], check=True, timeout=120)
                 fr = flash_scan(path, {"page_first": {"innerW": 1440}, "t_flash": -10}, 0.0)
                 check(f"вспышки {hz} Гц на весь кадр → fail={want}", fr.get("fail"), want)

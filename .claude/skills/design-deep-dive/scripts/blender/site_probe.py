@@ -21,8 +21,9 @@
     возвращает null;
   * --mobile: дескриптор телефона и CPU — budgets.yaml site conditions.lab_mobile (Pixel 7, CPU ×4), UA — HeadlessChrome;
     --throttle — сеть того же условия (1,6 Мбит/с, RTT 150 мс); --reduced-motion: контекст с prefers-reduced-motion: reduce.
-Замер времени — на тихой машине: зонд берёт общий тяжёлый замок и замок браузера (page_gates.heavy_lock; --no-lock — обёртка
-их уже держит). Автоматизация не маскируется.
+Замер времени — на тихой машине: зонд сам берёт общий тяжёлый замок и замок браузера на время работы браузера
+(page_gates.heavy_lock через kbpaths.lock, реентерабельно по дереву процессов: зонд, запущенный из утилиты с теми же
+замками, их не ждёт); --no-lock — без замков: ни тишины машины, ни очереди браузера. Автоматизация не маскируется.
 
 Использование (код-репо — соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/blender/site_probe.py):
   site_probe.py --selftest            # локальная страница: GSAP по рантайму, WebGL, прогон --no-3d
@@ -34,7 +35,7 @@
 """
 import contextlib, json, os, re, sys, time
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 kbpaths.use("site")
 import page_gates as PG  # noqa: E402  условия замера и тишина машины (budgets.yaml site)

@@ -1,5 +1,5 @@
-# КОПИЯ демо-фактов text E (../../../../text-research/99-raw/experiments/E/facts-demo-saas-okoshko.yaml) — вымышлены; J добавил пробел product-screenshots
-# (вид demo, blocking: true): SaaS без настоящего продукта не публикуется (A allOf; E/03 SB-P01).
+# Демо-факты (вымышлены) с пробелом product-screenshots (вид demo, blocking: true): SaaS без настоящего продукта
+# не публикуется (условие allOf схемы брифа).
 facts_version: 1
 date: '2026-09-24'
 site: okoshko-demo
@@ -10,7 +10,7 @@ example: true
 owner:
   role: основатель (демо-заказчик)
   contact: почта заказчика из брифа (демо)
-collected_by: агент E (демо-набор для примеров, 2026-09-24)
+collected_by: агент (демо-набор для примеров, 2026-09-24)
 never_claim_defaults: ru-default-1
 entities:
 - id: product-okoshko
@@ -81,7 +81,7 @@ facts:
     en:
       canonical: The Master plan of Okoshko costs 990 ₽ per month for one stylist (price list, September 2026).
       note: адаптация; рубли — основная валюта (38-ФЗ ст. 5 ч. 7.1)
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: price-salon
   kind: price
@@ -129,7 +129,7 @@ facts:
   translations:
     en:
       canonical: The Salon plan of Okoshko costs 2,490 ₽ per month for up to 5 stylists (price list, September 2026).
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: price-network-from
   kind: price
@@ -177,7 +177,7 @@ facts:
   valid:
     from: '2026-09-01'
     review_by: '2026-12-01'
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: annual-discount
   kind: offer-terms
@@ -222,7 +222,7 @@ facts:
     - badge
     - faq-a
     requires_nearby: 'условие: оплата за 12 месяцев вперёд'
-  notes: ДЕМО-факт E. «2 месяца в подарок» — только с условием в той же строке (H COPY-L-FREE-01).
+  notes: ДЕМО-факт. «2 месяца в подарок» — только с условием в той же строке (COPY-L-FREE-01).
   lang: ru
 - id: trial-14-days
   kind: offer-terms
@@ -281,7 +281,7 @@ facts:
     en:
       canonical: Any Okoshko plan is free for 14 days with no card required; after the trial, booking pauses until you pick a plan and
         your data is kept for 90 days.
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: reminders
   kind: property
@@ -334,7 +334,7 @@ facts:
     en:
       canonical: Okoshko reminds clients of their booking in Telegram 24 hours and 2 hours before the visit; Telegram reminders are
         included in every plan.
-  notes: 'ДЕМО-факт E. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (H COPY-L-FREE-01).'
+  notes: 'ДЕМО-факт. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (COPY-L-FREE-01).'
   lang: ru
 - id: sms-price
   kind: price
@@ -379,7 +379,7 @@ facts:
   translations:
     en:
       canonical: 'Okoshko SMS reminders are billed on top of the plan: 4 ₽ per message (price list, September 2026).'
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: self-booking-link
   kind: property
@@ -423,7 +423,7 @@ facts:
     en:
       canonical: 'Clients book themselves: through an Okoshko link they choose a service, a stylist and a free slot; the link goes into
         Telegram, VK, maps and the website.'
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: import-free
   kind: offer-terms
@@ -481,7 +481,7 @@ facts:
     en:
       canonical: Okoshko support migrates your client list from Excel or Google Sheets for free within 1 business day of receiving the
         file.
-  notes: ДЕМО-факт E. Снимает возражение switching-cost (B1 02 §4.1).
+  notes: ДЕМО-факт. Снимает возражение switching-cost (text 02/02 §4.1).
   lang: ru
 - id: salons-count
   kind: metric
@@ -528,7 +528,7 @@ facts:
   translations:
     en:
       canonical: As of 1 September 2026, 1,380 salons and barbershops use Okoshko on a paid plan (billing data).
-  notes: ДЕМО-факт E. «Более 1 300» — можно; «1 500+» — нет.
+  notes: ДЕМО-факт. «Более 1 300» — можно; «1 500+» — нет.
   lang: ru
 - id: rating-rustore
   kind: rating
@@ -580,7 +580,7 @@ facts:
   translations:
     en:
       canonical: As of 1 September 2026, the Okoshko app for stylists is rated 4.7 out of 5 on RuStore (860 ratings).
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: case-noshow-kazan
   kind: case
@@ -641,7 +641,7 @@ facts:
     - case-title
     - case-summary
     - case-result
-  notes: 'ДЕМО-факт E. Типичность (B2 §5.4): рядом — обычный результат noshow-average.'
+  notes: 'ДЕМО-факт. Типичность (text 02/03 §5.4): рядом — обычный результат noshow-average.'
   lang: ru
 - id: noshow-average
   kind: metric
@@ -690,7 +690,7 @@ facts:
     - stat-label
     - testimonial-attribution
     - body
-  notes: ДЕМО-факт E. Обычный результат рядом с кейсом (FTC 255.2(b), B2 §5.4).
+  notes: ДЕМО-факт. Обычный результат рядом с кейсом (FTC 255.2(b), text 02/03 §5.4).
   lang: ru
 - id: review-ruslan
   kind: testimonial
@@ -737,7 +737,7 @@ facts:
         who haven't confirmed”
       canonical: 'Ruslan (barbershop owner, Kazan): “I used to spend my evenings calling everyone booked for the next day. Now reminders
         go out on their own, and I only call those who haven''t confirmed” (translated from Russian).'
-      note: перевод цитаты — с пометкой «translated from Russian» рядом (B2 §5.1)
+      note: перевод цитаты — с пометкой «translated from Russian» рядом (text 02/03 §5.1)
   attribution:
     name: Руслан
     display: first-name-initial
@@ -754,7 +754,7 @@ facts:
     - testimonial-attribution
   valid:
     review_by: '2027-06-05'
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: support-chat
   kind: property
@@ -801,7 +801,7 @@ facts:
     - form-next-steps
   valid:
     review_by: '2026-10-01'
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 - id: cancel-refund
   kind: offer-terms
@@ -856,7 +856,7 @@ facts:
     en:
       canonical: You can switch off your Okoshko subscription in settings on any day; the unused part of a paid period is refunded within
         10 days of your request.
-  notes: ДЕМО-факт E. Срок 10 дней — в пределах требования H (COPY-L-RET-02).
+  notes: ДЕМО-факт. Срок 10 дней — в пределах требования (COPY-L-RET-02).
   lang: ru
 - id: data-in-russia
   kind: property
@@ -890,11 +890,11 @@ facts:
     - faq-a
     - objection-answer
     - body
-  notes: ДЕМО-факт E.
+  notes: ДЕМО-факт.
   lang: ru
 missing:
 - id: legal-details
-  what: 'реквизиты: полное название юрлица, ОГРН, ИНН, адрес (сведения о продавце — site I; блок «продавец» — H)'
+  what: 'реквизиты: полное название юрлица, ОГРН, ИНН, адрес (сведения о продавце — site 08; блок «продавец» — text 08)'
   kind: company
   claim_class: &id001
   - company-details
@@ -976,9 +976,9 @@ never_claim:
   - doubl\w*\s+(your\s+)?(\w+\s+)?revenue
   - increas\w*\s+(your\s+)?(\w+\s+)?revenue
   lift: never
-  reason: 38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis (B2, H)
+  reason: 38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis (text 02/03, text 08)
   source:
-    who: агент E (демо)
+    who: агент (демо)
     date: '2026-09-24'
 - id: nc-zero-noshow
   text: «без неявок», «забудьте о неявках» — абсолютное обещание результата, который зависит от клиентов салона
@@ -989,7 +989,7 @@ never_claim:
   - без\s+неяв\w*
   - забудьте\s+о\s+неяв\w*
   lift: never
-  reason: гарантия результата (H COPY-L-GUAR-01); кейс даёт 6 %, не ноль
+  reason: гарантия результата (COPY-L-GUAR-01); кейс даёт 6 %, не ноль
   source:
-    who: агент E (демо)
+    who: агент (демо)
     date: '2026-09-24'

@@ -1,4 +1,4 @@
-// util.js · общий код 3D «Звена» (_shared/code3d, дорожка CD) · кривые времени и обратный тон Neutral
+// util.js · общий код 3D «Звена» (_shared/code3d) · кривые времени и обратный тон Neutral
 import { Color } from 'three';
 
 export const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));

@@ -1,13 +1,13 @@
-# budgets.yaml — профили бюджета страницы «тип страницы × уровень амбиций» (site-research, владелец — P; v1 — K, волна 3)
+# budgets.yaml — профили бюджета страницы «тип страницы × уровень амбиций» (site)
 # Человеческое описание, основания и таблица расхождений с соседями — 03-performance-budgets-gates.md.
 # Ворота, которые применяют эти числа, — page-gates.yaml; автопроверка — ../../scripts/site/page_gates.py.
-# Правило PLAN (поправка 17): вес — предупреждение, а не блокер; блокируют исходы (LCP, CLS, INP-сценарий) и
+# Правило: вес — предупреждение, а не блокер; блокируют исходы (LCP, CLS, INP-сценарий) и
 # индексируемость. Профили эффектов (JS подачи, WebGL, 3D, видео, GPU) — creative, здесь только ссылка.
 version: 0
 checked: 2026-09-24
 status: draft
-owner: "site-research · агент P (волна 2); v1 — K (волна 3)"
-profile_id_format: "<page_type>@L<n>  (page-plan.page.budget_profile, схема E: ^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$)"
+owner: "site"
+profile_id_format: "<page_type>@L<n>  (page-plan.page.budget_profile, схема page-plan: ^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$)"
 
 sources:
   S-vitals: "web.dev, Web Vitals (обн. 2024-10-31): LCP ≤ 2,5 с, INP ≤ 200 мс, CLS ≤ 0,1 на p75, раздельно телефон/десктоп"
@@ -22,7 +22,6 @@ sources:
   S-blender: "../blender/09-web-runtime/05-performance-a11y-fallbacks.md §1.1, §7.2 (доля 3D)"
   S-everts: "[V:cnr3CJwpaps 32:32] Tammy Everts: бюджет = худшее значение за 2–4 недели; цель отдельно"
   S-googlebot: "[V:kype1JQbrks 08:18] + документация Googlebot (2026-02-03): первые 2 МБ несжатого файла"
-  S-plan20: "PLAN.md решение 20 (2026-09-24): умолчания уровня по типу страницы; lead-services L1 с первым экраном L0"
 
 # ---------------------------------------------------------------- условия замера
 conditions:
@@ -54,11 +53,11 @@ conditions:
     tools: "page_anatomy.py, page_accept.py без --throttle, motion_check.py; page_accept.py --throttle вес не сравнивает"
   first_screen:
     window_after_load_s: 5
-    what: "окно первого экрана: всё, что пришло по сети за load + window_after_load_s без прокрутки и кликов; видео, стартующее само, входит. Одно число для page_anatomy.py, page_accept.py и motion_check.py; окно замера жанра creative C (load + 8 с) — описание рынка, с числами ворот не сравнивается"
+    what: "окно первого экрана: всё, что пришло по сети за load + window_after_load_s без прокрутки и кликов; видео, стартующее само, входит. Одно число для page_anatomy.py, page_accept.py и motion_check.py; окно замера жанра creative 03-live-sites-measured (load + 8 с) — описание рынка, с числами ворот не сравнивается"
   quiet:
     what: "TBT, LCP и мс кадра — только на тихой машине: утилиты замера времени (page_accept.py, motion_check.py, site_probe.py, web_view.py) сначала берут общий тяжёлый замок (тот же, что slot_run.py --heavy), потом замок браузера; пара «с 3D / без 3D» и пара с эталоном — подряд в одном прогоне"
     lock: render
-    basis: "blender испытание 15-showcase (T23): под нагрузкой соседних прогонов TBT 634–827 мс против 76–137 мс в тишине"
+    basis: "blender 15-showcase: под нагрузкой соседних прогонов TBT 634–827 мс против 76–137 мс в тишине"
   inp_scenario:
     what: "лабораторный INP по сценарию (как page_anatomy.py --inp): меню, CTA, аккордеон, фокус в поле; + одно нажатие во время загрузки (DCL + 500 мс)"
     note: "сценарий после загрузки занижает INP: M — 0 из 111 прогонов > 200 мс при TBT телефона > 200 мс у 55 %"
@@ -74,8 +73,8 @@ layers:
   html_transfer_kb: "HTML-документ по сети (сжатый)"
   html_uncompressed_kb: "HTML без сжатия (предел Googlebot — 2 048 КБ на файл)"
   inline_data_uri_kb: "сумма data:-URI картинок внутри HTML и CSS"
-  wasm_first_screen_kb: "wasm-рантаймы подачи в слое first_screen (dotLottie ≈ 379 КБ br, Rive 272–613 КБ br) — отдельно от js_first_screen_kb; загрузка с jsDelivr или unpkg — сторонний домен (third_party_*), самохостинг — setWasmUrl (creative G; аудит X С-21, S1 2026-09-25)"
-  presentation_kb_by_mode: "JS и данные подачи — отдельно для режимов desktop, mobile, reduce (условная загрузка: закреплённая сцена GSAP 45,7 КБ br на десктопе и 3,9 КБ на телефоне и при reduce; SplitText 30 КБ против 0 — creative F); пороги эффектов — creative (effects_ref), здесь — слой отчёта (аудит X С-31, S1 2026-09-25)"
+  wasm_first_screen_kb: "wasm-рантаймы подачи в слое first_screen (dotLottie ≈ 379 КБ br, Rive 272–613 КБ br) — отдельно от js_first_screen_kb; загрузка с jsDelivr или unpkg — сторонний домен (third_party_*), самохостинг — setWasmUrl (creative)"
+  presentation_kb_by_mode: "JS и данные подачи — отдельно для режимов desktop, mobile, reduce (условная загрузка: закреплённая сцена GSAP 45,7 КБ br на десктопе и 3,9 КБ на телефоне и при reduce; SplitText 30 КБ против 0 — creative); пороги эффектов — creative (effects_ref), здесь — слой отчёта"
 
 # ---------------------------------------------------------------- виды порогов
 kinds:
@@ -101,8 +100,8 @@ levels:
       session_kb: {mobile: 3000, desktop: 5000, basis: "S-creative-C1; M телефон медиана 3 497"}
       js_first_screen_kb: {mobile: 300, desktop: 300, basis: "WA 2025 JS p25 270 КБ; M многостраничники медиана 283; Russell 2024 ≈ 365 КБ JS на p75-телефоне [мнение эксперта через blender 01/02 §3.2]"}
       fonts_kb: {mobile: 150, desktop: 150, basis: "S-creative-C1; WA 2025 медиана шрифтов 122 / 139 КБ"}
-      third_party_origins_before_input: {max: 1, basis: "до ввода — только CMP (0, если свой); счётчики и пиксели — после согласия (SG-LEGAL-01, позиция I по умолчанию [спорно]); карты, чат, видео, запись — по видимости или нажатию (03 §5); M медиана 7"}
-      third_party_first_screen_kb: {max: 200, basis: "Метрика ≈ 120 КБ за сессию (M vendors.tsv; реимплементация X2 — 124 КБ, vendors-final.tsv; ориентир) + CMP 16–84 КБ"}
+      third_party_origins_before_input: {max: 1, basis: "до ввода — только CMP (0, если свой); счётчики и пиксели — после согласия (SG-LEGAL-01, позиция site 08 по умолчанию [спорно]); карты, чат, видео, запись — по видимости или нажатию (03 §5); M медиана 7"}
+      third_party_first_screen_kb: {max: 200, basis: "Метрика ≈ 120 КБ за сессию (замер M; пересчёт — 124 КБ; ориентир) + CMP 16–84 КБ"}
   L1:
     name: "Выразительно"
     effects_ref: "../creative/01-creative-direction/ambition-levels.yaml#levels.L1.budgets.effects"
@@ -136,34 +135,34 @@ levels:
     weight:
       first_screen_kb: {mobile: 2500, desktop: 4000, basis: "S-creative-C1; ai-media Awwwards до прокрутки медиана 3,8 МБ"}
       session_kb: {mobile: 8000, desktop: 15000, basis: "S-creative-C1; Awwwards сессия медиана 20,9 МБ — L2 строже жанра"}
-      js_first_screen_kb: {mobile: 750, desktop: 900, basis: "L1 + JS 3D 250/350 КБ br (creative, blender A/03); WA p75 1 233 КБ"}
+      js_first_screen_kb: {mobile: 750, desktop: 900, basis: "L1 + JS 3D 250/350 КБ br (creative, blender); WA p75 1 233 КБ"}
       fonts_kb: {mobile: 300, desktop: 300, basis: S-creative-C1}
       third_party_origins_before_input: {max: 2, basis: "как L1"}
       third_party_first_screen_kb: {max: 300, basis: "как L1: «вау» делает свой код, а не сторонние виджеты"}
 
 # ---------------------------------------------------------------- общие для всех уровней
 all_levels:
-  html_uncompressed_kb: {max: 2048, severity_hint: blocker, owner: H, basis: S-googlebot}
-  css_js_file_uncompressed_kb: {max: 2048, severity_hint: blocker, owner: H, basis: "S-googlebot: предел на каждый файл"}
+  html_uncompressed_kb: {max: 2048, severity_hint: blocker, owner: head-kit.yaml, basis: S-googlebot}
+  css_js_file_uncompressed_kb: {max: 2048, severity_hint: blocker, owner: head-kit.yaml, basis: "S-googlebot: предел на каждый файл"}
   html_transfer_kb: {goal: 150, basis: "WA 2025 HTML p90 151–155 КБ; M медиана 57 КБ"}
   inline_data_uri_kb: {goal: 10, basis: "[V:kype1JQbrks 12:26] base64 раздувает HTML; иконки SVG — допустимы"}
   lcp_resource_rules: "LCP — H1 или картинка/постер в исходном HTML; LCP-картинка без loading=lazy (блокер), с fetchpriority=high (предупреждение); не canvas; без появления из opacity 0 (S-optlcp; ai-media 01/02 §5)"
 
-# ---------------------------------------------------------------- сетка «тип страницы → уровень» (PLAN решение 20)
+# ---------------------------------------------------------------- сетка «тип страницы → уровень»
 page_type_levels:
   ref: "../../creative/01-creative-direction/ambition-levels.yaml#defaults_by_page_type"   # одна таблица умолчаний; page_gates.py, site_validate.py и plan_to_assets.py читают её
   rules:
     - "уровень страницы не выше уровня сайта в брифе (site-brief.ambition.level)"
-    - "landing-lead-services: L0 по умолчанию по правилу лидогенерации услуг — доля горячего трафика с телефонов и decision_context.price_band (поля ambition-levels.yaml levels[L0].appropriate_for.lead_services; решение 20)"
-    - "секции lead-form и pricing — эффекты L0 при любом уровне страницы (creative CRV-AL; решение 20)"
+    - "landing-lead-services: L0 по умолчанию по правилу лидогенерации услуг — доля горячего трафика с телефонов и decision_context.price_band (поля ambition-levels.yaml levels[L0].appropriate_for.lead_services)"
+    - "секции lead-form и pricing — эффекты L0 при любом уровне страницы (creative CRV-AL)"
     - "отклонение от умолчания — только с причиной: site-brief.ambition.source ≠ default + note"
-    - "specialist-page, location-page, documents-page, search-results-page — L0, program-catalog-page — L1 (5 активных типов словаря v1; S1 2026-09-25 по предложению J и G; 5 типов proposed — после решения владельца)"
+    - "specialist-page, location-page, documents-page, search-results-page — L0, program-catalog-page — L1 (5 активных типов словаря v1; 5 типов proposed — после решения владельца)"
 
 # ---------------------------------------------------------------- исключения по типу страницы (накладываются на уровень)
 overrides:
   landing-lead-services@L1:
     weight: {first_screen_kb: {mobile: 1500, desktop: 2500}}
-    why: "решение 20: вес первого экрана на телефоне всегда по L0; горячий платный трафик с телефона; M лидген РФ телефон медиана 2 296 КБ (Q1 1 344) — цель ≈ Q1 рынка"
+    why: "вес первого экрана на телефоне всегда по L0; горячий платный трафик с телефона; M лидген РФ телефон медиана 2 296 КБ (Q1 1 344) — цель ≈ Q1 рынка"
   landing-lead-services@L2:
     weight: {first_screen_kb: {mobile: 1500, desktop: 2500}}
     why: "то же правило при любом уровне"
@@ -206,4 +205,4 @@ market_reference:
   WA2025_cwv_pass_home_mobile_by_weight: {"<=1MB": 0.57, "1-2MB": 0.52, "2-3MB": 0.45, "3-4MB": 0.38, "4-5MB": 0.34, ">=5MB": 0.30}
   WA2025_lcp_p75_home_mobile_by_weight_s: {"<=1MB": 2.6, "1-2MB": 3.0, "2-3MB": 3.2, "3-4MB": 3.4, "4-5MB": 3.6, ">=5MB": 3.8}
   creative_C_L2_desktop_first_screen_mb_no_video: {median: 5.6, q1: 2.5, q3: 9.1, n: 19, source: "creative 03-live-sites-measured/01-effects-sites-measured.md §12; creative CONTRADICTIONS X-17", note: "жанр наградных сайтов, не норма: цель L2 (4,0 МБ десктоп) — между Q1 и медианой жанра; превышение — S и x-gate-exception с причиной кампании и автором; LCP, INP, CLS исключением не снимаются; видео первого экрана — отдельной цифрой (SG-WEIGHT-09)"}
-  creative_C_first_screen_video_max_mb: {value: 140.6, note: "видео первого экрана без действия пользователя у эффектных сайтов C — считать отдельной цифрой (SG-WEIGHT-09)"}
+  creative_C_first_screen_video_max_mb: {value: 140.6, note: "видео первого экрана без действия пользователя у эффектных сайтов замера creative — считать отдельной цифрой (SG-WEIGHT-09)"}

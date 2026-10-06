@@ -15,7 +15,8 @@
 4. **Станции — якорями, не долями**: «маркер шага N на середине окна», а не `at: 0.33`, если шаги разной высоты. → §2.2 `[проверено]`
 5. **Не пиши чисел, которые требуют замера, при бюджете JS 0** (`var(--line-length)`): описывай видимое (`attach: {to, point}`). → §1.5 `[проверено]`
 6. **Числа — из токенов `motion.marketing` или доли базы** (`page.base.duration_ms` × share); мс вне шкалы — предупреждение (CRV-MO-14). → §1.4 `[практика: E, Bramus]`
-7. **LCP-элемент помечен** (`page.lcp`): без анимации или только transform ≤ 24 px; не из opacity 0, не маской строк. → §1.6 `[проверено]`
+7. **LCP-элемент помечен** (`page.lcp`): без анимации или вход по CRV-AL-09 — transform со сдвигом ≤ 24 px, clip-path или opacity
+   от 0,01; не из opacity 0, не маской строк. → §1.6 `[проверено]`
 8. **Опиши выход и прерывание**: `transition_type` (entrance / exit / persistent), `exit`, `interrupt` — иначе исполнитель анимирует только вход. → §1.5 `[практика: V Ug_dwJa07Os, v5oxrZWAq78]`
 9. **У каждого движения — функция** (`purpose`): attention, guide, inform, continuity, orient, narrate, feedback, personality, loading; без функции — удалить. → §1.2 `[мнение: V J6aNMFZogyk]`
 10. **Характер — прилагательными бренда из словаря** (energetic … heavy), приёмы — из таблицы Val Head. → §1.4 `[практика: V OqvQhZ0bTYY]`
@@ -72,18 +73,20 @@
 | `one-shot` | `duration`; `repeat` once или each-entry | сцена первого экрана ≤ 1 200 мс (задержка + длительность + стаггер) |
 | `pointer` | `mobile` (замена касанием или статика) | — |
 | `transition` | — | переход ≤ 400 мс в многостраничнике — через `never` и приёмку |
-| любой с `lcp: is-lcp` | только `transform`/`translate` | сдвиг ≤ 24 px (токены раскрываются); `page.lcp.entrance: none` — анимация LCP-элемента запрещена |
+| любой с `lcp: is-lcp` | вход по CRV-AL-09: `transform`/`translate`, `clip-path` или opacity от 0,01 | сдвиг ≤ 24 px (токены раскрываются); `page.lcp.entrance: none` — анимация LCP-элемента запрещена |
 
 Прочие коды `spec_check.py spec`: MS-01 секция есть в плане и уровень совпадает; MS-02 роль = `visual_role` treatment; MS-03 цель найдена; MS-04
 эффект есть и по уровню; MS-05 класс = `motion.kind` каталога (строка или список классов — у `3d-scene` скраб и разовое пробуждение, X-64); MS-06 токен есть; MS-07 мс вне шкалы; MS-08 свойство по уровню и blur ≤ 8 px;
 MS-11 стаггер; MS-12 скорость строки по `limits` F; MS-16/MS-21 пик без раздела или эффект treatment без момента; MS-17/MS-18 станции;
 MS-19 появление из opacity 0 в первом экране; MS-22 ворота `acceptance.gate` есть в `effect-gates.yaml` K.
+Шкала длительностей (MS-06, MS-07) — токены `motion.marketing` базы и токены времени ветки `motion` файла `refs.tokens` проекта: ссылка
+на токен проекта и длительность, равная его значению, — не находка.
 
 ### 1.4. Числа, характер, база
 
 - Длительности и кривые — токены `motion.marketing` (`04-visual-language/marketing-tokens.json`, CSS `--mm-*`): duration.feedback 120, hover 200,
   state 320, page 400, reveal 560, split-line 800, hero-scene 900, counter 1 200; stagger.group 60; easing.out-expo `(0.16, 1, 0.3, 1)`,
-  in-out `(0.65, 0, 0.35, 1)`; scroll.pin-l1-max-vh 150, pin-l2-max-vh 400; loop.marquee-speed 40 `[практика: E]`.
+  in-out `(0.65, 0, 0.35, 1)`; длина закрепления — токены `scroll.pin-l1-max-vh` и `scroll.pin-l2-max-vh`; loop.marquee-speed 40 `[практика: E]`.
 - `page.base.duration_ms` + `share` у моментов: темп страницы меняется одной правкой; у «Отвеса» база 400, подъём текста 0,8 × 400 = 320 мс.
 - `page.character` — до трёх слов; приёмы по Val Head [V:OqvQhZ0bTYY 37:11–39:46]: follow-through → energetic, friendly, bold; squash and
   stretch → playful; ease-in-out → balanced, measured; малые сдвиги → calm, subtle; прозрачность и blur → soft, stable `[практика]`.
@@ -122,8 +125,9 @@ MS-19 появление из opacity 0 в первом экране; MS-22 во
   @property-переменные, font-variation-settings (E П12); раскладка — никогда `[мнение вендора: impeccable]` `[данные: kimi — 13 из 13]`.
   Исключение — `block-size` у `::details-content` аккордеона `<details>` (`effect:details-accordion`, класс `transition`, `interpolate-size:
   allow-keywords`, ≤ 300 мс, reduce — мгновенно): UI-отклик по клику, не сцена; схема пускает его только с этим `effect` (X-11, S1 2026-09-25).
-- `page.lcp {target, entrance: none|transform-only}`; моменты на LCP-элементе — только transform ≤ 24 px (E/01: opacity 0, маска строк,
-  скрытие скриптом выбивают H1 из кандидатов LCP) `[данные: у E]`.
+- `page.lcp {target, entrance: none|transform-only}`; LCP-элемент: без анимации или вход по CRV-AL-09 — transform со сдвигом ≤ 24 px,
+  clip-path или opacity от 0,01; не из opacity 0, не маской строк (E/01: opacity 0, маска строк, скрытие скриптом выбивают H1 из
+  кандидатов LCP) `[данные: у E]`.
 - `page.toggle`: L2 — всегда, L1 — при петле с `page-toggle` или ≥ 2 scroll-linked секциях; `data-motion` на `<html>`: нет — как в системе,
   `reduced`, `full`, `paused`; кнопка с `aria-pressed` (E §4.4). У G `reduce` — K принимает оба; предложение G — `reduced`.
 - `section.fallback {no_js, unsupported}`: CSS scroll-driven — Chrome 115+, Safari 26+, Firefox только Nightly — BCD `preview` (E `05/02` §3.1,
@@ -294,7 +298,7 @@ Read MOTION.md first. Implement only the moments listed there, each on the eleme
 data-group, data-fx attributes as MOTION.md "Markup contract" says). Take numbers only from src/styles/tokens.css (--mm-*) or from motion/<section>.motion.json;
 never invent durations.
 Rules: animate only the properties MOTION.md allows for this page; never width, height, top, left, margin, padding; no "transition: all".
-The LCP element named in MOTION.md never animates from opacity 0 or behind a line mask — transform only, at most 24 px.
+The LCP element named in MOTION.md never animates from opacity 0 or behind a line mask — transform (shift at most 24 px), clip-path or opacity from 0.01 only.
 No scroll-jacking: never change scroll speed or direction; pinning with scrub is allowed only where MOTION.md has a scene.
 Scroll ranges use the subject element named in MOTION.md; stations are positions where the anchor element is at the named viewport line.
 Every moment has its reduced-motion branch (prefers-reduced-motion: reduce and html[data-motion="reduced"]) and its phone branch; loops pause
@@ -336,7 +340,8 @@ describe in REPORT.md each moment (trigger, element, timing) and what each stati
 - [ ] CRV-MS-02 Диапазоны scroll-linked заданы по subject того, что движется, станции — якорями?
 - [ ] CRV-MS-03 Нет чисел, требующих замера геометрии, при бюджете JS 0 (`attach` вместо них)?
 - [ ] CRV-MS-04 Длительности и кривые — токены `motion.marketing` или доли базы; стаггер 40–80 мс, сумма ≤ 600?
-- [ ] CRV-MS-05 LCP-элемент помечен; его момент — только transform ≤ 24 px; сцена первого экрана ≤ 1 200 мс?
+- [ ] CRV-MS-05 LCP-элемент помечен; без анимации или вход по CRV-AL-09 — transform со сдвигом ≤ 24 px, clip-path или opacity от 0,01;
+  не из opacity 0, не маской строк; сцена первого экрана ≤ 1 200 мс?
 - [ ] CRV-MS-06 Описаны выход (`exit`, `transition_type`) и прерывание (`interrupt`)?
 - [ ] CRV-MS-07 Есть ветки reduce, телефон, `fallback.no_js`, `fallback.unsupported`; на L2 — переключатель (`data-motion`)?
 - [ ] CRV-MS-08 Раскадровка: ≥ 3 станции сцены + телефон + reduce, у кадров измеримый `check`?

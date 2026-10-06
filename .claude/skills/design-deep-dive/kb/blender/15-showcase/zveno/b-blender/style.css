@@ -1,4 +1,4 @@
-/* style.css · L2 «Звено» · агент J · 2026-09-25 · Chromium 153 / WebKit 26.6
+/* style.css · L2 «Звено» · Chromium 153 / WebKit 26.6
    Мир: тёмная студия, белые корпуса, алюминий, сигнальный оранжевый кольца-замка. Display — Science Gothic узкий (wdth 72),
    текст — Onest. Ритм «спокойно ↔ вау»: hero (акцент) → модули (пик) → цифры (спокойно) → внутри (пик) → программа (акцент DOM)
    → задачи, цена, форма (спокойно, L0). Холст сцены — один, fixed, рисует только при изменении (0 кадров в покое). */
@@ -197,7 +197,7 @@ html.gl-pending .steps--right .step, html.gl-on .steps--right .step { left: auto
   .top .btn--small { display: none; }
   .hero { align-items: end; }
   .hero__in { padding-bottom: 28px; position: relative; z-index: 1; }
-  /* J2: на телефоне H1 и лид лежат на нижней половине руки (белые корпуса под белым H1 — кадры J/04 `out/mob-first-ab.jpg`,
+  /* на телефоне H1 и лид лежат на нижней половине руки (белые корпуса под белым H1,
      и у v1 тоже): затемнение снизу вверх в слое hero — над постером и холстом (холст под hero), под текстом; рука над текстом светлая */
   .hero::after { content: ""; position: absolute; inset: 22% 0 0; z-index: 0; pointer-events: none;
     background: linear-gradient(180deg, rgb(13 15 18 / 0) 0, rgb(13 15 18 / .82) 24%, rgb(13 15 18 / .9) 100%); }
@@ -215,8 +215,8 @@ html.gl-pending .steps--right .step, html.gl-on .steps--right .step { left: auto
   .specs__grid { grid-template-columns: 1fr 1fr; }
 }
 
-/* ширина display: Science Gothic при wdth 100 широкий (k 0,69, D) — узкий экземпляр 60 % читается как инженерная шкала,
-   а не «игровой» шрифт (кадры J/02, прогон 1: 72 % — тяжело и широко); фолбэк пересчитан под wdth 60 (J/00) */
+/* ширина display: Science Gothic при wdth 100 широкий (k 0,69) — узкий экземпляр 60 % читается как инженерная шкала,
+   а не «игровой» шрифт (72 % — тяжело и широко); фолбэк пересчитан под wdth 60 */
 .h2, .logo, .hero__title, .step__t, .specs__grid dd, .tasks__list h3, .price-card__v { font-stretch: 60%; }
 .hero__title { font-weight: 760; letter-spacing: 0; }
 .hero__facts b { font-stretch: 66%; }

@@ -1,4 +1,4 @@
-// world.js · общий код 3D «Звена» (_shared/code3d, дорожка CD) · приём «world»: туман по высоте во всех материалах,
+// world.js · общий код 3D «Звена» (_shared/code3d) · приём «world»: туман по высоте во всех материалах,
 // фон (v2 — экранный, v3 — мировой: горизонт + ореол в дымке), пол (v2 — циклорама, v3 — тёмный пол с отражением), зеркальный проход.
 import {
   Mesh, Scene, PerspectiveCamera, OrthographicCamera, PlaneGeometry, BufferGeometry, Float32BufferAttribute, CanvasTexture,
@@ -14,7 +14,7 @@ export const HF = {
   uMirrorPass: { value: 0 },                                     // 1 — рисуем отражение: в альфу пишем «близость к полу»
   uHalo: { value: new Vector4(0, 0, -1, 0) },                    // ореол в дымке за объектом: xyz — направление из камеры, w — сила
   uHaloColor: { value: new Color(0.007, 0.008, 0.011) },          // ореол тихий: фон кадра ≈ фон страницы (ΔE ≤ 3, img_metrics)
-  uHaloWidth: { value: 36 },                                     // CD3: ширина ореола (36 — как в фазах 1–2; телефон p3 — шире и ярче)
+  uHaloWidth: { value: 36 },                                     // ширина ореола (36 — как в фазах 1–2; телефон p3 — шире и ярче)
 };
 export const HALO_BASE = [0.007, 0.008, 0.011];
 const HF_VERT_PARS = 'varying vec3 vHFW;';

@@ -1,4 +1,4 @@
-# ru-otves-lead.yaml — пример copy deck v1 (10-templates-recipes, J3, 2026-09-24): основа — E3 deck-otves-lead-v0.yaml; тексты ai-self (E3, правки J3).
+# ru-otves-lead.yaml — пример copy deck v1 (10-templates-recipes); тексты ai-self.
 # Факты — 02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленные / ДЕМО, не публиковать). Проверки — 02-examples-ru.md §3.
 copy_deck:
   version: 1
@@ -14,8 +14,8 @@ copy_deck:
   legal_category:
   - general
   authors:
-  - E3 (ai-self, 2026-09-24)
-  - J3 (upgrade, пути, голос F; 2026-09-24)
+  - агент (ai-self, 2026-09-24)
+  - агент (правки путей и голоса, 2026-09-24)
   pages:
   - page_id: otves-product-aware
     page_type: landing-lead-services
@@ -23,11 +23,11 @@ copy_deck:
     hierarchy_ref: ../../02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
     primary_action: Позвать замерщика
     cta_primary: otves-product-aware/hero/cta
-    notes: 'Секция proof-stats иерархии B1 снята (правка 1): в ряд цифр по use B2 проходят только flats-completed и rating-yandex-maps, оба уже
+    notes: 'Секция proof-stats иерархии снята (правка 1): в ряд цифр по use фактов проходят только flats-completed и rating-yandex-maps, оба уже
       в первом экране; ряд из 3–5 чисел не набирается (03 §2). FAQ «как с соседями» не написан: отзыв Игоря — pending.'
     promise:
       from: otves-product-aware/hero/h1
-      basis: hierarchy.core_message + first_screen (B1)
+      basis: hierarchy.core_message + first_screen
     meta:
       title: Ремонт квартир под ключ в Нижнем Новгороде — студия «Отвес»
       description: Ремонтируем квартиры под ключ с 2014 года, сдали 1 146 квартир. Гарантия 3 года на работы по договору. Замер и смета — бесплатно
@@ -129,7 +129,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: requires_nearby факта (B2)
+        notes: requires_nearby факта
       - slot_id: cta
         slot_type: cta-label
         variants:
@@ -144,7 +144,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: образец голоса F (voice-otves-warm, ru-cta-label); одно имя действия на всю страницу (01 §6.3)
+        notes: образец голоса (voice-otves-warm, ru-cta-label); одно имя действия на всю страницу (01 §6.3)
       - slot_id: cta-note
         slot_type: cta-note
         variants:
@@ -162,7 +162,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: условие «в черте города» в той же строке (H FREE-01)
+        notes: условие «в черте города» в той же строке (COPY-L-FREE-01)
     - section_id: review
       section_role: testimonials
       question: Что говорят те, кто уже делал у вас ремонт?
@@ -201,7 +201,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: дословно verbatim (B2 §5.1); роль user-content — стиль не проверяется
+        notes: дословно verbatim (text 02/03 §5.1); роль user-content — стиль не проверяется
       - slot_id: author
         slot_type: testimonial-attribution
         variants:
@@ -232,7 +232,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: 'рамка типичности рядом с отзывом о смете (B2 §5.4); голосом компании «смета не меняется» — нельзя (nc-no-extra-cost-promise);
+        notes: 'рамка типичности рядом с отзывом о смете (text 02/03 §5.4); голосом компании «смета не меняется» — нельзя (nc-no-extra-cost-promise);
           правка 2: пробел estimate-change-policy — fallback rewrite-without (COPY-D-FALLBACK): пункт договора не упоминаем до ответа заказчика'
     - section_id: case
       section_role: case-studies
@@ -255,7 +255,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: 'правка 1: 17 слов → 10 (COPY-D-LEN: грубая граница D для case-title — 11 слов, provisional); форма из verbatim «47 рабочих дней
+        notes: 'правка 1: 17 слов → 10 (COPY-D-LEN: грубая граница корпуса для case-title — 11 слов, provisional); форма из verbatim «47 рабочих дней
           вместо 50 по договору»'
       - slot_id: summary
         slot_type: case-summary
@@ -313,7 +313,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: образец голоса F (факт → сцена, voice-otves-warm ru-card-body); предмет, срок, документ (H §5.1)
+        notes: образец голоса (факт → сцена, voice-otves-warm ru-card-body); предмет, срок, документ (text 08/01 §5.1)
       - slot_id: people
         slot_type: body
         variants:
@@ -353,7 +353,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: цена «от» с тем, что не входит (H PRICE-03)
+        notes: цена «от» с тем, что не входит (COPY-L-PRICE-03)
       - slot_id: lead
         slot_type: section-lead
         variants:
@@ -389,7 +389,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: срок и предмет скидки в той же строке (H PROMO-01)
+        notes: срок и предмет скидки в той же строке (COPY-L-PROMO-01)
       - slot_id: cta
         slot_type: cta-label
         variants:
@@ -441,7 +441,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: образец голоса F (voice-otves-warm, ru-form-lead)
+        notes: образец голоса (voice-otves-warm, ru-form-lead)
       - slot_id: button
         slot_type: cta-label
         variants:
@@ -470,7 +470,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: шаблон H 01 §8.1; галочка пустая — механика site
+        notes: шаблон text 08/01 §8.1; галочка пустая — механика site
       - slot_id: success
         slot_type: form-success
         variants:
@@ -558,7 +558,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: блокирующий пробел B2 — страница не публикуется до ответа
+        notes: блокирующий пробел фактов — страница не публикуется до ответа
     - section_id: final
       section_role: final-cta
       question: Что сделать сейчас?
@@ -645,7 +645,6 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: блокирующий пробел B2 (H DIST-01)
+        notes: блокирующий пробел фактов (COPY-L-DIST-01)
     status: draft
-  notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-otves-lead-v0.yaml (ai-self E3, 0 error), upgrade
-    v0 → v1 copydeck.py; правки J3 — в notes слотов и в 02-examples-ru.md.'
+  notes: 'Правки примера — в notes слотов и в 02-examples-ru.md.'

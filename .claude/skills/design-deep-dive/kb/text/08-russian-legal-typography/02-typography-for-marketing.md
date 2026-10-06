@@ -435,7 +435,7 @@ tp.addSafeTag('<no-typography>', '</no-typography>'); // коды, артику�
 - [S8] kimi: `../kimi-research/05-reviews-practice/03-default-look-k3.md` §3.7, §5.3; `07-brief-handoff/templates/copy.md`
   (норма набора пакета: «ёлочки», длинное тире, неразрывные пробелы, «1 234,56 ₽»).
 - [S9] taste-skill §9.G (Leonxlnx/taste-skill, клон в `../kimi-research/99-raw/cache/repos/`).
-- [S10] Гайд заказчика «Как избежать нейрослопа», §C «Тире» — `/home/mm/Документы/Как_избежать_нейрослопа_(гайд).md`.
+- [S10] Гайд заказчика «Как избежать нейрослопа», §C «Тире».
 - [S11] Microsoft Writing Style Guide, «Em dashes, en dashes, hyphens, and minus signs» — learn.microsoft.com
   `[документация]`.
 - [S12] Butterick M., «Practical Typography»: «Hyphens and dashes», «Straight and curly quotes», «Trademark and copyright

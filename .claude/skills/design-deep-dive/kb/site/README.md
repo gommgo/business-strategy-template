@@ -78,8 +78,7 @@ Schema, TSV, CSV — 40 361 строка), три полных примера «
 Порядок (09/02 §1.4; 09/03 §1.1): **план (SITE-PRE) → ворота → маркеры и сверка фактов → эксперт → судья → люди**; отдельная
 сессия, свои замеры, отчёт исполнителя не принимается, ноль находок — неудачная проверка.
 
-1. **Замер** (браузер — под `flock -w 900 /home/mm/Документы/app-design/.locks/browser.lock flock -w 900
-   99-raw/tools/.locks/browser.lock`, `free -g` ≥ 3 ГБ): `python3 ../../scripts/site/page_anatomy.py URL OUT --mobile --inp --label
+1. **Замер** (`free -g` ≥ 3 ГБ; утилита берёт замок браузера сама): `python3 ../../scripts/site/page_anatomy.py URL OUT --mobile --inp --label
    <page_type>` и десктоп; исходы — `python3 ../../scripts/ai-media/page_accept.py URL --out DIR --mobile --throttle` (блокировку site берёт
    сама). Исходы — с троттлингом, вес — отдельно без него, CLS — прокруткой всей страницы (09/02 §6.3).
 2. **Боты и SEO**: `python3 ../../scripts/site/geo_probe.py URL --out DIR --render`; многостраничник — `python3 ../../scripts/site/ia_probe.py
@@ -323,7 +322,7 @@ Schema, TSV, CSV — 40 361 строка), три полных примера «
 | `../../scripts/site/ab_plan.py` (P) | выборка, MDE, длительность, SRM, FPR, анализ, подглядывание | `size` · `duration` · `mde` · `srm` · `fpr` · `analyze` · `peeking` · `--selftest` | 35/35 | 07/04 §5 |
 | `../../scripts/site/checklist_export.py` (K) | `site-checklist.yaml` из Markdown 09/02 (YAML руками не править) | без ключей · `--check` · `--selftest` | 16/16; `--check` — совпадает | 09/02 §1 |
 | `99-raw/tools/sources_collect.py` 1.1 (S1, S1b) | библиография: `90-sources/sources.tsv` и автоблок `90-sources/README.md` из разделов «Источники» и дайджестов | без ключей или `--write` · `--check` · `--unparsed` · `--selftest` | 32/32; `--check` — совпадает | `90-sources/README.md` |
-| скрипты опытов | `../../scripts/site/run_axe_targets.py` — axe с адресами узлов для `--axe`; `99-raw/experiments/B/02-crosswalk/build_crosswalk.py --check` — сборка `crosswalk.tsv` | см. README опытов | K/03 побайтно; 710 строк OK | 09/02 §6.5; 02/02 §5 |
+| скрипты опытов | `../../scripts/site/run_axe_targets.py` — axe с адресами узлов для `--axe`; `../../scripts/site/vocab_lint.py --check-crosswalk` — сверка `crosswalk.tsv` | см. README опытов | K/03 побайтно; 709 строк, ошибок 0 | 09/02 §6.5; 02/02 §5 |
 | копии соседей (12) | `fetch.py`, `render_fetch.py` (страница → `99-raw/cache/`), `site_probe.py`, `asset_inventory.py`, `measure_ui.py`, `ui_audit.py` (на лендинге ложные J2, J8, H1–H2, A1, B2, L5), `color.py`, `yt_dl.py`, `vtt2md.py`, `yt_transcript.py`, `transcribe_local.py` | `../../scripts/site/README.md` | `py_compile` 12/12 | `../../scripts/site/README.md` |
 | оркестратора (4) | `check_links.py` (ссылки, `→ §`, `[V:]`, опыты, README против диска), `orch_check.py all` (формат, YAML, метки), `extract_for_audit.py`, `ctx_watch.py` (контекст 800/900 тыс.) | `check_links.py --quiet-info` · `orch_check.py all` | 39/39; 0 ошибок | `../../scripts/site/README.md` |
 
@@ -512,11 +511,11 @@ X43), клики из ИИ-ответов по Pew (X28), роли секций 
 | `01-foundations/01-how-visitors-decide.md` | 369 | как посетитель решает: запах, «страница как форма», модели решения как языки диагностики, осведомлённость и температура трафика, доверие, тревога (A) |
 | `01-foundations/02-cro-evidence-and-folklore.md` | 305 | иерархия доказательств CRO; ≈ треть идей работает, 90 % эффектов < 1,2 %; 21 миф и правила переноса кейсов (A) |
 | `01-foundations/03-site-brief.md` | 445 | бриф: разделы и владельцы полей, минимум по типу, процедура до «утверждено», банк вопросов, инвентарь фактов, проекция в kimi (A) |
-| `01-foundations/site-brief.schema.json`, `01-foundations/site-brief.example.yaml`, `01-foundations/site-brief.kimi-map.tsv` | 778 · 263 · 190 | схема брифа v0, пример «Отвес», таблица проекции в `brief.yaml` kimi (итоговая схема — v1 в папке 10) |
+| `01-foundations/site-brief.schema.json` | 777 | схема брифа v0 (итоговая схема и пример «Отвес» — v1 в папке 10) |
 | `02-site-types/01-site-and-page-taxonomy.md` | 372 | типы сайтов и страниц, обязательные страницы, дерево выбора по брифу (B) |
 | `02-site-types/02-vocabulary-and-crosswalk.md` | 363 | правила словаря и пространств имён, как добавлять id, сведение с сёстрами и соседями (B) |
 | `02-site-types/03-live-pages-measured.md` | 628 | замер 72 живых страниц × 2 устройства: длина и роли, призывы, формы и согласия, трекинг до выбора, SEO-гигиена, скорость и вес (M, M2) |
-| `02-site-types/vocabulary.yaml`, `02-site-types/crosswalk.tsv` | 671 · 711 | словарь v1 — 443 id в 17 пространствах; таблица соответствия — 710 строк (генерируется `build_crosswalk.py`) |
+| `02-site-types/vocabulary.yaml`, `02-site-types/crosswalk.tsv` | 652 · 710 | словарь v1 — 445 id в 17 пространствах; таблица соответствия — 709 строк (сверяет `vocab_lint.py --check-crosswalk`) |
 | `02-site-types/pages.csv` | 145 | выборка M2: 144 строки (72 страницы × 2 устройства), 132 колонки |
 | `03-page-structure/01-narratives-and-section-order.md` | 462 | роли секций, 13 сюжетных каркасов, порядок секций по типам и осведомлённости, 29 макроструктур, «общий хвост» (C) |
 | `03-page-structure/02-length-goal-message-match.md` | 333 | длина, одна цель и второй путь, attention ratio, меню на посадочной, соответствие объявлению (C) |
@@ -524,14 +523,14 @@ X43), клики из ИИ-ответов по Pew (X28), роли секций 
 | `04-blocks/01-blocks-catalog.md`, `04-blocks/02-blocks-catalog-specialized.md` | 444 · 343 | карточки блоков: общие (шапка, hero, доказательства, оффер, призывы, подвал) и специальные (формы, FAQ, люди, контакты, портфолио, события, курсы, служебные) (E) |
 | `04-blocks/03-slots-and-page-plan.md` | 357 | модель слотов, факты и пробелы, поля плана, процедура «бриф → план» (12 подшагов), проекции сёстрам (E) |
 | `04-blocks/blocks.yaml` | 2347 | каталог блоков v1: 84 блока (анатомия, варианты, телефон, разметка, ссылки на правила владельцев) |
-| `04-blocks/blocks.schema.json`, `04-blocks/page-plan.schema.json`, `04-blocks/examples/` | 730 · 1377 · 1271 (3 файлов) | схемы v0.9 и три плана v0.9 (итоговые схемы и образцы — v1 в папке 10) |
+| `04-blocks/blocks.schema.json`, `04-blocks/page-plan.schema.json` | 746 · 1377 | схемы v0.9 (итоговые схемы и образцы — v1 в папке 10) |
 | `05-conversion-funnels/01-cta-and-lead-capture.md` | 578 | призывы, лид-формы, квизы, калькуляторы, звонок, мессенджеры, запись, антиспам, согласие, «спасибо», окна захвата (F) |
 | `05-conversion-funnels/02-proof-pricing-risk.md` | 535 | доказательства у точки сомнения, честные замены, цены и тарифы, снятие риска, честная срочность (F) |
 | `05-conversion-funnels/03-multi-page-funnels.md` | 458 | воронки: объявление → посадочная → форма → «спасибо»; вебинар, лист ожидания, пробный период, лид-магнит, UTM → CRM (F) |
 | `05-conversion-funnels/lead-forms.yaml` | 486 | наборы форм v1.0: умолчания, 17 полей с `why`, 13 наборов |
 | `06-multipage-ia/01-sitemaps-templates-content-model.md` | 414 | карты по умолчанию для 7 многостраничных типов, шаблоны, модель контента, служебные страницы, порядок сборки (G) |
 | `06-multipage-ia/02-navigation-linking-i18n.md` | 732 | шапка (7 архетипов), мега-меню, меню телефона, подвал, крошки, перелинковка, адреса, языки (G, G2) |
-| `06-multipage-ia/site-map.schema.json`, `06-multipage-ia/examples/` | 484 · 806 (3 файлов) | схема карты v0 и три карты (корпоративный B2B, услуги, школа) |
+| `06-multipage-ia/site-map.schema.json` | 484 | схема карты v0 (итоговая схема и пример карты — v1 в папке 10) |
 | `07-seo-geo-performance-analytics/01-seo-google-yandex.md` | 529 | как Google и Яндекс получают страницу, HTML сервера, коды, robots.txt, canonical, sitemap, разметка, спам-политики (H) |
 | `07-seo-geo-performance-analytics/02-geo-ai-search.md` | 529 | ИИ-поиск: откуда ответы берут страницы, боты и управление, текст без JS, `llms.txt`, сущности, измерение (H, H2) |
 | `07-seo-geo-performance-analytics/03-performance-budgets-gates.md` | 400 | CWV (поле и лаборатория), профили бюджета, сторонние скрипты, ворота и расхождения с соседями (P) |
@@ -640,7 +639,8 @@ Perplexity, уровни — сервисы L0, лендинги L1, кампа�
 
 Порядок — `PLAN.md` «Как расширять базу». Коротко: правило — в файл владельца темы (таблица владения `_common.md`) с меткой и
 `→ §`, в выжимку файла и при необходимости сюда; новый id — через `vocabulary.yaml` (только добавления и `deprecated`) и
-`build_crosswalk.py`, проверка `vocab_lint.py`; блок — `blocks.yaml` и `site_validate.py --all`; пункт чек-листа — Markdown 09/02 →
+строки `crosswalk.tsv`, проверка `vocab_lint.py` и `vocab_lint.py --check-crosswalk`; блок — `blocks.yaml` и
+`site_validate.py --all`; пункт чек-листа — Markdown 09/02 →
 `checklist_export.py`; ворота — `page-gates.yaml` → `page_gates.py --selftest`; требование права — `legal-requirements.yaml` с
 редакцией закона; боты — `crawlers.yaml` раз в квартал. После правок: `python3 ../../scripts/maint/orch_check.py all`,
 `python3 ../../scripts/maint/check_links.py`, `python3 ../../scripts/site/site_validate.py --all`, `python3 ../../scripts/site/checklist_export.py

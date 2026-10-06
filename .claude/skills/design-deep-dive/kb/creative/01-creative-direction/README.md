@@ -12,7 +12,7 @@ F — эффекты, H — политику клише, I — специфик�
 | `art-direction.schema.json` | JSON Schema 2020-12 документа `art-direction` v0 (`urn:app-design:creative:art-direction:0`) | 459 · v0 |
 | `../09-ai-execution-evaluation/art-direction.v1.schema.json` (ссылка) | формат v1 = v0 + эмоциональная цель, money idea, мотив, характер и примитивы движения, прототип, вариативность; владелец формата — A, схему собирает I скриптом `99-raw/experiments/I/03-art-direction-v1/build_ad_v1.py` прямо в папку 09 (поэтому файл не перенесён); пример v1 — `../09-ai-execution-evaluation/examples/art-direction-okoshko.v1.json` | 1883 · v1 (I, волна 3) |
 | `examples/art-direction-*.json` | «Кварц» L1 (утверждён), «Лесная обжарка» L0 и L2, «Окошко» L1, «Отвес» L1 | 5 примеров · 5/5 без ошибок (A/01, 15:52) |
-| `drafts-for-site/site-brief-creative-fields.yaml` | C1: правка к `site-brief` v0 (амбиции, референсы, выражение бренда), фрагменты схемы, таблица «поле kimi → поле брифа» | 331 · выпущен 15:18, принят site |
+| `drafts-for-site/site-brief-creative-fields.yaml` | C1: правка к `site-brief` v0 (амбиции, референсы, выражение бренда), фрагменты схемы | 331 · выпущен 15:18, принят site |
 | `drafts-for-site/treatment.v0.schema.json` | C1: подсхема `treatment` (`urn:app-design:creative:treatment:0`), 29 временных id эффектов | 304 · выпущен 15:18, принят site (в схемы v1 — J site) |
 
 Опыты: `99-raw/experiments/A/01-art-direction-examples/` (`ad_check.py`), `02-c1-check/` (`c1_check.py`, `treatments.yaml`),

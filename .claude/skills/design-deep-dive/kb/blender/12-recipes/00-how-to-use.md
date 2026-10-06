@@ -2,8 +2,8 @@
 
 Волна 3 · агент K · 23.09.2026 · Blender 5.2.2 LTS, glTF-IO 5.2.40, three r186, Chromium (Playwright, Iris Xe) · 17 рецептов: 01–12 (K) —
 11 со сквозным прогоном кода `build(P)` → GLB/рендер → страница (`99-raw/experiments/K/01…10`), 1 — сборка готового демо F2 без Blender;
-13–17 (агент RC, испытание 15-showcase, 26.09.2026) — по исполненным скриптам и страницам дорожек `99-raw/experiments/{Z,CD,KB,SD,VD}/` ·
-набор помощников `../../../scripts/blender/rk.py`, прогонщик `../../scripts/blender/run_recipes.py`.
+13–17 (агент RC, испытание 15-showcase) — по исполненным скриптам и страницам (исходники отрывков — `examples/<рецепт>/src/`) ·
+набор помощников `../../../scripts/blender/rk.py`, прогонщик `../../../scripts/blender/run_recipes.py`.
 
 ## Выжимка для агента
 
@@ -144,10 +144,10 @@ python3 ../../scripts/blender/web_view.py --page 12-recipes/examples/06-logo-3d-
 ```
 
 - Блоки ```python рецепта исполняются **в напечатанном виде, по порядку** в одном процессе Blender; блок с первой строкой
-  `# run: system` — системным Python 3 (Pillow, ffmpeg) после Blender; блок с `[не проверено]` в первой строке пропускается.
-- Прогонщик пишет `examples/<slug>/build.py` (и `post.py`), `numbers.json`, `web/<name>/web_sheet.png`, итог — `K/01-run-recipes/result.json`.
+  `# run: system` — Python окружения скилла (Pillow, ffmpeg) после Blender; блок с `[не проверено]` в первой строке пропускается.
+- Прогонщик пишет `examples/<slug>/build.py` (и `post.py`), `numbers.json`, `web/<name>/web_sheet.png`, итог — `$DDD_HOME/out/blender/run_recipes/result.json`.
 - Через MCP (окно Blender): тот же код одним `execute_blender_code` (идемпотентный `build(P)` надёжнее кода частями, C1 `04 §5`);
-  `sys.path` на `_kit` — абсолютный. **`rk.reset()` в сцене человека не вызывать**: `bpyx.clear_scene()` удаляет все объекты сцены
+  `sys.path` на `scripts/blender` — абсолютный. **`rk.reset()` в сцене человека не вызывать**: `bpyx.clear_scene()` удаляет все объекты сцены
   и сирот (I `../02-blender-workflow/` §3 п. 1) — там только своя коллекция (`D.fresh_collection`), своя сцена превью для камеры и
   рендера, `inspect_scene()` до и `keep_user_state()` после (I `02-blender-workflow/01 §2`, `04 §2`).
 - Метки для JS (пустышки `hotspot_*`, extras) — имена по таблице I `02-blender-workflow/01 §8.1`, постобработка только

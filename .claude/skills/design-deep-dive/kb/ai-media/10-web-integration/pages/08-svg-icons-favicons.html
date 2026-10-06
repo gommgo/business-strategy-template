@@ -1,8 +1,8 @@
 <!doctype html>
 <!-- 08 · SVG на странице: спрайт <symbol> + <use> (один файл, кэшируется), currentColor в светлой и тёмной теме, анимация
      inline SVG с блоком reduce, анимированный SVG через <img> — статичная копия в <picture media="(prefers-reduced-motion: reduce)">,
-     паттерн mask-image + цвет из токена, фавиконы из 3 файлов (Evil Martians 2026). Правила и проверки — агент G
-     (07-vector-svg-icons/03 §3–§5, 04 §2–§3); здесь — сборка на одной странице. Агент J, волна 3, 23.09.2026 · проверено: J/06. -->
+     паттерн mask-image + цвет из токена, фавиконы из 3 файлов (Evil Martians 2026). Правила и проверки —
+     07-vector-svg-icons/03 §3–§5, 04 §2–§3; здесь — сборка на одной странице. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -37,7 +37,7 @@
 </section>
 <section class="section">
   <h2>Анимированный SVG через &lt;img&gt;</h2>
-  <p>Внутри <code>&lt;img&gt;</code> медиазапрос reduce не срабатывает (G/05) — статичную копию выбирает <code>&lt;picture&gt;</code>.</p>
+  <p>Внутри <code>&lt;img&gt;</code> медиазапрос reduce не срабатывает — статичную копию выбирает <code>&lt;picture&gt;</code>.</p>
   <picture><source srcset="assets/svg/wave-static.svg" media="(prefers-reduced-motion: reduce)"><img src="assets/svg/wave-anim.svg" width="120" height="40" alt=""></picture>
 </section>
 <section class="section">

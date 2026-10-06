@@ -1,8 +1,8 @@
-"""animx — помощники анимации для Blender 5.2 (агент H, волна 2). Проверено: Blender 5.2.2 LTS, glTF-IO 5.2.40.
+"""animx — помощники анимации для Blender 5.2. Проверено: Blender 5.2.2 LTS, glTF-IO 5.2.40.
 
-Дополняют bpyx (03-bpy-api/snippets/bpyx.py): там нет функций анимации. Всё через data API 5.x
+Дополняют bpyx (рядом, scripts/blender/bpyx.py): там нет функций анимации. Всё через data API 5.x
 (слои → полосы → channelbag слота), без устаревших action.fcurves / action.id_root.
-Подключение: sys.path.insert(0, ".../99-raw/experiments/H/_lib"); import animx
+Подключение: sys.path.insert(0, "<корень скилла>/scripts/blender"); import animx
 """
 from __future__ import annotations
 

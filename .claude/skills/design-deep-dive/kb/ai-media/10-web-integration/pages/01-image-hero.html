@@ -1,13 +1,13 @@
 <!doctype html>
 <!-- 01 · Картинка-hero: <picture> с отдельным телефонным кадром, AVIF → WebP, srcset/sizes, fetchpriority, LQIP,
      object-position по фокусу, цвет текста по зоне, lazy ниже первого экрана, OG и фавиконы.
-     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure (Chromium 153, 1440×900 и Pixel 7). -->
+     Проверено: Chromium 153, 1440×900 и Pixel 7. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Утро у воды — ретрит на озере</title>
-<meta name="description" content="Тестовая страница J/01: доставка картинки hero.">
+<meta name="description" content="Тестовая страница 01: доставка картинки hero.">
 <meta name="theme-color" content="#b6b1a9">
 <link rel="icon" href="assets/svg/favicon.ico" sizes="32x32">
 <link rel="icon" href="assets/svg/icon.svg" type="image/svg+xml">
@@ -28,9 +28,9 @@
   .hero__media { background: #b6b1a9 url("data:image/webp;base64,UklGRoIAAABXRUJQVlA4IHYAAADQBACdASogABIAPxFuslAsJiSisBgMAOIliQAAWpp0TqGgF5Yv4qJmdB2trACb/L2eqaSmpnm7XEz4+Q3/zCnZ8AbPbNP44XBwJK8HO7mgvPWvnaQ/cS6pkIG/UWHm/wAA") center / cover no-repeat; }
   @media (max-width: 699px) { .hero__media { background-color: #c6c2bd; } .hero__copy { padding-top: 56px; }
     .nav a.link:not(:last-child) { display: none; } .hero__lead { max-width: 27ch; } }
-  /* текст тёмный: зона слева — светлая вода и небо рассвета (F83 без скрима, см. J/06) */
+  /* текст тёмный: зона слева — светлая вода и небо рассвета (F83 без скрима, ai-media 10/03) */
   .hero--light .hero__lead { color: #1f242c; opacity: 1; }
-  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (J/06) */
+  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (ai-media 10/03) */
   .hero--light .hero__scrim { background: linear-gradient(90deg, rgb(243 239 231 / .46) 0%, rgb(243 239 231 / .34) 40%, rgb(243 239 231 / 0) 64%); }
   @media (max-width: 699px) { .hero--light .hero__scrim { background: linear-gradient(180deg, rgb(243 239 231 / .40) 0%, rgb(243 239 231 / .28) 55%, rgb(243 239 231 / 0) 75%); } }
 </style>

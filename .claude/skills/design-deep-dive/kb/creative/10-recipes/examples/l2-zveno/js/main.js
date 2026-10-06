@@ -1,8 +1,8 @@
-// main.js · L2 «Звено» · агент J · 2026-09-25 · Chromium 153 / WebKit 26.6 · ≈ 1,6 КБ br
+// main.js · L2 «Звено» · Chromium 153 / WebKit 26.6 · ≈ 1,6 КБ br
 // Порядок: HTML со смыслом и постер (LCP) → после load + простоя — import('./three-scene.js') (three 0.186.1, ≈ 123 КБ br) → первый кадр →
 // постер гаснет. В reduce (ОС или кнопка «Меньше движения») сцена не грузится: страница — стопка станций-картинок (reduce: stations).
 // Без WebGL и без JS — то же. Холст рисует только при прокрутке, указателе и одноразовом «пробуждении» (0 кадров в покое).
-// J2 (световой проход, сцена v2 — 99-raw/experiments/J/04-light-pass/src/scene.js): телефон получает quality 'low' (Standard, без карты теней).
+// Сцена v2 (после светового прохода; сборка — three-scene.js): телефон получает quality 'low' (Standard, без карты теней).
 const root = document.documentElement;
 let canvas = document.querySelector('.stage');
 const hero = document.querySelector('[data-section="hero"]');
@@ -91,7 +91,7 @@ addEventListener('pointermove', (e) => {
 }, { passive: true });
 document.addEventListener('visibilitychange', () => { if (document.hidden && S) S.stop(); });
 
-// кнопка «Меньше движения» (aria-pressed) поверх переключателя F2 motion.js: выбор побеждает ОС в обе стороны, помнится
+// кнопка «Меньше движения» (aria-pressed) поверх переключателя motion.js: выбор побеждает ОС в обе стороны, помнится
 function bindToggle() {
   if (!window.Motion) { btn.hidden = true; apply(); return; }
   btn.addEventListener('click', () => window.Motion.set(window.Motion.reduced() ? 'full' : 'reduced'));

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""ab_plan.py — план и проверка A/B-теста страницы сайта (агент P, волна 2 site-research, 2026-09-24).
+"""ab_plan.py — план и проверка A/B-теста страницы сайта.
 
 Что считает (только стандартная библиотека; numpy — по желанию, для симуляций):
   size      выборка на вариант для двух долей (двусторонний α, мощность) — точная формула без объединения дисперсий
-            (как опыт A/04) и правило Кохави n = 16σ²/δ²; поправка Бонферрони для A/B/n
+            и правило Кохави n = 16σ²/δ²; поправка Бонферрони для A/B/n
   duration  дни и полные недели при заданном трафике; вердикт «реально / долго / нереально»
   mde       минимальный обнаружимый эффект при заданном трафике и числе недель
   srm       проверка соотношения выборок (sample ratio mismatch) хи-квадратом, порог ExP p < 0,0005
@@ -11,20 +11,24 @@
   analyze   итог теста: сначала SRM, затем z-тест двух долей, интервал разницы, относительный эффект, FPR,
             закон Твимана, правило «0,01 < p < 0,05 → повторить»
   peeking   инфляция ложных срабатываний при k просмотрах и номинальный порог Pocock для k анализов (симуляция)
-  --selftest  сверка с первоисточниками (A/04, Intuition Busters 2022, Fabijan 2019, Evan Miller 2010) и Монте-Карло
+  --selftest  сверка с эталонными выборками и первоисточниками (Intuition Busters 2022, Fabijan 2019, Evan Miller 2010)
+              и Монте-Карло
 
-Примеры:
-  python3 99-raw/tools/ab_plan.py size --base 0.05 --mde-rel 0.20
-  python3 99-raw/tools/ab_plan.py duration --base 0.03 --mde-rel 0.25 --visits-per-day 400 --share 1.0
-  python3 99-raw/tools/ab_plan.py mde --base 0.03 --visits-per-day 400 --weeks 4
-  python3 99-raw/tools/ab_plan.py srm 821588 815482
-  python3 99-raw/tools/ab_plan.py fpr --success-rate 0.10
-  python3 99-raw/tools/ab_plan.py analyze --visitors 5210 5187 --conversions 161 198 --success-rate 0.15
-  python3 99-raw/tools/ab_plan.py peeking --looks 28
-  python3 99-raw/tools/ab_plan.py --selftest
-Вывод — человекочитаемый; `--json` — JSON. Код выхода: 0 — норма; 2 — SRM или вердикт «нереально»; 1 — ошибка ввода.
+Примеры (от корня скилла):
+  python3 scripts/site/ab_plan.py size --base 0.05 --mde-rel 0.20
+  python3 scripts/site/ab_plan.py duration --base 0.03 --mde-rel 0.25 --visits-per-day 400 --share 1.0
+  python3 scripts/site/ab_plan.py mde --base 0.03 --visits-per-day 400 --weeks 4
+  python3 scripts/site/ab_plan.py srm 821588 815482
+  python3 scripts/site/ab_plan.py fpr --success-rate 0.10
+  python3 scripts/site/ab_plan.py analyze --visitors 5210 5187 --conversions 161 198 --success-rate 0.15
+  python3 scripts/site/ab_plan.py peeking --looks 28
+  python3 scripts/site/ab_plan.py --selftest
+Вывод — человекочитаемый; `--json` — JSON. Код выхода: 0 — норма (самопроверка прошла); 1 — SRM, вердикт «нереально»
+или самопроверка не прошла; 2 — ошибка вызова или ввода (неверный ключ, значение вне области формулы).
 """
 import argparse
+import contextlib
+import io
 import json
 import math
 import random
@@ -37,7 +41,7 @@ PHI = N01.cdf
 SRM_P_THRESHOLD = 0.0005      # Microsoft ExP: «conservative… p-value < 0.0005» (MSR, Diagnosing SRM)
 MAX_WEEKS_OK = 4              # дольше — растут новизна, cookie churn, внешние события (Kohavi & Longbotham 2015)
 MAX_WEEKS_HARD = 8            # дольше — тест на сайте с таким трафиком не ставить (исследование вместо теста)
-TWYMAN_REL = 0.30             # относительный эффект > 30 % от правки — «подозрительно, ищи ошибку» (порог P)
+TWYMAN_REL = 0.30             # относительный эффект > 30 % от правки — «подозрительно, ищи ошибку»
 
 
 # ---------------------------------------------------------------- статистика
@@ -80,7 +84,7 @@ def chi2_sf(x, df):
 
 
 def n_two_prop(p1, p2, alpha=0.05, power=0.80, two_sided=True):
-    """Выборка на вариант (равные ветки), дисперсии без объединения — как A/04."""
+    """Выборка на вариант (равные ветки), дисперсии без объединения."""
     za = Z(1 - alpha / 2) if two_sided else Z(1 - alpha)
     zb = Z(power)
     return (za + zb) ** 2 * (p1 * (1 - p1) + p2 * (1 - p2)) / (p2 - p1) ** 2
@@ -213,7 +217,7 @@ def cmd_size(a):
                   f"{r['weeks_full']} полн. нед. ({r['days_planned']} дн.) — вердикт: {r['verdict']}")
             if r.get('advice'):
                 print('совет:', r['advice'])
-    return 2 if r.get('verdict') == 'infeasible' else 0
+    return 1 if r.get('verdict') == 'infeasible' else 0
 
 
 def cmd_mde(a):
@@ -235,7 +239,7 @@ def cmd_srm(a):
         print(f"доли {r['observed_share']}, ожидали {r['expected']}; χ² = {r['chi2']}, df = {r['df']}, p = {r['p_value']:.3g}")
         print('SRM: ДА — результат не показывать, искать причину (боты, редирект, триггер, старт, кэш)' if r['srm']
               else f"SRM нет (порог p < {SRM_P_THRESHOLD})")
-    return 2 if r['srm'] else 0
+    return 1 if r['srm'] else 0
 
 
 def cmd_fpr(a):
@@ -273,7 +277,7 @@ def cmd_analyze(a):
             print(f"риск ложной победы при доле успешных идей {a.success_rate:.0%}: {r['fpr_at_threshold']:.1%}")
         for n in notes:
             print('!', n)
-    return 2 if s['srm'] else 0
+    return 1 if s['srm'] else 0
 
 
 def cmd_peeking(a):
@@ -294,9 +298,9 @@ def selftest():
         ok &= good
         rows.append(('PASS' if good else 'FAIL', name, got, want, tol))
 
-    # 1) Опыт A/04 (та же формула, α 0,05, мощность 80 %) — `99-raw/experiments/A/04-sample-size/result.tsv`
+    # 1) Эталонные выборки той же формулы (α 0,05, мощность 80 %), посчитанные отдельно
     for base, lift, want in [(0.05, 0.20, 8155), (0.02, 0.10, 80679), (0.10, 0.50, 683), (0.066, 0.20, 6062)]:
-        check(f'A/04 n на ветку, база {base}, +{lift:.0%}', round(n_two_prop(base, base * (1 + lift))), want, 1)
+        check(f'n на ветку, база {base}, +{lift:.0%}', round(n_two_prop(base, base * (1 + lift))), want, 1)
     # 2) Kohavi, Deng, Vermeer 2022 (Intuition Busters) §4: 16σ²/δ², база 3,7 %, +10 % → 41 642 на вариант
     check('16σ²/δ²: 3,7 %, +10 %', n_rule16(0.037, 0.0037), 41642, 5)
     # мощность при 80 на вариант — «about 3%»
@@ -339,6 +343,18 @@ def selftest():
     check('Монте-Карло: ложные при нулевом эффекте', fa / sims, 0.05, 0.012)
     # 7) Бонферрони для A/B/C: α на сравнение 0,025
     check('A/B/C: α на сравнение', plan(0.05, 0.2, variants=3)['alpha_per_comparison'], 0.025, 1e-12)
+    # 8) коды выхода: SRM и «нереально» — 1, норма — 0, ошибка вызова или ввода — 2
+    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+        codes = (main(['srm', '821588', '815482']), main(['srm', '5000', '5010']),
+                 main(['duration', '--base', '0.03', '--mde-rel', '0.05', '--visits-per-day', '50']),
+                 main(['size', '--base', '0.05', '--mde-rel', '0.20']), main([]), main(['size', '--base', '0', '--mde-rel', '0.2']))
+        try:
+            main(['srm', '--нет-такого-ключа'])
+            codes += (0,)
+        except SystemExit as e:
+            codes += (e.code,)
+    check('коды: SRM 1, норма 0, «нереально» 1, план 0, без подкоманды 2, база 0 — 2, неверный ключ 2',
+          float(codes == (1, 0, 1, 0, 2, 2, 2)), 1.0, 0)
     for st, name, got, want, tol in rows:
         print(f'{st}  {name}: {got:.6g} (ожидали {want:.6g} ± {tol:g})')
     print(f"итог: {sum(r[0] == 'PASS' for r in rows)}/{len(rows)} PASS")
@@ -414,9 +430,13 @@ def main(argv=None):
     if a.selftest:
         return selftest()
     if not a.cmd:
-        ap.print_help()
-        return 1
-    return a.fn(a)
+        ap.print_help(sys.stderr)
+        return 2
+    try:
+        return a.fn(a)
+    except (ValueError, ZeroDivisionError, OverflowError) as e:   # значение вне области формулы — ошибка ввода
+        print(f'ab_plan.py: ошибка ввода: {e}', file=sys.stderr)
+        return 2
 
 
 if __name__ == '__main__':

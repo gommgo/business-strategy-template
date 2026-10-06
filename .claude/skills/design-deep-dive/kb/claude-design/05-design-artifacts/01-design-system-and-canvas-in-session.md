@@ -134,7 +134,8 @@ screens, UI mockups, wireframes…: live artboards laid out on a canvas» — и
 - **Обложка** `components/Cover/preview.html`: папка голая (README рядом превратит её в компонент); 960 × 240–360; 3–5 цветовых блоков +
   один паттерн + имя крупно внизу слева; вывод («derivation») комментарием над SVG; пишется последней.
 - Страница генерирует сама, не писать: `tokens.css`, `api/**`, `manifest.json`. Картинки и видео — загрузки по id с записью в
-  `assetGroups`; шрифты — файлы в `fonts/`.
+  `assetGroups`: в исходниках репозитория — путь к файлу ассета, id подставляет `ds_build artifact --bind-assets`; шрифты — файлы
+  в `fonts/`.
 - Справка типа `artifact-type/reference/migrated-compat.md` в пересказ не входит: у перенесённых систем — режим `editing: off`.
 - Лимиты: 1 008 своих файлов и 256 MiB, файл ≤ 15 MiB, вызов ≤ 16 MiB. `[документация типа]`
 

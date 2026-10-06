@@ -1,5 +1,4 @@
 # Пример motion-spec v1 — «Сталькон», главная корпоративного многостраничника (L1). Учебный.
-# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
 # Проверка: spec_check.py spec … --plan ../site/10-playbooks-contracts/examples/corporate-b2b-stalkon/plans/home.yaml --overlay stalkon-home.treatment.yaml
 # Показывает класс transition: кросс-документный View Transition «обложка карточки → hero кейса» с именами и ролями (Bramus) и долями базы.
 motion_spec_version: "1.0"

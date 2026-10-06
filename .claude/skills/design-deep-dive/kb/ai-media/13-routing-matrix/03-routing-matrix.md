@@ -4,7 +4,7 @@
 `IMG-LAYERS`; 124 варианта; `../../scripts/ai-media/routing_check.py` — 0 ошибок) · снимки каталогов: polza `2026-09-24` 04:10,
 RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-existing-evidence.md` (классы A/B/C, J1–J26) · прочитано
 целиком ≈ 40 файлов базы и отчётов, 3 опыта (`99-raw/experiments/N/01–03`).
-**v2 — агент U, сессия 5, 25.09.2026**: итоги фазы 5 вписаны в `routing.yaml` v2 (33 маршрута, 136 вариантов, `routing_check.py`
+**v2 — агент U, сессия 5, 25.09.2026**: итоги фазы 5 вписаны в `routing.yaml` v2 (33 маршрута, 137 вариантов, `routing_check.py`
 1.1 — 0 ошибок, 0 предупреждений, снимки `2026-09-25_1411`); что изменилось и почему — §2.2, итог ворот — §8; таблицы §2–§4 ниже —
 состояние v1 с точечными поправками фазы 5; при расхождении прав `routing.yaml` v2. История — `routing.v1.yaml`.
 
@@ -83,7 +83,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
     60 — поймано валидатором). → §1 [проверено]
 28. **`[не проверено]` меняется на `[стенд: N задач × моделей × повторов, судья, дата]`** только по правилу
     `01-stand-method.md` §5 после фазы 5. → §8 [практика] [фаза 5, 25.09.2026: правило стенда не выполнено ни разу (1–2 образца
-    на модель, голос одного заказчика) → живые прогоны помечены `[проверено: путь]` с n, `[стенд]` не поставлен → §2.2]
+    на модель, голос одного заказчика) → живые прогоны помечены `[проверено: условия]` с n, `[стенд]` не поставлен → §2.2]
 
 ## 1. Как читать матрицу
 
@@ -109,7 +109,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 | Код | Основная (параметры, ₽) | Запас / альтернатива | Дёшево, черновик | Диалект | Постобработка | Чем проверять (`asset_audit` · рубрика) | Метка | Фаза 5 решит |
 |---|---|---|---|---|---|---|---|---|
 | `IMG-HERO-PHOTO` | `openai/gpt-image-2.5-sunburst` 2K 16:9 — 7 | `gpt-image-2-5-flare` 2K — 7 (alt); `google/gemini-3.1-flash-image-preview` 2K — 7,2; RouterAI Sunburst `quality: high` 16:9 (1536×864) — 3,62 (ворота N-01) [поправка фазы 5, 25.09.2026: N-01 — `medium` 0,93 ₽ ≈ `high` 3,57 ₽ (по паспортам; списываются только выходные токены × 0,0033113 ₽) ≈ polza 1K 4 ₽, n = 2 брифа → в v2 вариант `medium` 0,93 → `99-raw/phase5/runs/S5-analysis/N-01_metrics.json`] | `bytedance/seedream-4` 4K 21:9 — 3 (ворота E-01); NB2 Lite — 2,9 | gpt-image · sections | best-of-2; 2K не 4K; грейд `.cube`; скрим F83; кадр 4:5 телефону | `image --slot hero --text-zone --dna` · `hero-photo`; K-06 | [исследование]; polza — [не проверено] | E-08, E-09, E-01, F-04, D2-04, N-01 |
-| `IMG-PRODUCT` | композит: вырез товара + сцена `openai/gpt-image-2.5-sunburst` 2K 4:3 — 7 | NB2 1K — 4,8 (правка «вокруг реального»: 74,6 % без дефектов) | `bytedance/seedream-4.5` basic — 5 (ворота E-01); Qwen 2.1 — 3 (черновик) | gpt-image · sections; 7 блоков продукта | композит, растушёвка 4 px, тень multiply, 2 кандидата | `edit --orig --mask --protect` · `product`; OCR этикетки | [исследование]; перенос — [не проверено] | E-10, H-07 |
+| `IMG-PRODUCT` | композит: вырез товара + сцена `openai/gpt-image-2.5-sunburst` 2K 4:3 — 7 | NB2 1K — 4,8 (правка «вокруг реального»: 74,6 % без дефектов) | `bytedance/seedream-4.5` basic — 5 (ворота E-01); Qwen 2.1 — 3 (черновик) | gpt-image · sections; 7 блоков продукта | композит, растушёвка 4 px, тень multiply, 2 кандидата; вариант — композит со светом сцены: маска товара с отсечкой по глубине (Depth Anything V2 Small), порог проверки правки — из `check` маршрута | `edit --orig --mask --protect` · `product`; OCR этикетки | [исследование]; перенос — [не проверено] | E-10, H-07 |
 | `IMG-ILLUSTR` | `gpt-image-2-5-flare` 1K 1:1 — 4 | Sunburst 1K — 4 (alt); NB2 1K — 4,8; схемы — `openai/gpt-5.4-image-2` 1K — 4 | Grok Image 2.0 — 3 (мини-стенд) | gpt-image · sections | проверка тёплого сдвига, грейд; подписи схем — кодом | `image --dna` · `illustration` | [исследование] | E-11, D2-01 |
 | `IMG-SERIES` | метод F + `gpt-image-2-5-flare` 1K 3:2 + 3 референса — 4 | `google/gemini-3-pro-image-preview` 2K — 13,5 (flex 7,95 после T5); RouterAI `recraft/recraft-v4-styles` — 3,84 | `bytedance/seedream-4.5` — 5 (ворота E-01; не с несколькими людьми) | gpt-image · sections, `reference_group` | палитра к паспорту (ΔE OKLab ≤ 0,045, оттенок ≤ 10°) | `series --ref --grid 2x2` · `series` | [спорно] | E-12, F-01, F-02, F-06, G-11, G-12 |
 | `IMG-ICON3D` | `openai/gpt-image-2.5-sunburst` 1K 1:1, сетка 2×2, форма-рендер + кубик материала — 4 | NB2 1K — 4,8; Blender — точный набор | Qwen 2.1 transparent — 3 (черновик) | gpt-image · sections | вырез: ровный фон → u2netp/isnet по краю | `cutout --grid 2x2 --series` · `icon3d` | [исследование]; набор — [не проверено] | E-14, F-07, G-17, G-18 |
@@ -121,7 +121,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 | `IMG-EDIT` | «не трогать остальное» — NB2 1K — 4,8; сложная инструкция — Sunburst 1K + композит — 4 | «обвёл — убери» — Seedream 4.5 — 5 (ворота E-01); маска — RouterAI `openai/gpt-image-2` medium ≈ 6,47 | Qwen 2.1 + `mask_url` (белое = менять) — 3 (черновик) | nano-banana · sections; ≤ 5 изменений, целевые значения | `edit_check.py --match-color --composite`; удаление: маска + 9 %, растушёвка 3 % | `edit --orig [--mask] [--protect]` · `edit` | [исследование]; сохранность в polza — [спорно] | E-15, H-06, H-07, D2-06 |
 | `IMG-OUTPAINT` | NB2 1K с целевым `aspect_ratio` — 4,8 (+ композит центра) | Sunburst 1K — 4 (2K — 7); точный кроп по фокусу — код | — | nano-banana · sections | `edit_check.py outpaint`: SSIM центра ≥ 0,9 И ΔE00 ≤ 3 И резкость ≥ 0,85 → иначе `--composite` | `edit` · `edit` | [исследование]; в polza — [не проверено] | H-08 |
 | `IMG-MOCKUP` | композит скриншота (Blender / CSS 3D) — 0 | сцена и устройство — Sunburst 2K — 7 | — | gpt-image · sections | скриншот поверх, OCR до/после | `edit --protect` · `edit` | [исследование] + [документация] | не тестируется (S21) |
-| `IMG-UPSCALE` | генерировать в целевой ступени (Sunburst 2K — 7); Lanczos — 0 | `topaz/image-upscale` ×2 — 7,5 (после H-05) | Seedream 4 4K перегенерацией — 3 (ворота E-01) | без промта | Real-ESRGAN — только графика; генеративная доводка — только декор | `image` (SSIMULACRA2 к мастеру) · `hero-photo` | [проверено] локально | H-05 |
+| `IMG-UPSCALE` | генерировать в целевой ступени (Sunburst 2K — 7); Lanczos — 0 | `topaz/image-upscale` ×2 — 7,5 (после H-05), не финал (`final: false`; выбыла — `defaults.unavailable`) | Seedream 4 4K перегенерацией — 3 (ворота E-01) | без промта | Real-ESRGAN — только графика; генеративная доводка — только декор | `image` (SSIMULACRA2 к мастеру) · `hero-photo` | [проверено] локально | H-05 |
 | `IMG-DRAFT` | `google/gemini-3.1-flash-lite-image` — 2,9 | Grok Image 2.0 — 3; RouterAI Recraft V4.1 Flash — 0,77 (новые, мини-стенд) | `tongyi-mai/z-image` — 1,4 (композиция без текста и цвета) | nano-banana · sections | черновик → финал референсом «keep composition of image 1» | `image` (pHash разнообразия) | [исследование]; перенос — [не проверено] | E-16 |
 | `IMG-LAYERS` (предложение H) | Gen-API `qwen-image-layered` 4 слоя — 12,5 | вырез по альфе + Depth Anything V2 Small 518² — 0; RouterAI Ming Image Design Layer (цена не указана) | — | без промта | сумма слоёв ≈ исходник (SSIM ≥ 0,95) | `cutout` · `cutout` | [не проверено] | H-10 |
 
@@ -145,7 +145,7 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 
 Живые прогоны 25.09.2026 (заходы 1–3: 261 медиа-генерация и 190 чат-вызовов; polza 1 343,57 ₽, RouterAI 212,68 ₽, Gen-API 384 ₽ —
 `99-raw/phase5/runs/README.md`). Каждый тест — 1–2 образца на модель: метрика кодом и/или голос заказчика вслепую (1 чел.); правило
-стенда (`04-update-procedure.md` §3) не выполнено ни разу → метки `[проверено: путь]` с n, `[стенд]` нет. Коды маршрутов не менялись.
+стенда (`04-update-procedure.md` §3) не выполнено ни разу → метки `[проверено: условия]` с n, `[стенд]` нет. Коды маршрутов не менялись.
 
 | Код | v1 (24.09) | v2 (25.09) | Основание: тест, число, путь |
 |---|---|---|---|
@@ -161,19 +161,19 @@ RouterAI и Gen-API `2026-09-24_0424` · доказательства — `02-ex
 | `IMG-TEXT-CYR` | HTML; модели `final: false` до лесенки E-02…E-04 | HTML основной; RouterAI Recraft V4.1 — `final: true` для ≤ 4 слов с OCR и чтением; Flare, GPT Image 2, NB2, Seedream 4.5 — `final: false`; Qwen 2.1, FLUX.2 Pro, Sunburst → `not` | E-02: 6 из 9 дословно; K-05: OCR 15/24, VLM 11/24; E-07/G-09: 3 из 3 глазом — `99-raw/phase5/runs/2.1-cyrillic/` |
 | `IMG-EDIT` | NB2 / Sunburst по типу; ≤ 5 изменений за вызов | + Seedream 5 Pro (удаление); композит обязателен; до 10 изменений одним вызовом | E-15: утечки и сдвиги у 3 из 4; D2-06: 10 из 10 одним вызовом — `99-raw/phase5/runs/4-edits/E-15-check/` |
 | `IMG-OUTPAINT` | NB2 + композит при REGENERATED | композит всегда; телефону — свой мастер | H-08: резкость 0,14 / 0,56 < 0,85 у обеих — `99-raw/phase5/runs/4-edits/H-08-check/` |
-| `VID-HERO-LOOP` | Seedance 1.5 Pro A,A 720p 10,5; премиум Omni 48, Kling std 50; запас Veo, H3; кроссфейд хвоста; `[не проверено]` | Seedance 1.5 Pro 720p 10,5 + premium 1080p 8 с 45; Omni, Kling std, Kling pro, H3 → `not`; стык — RIFE-мост 8 кадров | I-03 шов 1,28; I-09 2,12; I-15 5,08; I-08 7,21; MS-03 3,29 → RIFE 0,69, 8 с 0,84, MS-05 1080p 0,41; VM-02 движение 0,024 |
+| `VID-HERO-LOOP` | Seedance 1.5 Pro A,A 720p 10,5; премиум Omni 48, Kling std 50; запас Veo, H3; кроссфейд хвоста; `[не проверено]` | Seedance 1.5 Pro 720p 10,5 + premium 1080p 8 с 45; Omni, Kling std, Kling pro, H3 → `not`; стык — мост `loop_rife_bridge.py` (длина — от шва и движения у концов); кадр со знаком марки — камера неподвижна (`fixed_lens`) или кадр без знака; приёмка знаков по кадрам до монтажа | I-03 шов 1,28; I-09 2,12; I-15 5,08; I-08 7,21; MS-03 3,29 → RIFE 0,69, 8 с 0,84, MS-05 1080p 0,41; VM-02 движение 0,024 |
 | `VID-CINEMAGRAPH` | Seedance A fixed_lens; `[документация]` | без изменений; форма промта — `[проверено]` | D2-07: движение 1,61 / 1,69 / 2,45, SSIM0 0,814; MS-03: сдвиг камеры до 36,5 px — `99-raw/phase5/runs/3-prompt-form/video/D2-07/` |
 | `VID-I2V-PRODUCT` | Kling 3 std 50; `[мнение вендора]` | тот же + Seedance FLF по кадрам 3D (10,5) | SC-03: OCR 11 из 11; 3D-21: силуэт 0,82–0,90 — `99-raw/phase5/runs/SC-showcase/SC-03-frames/` |
 | `VID-ABSTRACT` | Seedance 2 Mini 12,83 | **Seedance 1.5 Pro i2v по кадру 10,5**; 2 Mini — без кадра; 2 Fast — `final: false`; Grok — переходы | VM-01, решение заказчика п. 14 («картинка → видео») — `99-raw/phase5/runs/6-video-models/sheets/` |
-| `VID-CAMERA` | Kling 3 pro 5 с 60; `[не проверено]` | **Seedance 1.5 Pro наезд 720p 10,5 / 1080p 22,5**; Kling 3 pro 3 с 36 — alt | VM-01, VM-02, MS-05: «все красивые, зависит от задачи»; Seedance дешевле в 1,6–3,4 раза |
+| `VID-CAMERA` | Kling 3 pro 5 с 60; `[не проверено]` | **Seedance 1.5 Pro наезд 720p 10,5 / 1080p 22,5**; Kling 3 pro 3 с 36 — alt; кадр со знаком марки движением камеры не снимается — план с неподвижной камерой или от кадра без знака | VM-01, VM-02, MS-05: «все красивые, зависит от задачи»; Seedance дешевле в 1,6–3,4 раза |
 | `VID-V2V` | Omni 126; preview 70 до 30.09 | не маршрут (решение заказчика п. 12), `final: false`; preview → `not` | I-17, I-20 не запускались |
 | `VID-ALPHA` | Seedance на ключе; Grok `final: false` | Grok 1.5 с запретами → alt `final: true` | D2-08: дрейф −58 %; D2-11: Seedance наезжает ×1,8–2,1 |
 | `VID-SCROLL` | FLF A → B; `[не проверено]` | + наезд 1080p; доставка — секвенция против короткого GOP | SC-04: кадр 0 = A, последний = B — `99-raw/phase5/runs/SC-showcase/SC-04_endpoints.jpg`; B/10 |
-| `VID-UPSCALE` | Omni 1080p 48; Topaz 24 | **Seedance 1.5 Pro 1080p 22,5**; Omni — alt; Topaz → `not` | MS-05; VM-05: 2 × INTERNAL_ERROR |
+| `VID-UPSCALE` | Omni 1080p 48; Topaz 24 | **Seedance 1.5 Pro 1080p 22,5**; Omni — alt; Topaz → `not`; чем задаётся разрешение у модели — `resolution_by` (параметр каталога или операция над готовым роликом) | MS-05; VM-05: 2 × INTERNAL_ERROR |
 | `VEC-ICON-LINE` | Lucide / LLM в сессии; polza-chat 0,92 / 2,46 | тот же; цены 0,84 / 3,43; Sonnet 5, DeepSeek → `not` | G-02, G-01; G-03 пустой ответ 9,77 ₽; G-04 ×6,9 к оценке; разбор V: поле и зазор 4 из 6 у обеих (Claude в сессии — 6 из 6) — `99-raw/phase5/runs/S5-analysis/G-llm-svg/nearest-lucide.json` |
 | `VEC-ICON-FILLED` | Recraft V4.1 Vector 8,78 | **Pro Vector 33,11** (наборы); Vector 8,83 — черновики; палитра — перекраской; на страницу — SVG без `<metadata>` | CM-01: 8 из 8, путей −44 %, без манифеста 6,7 против 10,1 КБ; B2-01; CM-03; провенанс — `99-raw/experiments/L/05-phase5-provenance/2026-09-25-all/README.md` |
 | `VEC-ILLUSTR` | Vector 8,78 | Vector 8,83 — фоны и иллюстрации; Pro 33,11 — спот; фото → вектор (image-to-image) | CM-01 spot/bg, CM-02 — `99-raw/phase5/runs/5-vector/analysis/illustrations/metrics.md` |
-| `defaults` | `deprecated` | + `unavailable_2026_09_25` (H3 Max, Topaz video, Wan 3.0), `not_routes` (3D по картинке, V2V, альфа Riverflow), `channel_rules`; класс доказательств `run` | журнал `99-raw/experiments/_ledger.jsonl`; `99-raw/experiments/3D/README.md` |
+| `defaults` | `deprecated` | + `unavailable_2026_09_25` (H3 Max, Topaz video, Wan 3.0), `unavailable` (`topaz/image-upscale`), `not_routes` (3D по картинке, V2V, альфа Riverflow), `channel_rules`; класс доказательств `run` | журнал `99-raw/experiments/_ledger.jsonl`; `99-raw/experiments/3D/README.md` |
 
 Без изменений маршрута (тест не прогонялся — отменено заказчиком 25.09, п. 15–16): `IMG-TEXTURE` (H-09), `IMG-TEXT-LATIN` (E-17),
 `IMG-MOCKUP`, `IMG-UPSCALE` (H-05), `IMG-DRAFT` (E-16, N-03), `IMG-LAYERS` (H-10), `VID-CHARACTER`, `VID-LONG` (I-05 закрыт SC-04, I-07,

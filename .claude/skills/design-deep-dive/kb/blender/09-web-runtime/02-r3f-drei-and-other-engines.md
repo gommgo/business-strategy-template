@@ -399,7 +399,7 @@ Blender → экспорт по пресету → gltfpack → страница
   ScrollControls, MeshTransmissionMaterial, Text, Sampler, useSurfaceSampler, Outlines, Html, AdaptiveDpr, PerformanceMonitor,
   Preload, BakeShadows, Center (9 886★, push 2026-09-21) — [документация].
 - [S3] Исходники `@react-three/drei` 10.7.8 (core/Gltf.js, core/useEnvironment.js), `three-stdlib` 2.36.1 и `three` 0.186.0
-  (GLTFLoader) в `~/.cache/blender-research/npm-F2` — [проверено].
+  (GLTFLoader) в `$DDD_HOME/node` — [проверено].
 - [S4] npm registry, 23.09.2026 (`99-raw/experiments/F2/01-npm-registry/npm_view_2026-09-23.txt`) — версии, теги, peer, лицензии.
 - [S5] Агент A: `../01-web-3d-landscape/03-runtime-landscape.md` §3–8, эксперименты A/03 (бандлы), A/07 (vanilla hero), A/08
   (R3F + WebGPU) — [проверено A].

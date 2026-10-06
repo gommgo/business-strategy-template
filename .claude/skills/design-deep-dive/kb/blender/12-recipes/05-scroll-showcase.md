@@ -37,10 +37,9 @@
 ## 3. Код: build(P) → одно действие со слотами → GLB с клипом
 
 ```python
-# Blender 5.2.2 — [проверено] рецепт 05: кейс рецепта 01 + клип «Reveal» (слоты, H/12)
+# Blender 5.2.2 — [проверено] рецепт 05: кейс рецепта 01 + клип «Reveal» (слоты — blender 07/03 §1.2)
 import sys, math, bpy, bmesh
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/H/_lib")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py и animx.py — scripts/blender
 import rk, animx
 D, bpyx = rk.D, rk.bpyx
 SLUG = "05-scroll-showcase"

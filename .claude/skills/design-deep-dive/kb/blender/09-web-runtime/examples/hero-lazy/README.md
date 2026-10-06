@@ -14,7 +14,7 @@
 Сборка и проверка:
 ```bash
 # esbuild 0.28 + three 0.186.0 (npm в своей папке) — [проверено: этот README]
-NODE_PATH=~/.cache/blender-research/npm-F1/node_modules npx esbuild hero.js --bundle --format=esm --splitting --minify --outdir=dist --legal-comments=none
+NODE_PATH=$DDD_HOME/node/node_modules npx esbuild hero.js --bundle --format=esm --splitting --minify --outdir=dist --legal-comments=none
 python3 make_poster.py                      # постер из того же GLB и той же пары тонмаппинга
 # замер: сервер с brotli (../../scripts/blender/serve_br.py) + ../../scripts/blender/site_probe.py URL OUT [--mobile --throttle | --reduced-motion] --quick
 ```

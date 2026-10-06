@@ -1,10 +1,10 @@
 /* scrub.js — «мышь ведёт видео»: горизонталь указателя (касание — протяжкой) → кадр ролика с плавным догоном (lerp) и холостым
    дрейфом, когда указатель стоит. Две доставки: видео с коротким GOP (перемотка currentTime, задержка `seeked`) и секвенция
    кадров на <canvas> (точный кадр + перекрёстное смешение соседних кадров — «под-кадровая» плавность).
-   Агент B, сессия 4, 25.09.2026. Обычный скрипт (не модуль) — работает и с file://, и с http.server.
+   Обычный скрипт (не модуль) — работает и с file://, и с http.server.
 
    Разметка: <section data-scrub data-default="orbit-av1-g4" data-rest="0.5"> … .stage__media (img постера) … </section>
-             <script type="application/json" id="scrub-manifest">{…}</script>   (веса и пути — build_scrub.py)
+             <script type="application/json" id="scrub-manifest">{…}</script>   (веса и пути ассетов)
    Доступность: reduce → 0 байт медиа, только постер и кнопка «Показать облёт»; Save-Data/2G → кнопка с весом; холостой дрейф
    дольше 5 с — кнопка паузы 44 px (WCAG 2.2.2); клавиатура — ползунок (input range) с именем; пауза вне экрана и во вкладке.
    Замер: ?bench=1 — сценарий движения 8 с, итог в window.__scrubBench и <html data-bench="done">; ?v=<вариант> — выбрать доставку. */
@@ -90,7 +90,7 @@
 
   Scrub.prototype.pickDefault = function () {
     // по умолчанию: точный указатель — секвенция кадров (0 отставания, смешение соседних кадров), касание — видео AV1 GOP 4
-    // (1 файл, 1 кадр в памяти, аппаратный декодер); замер B/10 — README галереи
+    // (1 файл, 1 кадр в памяти, аппаратный декодер); замер — README галереи
     var want = Q.get('v') || (FINE.matches ? this.root.dataset.default : (this.root.dataset.defaultTouch || this.root.dataset.default));
     if (this.m.video[want] || this.m.frames[want]) {
       if (this.m.video[want] && !document.createElement('video').canPlayType(this.m.video[want].type)) {

@@ -61,7 +61,7 @@
 
 ```python
 # Blender 5.2.2 — [проверено] крышка на петле: pivot на оси, открытие поворотом объекта
-import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, math; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 from mathutils import Vector
 bpy.ops.wm.read_factory_settings(use_empty=True)
@@ -105,7 +105,7 @@ assert all(p.y > DP / 2 - 0.0015 for p in low)                     # …толь
 
 ```python
 # Blender 5.2.2 — [проверено] экран мокапа: UV 0–1 на всю область и материал Screen
-import sys, os, tempfile; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, os, tempfile; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 sw, sd, r, z = 0.0679, 0.1434, 0.0098, 0.0079
@@ -193,7 +193,7 @@ A §22) — отличаться формой серии, палитрой бр�
 
 ```python
 # Blender 5.2.2 — [проверено] low-poly: палитра-текстура и окраска граней через UV
-import sys, os, random, tempfile; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, os, random, tempfile; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 from mathutils import Vector
 bpy.ops.wm.read_factory_settings(use_empty=True)

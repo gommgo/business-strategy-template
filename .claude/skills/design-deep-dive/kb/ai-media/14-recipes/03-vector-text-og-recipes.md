@@ -349,7 +349,8 @@ WebP по s2 ≥ 80 → **OCR слоя текста** (второй снимок
 
 ```bash
 # M/06b layout_check.py (Playwright, DOM) + asset_audit OCR по слою текста · [проверено: M/06, 24.09.2026 06:05]
-flock -w 900 99-raw/tools/.locks/browser.lock python3 ../../scripts/ai-media/layout_check.py   # before/after + textlayer.png
+# layout_check.py берёт замок браузера сама
+python3 ../../scripts/ai-media/layout_check.py <шаблон.html> <вырез.png>   # before/after + textlayer.png
 python3 ../../scripts/ai-media/asset_audit.py audit marketplace_textlayer.png --slot product --expect "ЛЕСНАЯ ОБЖАРКА" --expect "Кофе в зёрнах" \
    --expect "Арабика 100 % · 250 г" --expect "Обжарка раз в неделю" --expect "Средняя обжарка: орех и какао" \
    --expect "Доставка за 1–2 дня" --expect "Дата обжарки — на крышке каждой банки" --out audit_mp_textlayer/

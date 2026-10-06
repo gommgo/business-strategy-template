@@ -7,20 +7,22 @@
 окружения скилла (`$DDD_HOME/venv/bin/python`, `../install.sh`). Модели, сеть и браузер не нужны: тексты пишет агент
 сессии, утверждает человек, утилиты проверяют и переносят. Файлы проекта пишет только `copydeck.py` — туда, куда его
 направили (`-o`, `--update`, `export --out`); производные файлы базы пересобирают `ux_dict_to_yaml.py` и
-`copydeck.py before-after --write`. Ключи — `<утилита> --help` и шапка файла.
+`copydeck.py before-after --write`. Ключи — `<утилита> --help` и шапка файла. Коды выхода — один порядок: 0 — `error`
+нет; 1 — есть `error` (у самопроверки — она не прошла); 2 — ошибка вызова, входа или окружения; особые исходы — от 3,
+они названы в колонке «выход».
 
 | утилита | что делает | вызов | выход |
 |---|---|---|---|
-| `copydeck.py` | copy deck: каркас из плана страницы, проверки формата и стыка с планом, сверка с фактами и правом, линтер, статусы, слепой выбор вариантов, утверждение, выгрузка во вход холста, приём правок с холста | `skeleton PLAN -o DECK`; `check DECK [--update OUT --promote] [--final] [--all-variants]`; `validate`, `claims`, `lint`; `select DECK --page ID --slot СЕКЦИЯ/СЛОТ --variant ID --by КТО -o OUT`; `approve DECK --page ID --by КТО -o OUT`; `export DECK --page ID --stage directions\|wireframe\|mockup`; `import-copy`; `export-variants`, `apply-selection`, `export-assets`; `before-after [--write\|--check]`; `--selftest` | терминал, `--json`, `--md`; код 0 — нет error, 2 — есть, 1 — ошибка входа; `export` — `$DDD_HOME/out/text/export` или `--out` |
-| `claims_check.py` | сверка текстов с белым списком фактов `facts.yaml` и право формулировок — ядро контура честности | `check ВХОД --facts ФАКТЫ [--final]` (copy deck, `copy.md`, Markdown, текст, HTML); `lint-facts ФАКТЫ [--final]`; `inventory`, `rules-schema`; `--selftest` | терминал, `--json`, `--md`; код 0 · 2 · 1 |
-| `copy_lint.py` | линтер по жанру и роли строки: тексты сайта, строки интерфейса, реестр `texts.md` | `ВХОД --genre …`; `- --genre interface --role …`; `--selftest` | терминал, `--json`, `--md`; код 0 · 2 · 1 |
-| `ux_dict_to_yaml.py` | производный словарь ux 07/06 и длины по ролям для линтера | без ключей — собрать; `--check`; `--selftest` | `kb/text/06-anti-slop/lexicon/ux-07-06.yaml` |
-| `chain_inputs.py` | сверка смысла до текстов и вход судьи текстов | `meaning-claims --meaning M [--hierarchy H …] [--brief B] -o OUT`; `judge-input`, `judge-score`; `--selftest` | YAML; `meaning-claims` — число несверенных возражений и секций в stderr |
-| `validate_any.py` | смысл или иерархия проекта: схема, смысловые проверки, счётчики `basis_kinds` | `<файл>.yaml …` | терминал; код 0 · 1 |
-| `validate_voice.py` | профили голоса бренда и продукта проекта | `<профиль>.yaml …`; без файлов — схема и примеры базы; `--selftest` | терминал и `$DDD_HOME/out/text/validate_voice.last-run.txt`; код 0 · 1 |
+| `copydeck.py` | copy deck: каркас из плана страницы, проверки формата и стыка с планом, сверка с фактами и правом, линтер, статусы, слепой выбор вариантов, утверждение, выгрузка во вход холста, приём правок с холста | `skeleton PLAN -o DECK`; `check DECK [--update OUT --promote] [--final] [--all-variants]`; `validate`, `claims`, `lint`; `select DECK --page ID --slot СЕКЦИЯ/СЛОТ --variant ID --by КТО -o OUT`; `approve DECK --page ID --by КТО -o OUT`; `export DECK --page ID --stage directions\|wireframe\|mockup`; `import-copy`; `export-variants`, `apply-selection`, `export-assets`; `before-after [--write\|--check]`; `--selftest` | терминал, `--json`, `--md`; код 0 · 1 · 2, у `claims` и `check` 3 — сверка фактов не отработала (находка `COPY-D-TOOL`); `export` — `$DDD_HOME/out/text/export` или `--out` |
+| `claims_check.py` | сверка текстов с белым списком фактов `facts.yaml` и право формулировок — ядро контура честности | `check ВХОД --facts ФАКТЫ [--final]` (copy deck, `copy.md`, Markdown, текст, HTML); `lint-facts ФАКТЫ [--final]`; `inventory`, `rules-schema`; `--selftest` | терминал, `--json`, `--md`; код 0 · 1 · 2 |
+| `copy_lint.py` | линтер по жанру и роли строки: тексты сайта, строки интерфейса, реестр `texts.md` | `ВХОД --genre …`; `- --genre interface --role …`; `--selftest` | терминал, `--json`, `--md`; код 0 · 1 · 2 |
+| `ux_dict_to_yaml.py` | производный словарь ux 07/06 и длины по ролям для линтера | без ключей — собрать; `--check`; `--selftest` | `kb/text/06-anti-slop/lexicon/ux-07-06.yaml`; `--check` — код 3, если производный словарь устарел |
+| `chain_inputs.py` | сверка смысла до текстов и вход судьи текстов | `meaning-claims --meaning M [--hierarchy H …] [--brief B] -o OUT`; `judge-input`, `judge-score`; `--selftest` | YAML; `meaning-claims` — число несверенных возражений и секций в stderr; код 0 · 1 · 2 |
+| `validate_any.py` | смысл или иерархия проекта: схема, смысловые проверки, счётчики `basis_kinds` | `<файл>.yaml …` | терминал; код 0 · 1 · 2 |
+| `validate_voice.py` | профили голоса бренда и продукта проекта | `<профиль>.yaml …`; без файлов — схема и примеры базы; `--selftest` | терминал и `$DDD_HOME/out/text/validate_voice.last-run.txt`; код 0 · 1 · 2 |
 | `validate_meaning.py` | схемы смысла и иерархии сообщений, примеры базы | `[--quiet]` | терминал; код 0 · 1 |
 | `validate_facts.py` | схемы фактов и голоса клиента, примеры базы | без ключей | терминал; код 0 · 1 |
-| `run_checks.py` | все проверки примеров copy deck базы по порядку аудита текстов | `[<пример>.yaml …] [--md <таблица>]` | `$DDD_HOME/out/text/run_checks/`; код 0 · 2 |
+| `run_checks.py` | все проверки примеров copy deck базы по порядку аудита текстов | `[<пример>.yaml …] [--md <таблица>]` | `$DDD_HOME/out/text/run_checks/`; код 0 · 1 · 2 (2 — и утилита проверки не отработала) |
 
 ## Что проверка останавливает, а что докладывает
 

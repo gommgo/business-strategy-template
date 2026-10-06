@@ -10,19 +10,18 @@
 | `01-blocks-catalog.md` | Как выбрать блок и вариант: шапка и навигация, первый экран (13 задач hero), доказательства, ценность, оффер (цена, калькулятор, сравнение, акции, гарантия), призывы, подвал; сквозные конвенции; покрытие живых страниц |
 | `02-blocks-catalog-specialized.md` | Формы и действия, FAQ, о компании и люди, контакты и карта, портфолио и галереи, мероприятия, курсы, материалы и блог, сравнение, служебные (cookie, «спасибо», 404, юридические, чат) |
 | `03-slots-and-page-plan.md` | Модель слотов (6 видов, адресация элементов, факты и пробелы, медиа, 3D, действия, события), поля плана, процедура «бриф → план», проекции в copy-deck, treatment, план ассетов, 3D, пакет kimi |
-| `blocks.yaml` | Каталог v1.0: 84 блока (v0.9 E — 83; `service-area` добавил J) (анатомия, группы, варианты с архетипами Hallmark, телефон, разметка, ссылки на F, G, H, I, P, ux, ai-media, blender, creative, ошибки, данные C/01), 14 конвенций, `text_slot_defaults` (79 слотов, выведено из copy-slots.yaml) |
+| `blocks.yaml` | Каталог v1.0: 84 блока (анатомия, группы, варианты с архетипами Hallmark, телефон, разметка, ссылки на F, G, H, I, P, ux, ai-media, blender, creative, ошибки, данные C/01), 14 конвенций, `text_slot_defaults` (79 слотов, выведено из copy-slots.yaml) |
 | `blocks.schema.json` | JSON Schema 2020-12 каталога v0.9; итоговая — v1 `../10-playbooks-contracts/schemas/blocks.schema.json` (формат совместим) |
 | `page-plan.schema.json` | JSON Schema 2020-12 плана страницы v0.9 (для планов версии 0.9); итоговая — v1 `../10-playbooks-contracts/schemas/page-plan.schema.json` |
-| `examples/page-plan-lead-services-otves.yaml` | Лидогенерация услуг РФ (бриф A «Отвес», факты text): 15 секций |
-| `examples/page-plan-saas-okoshko.yaml` | Лендинг SaaS (демо «Окошко», факты text E): 10 секций |
-| `examples/page-plan-event-conference.yaml` | Мероприятие: план до сбора фактов (все утверждения — `missing:`) |
+| `../10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml` | Пример плана — лидогенерация услуг РФ («Отвес», факты text): 15 секций |
+| `../10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml` | Пример плана — лендинг SaaS (демо «Окошко», факты text): 10 секций |
 
-Примеры этой папки — v0.9 (`draft`); образцы v1 — `../10-playbooks-contracts/examples/` (J). Нормы блоков — у владельцев тем:
+Примеры планов — `../10-playbooks-contracts/examples/`. Нормы блоков — у владельцев тем:
 место в сюжете — C, конверсия — F, разметка — H, право и доступность — I; E — анатомия, варианты и слоты.
 
-Проверка: `99-raw/tools/venv-E/bin/python 99-raw/experiments/E/01-validate/validate.py` (схема + связи: блок, вариант,
-анатомия, обязательные элементы, факты и их вид, разрешения, H1) и `python3 ../../scripts/site/vocab_lint.py 04-blocks/blocks.yaml
---keys-as-ids blocks=block`, `… 04-blocks/examples/*.yaml` — на 2026-09-24: 0 ошибок, 0 предупреждений.
+Проверка (от корня скилла): `python3 scripts/site/site_validate.py --all` (схема + связи: блок, вариант, анатомия,
+обязательные элементы, факты и их вид, разрешения, H1) и
+`python3 scripts/site/vocab_lint.py kb/site/04-blocks/blocks.yaml --keys-as-ids blocks=block`.
 
 ## Выжимка
 

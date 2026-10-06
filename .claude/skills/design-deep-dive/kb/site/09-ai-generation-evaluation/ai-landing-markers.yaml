@@ -1,13 +1,10 @@
 # Маркеры «ИИ-лендинга» — структурные и конверсионные приметы сборки «по умолчанию».
-# site-research · 09-ai-generation-evaluation · волна 3 · агент K (нумерация AIL-01…51 зафиксирована K 2026-09-24 17:05),
-# файл собран продолжателем K2. Разбор и доказательства — 01-generators-and-ai-landing-markers.md; чек-лист — 02-site-checklist.md
+# Разбор и доказательства — 01-generators-and-ai-landing-markers.md; чек-лист — 02-site-checklist.md
 # (пункты SITE-* ссылаются на AIL; checklist_export.py сверяет, что каждый упомянутый AIL есть здесь).
-# Правки S1 (волна 4, 2026-09-25; аудит X): + AIL-52 (status: proposed, D; С-26); зеркало crosswalk_external creative (С-25);
-# AIL-33 — без карточек цен и каталожных сеток (В-03); AIL-29 — формулировка рынка по итогу H/02 (X2).
 version: "1.0"
 checked: "2026-09-24"
 status: released
-owner: "site-research K (09-ai-generation-evaluation)"
+owner: "site (09-ai-generation-evaluation)"
 doc: "01-generators-and-ai-landing-markers.md"
 scope: >-
   Структурные и конверсионные маркеры страницы и сайта: порядок секций, первый экран, блоки, призывы и окна, формы,
@@ -25,7 +22,7 @@ severity_scale:
   D: "желательно: отпечаток шаблона без вреда для действия"
 detect_codes:
   DOM: "разбор DOM или сырого HTML (page_anatomy.py, geo_probe.py, page_gates.py --html)"
-  LNT: "проверка плана и брифа до рендера (validate.py E, site_validate.py J, vocab_lint.py B)"
+  LNT: "проверка плана и брифа до рендера (site_validate.py, vocab_lint.py)"
   AXE: "axe-core в браузере"
   SCR: "сценарий в браузере: загрузка, прокрутка, перезагрузка, повторный визит, Tab (без ввода данных и отправки)"
   IMG: "кадр первого экрана или контактный лист (1440×900, 390×844, силуэт 200 px)"
@@ -43,7 +40,7 @@ fields:
   replace_with: "чем заменить"
   site_checklist: "пункты 02-site-checklist.md"
   defects: "дефекты каталога DEF (02-site-checklist.md §4)"
-  sources: "файлы базы, соседей, сестёр, гейты Hallmark, приметы K3, ролики [V:id mm:ss]"
+  sources: "файлы базы, соседей, сестёр, гейты Hallmark, приметы LLM-вёрстки, ролики [V:id mm:ss]"
   evidence: "метки доказательности базы"
   status: "только у кандидатов: proposed — в проверки и ворота не входит до калибровки (AIL-52)"
 groups:
@@ -68,13 +65,13 @@ crosswalk_external:
   - {ext: "гейт Hallmark 44 (hero в 1280×800 без прокрутки)", ail: [AIL-06]}
   - {ext: "гейт Hallmark 47 (Re-drawn chrome)", ail: [AIL-17]}
   - {ext: "гейты Hallmark 49 (двухстрочный кликабельный текст) и 56 (липкий под липкой шапкой)", ail: [], owner: "creative (визуальные); телефон — SITE-MOB-05"}
-  - {ext: "LOOK-STATS-ROW (kimi k3_checks, major, --allow)", ail: [AIL-02]}
-  - {ext: "LOOK-THREE-CARDS (kimi k3_checks, major, --allow)", ail: [AIL-07]}
-  - {ext: "LOOK-HERO-CENTER (kimi k3_checks, major, --allow)", ail: [AIL-06]}
-  - {ext: "LOOK-HERO-OVERLAY, LOOK-MARQUEE (kimi k3_checks)", ail: [], owner: "creative (визуальные приметы)"}
-  - {ext: "HON-NUMBERS, HON-QUOTE, HON-FILLER (kimi 08/02 §2 D, critical)", ail: [AIL-18, AIL-45, AIL-09]}
+  - {ext: "LOOK-STATS-ROW (mockup_checks.py, major, --allow)", ail: [AIL-02]}
+  - {ext: "LOOK-THREE-CARDS (mockup_checks.py, major, --allow)", ail: [AIL-07]}
+  - {ext: "LOOK-HERO-CENTER (mockup_checks.py, major, --allow)", ail: [AIL-06]}
+  - {ext: "LOOK-HERO-OVERLAY, LOOK-MARQUEE (mockup_checks.py)", ail: [], owner: "creative (визуальные приметы)"}
+  - {ext: "HON-NUMBERS, HON-QUOTE, HON-FILLER (claude-design 06/04 §3 D, critical)", ail: [AIL-18, AIL-45, AIL-09]}
   - {ext: "UX F12.1 (фейковые метрики и люди), F12.3 (выдуманные функции)", ail: [AIL-18, AIL-19, AIL-14, AIL-40]}
-  - {ext: "UX-AIG-01, AC-TXT-02 (с поправкой PLAN №7 — проверка по связке с фактом)", ail: [AIL-18, AIL-19]}
+  - {ext: "UX-AIG-01, AC-TXT-02 (проверка по связке с фактом)", ail: [AIL-18, AIL-19]}
   - {ext: "COPY-C-18 (приметы ИИ в тексте — text)", ail: [], owner: "text"}
   # зеркало crosswalk_external creative (cliche-registry.yaml): relation — термин creative относительно маркера (как в crosswalk.tsv)
   - {ext: "cliche:bento-uniform-tiles (визуал плиток: радиус, одинаковый padding)", ail: [AIL-08], relation: narrower, owner: "creative 08-uniqueness-anti-slop/cliche-registry.yaml"}
@@ -97,9 +94,9 @@ markers:
     site_checklist: [SITE-STR-01, SITE-PRE-16]
     defects: [DEF-01, DEF-02]
     sources:
-      - "гейт Hallmark 8 (../../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/references/slop-test.md)"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 C (major: форма страницы из брифа)"
-      - "../03-page-structure/01-narratives-and-section-order.md §3.4 [проверено: C/01 — 1 из 30 живых страниц; 0 из 6 ИИ-страниц 2026]"
+      - "гейт Hallmark 8 (https://github.com/Nutlope/hallmark, skills/hallmark/references/slop-test.md)"
+      - "../../claude-design/06-design-process/04-checks.md §3 C (major: форма страницы из плана)"
+      - "../03-page-structure/01-narratives-and-section-order.md §3.4 [проверено: 1 из 30 живых страниц; 0 из 6 ИИ-страниц 2026]"
     evidence: ["[проверено]", "[практика]"]
     note: "Старый шаблон редок и у рынка, и у ИИ 2026 — искать прежде всего AIL-02"
     checked: "2026-09-24"
@@ -118,8 +115,8 @@ markers:
     site_checklist: [SITE-STR-01, SITE-PRF-04, SITE-PRF-05]
     defects: [DEF-02]
     sources:
-      - "../03-page-structure/01-narratives-and-section-order.md §3.4 [проверено: C/01 — переход stats → benefits 5 раз на 6 ИИ-страницах 2026]"
-      - "LOOK-STATS-ROW (../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 C, major, --allow)"
+      - "../03-page-structure/01-narratives-and-section-order.md §3.4 [проверено: переход stats → benefits 5 раз на 6 ИИ-страницах 2026]"
+      - "LOOK-STATS-ROW (../../../scripts/claude-design/mockup_checks.py, major, --allow)"
       - "../../text/09-ai-generation-evaluation/03-evaluation.md (числа без факта: 1,49 у ИИ-страниц против 0,45 на 100 слов)"
     evidence: ["[проверено]", "[данные]"]
     checked: "2026-09-24"
@@ -130,7 +127,7 @@ markers:
     detect:
       method: [JDG, LNT]
       how: "последние 3–4 роли и штамп макроструктуры (page-plan.macrostructure, варианты блоков) против прошлых планов проекта; у секций хвоста нет objections"
-      auto: "нет: сравнение планов проекта — скриптом по page-plan (предложение J)"
+      auto: "нет: сравнение планов проекта — скриптом по page-plan"
     threshold: "последние 3 роли и варианты совпадают с прошлой страницей того же типа, или хвост без objections в плане"
     severity: S
     allow: "страницы одного шаблона многостраничника (одинаковость — норма, 06-multipage-ia); серия посадочных одной кампании с общим хвостом по решению плана"
@@ -159,7 +156,7 @@ markers:
     defects: [DEF-02]
     sources:
       - "../03-page-structure/01-narratives-and-section-order.md §3.3"
-      - "../../kimi-research/05-reviews-practice/03-default-look-k3.md §3.3 (три скелета витрины K3: люкс, магазин, портфолио)"
+      - "../../claude-design/06-design-process/05-default-look.md (три скелета витрины одного генератора: люкс, магазин, портфолио)"
     evidence: ["[практика]"]
     checked: "2026-09-24"
   - id: AIL-05
@@ -177,7 +174,7 @@ markers:
     site_checklist: [SITE-STR-07, SITE-BLK-06]
     defects: [DEF-07]
     sources:
-      - "../03-page-structure/03-first-screen-and-mobile.md §1.2 [проверено: C — слоган без категории у 5 из 30 живых страниц]"
+      - "../03-page-structure/03-first-screen-and-mobile.md §1.2 [проверено: слоган без категории у 5 из 30 живых страниц]"
       - "COPY-R-01 (../../text/09-ai-generation-evaluation/copy-rubric.yaml)"
     evidence: ["[проверено]", "[практика]"]
     note: "Примета и рынка (5 из 30), и генераторов; ловим независимо от происхождения"
@@ -189,7 +186,7 @@ markers:
     detect:
       method: [SCR, IMG]
       how: "высота коробки hero / высота окна ≥ 0,95 на 1440×900 и 390×844; край следующей секции не виден; 3–4 элемента hero выровнены по центру общего контейнера; на 1280×800 H1 или призыв ниже сгиба (гейт 44)"
-      auto: "частично: page_anatomy.py (first_screen, doc_h_vh); центр — LOOK-HERO-CENTER у kimi"
+      auto: "частично: page_anatomy.py (first_screen, doc_h_vh); центр — LOOK-HERO-CENTER (mockup_checks.py)"
     threshold: "hero ≥ 95 % высоты окна без видимого края следующей секции, стрелки или подписи продолжения"
     severity: S
     allow: "first_screen_policy: poster (L2-кампания, портфолио, бренд-событие) с призывом в шапке и видимым признаком продолжения"
@@ -201,7 +198,7 @@ markers:
       - "гейт Hallmark 44 (главное hero видно на 1280×800 без прокрутки)"
       - "../03-page-structure/03-first-screen-and-mobile.md §2.2, §2.4 [исследование: NN/g — ложный пол]"
       - "[V:F5x6ilNpfDo 25:40] (Gilis: пустота и линия — «ложное дно»; ClickShare: +33 % начали прокрутку) [кейс]"
-      - "../../kimi-research/05-reviews-practice/03-default-look-k3.md (центрированный hero: витрина 5 из 13, Kilo 3 из 3)"
+      - "../../claude-design/06-design-process/05-default-look.md §3 (центрированный hero: витрина 5 из 13, Kilo 3 из 3)"
     evidence: ["[исследование]", "[кейс]", "[данные]"]
     checked: "2026-09-24"
   - id: AIL-07
@@ -211,7 +208,7 @@ markers:
     detect:
       method: [DOM, IMG, JDG]
       how: "секция из 3–6 соседних узлов одной структуры (иконка или SVG + h3 + p); коэффициент вариации длины текстов карточек < 0,2; у SaaS или приложения нет кадра настоящего интерфейса"
-      auto: "частично: LOOK-THREE-CARDS (kimi); вариация длины — скриптом по HTML (опыт K/02)"
+      auto: "частично: LOOK-THREE-CARDS (mockup_checks.py); вариация длины — скриптом по HTML"
     threshold: "CV длины текстов карточек < 0,2 и у продукта нет block:product-showcase, block:feature-alternating или block:feature-tabs"
     severity: S
     allow: "карточки разного содержания (функция, число, цитата) или три реальных тарифа или услуги со своими фактами"
@@ -221,7 +218,7 @@ markers:
     sources:
       - "../../ui/12-ai-generated-ui/02-codegen-tools-and-default-look.md §2.1 (центроид — три одинаковые карточки в ряд), §5 (Lovable: 3-колоночные сетки у 8 из 10)"
       - "../../text/09-ai-generation-evaluation/03-evaluation.md (карточки одной длины: CV 0,18 у ИИ против 0,40)"
-      - "LOOK-THREE-CARDS (../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 C)"
+      - "LOOK-THREE-CARDS (../../../scripts/claude-design/mockup_checks.py)"
       - "../04-blocks/01-blocks-catalog.md §5.1"
     evidence: ["[данные]", "[практика]"]
     checked: "2026-09-24"
@@ -251,7 +248,7 @@ markers:
     sign: "Блок отзывов, логотипов, кейсов или команды заполнен примерами: «заглушка отзывов», «John Doe», «Feature 1», «fictional brand», «пример отзыва» — в том числе с честной пометкой вымысла"
     detect:
       method: [DOM, LNT]
-      how: "регулярное выражение заглушек по видимому тексту (PLACEHOLDER_RX page_gates.py: lorem ipsum, [placeholder], feature 1–6, john/jane doe, fictional brand, demo content, example.com, «заглушка отзывов», «вымышленный бренд»); в плане — блок доказательства без fact: (validate.py E)"
+      how: "регулярное выражение заглушек по видимому тексту (PLACEHOLDER_RX page_gates.py: lorem ipsum, [placeholder], feature 1–6, john/jane doe, fictional brand, demo content, example.com, «заглушка отзывов», «вымышленный бренд»); в плане — блок доказательства без fact: (site_validate.py)"
       auto: "да: page_gates.py --html → SG-CONTENT-05 (B)"
     threshold: "≥ 1 совпадение на публикуемой странице"
     severity: B
@@ -260,11 +257,11 @@ markers:
     site_checklist: [SITE-PRF-02, SITE-OUT-03]
     defects: [DEF-05, DEF-48]
     sources:
-      - "../../kimi-research/05-reviews-practice/03-default-look-k3.md (честная пометка вымысла «fictional brand» ≥ 3 из 15 сборок K3)"
+      - "../../claude-design/06-design-process/05-default-look.md (честная пометка вымысла «fictional brand» ≥ 3 из 15 сборок витрины)"
       - "Durable, «Service Business Website Builder Made with AI» (2026): ИИ-каркас включает «testimonial examples» — 01-generators-and-ai-landing-markers.md §1 [мнение вендора]"
       - "Framer Help, «How to build a website from scratch with Framer Agents» (2026): пример промта просит отзывы для вымышленной кофейни [документация]"
       - "COPY-C-04 (../../text/09-ai-generation-evaluation/copy-checklist.yaml)"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (HON-FILLER, critical)"
+      - "../../claude-design/06-design-process/04-checks.md §3 D (HON-FILLER, critical)"
     evidence: ["[данные]", "[документация]", "[мнение вендора]"]
     checked: "2026-09-24"
   - id: AIL-10
@@ -302,7 +299,6 @@ markers:
     defects: [DEF-25, DEF-26]
     sources:
       - "гейт Hallmark 42 (Nav fingerprint)"
-      - "поправка PLAN №24 (NAV_RULE kimi = гейт 42 «AI nav»)"
       - "../06-multipage-ia/02-navigation-linking-i18n.md §1.2 (маркеры ИИ-сборки навигации)"
       - "[V:F5x6ilNpfDo 35:50] (навигация на платной посадочной отвлекает; Connections — без меню) [кейс]"
       - "../03-page-structure/02-length-goal-message-match.md §2.3 [кейс] [спорно]"
@@ -318,13 +314,12 @@ markers:
       auto: "частично: page_anatomy.py (forms_popup_n, chat_widget); автопоказ — сценарий"
     threshold: "любое автооткрытие без политики брифа"
     severity: B
-    allow: "policies.capture_popup: engaged или on с policies.rationale и согласием заказчика (05-conversion-funnels/01 §11; решение заказчика 15); вариант block:capture-popup engaged-slide-in выключен по умолчанию; под Яндекс Директ — никогда"
+    allow: "policies.capture_popup: engaged или on с policies.rationale и согласием заказчика (05-conversion-funnels/01 §11); вариант block:capture-popup engaged-slide-in выключен по умолчанию; под Яндекс Директ — никогда"
     replace_with: "окно только по нажатию; лид-магнит — блоком в потоке; чат — кнопкой-фасадом"
     site_checklist: [SITE-CTA-07, SITE-CTA-08, SITE-PRE-08, SITE-PRE-24]
     defects: [DEF-24]
     sources:
       - "../05-conversion-funnels/01-cta-and-lead-capture.md §11; lead-forms.yaml forbidden: timed-capture-popup"
-      - "решение заказчика 15 и поправка PLAN №5 (PLAN.md)"
       - "../03-page-structure/03-first-screen-and-mobile.md (окно при входе — 1 из 27 живых страниц)"
       - "[V:hPS7LUW7SlA 24:45] (окно формы без кнопки закрытия — ловушка) [консенсус]"
     evidence: ["[консенсус]", "[проверено]", "[практика]"]
@@ -335,8 +330,8 @@ markers:
     sign: "Таймер без даты акции или сбрасывающийся при перезагрузке; «акция до завтра», посчитанная от сегодняшней даты; «осталось 3 места» без данных"
     detect:
       method: [SCR, DOM]
-      how: "в скриптах setDate(getDate()+N), countdown, 23:59:59, toLocaleDateString рядом со словами акции; перезагрузка и повторный визит через сутки — срок сдвинулся (deep_check.py опыта F/01)"
-      auto: "подозрение: page_gates.py --html → SG-CONTENT-06 (S); подтверждение — 99-raw/experiments/F/01-quiz-forms-ru/deep_check.py"
+      how: "в скриптах setDate(getDate()+N), countdown, 23:59:59, toLocaleDateString рядом со словами акции; перезагрузка и повторный визит через сутки — срок сдвинулся"
+      auto: "подозрение: page_gates.py --html → SG-CONTENT-06 (S); подтверждение — сценарием: перезагрузка и повторный визит"
     threshold: "срок сдвинулся при перезагрузке или через сутки; остаток не связан с данными"
     severity: B
     allow: "реальная дата акции фактом valid.until; после даты блок исчезает (section.expires)"
@@ -346,7 +341,7 @@ markers:
     sources:
       - "../05-conversion-funnels/02-proof-pricing-risk.md §4"
       - "../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §4; LR-EU-12"
-      - "../05-conversion-funnels/lead-forms.yaml forbidden: rolling-deadline [проверено: F/01 — катящийся срок у 2 из 10 страниц, у 2 из 5 квизов]"
+      - "../05-conversion-funnels/lead-forms.yaml forbidden: rolling-deadline [проверено: катящийся срок у 2 из 10 страниц, у 2 из 5 квизов]"
     evidence: ["[стандарт]", "[проверено]"]
     checked: "2026-09-24"
   - id: AIL-14
@@ -359,12 +354,11 @@ markers:
       auto: "нет: происхождение — по плану ассетов; детекторы ИИ-лиц ненадёжны и единственным основанием не служат"
     threshold: "любой человек в роли доказательства без реального источника и согласия"
     severity: B
-    allow: "ИИ-люди как художественный приём кампании — с раскрытием и согласием заказчика, не в роли клиентов, команды и авторов отзывов (решение заказчика 15; поправка PLAN №18)"
+    allow: "ИИ-люди как художественный приём кампании — с раскрытием и согласием заказчика, не в роли клиентов, команды и авторов отзывов"
     replace_with: "реальные фото с согласием; без фото — отзыв текстом с именем по разрешению; иллюстрации без лиц"
     site_checklist: [SITE-PRF-08, SITE-PRF-07]
     defects: [DEF-41]
     sources:
-      - "решение заказчика 15 и поправка PLAN №18 (PLAN.md)"
       - "../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §2"
       - "../01-foundations/01-how-visitors-decide.md §5 (фото людей сами по себе доверия не добавляют — CHI 2003) [исследование]"
     evidence: ["[исследование]", "[практика]"]
@@ -385,7 +379,7 @@ markers:
     site_checklist: [SITE-PRF-11, SITE-PRF-12, SITE-PRF-13, SITE-PRF-09]
     defects: [DEF-23]
     sources:
-      - "../../kimi-research/05-reviews-practice/03-default-look-k3.md §3.3 (общая анатомия K3 и Fable 5: трёхколоночный прайсинг с «most popular» в центре)"
+      - "../../claude-design/06-design-process/05-default-look.md (общая анатомия другого генератора и Fable 5: трёхколоночный прайсинг с «most popular» в центре)"
       - "../../ui/12-ai-generated-ui/02-codegen-tools-and-default-look.md §2.3 п.8 (неструктурированные тарифы)"
       - "../05-conversion-funnels/02-proof-pricing-risk.md §2.4–2.7"
     evidence: ["[данные]", "[практика]"]
@@ -425,7 +419,7 @@ markers:
     defects: []
     sources:
       - "гейт Hallmark 47 (Re-drawn chrome — один из сильнейших признаков ИИ-сборки)"
-      - "../../kimi-research/05-reviews-practice/03-default-look-k3.md §3.3 (макет дашборда в рамке браузера — общая анатомия K3 и Fable 5)"
+      - "../../claude-design/06-design-process/05-default-look.md §3 (макет дашборда в рамке браузера — общая анатомия другого генератора и Fable 5)"
       - "../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §1.2 (скриншот — настоящий)"
     evidence: ["[практика]", "[данные]"]
     checked: "2026-09-24"
@@ -436,7 +430,7 @@ markers:
     detect:
       method: [LNT, DOM]
       how: "в плане — слот data без fact:; на странице — числа вида «10k+», «98 %», «×3» в блоках proof-stats и hero без подписи источника; сверка значений с facts.yaml (claims_check text)"
-      auto: "план — validate.py E; страница — регулярное выражение + сверка с facts.yaml"
+      auto: "план — site_validate.py; страница — регулярное выражение + сверка с facts.yaml"
     threshold: "любое число-доказательство без fact:"
     severity: B
     allow: "число из факта с источником и датой, округлённое вниз"
@@ -445,9 +439,9 @@ markers:
     defects: [DEF-06]
     sources:
       - "../../ux/11-ai-generated-ui/01-failure-modes-catalog.md F12.1 (фейковые метрики: «10k+», «Trusted by»)"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (HON-NUMBERS, critical)"
+      - "../../claude-design/06-design-process/04-checks.md §3 D (HON-NUMBERS, critical)"
       - "../../text/09-ai-generation-evaluation/03-evaluation.md (числа без факта: 1,49 у ИИ-страниц против 0,45 на 100 слов)"
-      - "поправка PLAN №7; COPY-C-01"
+      - "COPY-C-01"
     evidence: ["[данные]", "[консенсус]"]
     checked: "2026-09-24"
   - id: AIL-19
@@ -457,7 +451,7 @@ markers:
     detect:
       method: [LNT, HUM]
       how: "у каждого логотипа — fact: вида logo с файлом от клиента и разрешением (08-legal-trust-a11y/02 §1.2); меньше 4 логотипов — блок не ставится"
-      auto: "план — validate.py E (data-слоты logo-wall); разрешение — заказчик"
+      auto: "план — site_validate.py (data-слоты logo-wall); разрешение — заказчик"
     threshold: "логотип без fact: с разрешением"
     severity: B
     allow: "реальные клиенты с разрешением, от 4 логотипов"
@@ -465,7 +459,7 @@ markers:
     site_checklist: [SITE-PRF-01, SITE-PRF-04]
     defects: [DEF-06]
     sources:
-      - "UX-AIG-01, AC-TXT-02 (../../ux/12-evaluation-checklists/02-master-checklist.md) с поправкой PLAN №7: проверка по связке с фактом, не регулярным выражением"
+      - "UX-AIG-01, AC-TXT-02 (../../ux/12-evaluation-checklists/02-master-checklist.md): проверка по связке с фактом, не регулярным выражением"
       - "../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §1.2–1.3"
       - "../04-blocks/01-blocks-catalog.md §4.1 (логотипы — от 4 и только с разрешением)"
     evidence: ["[консенсус]"]
@@ -507,7 +501,7 @@ markers:
     sources:
       - "гейт Hallmark 43 (Footer fingerprint)"
       - "../04-blocks/01-blocks-catalog.md (подвал «Продукт · Компания · Ресурсы · Правовое» по привычке — отпечаток ИИ)"
-      - "../02-site-types/03-live-pages-measured.md [проверено: M — политика в подвале у 88 %, соцсети у 71 %, ИНН или ОГРН у 3 из 14 лидогенов РФ]"
+      - "../02-site-types/03-live-pages-measured.md [проверено: политика в подвале у 88 %, соцсети у 71 %, ИНН или ОГРН у 3 из 14 лидогенов РФ]"
     evidence: ["[практика]", "[проверено]"]
     checked: "2026-09-24"
   - id: AIL-22
@@ -520,13 +514,13 @@ markers:
       auto: "частично: page_anatomy.py (burger на десктопе); DOM — role=menu"
     threshold: "любое из трёх на десктопе многостраничника"
     severity: S
-    allow: "одноэкранная арт-страница без меню — не маркер (M-NAV kimi к ней не применяется)"
+    allow: "одноэкранная арт-страница без меню — не маркер (проверка M-NAV к ней не применяется)"
     replace_with: "видимые ссылки верхнего уровня (≤ 7); подменю по клику и Enter с aria-expanded, Esc закрывает"
     site_checklist: [SITE-NAV-05, SITE-NAV-06]
     defects: [DEF-25]
     sources:
       - "../06-multipage-ia/02-navigation-linking-i18n.md §1.3 (NN/g «Menu-Design Checklist», 2024)"
-      - "аудит KIMI (../99-raw/notes/audit-2026-09-24/KIMI-report.md) §4 п.14 — M-NAV не для одноэкранных арт-страниц"
+      - "../../../scripts/claude-design/mockup_checks.py (M-NAV — не для одноэкранных арт-страниц)"
     evidence: ["[исследование]", "[практика]"]
     checked: "2026-09-24"
   - id: AIL-23
@@ -562,8 +556,7 @@ markers:
     site_checklist: [SITE-NAV-10]
     defects: [DEF-50]
     sources:
-      - "../06-multipage-ia/02-navigation-linking-i18n.md §2.1"
-      - "поправка PLAN №4 (крошки — на многостраничнике, не на лендинге)"
+      - "../06-multipage-ia/02-navigation-linking-i18n.md §2.1 (крошки — на многостраничнике, не на лендинге)"
     evidence: ["[практика]"]
     checked: "2026-09-24"
   - id: AIL-25
@@ -602,7 +595,7 @@ markers:
       - "../07-seo-geo-performance-analytics/head-kit.yaml hk-access-ssr"
       - "Lovable Docs «Optimize your app for SEO and AI search» (2026): приложения React + Vite до 2026-05-13 — SPA с пререндером только для проверенных краулеров; новые — TanStack Start с SSR [документация] — 01-generators-and-ai-landing-markers.md §1"
       - "[V:Vkn3R6DUJ34 16:14] (dynamic rendering — «workaround», не рекомендация Google) [документация]"
-      - "../02-site-types/03-live-pages-measured.md [проверено: M — 3 страницы почти без текста без JS; H1 в сыром HTML у 79 %]"
+      - "../02-site-types/03-live-pages-measured.md [проверено: 3 страницы почти без текста без JS; H1 в сыром HTML у 79 %]"
     evidence: ["[документация]", "[проверено]"]
     checked: "2026-09-24"
   - id: AIL-27
@@ -612,7 +605,7 @@ markers:
     detect:
       method: [DOM, IMG]
       how: "в первом экране нет текстового H1 при видимом заголовке на кадре; LCP-элемент — canvas; цены в img; распознанный текст кадра не совпадает с текстом DOM"
-      auto: "частично: page_anatomy.py (lcp_el); E-LOW-DOM kimi (canvas или видео > 50 % первого экрана)"
+      auto: "частично: page_anatomy.py (lcp_el); E-LOW-DOM mockup_checks.py (canvas или видео > 50 % первого экрана)"
     threshold: "смыслового текста нет в DOM"
     severity: B
     allow: "декоративный текст на медиа, когда тот же текст есть в HTML (кинетика поверх HTML — CRV-AL-04)"
@@ -622,7 +615,7 @@ markers:
     sources:
       - "CRV-AL-04 (../../creative/01-creative-direction/ambition-levels.yaml)"
       - "../07-seo-geo-performance-analytics/head-kit.yaml hk-access-ssr"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md (E-LOW-DOM)"
+      - "../../../scripts/claude-design/mockup_checks.py (E-LOW-DOM)"
     evidence: ["[документация]", "[практика]"]
     checked: "2026-09-24"
   - id: AIL-28
@@ -641,8 +634,7 @@ markers:
     defects: [DEF-29]
     sources:
       - "../07-seo-geo-performance-analytics/head-kit.yaml jsonld_policy"
-      - "../07-seo-geo-performance-analytics/01-seo-google-yandex.md «Частые ошибки» 9–10"
-      - "../99-raw/notes/wave2/H-notes.md «## Для K» (FAQPage и SearchAction «для полноты» — маркер ИИ-сборки)"
+      - "../07-seo-geo-performance-analytics/01-seo-google-yandex.md «Частые ошибки» 9–10 (FAQPage и SearchAction «для полноты» — маркер ИИ-сборки)"
     evidence: ["[документация]"]
     checked: "2026-09-24"
   - id: AIL-29
@@ -663,9 +655,9 @@ markers:
     sources:
       - "[V:Vkn3R6DUJ34 16:50] (SOTR №111, 2026-06-15: Markdown-зеркала не нужны; llms.txt Google «will neither harm nor help») [документация]"
       - "../07-seo-geo-performance-analytics/02-geo-ai-search.md"
-      - "опыт H/02 [проверено: llms.txt у 20 из 69 страниц выборки M; 16 хостов — 8 SaaS и приложений, 8 услуг и лидогенерации (4 на WordPress) — практика рынка (SaaS и сайты услуг на плагинах CMS), а не примета ИИ]"
+      - "[проверено: llms.txt у 20 из 69 страниц выборки site 02/03; 16 хостов — 8 SaaS и приложений, 8 услуг и лидогенерации (4 на WordPress) — практика рынка (SaaS и сайты услуг на плагинах CMS), а не примета ИИ]"
     evidence: ["[документация]", "[проверено]"]
-    note: "Низкая серьёзность: llms.txt обычен у рынка — SaaS и сайты услуг на плагинах CMS (H/02, итоговый прогон X2)"
+    note: "Низкая серьёзность: llms.txt обычен у рынка — SaaS и сайты услуг на плагинах CMS"
     checked: "2026-09-24"
   - id: AIL-30
     name: "инструкции моделям на странице"
@@ -692,7 +684,7 @@ markers:
     detect:
       method: [LNT, DOM]
       how: "vocab_lint.py по плану; section.id не выводится из role или block (page-plan v1: id — из роли или блока); якоря #section-N в DOM"
-      auto: "да для плана: vocab_lint.py, validate.py E"
+      auto: "да для плана: vocab_lint.py, site_validate.py"
     threshold: "≥ 1 секция с id вне роли и блока"
     severity: S
     allow: "суффикс повтора роли (testimonials-2) при законном повторе"
@@ -700,8 +692,8 @@ markers:
     site_checklist: [SITE-PRE-15]
     defects: [DEF-04]
     sources:
-      - "../99-raw/reports/wave1-B-report.md (в эталонном брифе kimi «Кварц» самодельные 4 из 8 id секций) [проверено]"
-      - "../99-raw/notes/wave3/J-notes.md «## Для K» (section.id — из роли или блока)"
+      - "в эталонном брифе исполнителя макета самодельные 4 из 8 id секций [проверено]"
+      - "../10-playbooks-contracts/01-procedure-brief-to-pages.md §12, PL-N01 (section.id — из роли или блока)"
     evidence: ["[проверено]"]
     checked: "2026-09-24"
   - id: AIL-32
@@ -719,7 +711,7 @@ markers:
     site_checklist: [SITE-CTA-03]
     defects: [DEF-13]
     sources:
-      - "../05-conversion-funnels/01-cta-and-lead-capture.md §1.3 [проверено: F/02 — медиана 3 разных текста одного призыва (итоговый CSV)]"
+      - "../05-conversion-funnels/01-cta-and-lead-capture.md §1.3 [проверено: медиана 3 разных текста одного призыва]"
       - "COPY-R-09 (../../text/09-ai-generation-evaluation/copy-rubric.yaml)"
       - "[V:hPS7LUW7SlA 21:42] (кнопка называет результат: «Find Flights», а не «Submit») [консенсус]"
     evidence: ["[проверено]", "[консенсус]"]
@@ -732,15 +724,15 @@ markers:
       method: [DOM]
       how: "page_anatomy.py: число главных призывов вне подвала и блоков cta-band; призыв после 3 и более секций подряд"
       auto: "частично: page_anatomy.py (cta_n, cta_repeat_max, block_seq)"
-    threshold: "главный призыв после ≥ 3 секций подряд или block:cta-band ≥ 3 раз; призывы в block:pricing-cards и каталожных сетках не считать (карточка — место решения); ориентир рынка — медиана 4 призыва вне подвала (M)"
+    threshold: "главный призыв после ≥ 3 секций подряд или block:cta-band ≥ 3 раз; призывы в block:pricing-cards и каталожных сетках не считать (карточка — место решения); ориентир рынка — медиана 4 призыва вне подвала (site 02/03)"
     severity: S
     allow: "повтор в местах решения — норма: шапка, hero, после доказательств, финал, липкий на телефоне"
     replace_with: "повтор в местах решения (05-conversion-funnels/01 §1.2)"
     site_checklist: [SITE-CTA-02]
     defects: [DEF-13]
     sources:
-      - "../05-conversion-funnels/01-cta-and-lead-capture.md §1.2; поправка PLAN №1"
-      - "../02-site-types/03-live-pages-measured.md [проверено: M — медиана 4 призыва вне подвала, самый частый текст ×2, у SaaS ×3]"
+      - "../05-conversion-funnels/01-cta-and-lead-capture.md §1.2"
+      - "../02-site-types/03-live-pages-measured.md [проверено: медиана 4 призыва вне подвала, самый частый текст ×2, у SaaS ×3]"
     evidence: ["[проверено]", "[практика]"]
     checked: "2026-09-24"
   - id: AIL-34
@@ -820,7 +812,7 @@ markers:
     sources:
       - "../03-page-structure/03-first-screen-and-mobile.md §2.4, §5.3"
       - "CRV-AL-06 (../../creative/01-creative-direction/ambition-levels.yaml)"
-      - "../02-site-types/03-live-pages-measured.md [проверено: M — телефону те же байты, что десктопу: 0,98–1,00]"
+      - "../02-site-types/03-live-pages-measured.md [проверено: телефону те же байты, что десктопу: 0,98–1,00]"
     evidence: ["[проверено]", "[практика]"]
     checked: "2026-09-24"
   - id: AIL-38
@@ -857,10 +849,9 @@ markers:
     site_checklist: [SITE-STR-12]
     defects: [DEF-12]
     sources:
-      - "../03-page-structure/01-narratives-and-section-order.md §3.2 [проверено: C/01 — FAQ в нижней трети, медиана позиции 0,90]"
-      - "поправка PLAN №14"
+      - "../03-page-structure/01-narratives-and-section-order.md §3.2 [проверено: FAQ в нижней трети, медиана позиции 0,90]"
     evidence: ["[проверено]", "[практика]"]
-    note: "порог 15 вопросов — ориентир K, не измерен"
+    note: "порог 15 вопросов — ориентир, не измерен"
     checked: "2026-09-24"
   - id: AIL-40
     name: "выдуманные боли и сегменты"
@@ -897,7 +888,7 @@ markers:
     defects: [DEF-17]
     sources:
       - "../05-conversion-funnels/lead-forms.yaml (forbidden: required-comment, repeat-email; defaults.layout)"
-      - "../02-site-types/03-live-pages-measured.md [проверено: M — 19 из 26 форм РФ по 1–2 поля]"
+      - "../02-site-types/03-live-pages-measured.md [проверено: 19 из 26 форм РФ по 1–2 поля]"
       - "[V:hPS7LUW7SlA 02:05] (Expedia: одно неоднозначное необязательное поле ломало воронку) [кейс]"
     evidence: ["[проверено]", "[кейс]"]
     checked: "2026-09-24"
@@ -917,8 +908,8 @@ markers:
     defects: [DEF-19]
     sources:
       - "152-ФЗ в ред. 156-ФЗ (с 01.09.2025) — LR-RU-01, LR-RU-02 (../08-legal-trust-a11y/legal-requirements.yaml) [стандарт]"
-      - "опыт F/01 [проверено: предотмечено у 2 из 10, click-wrap у 3 из 10, пустой чекбокс именно согласия ПД — 0 из 10]"
-      - "../02-site-types/03-live-pages-measured.md [проверено: M — у 9 из 17 русских посадочных с формой нет элемента согласия, отдельный чекбокс у 5]"
+      - "[проверено: предотмечено у 2 из 10, click-wrap у 3 из 10, пустой чекбокс именно согласия ПД — 0 из 10]"
+      - "../02-site-types/03-live-pages-measured.md [проверено: у 9 из 17 русских посадочных с формой нет элемента согласия, отдельный чекбокс у 5]"
     evidence: ["[стандарт]", "[проверено]"]
     note: "Примета рынка РФ, которую генератор повторяет; ловим как нарушение, а не как признак ИИ"
     checked: "2026-09-24"
@@ -932,15 +923,15 @@ markers:
       auto: "частично: page_gates.py SG-LEGAL-01, SG-LEGAL-02"
     threshold: "нет «Отклонить» на первом уровне или кнопки неравного вида; трекинг до выбора"
     severity: S
-    severity_note: "ЕС — B (SG-LEGAL-02); РФ — S [спорно] по позиции I"
+    severity_note: "ЕС — B (SG-LEGAL-02); РФ — S [спорно] по позиции site 08"
     allow: "баннер не нужен (legal.cookie_banner: not-needed — необязательных cookie нет)"
     replace_with: "«Принять» и «Отклонить» равного вида на первом уровне; счётчики — после выбора (LR-RU-10, LR-EU-01…04)"
     site_checklist: [SITE-LEGAL-06, SITE-LEGAL-05, SITE-A11Y-14]
     defects: [DEF-37, DEF-08]
     sources:
       - "../08-legal-trust-a11y/legal-requirements.yaml LR-RU-10, LR-EU-01…04"
-      - "../02-site-types/03-live-pages-measured.md [проверено: M — баннеры РФ 11 из 11 без «Отклонить», трекинг до выбора 11 из 11; зарубежные через ЕС — трекинг до выбора 6 из 6 страниц с баннером]"
-      - "поправка PLAN №6 (обязательный баннер — законный оверлей)"
+      - "../02-site-types/03-live-pages-measured.md [проверено: баннеры РФ 11 из 11 без «Отклонить», трекинг до выбора 11 из 11; зарубежные через ЕС — трекинг до выбора 6 из 6 страниц с баннером]"
+      - "02-site-checklist.md «Выжимка для агента» п. 14 (обязательный баннер — законный оверлей)"
     evidence: ["[стандарт]", "[регулятор]", "[проверено]", "[спорно]"]
     note: "Для РФ это практика рынка (11 из 11), а не примета ИИ"
     checked: "2026-09-24"
@@ -951,7 +942,7 @@ markers:
     detect:
       method: [DOM]
       how: "page_gates.py --html: SG-CONTENT-05 (заглушки; href=# у призыва — B); словарь бейджей конструкторов; title = имя шаблона"
-      auto: "да: SG-CONTENT-05; бейдж — словарь (опыт K/02)"
+      auto: "да: SG-CONTENT-05; бейдж — словарь"
     threshold: "≥ 1 на публикации"
     severity: B
     severity_note: "бейдж конструктора — S"
@@ -961,8 +952,8 @@ markers:
     defects: [DEF-48]
     sources:
       - "../../../scripts/site/page_gates.py (SG-CONTENT-05)"
-      - "аудит KIMI (../99-raw/notes/audit-2026-09-24/KIMI-report.md) §4 п.14 (бейдж хостинга Kimi давал ложные срабатывания ui_audit C2, C5, E1, E2 на 15 из 15 сборок)"
-      - "../../kimi-research/05-reviews-practice/03-default-look-k3.md (контент-баги у 3 из 15 сборок после отбора)"
+      - "../../claude-design/06-design-process/05-default-look.md §7 (бейдж хостинга давал ложные срабатывания ui_audit C2, C5, E1, E2 на 15 из 15 сборок)"
+      - "../../claude-design/06-design-process/05-default-look.md §3 (контент-баги у 3 из 15 сборок после отбора)"
     evidence: ["[данные]", "[практика]"]
     checked: "2026-09-24"
   - id: AIL-45
@@ -972,7 +963,7 @@ markers:
     detect:
       method: [DOM, JDG, LNT]
       how: "CV длины отзывов < 0,2; у всех оценка 5; нет дат и ссылок на площадку; у отзывов нет fact:"
-      auto: "частично: длина и оценки — скриптом по HTML (опыт K/02); факт — по плану"
+      auto: "частично: длина и оценки — скриптом по HTML; факт — по плану"
     threshold: "у отзывов нет fact: (→ B по SITE-PRF-07) или ≥ 2 признака из трёх: одна длина, только 5, нет дат"
     severity: S
     severity_note: "отзыв без fact: — B (SITE-PRF-01, SITE-PRF-07)"
@@ -983,8 +974,8 @@ markers:
     sources:
       - "Durable (2026): каркас сайта включает «testimonial examples» — 01-generators-and-ai-landing-markers.md §1 [мнение вендора]"
       - "../08-legal-trust-a11y/02-proof-authenticity-dark-patterns.md §3 (LR-RU-12, LR-RU-22)"
-      - "../../text/09-ai-generation-evaluation/03-evaluation.md (демо K3 с выдуманными отзывами получило 5,0 из 5 по рубрике текста)"
-      - "../../kimi-research/08-director-loop-qa/02-checks-k3.md §2 D (HON-QUOTE, critical)"
+      - "../../text/09-ai-generation-evaluation/03-evaluation.md (демо LLM-вёрстки с выдуманными отзывами получило 5,0 из 5 по рубрике текста)"
+      - "../../claude-design/06-design-process/04-checks.md §3 D (HON-QUOTE, critical)"
     evidence: ["[практика]", "[мнение вендора]", "[данные]"]
     checked: "2026-09-24"
   - id: AIL-46
@@ -1013,7 +1004,7 @@ markers:
     detect:
       method: [SCR]
       how: "document.elementFromPoint в центре каждой кнопки призыва возвращает саму кнопку или её потомка (1440×900 и 390×844, после выбора в баннере)"
-      auto: "нет: предложение к page_anatomy.py (отчёт K §7)"
+      auto: "нет: предложение к page_anatomy.py"
     threshold: "≥ 1 перекрытый призыв"
     severity: B
     allow: "нет"
@@ -1021,7 +1012,7 @@ markers:
     site_checklist: [SITE-CTA-13]
     defects: []
     sources:
-      - "../99-raw/notes/wave2/H-notes.md «## Для K» (прозрачные слои над CTA — маркер ИИ-сборки)"
+      - "../07-seo-geo-performance-analytics/02-geo-ai-search.md §8 (прозрачные слои над CTA — маркер ИИ-сборки)"
     evidence: ["[практика]"]
     checked: "2026-09-24"
   - id: AIL-48
@@ -1031,7 +1022,7 @@ markers:
     detect:
       method: [DOM, IMG]
       how: "вычисленные стили кнопки главного action (style primary): фон прозрачный или с альфой < 0,1 и есть рамка; контраст фона кнопки с фоном секции < 1,5:1"
-      auto: "нет: вычисленные стили — сценарий (опыт K/02)"
+      auto: "нет: вычисленные стили — сценарий"
     threshold: "главный призыв hero или финала — ghost"
     severity: S
     allow: "второстепенный путь ghost-кнопкой — так и нужно (иной стиль)"
@@ -1043,7 +1034,7 @@ markers:
       - "[V:XPH01OGrinQ 15:26] (Potanina: главный призыв сплошной, второстепенные можно ghost) [практика]"
       - "../05-conversion-funnels/01-cta-and-lead-capture.md §1.4"
     evidence: ["[кейс]", "[практика]"]
-    note: "пороги альфы и контраста — ориентир K2, не измерены"
+    note: "пороги альфы и контраста — ориентир, не измерены"
     checked: "2026-09-24"
   - id: AIL-49
     name: "картинка без смысла над заголовком"
@@ -1072,7 +1063,7 @@ markers:
     detect:
       method: [DOM]
       how: "ссылки vk.com/share, t.me/share, facebook.com/sharer, twitter.com/intent или виджеты share на странице page_type класса landing"
-      auto: "нет: словарь адресов (опыт K/02)"
+      auto: "нет: словарь адресов"
     threshold: "≥ 1 на посадочной вне статьи и блога"
     severity: D
     allow: "статья, блог, событие (пригласить друзей), реферальная механика"
@@ -1113,18 +1104,18 @@ markers:
     detect:
       method: [DOM, IMG]
       how: "правила шаблонного хрома impeccable 4.1.0 по DOM и CSS (капс-надзаголовки, пилюля над H1, номера секций, модные шрифты, курсив в заголовке); срабатывание — ≥ 2 правил на странице"
-      auto: "нет: правила impeccable в опыте creative H/01; @gessobuild/anti-slop как ворота не годится (SLOP у всех 16 наградных сайтов)"
-    threshold: "≥ 2 правил на странице; капс-надзаголовки — больше чем у ceil(N/3) секций (порог тройки — сверка S2 с creative и text); калибровка — страницы K и выборка M"
+      auto: "нет: правила impeccable — замер creative 08/02 §5.3; @gessobuild/anti-slop как ворота не годится (SLOP у всех 16 наградных сайтов)"
+    threshold: "≥ 2 правил на странице; капс-надзаголовки — больше чем у ceil(N/3) секций (порог общий с creative и text); калибровка — ИИ-страницы и выборка site 02/03"
     severity: D
-    severity_note: "D до калибровки: одна выборка creative H/01 (≥ 2 правил у 5 из 7 страниц K3, у 0 из 16 наградных)"
+    severity_note: "D до калибровки: одна выборка creative 08/02 §5.3 (≥ 2 правил у 5 из 7 страниц LLM-вёрстки, у 0 из 16 наградных)"
     allow: "фирменный приём из art-direction creative с причиной; капс — в логотипе или навигации бренда"
     replace_with: "надзаголовок — только где несёт смысл (text COPY-C-18); анонс — не над H1; номера секций — только в пошаговом сюжете"
     site_checklist: []
     defects: []
     sources:
-      - "../99-raw/notes/sync/creative-wave2-for-site-2026-09-24/README.md п. 13 [проверено]"
+      - "../../creative/08-uniqueness-anti-slop/02-uniqueness-and-variation.md §5.3 [проверено]"
       - "../../creative/08-uniqueness-anti-slop/cliche-registry.yaml (cliche:caps-eyebrow, cliche:pill-announcement-chip)"
       - "COPY-C-18 (../../text/09-ai-generation-evaluation/copy-checklist.yaml — текст надзаголовков)"
     evidence: ["[проверено]"]
-    note: "кандидат (аудит X С-26; S1, волна 4, 2026-09-25): в SITE-OUT-08 и ворота не входит до калибровки; порог — совместно с creative"
+    note: "кандидат: в SITE-OUT-08 и ворота не входит до калибровки; порог — совместно с creative"
     checked: "2026-09-25"

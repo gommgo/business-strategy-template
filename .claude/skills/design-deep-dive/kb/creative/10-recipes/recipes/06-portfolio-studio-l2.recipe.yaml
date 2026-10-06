@@ -1,4 +1,4 @@
-# Рецепт 06 · Портфолио студии · L2 — 10-recipes/06-portfolio-studio-l2.md · J · 2026-09-25
+# Рецепт 06 · Портфолио студии · L2 — 10-recipes/06-portfolio-studio-l2.md
 recipe_version: "0.1"
 id: recipe:portfolio-studio-l2
 title_ru: "Портфолио студии, L2 — работа как экспонат: кейсы открываются переходом"
@@ -7,7 +7,7 @@ checked_at: "2026-09-25"
 site_type: portfolio-site
 page_type: portfolio-page
 level: L2
-level_why: "портфолио студии — L2 по умолчанию A; вау и есть продукт"
+level_why: "портфолио студии — L2 по умолчанию (ambition-levels.yaml); вау и есть продукт"
 budget_profile: portfolio-page@L2
 when: ["работы реальные и с правами", "прямой трафик и галереи, доля десктопа заметна"]
 not_when: ["студия продаёт массовые услуги с телефона — рецепт 01 с кейсами"]

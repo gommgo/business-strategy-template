@@ -1,10 +1,10 @@
-# Blender 5.2.2 — scene_check.py (агент J, волна 3): проверка сцены и ассета кодом, одна строка JSON.
-# Объединяет scene_audit.py (C1/10) + passport_asserts.py (C1/16) + метрики d1lib (D1: доля острых рёбер, иерархия частей).
+# Blender 5.2.2 — scene_check.py: проверка сцены и ассета кодом, одна строка JSON.
+# Объединяет scene_audit.py + passport_asserts.py + метрики d1lib (доля острых рёбер, иерархия частей).
 # Совместим с BLENDER_MCP_SAFE_MODE (нет sys/os/open/lambda/class/global): можно отправить текстом в execute_blender_code.
 # Паспорт: заменить PASSPORT = None на dict ИЛИ положить JSON в свойство коллекции ASSET_*: coll["passport"] = json.dumps(P).
-# Запуск в фоне с аргументами — через обёртку: python3 99-raw/tools/qa_pipeline.py scene file.blend [--passport p.json]
+# Запуск в фоне с аргументами — через qa_pipeline.py: python3 scripts/blender/qa_pipeline.py scene file.blend [--passport p.json]
 # Вывод: последняя строка "SCENE_CHECK {json}": verdict (fail/review/pass), issues [{code, level, m, obj, msg}], metrics.
-# Калибровка порогов — 99-raw/experiments/J/01-calibration (32 сцены C1/11 + C1/12).
+# Пороги откалиброваны на 32 сценах.
 import bpy
 import bmesh
 import json
@@ -16,7 +16,7 @@ PASSPORT = None
 OPTS = {}
 
 DEFAULTS = {
-    "touch_m": 0.001,          # «касается»: зазор ≤ 1 мм (C1/16; калибровка J/01)
+    "touch_m": 0.001,          # «касается»: зазор ≤ 1 мм
     "touch_rel": 0.002,        # … или ≤ 0,2 % диагонали ассета (крупные сцены)
     "dims_tol": 0.05,          # габариты против паспорта ±5 %
     "sharp_deg": 85.0,         # «сырое» ребро: двугранный угол > 85°
@@ -44,7 +44,7 @@ M_CODE = {
 
 DEFAULT_PREFIXES = ("Cube", "Sphere", "Cylinder", "Cone", "Torus", "Plane", "Circle", "Icosphere", "Text",
                     "Suzanne", "Mesh", "BezierCurve", "NurbsPath", "Grid")
-# ноды, которые не переживают экспорт glTF (= LOST_NODES из preflight() агента E, 08-export-gltf/04 §5)
+# ноды, которые не переживают экспорт glTF (= LOST_NODES из preflight_block.py, 08-export-gltf/04 §5)
 PROCEDURAL = {"TEX_NOISE", "TEX_VORONOI", "TEX_WAVE", "TEX_MAGIC", "TEX_GRADIENT", "TEX_CHECKER", "TEX_BRICK",
               "TEX_WHITE_NOISE", "TEX_GABOR", "LAYER_WEIGHT", "FRESNEL", "BUMP", "VALTORGB", "HUE_SAT",
               "BRIGHTCONTRAST", "GAMMA", "INVERT", "CURVE_RGB", "AMBIENT_OCCLUSION", "SHADERTORGB", "WIREFRAME",
@@ -168,7 +168,7 @@ def point_inside(tree, pt):
 
 def inside_share(a, b, parts):
     """Доля части a внутри замкнутой части b: минимум из доли площади (центры граней) и доли вершин; глубина, м.
-    Только вершины нельзя: у вставленного цилиндра или ребра половина вершин всегда внутри (J/01);
+    Только вершины нельзя: у вставленного цилиндра или ребра половина вершин всегда внутри;
     только центры нельзя: у плоскости из одной грани центр может попасть внутрь, а углы — нет."""
     if not parts[b]["closed"]:
         return 0.0, 0.0

@@ -62,7 +62,7 @@ except ImportError as e:  # pragma: no cover
     sys.stderr.write(f'нужны pyyaml и jsonschema ≥ 4.18 ({e}); запуск — Python окружения скилла ($DDD_HOME/venv, scripts/install.sh)\n')
     sys.exit(2)
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('creative'))
 APP = str(kbpaths.kb())

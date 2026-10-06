@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · страница spasibo (planlib.py); факты — демо text E.
+# ПРИМЕР v1 · страница spasibo; факты — демо text.
 page_plan_version: '1'
 checked: '2026-09-24'
 status: proposed
@@ -29,7 +29,7 @@ page:
   awareness: product-aware
   awareness_basis:
     from: assumption
-    rule: уровень по главному источнику страницы (C 01 §3.1)
+    rule: уровень по главному источнику страницы (site 03/01 §3.1)
   traffic:
   - traffic_source: internal
     temperature: warm
@@ -71,7 +71,7 @@ page:
     - req:LR-RU-19
     - req:LR-RU-22
     - req:LR-RU-24
-    notes: 'регистрация и оплата — в продукте (/signup): согласие и оферта там (I); не юридическое заключение'
+    notes: 'регистрация и оплата — в продукте (/signup): согласие и оферта там (site 08); не юридическое заключение'
   analytics:
     systems:
     - yandex-metrica

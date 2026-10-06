@@ -103,7 +103,7 @@ def lim(th, key):
 
 # ---------- чтение кадров ----------
 def probe(path):
-    r = subprocess.run(["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams", path],
+    r = subprocess.run([kbpaths.ffprobe(), "-v", "error", "-print_format", "json", "-show_format", "-show_streams", path],
                        capture_output=True, text=True)
     j = json.loads(r.stdout or "{}")
     v = next((s for s in j.get("streams", []) if s.get("codec_type") == "video"), {})
@@ -139,7 +139,7 @@ def frames(src, width=320, mode="gray"):
     p = probe(src)
     h = int(round(p["h"] * width / p["w"] / 2) * 2)
     pf, ch = ("gray", 1) if mode == "gray" else ("rgb24", 3)
-    proc = subprocess.Popen(["ffmpeg", "-v", "error", "-threads", "4", "-i", src, "-fps_mode", "passthrough", "-vf",
+    proc = subprocess.Popen([kbpaths.ffmpeg(), "-v", "error", "-threads", "4", "-i", src, "-fps_mode", "passthrough", "-vf",
                              f"scale={width}:{h}:flags=area,format={pf}", "-f", "rawvideo", "-pix_fmt", pf, "-"],
                             stdout=subprocess.PIPE)
     size = width * h * ch
@@ -168,7 +168,7 @@ def load(src, width=320, mode="gray"):
     p = probe(src)
     h = int(round(p["h"] * width / p["w"] / 2) * 2)
     pf, ch = ("gray", 1) if mode == "gray" else ("rgb24", 3)
-    raw = subprocess.run(["ffmpeg", "-v", "error", "-threads", "4", "-i", src, "-fps_mode", "passthrough", "-vf",
+    raw = subprocess.run([kbpaths.ffmpeg(), "-v", "error", "-threads", "4", "-i", src, "-fps_mode", "passthrough", "-vf",
                           f"scale={width}:{h}:flags=area,format={pf}", "-f", "rawvideo", "-pix_fmt", pf, "-"],
                          capture_output=True).stdout
     n = len(raw) // (width * h * ch)
@@ -203,7 +203,7 @@ def frame_timing(path):
     (так выглядит переменная частота после приведения к постоянной). У папки кадров таймкодов нет — None."""
     if os.path.isdir(path):
         return None
-    r = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "packet=pts_time", "-of",
+    r = subprocess.run([kbpaths.ffprobe(), "-v", "error", "-select_streams", "v:0", "-show_entries", "packet=pts_time", "-of",
                         "csv=p=0", path], capture_output=True, text=True)
     ts = []
     for x in r.stdout.replace(",", " ").split():
@@ -492,7 +492,7 @@ def cmd_trim(a):
     # исходника сохраняется (4:2:0 → 4:2:0 без пересчёта цветности, 10 бит → 10 бит), кадры вне списка x264 (RGB и т. п.)
     # — 4:4:4.
     pix = pr.get("pix_fmt") if pr.get("pix_fmt") in X264_LOSSLESS_PIX else "yuv444p"
-    cmd = ["ffmpeg", "-v", "error", "-y", "-threads", "4", "-i", a.video, "-vf", vf, "-an", "-c:v", "libx264", "-qp", "0",
+    cmd = [kbpaths.ffmpeg(), "-v", "error", "-y", "-threads", "4", "-i", a.video, "-vf", vf, "-an", "-c:v", "libx264", "-qp", "0",
            "-preset", "medium", "-pix_fmt", pix, "-r", fr, "-movflags", "+faststart", a.out]
     subprocess.run(cmd, check=True)
     n_out = len(load(a.out, 64))

@@ -1,14 +1,12 @@
-# КОПИЯ демо-фактов агента E без изменений данных: 99-raw/experiments/E/facts-demo-saas-okoshko-en.yaml (md5 faa3236958d1…, 2026-09-24) — снимок для примеров 10-templates-recipes/examples (J3).
-# Источник правды — файл E; при его правке пересобрать копию: 99-raw/experiments/J/08-examples/make_ru_from_e3.py --copy-facts.
-# facts-demo-saas-okoshko-en.yaml — ДЕМО-ФАКТЫ агента E: английская адаптация набора «Окошко» для EN-примеров и EN copy deck
-# text-research · волна 2 · агент E · 2026-09-24 · формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
+# facts-demo-saas-okoshko-en.yaml — ДЕМО-ФАКТЫ: английская адаптация набора «Окошко» для EN-примеров и EN copy deck
+# Формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
 #
-# ДЕМО. Сервис выдуман агентом E; все числа, цены, имена, даты и документы — синтетика (см. facts-demo-saas-okoshko.yaml).
+# ДЕМО. Сервис выдуман; все числа, цены, имена, даты и документы — синтетика (см. facts-demo-saas-okoshko.yaml).
 # Не публиковать. Совпадение названия с настоящими сервисами случайно.
 # Зачем отдельный файл: claims_check.py сравнивает числа по values.what и цитаты по verbatim на языке факта; английский текст
 # против русских фактов даёт ложные COPY-F-NUM-MISMATCH (объект счёта по-русски), «1,380» читается как 1,38, перевод цитаты
-# из translations.en не находится (опыт E/03). Второй язык — отдельный copy deck (PLAN, copy-deck v0: source_lang) и свой
-# facts.yaml с теми же id. Цены — в рублях: сайт российской компании (38-ФЗ ст. 5 ч. 7.1, H).
+# из translations.en не находится. Второй язык — отдельный copy deck (source_lang) и свой
+# facts.yaml с теми же id. Цены — в рублях: сайт российской компании (38-ФЗ ст. 5 ч. 7.1).
 
 facts_version: 1
 date: "2026-09-24"
@@ -18,7 +16,7 @@ jurisdiction: ru
 status: draft
 example: true
 owner: {role: "founder (demo customer)"}
-collected_by: "агент E (демо-набор, английская адаптация, 2026-09-24)"
+collected_by: "демо-набор, английская адаптация (2026-09-24)"
 never_claim_defaults: ru-default-1
 
 entities:
@@ -253,12 +251,12 @@ never_claim:
     claim_class: [income-finance, forecast]
     patterns: ["doubl\\w*\\s+(your\\s+)?(\\w+\\s+)?revenue", "increas\\w*\\s+(your\\s+)?(\\w+\\s+)?revenue", "pays?\\s+for\\s+itself"]
     lift: never
-    reason: "38-FZ art. 5 part 3 item 2; forecast without basis (B2, H)"
-    source: {who: "агент E (демо)", date: "2026-09-24"}
+    reason: "38-FZ art. 5 part 3 item 2; forecast without basis"
+    source: {who: "демо-набор", date: "2026-09-24"}
   - id: nc-zero-noshow
     text: "“no more no-shows”, “zero no-shows” — absolute result promise"
     claim_class: [guarantee, forecast]
     patterns: ["no\\s+more\\s+no-?shows", "zero\\s+no-?shows"]
     lift: never
-    reason: "result guarantee (H COPY-L-GUAR-01); the case shows 6%, not zero"
-    source: {who: "агент E (демо)", date: "2026-09-24"}
+    reason: "result guarantee (COPY-L-GUAR-01); the case shows 6%, not zero"
+    source: {who: "демо-набор", date: "2026-09-24"}

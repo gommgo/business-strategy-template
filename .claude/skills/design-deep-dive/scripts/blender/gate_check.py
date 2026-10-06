@@ -25,7 +25,7 @@ import json
 import os
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 
 GATES = str(kbpaths.kb("blender", "09-web-runtime", "page-3d-gates.yaml"))

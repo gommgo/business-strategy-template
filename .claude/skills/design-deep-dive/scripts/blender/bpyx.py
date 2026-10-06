@@ -1,7 +1,7 @@
 """bpyx — проверенные помощники Python API для Blender 5.2 (ИИ-агент, фон и MCP).
 
-Проверено: Blender 5.2.2 LTS (Python 3.13), тесты — test_bpyx.py (запуск через 99-raw/tools/blender_run.py).
-База знаний: blender-research/03-bpy-api/ (01 модель данных, 02 ноды, 03 дрейф версий, 04 ошибки нейросетей).
+Проверено: Blender 5.2.2 LTS (Python 3.13), тесты — test_bpyx.py (запуск через scripts/blender/blender_run.py).
+База знаний: kb/blender/03-bpy-api/ (01 модель данных, 02 ноды, 03 дрейф версий, 04 ошибки нейросетей).
 
 Принципы:
 - только data API, где это возможно (быстро, не зависит от выделения, активного объекта и окна);
@@ -789,8 +789,8 @@ def add_light(kind: str = "AREA", name: str | None = None, location=(3.0, -3.0, 
 
 
 def three_point_lights(objects=None, *, power: float = 1.0, collection=None, prefix: str = "Key") -> list:
-    """Студийный свет key/fill/rim, размер и мощность по габаритам объектов (калибровка 99-raw/tools/render_views.py:
-    900 Вт на 7 м ≈ нормальная экспозиция при AgX; под Khronos PBR Neutral — `power` ≈ 0,33–0,5: E_key 2–3 Вт/м², D2 `06/02 §2`). Возвращает [key, fill, rim]. [5.2.2]"""
+    """Студийный свет key/fill/rim, размер и мощность по габаритам объектов (калибровка render_views.py:
+    900 Вт на 7 м ≈ нормальная экспозиция при AgX; под Khronos PBR Neutral — `power` ≈ 0,33–0,5: E_key 2–3 Вт/м², blender `06/02 §2`). Возвращает [key, fill, rim]. [5.2.2]"""
     mn, mx = world_bbox(objects)
     c = (mn + mx) / 2
     r = max((mx - mn).length / 2, 1e-3)
@@ -844,9 +844,9 @@ def frame_camera(cam, objects=None, *, margin: float = 1.1, extra_points=()):
     extra_points — мировые точки, которые тоже должны войти в кадр (например, концы тени на земле).
 
     PERSP — Object.camera_fit_coords по 8 углам габарита (как view3d.camera_to_view_selected), камера отводится от центра
-    габарита в margin раз. ORTHO — своя проекция вершин на оси камеры (исправлено FX 26.09.2026 по T22 реестра корневого
-    README): camera_fit_coords для ORTHO точен только в квадратном кадре — в 16:9 ответ зависит от прежнего ortho_scale и
-    режет модель (SD: 9,8 м при нужных ≥ 11,5 м; тест 99-raw/notes/trial/FX/t22_frame_camera_test.py). ortho_scale —
+    габарита в margin раз. ORTHO — своя проекция вершин на оси камеры:
+    camera_fit_coords для ORTHO точен только в квадратном кадре — в 16:9 ответ зависит от исходного ortho_scale и
+    режет модель (9,8 м в кадре при нужных ≥ 11,5 м). ortho_scale —
     сторона кадра по sensor_fit (AUTO: большая сторона с учётом pixel_aspect), центр объектов — в центре кадра с учётом
     shift_x/y; ближняя точка — в 1 м + clip_start перед камерой, clip_end растёт, если дальняя точка за ним."""
     if cam.data.type == "ORTHO":
@@ -980,7 +980,7 @@ def export_glb(filepath: str, objects=None, *, apply_modifiers: bool = True, **p
 
     objects=None — вся сцена; иначе временно выделяются только эти объекты (+ дети) и use_selection=True, после —
     выделение восстанавливается. Путь делается абсолютным (относительный уходит в cwd процесса). Подробные пресеты
-    и что переживает экспорт — ../08-export-gltf/ (агент E)."""
+    и что переживает экспорт — kb/blender/08-export-gltf/."""
     op = bpy.ops.export_scene.gltf
     valid = {p.identifier for p in op.get_rna_type().properties}
     kw = dict(GLTF_DEFAULTS)

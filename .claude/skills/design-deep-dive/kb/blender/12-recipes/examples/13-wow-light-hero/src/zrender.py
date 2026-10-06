@@ -1,4 +1,4 @@
-"""zrender — этюд света, hero и рентген «Звена» (дорожка Z). Открывает собранный .blend, ставит студию/камеру, рендерит
+"""zrender — этюд света, hero и рентген «Звена». Открывает собранный .blend, ставит студию/камеру, рендерит
 Cycles + маски Workbench (альфа — рука, R — видимый белый лак) для img_metrics.
 
     blender -b blend/zveno_render.blend --python zrender.py -- --job light --schemes S1,S2,S3,S4 --res 960x540 --samples 32

@@ -249,8 +249,10 @@
   товара, скриншотов), соотношения телефона 4:5 или 9:16 у hero, кандидат LCP (`lcp_candidate`, `loading: eager`), `alt` → id
   текстового слота; `motion` — только вид ассета, параметры — treatment (C1).
 - **Факты:** каждое число, отзыв, логотип, рейтинг, цена, срок — `data`-слот `fact:<id>` с `binds`; вид факта ∈ `fact_kinds` слота
-  (PL-F01); факт допущен (PL-F03); `use.page_types` содержит тип страницы (PL-F04); у акций и событий — `expires` с фактом
-  `valid.until` (PL-F05); «Популярный» у тарифа — только с фактом доли выбора (PL-F06); минимумы блоков (PL-F07).
+  (PL-F01); факт допущен (PL-F03); `use.page_types` содержит тип страницы (PL-F04); у факта общей шапки или подвала с ролью
+  секции в `use.section_roles` тип страницы не сверяется; у акций и событий — `expires` с фактом
+  `valid.until` (PL-F05); «Популярный» у тарифа — только с фактом доли выбора (PL-F06); минимумы блоков (PL-F07); секция с
+  пробелом `missing:` и `on_missing: omit-block` — info: она снимается до факта.
 - 3D — `recipe:`, постер (медиа-слот того же ракурса, кандидат LCP), `load: after-lcp`, `cta_before_3d: true` (PL-D01).
 
 ### 6.5. Призывы, формы, события
@@ -267,10 +269,10 @@
 
 | Поле v1 | Откуда | Проверка |
 |---|---|---|
-| `navigation.{header, archetype, breadcrumbs, footer}` | карта (`chrome`), шаблон | PL-N02: архетип = карте, крошки = шаблону |
-| `seo.{indexable, canonical, h1, structured_data, ssr_required, sitemap, hreflang}` | `head-kit.yaml page_types` (H) | PL-H01 один H1; PL-SEO01 типы разметки ⊆ head-kit |
+| `navigation.{header, archetype, breadcrumbs, local_nav, footer}` | карта (`chrome`), шаблон | PL-N02: архетип = карте, крошки и `local_nav` = шаблону |
+| `seo.{indexable, canonical, h1, structured_data, ssr_required, sitemap, hreflang}` | `head-kit.yaml page_types` (H) | PL-H01 один H1; PL-SEO01: типы разметки — типы страницы и подтипы `structured_data_subtypes` head-kit |
 | `legal.{pd_consent, cookie_mode, analytics_before_consent, cross_border, withdraw_link, ad_marking, erid_blocks, requisites, operator_ref, requirements}` | `constraints.legal_intake`, `legal-requirements.yaml` (I) | PL-G01…G04 |
-| `budget_profile`, `ambition_level`, `x-gate-exception` | `budgets.yaml` (P), решение 20 | PL-P01…P03, PL-X01 |
+| `budget_profile`, `ambition_level`, `x-gate-exception` | `budgets.yaml` (P), решение 20 | PL-P01…P03; PL-X01: `x-gate-exception` — id ворот страницы `SG-…` или ворот эффектов `EG-…` |
 | `overlays` (липкий призыв, баннер cookie, чат, окно захвата) | политики брифа | PL-O02: `on` без политики — ошибка |
 | `treatment` страницы и секций | creative (подсхема `treatment` v1 через `$ref`; до 2026-09-25 — v0) | PL-C01: секция ≤ страницы, конверсия L0, пики ≤ лимита уровня, референс — одна секция |
 | виджеты (карта, видео-iframe, запись, чат) | P 03 §5.2 | PL-W01: `load: on-visible | on-interaction` |
@@ -320,8 +322,7 @@ D — в журнал.
 `python3 99-raw/tools/site_brief_to_kimi.py --brief site-brief.yaml --plan plans/<id>.yaml --out <папка> [--fills fills.yaml]
 [--copy-deck copy-deck.yaml] [--check]` — пишет `brief.yaml` (только ключи шаблона kimi: `lint_brief` отвергает неизвестные),
 `acceptance-site.md` (блоки I–L для ACCEPTANCE — предложение kimi) и `projection.tsv` (откуда каждое поле); с `--check` сразу
-гонит `build_package.py questions`, `build`, `check` в той же папке. Таблица полей — `../01-foundations/site-brief.kimi-map.tsv`
-(A, 189 строк) + план (E 03 §6.5).
+гонит `build_package.py questions`, `build`, `check` в той же папке. Проекция плана — E 03 §6.5.
 
 | Поле kimi | Откуда | Правило |
 |---|---|---|
@@ -430,27 +431,29 @@ D — в журнал.
 
 | Код | Что | Уровень | Шаг |
 |---|---|---|---|
-| SB-S01 | бриф по схеме v0 или v1 (по полю `version`) | error | 1 |
-| SB-F01…F04 | `facts.yaml`: файл, схема text, `site`, юрисдикция | error | 2 |
+| SB-S01 | бриф по схеме v1 (`version: 1`); другая версия — ошибка | error | 1 |
+| SB-F01…F04 | `facts.yaml`: файл, схема text, `site`, юрисдикция; файла по ссылке ещё нет (SB-F01): у брифа `draft` — info, со статуса `proposed` — error | error / info | 2 |
 | SB-P01 · P02 · P03 | обязательный вид без факта и без блокирующего пробела · только пробел · желательный без фактов | error · warning · warning | 2 |
 | SB-R01…R04 | ссылки `fact:`/`missing:` брифа; срок стимула без `valid.until`; цена не того вида | error / warning | 2 |
-| SB-M00…M05, SB-Q01…Q02 | смысл text: файл, `site`, `proof_ref`, языки, снятие риска; журнал вопросов | error | 1 |
+| SB-M00…M05, SB-Q01…Q02 | смысл text: файл, `site`, `proof_ref`, языки, снятие риска; журнал вопросов; файла по ссылке ещё нет (SB-M00): у брифа `draft` — info, со статуса `proposed` — error | error / info | 1 |
 | SB-T01…T03 | доли трафика > 1; `entry_page` и `by_page` вне `pages.list` | error | 1 |
-| SB-D01…D03 | аналитика не Метрика; прелоадер вне L2-кампании; окно захвата при платном трафике | warning / error | 1 |
+| SB-D01…D03 | система аналитики не `yandex-metrica` и не `none`; прелоадер вне L2-кампании; окно захвата при платном трафике | warning / error | 1 |
 | SB-A01…A03 | уровень секций ≤ сайта; референс в одном месте; правило решения 20 | error / warning | 1, 3 |
-| SB-L01…L03 | заявки за рубежом при ru; cookie без баннера; реестр РКН, трансграничная передача | error / warning / info | 1 |
-| PL-S01, PL-V01 | план по схеме 0.9 или 1; id словаря, macro-действие, семейство формы | error | 5 |
-| PL-B01…B03, PL-A01…A05 | блок, вариант, роль в `serves`; слоты, анатомия, группы, кратность, обязательные | error / warning | 5 |
-| PL-F00…F07 | факты: файл, наличие, вид, допуск, `use.page_types`, срок, «популярный», минимумы | error / warning | 5 |
+| SB-L01…L03 | заявки за рубежом при ru; cookie без баннера; уведомление РКН — у сайта с формой (канал-форма брифа или action-слот с формой в планах) или с необязательными cookie, трансграничная передача | error / warning / info | 1 |
+| PL-S01, PL-V01 | план по схеме v1 (`page_plan_version: 1`), другая версия — ошибка; id словаря, macro-действие, семейство формы | error | 5 |
+| PL-B01…B03, PL-A01…A05 | блок, вариант, роль в `serves`; слоты, анатомия, группы, кратность, обязательные; `target.prefill` — текстовый слот `messenger-prefill` своей секции (PL-A03) | error / warning | 5 |
+| PL-F00…F07 | факты: файл, наличие, вид, допуск, `use.page_types`, срок, «популярный», минимумы; цель `messenger:<fact-id>` — факт есть (PL-F01) | error / warning | 5 |
 | PL-H01, PL-R01, PL-L01 | один H1; «секция.слот»; длина | error / warning | 5 |
 | PL-N01, PL-N02 | id секции из роли или блока; навигация и уровень = карте и шаблону | error (v1) | 5 |
 | PL-O01…O02, PL-W01 | overlays и политики брифа; виджеты фасадом | error / warning | 5 |
 | PL-E01…E02, PL-T01…T02 | события `events.yaml`, цели; набор формы, «спасибо» | error / warning | 5 |
 | PL-P01…P03, PL-X01 | профиль бюджета, уровень ≤ сайта и шаблона; исключение ворот | error / warning | 5 |
+| PL-U01 | план `approved` без записи `approval` | warning | 5 |
 | PL-G01…G04 | согласие ПД в ru; `req:`; оператор; cookie и счётчики | error | 5 |
 | PL-C01, PL-D01, PL-SEO01, PL-K01…K03 | подача; 3D; разметка head-kit; бриф ↔ план | error / warning | 5–6 |
-| SM-S01, SM-01…SM-23 | карта: схема, ссылки, словарь, граф входящих, крошки, уровень, планы, «спасибо» | error / warning | 4 |
+| SM-S01, SM-01…SM-23 | карта: схема, ссылки, словарь, граф входящих, крошки, уровень, планы, «спасибо»; цель призыва шапки — страница карты, `#якорь` или `messenger:<fact-id>` с фактом в `facts.yaml` (SM-01) | error / warning | 4 |
 | BL-*, LF-* | каталог блоков и наборы форм | error | — |
+| BL-14 | информационная картинка каталога без парного элемента `image-alt` | warning | — |
 | PJ-01…PJ-03 | проект: есть бриф, `site` планов = бриф, у страниц брифа есть планы | error | 7 |
 
 Самопроверка: `python3 ../../scripts/site/site_validate.py --selftest` — пример проходит, отрицательные случаи падают каждый по своей

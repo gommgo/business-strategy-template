@@ -15,12 +15,12 @@ marks.json. Модель не вызывается; сеть — только к
   python3 shot.py <папка копий> <outdir> [--manifest kit.json | ПУТЬ/kit.json] [--canvas ПАПКА] [--only landing.html]
           [--themes light,dark] [--scale 1] [--tiles] [--no-plain] [--no-marks] [--no-canvas] [--canvas-dpr 0.5]
           [--set "radius-md=16px;color-accent=#0a7d4f"] [--prev review/iter-01/marks.json] [--iteration iter-02]
-          [--lock /path/to/browser.lock] [--min-free-gb 2] [--strict]
+          [--lock ФАЙЛ] [--min-free-gb 2] [--strict]
   python3 shot.py serve <папка проекта> [--port 8765]
       → http://127.0.0.1:8765/ перенаправляет на /_kit/canvas.html?m=/canvas.json&marks=1 (холст для встроенного браузера
         приложения через .claude/launch.json или для своего браузера)
   python3 shot.py --selftest      офлайн: шрифты и их метрические двойники, H1 у частей артборда, путь манифеста,
-                                  манифест копий при съёмке, ярлыки вайрфрейма вне проверок кадра
+                                  манифест копий при съёмке, ярлыки вайрфрейма вне проверок кадра, замок браузера
 
 Что пишет в <outdir>:
   <файл>-<W>-<тема>.png            артборд целиком (full page) без меток
@@ -37,10 +37,15 @@ marks.json. Модель не вызывается; сеть — только к
 не пропажа: объявленного системного шрифта на машине нет, раскладка та же. Ярлыки вайрфрейма — элементы с атрибутом
 `data-wf` и их поддерево — пометки артборда, а не текст страницы: в счёт мелкого текста, наименьший кегль и невидимый
 текст они не входят.
-Коды выхода: 0 — готово; 2 — страница или браузер не открылись; 3 — нет кадров (манифест не читается, в нём нет рамок
-или --only мимо); 4 — --strict и есть непройденные проверки, наложения меток или расхождение номеров холста и кадров.
+Замок браузера съёмка берёт сама на время работы браузера: браузер один за раз на машину. Умолчание --lock — общий
+замок окружения, его берёт `kbpaths.lock("browser")`: замок реентерабелен по дереву процессов, поэтому съёмка, запущенная
+из утилиты, которая держит тот же замок, его не ждёт, а чужого держателя ждёт до 15 минут. `--lock ФАЙЛ` (или переменная
+KIT_BROWSER_LOCK) — другой файл замка, его съёмка держит своим flock без повторного входа; `--lock ""` — без замка.
+Коды выхода: 0 — готово; 2 — страница или браузер не открылись, замок браузера не дождался или мало памяти
+(--min-free-gb); 3 — нет кадров (манифест не читается, в нём нет рамок или --only мимо); 4 — --strict и есть непройденные
+проверки, наложения меток или расхождение номеров холста и кадров.
 """
-import argparse, fcntl, functools, http.server, json, os, re, socketserver, sys, threading, time
+import argparse, contextlib, fcntl, functools, http.server, json, os, re, socketserver, sys, threading, time
 from datetime import datetime, timezone
 from urllib.parse import quote, unquote, urlparse
 
@@ -206,23 +211,26 @@ def mem_available_gb():
     return None
 
 
-class BrowserLock:
-    """Блокировка браузера (flock): --lock PATH, переменная KIT_BROWSER_LOCK или общая блокировка окружения
-    `kbpaths.lock_path("browser")` — браузер один за раз на машину; пустой --lock "" — без блокировки."""
-    def __init__(self, path):
-        self.path, self.fh = path, None
+def browser_lock(path):
+    """Замок браузера на время его работы. Общий замок окружения (`kbpaths.lock_path("browser")`) — через
+    `kbpaths.lock("browser")`: реентерабелен по дереву процессов, чужого держателя ждёт до 15 минут (TimeoutError).
+    Другой файл (--lock ФАЙЛ, переменная KIT_BROWSER_LOCK) — свой flock без повторного входа; пустой путь — без замка."""
+    if not path:
+        return contextlib.nullcontext()
+    if os.path.abspath(path) == os.path.abspath(kbpaths.lock_path('browser')):
+        return kbpaths.lock('browser')
+    return _file_lock(path)
 
-    def __enter__(self):
-        if self.path:
-            os.makedirs(os.path.dirname(os.path.abspath(self.path)), exist_ok=True)
-            self.fh = open(self.path, 'a')
-            fcntl.flock(self.fh, fcntl.LOCK_EX)
-        return self
 
-    def __exit__(self, *exc):
-        if self.fh:
-            fcntl.flock(self.fh, fcntl.LOCK_UN)
-            self.fh.close()
+@contextlib.contextmanager
+def _file_lock(path):
+    os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
+    with open(path, 'a') as fh:
+        fcntl.flock(fh, fcntl.LOCK_EX)
+        try:
+            yield path
+        finally:
+            fcntl.flock(fh, fcntl.LOCK_UN)
 
 
 # --- сервер: проект + /_kit/ + /_virtual/ -------------------------------------------------------------------------------
@@ -442,6 +450,31 @@ def selftest():
               r.returncode == 3 and 'нет рамок' in r.stderr and 'Traceback' not in r.stderr, (r.returncode, r.stderr[-300:]))
     check('проверки кадра: ярлык вайрфрейма data-wf и его поддерево — вне счёта мелкого и невидимого текста',
           re.search(r"closest\('\[data-wf\]'\)\) continue;[^\n]*\n\s*const cs = getComputedStyle\(el\)", CHECKS_JS) is not None)
+    home0 = os.environ.get('DDD_HOME')
+    with tempfile.TemporaryDirectory() as td:          # замки — во временном $DDD_HOME, общий замок машины не трогается
+        os.environ['DDD_HOME'] = td
+        try:
+            nested = "import sys; sys.path.insert(0, %r); import kbpaths\nwith kbpaths.lock('browser', timeout=5): pass" % \
+                os.path.join(KIT_DIR, '..', '..', 'lib')
+            with browser_lock(kbpaths.lock_path('browser')):
+                held = kbpaths.lock_held('browser')
+                t0 = time.monotonic()
+                rc = subprocess.run([sys.executable, '-c', nested], capture_output=True, text=True, timeout=60).returncode
+                quick = time.monotonic() - t0 < 5
+            free = not kbpaths.lock_held('browser')
+            with browser_lock(''):
+                none = kbpaths.lock_held('browser')
+            with browser_lock(os.path.join(td, 'other.lock')):
+                other = (kbpaths.lock_held('browser'), os.path.exists(os.path.join(td, 'other.lock')))
+        finally:
+            if home0 is None:
+                os.environ.pop('DDD_HOME', None)
+            else:
+                os.environ['DDD_HOME'] = home0
+    got = (held, rc, quick, free, none, other)
+    check('замок браузера: общий файл — kbpaths.lock (назван в DDD_LOCKS_HELD), вложенный процесс с тем же замком не ждёт, '
+          'после выхода замок свободен; --lock "" — без замка; другой файл — свой flock', got == (True, 0, True, True, False,
+                                                                                               (False, True)), got)
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
 
@@ -482,7 +515,9 @@ def main():
     ap.add_argument('--prev', default='', help='marks.json прошлой итерации — перенести номера')
     ap.add_argument('--iteration', default='')
     ap.add_argument('--wait-ms', type=int, default=350)
-    ap.add_argument('--lock', default=os.environ.get('KIT_BROWSER_LOCK') or kbpaths.lock_path('browser'))
+    ap.add_argument('--lock', default=os.environ.get('KIT_BROWSER_LOCK') or kbpaths.lock_path('browser'),
+                    help='файл замка браузера: умолчание — общий замок окружения (kbpaths.lock), другой файл — свой flock, '
+                         '"" — без замка')
     ap.add_argument('--min-free-gb', type=float, default=float(os.environ.get('KIT_MIN_FREE_GB', '0') or 0))
     ap.add_argument('--strict', action='store_true')
     a = ap.parse_args()
@@ -585,7 +620,7 @@ def main():
         return ctx, page, errs, failed
 
     try:
-        with BrowserLock(a.lock), sync_playwright() as p:
+        with browser_lock(a.lock), sync_playwright() as p:
             browser = p.chromium.launch()
             try:
                 # 1) канонический кадр каждого файла → номера

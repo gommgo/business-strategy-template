@@ -1,4 +1,4 @@
-# Blender 5.2.2 / glTF-IO 5.2.40 — [проверено: 99-raw/experiments/E/26-doc-snippets/preflight_test.py, run_md04.py] предэкспортная проверка сцены для веба
+# Blender 5.2.2 / glTF-IO 5.2.40 — [проверено] предэкспортная проверка сцены для веба
 import bpy
 from mathutils import Vector
 

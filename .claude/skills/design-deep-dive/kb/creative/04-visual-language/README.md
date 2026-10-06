@@ -5,7 +5,7 @@
 | `01-display-typography.md` | display-роли и clamp (360→1440, max ≤ 2,5 min), размер по длине H1 и колонке, интерлиньяж и трекинг по замерам кириллицы, выбор гарнитур, загрузка и метрический фолбэк, eyebrow, hero-CTA |
 | `02-composition-rhythm-sections.md` | сетка, асимметрия, вылет; hero «текст ↔ медиа», высота hero по политике site, мобильный hero; отступы и фоны секций, стыки, прозрачная шапка, формы и cookie коротко |
 | `03-color-surfaces-product.md` | число цветов по уровню, стратегии цвета, тёмные сайты, градиенты как цвет, бандинг, стекло, зерно, свечение CTA, подача продукта, единство многостраничника |
-| `marketing-tokens.json` / `marketing-tokens.css` | DTCG 2025.10 + `org.design-deep-dive.llm` + `org.design-deep-dive.fluid`: `type.display-*`, `space.section-*`, `size.hero-*`, радиусы, поверхности, скримы, градиенты-стыки, свечение CTA; `motion.marketing` — за E |
+| `marketing-tokens.json` / `marketing-tokens.css` | DTCG 2025.10 + `org.design-deep-dive.llm` + `org.design-deep-dive.fluid`: `type.display-*`, `space.section-*`, `size.hero-*`, радиусы, поверхности, скримы, градиенты-стыки, свечение CTA; `motion.marketing` — за E; `line_height_css` расширения `fluid` — готовый интерлиньяж от кегля: сборка ДС кладёт его в переменную `--type-<стиль>-leading`, число `lineHeight` значения остаётся в передней части `DESIGN.md` и в артефакте |
 | `cyrillic-display-fonts.yaml` | 37 гарнитур (32 OFL + 5 коммерческих), лицензии, оси, вердикты type.today, метрики D/02, роли; списки avoid и no_cyrillic |
 
 Выжимка:

@@ -131,7 +131,7 @@ F) [S20] [S21].
 `threshold` ({L0|L1|L2|all: число | {desktop, mobile}}) или `threshold_ref` (путь в `levels.<уровень>` файла `ambition-levels.yaml` v0.2) +
 `scale`, `severity` (B / S / D, как у site), `levels`, `spec_override` (порог `page.budget` motion-spec — только строже), `where`,
 `source`, `label`, `site`, `fix`. `auto: false` — проверка вручную или соседом (строка MANUAL в отчёте). v0.2: 60 строк, из них 54
-автоматических (v0.1 — 57 и 51; добавлены EG-PERF-11, EG-A11Y-24, EG-A11Y-25, поле `changes`) [S1].
+автоматических (v0.1 — 57 и 51; добавлены EG-PERF-11, EG-A11Y-24, EG-A11Y-25) [S1].
 
 | Наша строка | Ворота site (v1.2) | Отношение | Кто блокирует |
 |---|---|---|---|

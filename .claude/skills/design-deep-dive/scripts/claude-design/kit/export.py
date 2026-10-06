@@ -4,11 +4,13 @@
 Холст — рамки манифеста: `kit.json` статичных копий артбордов или `canvas.json` kit; рамка — копия на ширине своей
 рамки, standalone раскладывает их рядами по ширинам (`canvas.html`). Манифест читается как при съёмке (`shot.py`):
 `--manifest kit.json` без такого файла в папке копий — манифест считается из статичных копий (подписи и порядок — из
-исходников холста, ключ --canvas). Использует сервер, блокировку и проверку памяти из shot.py (тот же каталог).
+исходников холста, ключ --canvas). Сервер, замок браузера и проверка памяти — из shot.py (тот же каталог): замок
+браузера экспорт берёт сам на время работы браузера (pdf, png2x) — умолчание --lock, общий замок окружения, берёт
+`kbpaths.lock("browser")`, реентерабельный по дереву процессов; `--lock ФАЙЛ` — другой файл замка, `--lock ""` — без замка.
 
 Использование:
   python3 export.py <pdf|png2x|standalone|zip|all> <папка проекта> <outdir> [--manifest canvas.json] [--only landing.html]
-          [--canvas ПАПКА] [--lock /path/to/browser.lock] [--min-free-gb 2]
+          [--canvas ПАПКА] [--lock ФАЙЛ] [--min-free-gb 2]
 Что получается:
   pdf        <файл>-<W>-<тема>.pdf — артборд одной страницей во всю высоту (вектор: текст выделяется, шрифты встроены),
              плюс canvas.pdf — все рамки подряд (pypdf). Экранные стили (emulate_media screen), фоны печатаются.
@@ -25,7 +27,7 @@ import argparse, base64, json, mimetypes, os, re, sys, time, zipfile
 
 KIT_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, KIT_DIR)
-import shot  # noqa: E402  (serve, BrowserLock, mem_available_gb, slug)
+import shot  # noqa: E402  (serve, browser_lock, mem_available_gb, slug)
 
 KEEP_EXT = {'.html', '.htm', '.css', '.js', '.mjs', '.json', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.avif', '.gif',
             '.woff', '.woff2', '.ttf', '.otf', '.md', '.txt', '.mp4', '.webm'}
@@ -210,7 +212,9 @@ def main():
     ap.add_argument('--manifest', default='canvas.json')
     ap.add_argument('--canvas', default='', help='папка исходников холста с canvas.json — для манифеста копий, который считается')
     ap.add_argument('--only', default='')
-    ap.add_argument('--lock', default=os.environ.get('KIT_BROWSER_LOCK', ''))
+    ap.add_argument('--lock', default=os.environ.get('KIT_BROWSER_LOCK') or shot.kbpaths.lock_path('browser'),
+                    help='файл замка браузера: умолчание — общий замок окружения (kbpaths.lock), другой файл — свой flock, '
+                         '"" — без замка')
     ap.add_argument('--min-free-gb', type=float, default=float(os.environ.get('KIT_MIN_FREE_GB', '0') or 0))
     a = ap.parse_args()
     project = os.path.abspath(a.project)
@@ -232,7 +236,7 @@ def main():
         from playwright.sync_api import sync_playwright
         httpd, base_url = shot.serve(project)
         try:
-            with shot.BrowserLock(a.lock), sync_playwright() as p:
+            with shot.browser_lock(a.lock), sync_playwright() as p:
                 browser = p.chromium.launch()
                 try:
                     if 'pdf' in steps:

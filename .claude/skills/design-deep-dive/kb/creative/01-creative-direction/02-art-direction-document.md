@@ -70,8 +70,9 @@
 | `ambition` | уровень, источник, `budget_profile` `<page_type>@L<n>`, потолок движения, причина, уровни по ролям секций | Claude по `03-ambition-levels` | всегда |
 | `concept` | Design Read, механизм, сцена, что доказывает первый экран, тезис ≤ 240, метафора, материал, энергия, колея и противоположность | арт-директор | всегда |
 | `territories` | 5–9 миров, семейство, причина, `literal`, `rejected_because` | арт-директор | всегда |
-| `directions` | 3–5: оси, палитра, гарнитуры, главный приём, первый экран, риск, цена, `level_fit`, `canon`, `recommended` | арт-директор | всегда |
+| `directions` | 3–5: оси, палитра, гарнитуры, главный приём, первый экран, риск, цена, `level_fit`, `canon`, `recommended`; v1 — `bans` (запреты направления до выбора) и `notes` (на что смотреть на артборде) | арт-директор | всегда |
 | `choice` | выбранное, кем, когда, почему, `merged_from`, отклонённые | заказчик или умолчание | при `approved` |
+| `treatment_variants` | v1: варианты подачи выбранного направления (`id`, `shows`, `effects`, `chosen`, `chosen_by`) | арт-директор; выбор — `chosen`, `chosen_by` | нет |
 | `moodboard` | референсы с ролью, «взять / не брать», одной секцией | B (библиотека) + арт-директор | нет |
 | `visual_language` | стратегия цвета, палитра, правило акцента, гарнитуры, композиция, поверхности, картинки, тема, ссылки на D | арт-директор по D | при `approved` |
 | `tokens_extension` | путь к `marketing-tokens.json` и переопределения с причиной | D, арт-директор | нет |
@@ -80,7 +81,7 @@
 | `decisions` | приём → use / avoid / twist по пяти критериям H | арт-директор по H | нет |
 | `exclusions` | запретные полосы, маркеры IMG/VID, снятые умолчания L0, `k3_allow`, запреты | арт-директор | нет |
 | `budget` | профиль, крупные траты, исключения с подписью | арт-директор, site P | нет |
-| `handoff` | проекции: `visual_dna`, `blender`, `kimi` | Claude | при `approved` |
+| `handoff` | проекции: `visual_dna`, `blender`; v1 — ещё `generated` (`by`, `at`) | Claude | при `approved` |
 | `lifecycle` | версия major.minor, история, пересмотр ≤ 6 мес., что делать при смене бренда | Claude | всегда |
 
 ## 3. Статусы и правила схемы
@@ -126,7 +127,7 @@
 
 | `art-direction` | kimi | Правило |
 |---|---|---|
-| `concept.thesis` / `handoff.kimi.design_system_style` | `design_system.style`, `direction.visual_thesis` | одна фраза |
+| `concept.thesis` | `design_system.style`, `direction.visual_thesis` | одна фраза |
 | `directions[chosen].axes` | `direction.paper`, `display_style` | оси совпадают с kimi 07/01 §2.4 |
 | `visual_language.accent_rule` | `direction.accent_rule`, раздел Colors DESIGN.md | где живёт акцент |
 | `visual_language.imagery` | `direction.imagery`, раздел Imagery | что на картинках и откуда |
@@ -134,8 +135,7 @@
 | `motion_system.level`, `thesis`, `library` | `decisions.motion.level`, `thesis`, `library`; раздел Motion | уровень ≤ `motion_cap`; cinematic — только с готовыми роликами или рендером |
 | `effects_by_section` + motion-spec I | `decisions.motion.moments` | моменты в формате T7 |
 | `exclusions.bans` | `design_system.bans`, Do's and Don'ts | конкретные паттерны, не «без ИИ-вида» |
-| `exclusions.k3_allow` ∪ `site-brief.ambition.allow.markers` | `k3_checks.py --allow` | только с решением или словом заказчика |
-| `handoff.kimi.design_md_overview` | раздел Overview DESIGN.md | характер и главный приём; раздела «Brand expression» у kimi нет — предложение kimi |
+| `exclusions.k3_allow` ∪ `site-brief.ambition.allow.markers` | `mockup_checks.py --allow` | только с решением или словом заказчика |
 
 ### 4.4. → план страницы site (`treatment`, C1) [S7] [S10]
 
@@ -198,7 +198,7 @@
 | `avoid` визуального маркера | `exclusions.forbidden_markers` (`IMG-Mnn` — 25, `VID-Mnn` — 18: `../ai-media/01-web-assets-landscape/03-ai-fit-trust-and-slop.md` §5.2–5.3) [S4] | `visual-dna exclusions.forbidden_markers` | подсхема паспорта, A/01 |
 | `avoid` оттенка | `exclusions.forbidden_hues` (+ `except_share_max`, если в полосе бренд) | `visual-dna palette.forbidden_hues` | `ad_check`: акцент в полосе — предупреждение |
 | `avoid` паттерна | `exclusions.bans` — предметно («рамки браузера и телефона», а не «без ИИ-вида») | kimi `design_system.bans`, Do's and Don'ts `DESIGN.md`; `visual-dna exclusions.banned_words` | K (волна 3) |
-| `use`/`twist` приметы K3 | `decisions[].k3_allow` и `exclusions.k3_allow` | `k3_checks.py --allow`; бриф site `ambition.allow.markers` (C1) | `ad_check`: `--allow` без решения — предупреждение |
+| `use`/`twist` приметы K3 | `decisions[].k3_allow` и `exclusions.k3_allow` | `mockup_checks.py --allow`; бриф site `ambition.allow.markers` (C1) | `ad_check`: `--allow` без решения — предупреждение |
 | снятие умолчания L0 соседа | `exclusions.lifted_markers[] {marker, decision_ref}` (пример: `LOOK-BG-WARM` ← `d-warm-field`) | ai-media, blender, ui — только для этого сайта | ссылка на `decisions[].id` |
 | `use` эффекта | `effects_by_section`, `treatment.effects` секции | F (`effects.yaml`), E (motion-spec), I | `ad_check`, `c1_check`: эффект ≤ уровня секции |
 

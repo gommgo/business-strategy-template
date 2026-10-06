@@ -5,7 +5,7 @@
 # Russell et al. 2025 guidebook, Hallmark copy.md.
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   lang: en
   flags: i
@@ -265,5 +265,5 @@ rules:
     message: "Benefit without a fact («fast and reliable», «in just a few clicks») and no number nearby."
     replacement: "time, price or steps from facts.yaml: «in 3 fields», «from $9 a month»"
     examples: {bad: "Fast and reliable service at affordable prices.", good: "Same-day repair from $49."}
-    source: "PLAN.md correction to ux 07/06 §1 (easy/fast only with a fact); ux 07/06 §4.1 (simply, just, easily, quickly)"
+    source: "correction to ux 07/06 §1 (easy/fast only with a fact); ux 07/06 §4.1 (simply, just, easily, quickly)"
     evidence: "[практика]"

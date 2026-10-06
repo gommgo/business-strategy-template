@@ -9,20 +9,20 @@
 Что делает:
     - запускает `blender -b [--factory-startup] [file.blend] --python-exit-code 1 --python script.py -- args`;
       по умолчанию --factory-startup: чистые настройки без пользовательских аддонов (MCP, MPFB), чтобы
-      эксперимент был воспроизводим; --user-prefs — с настройками и аддонами пользователя;
+      запуск был воспроизводим; --user-prefs — с настройками и аддонами пользователя;
     - аргументы после `--` скрипт читает так: `argv = sys.argv[sys.argv.index("--") + 1:]`;
     - код выхода: 0 — успех, 1 — исключение в скрипте, 124 — таймаут;
     - вывод фильтруется от шума рендера (строки Fra:, прогресс сэмплов); --all печатает всё;
     - полный журнал всегда сохраняется в $DDD_HOME/out/blender/logs/<имя>_<время>.log (или --log).
 
-Blender: DDD_BLENDER или blender из PATH (5.2.2 LTS). EEVEE в фоне работает через EGL на Intel Iris Xe (~4 с на кадр
-480×270), Cycles — на CPU (20 потоков). Параллельно работают несколько агентов: держи рендеры маленькими
+Blender: DDD_BLENDER или blender из PATH (5.2.2 LTS). EEVEE в фоне работает через EGL на видеокарте машины, Cycles без
+GPU — на CPU. Параллельно работают несколько агентов: держи рендеры маленькими
 (≤ 1024 px, Cycles ≤ 64 сэмплов), ставь таймаут и не оставляй процессы висеть.
 """
 import os, re, shutil, subprocess, sys, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 LOGDIR = str(kbpaths.out("blender", "logs"))
 BLENDER = kbpaths.blender()

@@ -89,13 +89,16 @@ H2 (`../08-image-post-processing/02-upscale-outpaint-edit.md` §2); метод �
 |---|---|
 | `replace`, `recolor` | Change only the {target}{where} to {to} ({value}). Keep its position and size exactly the same. |
 | `add` | Add {to} ({value}) {where}. |
-| `remove` | Remove the {target}{where}; in its place the frame shows {to}. |
+| `remove` | Remove the {target}{where}; in its place the frame shows {to}. Артикль цели — один: свой артикль снимается, своё местоимение или квантор (its, all …) остаётся |
 | `text_replace` | Replace the text "{target}" with "{to}", keeping the same font, size, color and position. |
 | `translate_text` | Translate the {target} into {to}, keeping everything else the same. |
 | `background_swap` | Replace the background with {to}; keep the subject, its edges and the lighting direction unchanged. |
 | `relight` | Relight the scene: {to} ({value}). |
 | `restyle` | Preserve the original composition of {источник} but render it as {to}. |
-| `extend` | Extend the scene of {источник} to fill a {ratio} frame; keep the original image content unchanged… (Qwen — шаблон §2.4) |
+| `extend` | Extend the scene of {источник} to fill a {ratio} frame; keep the original image content unchanged and continue {caption} naturally at the new edges. Затем кадрирование: по предложению на `changes[]` — «The {target}{where} shows {to} ({value}).» — и фраза зоны текста `composition.text_zone` (Qwen — шаблон §2.4, кадрирование после описания исходника) |
+
+Запрет текста в правке — «No added text.»: надписи исходника остаются, `edit.keep` с надписями запрету не противоречит. В
+генерации с нуля — «No text.»
 
 | Семейство | Вступление | Закрытие |
 |---|---|---|
@@ -109,7 +112,7 @@ H2 (`../08-image-post-processing/02-upscale-outpaint-edit.md` §2); метод �
 Change only these elements: the armchair upholstery in the right third to deep green velvet (#1F5E3B); the throw pillow to a
 darker pillow. Keep their positions and sizes exactly the same. After the change, the frame shows the same room with a deep
 green armchair. Keep the camera angle, window light and floor shadows unchanged. Change nothing else. Maintain the original
-composition and subject. No text.
+composition and subject. No added text.
 ```
 
 «a darker pillow» — намеренная ошибка фикстуры: компилятор предупреждает «сравнительная формулировка — задай целевое значение
@@ -151,7 +154,7 @@ add a single framed botanical print on the bare wall above the armchair; change 
 parquet; add a round jute rug on the floor near the window; add a small potted fern on the window sill; add a folded mustard
 wool throw over the armchair armrest. Keep the position and size of every changed element exactly the same. Keep the camera
 angle, window light and room layout unchanged. Keep everything else in the image exactly the same, preserving the original
-style, lighting, and composition. Maintain the original composition and subject. No text.
+style, lighting, and composition. Maintain the original composition and subject. No added text.
 ```
 
 - Явный `op` хотя бы у одного изменения включает формулу «make only these changes: change…; add…; remove…» — одинаковую во
@@ -209,8 +212,10 @@ Extend the image beyond its boundaries using outpainting. The original caption i
 ```
 
 - Остальные семейства: `extend` → «Extend the scene of the provided image to fill a 21:9 frame; keep the original image content
-  unchanged and continue <caption> naturally at the new edges.» + новый `aspect_ratio`; модель перерисовывает и исходную часть →
-  `edit_check.py outpaint` и вставка исходника (H `08/02` §4.2–4.3).
+  unchanged and continue <caption> naturally at the new edges.» + предложения кадрирования (`changes`, зона текста) + новый
+  `aspect_ratio`; модель перерисовывает и исходную часть → `edit_check.py outpaint` и композит: исходные пиксели — на место,
+  из ответа модели — новые области (H `08/02` §4.2–4.3). Вариант маршрута с отсечкой маски и порогом проверки — `routing.yaml`,
+  IMG-PRODUCT.
 
 ## 3. Референсы с ролями
 

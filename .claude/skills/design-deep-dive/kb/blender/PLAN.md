@@ -49,7 +49,7 @@ Blender 2.7x–3.x, а на машине стоит 5.2.2 LTS, где часть
 
 ## Окружение (проверено оркестратором 22.09.2026)
 
-- **Blender 5.2.2 LTS** (`/home/mm/.local/bin/blender`, сборка 2026-09-15). Фоновый режим работает: EEVEE через EGL
+- **Blender 5.2.2 LTS** (`blender` из PATH, сборка 2026-09-15). Фоновый режим работает: EEVEE через EGL
   на Intel Iris Xe (кадр 480×270 ≈ 4 с), Cycles только на CPU (20 потоков). Экспортёр «Khronos glTF Blender I/O
   v5.2.40», Draco и Meshopt доступны. Встроенный Python 3.13 с numpy, OpenImageIO, MaterialX, USD, OpenVDB.
   Проверено в 5.2.2: `Material.use_nodes` и `World.use_nodes` устарели (удаление в 6.0), новые материалы и миры

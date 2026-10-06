@@ -4,9 +4,9 @@
 план ассетов ai-media `01/01` §8, blender `01/02` §7 и `12-recipes/`, пакет kimi `07-brief-handoff/` · опыты
 `99-raw/experiments/E/01-validate`, `02-text-slot-defaults`, `03-saas-demo-brief`
 
-Схемы — `page-plan.schema.json` (v0.9) и `blocks.schema.json`; примеры — `examples/page-plan-lead-services-otves.yaml`
-(лидогенерация услуг РФ), `examples/page-plan-saas-okoshko.yaml` (SaaS), `examples/page-plan-event-*.yaml` (мероприятие).
-Проверка — `99-raw/experiments/E/01-validate/validate.py` (схема + связи) и `../../scripts/site/vocab_lint.py`. План — точка S1
+Схемы — `page-plan.schema.json` (v0.9) и `blocks.schema.json`; примеры — `../10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml`
+(лидогенерация услуг РФ), `../10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml` (SaaS).
+Проверка — `../../../scripts/site/site_validate.py` (схема + связи) и `../../../scripts/site/vocab_lint.py`. План — точка S1
 тройки: по нему text пишет copy-deck, creative — подачу секций, ai-media — план ассетов, blender — 3D, kimi получает секции.
 
 ## Выжимка для агента
@@ -44,7 +44,7 @@
 18. **Копия текста для copy-deck получается прямым переносом полей** (id → section_id, role → section_role, anatomy →
     site_slot_id, group → group); `fact_ids` слота — из `data[].binds`. [проверено: схема copy-deck v1] → §6.1
 19. **Секции kimi — `site.sections[{id, job}]` из плана без самодельных id**. [практика] [проверено] → §6.5
-20. **Перед сдачей — `validate.py` и `vocab_lint.py` с кодом 0**; info-строки о `use.slot_types` — сигнал для text, не ошибка. [проверено] → §7
+20. **Перед сдачей — `site_validate.py` и `vocab_lint.py` с кодом 0**; info-строки о `use.slot_types` — сигнал для text, не ошибка. [проверено] → §7
 
 ## 1. Модель слота
 
@@ -68,14 +68,16 @@
   `group` — экземпляр `группа-N` (`step-1`). По умолчанию `anatomy` = `id` (кроме data-слотов — у них анатомия только явная).
 - Пример (`steps`, «Отвес»): `{id: step-1-title, slot: step-title, anatomy: step.title, group: step-1, heading: h3}` и
   `{id: step-1-body, slot: step-body, anatomy: step.body, group: step-1}`.
+- Подписи кнопок окна просмотра — слоты `viewer.close-label`, `viewer.prev-label`, `viewer.next-label`, экземпляр
+  `viewer-1`.
 - Обязательные элементы блока (`required: true`, `adds` варианта) должны быть в плане; кратность элемента без `max` — 1
-  (кроме data); число экземпляров группы — в пределах `min`–`max` группы. Проверяет `validate.py` (E/01).
+  (кроме data); число экземпляров группы — в пределах `min`–`max` группы. Проверяет `site_validate.py` (PL-A05).
 
 ### 1.3. Текстовые слоты: назначение, длина, факт
 
 - **Назначение** — `def` словаря и `purpose` copy-slots.yaml; блок уточняет своё (`purpose` элемента), план — что сказать
   (`intent`: «4,8 из 5 на Яндекс Картах по 214 оценкам»). Текст пишет text в copy-deck.
-- **Класс длины** — `text_slot_defaults` в `blocks.yaml` (выведено `derive_text_defaults.py` из `copy-slots.yaml`,
+- **Класс длины** — `text_slot_defaults` в `blocks.yaml` (выведено из `copy-slots.yaml`,
   target RU): label ≤ 3 слов, phrase 4–10, sentence 11–25, paragraph 26–80, long > 80. Распределение 79 слотов: phrase 37,
   sentence 16, label 16, paragraph 10. [проверено]
 - **Нужен ли факт** — `fact` (always, if-claim, never) как `fact_required` text: `hero-proof`, `stat-value`,
@@ -140,6 +142,7 @@
   `read-more`, `log-in`); `target` — как `conversion.target` брифа (`anchor`, `route`, `url`, `tel`, `messenger`, `store`);
   `style`: `primary` (главный призыв; повторяется), `secondary` (второй путь иным стилем), `channel` (телефон, мессенджер
   того же действия), `link` (служебное); `label` — id текстового слота с подписью.
+- Готовое сообщение мессенджера — текстовый слот `messenger-prefill` той же секции, на него ссылается `target.prefill`.
 - `form` — `ref` (набор полей F, `lead-forms.yaml#…`), `fields_visible_max`, `steps`, `consent` (`separate-checkbox` по
   умолчанию для РФ — I), `success` (`inline` или `thank-you-page`).
 - `events[]` секции: `trigger` (view, click, submit, start, step, play, expand, scroll-depth, copy, error), `target` (слот
@@ -161,6 +164,9 @@
 | `seo`, `legal`, `analytics` | H, I, P | H, I, P, K |
 | `treatment{}` | creative | creative |
 
+Запись утверждения — `approval {by, date, note}` в корне плана; у плана `approved` она обязательна по смыслу
+(валидатор — warning PL-U01).
+
 ### 2.1. Происхождение осведомлённости
 
 - Правило оркестратора (2026-09-24): уровень страницы выводится из `pages.list[].main_sources` брифа через
@@ -175,7 +181,8 @@
 
 - `first_screen_policy` — `offer-cta` (обещание и призыв в hero), `offer-cta-header` (призыв в шапке или липкой панели),
   `poster` (образ и признак продолжения, призыв в шапке; только кампании L2, портфолио, письма, манифесты; не при
-  `paid-search` и не у ЛУ и SaaS под рекламу). Вариант hero должен ей отвечать (`variants[].first_screen_policy` в блоке).
+  `paid-search` и не у ЛУ и SaaS под рекламу). Вариант hero должен ей отвечать (`variants[].first_screen_policy` в блоке);
+  у варианта каталога `first_screen_policy` — значение или список допустимых политик.
 - `must_show` — «секция.слот», которые обязаны быть выше черты первого экрана (C 03 §1.3 по типу страницы); `core_words_max`
   — ядро ≤ 40 слов (text `hero-core`).
 - `message_match[]` — источник, его обещание, что совпадает (`subject`, `price`, `offer`, `geo`, `audience`, `action`,
@@ -237,7 +244,7 @@
 | 9 | Медиа и 3D: роль, источник, подлинность, соотношения, LCP, постер | `slots.media[]`, `slots.3d[]` | real-only у людей и работ |
 | 10 | Действия и события: главный призыв повторяется, второй путь иным стилем | `slots.action[]`, `events[]` | действие в словаре |
 | 11 | Overlays, мета, SEO, право, аналитика — ссылками на владельцев | `overlays`, `page_slots`, `page.seo/legal/analytics` | баннер и согласие — по юрисдикции |
-| 12 | Проверка и вопросы заказчику | `validate.py`, `vocab_lint.py`, `open_questions` | код 0; блокирующие пробелы названы |
+| 12 | Проверка и вопросы заказчику | `site_validate.py`, `vocab_lint.py`, `open_questions` | код 0; блокирующие пробелы названы |
 
 Полная процедура «бриф → карта → планы → пакет → приёмка» — J (`../10-playbooks-contracts/01-procedure-brief-to-pages.md`, волна 3).
 
@@ -289,9 +296,9 @@
 
 ## 7. Проверка плана
 
-- `validate.py` (E/01): JSON Schema 2020-12 + связи (блок, вариант, анатомия, обязательные элементы, факты и их вид,
-  разрешения, binds, label, alt, события, H1, семейство макроструктуры, профиль бюджета, «секция.слот» в первом экране и
-  SEO). Результат на примерах: error 0, warning 0. `vocab_lint.py`: 0 ошибок.
+- `site_validate.py` (коды `PL-*`): JSON Schema 2020-12 + связи (блок, вариант, анатомия, обязательные элементы, факты и
+  их вид, разрешения, binds, label, alt, события, H1, семейство макроструктуры, профиль бюджета, «секция.слот» в первом
+  экране и SEO); id словаря — `vocab_lint.py`.
 - Для `site_validate.py` (J, v1): длины текстов — не проверять (text); добавить сверку `awareness_basis` с брифом,
   `entry_page` источников с `page.id`, фактов `use.page_types` с `page_type`, согласованность `overlays` с `policies` брифа.
 
@@ -318,7 +325,7 @@
 
 ## Чек-лист
 
-- [ ] Все id — из словаря и `blocks.yaml`; `vocab_lint.py` и `validate.py` — код 0?
+- [ ] Все id — из словаря и `blocks.yaml`; `vocab_lint.py` и `site_validate.py` — код 0?
 - [ ] `awareness_basis` выведен из `main_sources` брифа, правило сведения записано?
 - [ ] Политика первого экрана соответствует макроструктуре и источнику; `must_show` и `message_match` ссылаются на слоты?
 - [ ] У содержательных секций есть `question` и `next_step`; у всех — роль, блок, вариант?
@@ -346,8 +353,9 @@
 - [S2] Словарь B `../02-site-types/vocabulary.yaml` v0 r2; `02-vocabulary-and-crosswalk.md` §4.5–4.7. Свой агент.
 - [S3] C `../03-page-structure/01-narratives-and-section-order.md` §1.1, §3–4; `02-length-goal-message-match.md` §1.3, §2–4;
   `03-first-screen-and-mobile.md` §1.3, §2, §5. Свой агент.
-- [S4] A `../01-foundations/site-brief.schema.json` (v0), `site-brief.example.yaml`, `03-site-brief.md`; валидатор
-  `../99-raw/experiments/A/01-schema-validate/validate.py`. Свой агент.
+- [S4] A `../01-foundations/site-brief.schema.json` (v0), `../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`,
+  `03-site-brief.md`; валидатор
+  `../../../scripts/site/site_validate.py`. Свой агент.
 - [S5] text `../../text/10-templates-recipes/copy-deck.schema.json` (v1), `04-copy-by-block/copy-slots.yaml`,
   `02-strategy-messaging/facts.schema.yaml`, примеры фактов «Отвес» и демо «Окошко» (`99-raw/experiments/E/`). Сестра.
 - [S6] ai-media `../../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md` §2.1, §8. Сосед.

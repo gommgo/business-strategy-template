@@ -1,10 +1,10 @@
 # meta-rules.yaml — мета и OG: правила для линтера copy_lint.py (профиль meta) + справочник длин и шаблонов.
-# text-research · волна 2 · агент G · 2026-09-24. Подробности, примеры и спорные места — 07-seo-geo-copy/02-seo-pages-articles-meta.md §4–5.
+# Подробности, примеры и спорные места — 07-seo-geo-copy/02-seo-pages-articles-meta.md §4–5.
 #
 # Как работает.
-# - Блок `rules` — формат спецификации C (06-anti-slop/02-linter-spec-and-profiles.md §2). Файл уже подключён в
+# - Блок `rules` — формат спецификации линтера (06-anti-slop/02-linter-spec-and-profiles.md §2). Файл уже подключён в
 #   06-anti-slop/profiles.yaml → external_rules; линтер читает только `defaults`, `rules`, `overrides`, остальные ключи
-#   (`engines`, `limits`, `templates`, `checks_outside_linter`) — справочник для генерации (E, I, J) и для человека.
+#   (`engines`, `limits`, `templates`, `checks_outside_linter`) — справочник для генерации и для человека.
 # - Правила ищут по тексту одного слота. Мета-юниты: copy deck `meta.title / description / og_title / og_description`
 #   (жанр слота — meta), HTML `<title>`, `meta description`, `og:*` (жанр — жанр документа). Поэтому фильтр — slot_types,
 #   а genres — все жанры страниц, кроме email-form.
@@ -12,15 +12,14 @@
 #   ниже — сигнал «проверь, что главное в начале», а не ворота. Ворота (error) — только то, что поисковики прямо называют
 #   плохим: пустой или общий title, набивка повторами, кликбейт.
 # - Проверки между полями и страницами (дубли title на сайте, description = title, og:title без title) регулярками не
-#   делаются — `checks_outside_linter`, скрипт опыта 99-raw/experiments/G/01-meta-corpus/run.py.
-# Тест загрузки: python3 ../../scripts/text/copy_lint.py --selftest (примеры каждого правила) и
-#               python3 99-raw/experiments/G/00-rules-load/test_rules.py (YAML, поля, прогон примеров по слотам).
+#   делаются — `checks_outside_linter`: их ведёт ../../scripts/text/copydeck.py validate.
+# Тест загрузки: python3 ../../scripts/text/copy_lint.py --selftest (примеры каждого правила).
 
 date: 2026-09-24
 version: 1
-owner: G (волна 2)
+owner: text/07-seo-geo-copy
 status: provisional
-provisional: true          # пороги длины сверены с корпусом D (n страниц — в 01-meta-corpus/README.md); пересмотр после живой фазы
+provisional: true          # пороги длины сверены с корпусом 03-corpus-measured; пересмотр после живой фазы
 
 defaults:
   group: EXT
@@ -65,7 +64,7 @@ rules:
     message: "Одно слово (по основе из 5 букв) три раза и больше: набивка ключей. Google и Яндекс прямо называют такие заголовки спамными."
     replacement: "одна формулировка запроса + то, чем страница отличается: «Ремонт квартир под ключ в Екатеринбурге — от 9 800 ₽/м², гарантия 3 года»"
     examples: {bad: "Ремонт квартир под ключ в Екатеринбурге | Ремонт квартир в новостройке | Ремонт ручной работы", good: "Ремонт квартир под ключ в Екатеринбурге — работаем с новостройками"}
-    source: "Google «Influencing your title links» («Foobar, foo bar, foobars, foo bars»; keyword stuffing); Google Spam policies (обновлено 2026-08-28) — keyword stuffing; Яндекс «Как правильно написать title» («не повторяйте их несколько раз… поиск может посчитать такой заголовок спамом»); плохой пример — title страницы корпуса D (ru-mid, имя сайта не приводим; 99-raw/experiments/G/01-meta-corpus)"
+    source: "Google «Influencing your title links» («Foobar, foo bar, foobars, foo bars»; keyword stuffing); Google Spam policies (обновлено 2026-08-28) — keyword stuffing; Яндекс «Как правильно написать title» («не повторяйте их несколько раз… поиск может посчитать такой заголовок спамом»); плохой пример — title страницы корпуса 03-corpus-measured (ru-mid, имя сайта не приводим)"
     evidence: "[документация]"
     note: "основа — первые 5 букв: ловит словоформы («квартир», «квартиры»); редкие ложные — однокоренные разные слова"
 
@@ -76,7 +75,7 @@ rules:
     message: "Одно слово (по основе) четыре раза и больше в описании: похоже на набивку; Яндекс просит описание «без злоупотребления ключевыми словами»."
     replacement: "одно упоминание предмета + факты: «Натяжные потолки в Казани: от 918 ₽/м² с установкой, замер бесплатно»"
     examples: {bad: "Натяжные потолки недорого. Цена потолка под ключ. Заказать натяжной потолок, установка потолков в Казани.", good: "Натяжные потолки в Казани: от 918 ₽/м² с установкой, замер бесплатно в пределах города."}
-    source: "Яндекс «Как правильно составить description» (снято 2026-09-24); Google «Control your snippets» («long strings of keywords»); порог 4 — корпус D: 3 повтора в описаниях часто естественны (19 из ≈ 100), 4 — в основном набивка (5 из 6; 01-meta-corpus)"
+    source: "Яндекс «Как правильно составить description» (снято 2026-09-24); Google «Control your snippets» («long strings of keywords»); порог 4 — корпус 03-corpus-measured: 3 повтора в описаниях часто естественны (19 из ≈ 100), 4 — в основном набивка (5 из 6)"
     evidence: "[документация] + [проверено]"
     note: "ложное — линейка товаров («iPhone Duo, iPhone 18 Pro…»); законный случай — lint_allow"
 
@@ -90,9 +89,9 @@ rules:
     message: "Кликбейт: заголовок обещает сенсацию, которой нет в тексте. Google просит title без преувеличений и шока, Яндекс — «Избегайте кликбейта»; асессоры Google ставят таким страницам Low."
     replacement: "польза + сужение + источник: «Вас удивит, сколько стоит ремонт» → «Сколько стоит ремонт двушки в 2026 году: смета 54 м² по статьям»"
     examples: {bad: "Вы не поверите, сколько стоит ремонт квартиры", good: "Сколько стоит ремонт двушки в 2026 году: смета 54 м² по статьям"}
-    source: "Google «Creating helpful, reliable, people-first content» (обновлено 2025-12-10): «Does the main heading or page title avoid exaggerating or being shocking in nature?»; Google SQRG 11.09.2025: «Exaggerated or shocking titles are evidence of Low quality»; Яндекс, блог Вебмастера 2024-03-22 («Избегайте кликбейта»); Ильяхов, «Боеспособный заголовок», 2017 [V:y0iIV5meaB4 31:52] — обманутое ожидание; список фраз — W2 (кандидаты в маркеры C)"
+    source: "Google «Creating helpful, reliable, people-first content» (обновлено 2025-12-10): «Does the main heading or page title avoid exaggerating or being shocking in nature?»; Google SQRG 11.09.2025: «Exaggerated or shocking titles are evidence of Low quality»; Яндекс, блог Вебмастера 2024-03-22 («Избегайте кликбейта»); Ильяхов, «Боеспособный заголовок», 2017 [V:y0iIV5meaB4 31:52] — обманутое ожидание; список фраз — кандидаты в маркеры 06-anti-slop"
     evidence: "[документация] + [практика]"
-    note: "одно правило кликбейта на мету, статью и письма: заголовки статьи, лид, тема и прехедер письма — там же, где title (маркер каталога C — строка «кликбейт» в 06-anti-slop/01)"
+    note: "одно правило кликбейта на мету, статью и письма: заголовки статьи, лид, тема и прехедер письма — там же, где title (маркер каталога — строка «кликбейт» в text 06/01)"
 
   - id: meta-title-boilerplate-tail
     level: warning
@@ -112,7 +111,7 @@ rules:
     message: "Три и больше вертикальных черты в title: склейка нескольких формулировок запроса вместо одного заголовка."
     replacement: "один заголовок + бренд через один разделитель: «Ремонт квартир под ключ в Екатеринбурге | Отвес»"
     examples: {bad: "Ремонт квартир | Ремонт под ключ | Дизайн интерьера | Отвес", good: "Ремонт квартир под ключ в Екатеринбурге | Отвес"}
-    source: "Google «Influencing your title links» (бренд «at the beginning or end… separated… with a delimiter such as a hyphen, colon, or pipe»); Яндекс «Как правильно написать title» (бренд через двоеточие, дефис или вертикальную черту); корпус D (01-meta-corpus)"
+    source: "Google «Influencing your title links» (бренд «at the beginning or end… separated… with a delimiter such as a hyphen, colon, or pipe»); Яндекс «Как правильно написать title» (бренд через двоеточие, дефис или вертикальную черту); корпус 03-corpus-measured"
     evidence: "[документация] + [проверено]"
 
   - id: meta-place-list
@@ -135,7 +134,7 @@ rules:
     message: "Слова капсом подряд в мета: Яндекс просит описание «без злоупотребления… заглавными буквами»."
     replacement: "обычный регистр; аббревиатуры (ООО, ГОСТ) по одной — законны"
     examples: {bad: "РЕМОНТ КВАРТИР ПОД КЛЮЧ в Нижнем Новгороде", good: "Ремонт квартир под ключ в Нижнем Новгороде — Отвес"}
-    source: "Яндекс Вебмастер «Как правильно составить description» (снято 2026-09-24); C ru-pun-caps-text (мета не покрывает)"
+    source: "Яндекс Вебмастер «Как правильно составить description» (снято 2026-09-24); 06-anti-slop ru-pun-caps-text (мета не покрывает)"
     evidence: "[документация]"
 
   - id: meta-desc-keyword-list
@@ -156,7 +155,7 @@ rules:
     message: "Title длиннее 80 знаков: в выдаче Google видна примерно первая половина (≈ 55–60 знаков кириллицей при ширине ≈ 600 px — оценка), хвост поисковик обрежет или перепишет."
     replacement: "главное — в первых 55 знаках: предмет страницы + отличие; бренд — в конец; перечни и повторы — убрать"
     examples: {bad: "Сеть клиник и медицинских центров — клинико-диагностические центры, детские клиники и клинические больницы", good: "Клиники «Икс» в Нижнем Новгороде: взрослые и детские"}
-    source: "Google «Influencing your title links» («no limit on how long a <title> element can be… truncated… to fit the device width»); Яндекс «Как правильно написать title» («Длина заголовка ограниченна шириной экрана»); порог — корпус D (медиана title RU-лидеров 69 знаков, p75 ≈ 85) и расчёт ширины Liberation Sans = Arial 20 px (01-meta-corpus)"
+    source: "Google «Influencing your title links» («no limit on how long a <title> element can be… truncated… to fit the device width»); Яндекс «Как правильно написать title» («Длина заголовка ограниченна шириной экрана»); порог — корпус 03-corpus-measured (медиана title RU-лидеров 69 знаков, p75 ≈ 85) и расчёт ширины Liberation Sans = Arial 20 px"
     evidence: "[документация] + [проверено]; ширина 600 px — [мнение вендора]"
 
   - id: meta-title-very-long
@@ -166,7 +165,7 @@ rules:
     message: "Title длиннее 110 знаков: больше половины не увидят ни в Google, ни в Яндексе; так длинно пишут, когда склеивают ключи."
     replacement: "сократить до одной мысли; перечни видов услуг — в H2 и текст страницы"
     examples: {bad: "Онлайн-курс «Аналитик данных»: обучение анализу данных с нуля, программа для начинающих, стажировка и помощь с трудоустройством — Школа Икс", good: "Курс «Аналитик данных» с нуля — Школа Икс"}
-    source: "Google и Яндекс (см. meta-title-long); порог — корпус D (p90 title RU-лидеров ≈ 118 знаков)"
+    source: "Google и Яндекс (см. meta-title-long); порог — корпус 03-corpus-measured (p90 title RU-лидеров ≈ 118 знаков)"
     evidence: "[документация] + [проверено]"
 
   - id: meta-desc-long
@@ -176,7 +175,7 @@ rules:
     message: "Description длиннее 200 знаков: видимая часть сниппета короче (≈ 130–150 знаков кириллицей на десктопе Google — оценка); Яндекс просит главное ставить в начало."
     replacement: "главное — в первых 120 знаках: что на странице + факт; остальное можно оставить"
     examples: {bad: "Мы занимаемся ремонтом квартир под ключ в Нижнем Новгороде уже много лет и предлагаем нашим клиентам полный комплекс услуг от дизайн-проекта и сметы до чистовой отделки, уборки и сдачи объекта по акту с гарантией.", good: "Ремонт квартир под ключ в Нижнем Новгороде: от 9 800 ₽/м² без материалов, гарантия 3 года по договору."}
-    source: "Google «Control your snippets» (обновлено 2026-04-20: «no limit… truncated… to fit the device width»); Яндекс «Как правильно составить description» («Размещение важной информации в конце текста» — плохо); порог — корпус D (медиана RU 181 знак)"
+    source: "Google «Control your snippets» (обновлено 2026-04-20: «no limit… truncated… to fit the device width»); Яндекс «Как правильно составить description» («Размещение важной информации в конце текста» — плохо); порог — корпус 03-corpus-measured (медиана RU 181 знак)"
     evidence: "[документация] + [проверено]"
 
   - id: meta-desc-short
@@ -232,7 +231,7 @@ engines:
               "не временная и служебная информация, не устаревшее, не «из нескольких слов»"]
     snippet: "заголовок и описание собираются из title, description, текста страницы (со schema.org), Маркета и текстов ссылок; «наиболее информативный и релевантный поисковому запросу текст»"
     og: "Open Graph поддерживается как семантическая разметка (справка «Сниппет»)"
-    direct_dynamic_places: "объявление «динамических мест» Директа собирается из сниппета страницы — title и описание работают и в платном показе (справка Директа, β; W2)"
+    direct_dynamic_places: "объявление «динамических мест» Директа собирается из сниппета страницы — title и описание работают и в платном показе (справка Директа, β)"
 
 limits:                                    # ориентиры для генерации; линтер — по правилам выше
   width_estimate:
@@ -252,7 +251,7 @@ limits:                                    # ориентиры для гене�
   og-description: {rule: "одно предложение: что получит человек, открыв ссылку", limit_chars: none}
   og-image-alt: {rule: "что на картинке, без «фото…» для ИИ-кадра", ref: "../ai-media/10-web-integration/01-images-delivery.md §7–8"}
 
-templates:                                 # шаблон — порядок смысловых частей, не текст; примеры — ai-self, факты «Отвеса» демо (B2)
+templates:                                 # шаблон — порядок смысловых частей, не текст; примеры — ai-self, демо-факты «Отвеса»
   landing-lead-services:
     title: "{услуга} {где} — {отличие-факт} | {бренд}"
     description: "{факт-1: цена от / срок / гарантия} — {что делаете}. {снятие риска: замер, смета}."
@@ -289,12 +288,12 @@ templates:                                 # шаблон — порядок с�
     description: "{вывод статьи одной фразой}. {автор или источник данных, дата}."
     note: "не кликбейт; «7 советов…» — commodity, «Почему мы отказались от…: разбор» — опыт (Google, 2026-07-10)"
 
-checks_outside_linter:                     # делаются скриптом опыта или человеком (cross-slot, cross-page)
+checks_outside_linter:                     # делаются скриптом или человеком (cross-slot, cross-page)
   - {id: meta-x-duplicate-title, check: "одинаковые title у разных страниц сайта", level: error, source: "Google title-link (boilerplate); Яндекс (Вебмастер сообщает о повторах)", how: "01-meta-corpus/run.py --site"}
   - {id: meta-x-duplicate-description, check: "одинаковые description у разных страниц", level: warning, source: "Google snippet; Яндекс description", how: "скрипт"}
   - {id: meta-x-desc-equals-title, check: "description совпадает с title или начинается с него", level: warning, source: "Яндекс «description отличается от содержимого элемента title»", how: "скрипт"}
   - {id: meta-x-title-vs-h1, check: "title и H1 про разное (предмет не совпадает)", level: warning, source: "Google title-link (inaccurate; no clear main title)", how: "судья или человек"}
   - {id: meta-x-missing, check: "нет title или description", level: error, source: "Google и Яндекс: title на каждой странице; Яндекс: description на всех страницах", how: "скрипт"}
   - {id: meta-x-lang-mismatch, check: "язык мета не совпадает с языком страницы", level: warning, source: "Google title-link; Яндекс description", how: "скрипт (detect_lang)"}
-  - {id: meta-x-fact-in-meta, check: "число, цена, рейтинг в мета без записи facts.yaml", level: error, source: "B2 claims_check.py (мета — тоже слот)", how: "claims_check.py check deck.yaml"}
-  - {id: meta-x-og-missing, check: "нет og:title / og:description / og:image", level: warning, source: "higgsfield seo.md audit 10 [практика]; ai-media 10/01 §7", how: "скрипт; техника — site H"}
+  - {id: meta-x-fact-in-meta, check: "число, цена, рейтинг в мета без записи facts.yaml", level: error, source: "claims_check.py (мета — тоже слот)", how: "claims_check.py check deck.yaml"}
+  - {id: meta-x-og-missing, check: "нет og:title / og:description / og:image", level: warning, source: "higgsfield seo.md audit 10 [практика]; ai-media 10/01 §7", how: "скрипт; техника — site 07"}

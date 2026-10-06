@@ -43,9 +43,11 @@ POLZA_OUT_ROOT (корень результатов, по умолчанию $DD
 POLZA_BUDGET_TOTAL (2000); POLZA_BUDGET_AGENT; POLZA_MAX_JOB (60). Ключ никогда не печатается и не пишется в журнал
 и паспорта.
 
-Коды выхода: 0 — успех; 1 — ошибка задания/проверки; 2 — отказ по бюджету или цене; 3 — таймаут опроса (генерацию
-можно дожать: download ID --live); 4 — генерация failed/cancelled или операция не выполнена (канал вернул исходник);
-5 — HTTP-ошибка; 6 — ошибка скачивания.
+Коды выхода: 0 — успех; 1 — ошибка задания или проверки (в том числе расхождение сверки журнала); 2 — ошибка вызова
+или окружения (нет снимка каталога, файла, модели; файл задания не разбирается). Особые исходы: 3 — отказ по бюджету
+или цене; 4 — таймаут опроса (генерацию можно дожать: download ID --live); 5 — генерация failed/cancelled или операция
+не выполнена (канал вернул исходник); 6 — отказ канала (HTTP-ошибка); 7 — файл не скачан. У batch — наибольший код
+серии.
 """
 from __future__ import annotations
 
@@ -86,7 +88,8 @@ KEY_FILE = Path(os.environ.get("POLZA_KEY_FILE", str(Path.home() / ".config" / "
 INLINE_MAX = 4 * 1024 * 1024          # до 4 МБ — base64 в теле, больше — загрузка в хранилище (media-input.mdx: «больше нескольких МБ — через хранилище»)
 MAX_PARALLEL = 3
 TERMINAL = ("completed", "failed", "cancelled")
-EXIT_OK, EXIT_JOB, EXIT_BUDGET, EXIT_TIMEOUT, EXIT_FAILED, EXIT_HTTP, EXIT_DOWNLOAD = 0, 1, 2, 3, 4, 5, 6
+EXIT_OK, EXIT_JOB, EXIT_USAGE = 0, 1, 2                  # 2 — ошибка вызова или окружения
+EXIT_BUDGET, EXIT_TIMEOUT, EXIT_FAILED, EXIT_HTTP, EXIT_DOWNLOAD = 3, 4, 5, 6, 7   # особые исходы
 
 _print_lock = threading.Lock()
 _SECRET: str | None = None
@@ -427,6 +430,8 @@ class Ctx:
 
 def load_jobs(path: str) -> list[dict]:
     p = Path(path)
+    if not p.is_file():
+        raise SystemExit(f"нет файла задания {path}")
     text = p.read_text(encoding="utf-8")
     if p.suffix == ".jsonl":
         jobs = []
@@ -439,15 +444,19 @@ def load_jobs(path: str) -> list[dict]:
             except json.JSONDecodeError as e:
                 raise SystemExit(f"{path}:{i}: не JSON: {e}")
         return jobs
-    obj = json.loads(text)
+    try:
+        obj = json.loads(text)
+    except json.JSONDecodeError as e:
+        raise SystemExit(f"{path}: не JSON: {e}")
     return obj if isinstance(obj, list) else [obj]
 
 
 def ffprobe(path: Path) -> dict | None:
-    if not shutil.which("ffprobe"):
+    prog = kbpaths.find("ffprobe", **kbpaths.BIN_LOOKUP["ffprobe"])
+    if not prog:
         return None
     try:
-        r = subprocess.run(["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams",
+        r = subprocess.run([prog, "-v", "error", "-print_format", "json", "-show_format", "-show_streams",
                             str(path)], capture_output=True, text=True, timeout=30)
         d = json.loads(r.stdout or "{}")
     except (subprocess.SubprocessError, json.JSONDecodeError):
@@ -1774,7 +1783,7 @@ def selftest() -> int:
             ctx, code, job, src = stage(tmp, "same-file", up, {
                 op_path: [{"id": src_id, "status": "processing"}], poll_src: [src_record]})
             pp = json.loads(absp(job["passport"]).read_text(encoding="utf-8")) if job.get("passport") else {}
-            ok("исходник в ответе: код выхода 4", code == EXIT_FAILED, code)
+            ok("исходник в ответе: код выхода 5", code == EXIT_FAILED, code)
             ok("исходник в ответе: запись failed, цена 0", job.get("state") == "failed" and job.get("spent") == 0.0, job)
             ok("исходник в ответе: в журнале потрачена только генерация", ctx.ledger.spent(base) == src_cost,
                ctx.ledger.spent(base))
@@ -1834,7 +1843,7 @@ def selftest() -> int:
             ctx, code, job, src = stage(tmp, "failed", up, {
                 op_path: [{"id": src_id, "status": "processing"}],
                 poll_src: [{**src_record, "status": "failed", "error": {"code": "BAD_GATEWAY"}}]})
-            ok("отказ операции: код 4, цена 0", code == EXIT_FAILED and job.get("spent") == 0.0, (code, job))
+            ok("отказ операции: код 5, цена 0", code == EXIT_FAILED and job.get("spent") == 0.0, (code, job))
 
             def ctx_for(name: str, argv: list[str], replies: dict, budget: str = "200") -> tuple:
                 """Свежие журнал и папка результатов, подменный канал → (ctx, разобранные ключи)."""
@@ -1952,6 +1961,19 @@ def selftest() -> int:
                 got.append(image_size(tmp / name))
             ok("размер по заголовку файла без Pillow: PNG, JPEG, WebP; не картинка — None",
                got == [(16, 9), (16, 9), (16, 9), None], got)
+            (tmp / "broken.json").write_text("{не json", encoding="utf-8")
+            codes = []
+            for job_file in (tmp / "absent.json", tmp / "broken.json"):
+                with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as said:
+                    try:
+                        main(["estimate", str(job_file), "--catalog", str(tmp / "catalog"), "--ledger",
+                              str(tmp / "codes-ledger.jsonl"), "--out", str(tmp / "codes-out")])
+                    except SystemExit as e:
+                        codes.append((e.code, bool(said.getvalue().strip())))
+                    except Exception as e:  # noqa: BLE001
+                        codes.append((type(e).__name__, False))
+            ok("нет файла задания или не JSON: код 2 (ошибка вызова), строка в stderr",
+               codes == [(EXIT_USAGE, True)] * 2, codes)
     finally:
         KEY_FILE = key_file
         if env_key is not None:
@@ -2051,9 +2073,14 @@ def main(argv=None):
     a = build_parser().parse_args(argv)
     if a.cmd == "selftest":         # свои каталог, журнал и канал во временной папке: окружение машины не читается
         sys.exit(selftest())
-    ctx = Ctx(a)
     try:
+        ctx = Ctx(a)
         code = a.fn(ctx, a)
+    except SystemExit as e:         # текст вместо кода — ошибка вызова или окружения (нет снимка, файла, модели)
+        if not isinstance(e.code, str):
+            raise
+        say(e.code, err=True)
+        code = EXIT_USAGE
     except ApiError as e:
         say(f"ОШИБКА API: {e}", err=True)
         if isinstance(e.body, dict):

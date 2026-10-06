@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""blender_supervisor.py — фоновый Blender 5.2 под надзором для агента (агент O, волна 3, 23.09.2026).
+"""blender_supervisor.py — фоновый Blender 5.2 под надзором для агента.
 
 Один процесс Blender на рабочую папку WORK. Каждый вызов — транзакция: успех → контрольная точка .blend,
 ошибка → откат к последней точке. Падение, убийство по таймауту или зависание → перезапуск и восстановление
@@ -10,10 +10,10 @@
   python3 blender_supervisor.py exec WORK script.py [--timeout 120] [--no-checkpoint] [-- арг1 арг2]
   python3 blender_supervisor.py status WORK | stop WORK | replay WORK journal.jsonl
 Код выхода exec: 0 — успех, 1 — исключение в коде (сцена откатена), 2 — процесс убит/упал (восстановлен).
-Проверено: 99-raw/experiments/O/01-supervisor (падения), O/02-bwrap-sandbox (--sandbox).
+[проверено: падения процесса и песочница --sandbox]
 """
 import argparse, json, os, shutil, signal, socket, subprocess, sys, time
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 
 BLENDER = os.environ.get("BLENDER") or kbpaths.blender()
@@ -248,7 +248,7 @@ def main():
     if o.cmd == "start":
         sock_path = os.path.join(s, "blender.sock")
         sock_len = len(sock_path.encode())
-        if sock_len > SOCK_MAX:                     # X/01: иначе call() ждёт START_MAX (90 с) и падает «нет сокета»
+        if sock_len > SOCK_MAX:                     # иначе call() ждёт START_MAX (90 с) и падает «нет сокета»
             sys.exit(f"путь Unix-сокета {sock_len} байт > {SOCK_MAX} (sockaddr_un.sun_path короче ОС не даст "
                      f"привязать): {sock_path!r} — укажи WORK короче")
         st = read_json(os.path.join(s, "state.json"), {})

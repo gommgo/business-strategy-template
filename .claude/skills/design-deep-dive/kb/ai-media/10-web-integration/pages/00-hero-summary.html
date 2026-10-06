@@ -1,9 +1,9 @@
 <!doctype html>
-<!-- 00 · СВОДНАЯ hero-страница — канонический шаблон для рецептов (M): <picture> с отдельным телефонным кадром (постер = кадр 0
+<!-- 00 · СВОДНАЯ hero-страница — канонический шаблон для рецептов: <picture> с отдельным телефонным кадром (постер = кадр 0
      финального видео, он же LCP) → видео-слой после load (AV1 → H.264; reduce / Save-Data / 2G — 0 байт) → светлый скрим под
      текстом (альфа из проверки F83 по буквам и по кадрам) → зерно поверх → кнопка паузы; ниже — lazy-карточки с sizes="auto",
      CTA-полоса CSS-градиентом, OG 1200×630 шаблоном, фавиконы из 3 файлов. Бюджеты и приёмка — 04-budgets-and-acceptance.md.
-     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/06-pages-measure/00 (Chromium 153, 1440×900, Pixel 7, CPU×4 + 4G). -->
+     Проверено: Chromium 153, 1440×900, Pixel 7, CPU×4 + 4G. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -32,7 +32,7 @@
   .hero--light .media-toggle { border-color: rgb(17 20 24 / .35); background: rgb(243 239 231 / .55); color: #111418; }
   @media (max-width: 699px) { .hero__media { background: #c6c2bd; } .hero__copy { padding-top: 56px; } .hero__lead { max-width: 27ch; }
     .nav a.link:not(:last-child) { display: none; } }
-  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (J/06) */
+  /* светлый скрим под колонкой текста (тёмный текст на светлом кадре): альфа подобрана проверкой F83 по буквам (ai-media 10/03) */
   .hero--light .hero__scrim { background: linear-gradient(90deg, rgb(243 239 231 / .46) 0%, rgb(243 239 231 / .34) 40%, rgb(243 239 231 / 0) 64%); }
   @media (max-width: 699px) { .hero--light .hero__scrim { background: linear-gradient(180deg, rgb(243 239 231 / .40) 0%, rgb(243 239 231 / .28) 55%, rgb(243 239 231 / 0) 75%); } }
   .band { border-radius: 20px; padding: 64px clamp(24px, 5vw, 64px); color: #eef0f3;
@@ -110,7 +110,7 @@
     <a class="hero__cta" href="#book" style="margin-top:22px">Забронировать</a>
   </div>
 </section>
-<footer class="section note">© Тихая вода, 2026 · тестовая страница базы ai-media-research (агент J)</footer>
+<footer class="section note">© Тихая вода, 2026 · тестовая страница базы ai-media</footer>
 <script>
   // object-position видео = как у постера (focal.js считает для <img>; копируем на <video> при каждом пересчёте)
   const img = document.querySelector('.hero__media img'), vid = document.querySelector('.hero__media video');

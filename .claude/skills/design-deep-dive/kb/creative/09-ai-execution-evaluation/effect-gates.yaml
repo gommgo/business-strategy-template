@@ -1,8 +1,7 @@
-# effect-gates.yaml — ворота эффектов подачи (creative-research) · v0.2
-# 09-ai-execution-evaluation · волна 3 · агент K · 2026-09-24; v0.2 — продолжатель K2, 2026-09-25 (поле changes ниже).
-# Описание и обоснование — 03-verification-loop-and-gates.md §3; итоги на лаборатории F и странице I/02 — там же §5.
+# effect-gates.yaml — ворота эффектов подачи (creative) · v0.2
+# Описание и обоснование — 03-verification-loop-and-gates.md §3; итоги на лаборатории эффектов и странице-примере — там же §5.
 #
-# Иерархия (контракт тройки v2 §2): ворота страницы site (../site/07-seo-geo-performance-analytics/page-gates.yaml
+# Иерархия (kb/common/owners.md § Правила владения): ворота страницы site (../site/07-seo-geo-performance-analytics/page-gates.yaml
 # v1.2) ВЫШЕ этих; ворота ассетов (ai-media page_accept.py, blender 09/05 §7.2) страницу не блокируют за чужие байты.
 # Здесь — то, что добавляет подача: движение, петли, reduce, фолбэки, вес и цена эффектов. Там, где метрика совпадает с
 # воротами site (LCP, TBT, вес страницы, CLS загрузки), наша строка — «зеркало» с серьёзностью D и полем site: владелец —
@@ -19,22 +18,17 @@
 # минимум периода, доля окна); levels — к каким уровням строка относится; auto: false — проверка вручную или другим
 # инструментом.
 # Серьёзность — как у site: B блокер (страница не принимается), S серьёзно (исправить или x-gate-exception {id, why, who, until}
-# в page-plan), D желательно. Пороги с меткой [гипотеза] — кандидаты по данным C, E, F, G; калибровка — живая фаза.
+# в page-plan), D желательно. Пороги с меткой [гипотеза] — кандидаты по данным creative 03, 05, 06, 07; калибровка — живая фаза.
 version: "0.2"
 status: draft
 checked_at: "2026-09-25"
-owner: "creative-research · 09-ai-execution-evaluation · K (волна 3); v0.2 — продолжатель K2"
+owner: "creative · 09-ai-execution-evaluation"
 tool: "../../scripts/creative/motion_check.py 0.2; статические визуальные проверки — ../../scripts/creative/marketing_audit.py (профиль marketing)"
-changes:
-  - "0.2 (2026-09-25, K2): + EG-PERF-11 (CLS окна сессии с атрибуцией узлов, зеркало SG-PERF-03), EG-A11Y-24 (переключатель «Меньше» работает — нажатие), EG-A11Y-25 («Полное» в reduce включает движение), EG-A11Y-26 (F83 по буквам автоматом при --f83, B), EG-A11Y-27 (контраст над живым фоном, --contrast, S); EG-A11Y-11 — исключения (JS ≤ 3 КБ br, script[data-motion-toggle]); пороги и id прежних строк не менялись. Ложные S motion_check 0.1 (петля в покое из кадров прокрутки, станции холста, радиогруппа не видна) исправлены в 0.1.2."
-  - "0.1 (2026-09-24, K): 50 строк, 42 автоматические."
-  - "правки аудита без смены версии (2026-09-25, S1b по X-10): EG-PERF-03 fix — lerp ≥ 0,15 (замер S1: 0,12 даёт 1 094–1 125 мс — провал этих же ворот); ссылка blender — 09-web-runtime/05 (путь 09-perf-access-seo не существует); tool — marketing_audit.py 0.1.1. Пороги, id и серьёзность не менялись."
 levels_source: "01-creative-direction/ambition-levels.yaml (budgets.effects — слой подачи по уровню, motion_hints — бюджет внимания); профиль страницы — ../site/07-seo-geo-performance-analytics/budgets.yaml (threshold_ref profile.*, зеркала D)"
 site_gates: "../site/07-seo-geo-performance-analytics/page-gates.yaml v1.2 (62 строки; page_gates.py v1.2)"
 neighbours:
-  ai_media: "../../scripts/ai-media/page_accept.py (копия ai-media J): вес первого экрана, LCP, CLS, TBT, пауза видео на 6-й с, reduce 0 байт видео и < 0,5 % движения, F83 по буквам и кадрам видео"
+  ai_media: "../../scripts/ai-media/page_accept.py: вес первого экрана, LCP, CLS, TBT, пауза видео на 6-й с, reduce 0 байт видео и < 0,5 % движения, F83 по буквам и кадрам видео"
   blender: "../blender/09-web-runtime/05-performance-a11y-fallbacks.md §7.2 — 11 порогов страницы с 3D (site_probe.py + gate_check): вызовы в кадре ≤ 30/60, reduce 0 вызовов и ≤ 0,05 % движения, DPR ≤ 1,5, первый кадр модели ≤ 5000/2000 мс"
-  kimi: "../kimi-research/99-raw/tools/k3_checks.py — приметы K3 (K3-*, --allow), M-H1-LINES, M-OVERFLOW, M-NAV; ACCEPTANCE F2/F3, D1"
 severity:
   B: "блокер: страница не принимается, пока не исправлено"
   S: "серьёзно: исправить или записать обоснование в page-plan (x-gate-exception: {id, why, who, until})"
@@ -59,8 +53,8 @@ gates:
     severity: S
     spec_override: budget.long_frames_pct_max
     where: scroll.cls_sources
-    source: "E 05-motion/03 §3.2 (кандидаты по квартилям C: десктоп медиана 0, Q3 0,5; телефон CPU×4 медиана 3, Q3 10,2); CRV-PF-11"
-    label: "[данные: C] [гипотеза: порог]"
+    source: "creative 05/03 §3.2 (кандидаты по квартилям creative 03/01: десктоп медиана 0, Q3 0,5; телефон CPU×4 медиана 3, Q3 10,2); CRV-PF-11"
+    label: "[данные: creative 03] [гипотеза: порог]"
     site: "дополняет SG-PERF-04/05 (INP и TBT прокрутку не видят — web.dev)"
     fix: "тяжёлое — вне кадра прокрутки: WebGL и видео по видимости, меньше ScrollTrigger, будить эффект по IntersectionObserver"
   - id: EG-PERF-02
@@ -73,7 +67,7 @@ gates:
     severity: S
     spec_override: budget.cls_scroll_max
     where: scroll.cls_sources
-    source: "E 05-motion/03 §3.2; E/02 (pin ScrollTrigger через position: fixed — 1,6–2,0; sticky и pinType: 'transform' — 0)"
+    source: "creative 05/03 §3.2; creative 05/02 §3.5 (pin ScrollTrigger через position: fixed — 1,6–2,0; sticky и pinType: 'transform' — 0)"
     label: "[проверено]"
     site: "дополняет SG-PERF-03 (CLS страницы web-vitals после прокрутки): наш — только фаза прокрутки, указывает на эффект"
     fix: "pinType: 'transform' или position: sticky вместо pin через fixed; размеры медиа до загрузки"
@@ -85,10 +79,10 @@ gates:
     op: "<="
     threshold: 1000
     severity: S
-    source: "E 05-motion/01 и токен motion.marketing.duration.settle-max 1000; E/02 (Lenis 800–1050 мс на шаг); C (живые сайты 0,8–1,4 с)"
-    label: "[проверено] [данные: C]"
+    source: "creative 05/01 и токен motion.marketing.duration.settle-max 1000; creative 05/02 §3.5 (Lenis 800–1050 мс на шаг); creative 03 (живые сайты 0,8–1,4 с)"
+    label: "[проверено] [данные: creative 03]"
     site: "—"
-    fix: "Lenis только на L2 и с lerp ≥ 0,15 (токен scroll.lenis-lerp; замер S1 2026-09-25: 0,12 — 1 094–1 125 мс, 0,15 — 896 мс); на L0–L1 — родная прокрутка"
+    fix: "Lenis только на L2 и с lerp ≥ 0,15 (токен scroll.lenis-lerp; замер 2026-09-25: 0,12 — 1 094–1 125 мс, 0,15 — 896 мс); на L0–L1 — родная прокрутка"
   - id: EG-PERF-04
     name: "Частота кадров rAF при прокрутке"
     group: perf
@@ -98,8 +92,8 @@ gates:
     op: ">="
     threshold_ref: budgets.effects.scroll_fps_min
     severity: D
-    source: "A ambition-levels.yaml budgets.effects.scroll_fps_min (30 / 50) — величина слоя подачи; F 03-effects-lab-method: в лаборатории все эффекты дают 60 — не критерий"
-    label: "[гипотеза] [проверено: F — не различает]"
+    source: "ambition-levels.yaml budgets.effects.scroll_fps_min (30 / 50) — величина слоя подачи; creative 06/03: в лаборатории все эффекты дают 60 — не критерий"
+    label: "[гипотеза] [проверено: не различает]"
     site: "—"
   - id: EG-PERF-05
     name: "TBT до прокрутки (зеркало ворот site)"
@@ -131,7 +125,7 @@ gates:
     op: "false"
     severity: S
     where: vitals.lcp_sel
-    source: "E/01: H1 из opacity 0, за маской строк или скрытый скриптом — не кандидат LCP в Chromium 153, LCP уходит на лид в 5× меньше"
+    source: "creative 05/02 §10: H1 из opacity 0, за маской строк или скрытый скриптом — не кандидат LCP в Chromium 153, LCP уходит на лид в 5× меньше"
     label: "[проверено]"
     site: "= SG-PERF-06 v1.2 (S) — владелец site"
     fix: "H1 без анимации или только transform ≤ 24 px; split по строкам без overflow: hidden; reduce — видно с первого кадра"
@@ -142,7 +136,7 @@ gates:
     metric: vitals.lcp_canvas
     op: "false"
     severity: B
-    source: "CRV-AL-04; blender 09/05 §7.2 №1; blender 01/04 A/04"
+    source: "CRV-AL-04; blender 09/05 §7.2 №1; blender 01/04"
     label: "[проверено] у соседей"
     site: "= SG-PERF-06 (B)"
   - id: EG-PERF-09
@@ -153,7 +147,7 @@ gates:
     op: ">="
     threshold: 1
     severity: B
-    source: "page_accept.py verdict: «нет ни одной записи LCP (всё появляется из opacity 0?)»; E/01"
+    source: "page_accept.py verdict: «нет ни одной записи LCP (всё появляется из opacity 0?)»; creative 05/02 §10"
     label: "[проверено] у ai-media"
     site: "= SG-PERF-06 (B «LCP нет»)"
   - id: EG-PERF-10
@@ -163,7 +157,7 @@ gates:
     metric: vitals.h1_first_frame_invisible
     op: "false"
     severity: {L0: S, L1: S, L2: D}
-    source: "E/01; CRV-AL-09 (LCP-элемент не анимируется из opacity: 0); на L2 — только если LCP-элемент другой (постер) и H1 — не LCP"
+    source: "creative 05/02 §10; CRV-AL-09 (LCP-элемент не анимируется из opacity: 0); на L2 — только если LCP-элемент другой (постер) и H1 — не LCP"
     label: "[проверено]"
     site: "дополняет SG-PERF-06"
   - id: EG-PERF-11
@@ -175,7 +169,7 @@ gates:
     threshold: 0.1
     severity: D
     where: cls.top_sources
-    source: "web.dev CLS (окно сессии: разрыв < 1 с, окно ≤ 5 с); F2/12 cls_sources.py (причины в лаборатории: pin через fixed 0,35–0,99, подпись, вставленная скриптом, подмена латинского подмножества шрифта 0,15); motion_check 0.1.2 — cls.load, cls.scroll, cls.total, cls.top_sources (узел, откуда → куда)"
+    source: "web.dev CLS (окно сессии: разрыв < 1 с, окно ≤ 5 с); creative 06/03 §7.3 (причины в лаборатории: pin через fixed 0,35–0,99, подпись, вставленная скриптом, подмена латинского подмножества шрифта 0,15); motion_check 0.1.2 — cls.load, cls.scroll, cls.total, cls.top_sources (узел, откуда → куда)"
     label: "[документация] + [проверено]"
     site: "= SG-PERF-03 (владелец site); наша добавка — атрибуция: какой эффект сдвигает"
     fix: "размеры медиа и шрифтов до загрузки (preload обоих подмножеств шрифта), вставки скриптом — в зарезервированное место, pin — pinType: 'transform' или sticky"
@@ -191,10 +185,10 @@ gates:
     severity: S
     spec_override: budget.js_kb_br_effects_max
     where: net.effects_js
-    source: "G 07/02 §5–6 и ворота G (1); A budgets.effects.js_presentation_kb_br (L0 20, L1 100, L2 150/200); G/01 (gsap+ST 39,7 КБ br, «набор Awwwards» 52,4)"
+    source: "creative 07/02 §5–6; ambition-levels.yaml budgets.effects.js_presentation_kb_br (L0 20, L1 100, L2 150/200); creative 07/01 §1.1 (gsap+ST 39,7 КБ br, «набор Awwwards» 52,4)"
     label: "[проверено] + [гипотеза: порог]"
     site: "часть SG-WEIGHT-03 (JS первого экрана — все источники)"
-    fix: "загрузчик [data-effect] с динамическим импортом за 200 px до экрана (G/03); тяжёлое — только в init() через прокладку"
+    fix: "загрузчик [data-effect] с динамическим импортом за 200 px до экрана (creative 07/02 §6); тяжёлое — только в init() через прокладку"
   - id: EG-WEIGHT-02
     name: "JS и wasm 3D (three, OGL, pixi, Spline, Unicorn, декодеры) за сессию, КБ"
     group: weight
@@ -203,7 +197,7 @@ gates:
     op: "<="
     threshold_ref: budgets.effects.js_3d_kb_br
     severity: S
-    source: "A budgets.effects.js_3d_kb_br (L0 0, L1 200/300, L2 250/350); blender A/03 (three core 109, R3F + drei + post 345 КБ br); wasm декодеров 3D (Draco, Basis, meshopt) — здесь же; wasm-рантаймы подачи 2D — EG-WEIGHT-11"
+    source: "ambition-levels.yaml budgets.effects.js_3d_kb_br (L0 0, L1 200/300, L2 250/350); blender 01/03 (three core 109, R3F + drei + post 345 КБ br); wasm декодеров 3D (Draco, Basis, meshopt) — здесь же; wasm-рантаймы подачи 2D — EG-WEIGHT-11"
     label: "[данные] [спорно] у blender"
     site: "SG-WEIGHT-08: доля 3D — ворота blender, не страницы"
   - id: EG-WEIGHT-03
@@ -214,7 +208,7 @@ gates:
     op: "<="
     threshold_ref: budgets.effects.webgl_contexts
     severity: S
-    source: "A budgets.effects.webgl_contexts (L0 0, L1 1, L2 1/2)"
+    source: "ambition-levels.yaml budgets.effects.webgl_contexts (L0 0, L1 1, L2 1/2)"
     label: "[решение уровня] + [гипотеза]"
     site: "—"
   - id: EG-WEIGHT-04
@@ -225,8 +219,8 @@ gates:
     op: "<="
     threshold_ref: budgets.effects.video_first_screen_kb
     severity: S
-    source: "A budgets.effects.video_first_screen_kb (L0 300 — только синемаграф, L1 600/1500 — петля hero, L2 1000/2500 — C: 15 из 49 эффектных страниц > 5 МБ видео до прокрутки)"
-    label: "[данные: ai-media 01/02 §4.3] + [гипотеза K для L2]"
+    source: "ambition-levels.yaml budgets.effects.video_first_screen_kb (L0 300 — только синемаграф, L1 600/1500 — петля hero, L2 1000/2500 — creative 03/01: 15 из 49 эффектных страниц > 5 МБ видео до прокрутки)"
+    label: "[данные: ai-media 01/02 §4.3] + [гипотеза для L2]"
     site: "SG-WEIGHT-09 показывает отдельно (D; S — одно видео больше всего первого экрана)"
     fix: "постер + видео 720p на телефоне, preload=metadata, запуск по видимости; сюжетное видео — по клику"
   - id: EG-WEIGHT-05
@@ -238,7 +232,7 @@ gates:
     op: "<="
     threshold_ref: budgets.effects.video_autoplay_session_mb
     severity: S
-    source: "A budgets.effects.video_autoplay_session_mb (L1 2/5, L2 4/10); ai-media 01/02 §4.3"
+    source: "ambition-levels.yaml budgets.effects.video_autoplay_session_mb (L1 2/5, L2 4/10); ai-media 01/02 §4.3"
     label: "[данные] + [практика]"
     site: "часть SG-WEIGHT-02"
   - id: EG-WEIGHT-06
@@ -294,8 +288,8 @@ gates:
     op: "empty"
     severity: S
     where: net.cdn
-    source: "ворота G (3): самохостинг библиотек и wasm (setWasmUrl); CDN — лишнее соединение, приватность и отказ при блокировке домена"
-    label: "[практика] G 07/02"
+    source: "creative 07/02 §8: самохостинг библиотек и wasm (setWasmUrl); CDN — лишнее соединение, приватность и отказ при блокировке домена"
+    label: "[практика] creative 07/02"
     site: "дополняет SG-WEIGHT-05/06 (сторонние домены и байты) и SG-LEGAL-07"
   - id: EG-WEIGHT-11
     name: "wasm-рантаймы подачи 2D (dotLottie, Rive) за сессию, КБ"
@@ -306,7 +300,7 @@ gates:
     threshold_ref: budgets.effects.wasm_presentation_kb_br
     severity: S
     where: net.wasm_presentation
-    source: "A budgets.effects.wasm_presentation_kb_br — числа нет (null): порог даст пилот с Lottie или Rive; веса рантаймов — 07-stack-implementation/stack.yaml (dotLottie ≈ 379 КБ br, Rive 272–613); JS их загрузчиков — в EG-WEIGHT-01, JS и wasm 3D — EG-WEIGHT-02"
+    source: "ambition-levels.yaml budgets.effects.wasm_presentation_kb_br — числа нет (null): порог даст пилот с Lottie или Rive; веса рантаймов — 07-stack-implementation/stack.yaml (dotLottie ≈ 379 КБ br, Rive 272–613); JS их загрузчиков — в EG-WEIGHT-01, JS и wasm 3D — EG-WEIGHT-02"
     label: "[открыто: число — пилот]"
     site: "слой budgets.yaml layers.wasm_first_screen_kb (отдельно от JS первого экрана); с публичного CDN — EG-WEIGHT-10"
 
@@ -319,7 +313,7 @@ gates:
     op: "false"
     limits: {moving_pct_min: 0.5}   # «движется»: ≥ 0,5 % пикселей за 1 с (канал > 12/255) или играет видео; так же считает page_accept.py
     severity: B
-    source: "WCAG 2.2 SC 2.2.2 (A); E 05-motion/01 §3.3; page_accept.py (движение ≥ 0,5 % пикселей или видео играет на 6-й с)"
+    source: "WCAG 2.2 SC 2.2.2 (A); creative 05/01 §3.3; page_accept.py (движение ≥ 0,5 % пикселей или видео играет на 6-й с)"
     label: "[стандарт] [проверено] у ai-media"
     site: "= SG-A11Y-03 (B), у site — только первый экран"
     fix: "видимая кнопка с aria-pressed и именем «Остановить движение» (одна на все петли) или остановка ≤ 5 с (loop-autostop 4000)"
@@ -331,7 +325,7 @@ gates:
     op: "empty"
     severity: B
     where: derived.loops_without_pause
-    source: "WCAG 2.2 SC 2.2.2: движение, запущенное при прокрутке в зону видимости, дольше 5 с и параллельно контенту; E 05-motion/01 §3.2"
+    source: "WCAG 2.2 SC 2.2.2: движение, запущенное при прокрутке в зону видимости, дольше 5 с и параллельно контенту; creative 05/01 §3.2"
     label: "[стандарт]"
     site: "дополняет SG-A11Y-03 ниже первого экрана (page_accept видит только первый экран)"
   - id: EG-A11Y-03
@@ -341,7 +335,7 @@ gates:
     metric: derived.pause_works
     op: "true"
     severity: S
-    source: "E 05-motion/01 §3.3 («проверка поведением»); W3C: один механизм на все петли"
+    source: "creative 05/01 §3.3 («проверка поведением»); W3C: один механизм на все петли"
     label: "[стандарт] [практика]"
     site: "—"
   - id: EG-A11Y-04
@@ -352,7 +346,7 @@ gates:
     op: "false"
     severity: B
     where: video.flash
-    source: "WCAG 2.2 SC 2.3.1 (A) и Understanding (пара противоположных изменений относительной яркости ≥ 10 % при тёмном < 0,80); E 05-motion/01 §3.4; покадрово 25 к/с по записи"
+    source: "WCAG 2.2 SC 2.3.1 (A) и Understanding (пара противоположных изменений относительной яркости ≥ 10 % при тёмном < 0,80); creative 05/01 §3.4; покадрово 25 к/с по записи"
     label: "[стандарт] [проверено: самопроверка motion_check — 10 Гц провал, 1 Гц норма]"
     site: "автоматизирует SG-A11Y-04 (у site — method: human)"
   - id: EG-A11Y-05
@@ -363,7 +357,7 @@ gates:
     op: "<="
     threshold: 0
     severity: S
-    source: "CRV-AL-01; E 05-motion/01 §4.5; page_accept.py (reduce media > 0 = FAIL)"
+    source: "CRV-AL-01; creative 05/01 §4.5; page_accept.py (reduce media > 0 = FAIL)"
     label: "[стандарт] для 2.3.3 + [проверено] у соседей"
     site: "= SG-A11Y-07 (S) — у site только первый экран"
   - id: EG-A11Y-06
@@ -374,8 +368,8 @@ gates:
     op: "<="
     threshold: 0.3
     severity: S
-    source: "E 05-motion/01 §4.5 (0,3 %/с; кандидат C, принят E); blender 09/05 §7.2 №8 (≤ 0,05 % для 3D)"
-    label: "[данные: C] [гипотеза: порог]"
+    source: "creative 05/01 §4.5 (0,3 %/с — по замеру creative 03); blender 09/05 §7.2 №8 (≤ 0,05 % для 3D)"
+    label: "[данные: creative 03] [гипотеза: порог]"
     site: "строже SG-A11Y-07 (< 0,5 %)"
   - id: EG-A11Y-07
     name: "reduce: паузы записи с непрерывным движением (вся страница)"
@@ -385,9 +379,9 @@ gates:
     op: "<="
     threshold: 0
     severity: S
-    source: "E 05-motion/01 §4.5 («ни одной паузы с непрерывным движением на всей записи»); C: у Stripe 1 из 13, у Lisa — все"
-    label: "[данные: C]"
-    site: "дополняет SG-A11Y-07 (запись всей страницы — v1.2 ссылается на E §4.5)"
+    source: "creative 05/01 §4.5 («ни одной паузы с непрерывным движением на всей записи»); creative 03/02: у Stripe 1 из 13, у Lisa — все"
+    label: "[данные: creative 03]"
+    site: "дополняет SG-A11Y-07 (запись всей страницы — v1.2 ссылается на creative 05/01 §4.5)"
   - id: EG-A11Y-08
     name: "reduce: бегущие бесконечные анимации"
     group: a11y
@@ -396,8 +390,8 @@ gates:
     op: "<="
     threshold: 0
     severity: S
-    source: "E 05-motion/01 §4.5 (0 бегущих бесконечных CSS-анимаций, в том числе в скрытых элементах)"
-    label: "[данные: C]"
+    source: "creative 05/01 §4.5 (0 бегущих бесконечных CSS-анимаций, в том числе в скрытых элементах)"
+    label: "[данные: creative 03]"
     site: "—"
   - id: EG-A11Y-09
     name: "reduce: WebGL рисует в покое (пауз с вызовами отрисовки)"
@@ -407,8 +401,8 @@ gates:
     op: "<="
     threshold: 0
     severity: S
-    source: "CRV-AL-01, CRV-AL-10; E §4.5 (0 вызовов WebGL в покое); blender 09/05 §7.2 №8; C: WebGL рисует под reduce у 11 из 12"
-    label: "[проверено] у blender + [данные: C]"
+    source: "CRV-AL-01, CRV-AL-10; creative 05/01 §4.5 (0 вызовов WebGL в покое); blender 09/05 §7.2 №8; creative 03: WebGL рисует под reduce у 11 из 12"
+    label: "[проверено] у blender + [данные: creative 03]"
     site: "—"
   - id: EG-A11Y-10
     name: "reduce: текст ниже первого экрана скрыт до прокрутки (появление не отключено)"
@@ -419,8 +413,8 @@ gates:
     threshold: 0
     severity: S
     where: page_first.hidEx
-    source: "E 05-motion/01 §4.5 («содержимое и CTA видимы»), §4.3 (html.js .reveal; анимации только под no-preference)"
-    label: "[практика] + [данные: C]"
+    source: "creative 05/01 §4.5 («содержимое и CTA видимы»), §4.3 (html.js .reveal; анимации только под no-preference)"
+    label: "[практика] + [данные: creative 03]"
     site: "—"
   - id: EG-A11Y-11
     name: "reduce: библиотеки эффектов всё равно загружены"
@@ -431,7 +425,7 @@ gates:
     severity: D
     limits: {exempt_js_kb_br_max: 3}   # файл JS не больше — переключатель или загрузчик, не библиотека эффектов
     where: derived.effects_libs_loaded
-    source: "ворота G (2); G/03 (reduce — GSAP и шейдер не грузятся, ≈ 2 КБ br JS); E/02 (статический импорт — 115–133 КБ и в reduce). Исключения (v0.2): файл ≤ limits.exempt_js_kb_br_max КБ br (переключатель, загрузчик — F2 motion.js 1,1 КБ обязан грузиться и в reduce) и script[data-motion-toggle]; список — derived.effects_libs_exempt. Библиотека распознаётся по имени и по содержимому (__THREE__, GreenSock, pin-spacer, lenis-smooth, bodymovin…)"
+    source: "creative 07/02 §2 (reduce — GSAP и шейдер не грузятся, ≈ 2 КБ br JS); creative 05/02 §3.5 (статический импорт — 115–133 КБ и в reduce). Исключения: файл ≤ limits.exempt_js_kb_br_max КБ br (переключатель, загрузчик — motion.js 1,1 КБ обязан грузиться и в reduce) и script[data-motion-toggle]; список — derived.effects_libs_exempt. Библиотека распознаётся по имени и по содержимому (__THREE__, GreenSock, pin-spacer, lenis-smooth, bodymovin…)"
     label: "[проверено]"
     site: "—"
   - id: EG-A11Y-12
@@ -442,8 +436,8 @@ gates:
     metric: derived.toggle
     op: "true"
     severity: S
-    source: "CRV-AL-12; E 05-motion/01 §4.4 (data-motion: reduced | full | paused, запоминается). v0.2: распознаётся и радиогруппа или select «Движение» (F2 lab/motion-toggle), [data-motion-toggle], [data-motion-set]"
-    label: "[гипотеза] A → принято E"
+    source: "CRV-AL-12; creative 05/01 §4.4 (data-motion: reduced | full | paused, запоминается). Распознаётся и радиогруппа или select «Движение», [data-motion-toggle], [data-motion-set]"
+    label: "[гипотеза]"
     site: "—"
   - id: EG-A11Y-24
     name: "Переключатель «меньше движения» работает: после нажатия «Меньше» первый экран ≤ 0,3 %/с, 0 вызовов WebGL, 0 бесконечных анимаций, видео стоит"
@@ -453,8 +447,8 @@ gates:
     op: "true"
     severity: S
     where: derived.toggle_summary
-    source: "CRV-AL-12; E 05-motion/01 §4.4 и §4.5 (0,3 %/с); F2/12 (lab/motion-toggle: 3,94 → 0 %/с, WebGL «static», видео на паузе, GSAP ctx.revert, Lenis destroy). Переключателя нет — N/A (на L2 его требует EG-A11Y-12)"
-    label: "[проверено: F2/12, K2 K/02]"
+    source: "CRV-AL-12; creative 05/01 §4.4 и §4.5 (0,3 %/с); creative 06/01 (замер переключателя: 3,94 → 0 %/с, WebGL «static», видео на паузе, GSAP ctx.revert, Lenis destroy). Переключателя нет — N/A (на L2 его требует EG-A11Y-12)"
+    label: "[проверено]"
     site: "—"
     fix: "всё JS-движение подписано на выбор (Motion.on): WebGL — один статичный кадр и отмена rAF, видео — pause() и постер, GSAP — context().revert(), Lenis — destroy(); CSS-петли слушают html[data-motion]"
   - id: EG-A11Y-25
@@ -466,8 +460,8 @@ gates:
     op: "true"
     severity: D
     where: derived.toggle_summary
-    source: "E 05-motion/01 §4.4 (выбор побеждает ОС в обе стороны); F2/12 (?start=full при системном reduce — 3,6 %/с; Lenis — respectReducedMotion: false, иначе ОС перебьёт выбор). Варианта «Полное» нет — N/A"
-    label: "[практика] E + [проверено]"
+    source: "creative 05/01 §4.4 (выбор побеждает ОС в обе стороны); creative 06/01 (?start=full при системном reduce — 3,6 %/с; Lenis — respectReducedMotion: false, иначе ОС перебьёт выбор). Варианта «Полное» нет — N/A"
+    label: "[практика] + [проверено]"
     site: "—"
   - id: EG-A11Y-13
     name: "Фокус после Tab на экране (плавная прокрутка не ломает прокрутку к фокусу)"
@@ -488,7 +482,7 @@ gates:
     op: "empty"
     severity: S
     where: derived.focus_invisible
-    source: "CRV-AL-07; W1 (порядок DOM = визуальный после анимаций)"
+    source: "CRV-AL-07 (порядок DOM = визуальный после анимаций)"
     label: "[стандарт] [практика]"
     site: "—"
   - id: EG-A11Y-15
@@ -510,7 +504,7 @@ gates:
     op: "empty"
     severity: S
     where: loops.under_text
-    source: "E 05-motion/01 §5.3 (ни одного движения под читаемым текстом; перекрытие ≥ 10 % с полем 24 px); kimi T7"
+    source: "creative 05/01 §5.3 (ни одного движения под читаемым текстом; перекрытие ≥ 10 % с полем 24 px)"
     label: "[исследование: качественное NN/g] + [гипотеза: геометрия]"
     site: "—"
   - id: EG-A11Y-17
@@ -522,8 +516,8 @@ gates:
     threshold_ref: motion_hints.continuous_motions_in_view_max
     severity: S
     spec_override: budget.loops_in_view_max
-    source: "A ambition-levels.yaml motion_hints.continuous_motions_in_view_max (L0 ≤ 1, L1 ≤ 2, L2 ≤ 3; телефон на 1 меньше, минимум 1); E 05-motion/01 §5.2"
-    label: "[гипотеза] A, согласовано с практикой C"
+    source: "ambition-levels.yaml motion_hints.continuous_motions_in_view_max (L0 ≤ 1, L1 ≤ 2, L2 ≤ 3; телефон на 1 меньше, минимум 1); creative 05/01 §5.2"
+    label: "[гипотеза], согласовано с практикой creative 03"
     site: "—"
   - id: EG-A11Y-18
     name: "Колебание объекта с периодом короче нормы: крупного — короче 10 с (полоса 2,5–6 с запрещена), мелкого — короче 6 с"
@@ -534,7 +528,7 @@ gates:
     limits: {band_s: [2.5, 6], period_min_s: 10, small_period_min_s: 6, large_min_side_share: 0.25}   # крупный — меньшая сторона ≥ 25 % меньшей стороны окна; период короче band_s[0] — пульсация (EG-A11Y-20, -22)
     severity: S
     where: loops.oscillation
-    source: "E 05-motion/01 §6.3 (крупный объект и фон — период ≥ 10 с или шум; 2,5–6 с — около 0,2 Гц — не делать; мелкий — ≥ 6 с); мера «крупного» — одна, поле large_min_side_share; токен motion.marketing.loop.breathe-period — значение по умолчанию в пределах нормы"
+    source: "creative 05/01 §6.3 (крупный объект и фон — период ≥ 10 с или шум; 2,5–6 с — около 0,2 Гц — не делать; мелкий — ≥ 6 с); мера «крупного» — одна, поле large_min_side_share; токен motion.marketing.loop.breathe-period — значение по умолчанию в пределах нормы"
     label: "[исследование] + [гипотеза: период]"
     site: "—"
   - id: EG-A11Y-19
@@ -546,8 +540,8 @@ gates:
     threshold_ref: effects.yaml#marquee-logos.limits.speed_px_s_max
     severity: D
     where: loops.marquee
-    source: "каталог эффектов effects.yaml marquee-logos.limits (30–60 px/с); E 05-motion/01 §7.1; токен motion.marketing.loop.marquee-speed 40 — в пределах limits"
-    label: "[мнение] + [данные: C]"
+    source: "каталог эффектов effects.yaml marquee-logos.limits (30–60 px/с); creative 05/01 §7.1; токен motion.marketing.loop.marquee-speed 40 — в пределах limits"
+    label: "[мнение] + [данные: creative 03]"
     site: "—"
   - id: EG-A11Y-20
     name: "Бесконечная пульсация призыва (CTA)"
@@ -557,7 +551,7 @@ gates:
     op: "empty"
     severity: S
     where: loops.pulsing_cta
-    source: "cliche-registry pulsing-cta (S); E 05-motion/01 §6.4 (пульсация — ≤ 2 раз и стоп)"
+    source: "cliche-registry pulsing-cta (S); creative 05/01 §6.4 (пульсация — ≤ 2 раз и стоп)"
     label: "[практика] H"
     site: "—"
   - id: EG-A11Y-21
@@ -568,7 +562,7 @@ gates:
     op: "false"
     limits: {ratio_min: 0.5, ratio_max: 1.6}   # путь колеса к ожидаемому
     severity: S
-    source: "E 05-motion/02 (скорость и направление не меняются никогда; pin со скрабом — не перехват); motion-spec page.scroll.jacking: never; A L0–L1 forbidden scroll-jacking"
+    source: "creative 05/02 (скорость и направление не меняются никогда; pin со скрабом — не перехват); motion-spec page.scroll.jacking: never; ambition-levels.yaml L0–L1 forbidden scroll-jacking"
     label: "[исследование: NN/g] [практика]"
     site: "—"
   - id: EG-A11Y-22
@@ -579,8 +573,8 @@ gates:
     op: "<="
     threshold: {L0: 0, L1: 0, L2: 1}
     severity: S
-    source: "E 05-motion/01 §5.4 (громкая петля > 5 % — только L2 и первый экран, пауза видна сразу, текст на скриме)"
-    label: "[данные: C]"
+    source: "creative 05/01 §5.4 (громкая петля > 5 % — только L2 и первый экран, пауза видна сразу, текст на скриме)"
+    label: "[данные: creative 03]"
     site: "—"
   - id: EG-A11Y-23
     name: "Контраст текста на медиа по F83 в худшем кадре (H1, лид, призыв поверх фото, видео, шейдера)"
@@ -600,8 +594,8 @@ gates:
     op: "empty"
     severity: B
     where: derived.f83_min
-    source: "CRV-AL-08; ai-media 10/03 §1 и page_accept.py (F83 по буквам, кадры видео); автоматическая форма EG-A11Y-23 — если motion_check вызван с --f83 (иначе N/A, остаётся ручная EG-A11Y-23). v0.2: page_accept получает адрес сервера motion_check (стили страницы находятся)"
-    label: "[стандарт] F83 [проверено] у ai-media + K2 K/02"
+    source: "CRV-AL-08; ai-media 10/03 §1 и page_accept.py (F83 по буквам, кадры видео); автоматическая форма EG-A11Y-23 — если motion_check вызван с --f83 (иначе N/A, остаётся ручная EG-A11Y-23); page_accept получает адрес сервера motion_check (стили страницы находятся)"
+    label: "[стандарт] F83 [проверено] у ai-media"
     site: "SG-A11Y-01 (color-contrast B у ключевых узлов)"
   - id: EG-A11Y-27
     name: "Контраст текста над живым фоном — худший из кадров первого экрана (текст прозрачен, 95-й или 5-й перцентиль яркости под строками)"
@@ -611,8 +605,8 @@ gates:
     op: "empty"
     severity: S
     where: derived.contrast_live_min
-    source: "F2 99-raw/experiments/F/14-holo-look/contrast.py (худший из N положений по границам текста) — встроено в motion_check 0.1.3 (--contrast SEL …): 4 кадра по 0,45 с и 5 положений указателя на десктопе; порог WCAG 1.4.3 4,5:1, крупный 3:1. Эвристика по фону без текста — точная проверка по буквам — EG-A11Y-26 (B). Не запускали — N/A"
-    label: "[проверено: F2/14, K2 K/02]"
+    source: "худший из N положений по границам текста — motion_check 0.1.3 (--contrast SEL …): 4 кадра по 0,45 с и 5 положений указателя на десктопе; порог WCAG 1.4.3 4,5:1, крупный 3:1. Эвристика по фону без текста — точная проверка по буквам — EG-A11Y-26 (B). Не запускали — N/A"
+    label: "[проверено]"
     site: "дополняет SG-A11Y-01"
     fix: "скрим под текстом (фон с альфой ≥ 0,6 или затемнение медиа под колонкой), светлая точка фона не под строками, «дыхание» ≤ 2,5 %"
   - id: EG-A11Y-28
@@ -637,7 +631,7 @@ gates:
     metric: derived.h1_lost
     op: "false"
     severity: S
-    source: "CRV-AL-05 (фолбэк без JS); E §4.3 (html.js .reveal — скрывать только при JS)"
+    source: "CRV-AL-05 (фолбэк без JS); creative 05/01 §4.3 (html.js .reveal — скрывать только при JS)"
     label: "[практика]"
     site: "SG-GEO-01 (смысл в HTML сервера) — дополняет"
   - id: EG-FB-02
@@ -648,7 +642,7 @@ gates:
     op: "<="
     threshold: 0.05
     severity: S
-    source: "CRV-AL-05; F 10-nojs-fix (опыт F)"
+    source: "CRV-AL-05"
     label: "[практика] + [проверено]"
     site: "—"
   - id: EG-FB-03
@@ -668,8 +662,8 @@ gates:
     metric: derived.hero_blank
     op: "false"
     severity: S
-    source: "CRV-AL-05; F effect_bench nogl (blank_check σ < 2 — кадр однотонный); blender 09/05 §6 (постер = 3D)"
-    label: "[практика] + [проверено: F]"
+    source: "CRV-AL-05; creative 06/03 §7.3 (режим nogl: blank_check σ < 2 — кадр однотонный); blender 09/05 §6 (постер = 3D)"
+    label: "[практика] + [проверено]"
     site: "—"
   - id: EG-FB-05
     name: "Без WebGL: H1, видимый с WebGL, пропал"
@@ -703,7 +697,7 @@ gates:
     op: "<="
     threshold: 2
     severity: D
-    source: "D (волна 1) и kimi ACCEPTANCE D1"
+    source: "creative 04 и kb/common/acceptance-criteria.yaml D1"
     label: "[практика]"
     site: "= SG-MOB-01 (B при расширении области — владелец site)"
   - id: EG-CHOR-01
@@ -714,8 +708,8 @@ gates:
     op: "<="
     threshold: {L0: 1, L1: 4, L2: 6}
     severity: D
-    source: "C 03-live-sites-measured/02 (1–4 на страницу из 12 шагов, больше 4 не встретилось); E 05-motion/01 §5.5 (пики L0 0, L1 ≤ 2, L2 2–4)"
-    label: "[данные: C] [гипотеза: порог]"
+    source: "creative 03/02 (1–4 на страницу из 12 шагов, больше 4 не встретилось); creative 05/01 §5.5 (пики L0 0, L1 ≤ 2, L2 2–4)"
+    label: "[данные: creative 03] [гипотеза: порог]"
     site: "—"
   - id: EG-CODE-01
     name: "После __fx.destroyAll() не осталось pin-spacer (чистое разрушение эффектов)"
@@ -725,17 +719,17 @@ gates:
     op: "<="
     threshold: 0
     severity: D
-    source: "ворота G (4); G/03 (destroyAll → 0 ScrollTrigger, 0 обёрток split, canvas и pin-spacer удалены)"
+    source: "creative 07/02 §6 (destroyAll → 0 ScrollTrigger, 0 обёрток split, canvas и pin-spacer удалены)"
     label: "[проверено]"
     site: "—"
   - id: EG-CODE-02
     name: "ScrollTrigger.refresh() после View Transition, меняющего раскладку"
     group: code
     auto: false
-    method: "чтение кода (grep startViewTransition → finished.then(… ScrollTrigger.refresh())) или сценарий G/02"
+    method: "чтение кода (grep startViewTransition → finished.then(… ScrollTrigger.refresh())) или сценарий creative 07/02 §7.2"
     threshold_text: "есть"
     severity: S
-    source: "ворота G (6); G/02 (без refresh старт pin устаревает в Chromium и WebKit)"
+    source: "creative 07/02 §7.2 (без refresh старт pin устаревает в Chromium и WebKit)"
     label: "[проверено]"
     site: "—"
   - id: EG-CODE-03
@@ -745,7 +739,7 @@ gates:
     method: "grep -c '@license' в собранном JS, если GSAP есть"
     threshold_text: "есть"
     severity: D
-    source: "ворота G (5); лицензия GSAP (бесплатна с 3.13, условия — stack.yaml)"
+    source: "creative 07/02 §8; лицензия GSAP (бесплатна с 3.13, условия — stack.yaml)"
     label: "[документация]"
     site: "—"
   - id: EG-CODE-04
@@ -755,7 +749,7 @@ gates:
     method: "чтение кода + переход по страницам SPA туда и обратно ×3: число canvas, ScrollTrigger и слушателей не растёт"
     threshold_text: "не растёт"
     severity: S
-    source: "W2 (волна 2) — чек-лист «грязного» компонента"
+    source: "чек-лист «грязного» компонента"
     label: "[практика]"
     site: "—"
   - id: EG-3D-01
@@ -765,7 +759,7 @@ gates:
     method: "python3 ../../scripts/blender/site_probe.py URL out/ [--mobile] [--reduced-motion] + gate_check (blender 09/05 §7.2)"
     threshold_text: "11 порогов blender"
     severity: D
-    source: "blender 09/05 §7.2; контракт v2 §2 (ворота ассета не блокируют страницу за чужие байты)"
+    source: "blender 09/05 §7.2; kb/common/owners.md § Правила владения (ворота ассета не блокируют страницу за чужие байты)"
     label: "[проверено] у blender"
     site: "SG-WEIGHT-08"
   - id: EG-LIVE-01
@@ -775,6 +769,6 @@ gates:
     method: "живая фаза: Android среднего класса и iPhone, запись экрана, chrome://inspect"
     threshold_text: "сцены без рывков; память стабильна 60 с"
     severity: D
-    source: "W2 (Прокопьев: замер на одном телефоне — перепроверить); E 05-motion/03 §3 (headless ≠ телефон)"
+    source: "Прокопьев: замер на одном телефоне — перепроверить; creative 05/03 §3 (headless ≠ телефон)"
     label: "[не проверено]"
     site: "—"

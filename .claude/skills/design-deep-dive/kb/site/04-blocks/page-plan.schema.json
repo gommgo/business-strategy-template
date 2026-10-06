@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:site:page-plan:0.9",
   "title": "page-plan v0.9 — план одной страницы или шаблона: цель, трафик, форма, секции по порядку, слоты, события",
-  "description": "ЗАМЕНЕНО v1: ../10-playbooks-contracts/schemas/page-plan.schema.json (J, волна 3, 2026-09-24); эта схема v0.9 остаётся для файлов версии 0.9. Владелец — site-research (04-blocks, агент E, волна 2; v1 — J, волна 3). Контракт тройки §3 п.3. Id — словарь B (02-site-types/vocabulary.yaml), блоки и элементы анатомии — 04-blocks/blocks.yaml. Потребители: text (copy-deck: section.id → section_id и site_section_id, role → section_role, block → block, текстовый слот id → slot_id, slot → slot_type, anatomy → site_slot_id, group → group; факты — data[].binds), creative (treatment{} — подсхема creative, пока пустой контейнер), ai-media (media[] → план ассетов 01/01 §8), blender (3d[] → рецепты 12-recipes), kimi (sections[].id и job → site.sections[{id, job}]; first_screen_policy → A3; macrostructure_family → direction.macrostructure). Проверки: форма — эта схема; id — vocab_lint.py; связи (блок есть, слот разрешён блоку, факт есть и разрешён слоту) — 99-raw/experiments/E/01-… (plan_check.py), итог — site_validate.py (J).",
+  "description": "Заменена схемой v1 — ../10-playbooks-contracts/schemas/page-plan.schema.json; эта схема v0.9 остаётся для файлов версии 0.9. Владелец — site (04-blocks). Контракт тройки §3 п.3. Id — словарь 02-site-types/vocabulary.yaml, блоки и элементы анатомии — 04-blocks/blocks.yaml. Потребители: text (copy-deck: section.id → section_id и site_section_id, role → section_role, block → block, текстовый слот id → slot_id, slot → slot_type, anatomy → site_slot_id, group → group; факты — data[].binds), creative (treatment{} — подсхема creative, пока пустой контейнер), ai-media (media[] → план ассетов 01/01 §8), blender (3d[] → рецепты 12-recipes), вход холста (sections[].id и job, first_screen_policy, macrostructure_family). Проверки: форма — эта схема; id — vocab_lint.py; связи (блок есть, слот разрешён блоку, факт есть и разрешён слоту) — site_validate.py.",
   "type": "object",
   "additionalProperties": false,
   "patternProperties": {
@@ -21,7 +21,7 @@
     "page_plan_version": {
       "type": "string",
       "pattern": "^0\\.9(\\.[0-9]+)?$|^1(\\.[0-9]+)*$",
-      "description": "0.9 — черновик E к S1; 1 — J."
+      "description": "0.9 — прежняя версия; 1 — действующая."
     },
     "checked": {
       "$ref": "#/$defs/date",
@@ -70,7 +70,7 @@
             "string",
             "null"
           ],
-          "description": "facts.yaml (формат text B2). null — фактов нет: все data-слоты — missing:."
+          "description": "facts.yaml (формат text). null — фактов нет: все data-слоты — missing:."
         },
         "meaning": {
           "type": "string"
@@ -90,7 +90,7 @@
         },
         "site_map": {
           "type": "string",
-          "description": "site-map G (многостраничник)."
+          "description": "site-map (многостраничник)."
         },
         "copy_deck": {
           "type": "string"
@@ -104,7 +104,7 @@
         },
         "treatment": {
           "type": "string",
-          "description": "art-direction / treatment creative (после C1)."
+          "description": "art-direction / treatment creative."
         }
       }
     },
@@ -139,14 +139,14 @@
     "sections": {
       "type": "array",
       "minItems": 1,
-      "description": "Секции потока по порядку DOM (он же визуальный порядок на всех экранах — C 03 §5.1): шапка первой, подвал последним.",
+      "description": "Секции потока по порядку DOM (он же визуальный порядок на всех экранах — site 03/03 §5.1): шапка первой, подвал последним.",
       "items": {
         "$ref": "#/$defs/section"
       }
     },
     "overlays": {
       "type": "array",
-      "description": "Элементы вне потока: липкий призыв, баннер cookie, чат, окно захвата (по умолчанию выключено — решение заказчика 15).",
+      "description": "Элементы вне потока: липкий призыв, баннер cookie, чат, окно захвата (по умолчанию выключено).",
       "items": {
         "$ref": "#/$defs/overlay"
       }
@@ -156,7 +156,7 @@
       "items": {
         "type": "string"
       },
-      "description": "Что не решено в плане (id вопросов брифа, пробелы фактов, решения F, H, I, P)."
+      "description": "Что не решено в плане (id вопросов брифа, пробелы фактов, решения разделов site 05, 07, 08)."
     }
   },
   "$defs": {
@@ -265,11 +265,11 @@
         },
         "template": {
           "type": "boolean",
-          "description": "true — план шаблона серии страниц (G); false — одна страница."
+          "description": "true — план шаблона серии страниц (site 06); false — одна страница."
         },
         "segment": {
           "type": "string",
-          "description": "Сегмент или источник, для которого этот вариант плана (C 02 §3.4: отдельная страница — если различаются ≥ 2 признака)."
+          "description": "Сегмент или источник, для которого этот вариант плана (site 03/02 §3.4: отдельная страница — если различаются ≥ 2 признака)."
         },
         "url": {
           "type": "string"
@@ -310,7 +310,7 @@
         },
         "secondary_goal": {
           "type": "string",
-          "description": "Переходный призыв для не готовых сейчас (C 02 §2.1; meaning.conversion.secondary_goal)."
+          "description": "Переходный призыв для не готовых сейчас (site 03/02 §2.1; meaning.conversion.secondary_goal)."
         },
         "awareness": {
           "$ref": "#/$defs/id",
@@ -319,7 +319,7 @@
         "awareness_basis": {
           "type": "object",
           "additionalProperties": false,
-          "description": "Откуда уровень: бриф pages.list[].main_sources → meaning.awareness.by_source (сообщение оркестратора 2026-09-24).",
+          "description": "Откуда уровень: бриф pages.list[].main_sources → meaning.awareness.by_source.",
           "properties": {
             "from": {
               "enum": [
@@ -402,7 +402,7 @@
               },
               "in_app_browser": {
                 "type": "boolean",
-                "description": "Трафик открывается во встроенном браузере соцсети или мессенджера (C 02 §4)."
+                "description": "Трафик открывается во встроенном браузере соцсети или мессенджера (site 03/02 §4)."
               }
             }
           }
@@ -417,14 +417,14 @@
             "poster",
             "flow"
           ],
-          "description": "layout_family макроструктуры (C 01 §4.1); проекция в kimi: flow → document-led."
+          "description": "layout_family макроструктуры (site 03/01 §4.1)."
         },
         "macrostructure_alternatives": {
           "type": "array",
           "items": {
             "$ref": "#/$defs/id"
           },
-          "description": "Две другие формы из разных семейств, показанные заказчику (C 01 §4.3)."
+          "description": "Две другие формы из разных семейств, показанные заказчику (site 03/01 §4.3)."
         },
         "first_screen_policy": {
           "enum": [
@@ -432,7 +432,7 @@
             "offer-cta-header",
             "poster"
           ],
-          "description": "C 03 §2.2; источник строки A3 в ACCEPTANCE.md kimi."
+          "description": "site 03/03 §2.2."
         },
         "first_screen": {
           "type": "object",
@@ -443,7 +443,7 @@
               "items": {
                 "type": "string"
               },
-              "description": "Что обязано быть выше черты первого экрана (C 03 §1.3) — id элементов «секция.слот»."
+              "description": "Что обязано быть выше черты первого экрана (site 03/03 §1.3) — id элементов «секция.слот»."
             },
             "core_words_max": {
               "type": "integer",
@@ -479,7 +479,7 @@
                         "visual"
                       ]
                     },
-                    "description": "Что совпадает с источником (C 02 §3.1)."
+                    "description": "Что совпадает с источником (site 03/02 §3.1)."
                   },
                   "slots": {
                     "type": "array",
@@ -499,7 +499,7 @@
                 "default",
                 "variants"
               ],
-              "description": "Подстановка по UTM или ключу — белый список вариантов, до первой отрисовки (C 02 §3.3).",
+              "description": "Подстановка по UTM или ключу — белый список вариантов, до первой отрисовки (site 03/02 §3.3).",
               "properties": {
                 "param": {
                   "enum": [
@@ -552,7 +552,7 @@
                 },
                 "event_param": {
                   "type": "string",
-                  "description": "Как вариант попадает в событие аналитики (P)."
+                  "description": "Как вариант попадает в событие аналитики (site 07/04)."
                 }
               }
             }
@@ -576,7 +576,7 @@
         "budget_profile": {
           "type": "string",
           "pattern": "^[a-z0-9]+(-[a-z0-9]+)*@L[0-2]$",
-          "description": "Профиль бюджета P: <page_type>@<уровень амбиций> (budgets.yaml P, волна 2)."
+          "description": "Профиль бюджета: <page_type>@<уровень амбиций> (budgets.yaml)."
         },
         "ambition_level": {
           "$ref": "#/$defs/ambition-level"
@@ -591,11 +591,11 @@
                 "site",
                 "none"
               ],
-              "description": "landing-minimal — логотип (ссылка на главную), призыв, контакт без меню сайта (платный трафик, C 02 §2.3); site — шапка сайта (G)."
+              "description": "landing-minimal — логотип (ссылка на главную), призыв, контакт без меню сайта (платный трафик, site 03/02 §2.3); site — шапка сайта (site 06)."
             },
             "archetype": {
               "type": "string",
-              "description": "Архетип шапки (G, по типу сайта в site-map)."
+              "description": "Архетип шапки (site 06, по типу сайта в site-map)."
             },
             "anchor_nav": {
               "type": "boolean"
@@ -618,7 +618,7 @@
           "patternProperties": {
             "^x-": {}
           },
-          "description": "Техническое SEO и GEO — H (head-kit.yaml); здесь — решения уровня страницы.",
+          "description": "Техническое SEO и GEO — head-kit.yaml; здесь — решения уровня страницы.",
           "properties": {
             "indexable": {
               "type": "boolean"
@@ -635,7 +635,7 @@
               "items": {
                 "type": "string"
               },
-              "description": "Типы schema.org (решение H)."
+              "description": "Типы schema.org (по head-kit.yaml)."
             },
             "ssr_required": {
               "type": "boolean",
@@ -660,7 +660,7 @@
                 "checkbox-and-link",
                 "not-collected"
               ],
-              "description": "152-ФЗ: отдельное согласие с 01.09.2025 (I)."
+              "description": "152-ФЗ: отдельное согласие с 01.09.2025 (site 08)."
             },
             "privacy_policy": {
               "type": "string"
@@ -693,7 +693,7 @@
           "patternProperties": {
             "^x-": {}
           },
-          "description": "События и цели — P (events.yaml); правовые условия — I.",
+          "description": "События и цели — events.yaml; правовые условия — site 08.",
           "properties": {
             "systems": {
               "type": "array",
@@ -744,7 +744,7 @@
       "properties": {
         "id": {
           "$ref": "#/$defs/id",
-          "description": "Уникален на странице; = site.sections[].id kimi = section_id copy-deck = section в плане ассетов."
+          "description": "Уникален на странице; = section_id copy-deck = section в плане ассетов."
         },
         "role": {
           "$ref": "#/$defs/id",
@@ -752,11 +752,11 @@
         },
         "question": {
           "type": "string",
-          "description": "Вопрос посетителя, на который отвечает секция (C 01 §1.1; text sections[].question)."
+          "description": "Вопрос посетителя, на который отвечает секция (site 03/01 §1.1; text sections[].question)."
         },
         "job": {
           "type": "string",
-          "description": "Работа секции одной фразой → site.sections[].job kimi."
+          "description": "Работа секции одной фразой."
         },
         "block": {
           "$ref": "#/$defs/id",
@@ -1059,7 +1059,7 @@
             "shader",
             "scroll"
           ],
-          "description": "Только вид; параметры движения — creative, пауза и reduce — ворота (P, I)."
+          "description": "Только вид; параметры движения — creative, пауза и reduce — ворота (site 07, site 08)."
         },
         "note": {
           "type": "string"
@@ -1110,7 +1110,7 @@
         "cta_before_3d": {
           "type": "boolean",
           "default": true,
-          "description": "Призыв и форма работают до загрузки 3D (поправка PLAN №22)."
+          "description": "Призыв и форма работают до загрузки 3D."
         },
         "note": {
           "type": "string"
@@ -1211,7 +1211,7 @@
           "properties": {
             "ref": {
               "type": "string",
-              "description": "Набор полей F (lead-forms.yaml#<id>)."
+              "description": "Набор полей (lead-forms.yaml#<id>)."
             },
             "fields_visible_max": {
               "type": "integer"
@@ -1225,7 +1225,7 @@
                 "link-only",
                 "none"
               ],
-              "description": "Согласие на ПД — I (152-ФЗ)."
+              "description": "Согласие на ПД — site 08 (152-ФЗ)."
             },
             "success": {
               "enum": [
@@ -1241,7 +1241,7 @@
         "event": {
           "type": "string",
           "pattern": "^event:[a-z0-9-]+$",
-          "description": "id события P (events.yaml) — когда будет."
+          "description": "id события (events.yaml) — когда будет."
         },
         "note": {
           "type": "string"
@@ -1317,7 +1317,7 @@
             "off",
             "auto"
           ],
-          "description": "auto — по юрисдикции и составу скриптов (баннер cookie — I)."
+          "description": "auto — по юрисдикции и составу скриптов (баннер cookie — site 08)."
         },
         "when": {
           "type": "string"
@@ -1359,8 +1359,8 @@
     },
     "treatment": {
       "type": "object",
-      "description": "Контейнер подачи creative (контракт §2, §3 п.12): подсхема treatment — владелец creative-research; до точки C1 поля не задаются и не выдумываются. После C1 здесь будет $ref на ../../creative-research/<папка>/treatment.schema.json. Ключи словаря site для treatment-слотов (visual-role, effect-ref, motion-level) — предложение имён, значения — creative.",
-      "$comment": "C1 не наступила на 2026-09-24: creative-research не запущена. Не добавлять свойства до подсхемы creative.",
+      "description": "Контейнер подачи creative (контракт §2, §3 п.12): подсхема treatment — владелец creative; в версии 0.9 поля не задаются и не выдумываются — подсхема подключена в схеме v1 (creative 09-ai-execution-evaluation/treatment.schema.json). Ключи словаря site для treatment-слотов (visual-role, effect-ref, motion-level) — предложение имён, значения — creative.",
+      "$comment": "Версия 0.9: свойства не добавлять — подсхема подачи creative подключена в схеме v1.",
       "additionalProperties": true
     },
     "anatomy-ref": {

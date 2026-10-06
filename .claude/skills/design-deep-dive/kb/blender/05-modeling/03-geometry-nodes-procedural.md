@@ -39,7 +39,7 @@ C1 и задание) [исследование].
 
 ```python
 # Blender 5.2.2 — [проверено] GN-дерево обёртками: интерфейс, режим до сокетов, is_valid
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 t, gi, go = bpyx.gn_tree("Pebbles", inputs=[("Density", "NodeSocketFloat", 300.0), ("Seed", "NodeSocketInt", 1)])
@@ -81,7 +81,7 @@ E/08: 100 икосфер — 11,8 КБ и 1 вызов отрисовки про
 
 ```python
 # Blender 5.2.2 — [проверено] два прототипа по случайному выбору + разброс по «верху»
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 hidden = bpy.data.collections.new("glTF_not_exported"); bpy.context.scene.collection.children.link(hidden)
@@ -137,7 +137,7 @@ assert len(kinds) > 20 and len(set(kinds)) == 2
 
 ```python
 # Blender 5.2.2 — [проверено] точки GN (детерминизм) и ровно N точек для морфинга
-import sys, os, tempfile; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, os, tempfile; sys.path.insert(0, "../../scripts/blender")
 import numpy as np, bpy, d1lib as D, bpyx         # d1lib первым: он добавляет путь к bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 src = bpyx.primitive("uvsphere", "Shape", radius=0.1)
@@ -186,7 +186,7 @@ assert info["bytes"] == 1024 * 12
 
 ```python
 # Blender 5.2.2 — [проверено] SDF-капля из перекрывающихся шаров и метаболы
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 balls = [(0.0, 0.0, 0.085, 0.065), (0.022, 0.008, 0.135, 0.052), (0.008, -0.006, 0.18, 0.04), (-0.014, 0.004, 0.215, 0.03)]
@@ -227,7 +227,7 @@ print(bpyx.object_stats(blob)["tris"], bpyx.object_stats(meta)["tris"])
 
 ```python
 # Blender 5.2.2 — [проверено] Mesh Bevel (5.2): ширина — во все 4 входа сторон
-import sys, math; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, math; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 ob = D.rounded_slab("Block", 0.10, 0.07, 0.035, 0.012, 0.0, smooth_angle=30.0)     # острые рёбра → атрибут sharp_edge

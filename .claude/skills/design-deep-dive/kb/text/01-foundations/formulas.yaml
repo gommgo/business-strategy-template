@@ -1,124 +1,123 @@
 # Формулы маркетингового текста как инструменты: уровень, шаги, когда брать и когда нет, жанры, слоты, метка.
-# Пишет агент A (волна 1); читают E (copy-slots.yaml), I (промты и рубрика), J (примеры). Разбор — 01-foundations/03 §2.
-# Проверка загрузки и полей: python3 99-raw/experiments/A/04-formulas-yaml-check/check_formulas.py
+# Читают: copy-slots.yaml, промты и рубрика (text 09), примеры (text 10). Разбор — 01-foundations/03 §2.
 date: 2026-09-24
 version: 1
-status: draft            # draft — до сверки с site C (порядок секций) и E (слоты)
-owner: text-research · агент A · волна 1
+status: draft            # draft — до сверки с site 03 (порядок секций) и copy-slots.yaml (слоты)
+owner: text · 01-foundations
 description: >-
-  Формулы — черновой каркас хода мысли после смысла (B1) и фактов (B2), а не шаблон предложения и не гарантия
+  Формулы — черновой каркас хода мысли после смысла (meaning.yaml) и фактов (facts.yaml), а не шаблон предложения и не гарантия
   результата. Сравнительных тестов формул с методикой не найдено; последовательность «внимание → интерес → желание →
-  действие» не подтверждена обзором > 250 работ (Vakratsas & Ambler 1999). Для level: page — только ссылка на site C.
+  действие» не подтверждена обзором > 250 работ (Vakratsas & Ambler 1999). Для level: page — только ссылка на site 03.
 fields:
   id: латиница, kebab-case, уникален
   name: название формулы (как в практике)
-  level: page — порядок секций страницы (решает site C); block — ход текста секции или письма; sentence — заголовок, фраза
+  level: page — порядок секций страницы (решает site 03); block — ход текста секции или письма; sentence — заголовок, фраза
   also_levels: где формулу ещё применяют (необязательно)
   steps: шаги по порядку
   use_when: условия, при которых формула уместна
   avoid_when: условия, при которых формулу не брать
   genres: подмножество landing, site-page, article, meta, geo, email-form
-  slots: slot_type из 99-raw/notes/temp-vocabulary-v0.yaml (для page — пусто)
+  slots: slot_type словаря site ../site/02-site-types/vocabulary.yaml (для page — пусто)
   evidence: метка доказательности базы
   source: откуда формула и где разбор
-  site_ref: для page — ссылка на site C (разбора здесь нет)
+  site_ref: для page — ссылка на site 03 (разбора здесь нет)
   example: пример RU (и EN, если нужен); факты — плейсхолдеры
   antiexample: как не надо
   notes: оговорки
   date: дата записи
 levels:
-  page: порядок секций всей страницы — решает site C (../site-research/03-page-structure/01, план; до выхода файлов site — временные роли секций из temp-vocabulary-v0.yaml)
+  page: порядок секций всей страницы — решает site 03 (../site/03-page-structure/01-narratives-and-section-order.md, план страницы)
   block: ход текста внутри одной секции, карточки, письма
   sentence: заголовок, подзаголовок, фраза, строка CTA, тема письма
 formulas:
-  # ---------------------------------------------------------------- page (только ссылка на site C)
+  # ---------------------------------------------------------------- page (только ссылка на site 03)
   - id: aida
     name: AIDA (Attention, Interest, Desire, Action)
     level: page
     also_levels: [block]
     steps: ["внимание", "интерес", "желание", "действие"]
-    use_when: ["→ site C: порядок секций; как чек-лист блока — «есть ли желание, кроме внимания и призыва»"]
-    avoid_when: ["→ site C; не выдавать за закон: последовательность иерархии эффектов не подтверждена"]
+    use_when: ["→ site 03: порядок секций; как чек-лист блока — «есть ли желание, кроме внимания и призыва»"]
+    avoid_when: ["→ site 03; не выдавать за закон: последовательность иерархии эффектов не подтверждена"]
     genres: [landing, email-form]
     slots: []
     evidence: "[практика]"
     source: "E. St. Elmo Lewis (1898–1910; Printers' Ink, 09.02.1898); критика — Vakratsas & Ambler, J. of Marketing 63(1), 1999; 01-foundations/03 §2.3"
-    site_ref: ../site-research/03-page-structure/01
+    site_ref: ../site/03-page-structure/01-narratives-and-section-order.md
     notes: "варианты AIDCA/IDCA (+ убеждённость: отзывы, данные, гарантии; IDCA — когда внимание уже поймано объявлением)"
     date: 2026-09-24
   - id: storybrand-sb7
     name: StoryBrand SB7
     level: page
     steps: ["герой-клиент чего-то хочет", "проблема (внешняя, внутренняя, философская)", "проводник (эмпатия и авторитет)", "план из 3–4 шагов", "призыв (прямой и переходный)", "что будет при провале", "успех"]
-    use_when: ["→ site C"]
-    avoid_when: ["→ site C; буквальное применение делает сайты одинаковыми"]
+    use_when: ["→ site 03"]
+    avoid_when: ["→ site 03; буквальное применение делает сайты одинаковыми"]
     genres: [landing, site-page]
     slots: []
     evidence: "[практика]"
     source: "Miller D., «Building a StoryBrand», 2017 (конспект grahammann.net); 01-foundations/03 §2.3"
-    site_ref: ../site-research/03-page-structure/01
+    site_ref: ../site/03-page-structure/01-narratives-and-section-order.md
     notes: «мозг экономит калории» — поп-нейро без данных
     date: 2026-09-24
   - id: big8-four-layers
     name: Big 8 и «четыре слоя» (стратегия, сюжет, опыт, рост)
     level: page
     steps: ["продуманный дизайн", "ясный путь клиента", "визуальный рассказ", "сильный конкретный текст", "свои изображения", "осмысленные взаимодействия", "ясный призыв", "система поиска и контента"]
-    use_when: ["→ site C; как рубрика приёмки страницы, с измерениями, а не «на глаз»"]
-    avoid_when: ["→ site C; не как текст страницы"]
+    use_when: ["→ site 03; как рубрика приёмки страницы, с измерениями, а не «на глаз»"]
+    avoid_when: ["→ site 03; не как текст страницы"]
     genres: [landing]
     slots: []
     evidence: "[мнение]"
-    source: "Samin Yasar, YouTube, 07.2026 — ../kimi-research/91-videos/digests/p1J5uWcn3hI.md §2.3"
-    site_ref: ../site-research/03-page-structure/01
+    source: "Samin Yasar, YouTube, 07.2026 [V:p1J5uWcn3hI]"
+    site_ref: ../site/03-page-structure/01-narratives-and-section-order.md
     notes: карточки «question → proof → action» и «problem → transformation → outcome» вынесены в формулы уровня block
     date: 2026-09-24
   - id: protagonist-payoff
     name: Protagonist / Payoff (сайт-история)
     level: page
     steps: ["герой-объект", "3–5 битов сюжета", "итоговое состояние", "целевое действие"]
-    use_when: ["→ site C; кампании и запуски уровня L2 с прокруткой-историей"]
-    avoid_when: ["→ site C"]
+    use_when: ["→ site 03; кампании и запуски уровня L2 с прокруткой-историей"]
+    avoid_when: ["→ site 03"]
     genres: [landing]
     slots: []
     evidence: "[мнение]"
-    source: "Jack Roberts, YouTube, 07.2026 — ../kimi-research/91-videos/digests/weoV4dm-X1A.md"
-    site_ref: ../site-research/03-page-structure/01
+    source: "Jack Roberts, YouTube, 07.2026 [V:weoV4dm-X1A]"
+    site_ref: ../site/03-page-structure/01-narratives-and-section-order.md
     date: 2026-09-24
   - id: pastor
     name: PASTOR (Person/Problem, Amplify, Story, Testimony, Offer, Response)
     level: page
     steps: ["человек и боль", "последствия бездействия", "история и решение", "свидетельства", "предложение", "призыв"]
-    use_when: ["→ site C; длинная продающая страница, курс, вебинар"]
-    avoid_when: ["→ site C; нет реальных отзывов (выдумка — запрет, B2)"]
+    use_when: ["→ site 03; длинная продающая страница, курс, вебинар"]
+    avoid_when: ["→ site 03; нет реальных отзывов (выдумка — запрет, text 02/03)"]
     genres: [landing]
     slots: []
     evidence: "[практика]"
     source: "Ray Edwards — по Copyhackers «Copywriting Formulas», 2015/2023"
-    site_ref: ../site-research/03-page-structure/01
+    site_ref: ../site/03-page-structure/01-narratives-and-section-order.md
     date: 2026-09-24
   - id: quest
     name: QUEST (Qualify, Understand, Educate, Stimulate, Transition)
     level: page
     steps: ["отобрать своего читателя", "показать понимание его ситуации", "объяснить лучший способ", "вызвать желание", "перевести в клиенты"]
-    use_when: ["→ site C"]
-    avoid_when: ["→ site C"]
+    use_when: ["→ site 03"]
+    avoid_when: ["→ site 03"]
     genres: [landing]
     slots: []
     evidence: "[практика]"
     source: "Michel Fortin — по Copyhackers «Copywriting Formulas», 2015/2023"
-    site_ref: ../site-research/03-page-structure/01
+    site_ref: ../site/03-page-structure/01-narratives-and-section-order.md
     date: 2026-09-24
   - id: acca
     name: ACCA (Awareness, Comprehension, Conviction, Action)
     level: page
     steps: ["показать проблему", "объяснить её", "убедить действовать", "призвать"]
-    use_when: ["→ site C; некоммерческие и социальные кампании"]
-    avoid_when: ["→ site C"]
+    use_when: ["→ site 03; некоммерческие и социальные кампании"]
+    avoid_when: ["→ site 03"]
     genres: [landing]
     slots: []
     evidence: "[практика]"
     source: "по Copyhackers «Copywriting Formulas», 2015/2023"
-    site_ref: ../site-research/03-page-structure/01
+    site_ref: ../site/03-page-structure/01-narratives-and-section-order.md
     date: 2026-09-24
   # ---------------------------------------------------------------- block
   - id: pas
@@ -127,7 +126,7 @@ formulas:
     also_levels: [page]
     steps: ["узнаваемая проблема словами клиента", "последствия — конкретно и без запугивания", "решение с фактом"]
     use_when: ["секция «проблема» или «почему это важно»", "посетитель problem-aware", "письмо после заявки на материал"]
-    avoid_when: ["посетитель most-aware (нужна сделка)", "медицина и финансы (страх — правовой риск, H)", "нет проверяемого решения", "проблему можно описать только как массовую («80 % компаний теряют…» нормализует потерю)"]
+    avoid_when: ["посетитель most-aware (нужна сделка)", "медицина и финансы (страх — правовой риск, text 08/01)", "нет проверяемого решения", "проблему можно описать только как массовую («80 % компаний теряют…» нормализует потерю)"]
     genres: [landing, site-page, email-form]
     slots: [section-lead, body, card-body, email-body]
     evidence: "[практика]"
@@ -143,7 +142,7 @@ formulas:
     level: block
     steps: ["как сейчас", "как будет", "что переводит из «сейчас» в «будет»"]
     use_when: ["результат видим и доказуем фактом", "кейс", "секция «как это работает»", "письмо"]
-    avoid_when: ["результат не гарантирован или не измерен", "«после» звучит как обещание здоровья или дохода (H)"]
+    avoid_when: ["результат не гарантирован или не измерен", "«после» звучит как обещание здоровья или дохода (text 08/01)"]
     genres: [landing, site-page, email-form]
     slots: [section-lead, body, case-summary, email-body]
     evidence: "[практика]"
@@ -156,7 +155,7 @@ formulas:
     name: FAB (Features, Advantages, Benefits)
     level: block
     steps: ["свойство", "что оно даёт", "зачем это этому клиенту"]
-    use_when: ["карточки фич", "когда потребность клиента известна из смысла (B1) или голоса клиента (B2)"]
+    use_when: ["карточки фич", "когда потребность клиента известна из смысла (meaning.yaml) или голоса клиента (voc.yaml)"]
     avoid_when: ["сложные B2B-продажи без выявленной потребности", "список фич ради списка"]
     genres: [landing, site-page]
     slots: [card-title, card-body, list-item]
@@ -183,7 +182,7 @@ formulas:
     level: block
     steps: ["герой (клиент или продукт)", "его история", "решение", "которое помогло"]
     use_when: ["кейс клиента с разрешением", "история основателя из фактов", "письмо"]
-    avoid_when: ["нет реальной истории и разрешения (выдумка — запрет, B2)", "герой — сам бренд вместо клиента"]
+    avoid_when: ["нет реальной истории и разрешения (выдумка — запрет, text 02/03)", "герой — сам бренд вместо клиента"]
     genres: [landing, site-page, article, email-form]
     slots: [case-title, case-summary, case-result, testimonial-quote, email-body]
     evidence: "[практика]"
@@ -198,7 +197,7 @@ formulas:
     genres: [landing, site-page]
     slots: [section-title, section-lead, body, objection-answer, faq-a, cta-note]
     evidence: "[практика]"
-    source: "карточка Big 8 «Clear customer journey» (../kimi-research/91-videos/digests/p1J5uWcn3hI.md §2.3); B1 — 02-strategy-messaging/02 §2.4"
+    source: "карточка Big 8 «Clear customer journey» [V:p1J5uWcn3hI]; 02-strategy-messaging/02 §2.4"
     example:
       ru: "Что будет, если налоговая выставит штраф по нашей ошибке? Его оплачиваем мы — это пункт 6.2 договора [PLACEHOLDER: fact:contract-6-2]. Скачайте договор и прочитайте пункт до звонка."
       en: "What if the tax office fines you for our mistake? We pay it — clause 6.2 of our contract [PLACEHOLDER]. Read the contract before you call."
@@ -212,7 +211,7 @@ formulas:
     genres: [landing, site-page]
     slots: [section-lead, body, step-body, case-summary]
     evidence: "[мнение]"
-    source: "карточка Big 8 «Visual storytelling» (../kimi-research/91-videos/digests/p1J5uWcn3hI.md §2.3)"
+    source: "карточка Big 8 «Visual storytelling» [V:p1J5uWcn3hI]"
     date: 2026-09-24
   - id: inverted-pyramid
     name: Перевёрнутая пирамида
@@ -246,7 +245,7 @@ formulas:
     level: sentence
     steps: ["можно представить?", "можно опровергнуть?", "может ли это сказать конкурент?"]
     use_when: ["любая ключевая фраза: заголовок", "подзаголовок", "выгода", "строка доказательства"]
-    avoid_when: ["юридические формулировки и оговорки (правила — H)"]
+    avoid_when: ["юридические формулировки и оговорки (правила — text 08/01)"]
     genres: [landing, site-page, meta, email-form, article]
     slots: [headline, subheadline, hero-proof, card-title, card-body, meta-description, email-subject]
     evidence: "[практика]"
@@ -304,18 +303,18 @@ formulas:
     genres: [landing, site-page]
     slots: [subheadline, cta-note, section-title, objection-answer]
     evidence: "[практика]"
-    source: "Wiebe (Copyhackers) — по B1 02-strategy-messaging/02 §4.3"
+    source: "Wiebe (Copyhackers) — по 02-strategy-messaging/02 §4.3"
     date: 2026-09-24
   - id: category-statement
     name: Продукт — категория, которая делает главное отличие
     level: sentence
     steps: ["{продукт} — {рыночная категория}", "которая {главное отличие с фактом}"]
     use_when: ["hero", "meta-description", "«о компании»", "сниппет"]
-    avoid_when: ["новая категория без объяснения (B1 02/01 §2.5–2.6)"]
+    avoid_when: ["новая категория без объяснения (text 02/01 §2.5–2.6)"]
     genres: [landing, site-page, meta, geo]
     slots: [headline, subheadline, meta-description, section-lead, geo-answer]
     evidence: "[практика]"
-    source: "шаблон TechCrunch по Copyhackers «Copywriting Formulas»; согласуется с позиционированием Dunford (B1 02/01 §2.5)"
+    source: "шаблон TechCrunch по Copyhackers «Copywriting Formulas»; согласуется с позиционированием Dunford (text 02/01 §2.5)"
     example:
       ru: "Сервис бухгалтерии для ООО на УСН, который сам сдаёт отчёты за три дня до срока [PLACEHOLDER: fact:deadline-policy]"
     date: 2026-09-24

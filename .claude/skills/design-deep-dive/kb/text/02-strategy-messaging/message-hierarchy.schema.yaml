@@ -1,19 +1,18 @@
 # message-hierarchy.schema.yaml — иерархия сообщений страницы: главное сообщение, опоры, доказательства, возражения и
 # «сюжет словами» по секциям
-# text-research · волна 1 · агент B1 · 2026-09-24 · версия формата 1 (черновик; v1 — по итогам волны 1)
 #
 # Что это. JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — файл `hierarchy-<страница>.yaml`: одна иерархия
 # на страницу или шаблон страницы и на один уровень осведомлённости трафика (две аудитории с разным уровнем — два файла,
 # связанных `sibling_ids`). Правила — `02-awareness-hierarchy-objections.md` §2–§3.
 #
-# Границы (контракт тройки v2 §2): ПОРЯДОК и набор секций задаёт site (`page-plan`); здесь — какое сообщение несёт
+# Границы (`kb/common/owners.md` § Форматы обмена): ПОРЯДОК и набор секций задаёт site (`page-plan`); здесь — какое сообщение несёт
 # секция и какой вопрос посетителя она закрывает («вопрос → доказательство → действие»). Секции описываются ролями
 # `section_role` словаря site (`../site/02-site-types/vocabulary.yaml`) с черновым порядком (`order`), который задаёт
 # план страницы; место в плане — поле `section_id`.
 #
-# Ссылки: смысл — `meaning_ref` (meaning.schema.yaml); факты — `fact:<id>` / `missing:<id>` (B2 facts.yaml); голос
-# клиента — `voc:<id>` (B2); возражения и ценность — id из meaning (`objection_ids`, `value_theme_refs`).
-# Потребители: E (тексты по слотам), I (цепочка генерации), J (copy-deck: `sections[].message` ← `sections[].message`,
+# Ссылки: смысл — `meaning_ref` (meaning.schema.yaml); факты — `fact:<id>` / `missing:<id>` (facts.yaml); голос
+# клиента — `voc:<id>`; возражения и ценность — id из meaning (`objection_ids`, `value_theme_refs`).
+# Потребители: тексты по слотам (text 04), цепочка генерации (text 09), copy-deck (`sections[].message` ← `sections[].message`,
 # `slots[].fact_ids` ← `proof_ids`), вход холста (работа секций `site.sections[].job` брифа холста — проекция `x-canvas-map`).
 #
 # Даты — строкой в кавычках. Проверка: `../../scripts/text/validate_meaning.py` (схема + смысловые
@@ -31,8 +30,7 @@ description: >-
   тексты страницы пишет copy-deck.
 date: "2026-09-29"
 x-version: 1
-x-status: "черновик волны 1, 2026-09-24"
-x-owner: "text-research · 02-strategy-messaging · B1"
+x-owner: "text · 02-strategy-messaging"
 x-doc: "02-strategy-messaging/02-awareness-hierarchy-objections.md"
 
 type: object
@@ -312,6 +310,6 @@ x-canvas-map:
     - {from: [/core_message, /first_screen, /pillars, /proof_order, /not_said], note: "главное сообщение, первый экран, опоры и порядок доводов воплощены в текстах copy deck; обещание первого экрана — слот copy deck, product.goal — из смысла"}
     - {from: [/sections/*/order, /sections/*/carries, /sections/*/objection_ids, /sections/*/next_step, /sections/*/awareness_shift, /sections/*/notes], note: "порядок и следующий шаг секции — план страницы; опоры и возражения — уже в текстах"}
 x-copy-deck-map:
-  - {from: "sections[].message", to: "copy_deck.pages[].sections[].message", note: "опора иерархии одной фразой (copy-deck v0, PLAN)"}
+  - {from: "sections[].message", to: "copy_deck.pages[].sections[].message", note: "опора иерархии одной фразой"}
   - {from: "sections[].proof_ids", to: "copy_deck…slots[].fact_ids", note: "без префикса fact:; missing:<id> → [PLACEHOLDER] в тексте"}
-  - {from: "sections[].question", to: "copy_deck…slots[].notes", note: "вопрос посетителя — вход E для заголовка секции (заголовок-ответ или заголовок-вопрос решает E)"}
+  - {from: "sections[].question", to: "copy_deck…slots[].notes", note: "вопрос посетителя — вход для заголовка секции (заголовок-ответ или заголовок-вопрос — по copy-slots.yaml)"}

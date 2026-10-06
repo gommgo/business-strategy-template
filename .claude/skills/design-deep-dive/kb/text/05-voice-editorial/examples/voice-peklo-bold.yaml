@@ -1,13 +1,12 @@
 # voice-peklo-bold.yaml — пример 3 из 3: дерзкий потребительский голос, кампания запуска уровня L2 (острый соус, D2C)
-# text-research · F · 2026-09-24 · формат: ../voice.schema.yaml (voice_version 1)
+# Формат: ../voice.schema.yaml (voice_version 1)
 #
-# Бренд «Пекло» — ВЫМЫШЛЕННЫЙ; ДЕМО-факты и демо-бриф — ../../99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml
-# (агент F: дерзкий голос нужно показывать на фактах). Образцы строк — ai-self, прошли claims_check.py и copy_lint.py:
-# 99-raw/experiments/F/04-voice-samples/README.md.
+# Бренд «Пекло» — ВЫМЫШЛЕННЫЙ; ДЕМО-факты и демо-бриф — файл brand.facts_ref (дерзкий голос нужно показывать на
+# фактах). Образцы строк — ai-self, прошли claims_check.py и copy_lint.py.
 # Что показывает пример: дерзость живёт в контрасте, позиции и точных числах, а не в «ты», восклицаниях и капсе; юмор —
 # над категорией и над собой, не над читателем; шутка стоит рядом с фактом и не заменяет его; эмодзи разрешены голосом,
 # но не в заголовках, CTA, цене и праве (поправка профиля линтера `ru-pun-emoji-body: off`); история основателя — только
-# из фактов интервью. Обращение — «вы» (решение заказчика п. 16 для примеров); «ты» — только решением заказчика.
+# из фактов интервью. Обращение — «вы»; «ты» — только решением заказчика.
 
 voice_version: 1
 date: "2026-09-24"
@@ -18,7 +17,7 @@ brand:
   name: "Пекло"
   site: peklo-demo
   category: "острый соус с цифрой остроты на этикетке"
-  facts_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml"
+  facts_ref: "facts-demo-peklo.yaml"
 
 scope:
   genres: [landing, email-form, meta]
@@ -70,7 +69,7 @@ principles:
     why: "Категория говорит «огненный» и «взрыв вкуса»; число можно проверить (Dry: «can I falsify it?»)."
     execution:
       - "Вместо «супер-острый» — 120 000 SHU по замеру лаборатории и 3 из 5 по нашей шкале (факты)"
-      - "Сравнения — только с тем, что есть у читателя на кухне, без чужих марок и «острее всех» (H, never_claim:nc-hottest)"
+      - "Сравнения — только с тем, что есть у читателя на кухне, без чужих марок и «острее всех» (text 08/01, never_claim:nc-hottest)"
     is_not: "Не протокол лаборатории: число живёт в шутке или сцене, а не в таблице «SHU: 120 000»."
     do: ["Острота с протоколом: 120 000 единиц по шкале Сковилла по замеру лаборатории."]
     dont: ["Самый острый соус в России!"]
@@ -88,7 +87,7 @@ principles:
     checked_by: [copy_lint, judge, human]
   - id: honest-about-heat
     name: "Честно про последствия, без медицины"
-    why: "Острота — реальный риск для непривычного; пищевой продукт не обещает пользы (never_claim:nc-health, H)."
+    why: "Острота — реальный риск для непривычного; пищевой продукт не обещает пользы (never_claim:nc-health, text 08/01)."
     execution:
       - "Предупреждаем прямо и с улыбкой: «начните с половины капли»; ни слова о пользе, метаболизме и иммунитете"
       - "Страшилки ради хайпа («опасно для жизни») не пишем"
@@ -137,13 +136,13 @@ vocabulary:
     - {term: "метаболизм*", use_instead: "не писать", reason: "never_claim:nc-health", level: error}
     - {term: "не для слабаков", use_instead: "«начните с половины капли»", reason: "стыд вместо довода (never_claim:nc-danger-hype)", level: error}
     - {term: "настоящ* мужчин*", use_instead: "без гендерных стереотипов", reason: "мачизм (never_claim:nc-danger-hype)", level: error}
-    - {term: "натуральн*", unless: "рядом состав из fact:ingredients-no3", use_instead: "перечислить 6 ингредиентов", reason: "маркетинговое слово без определения (H)", level: warning}
+    - {term: "натуральн*", unless: "рядом состав из fact:ingredients-no3", use_instead: "перечислить 6 ингредиентов", reason: "маркетинговое слово без определения (text 08/01 §10)", level: warning}
   use_with_care:
     - {term: "остро, острый", condition: "с числом или своей шкалой рядом; без «самый»"}
     - {term: "эмодзи 🌶", condition: "не больше одного на блок и только в прозе писем и подвала; никогда в заголовке, CTA, цене"}
   spellings:
     - {preferred: "SHU", variants: ["ШУ", "shu"], lang: ru, note: "латиницей, при первом упоминании — «единиц по шкале Сковилла»"}
-    - {preferred: "«Пекло № 3»", variants: ["Пекло №3", "Пекло 3"], lang: ru, note: "знак номера с неразрывным пробелом (H)"}
+    - {preferred: "«Пекло № 3»", variants: ["Пекло №3", "Пекло 3"], lang: ru, note: "знак номера с неразрывным пробелом (text 08/02 §6)"}
   category_name: {ru: "острый соус", en: "hot sauce"}
 
 punctuation:
@@ -174,11 +173,11 @@ tone_map:
 taboos:
   - {id: shame, what: "стыдить тех, кто не ест острое", why: "читатель всегда в порядке", refs: ["never_claim:nc-danger-hype"]}
   - {id: machismo, what: "гендерные стереотипы («для настоящих мужчин»)", why: "мачизм — штамп категории и исключает половину аудитории"}
-  - {id: health, what: "польза, лечение, метаболизм, иммунитет", why: "пищевой продукт (H)", refs: ["never_claim:nc-health"]}
-  - {id: alcohol, what: "связка с алкоголем в шутках («под водочку»)", why: "реклама алкоголя — отраслевые запреты (H)"}
+  - {id: health, what: "польза, лечение, метаболизм, иммунитет", why: "пищевой продукт (text 08/01)", refs: ["never_claim:nc-health"]}
+  - {id: alcohol, what: "связка с алкоголем в шутках («под водочку»)", why: "реклама алкоголя — отраслевые запреты (text 08/01 §6)"}
   - {id: fake-scarcity, what: "«осталось N бутылок», таймер", why: "ложная срочность", refs: ["never_claim:nc-scarcity"]}
 
-claims_boundaries_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml#never_claim"
+claims_boundaries_ref: "facts-demo-peklo.yaml#never_claim"
 
 samples:
   # --- русский (10 типов слотов) — ai-self, ДЕМО-факты «Пекла»
@@ -250,6 +249,6 @@ open_questions:
 
 review:
   method: editor
-  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review (99-raw/experiments/F/04-voice-samples)"
-  by: "агент F (ai-self)"
+  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review"
+  by: "ai-self"
   date: "2026-09-24"

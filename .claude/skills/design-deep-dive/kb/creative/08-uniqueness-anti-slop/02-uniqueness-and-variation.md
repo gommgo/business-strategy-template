@@ -259,7 +259,7 @@ VLM движения не видит: приметы движения прове
 
 | Инструмент | Что видит | Слепые зоны | Статус для нас |
 |---|---|---|---|
-| `k3_checks.py` 1.0 (kimi) | 18 примет K3 с ключами `--allow`, выдумки, мобильная | эффекты вне бан-листа (курсор, аврора без градиента, частицы) | основной для K3; ключи = `k3_allow` реестра |
+| `mockup_checks.py` (`kb/common/tells.yaml`, раздел `checks`) | приметы макета: 23 проверки `LOOK-*`, у 20 — ключ `--allow` | эффекты вне бан-листа (курсор, аврора без градиента, частицы) | основной для макета; ключи `--allow` = `k3_allow` реестра |
 | impeccable detect 4.1.0 | 61 правило по отрисовке (32 slop + 29 quality): `ai-color-palette`, `gradient-text`, `cream-palette`, `overused-font`, `kicker-above-heading`, `marquee`, `dark-glow`, `layout-transition`, `low-contrast`… | `transition: all`, lorem, `lang`, `alt`; фон только страницы, не секций (kimi D/02) | вход; нормы местами против наших (§5.4) |
 | @gessobuild/anti-slop 0.4.3 `--marketing` | 73 правила по HTML и встроенному CSS: `indigo-accent`, `gradient-text`, `transition-all` (GATE), `multicolor-heading`, `fabricated-precision`, `reveal-specificity-trap` | контраст и интерлиньяж по отрисовке; внешний CSS; мёртвые правила бандла шумят | вход; только по снимку со встроенным CSS |
 | сигналы реестра по зонду C (H/04) | пурпур по палитре, тёплая бумага, курсор, строка, split, появление, плавная прокрутка, WebGL в покое, дисплей > 160, ворота | мелкий пурпур, смысл приёма | считать для каждой сборки (зонд C) |

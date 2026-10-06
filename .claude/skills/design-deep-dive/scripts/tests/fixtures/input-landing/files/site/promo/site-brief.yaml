@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · лидогенерация услуг РФ · вымышленная студия «Отвес» (Нижний Новгород). Факты — демо text, вымышлены.
+# ПРИМЕР v1 · лидогенерация услуг РФ · вымышленная студия «Отвес» (Нижний Новгород). Факты — демо text, вымышлены.
 # Бриф — перевод брифа A v0 (01-foundations/site-brief.example.yaml) в схему v1: 10-playbooks-contracts/schemas/site-brief.schema.json.
 version: 1
 checked: '2026-09-24'
@@ -420,7 +420,7 @@ meaning:
       why: нет независимого рейтинга
   message_hierarchy_ref:
   - ../../../../text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
-  voice_ref: 'черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — text F (волна 2)'
+  voice_ref: 'черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — text 05-voice-editorial'
   proof_ref: ../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
   languages:
   - lang: ru
@@ -693,7 +693,7 @@ questions:
   - ответы — да, обучение — да
   - ответы — да, обучение — нет
   - нет
-  default: Ответы — да; обучение — по умолчанию H (волна 2)
+  default: Ответы — да; обучение — по умолчанию из crawlers.yaml
   affects:
   - /search/ai_bots_policy
   priority: 3

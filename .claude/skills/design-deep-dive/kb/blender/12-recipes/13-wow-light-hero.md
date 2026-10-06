@@ -3,7 +3,7 @@
 Испытание 15-showcase («3D для сайта до вау-уровня») · рецепт по итогам фаз 1–2 · агент RC, 26.09.2026 · Blender 5.2.2 LTS
 (Cycles CPU + OIDN), Khronos PBR Neutral, Iris Xe без CUDA · доказательства — дорожки Z («Звено», белый лак на тёмном), KB (клавиатура
 «Ё», белый PBT и алюминий), SD («Сдано», белый архитектурный макет), VD (флакон Velmora, стекло на тёмном) · метод — `15-showcase/KIT.md`
-§4 · код — отрывки исполненных скриптов дорожек (`99-raw/experiments/<X>/…`), новые проверки — `99-raw/notes/trial/RC-checks/`.
+§4 · код — отрывки исполненных скриптов дорожек (`examples/13-wow-light-hero/src/`), новые проверки — `99-raw/notes/trial/RC-checks/`.
 
 ## Выжимка рецепта
 
@@ -80,7 +80,7 @@
 Время: Z 4,6–13,8 с, KB 8–12 с, VD 11–21 с на кадр этюда [проверено: журналы очереди дорожек].
 
 ```python
-# [проверено: 99-raw/experiments/Z/zrender.py, stage(), схема S1 «Звена»] Blender 5.2.2 — отрывок, не самостоятелен [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/13-wow-light-hero/src/zrender.py, stage(), схема S1 «Звена»] Blender 5.2.2 — отрывок, не самостоятелен [не исполняется] # run: skip
 def strip(coll, name, cam_pos, tgt, az, el, d, sx, sy, E, long_axis, *, spread=180.0):
     pos = Vector(tgt) + S.dir_from(cam_pos, tgt, az, el) * d
     lo = S.area(coll, name, pos, tgt, size=sx, size_y=sy, power=S.light_power(d, E), spread=spread)   # P = π·d²·E
@@ -131,7 +131,7 @@ def strip(coll, name, cam_pos, tgt, az, el, d, sx, sy, E, long_axis, *, spread=1
 и «#101215 на экране» требует ≈ 0,029 линейного на входе — без поправки фон уходит в чёрный и в синеву (Z грабли 1; то же в коде — CD `preTone`).
 
 ```python
-# [проверено: 99-raw/experiments/Z/lib/zstudio.py, inv_neutral() и world_page()] Blender 5.2.2 — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/13-wow-light-hero/src/zstudio.py, inv_neutral() и world_page()] Blender 5.2.2 — отрывок [не исполняется] # run: skip
 def inv_neutral(target_lin):
     """Вход сцены, который Neutral превратит в target (для тёмных и средних тонов, peak < 0,76)."""
     t = list(target_lin)
@@ -154,14 +154,14 @@ def inv_neutral(target_lin):
 Лампа-полоса под фаску (KB): блик ляжет длинной линией, если лампа стоит по зеркальному направлению взгляда камеры от нормали фаски.
 
 ```python
-# [проверено: 99-raw/experiments/KB/07-b/brender.py, chamfer_strip()] Blender 5.2.2 — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/13-wow-light-hero/src/brender.py, chamfer_strip()] Blender 5.2.2 — отрывок [не исполняется] # run: skip
 def chamfer_strip(st, cam, point, normal, along, name, E=2.4, dist=0.34, length=0.5, width=0.012):
     """Лампа-полоса по зеркальной формуле: блик ляжет длинной линией на фаску с нормалью normal в точке point."""
     v = (cam.matrix_world.translation - point).normalized()
     n = normal.normalized()
     r = (2 * n.dot(v) * n - v).normalized()
     pos = point + r * dist
-    return kbr.area(st, name, pos, point, E, dist, length, width, xdir=along)
+    return kbr.area(st, name, pos, point, E, dist, length, width, xdir=along)   # kbr — 12-recipes/examples/13-wow-light-hero/src/kbr.py
 ```
 
 Сдвиг кадра: Blender меряет `shift_x/shift_y` в долях стороны, по которой вписан сенсор. Функция ниже — пересчёт доли кадра (как
@@ -199,11 +199,11 @@ print("shift: VERTICAL 1600x1000, 0,2 ширины → shift_x", round(sx, 3), "
 
 ```bash
 # run: skip — [проверено: 99-raw/experiments/CD/HANDOFF.md §3; Z/HANDOFF.md §6; KB/HANDOFF-2.md §3] числа кадра по маске объекта
-R=/home/mm/Документы/app-design/blender-research
-python3 $R/15-showcase/_shared/img_metrics.py hero.png --mask hero_mask.png --bg-hex '#101215' --text-zone 0,0,0.45,1 --out m.json
-python3 $R/99-raw/experiments/Z/zmetrics.py out/hero/H4m_S1H.png --out out/hero/metrics_m.json     # лак p50/p75/p90, шум по гладкому лаку
-python3 $R/99-raw/experiments/KB/_lib/kbm.py hero2_desk.png mask_hero2_desk.png "#1C1D20" m.json     # + шум фона дальше 12 px от объекта
-python3 $R/15-showcase/_shared/sheet.py --out лист.jpg --cols 2 --title "этюд S1–S4" S1.png:S1 S2.png:S2 S3.png:S3 S4.png:S4
+R=.                                                    # корень базы kb/blender — рабочая папка блока
+python3 ../../scripts/blender/img_metrics.py hero.png --mask hero_mask.png --bg-hex '#101215' --text-zone 0,0,0.45,1 --out m.json
+python3 $R/12-recipes/examples/13-wow-light-hero/src/zmetrics.py out/hero/H4m_S1H.png --out out/hero/metrics_m.json     # лак p50/p75/p90, шум по гладкому лаку
+python3 $R/12-recipes/examples/13-wow-light-hero/src/kbm.py hero2_desk.png mask_hero2_desk.png "#1C1D20" m.json     # + шум фона дальше 12 px от объекта
+python3 ../../scripts/blender/sheet.py --out лист.jpg --cols 2 --title "этюд S1–S4" S1.png:S1 S2.png:S2 S3.png:S3 S4.png:S4
 ```
 
 `sheet.py` кладёт прозрачное на тёмно-серый: кадры для белой страницы сначала свести на `#fff` (SD `scripts/onwhite.py`), иначе тень
@@ -271,9 +271,9 @@ python3 $R/15-showcase/_shared/sheet.py --out лист.jpg --cols 2 --title "э�
 
 ```bash
 # run: skip — [проверено: 15-showcase/KIT.md §2; 99-raw/experiments/VD/HANDOFF.md §2; Z/HANDOFF.md §6] очередь slot_run (v2 — FIFO по номерку)
-R=/home/mm/Документы/app-design/blender-research; Q="python3 $R/99-raw/tools/slot_run.py"; B="python3 $R/99-raw/tools/blender_run.py"
+R=.; Q="python3 ../../scripts/blender/slot_run.py"; B="python3 ../../scripts/blender/blender_run.py"   # R — корень базы kb/blender, рабочая папка блока
 $Q --label VD-prev -- $B velmora.py --timeout 300 -- --scheme S1 --views f000,f060 --res 640x360 --samples 16 --out 02-light --tag p1
-$Q --heavy --label Z-light -- $B $R/99-raw/experiments/Z/zrender.py --blend blend/zveno_render.blend --timeout 900 -- \
+$Q --heavy --label Z-light -- $B $R/12-recipes/examples/13-wow-light-hero/src/zrender.py --blend blend/zveno_render.blend --timeout 900 -- \
    --job light --schemes S1,S2,S3,S4 --res 960x540 --samples 32 --out out/light            # 4 схемы одним процессом ≈ 30–40 с
 $Q --status                                                                                  # кто стоит в очередях
 ```

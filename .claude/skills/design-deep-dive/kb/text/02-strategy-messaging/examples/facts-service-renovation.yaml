@@ -1,5 +1,5 @@
 # facts-service-renovation.yaml — пример 2: услуга с лидогенерацией (ремонт квартир под ключ), приоритет 1 заказчика
-# text-research · B2 · 2026-09-24 · формат: ../facts.schema.yaml (facts_version 1)
+# Формат: ../facts.schema.yaml (facts_version 1)
 #
 # ВЫМЫШЛЕННАЯ компания «Отвес» (Нижний Новгород) и синтетические данные: имена, числа, адреса и ссылки — для примера
 # формата, не для публикации. Ссылки на площадки — шаблоны вида <id-организации>.
@@ -68,7 +68,7 @@ facts:
       slot_types: [hero-proof, stat-value, stat-label, stat-source]
       requires_nearby: "источник и дата: «Яндекс Карты, 01.09.2026» или ссылка на карточку"
     valid: {from: "2026-09-01", until: "2026-12-01", review_by: "2026-11-01"}
-    schema_org: {type: AggregateRating, note: "Google не показывает звёзды для самохвальных отзывов об организации на её сайте — решают G и site H"}
+    schema_org: {type: AggregateRating, note: "Google не показывает звёзды для самохвальных отзывов об организации на её сайте — решают text 07 и site 07"}
     lang: ru
 
   - id: review-anna-k
@@ -244,7 +244,7 @@ facts:
 
 missing:
   - id: legal-details
-    what: "реквизиты для подвала: полное название, ОГРН, ИНН, адрес (сведения о продавце — site I)"
+    what: "реквизиты для подвала: полное название, ОГРН, ИНН, адрес (сведения о продавце — site 08/01)"
     kind: company
     claim_class: [company-details]
     placeholder: "[PLACEHOLDER: реквизиты ООО]"
@@ -275,7 +275,7 @@ missing:
     fallback: omit-block
     question: "Есть ли фото до и после по трём последним объектам и согласие владельцев показать их без адреса?"
 
-  # Пробелы ниже заведены под опоры иерархии B1 (examples/hierarchy-otves-*.yaml, meaning-otves.yaml: proof_ids missing:*)
+  # Пробелы ниже заведены под опоры иерархии сообщений (examples/hierarchy-otves-*.yaml, meaning-otves.yaml: proof_ids missing:*)
   - id: foreman-per-object
     what: "правда ли, что один прораб ведёт объект от замера до сдачи (и сколько объектов у прораба одновременно)"
     kind: property

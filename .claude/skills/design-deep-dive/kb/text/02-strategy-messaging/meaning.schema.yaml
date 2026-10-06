@@ -1,22 +1,21 @@
 # meaning.schema.yaml — блок «смысл» (meaning) для site-brief: аудитория и задачи, осведомлённость и искушённость рынка,
 # позиционирование, ценностное предложение, силы выбора, возражения и снятие риска
-# text-research · волна 1 · агент B1 · 2026-09-24 · версия формата 1 (черновик T1 → v1 после волны 1)
 #
 # Что это. JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — блок `meaning:` в site-brief (владелец схемы брифа —
-# site A: будущий `../site/01-foundations/site-brief.schema.json` включает этот блок через `$ref` на `$id` ниже)
+# site: `../site/01-foundations/site-brief.schema.json` включает этот блок через `$ref` на `$id` ниже)
 # или отдельный файл `meaning.yaml` проекта, пока site-brief нет. Как заполнять — `01-positioning-value-proposition.md`
 # §5 (процедура «бриф → позиционирование») и `02-awareness-hierarchy-objections.md`.
 #
-# Главный принцип: у каждого утверждения смысла есть основание `basis` — бриф, ответ заказчика, голос клиента (VoC, B2),
-# факт (facts.yaml, B2), публичная страница, исследование, вывод агента или допущение. Допущение не входит в обещание
+# Главный принцип: у каждого утверждения смысла есть основание `basis` — бриф, ответ заказчика, голос клиента (VoC),
+# факт (facts.yaml), публичная страница, исследование, вывод агента или допущение. Допущение не входит в обещание
 # страницы, пока заказчик его не подтвердил (урок «Кварца»: цель «без усталости глаз» попала в Promise задачи и нарушила
 # собственный never_claim).
 #
-# Ссылки на другие форматы (контракт тройки v2 §3 п.10–15):
-#   facts.yaml (B2)          → `fact:<id>` и `missing:<id>` в `proof_ids`; путь к файлу — `proof_ref`;
-#   голос клиента (B2)       → `voc:<id>` (формат записи — B2 `voc.schema.yaml`; до него — kebab-case id);
-#   иерархия сообщений (B1)  → `message_hierarchy_ref` (файлы по `message-hierarchy.schema.yaml`, один на страницу);
-#   профиль голоса (F)       → `voice_ref` (`05-voice-editorial/voice.schema.yaml`, волна 2);
+# Ссылки на другие форматы (`kb/common/owners.md` § Форматы обмена):
+#   facts.yaml               → `fact:<id>` и `missing:<id>` в `proof_ids`; путь к файлу — `proof_ref`;
+#   голос клиента            → `voc:<id>` (формат записи — `voc.schema.yaml`);
+#   иерархия сообщений       → `message_hierarchy_ref` (файлы по `message-hierarchy.schema.yaml`, один на страницу);
+#   профиль голоса           → `voice_ref` (`05-voice-editorial/voice.schema.yaml`);
 #   site-brief (site)        → `traffic.ref`, `offer.ref`, `conversion.action_ref` — JSON Pointer внутри site-brief;
 #   словарь                  → awareness, traffic, section_role — id словаря site `../site/02-site-types/vocabulary.yaml`;
 #   вход холста              → поля product.* брифа холста — проекция `x-canvas-map`.
@@ -31,11 +30,10 @@ title: "meaning — смысл страницы или сайта до слов"
 description: >-
   Что сказать, прежде чем писать: кто клиент и какую работу он поручает продукту, что он уже знает, с чем сравнивает,
   чем продукт отличается и чем это доказано, какую категорию назвать, какие силы мешают выбору и чем снять риск.
-  Не тексты страницы: формулировки здесь внутренние, тексты пишет copy-deck (E, J) по иерархии сообщений.
+  Не тексты страницы: формулировки здесь внутренние, тексты пишет copy-deck по иерархии сообщений.
 date: "2026-09-29"
 x-version: 1
-x-status: "черновик T1 (ранний выпуск для site-brief), 2026-09-24; v1 — по итогам волны 1"
-x-owner: "text-research · 02-strategy-messaging · B1 (контракт тройки v2 §2: поля «смысл» брифа — text)"
+x-owner: "text · 02-strategy-messaging (kb/common/owners.md § Темы: поля «смысл» брифа — text)"
 x-doc: ["02-strategy-messaging/01-positioning-value-proposition.md", "02-strategy-messaging/02-awareness-hierarchy-objections.md"]
 
 type: object
@@ -180,13 +178,13 @@ properties:
 
   risk_reversal:
     type: array
-    description: "Способы снять риск: только реально действующие условия (fact_id обязателен); формулировку проверяет H."
+    description: "Способы снять риск: только реально действующие условия (fact_id обязателен); формулировку проверяют правила text 08/01."
     items: {$ref: "#/$defs/risk-reversal"}
 
   boundaries:
     type: object
     additionalProperties: false
-    description: "Границы позиционирования: кому не подходит и чего продукт не обещает. Питает never_claim (B2) и снимает возражение «не для меня» честно."
+    description: "Границы позиционирования: кому не подходит и чего продукт не обещает. Питает never_claim фактов и снимает возражение «не для меня» честно."
     properties:
       not_for:
         type: array
@@ -200,7 +198,7 @@ properties:
           required: [text]
           properties:
             text: {type: string, description: "Чего не обещаем, даже если хочется: «без усталости глаз», «окупится за месяц»."}
-            claim_class: {type: string, description: "Класс утверждения B2 (facts.schema.yaml, `claim-class`: health, income-finance, superlative…)."}
+            claim_class: {type: string, description: "Класс утверждения (facts.schema.yaml, `claim-class`: health, income-finance, superlative…)."}
             why: {type: string}
 
   message_hierarchy_ref:
@@ -210,28 +208,28 @@ properties:
 
   voice_ref:
     type: string
-    description: "Путь к профилю голоса (F, voice.schema.yaml). До волны 2 — пусто или строка-описание со словом «черновик»."
+    description: "Путь к профилю голоса (voice.schema.yaml). До профиля — пусто или строка-описание со словом «черновик»."
 
   proof_ref:
     type: string
-    description: "Путь к facts.yaml проекта (B2). В site-brief совпадает с `proof.facts_ref`; поля фактов здесь не дублируются."
+    description: "Путь к facts.yaml проекта. В site-brief совпадает с `proof.facts_ref`; поля фактов здесь не дублируются."
 
   legal_category:
     type: array
     minItems: 1
     uniqueItems: true
     description: >-
-      Отраслевой режим формулировок для H (claims-rules.yaml): finance — финансы и инвестиции; medical — медицина и
+      Отраслевой режим формулировок для правил права (claims-rules.yaml): finance — финансы и инвестиции; medical — медицина и
       медизделия; dietary-supplements — БАДы; alcohol — алкоголь; education — образование; real-estate — недвижимость;
-      other — иная отрасль с особыми требованиями (назвать в legal_note); general — без отраслевого режима (предложение
-      B1: явное «ничего особого» вместо пустого поля).
+      other — иная отрасль с особыми требованиями (назвать в legal_note); general — без отраслевого режима (явное
+      «ничего особого» вместо пустого поля).
     items: {enum: [finance, medical, dietary-supplements, alcohol, education, real-estate, other, general]}
   legal_note: {type: string}
 
   languages:
     type: array
     minItems: 1
-    description: "Языки. Второй язык — адаптация под свою аудиторию (решение заказчика п. 16), а не дословный перевод."
+    description: "Языки. Второй язык — адаптация под свою аудиторию, а не дословный перевод."
     items:
       type: object
       additionalProperties: false
@@ -259,7 +257,7 @@ $defs:
   date:
     type: string
     pattern: "^[0-9]{4}-(0[1-9]|1[0-2])(-(0[1-9]|[12][0-9]|3[01]))?$"
-    description: "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ (как в facts.schema.yaml B2)."
+    description: "ISO-дата ГГГГ-ММ-ДД или ГГГГ-ММ (как в facts.schema.yaml)."
 
   lang:
     type: string
@@ -276,7 +274,7 @@ $defs:
   voc-ids:
     type: array
     uniqueItems: true
-    description: "Ссылки на записи голоса клиента (B2): `voc:<id>`."
+    description: "Ссылки на записи голоса клиента: `voc:<id>`."
     items:
       type: string
       pattern: "^voc:[a-z0-9]+(-[a-z0-9]+)*$"
@@ -387,7 +385,7 @@ $defs:
         description: "Чем обходится сейчас — id из positioning.alternatives."
       customer_words:
         $ref: "#/$defs/voc-ids"
-        description: "Слова клиента (VoC B2): как он называет проблему, результат, категорию."
+        description: "Слова клиента (VoC): как он называет проблему, результат, категорию."
       basis: {$ref: "#/$defs/basis"}
 
   positioning:
@@ -413,7 +411,7 @@ $defs:
             mention_on_page:
               enum: [never, as-approach, by-name-with-fact]
               default: as-approach
-              description: "Как упоминать на странице: подход без имени (по умолчанию); по имени — только с фактом сравнения (38-ФЗ ст. 5, проверяет H)."
+              description: "Как упоминать на странице: подход без имени (по умолчанию); по имени — только с фактом сравнения (38-ФЗ ст. 5, text 08/01)."
             basis: {$ref: "#/$defs/basis"}
       unique_attributes:
         type: array
@@ -589,7 +587,7 @@ $defs:
       text: {type: string, description: "Словами клиента: «дорого», «а если не приживётся», «у нас особый случай»."}
       type:
         enum: [price, risk, time, trust, switching-cost, not-for-me, competitor, status-quo, decision-maker, timing]
-        description: "Семь типов задания + три предложения B1 (status-quo, decision-maker, timing); описания — 02 §4.1."
+        description: "Семь типов задания + три предложения text (status-quo, decision-maker, timing); описания — 02 §4.1."
       force: {enum: [anxiety, habit], description: "Какая сила выбора стоит за возражением."}
       segment_ids: {type: array, items: {$ref: "#/$defs/id"}}
       voc_ids: {$ref: "#/$defs/voc-ids"}
@@ -637,7 +635,7 @@ $defs:
     properties:
       id: {$ref: "#/$defs/id"}
       type: {enum: [guarantee, trial, refund, pay-after, free-first-step, fixed-price, cancel-anytime, demo, sample, pilot]}
-      summary: {type: string, description: "Условия по смыслу: срок, что вернут, что нужно сделать. Текст пишет E, формулировку проверяет H."}
+      summary: {type: string, description: "Условия по смыслу: срок, что вернут, что нужно сделать. Текст — по copy-slots.yaml, формулировку проверяют правила text 08/01."}
       fact_id:
         type: string
         pattern: "^(fact|missing):[a-z0-9]+(-[a-z0-9]+)*$"
@@ -701,7 +699,7 @@ x-canvas-map:
     - {from: [/message_hierarchy_ref, /voice_ref, /proof_ref, /legal_category, /legal_note],
        note: "ссылки на иерархию, голос и факты (у них свои карты); отрасль права — вход claims_check.py"}
 
-# ───────────────────────── Как блок встаёт в site-brief (предложение site A) ─────────────────────────
+# ───────────────────────── Как блок встаёт в site-brief ─────────────────────────
 x-site-brief-meaning:
   include: "site-brief.properties.meaning = {$ref: 'urn:app-design:text:meaning:1'} (или относительный путь к этому файлу)"
   site_owned_fields_referenced: "traffic (источники × температура), offer, conversion.action — живут в site-brief; meaning хранит JSON Pointer и рабочую копию"
@@ -711,7 +709,7 @@ x-site-brief-meaning:
     awareness.level, positioning.alternatives (≥ 1, лучше 2–5), unique_attributes (≥ 1), value_themes (≥ 1),
     market_category (name, strategy), value_proposition.core и forces, objections (≥ 3 для landing-*, ≥ 1 для
     site-page), legal_category, languages. Без этого агент пишет «медианный лендинг» (ui 12/02 §3.1).
-  questions: "open_questions → общий журнал вопросов site-brief (у site — свой список; дубли сводит оркестратор)"
+  questions: "open_questions → общий журнал вопросов site-brief (у site — свой список; дубли сводит исполнитель слоя страницы)"
 
 x-vocabulary-proposals:
   # Значения, которых нет в словаре site (предложения text к словарю); источники трафика и роли — уже в словаре site v1.
@@ -720,4 +718,4 @@ x-vocabulary-proposals:
     - {id: decision-maker, name: "«Надо согласовать»", why: "B2B-комитет, семья в B2C: нужен материал для того, кто решает"}
     - {id: timing, name: "«Не сейчас»", why: "Сезон, бюджетный цикл; снимается второй целью страницы (запомнить, вернуться)"}
   legal_category:
-    - {id: general, name: "Без отраслевого режима", why: "Явное «ничего особого» вместо пустого поля; H применяет только общие правила 38-ФЗ и ЗоЗПП"}
+    - {id: general, name: "Без отраслевого режима", why: "Явное «ничего особого» вместо пустого поля; действуют только общие правила 38-ФЗ и ЗоЗПП"}

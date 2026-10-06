@@ -74,8 +74,7 @@
     "label_noise_e3": 60.415065646843885,
     "mask_share": 0.0981,
     "bg_noise_e3": 1.116
-   },
-   "b-blender_src": "07-orbit/arc/o25_000.png"
+   }
   },
   "f030": {
    "ai": {
@@ -149,8 +148,7 @@
     "label_noise_e3": 57.59582804525299,
     "mask_share": 0.1098,
     "bg_noise_e3": 1.119
-   },
-   "b-blender_src": "07-orbit/arc/o25_030.png"
+   }
   },
   "f060": {
    "ai": {
@@ -224,8 +222,7 @@
     "label_noise_e3": 54.76348376515834,
     "mask_share": 0.1243,
     "bg_noise_e3": 1.124
-   },
-   "b-blender_src": "07-orbit/arc/o25_060.png"
+   }
   },
   "f180": {
    "b-blender": {
@@ -263,11 +260,10 @@
     "label_noise_e3": null,
     "mask_share": 0.0767,
     "bg_noise_e3": null
-   },
-   "b-blender_src": "07-orbit/full/o360_036.png"
+   }
   }
  },
- "phase": "3 (VD3, 26.09.2026): кадры облёта i3",
+ "phase": "3: кадры облёта i3",
  "first_screen": {
   "ai": "ai__first-screen-desk.png",
   "b-blender": "b-blender__first-screen-desk.png",

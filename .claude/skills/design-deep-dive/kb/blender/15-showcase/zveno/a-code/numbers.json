@@ -1,6 +1,6 @@
 {
  "variant": "a-code",
- "title": "«Звено» A — код v3 (дорожка CD)",
+ "title": "«Звено» A — код v3",
  "phase": 3,
  "date": "2026-09-26",
  "look": "p3",
@@ -13,7 +13,7 @@
   "esbuild": "0.28.2",
   "browser": "Chromium 153 headless, ANGLE GL, Intel Iris Xe (Mesa)"
  },
- "source": "15-showcase/_shared/code3d/src/ (общий код A и C)",
+ "source": "../../_shared/code3d/src/ (общий код A и C)",
  "time": {
   "agent_clock_phase3": "00:05–02:40",
   "machine_browser_runs_phase3": 26,
@@ -22,7 +22,7 @@
   "queue_wait_s_phase3": 5563,
   "machine_blender_s": 0,
   "phase2": {
-   "agent_clock_phase2": "20:15–(см. NOTES)",
+   "agent_clock_phase2": "с 20:15",
    "machine_browser_runs_phase2": 17,
    "machine_browser_s_phase2": 1575,
    "queue_wait_s_phase2": 1156,
@@ -44,7 +44,7 @@
   }
  },
  "weight_kb_br": {
-  "method": "brotli q11 по файлам a-code/js (сборка 26.09 01:36)",
+  "method": "brotli q11 по файлам a-code/js",
   "files": {
    "chunks/chunk-AGLPBZOW.js": 118.73,
    "chunks/post-CCX4XNEH.js": 98.43,
@@ -427,48 +427,43 @@
    "fail": 0
   }
  },
- "gates_dir": "gates2",
  "motion_check_L2": {
   "p3_final": {
-   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/a-code/index.html",
+   "target": "index.html",
    "level": "L2",
    "fail_B": 0,
    "fail_S": 0,
    "fail_D": 0,
    "na": 2,
-   "spec_fail": 0,
-   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/CD/out/cd3/gates2/motion-l2"
+   "spec_fail": 0
   },
   "p3_01_52": {
-   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/a-code/index.html",
+   "target": "index.html",
    "level": "L2",
    "fail_B": 0,
    "fail_S": 0,
    "fail_D": 0,
    "na": 2,
-   "spec_fail": 0,
-   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/CD/out/cd3/gates/motion-l2"
+   "spec_fail": 0
   },
   "p2_00_54": {
-   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/a-code/index.html",
+   "target": "index.html",
    "level": "L2",
    "fail_B": 0,
    "fail_S": 0,
    "fail_D": 0,
    "na": 2,
-   "spec_fail": 0,
-   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/CD/out/cd3/motion-l2-a"
+   "spec_fail": 0
   }
  },
  "marketing_audit_L2_00_54": {
   "blockers": 0,
   "serious": 0,
-  "polish": 65,
-  "report": "99-raw/experiments/CD/out/cd3/mkt-a/zveno-a-code.marketing.md"
+  "polish": 65
  },
  "experiments_phase3": {
   "ao_tsl": {
-   "method": "пропускная: окно 2500 мс / число кадров после ожидания простоя (медиана интервалов rAF при --disable-gpu-vsync непригодна — CD/15)",
+   "method": "пропускная: окно 2500 мс / число кадров после ожидания простоя (медиана интервалов rAF при --disable-gpu-vsync непригодна)",
    "ao": {
     "none": {
      "ms_per_frame": [
@@ -1407,29 +1402,9 @@
    }
   }
  },
- "files": {
-  "sheets": [
-   "99-raw/experiments/CD/out/cd3/pairs-judge-p2-p3.jpg",
-   "99-raw/experiments/CD/out/cd3/pairs-p2-p3b.jpg",
-   "99-raw/experiments/CD/out/cd3/abc_judge.jpg",
-   "99-raw/experiments/CD/out/cd3/ao_sheet.jpg",
-   "99-raw/experiments/CD/out/cd3/tsl_sheet.jpg",
-   "99-raw/experiments/CD/out/cd3/sweep/sheet3.jpg",
-   "99-raw/experiments/CD/out/cd3/final/trail-1600/hero.png"
-  ],
-  "judge": [
-   "15-showcase/zveno/judge/a-code__hero.png",
-   "15-showcase/zveno/judge/a-code__hero-ik.png",
-   "15-showcase/zveno/judge/a-code__exploded.png",
-   "15-showcase/zveno/judge/a-code__locking.png",
-   "15-showcase/zveno/judge/a-code__first-move.png",
-   "15-showcase/zveno/judge/a-code__scan-half.png",
-   "15-showcase/zveno/judge/a-code__inside.png"
-  ]
- },
  "phase2": {
   "variant": "a-code",
-  "title": "«Звено» A — код v3 (дорожка CD)",
+  "title": "«Звено» A — код v3",
   "phase": 2,
   "date": "2026-09-25",
   "look": "p2",
@@ -1441,9 +1416,9 @@
    "esbuild": "0.28.2",
    "browser": "Chromium 153 headless, ANGLE GL, Intel Iris Xe (Mesa)"
   },
-  "source": "15-showcase/_shared/code3d/src/ (общий код A и C); фаза 1 — 99-raw/experiments/CD/src/scene-v3p1.js",
+  "source": "../../_shared/code3d/src/ (общий код A и C)",
   "time": {
-   "agent_clock_phase2": "20:15–(см. NOTES)",
+   "agent_clock_phase2": "с 20:15",
    "machine_browser_runs_phase2": 17,
    "machine_browser_s_phase2": 1575,
    "queue_wait_s_phase2": 1156,
@@ -1457,7 +1432,7 @@
    }
   },
   "weight_kb_br": {
-   "method": "brotli q11 по файлам сборки (out/kb.json)",
+   "method": "brotli q11 по файлам сборки",
    "desktop_total": 231.2,
    "mobile_total": 134.3,
    "files": {
@@ -2362,10 +2337,7 @@
   "motion_check_L2": null,
   "marketing_audit": null,
   "hybrid_hook": {
-   "path": "15-showcase/_shared/code3d/",
-   "test_glb": "99-raw/experiments/Z/out/web_lean/j2.glb",
-   "frames": "out/p2/hy2-*",
-   "sheet": "99-raw/experiments/CD/sheet-hook-glb.jpg",
+   "path": "../../_shared/code3d/",
    "hero_calls_tris_programs": {
     "calls": 88,
     "tris": 88287,
@@ -2394,30 +2366,11 @@
    },
    "tsl": null,
    "tsl_weights": "tsl 1232.0 КБ min, 260.5 КБ br\ngl 730.8 КБ min, 153.1 КБ br"
-  },
-  "files": {
-   "sheets": [
-    "99-raw/experiments/CD/pairs-p1-p2-desk.jpg",
-    "99-raw/experiments/CD/sheet-hook-glb.jpg",
-    "99-raw/experiments/CD/judge-pair-hero.jpg",
-    "99-raw/experiments/CD/judge-pair-hero-ik.jpg",
-    "99-raw/experiments/CD/out/p2/look/sheet-ik5.jpg",
-    "99-raw/experiments/CD/out/p2/page-ik-p1-p2.jpg"
-   ],
-   "judge": [
-    "15-showcase/zveno/judge/a-code__hero.png",
-    "15-showcase/zveno/judge/a-code__hero-ik.png",
-    "15-showcase/zveno/judge/a-code__exploded.png",
-    "15-showcase/zveno/judge/a-code__locking.png",
-    "15-showcase/zveno/judge/a-code__first-move.png",
-    "15-showcase/zveno/judge/a-code__scan-half.png",
-    "15-showcase/zveno/judge/a-code__inside.png"
-   ]
   }
  },
  "phase1": {
   "variant": "a-code",
-  "title": "«Звено» A — код v3 (дорожка CD)",
+  "title": "«Звено» A — код v3",
   "phase": 1,
   "date": "2026-09-25",
   "stack": {
@@ -2607,26 +2560,7 @@
     "idle_motion_pct": 0.0,
     "js_kb": 4.2
    },
-   "verdict": "всё, кроме TBT и первого кадра, проходит; TBT не проходит и у v2 в том же прогоне (J/04 в тишине: 76–137 мс) — перемерить"
-  },
-  "files": {
-   "sheets": [
-    "99-raw/experiments/CD/pairs-v2-v3-desk.jpg",
-    "99-raw/experiments/CD/pairs-v2-v3-mob.jpg",
-    "99-raw/experiments/CD/sheet-techniques.jpg",
-    "99-raw/experiments/CD/sheet-page-v3.jpg",
-    "99-raw/experiments/CD/sheet-page-v3-mob.jpg",
-    "99-raw/experiments/CD/judge-pair-hero.jpg"
-   ],
-   "judge": [
-    "15-showcase/zveno/judge/a-code__hero.png",
-    "a-code__hero-ik.png",
-    "a-code__exploded.png",
-    "a-code__locking.png",
-    "a-code__first-move.png",
-    "a-code__scan-half.png",
-    "a-code__inside.png"
-   ]
+   "verdict": "всё, кроме TBT и первого кадра, проходит; TBT не проходит и у v2 в том же прогоне (в тишине: 76–137 мс) — перемерить"
   },
   "gates_site_probe_calm": {
    "load_average": 6,

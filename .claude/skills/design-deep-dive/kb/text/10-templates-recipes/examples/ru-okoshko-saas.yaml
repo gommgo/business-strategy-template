@@ -1,4 +1,4 @@
-# ru-okoshko-saas.yaml — пример copy deck v1 (10-templates-recipes, J3, 2026-09-24): основа — E3 deck-okoshko-saas-v0.yaml; тексты ai-self (E3, правки J3).
+# ru-okoshko-saas.yaml — пример copy deck v1 (10-templates-recipes); тексты ai-self.
 # Факты — 10-templates-recipes/examples/facts/facts-demo-saas-okoshko.yaml (вымышленные / ДЕМО, не публиковать). Проверки — 02-examples-ru.md §3.
 copy_deck:
   version: 1
@@ -13,15 +13,15 @@ copy_deck:
   legal_category:
   - general
   authors:
-  - E3 (ai-self, 2026-09-24)
-  - J3 (upgrade, пути, голос F; 2026-09-24)
+  - агент (ai-self, 2026-09-24)
+  - агент (правки путей и голоса, 2026-09-24)
   pages:
   - page_id: okoshko-solution-aware
     page_type: landing-saas
     awareness: solution-aware
     primary_action: Настроить ссылку на запись
     cta_primary: okoshko-solution-aware/hero/cta
-    notes: 'Трафик: категорийный поиск «онлайн-запись для барбершопа», статьи, ответы нейросетей (solution-aware, B1 §1.5). hero-proof нет: для
+    notes: 'Трафик: категорийный поиск «онлайн-запись для барбершопа», статьи, ответы нейросетей (solution-aware, text 02/02 §1.5). hero-proof нет: для
       solution-aware первым идёт механизм (01 §4). Логотипов клиентов нет (missing client-logos) — блок не выводится.'
     promise:
       variants:
@@ -133,7 +133,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: условие «бесплатно» в той же строке (H FREE-01)
+        notes: условие «бесплатно» в той же строке (COPY-L-FREE-01)
     - section_id: how
       section_role: benefits
       question: Что именно делает сервис?
@@ -223,7 +223,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: 'карточек две — по числу фактов о продукте, не три по шаблону (02 §3; D: три карточки — примета ИИ)'
+        notes: 'карточек две — по числу фактов о продукте, не три по шаблону (02 §3; три карточки — примета ИИ, 03-corpus-measured)'
     - section_id: case
       section_role: case-studies
       question: Это правда снижает неявки?
@@ -245,7 +245,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: 'правка 1: verbatim факта (15 слов) сокращён до 11 — COPY-D-LEN, грубая граница D для case-title (provisional); число кресел —
+        notes: 'правка 1: verbatim факта (15 слов) сокращён до 11 — COPY-D-LEN, грубая граница корпуса для case-title (provisional); число кресел —
           в тексте кейса'
       - slot_id: result
         slot_type: case-result
@@ -264,7 +264,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: обычный результат рядом с лучшим (B2 §5.4)
+        notes: обычный результат рядом с лучшим (text 02/03 §5.4)
       - slot_id: quote
         slot_type: testimonial-quote
         variants:
@@ -544,7 +544,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: от чего зависит итог «от» (H PRICE-03)
+        notes: от чего зависит итог «от» (COPY-L-PRICE-03)
       - slot_id: sms
         slot_type: pricing-feature
         variants:
@@ -672,7 +672,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: 'ответ первой фразой (02 §9; G COPY-GEO-14); правка 1: «без привязки карты» дословно — requires_nearby факта (COPY-F-NEARBY)'
+        notes: 'ответ первой фразой (02 §9; COPY-GEO-14); правка 1: «без привязки карты» дословно — requires_nearby факта (COPY-F-NEARBY)'
     - section_id: final
       section_role: final-cta
       question: Попробовать сейчас?
@@ -731,7 +731,7 @@ copy_deck:
       slots:
       - slot_id: tagline
         slot_type: footer-tagline
-        notes: 'правка 1: факты о напоминаниях убраны из подвала — use B2 не включает footer (COPY-F-USE); строка бренда — категория без утверждения'
+        notes: 'правка 1: факты о напоминаниях убраны из подвала — use фактов не включает footer (COPY-F-USE); строка бренда — категория без утверждения'
         variants:
         - id: a
           text: «Окошко» — онлайн-запись для барбершопов и салонов
@@ -760,9 +760,7 @@ copy_deck:
           profile: landing
           errors: 0
           warnings: 0
-        notes: блокирующий пробел (H DIST-01)
+        notes: блокирующий пробел (COPY-L-DIST-01)
     status: draft
-  notes: 'Пример J3 (фаза 2 J): основа — страница E3 99-raw/experiments/E/04-copy-deck-v0/deck-okoshko-saas-v0.yaml (ai-self E3, 0 error), upgrade
-    v0 → v1 copydeck.py; правки J3 — в notes слотов и в 02-examples-ru.md. voice_ref: профиль F «Графа» (сдержанный B2B, «вы») как ближайший —
-    своего профиля голоса у бренда нет (E, F: профилей SaaS и товара нет); у E3 было: ''черновик: на «вы», спокойно и по делу, без восклицаний;
-    профиля голоса F для «Окошка» нет''.'
+  notes: 'Правки примера — в notes слотов и в 02-examples-ru.md. voice_ref: профиль «Графа» (сдержанный B2B, «вы») как ближайший —
+    своего профиля голоса у бренда нет (профилей SaaS и товара в базе нет).'

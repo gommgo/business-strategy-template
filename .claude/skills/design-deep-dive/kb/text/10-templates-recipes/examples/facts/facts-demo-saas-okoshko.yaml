@@ -1,15 +1,13 @@
-# КОПИЯ демо-фактов агента E без изменений данных: 99-raw/experiments/E/facts-demo-saas-okoshko.yaml (md5 1dc98a8f131a…, 2026-09-24) — снимок для примеров 10-templates-recipes/examples (J3).
-# Источник правды — файл E; при его правке пересобрать копию: 99-raw/experiments/J/08-examples/make_ru_from_e3.py --copy-facts.
-# facts-demo-saas-okoshko.yaml — ДЕМО-ФАКТЫ агента E для примеров SaaS (copy-slots.yaml, 04-copy-by-block, copy deck v0)
-# text-research · волна 2 · агент E · 2026-09-24 · формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
+# facts-demo-saas-okoshko.yaml — ДЕМО-ФАКТЫ для примеров SaaS (copy-slots.yaml, 04-copy-by-block, copy deck)
+# Формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
 #
-# ДЕМО. Сервис «Окошко» (онлайн-запись и напоминания для барбершопов и салонов) выдуман агентом E; все числа, цены, имена,
+# ДЕМО. Сервис «Окошко» (онлайн-запись и напоминания для барбершопов и салонов) выдуман; все числа, цены, имена,
 # даты и документы — синтетика для проверки правил текста (claims_check.py, copy_lint.py). Не публиковать и не выдавать за
 # реальную компанию. Совпадение названия с настоящими сервисами случайно. Ссылки — шаблоны <…>.
-# Зачем: у базы нет фактов SaaS (B2 дал «Отвес» — услуга и «Кварц» — предзаказ), а приоритет 2 заказчика — лендинг SaaS.
+# Зачем: остальные наборы базы — «Отвес» (услуга) и «Кварц» (предзаказ); этот — лендинг SaaS.
 # Что показывает: цену за мастера и тарифы (цена «от», скидка при оплате за год с условием), пробный период без карты,
-# платное SMS как условие «бесплатных напоминаний», кейс с типичным результатом рядом (B2 §5.4), отзыв с разрешением,
-# рейтинг площадки со снимком, счётчик клиентов с датой, отмена и возврат (10 дней — H), реквизиты в missing (ворота).
+# платное SMS как условие «бесплатных напоминаний», кейс с типичным результатом рядом (text 02/03 §5.4), отзыв с разрешением,
+# рейтинг площадки со снимком, счётчик клиентов с датой, отмена и возврат (10 дней — COPY-L-RET-02), реквизиты в missing (ворота).
 
 facts_version: 1
 date: "2026-09-24"
@@ -19,7 +17,7 @@ jurisdiction: ru
 status: draft
 example: true
 owner: {role: "основатель (демо-заказчик)", contact: "почта заказчика из брифа (демо)"}
-collected_by: "агент E (демо-набор для примеров, 2026-09-24)"
+collected_by: "демо-набор для примеров (2026-09-24)"
 never_claim_defaults: ru-default-1
 
 entities:
@@ -46,7 +44,7 @@ facts:
     valid: {from: "2026-09-01", review_by: "2026-12-01"}
     translations:
       en: {canonical: "The Master plan of Okoshko costs 990 ₽ per month for one stylist (price list, September 2026).", note: "адаптация; рубли — основная валюта (38-ФЗ ст. 5 ч. 7.1)"}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: price-salon
@@ -67,7 +65,7 @@ facts:
     valid: {from: "2026-09-01", review_by: "2026-12-01"}
     translations:
       en: {canonical: "The Salon plan of Okoshko costs 2,490 ₽ per month for up to 5 stylists (price list, September 2026)."}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: price-network-from
@@ -86,7 +84,7 @@ facts:
     permission: {status: not-required}
     use: {section_roles: [pricing], slot_types: [pricing-price, pricing-price-note, pricing-plan-summary], requires_nearby: "от чего зависит итог: число мастеров"}
     valid: {from: "2026-09-01", review_by: "2026-12-01"}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: annual-discount
@@ -104,7 +102,7 @@ facts:
     verification: {status: stated, date: "2026-09-24", method: "демо"}
     permission: {status: not-required}
     use: {section_roles: [pricing], slot_types: [pricing-price-note, badge, faq-a], requires_nearby: "условие: оплата за 12 месяцев вперёд"}
-    notes: "ДЕМО-факт E. «2 месяца в подарок» — только с условием в той же строке (H COPY-L-FREE-01)."
+    notes: "ДЕМО-факт. «2 месяца в подарок» — только с условием в той же строке (COPY-L-FREE-01)."
     lang: ru
 
   - id: trial-14-days
@@ -124,7 +122,7 @@ facts:
     use: {section_roles: [hero, pricing, final-cta, faq, lead-form], slot_types: [cta-note, cta-label, pricing-price-note, faq-a, form-next-steps, form-lead, email-subject, email-preheader, email-body], requires_nearby: "«без привязки карты» или что будет после 14 дней"}
     translations:
       en: {canonical: "Any Okoshko plan is free for 14 days with no card required; after the trial, booking pauses until you pick a plan and your data is kept for 90 days."}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: reminders
@@ -144,7 +142,7 @@ facts:
     use: {section_roles: [hero, solution, benefits, how-it-works, pricing, faq], slot_types: [headline, subheadline, card-title, card-body, step-body, pricing-feature, faq-a]}
     translations:
       en: {canonical: "Okoshko reminds clients of their booking in Telegram 24 hours and 2 hours before the visit; Telegram reminders are included in every plan."}
-    notes: "ДЕМО-факт E. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (H COPY-L-FREE-01)."
+    notes: "ДЕМО-факт. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (COPY-L-FREE-01)."
     lang: ru
 
   - id: sms-price
@@ -164,7 +162,7 @@ facts:
     valid: {from: "2026-09-01", review_by: "2026-12-01"}
     translations:
       en: {canonical: "Okoshko SMS reminders are billed on top of the plan: 4 ₽ per message (price list, September 2026)."}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: self-booking-link
@@ -181,7 +179,7 @@ facts:
     use: {section_roles: [hero, solution, benefits, how-it-works], slot_types: [subheadline, card-title, card-body, step-title, step-body, body]}
     translations:
       en: {canonical: "Clients book themselves: through an Okoshko link they choose a service, a stylist and a free slot; the link goes into Telegram, VK, maps and the website."}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: import-free
@@ -201,7 +199,7 @@ facts:
     use: {section_roles: [how-it-works, objections, faq, pricing, benefits, hero], slot_types: [step-body, objection-answer, faq-a, pricing-feature, card-title, card-body, cta-note], requires_nearby: "из Excel или Google Таблиц"}
     translations:
       en: {canonical: "Okoshko support migrates your client list from Excel or Google Sheets for free within 1 business day of receiving the file."}
-    notes: "ДЕМО-факт E. Снимает возражение switching-cost (B1 02 §4.1)."
+    notes: "ДЕМО-факт. Снимает возражение switching-cost (text 02/02 §4.1)."
     lang: ru
 
   - id: salons-count
@@ -221,7 +219,7 @@ facts:
     valid: {review_by: "2026-12-01"}
     translations:
       en: {canonical: "As of 1 September 2026, 1,380 salons and barbershops use Okoshko on a paid plan (billing data)."}
-    notes: "ДЕМО-факт E. «Более 1 300» — можно; «1 500+» — нет."
+    notes: "ДЕМО-факт. «Более 1 300» — можно; «1 500+» — нет."
     lang: ru
 
   - id: rating-rustore
@@ -240,7 +238,7 @@ facts:
     valid: {from: "2026-09-01", until: "2026-12-01", review_by: "2026-11-01"}
     translations:
       en: {canonical: "As of 1 September 2026, the Okoshko app for stylists is rated 4.7 out of 5 on RuStore (860 ratings)."}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: case-noshow-kazan
@@ -259,7 +257,7 @@ facts:
     permission: {status: granted, subject: "Руслан (владелец барбершопа)", form: written-email, document: "письмо от 2026-06-10 (демо)", date: "2026-06-10", shows: [first-name, city, position], pd_consent: true, image_consent: false}
     related: [noshow-average, review-ruslan]
     use: {section_roles: [case-studies, hero], slot_types: [case-title, case-summary, case-result]}
-    notes: "ДЕМО-факт E. Типичность (B2 §5.4): рядом — обычный результат noshow-average."
+    notes: "ДЕМО-факт. Типичность (text 02/03 §5.4): рядом — обычный результат noshow-average."
     lang: ru
 
   - id: noshow-average
@@ -277,7 +275,7 @@ facts:
     verification: {status: stated, date: "2026-09-24", method: "демо"}
     permission: {status: not-required}
     use: {section_roles: [case-studies, testimonials, proof-stats], slot_types: [case-result, stat-value, stat-label, testimonial-attribution, body]}
-    notes: "ДЕМО-факт E. Обычный результат рядом с кейсом (FTC 255.2(b), B2 §5.4)."
+    notes: "ДЕМО-факт. Обычный результат рядом с кейсом (FTC 255.2(b), text 02/03 §5.4)."
     lang: ru
 
   - id: review-ruslan
@@ -292,11 +290,11 @@ facts:
     permission: {status: granted, subject: "Руслан", form: written-email, scope: [site], document: "письмо от 2026-06-10 (демо)", date: "2026-06-10", shows: [first-name, position, city], pd_consent: true, image_consent: false}
     original_ref: "evidence/interviews/2026-06-05-ruslan.txt (демо)"
     translations:
-      en: {verbatim: ["“I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed”"], canonical: "Ruslan (barbershop owner, Kazan): “I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed” (translated from Russian).", note: "перевод цитаты — с пометкой «translated from Russian» рядом (B2 §5.1)"}
+      en: {verbatim: ["“I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed”"], canonical: "Ruslan (barbershop owner, Kazan): “I used to spend my evenings calling everyone booked for the next day. Now reminders go out on their own, and I only call those who haven't confirmed” (translated from Russian).", note: "перевод цитаты — с пометкой «translated from Russian» рядом (text 02/03 §5.1)"}
     attribution: {name: "Руслан", display: first-name-initial, role: "владелец барбершопа", city: "Казань", verified_customer: true, relation: customer}
     use: {section_roles: [testimonials, case-studies], slot_types: [testimonial-quote, testimonial-attribution]}
     valid: {review_by: "2027-06-05"}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: support-chat
@@ -313,7 +311,7 @@ facts:
     permission: {status: not-required}
     use: {section_roles: [objections, faq, pricing, how-it-works], slot_types: [objection-answer, faq-a, pricing-feature, cta-note, form-next-steps]}
     valid: {review_by: "2026-10-01"}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
   - id: cancel-refund
@@ -332,7 +330,7 @@ facts:
     legal: {flags: [zozpp-32], review: {status: not-needed}, disclaimer: ""}
     translations:
       en: {canonical: "You can switch off your Okoshko subscription in settings on any day; the unused part of a paid period is refunded within 10 days of your request."}
-    notes: "ДЕМО-факт E. Срок 10 дней — в пределах требования H (COPY-L-RET-02)."
+    notes: "ДЕМО-факт. Срок 10 дней — в пределах требования права (COPY-L-RET-02)."
     lang: ru
 
   - id: data-in-russia
@@ -346,12 +344,12 @@ facts:
     verification: {status: stated, date: "2026-09-24", method: "демо"}
     permission: {status: not-required}
     use: {section_roles: [faq, objections, footer], slot_types: [faq-a, objection-answer, body]}
-    notes: "ДЕМО-факт E."
+    notes: "ДЕМО-факт."
     lang: ru
 
 missing:
   - id: legal-details
-    what: "реквизиты: полное название юрлица, ОГРН, ИНН, адрес (сведения о продавце — site I; блок «продавец» — H)"
+    what: "реквизиты: полное название юрлица, ОГРН, ИНН, адрес (сведения о продавце — site 08/01; блок «продавец» — COPY-L-DIST-01)"
     kind: company
     claim_class: [company-details]
     placeholder: "[PLACEHOLDER: реквизиты ООО]"
@@ -395,12 +393,12 @@ never_claim:
     claim_class: [income-finance, forecast]
     patterns: ["увелич\\w*\\s+выручк", "удво\\w*\\s+выручк", "окуп\\w*\\s+за", "doubl\\w*\\s+(your\\s+)?(\\w+\\s+)?revenue", "increas\\w*\\s+(your\\s+)?(\\w+\\s+)?revenue"]
     lift: never
-    reason: "38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis (B2, H)"
-    source: {who: "агент E (демо)", date: "2026-09-24"}
+    reason: "38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis"
+    source: {who: "демо-набор", date: "2026-09-24"}
   - id: nc-zero-noshow
     text: "«без неявок», «забудьте о неявках» — абсолютное обещание результата, который зависит от клиентов салона"
     claim_class: [guarantee, forecast]
     patterns: ["без\\s+неяв\\w*", "забудьте\\s+о\\s+неяв\\w*"]
     lift: never
-    reason: "гарантия результата (H COPY-L-GUAR-01); кейс даёт 6 %, не ноль"
-    source: {who: "агент E (демо)", date: "2026-09-24"}
+    reason: "гарантия результата (COPY-L-GUAR-01); кейс даёт 6 %, не ноль"
+    source: {who: "демо-набор", date: "2026-09-24"}

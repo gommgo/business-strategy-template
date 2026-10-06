@@ -366,7 +366,7 @@ C (`../03-page-structure/01-narratives-and-section-order.md`), блоки — E.
 - [S15] schema.org «WebPage» (подтипы), https://schema.org/WebPage (2026-09-24) — спецификация; типы Event, Course, MobileApplication, Product, Service, JobPosting, LocalBusiness проверены (HTTP 200).
 - [S16] Unbounce «13 types of landing pages», обновлено 2024-06-07, https://unbounce.com/landing-pages/7-types-of-landing-page/ — мнение вендора.
 - [S17] Tilda Education «Анатомия лендинга: функциональные блоки», 2024, https://tilda.education/courses/landing-page/anatomiya-landing-page/ — мнение вендора, словарь рынка РФ.
-- [S18] Hallmark (Nutlope / Together AI, MIT) `references/structure.md`, `macrostructures.md` — клон `../kimi-research/99-raw/cache/repos/Nutlope__hallmark/` — внешний скилл, механизмы с атрибуцией.
-- [S19] ui-ux-pro-max `data/landing.csv` (MIT) — клон `../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/`; разбор — опыт B/01.
+- [S18] Hallmark (Nutlope / Together AI, MIT) `references/structure.md`, `macrostructures.md` — https://github.com/Nutlope/hallmark — внешний скилл, механизмы с атрибуцией.
+- [S19] ui-ux-pro-max `data/landing.csv` (MIT) — https://github.com/nextlevelbuilder/ui-ux-pro-max-skill; разбор — опыт B/01.
 - [S20] Корпус text D: `../text-research/03-corpus-measured/corpus.tsv` (177 страниц, 2026-09-24) — примеры страниц; адреса типов вне корпуса проверены curl 2026-09-24 (HTTP 200).
 - [S21] ai-media `../ai-media/01-web-assets-landscape/01-asset-slots-by-page-type.md` §3; blender `../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md` §7; kimi `../kimi-research/07-brief-handoff/01-from-app-description-to-brief.md` §2.2, `91-videos/digests/weoV4dm-X1A.md` стр. 196–210 — соседи.

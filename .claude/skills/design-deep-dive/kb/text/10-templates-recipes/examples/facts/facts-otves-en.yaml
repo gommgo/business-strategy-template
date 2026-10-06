@@ -1,11 +1,11 @@
-# facts-otves-en.yaml — английская адаптация набора B2 «Отвес» (02-strategy-messaging/examples/facts-service-renovation.yaml) с теми же id
-# text-research · волна 3 · J3 · 2026-09-24 · формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
+# facts-otves-en.yaml — английская адаптация набора «Отвес» (02-strategy-messaging/examples/facts-service-renovation.yaml) с теми же id
+# Формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
 #
-# ВЫМЫШЛЕННАЯ студия «Отвес» (B2) и синтетические данные — не публиковать. Зачем отдельный файл, а не translations.en:
-# claims_check.py сверяет объект счёта (values[].what), условие «рядом» и цитаты на языке факта (E/03, F/05, I/04).
-# Шесть фактов, нужных примеру en-otves-case.yaml; verbatim гарантии, цены и сметы — из EN-оверлея F
-# (99-raw/experiments/F/04-voice-samples/en-overlays/otves-remont-nn.yaml; «₽9,800» → «₽9800»: запятую тысяч сверка читает
-# как десятичную — ограничение B2, E/03), кейс и отзыв — перевод J3 с пометкой.
+# ВЫМЫШЛЕННАЯ студия «Отвес» и синтетические данные — не публиковать. Зачем отдельный файл, а не translations.en:
+# claims_check.py сверяет объект счёта (values[].what), условие «рядом» и цитаты на языке факта.
+# Шесть фактов, нужных примеру en-otves-case.yaml; verbatim гарантии, цены и сметы — из EN-оверлея профиля голоса
+# («₽9,800» → «₽9800»: запятую тысяч сверка читает
+# как десятичную — ограничение claims_check.py), кейс и отзыв — перевод с пометкой.
 
 facts_version: 1
 date: '2026-09-24'
@@ -17,7 +17,7 @@ example: true
 owner:
   role: директор (заказчик)
   contact: почта заказчика из брифа
-collected_by: агент J3 (английская адаптация набора B2 «Отвес», 2026-09-24)
+collected_by: демо-набор, английская адаптация набора «Отвес» (2026-09-24)
 never_claim_defaults: ru-default-1
 entities:
 - id: company-otves
@@ -73,7 +73,7 @@ facts:
   use:
     any: true
   lang: en
-  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+  notes: Английская адаптация факта с тем же id (verbatim guarantee, price, estimate — из EN-оверлея профиля голоса). Источник (source.quote) — русские
     слова заказчика, не переводится.
 - id: case-two-room-47-days
   kind: case
@@ -136,7 +136,7 @@ facts:
     - case-summary
     - case-result
   lang: en
-  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+  notes: Английская адаптация факта с тем же id (verbatim guarantee, price, estimate — из EN-оверлея профиля голоса). Источник (source.quote) — русские
     слова заказчика, не переводится.
 - id: review-anna-k
   kind: testimonial
@@ -212,8 +212,8 @@ facts:
   valid:
     review_by: '2027-06-14'
   lang: en
-  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
-    слова заказчика, не переводится. Перевод цитаты — с пометкой «translated from Russian» рядом (B2 §5.1).
+  notes: Английская адаптация факта с тем же id (verbatim guarantee, price, estimate — из EN-оверлея профиля голоса). Источник (source.quote) — русские
+    слова заказчика, не переводится. Перевод цитаты — с пометкой «translated from Russian» рядом (text 02/03 §5.1).
 - id: guarantee-3-years
   kind: guarantee
   claim_class:
@@ -260,7 +260,7 @@ facts:
       status: not-needed
     disclaimer: ''
   lang: en
-  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+  notes: Английская адаптация факта с тем же id (verbatim guarantee, price, estimate — из EN-оверлея профиля голоса). Источник (source.quote) — русские
     слова заказчика, не переводится.
 - id: price-from-per-m2
   kind: price
@@ -306,7 +306,7 @@ facts:
     until: '2026-12-31'
     review_by: '2026-12-01'
   lang: en
-  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+  notes: Английская адаптация факта с тем же id (verbatim guarantee, price, estimate — из EN-оверлея профиля голоса). Источник (source.quote) — русские
     слова заказчика, не переводится.
 - id: estimate-free
   kind: offer-terms
@@ -354,7 +354,7 @@ facts:
   valid:
     until: '2026-12-31'
   lang: en
-  notes: Английская адаптация факта B2 с тем же id (J3; verbatim guarantee, price, estimate — из EN-оверлея F/04). Источник (source.quote) — русские
+  notes: Английская адаптация факта с тем же id (verbatim guarantee, price, estimate — из EN-оверлея профиля голоса). Источник (source.quote) — русские
     слова заказчика, не переводится.
 missing:
 - id: legal-details
@@ -385,9 +385,9 @@ never_claim:
   - no\.?\s*1\s+in
   - lowest\s+prices?
   lift: with-fact
-  reason: 135-ФЗ ст. 14.3; 38-ФЗ ст. 5 ч. 3 п. 1 (H)
+  reason: 135-ФЗ ст. 14.3; 38-ФЗ ст. 5 ч. 3 п. 1
   source:
-    who: B2 (RU), EN — J3
+    who: демо-набор (RU), EN — адаптация
     date: '2026-09-24'
 - id: nc-no-extra-cost-promise
   text: “the estimate never changes” as a promise to every client — the contract has no such clause
@@ -397,7 +397,7 @@ never_claim:
   patterns:
   - estimate\w*\s+(never|won.t|will\s+not|does\s+not)\s+(change|grow|go\s+up|increase)
   lift: with-fact
-  reason: 'B2: пробел estimate-change-policy'
+  reason: 'пробел estimate-change-policy'
   source:
-    who: B2 (RU), EN — J3
+    who: демо-набор (RU), EN — адаптация
     date: '2026-09-24'

@@ -1,6 +1,6 @@
-# en-otves-case.yaml — пример copy deck v1.1 (10-templates-recipes, J3, 2026-09-24): английская АДАПТАЦИЯ страницы кейса
-# ru-otves-case.yaml (не перевод, решение заказчика п. 16). Тексты — ai-self J3. Факты — facts/facts-otves-en.yaml (английская
-# адаптация набора B2 с теми же id; студия вымышленная, не публиковать). id страницы, секций и слотов — как в исходнике.
+# en-otves-case.yaml — пример copy deck v1.1 (10-templates-recipes): английская АДАПТАЦИЯ страницы кейса
+# ru-otves-case.yaml (не перевод). Тексты — ai-self. Факты — facts/facts-otves-en.yaml (английская
+# адаптация набора «Отвес» с теми же id; студия вымышленная, не публиковать). id страницы, секций и слотов — как в исходнике.
 copy_deck:
   version: 1
   date: '2026-09-24'
@@ -18,11 +18,11 @@ copy_deck:
   copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
   jurisdiction: ru
   legal_category: [general]
-  authors: ['J3 (ai-self, 2026-09-24)']
+  authors: ['агент (ai-self, 2026-09-24)']
   notes: >-
     Адаптация: район объяснён одной вставкой («Sormovo, a district of Nizhny Novgorod»), «замерщик» — site visit, цена —
-    в рублях (компания в РФ: 38-ФЗ ст. 5 ч. 7.1, H), перевод цитаты помечен рядом (B2 §5.1), без «dear customer» и
-    восклицаний. Длины — EN-колонки copy-slots.yaml E (основная единица — слова).
+    в рублях (компания в РФ: 38-ФЗ ст. 5 ч. 7.1), перевод цитаты помечен рядом (text 02/03 §5.1), без «dear customer» и
+    восклицаний. Длины — EN-колонки copy-slots.yaml (основная единица — слова).
   pages:
   - page_id: case-sormovo-54
     page_type: case-page

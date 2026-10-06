@@ -38,8 +38,7 @@
   (9 команд проекций и переноса), `make_skeleton.py`, `validate_any.py`; иерархия solution-aware; copy deck на 10 секций,
   4 прогона `copydeck.py check`, 2 прохода правки, судья по 9 критериям, лист слепого выбора; сравнение с deck B1.
 
-Заметки — `99-raw/notes/wave3/I-notes.md`, отчёт — `99-raw/reports/wave3-I-report.md`. Проверки: `python3
-../../scripts/maint/orch_check.py 09-ai-generation-evaluation`, `python3 99-raw/experiments/I/01-rubric-corpus/check_rubric.py`,
+Заметки — `99-raw/notes/wave3/I-notes.md`, отчёт — `99-raw/reports/wave3-I-report.md`. Проверки: `python3 99-raw/experiments/I/01-rubric-corpus/check_rubric.py`,
 `python3 ../../scripts/text/chain_inputs.py --selftest`, `… check_intake.py --selftest`.
 
 ## Выжимка на 10 строк

@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · служебная страница consent (planlib.py); факты — демо text.
+# ПРИМЕР v1 · служебная страница consent; факты — демо text.
 page_plan_version: '1'
 checked: '2026-09-24'
 status: proposed
@@ -25,7 +25,7 @@ page:
   awareness: product-aware
   awareness_basis:
     from: assumption
-    rule: уровень по главному источнику страницы (C 01 §3.1)
+    rule: уровень по главному источнику страницы (site 03/01 §3.1)
   traffic:
   - traffic_source: internal
     temperature: hot

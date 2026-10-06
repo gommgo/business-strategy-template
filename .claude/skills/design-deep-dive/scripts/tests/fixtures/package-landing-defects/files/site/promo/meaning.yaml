@@ -1,8 +1,8 @@
 # meaning-otves.yaml — пример 1: смысл для лидогенерации услуги (ремонт квартир под ключ), приоритет 1 заказчика
-# text-research · B1 · 2026-09-24 · формат: ../meaning.schema.yaml (meaning_version 1)
+# Формат: ../meaning.schema.yaml (meaning_version 1)
 #
 # ВЫМЫШЛЕННАЯ студия «Отвес» (Нижний Новгород) — та же, что в ../examples/facts-service-renovation.yaml (B2): факты и
-# их id — оттуда. Вход — сообщение заказчика (ai-self, 99-raw/experiments/B1/01-briefs-to-meaning/README.md §3).
+# их id — оттуда. Вход — сообщение заказчика (ai-self).
 # Что показывает пример: вывод позиционирования из короткого брифа; basis у каждого утверждения; допущения → вопросы;
 # уникальное свойство без документа — needs-proof; возражения с доказательствами из facts.yaml и с missing, которых в
 # инвентаре ещё нет (предложения B2 — x-missing-proposals). Иерархии страниц — hierarchy-otves-*.yaml.
@@ -316,7 +316,7 @@ boundaries:
     - {text: "«лучший ремонт в городе», «№ 1»", claim_class: superlative, why: "нет независимого рейтинга (B2 nc-best-in-city)"}
 
 message_hierarchy_ref: ["hierarchy-otves-problem-aware.yaml", "hierarchy-otves-product-aware.yaml"]
-voice_ref: "черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — F (волна 2)"
+voice_ref: "черновик: спокойно и по делу, на «вы», без восклицаний"
 proof_ref: "../../facts.yaml"
 legal_category: [general]
 legal_note: "Бытовой подряд (ГК, ЗоЗПП): цена «от», скидка с датой, гарантия — формулировки проверяет H; реквизиты — site I."

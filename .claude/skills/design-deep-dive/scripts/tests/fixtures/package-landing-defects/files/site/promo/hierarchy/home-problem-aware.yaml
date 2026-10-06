@@ -1,8 +1,8 @@
 # hierarchy-otves-problem-aware.yaml — иерархия лендинга «Отвес» для трафика из поиска по проблеме (problem-aware)
-# text-research · B1 · 2026-09-24 · формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
+# Формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
 # Смысл — meaning-otves.yaml; факты — facts-service-renovation.yaml (B2). Парная иерархия под брендовый трафик —
-# hierarchy-otves-product-aware.yaml (опыт 99-raw/experiments/B1/02-two-hierarchies/: что меняется между ними).
-# Порядок секций — черновой (site задаёт page-plan); секции — роли temp-vocabulary-v0.
+# hierarchy-otves-product-aware.yaml.
+# Порядок секций — черновой (site задаёт page-plan); секции — роли section_role словаря site.
 
 hierarchy_version: 1
 date: "2026-09-24"

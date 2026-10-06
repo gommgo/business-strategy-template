@@ -1,7 +1,7 @@
-# Сгенерировано K/01 из 12-recipes/04-abstract-sculpture.md — блоки python в напечатанном виде, по порядку.
+# Сгенерировано run_recipes.py из 12-recipes/04-abstract-sculpture.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 36
-# Blender 5.2.2 — [проверено] рецепт 04: лента по узлу (D1/06), два варианта паспорта
+# Blender 5.2.2 — [проверено] рецепт 04: лента по узлу (blender 05/04 §5), два варианта паспорта
 import sys, math, bpy
 from mathutils import Matrix
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender

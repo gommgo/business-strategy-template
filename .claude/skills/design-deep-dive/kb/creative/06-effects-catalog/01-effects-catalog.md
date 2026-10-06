@@ -1,6 +1,6 @@
 # Каталог эффектов подачи: реализация, цена, фолбэки, reduce, телефон, клише
 
-Волна 2 · агент F (2026-09-24) и продолжатель F2 (2026-09-24/25) · 56 записей `effects.yaml` (42 лабораторные страницы `lab/<id>/` +
+Волна 2 · агент F (2026-09-24) и продолжатель F2 (2026-09-24/25) · 59 записей `effects.yaml` (42 лабораторные страницы `lab/<id>/` +
 варианты, 12 внешних ссылок на blender, ai-media и G) · опыты `99-raw/experiments/F/00–16` · Chromium 153.0.8010.12 и WebKit 26.6
 (Playwright 1.63, WebKit 2359; десктоп, reduce, iPhone 13), ANGLE GL на Intel Iris Xe · GSAP 3.15.0, Lenis 1.3.26 · метод
 замеров — `03-effects-lab-method.md`.
@@ -70,11 +70,11 @@
 ## 1. Как пользоваться каталогом
 
 ### 1.1. Запись и ссылки
-- Поля — `effects.schema.json` (контракт §3 п.6 + поля E `motion.kind`, `attention_cost`, `loop_control`); `reduce.strategy` —
+- Поля — `effects.schema.json` (`motion.kind`, `attention_cost`, `loop_control` — для норм движения `05-motion`); `reduce.strategy` —
   перечисление `treatment` v1 (с `stations`, X-05), `mobile.behavior` — `treatment.v0` A; `motion.kind` — строка или список классов
   моментов (`3d-scene`, X-64); роль эффекта — `effect_role` (было `roles`, X-54); `cliche.registry_id` — реестр H `08-uniqueness-anti-slop/cliche-registry.yaml`;
-  `stack_ref` — G `07-stack-implementation/stack.yaml`; числа `cost.*` и `fallback.*.measured` — сборка из замеров.
-- 29 id A сохранены (`id_map`); новые — `text-scramble`, `variable-font-pointer`, `text-path`, `rotating-badge`, `scroll-text-highlight`,
+  `stack_ref` — G `07-stack-implementation/stack.yaml`; числа `cost.*` и `fallback.*.measured` — из замеров лаборатории (`03-effects-lab-method.md`). Каталог правится по месту: схема описывает поля, сверка — `registry_check.py` и `spec_check.py levels --check`; схема проходит метасхему при приёмке правки (`scripts/maint/accept.py`).
+- Новые id — `text-scramble`, `variable-font-pointer`, `text-path`, `rotating-badge`, `scroll-text-highlight`,
   `svg-line-draw`, `tilt-card`, `hover-distort-dom`, `aurora-css`, `gradient-seams`, `glass-panel`, `glow-accent`, `scroll-mask-expand`,
   `text-mask-media`, `motion-toggle` и внешние `alpha-video-object`, `particles-webgl`, `webgl-image-distortion`, `depth-parallax-25d`, `preloader`.
 - F2 (2026-09-25) id не менял, добавил 7: `dialog-entry-exit`, `details-accordion`, `button-expand-label`, `card-flip-3d`,
@@ -85,16 +85,18 @@
 ### 1.2. Уровни
 | Уровень | Разрешено из каталога (сверх ниже стоящих) | Запрещено уровнем (A §3.1) |
 |---|---|---|
-| L0 | `hero-entrance-once` ≤ 600 мс, `marquee-logos` (1, с паузой), `counter-up`, `scroll-driven-progress`, `sticky-stack` без масштаба, `mask-reveal`, `grain-overlay`, `mesh-gradient-css` статичный, `cinemagraph`, `rotating-badge` (1), `motion-toggle` (на L2 обязателен), `dialog-entry-exit`, `details-accordion`, `button-expand-label`, `header-shrink-on-scroll`, CSS-отклик | WebGL, закрепление со скрабом, плавная прокрутка, свой курсор, видео-фон, появление на каждой секции |
+| L0 | `hero-entrance-once` ≤ 600 мс, `marquee-logos` (1, с паузой), `counter-up`, `scroll-driven-progress`, `sticky-stack` без масштаба, `mask-reveal`, `grain-overlay`, `mesh-gradient-css` статичный, `cinemagraph`, `rotating-badge` (1), `motion-toggle` (на L2 обязателен), `dialog-entry-exit`, `details-accordion`, `button-expand-label`, `header-shrink-on-scroll`, `light-sweep`, `expanding-columns`, `overlay-viewer`, CSS-отклик | WebGL, закрепление со скрабом, плавная прокрутка, свой курсор, видео-фон, появление на каждой секции |
 | L1 | + `split-text-reveal`, `kinetic-headline`, `scroll-reveal-system`, `parallax-layers`, `scroll-text-highlight`, `svg-line-draw`, `pin-scrub-story` (1 сцена ≤ 150vh), `scroll-mask-expand`, `view-transition`, `page-transition` (нативный кросс-документный VT, `@supports`, ≤ 400 мс), `cursor-accent`, `magnetic-cta`, `tilt-card`, `hover-distort-dom`, `shader-bg` или `holo-shader-bg` (1 контекст), `aurora-css`, `glass-panel`, `glow-accent`, `text-mask-media`, `video-loop-hero`, `marquee-text`, `3d-object`, `card-flip-3d`, `lottie-illustration-loop`, `rive-state-interaction` | горизонталь, свой курсор, плавная прокрутка, переходы страниц на библиотеках (Barba, Swup) и с заставкой, секвенции, 3D-сцена |
 | L2 | + `horizontal-scroll`, `smooth-scroll`, `custom-cursor`, `page-transition` на библиотеках (Barba, Swup) и с заставкой, `variable-font-pointer`, `video-scrub`, `image-sequence`, `3d-scene`, `particles-webgl`; `preloader` — только кампания по явному решению | текст в canvas, изменение скорости прокрутки, эффекты в блоке конверсии |
+
+Свойства приёма (`motion.properties`) на его минимальном уровне сверяет `spec_check.py levels --check` (LV-03).
 
 ### 1.3. Что значит «цена»
 - `cost.bytes_br` — байты эффекта по сети (свой код, библиотеки, медиа; текст — brotli q11), без общей обвязки и шрифтов;
   `js_kb_br` — из них JS. `fps_*`, `loaf_ms`, `cls`, `input_delay_ms_mobile` — медианы `effect_bench.py` (4-секундный
   сценарий: покой, прокрутка колесом, движение указателя или клики); `frame_ms_unlimited` — цена кадра без vsync для эффектов,
   где кадр рисует JS или WebGL. Главный различитель — `measured.*.TaskDuration_ms_per_s` (работа главного потока в секунду);
-  контроль без эффекта — 12,1 / 20,6 мс/с (десктоп / телефон ×4); таблицы разделов — сборка `fill_tables.py` из F/03, F/05, F/06, F/08.
+  контроль без эффекта — 12,1 / 20,6 мс/с (десктоп / телефон ×4); таблицы разделов — из замеров лаборатории.
 - Лаборатория ≠ поле (Iris Xe, headless, эмуляция телефона): сравнивай эффекты между собой; поле — ворота страницы site.
 
 ### 1.4. Обязательный контракт каждого эффекта (проверен на всех 36 страницах)
@@ -321,7 +323,8 @@ LAB.load(['gsap.min.js', 'SplitText.min.js']).then(() => { gsap.registerPlugin(S
 <!-- /TABLE -->
 
 ### 5.1. Закреплённая сцена (`pin-scrub-story`)
-- L1 — одна сцена ≤ 150vh; L2 — 100–150vh на шаг; не закреплять форму, тарифы и CTA-блок.
+- Длина закрепления — токены `motion.marketing.scroll.pin-l1-max-vh` (L1, одна сцена) и `pin-l2-max-vh` (L2), шаги делят длину
+  сцены; не закреплять форму, тарифы и CTA-блок.
 - GSAP ScrollTrigger (`pin`, `scrub: 0.6`, `end: '+=' + LEN + '%'`, `invalidateOnRefresh`) грузится только при ≥ 768 px и без
   reduce (`LAB.load` + `gsap.matchMedia`): 45,7 КБ br на десктопе, 3,9 КБ на телефоне; `refresh()` после `fonts.ready`.
 - Без JS, при reduce и < 768 px — шаги стопкой в конечных состояниях (`reduce.strategy: custom`, «станции» — предложение E для
@@ -425,6 +428,11 @@ LAB.load(['gsap.min.js', 'SplitText.min.js']).then(() => { gsap.registerPlugin(S
   во время анимации (в покое — 0 работы); растеризация фильтра — на процессоре. WebGL-версии (1 вызов на картинку, переходы по
   карте смещения, искажение от скорости) — `blender:01-01#9.1`, `#9.2`, `#9.4`; клише `cliche:liquid-hover-distortion` —
   на каждой карточке.
+- `light-sweep` (L0, семейство `image`): наклонная полоса света — отдельный слой поверх кадра внутри его рамки
+  (`overflow: hidden`) — один раз проходит по кадру на наведение или фокус с клавиатуры (`:hover`, `:focus-visible`), без петли;
+  движется только полоса (`transform`), проявляется и гаснет прозрачностью, коробка карточки, кадр и текст стоят. Наведение —
+  в `(hover: hover) and (pointer: fine)`, на тач блика нет; длительность — шкала `motion.marketing.duration`; reduce — блика нет;
+  полоса — декоративный слой (`aria-hidden`). Лабораторной страницы и замера нет.
 
 ## 8. Фоны
 
@@ -517,12 +525,14 @@ vec3 col = base + mix(spec(ph), ramp(ph), uBrand) * band * .95 * (.9 + .1 * sin(
 
 - `mask-reveal` (L0): `clip-path: inset(100% 0 0 0)` → `inset(0)` за 900 мс + обратный масштаб 1,06 → 1, один раз по IO,
   скрытие только при `html.js`; вариант «окно-арка» — `mask-image` из SVG 0,2 КБ растёт по `view()` (окно в форме знака —
-  кандидат W2 `[V:xQnJLYTVl_E 24:06]`).
+  кандидат W2 `[V:xQnJLYTVl_E 24:06]`). Два класса движения (`motion.kind`): `one-shot` — раскрытие по IO, `scroll-linked` —
+  окно-арка по `view()`.
 - `scroll-mask-expand` (L1): sticky-сцена 100svh в обёртке 100svh + 150vh; кадр из `inset(22% 30% round 28px)` раскрывается до
   полного вылета за 70 % пути, подпись — в последней четверти; < 768 px и при reduce — кадр сразу на всю ширину (механика C3
   higgsfield `[мнение вендора]`).
 - `text-mask-media` (L1): `background-clip: text` с кадром; `background-position` по `view()` — перерисовка на главном
   потоке; настоящий текст (выделяется, читается), контраст — тёмная часть кадра + обводка 1 px; без поддержки — сплошной цвет.
+  Два класса движения (`motion.kind`): `scroll-linked` и `one-shot`.
 
 ## 11. 3D, WebGL над картинками, секвенции, прелоадер — ссылками
 
@@ -593,6 +603,24 @@ vec3 col = base + mix(spec(ph), ramp(ph), uBrand) * band * .95 * (.9 + .1 * sin(
   с `opacity`, не `box-shadow`); без SDA (Firefox) — класс по порогу 40 px из rAF + переходы 240 мс (`?v=class`).
 - Антипример `?v=height` (высота шапки в потоке по прокрутке) — CLS 0,0004 и раскладка на кадре при 0 у варианта `transform`: мало, но
   не ноль, и растёт с высотой шапки `[проверено]`; reduce — сразу компактная шапка.
+
+### 12.6. Раздвижные колонки (`expanding-columns`)
+- L0, роли `signature` и `support`: колонка-кадр под указателем или фокусом раскрывается шире соседних — `clip-path` окна
+  колонки и сдвиг соседних `transform`; раскладка ряда стоит, свойства раскладки (`flex-grow`, `width`,
+  `grid-template-columns`) не анимируются.
+- Без указателя и фокуса раскрыта первая колонка; фокус с клавиатуры (`:focus-visible`) раскрывает так же, как наведение,
+  наведение — в `(hover: hover) and (pointer: fine)`; на тач колонки стоят раскрытыми — одна под другой или равным рядом.
+  Колонка — ссылка или кнопка в порядке чтения, содержимое закрытой колонки остаётся в DOM.
+- Reduce — раскрытие без перехода; длительность — шкала `motion.marketing.duration`. Лабораторной страницы и замера нет.
+
+### 12.7. Наложение-просмотр (`overlay-viewer`)
+- L0, роль `feedback`: кадр галереи или работа из сетки открывается крупно поверх страницы, с переходом к соседним. Окно —
+  нативный `<dialog>`, открытый `showModal()`: фокус в окне, Esc и «закрыть» закрывают, страница под окном не прокручивается,
+  после закрытия фокус возвращается на миниатюру, которая открыла окно.
+- Кнопки «закрыть», «вперёд», «назад» — `<button>` с подписями из текстов страницы (слоты подписей управления блока); у окна —
+  доступное имя, у кадра в окне — alt миниатюры. Без JS миниатюра — ссылка на кадр или страницу работы.
+- Вход и выход окна — `effect:dialog-entry-exit` (движение и reduce — оттуда, §12.1); смена кадра в окне — без движения или
+  проявлением; на телефоне окно во всю ширину. Лабораторной страницы и замера нет.
 
 ## 13. Векторная анимация: Lottie и Rive (ссылки на G, без лаборатории)
 

@@ -1,5 +1,5 @@
-"""zweb_all — ассет гибрида C: все 8 модулей «Звена» + начинка J3 + кабель → GLB по контракту крюка CD2
-(`15-showcase/_shared/code3d/README.md`), дорожка Z2, Blender 5.2.2.
+"""zweb_all — ассет гибрида C: все 8 модулей «Звена» + начинка J3 + кабель → GLB по контракту крюка
+(`15-showcase/_shared/code3d/README.md`), Blender 5.2.2.
 
 build(P: web | webl, поза «прямо», начинка) →
   • модуль: детали (кроме начинки, кабеля и наклеек) слиты в меш `<модуль>_mesh`, наклейки — в `<модуль>_decal` (без AO);
@@ -294,7 +294,7 @@ bpy.context.view_layer.update()
 bpyx.set_engine("CYCLES")
 exec(open(kbpaths.scripts("blender", "presets.py"), encoding="utf-8").read())   # export(path, preset, **over)
 raw_glb = os.path.join(OUT, f"{NAME}_raw.glb")
-# Z3: --tangents — атрибут TANGENT (MikkTSpace по UV0): без него three берёт направление анизотропии из экранных производных UV0,
+# --tangents — атрибут TANGENT (MikkTSpace по UV0): без него three берёт направление анизотропии из экранных производных UV0,
 # постоянных на треугольнике, — на 48 гранях точёной крышки «веер»; телефону не нужно (Standard без анизотропии)
 r = export(raw_glb, "static_hero", collection=coll.name, **({"export_tangents": True} if "--tangents" in argv else {}))  # noqa: F821
 assert r == {"FINISHED"}, r

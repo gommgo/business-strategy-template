@@ -1,7 +1,6 @@
-# cinemagraph.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#4; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+# cinemagraph.yaml — машиночитаемый рецепт; текст — 14-recipes/01-hero-recipes.md#4; схема — recipe.schema.json
 recipe_version: 1
 checked_at: '2026-09-25'
-author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
 id: cinemagraph
 title: 'Синемаграф: 720p i2v с одним очагом движения + мастер 2K (maskedmerge)'
 doc: 14-recipes/01-hero-recipes.md#4
@@ -45,36 +44,23 @@ spec:
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E4.spec.json
 compile: scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --out $DDD_HOME/out/ai-media/<ассет>.jsonl
-phase5:
-  jobs:
-  - 99-raw/phase5/jobs/M-03-cinemagraph-steam.jsonl
-  - 99-raw/phase5/jobs/M-05-cinemagraph-steam-1080p.json
-  reuse:
-  - M-01
-  - D2-07
-  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
 steps:
 - id: mask
   cmd: маска зоны движения по естественным краям, растушёвка 1–2 px
   status: checked
-  evidence: 99-raw/experiments/M/03-cinemagraph/still_mask.png
 - id: merge
   cmd: ffmpeg -i steam_720p.mp4 -loop 1 -i master.png -loop 1 -i mask.png -filter_complex "[0:v]scale=W:H:flags=lanczos,format=yuv444p[v];[1:v]format=yuv444p[s];[2:v]format=gray[m];[s][v][m]maskedmerge,format=yuv420p"
     -c:v libx264 -qp 0 mezz.mp4
   status: checked
-  evidence: 99-raw/experiments/M/03-cinemagraph
 - id: drift
   cmd: python3 ../../scripts/ai-media/video_loop_check.py drift mezz.mp4 --mask still_mask.png
   status: checked
-  evidence: 99-raw/experiments/M/03-cinemagraph/results_steam.json
 - id: masked-motion
-  cmd: python3 99-raw/experiments/M/03-cinemagraph/masked_motion.py (keep_in в маске ≥ 0,75)
+  cmd: keep_in в маске ≥ 0,75
   status: checked
-  evidence: 99-raw/experiments/M/03-cinemagraph/results_masked_motion.json
 - id: encode
   cmd: 'как hero-loop: полные теги BT.709, AV1 CRF по keep_in, H.264, флаги провенанса одной строкой'
   status: checked
-  evidence: 99-raw/experiments/M/03-cinemagraph/encode.py
 accept:
   asset_audit:
     mode: video-loop
@@ -107,7 +93,7 @@ numbers:
   mezz_seam_local: 1.04
   keep_in_av1_crf36: 0.84
   keep_in_av1_crf40: 0.71
-  phase5_status: 'M-03, M-05 и живой синемаграф (MS-02 motion) не запускались — отменено заказчиком 25.09; маска по слову SAM 3.1 — не проверена'
+  live_status: 'M-03, M-05 и живой синемаграф (MS-02 motion) не запускались; маска по слову SAM 3.1 — не проверена'
 status:
   local: checked
   generation: unchecked

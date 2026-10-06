@@ -147,7 +147,7 @@ Looks AgX [S1]: «Base Contrast» — контраст 1 (тождество), �
 ```python
 # Blender 5.2.2 — [проверено] цвет для веб-продукта: вид, запись, hex → линейный
 import sys, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 def web_color_setup(scene=None, view="Khronos PBR Neutral"):
@@ -377,8 +377,8 @@ for v, lk in (("Standard", None), ("AgX", None), ("AgX", "AgX - Punchy"), ("Khro
 ```python
 # Blender 5.2.2 — [проверено] «белая печь»: hex → рендер EEVEE → hex и ΔE2000
 import bpy, math, os, sys, tempfile
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D2/01-brand-color")
+sys.path.insert(0, "../../scripts/blender")
+sys.path.insert(0, "99-raw/experiments/D2/01-brand-color")
 import bpyx
 from palette import de2000, srgb2lab, hex2srgb      # CIEDE2000 (сверено с парой Sharma 2005)
 

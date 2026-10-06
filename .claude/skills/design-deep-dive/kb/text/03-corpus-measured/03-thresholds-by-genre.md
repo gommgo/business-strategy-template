@@ -1,6 +1,6 @@
 # Пороги линтера по жанрам и слотам: как выведены и какие
 
-Волна 1 · агент D и продолжатель D2 · 2026-09-24 · данные — `corpus.tsv` (177 страниц), `measurements.tsv` (copy_lint
+Волна 1 · агент D и продолжатель D2 · 2026-09-24 · данные — корпус 177 страниц (copy_lint
 0.9.2 / 0.9.3 — эквивалентны по метрикам, 336 правил словарей C), опыт `99-raw/experiments/D/03-measure/` ·
 машиночитаемо — `thresholds.yaml` (version 2, 3 015 строк) · проверка — `copy_lint.py --selftest` и 3 страницы корпуса
 
@@ -275,11 +275,7 @@ p10–p50–p90 слов · медиана знаков · n страниц оп
 
 **I (оценка).** Пороги — ориентиры рубрики и сигналы, не детектор ИИ: у плотностей распределения ИИ и людей
 перекрываются (02 §4, §9); сильные сигналы ИИ — тире, «·» и надзаголовки (EN), числа без факта и одинаковые карточки
-(RU, ai-self). Ворота — факты (`claims_check.py`). Слепой набор 10 текстов корпуса — `99-raw/cache/corpus-D/for-I/`,
-ключ — `99-raw/experiments/D/06-for-I/key.tsv`.
-
-**Перемер.** `bash 99-raw/experiments/D/03-measure/run_final.sh` пересобирает корпус, метрики, пороги и проверку
-(≈ 4 минуты, без браузера); версия линтера и число правил — в шапке `measurements.tsv`.
+(RU, ai-self). Ворота — факты (`claims_check.py`).
 
 ## Частые ошибки
 
@@ -314,7 +310,7 @@ p10–p50–p90 слов · медиана знаков · n страниц оп
 
 ## Источники
 
-- [S1] Корпус D: `03-corpus-measured/corpus.tsv`, `measurements.tsv`, `thresholds.yaml`; опыт `99-raw/experiments/D/03-measure/`
+- [S1] Корпус D: `thresholds.yaml`; опыт `99-raw/experiments/D/03-measure/`
   (analyze.py, write_thresholds.py, thresholds_draft.json, validation.tsv, validation_by_lang.tsv, hero_core.tsv,
   lint3_check.txt), 2026-09-24; [проверено].
 - [S2] Опыт D/05 `99-raw/experiments/D/05-why-markers/` (compare.py, prose_vs_page.py): плотность маркеров по страницам и

@@ -1,5 +1,5 @@
 {
- "model": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series/icon_folder.glb",
+ "model": "icon_folder.glb",
  "file_kb": 17.0,
  "config": {
   "ver": "0.186.0",
@@ -43,28 +43,28 @@
    "el": 20,
    "calls": 4,
    "triangles": 2384,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series/web/icon_folder/web_view_0_az35_el20.png"
+   "file": "web/icon_folder/web_view_0_az35_el20.png"
   },
   {
    "az": 0,
    "el": 5,
    "calls": 4,
    "triangles": 2384,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series/web/icon_folder/web_view_1_az0_el5.png"
+   "file": "web/icon_folder/web_view_1_az0_el5.png"
   },
   {
    "az": 90,
    "el": 5,
    "calls": 4,
    "triangles": 2384,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series/web/icon_folder/web_view_2_az90_el5.png"
+   "file": "web/icon_folder/web_view_2_az90_el5.png"
   },
   {
    "az": 200,
    "el": 35,
    "calls": 4,
    "triangles": 2384,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series/web/icon_folder/web_view_3_az200_el35.png"
+   "file": "web/icon_folder/web_view_3_az200_el35.png"
   }
  ],
  "frame_time": {
@@ -73,5 +73,5 @@
   "frames": 120
  },
  "console": [],
- "sheet": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/02-icon-series/web/icon_folder/web_sheet.png"
+ "sheet": "web/icon_folder/web_sheet.png"
 }

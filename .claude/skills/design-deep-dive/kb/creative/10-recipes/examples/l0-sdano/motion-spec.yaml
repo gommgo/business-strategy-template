@@ -1,6 +1,6 @@
 # motion-spec v1 — рабочий пример L0 «Сдано» (лидогенерация услуг РФ). Рецепт 10-recipes/01-lead-services-l0.md.
-# creative-research · 10-recipes · агент J · волна 3 · 2026-09-25. Демо: компания и цифры вымышлены.
-# Проверка схемой: 99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l0-sdano/motion-spec.yaml
+# Демо: компания и цифры вымышлены.
+# Проверка схемой: $DDD_HOME/venv/bin/python ../../scripts/creative/spec_check.py spec 10-recipes/examples/l0-sdano/motion-spec.yaml
 # Сверка сборки: python3 ../../scripts/creative/motion_check.py 10-recipes/examples/l0-sdano/index.html --level L0 --spec <этот файл>
 motion_spec_version: "1.0"
 id: sdano-home
@@ -19,7 +19,7 @@ page:
   character: [precise, calm]
   base: {duration_ms: 560, easing: {token: motion.marketing.easing.out-expo}}
   primitives: [fade-up, none]
-  lcp: {target: hero.headline, entrance: none, note: "H1 — кандидат LCP, без анимации (E 05/02 §10); план — inline SVG, не кандидат"}
+  lcp: {target: hero.headline, entrance: none, note: "H1 — кандидат LCP, без анимации (creative 05/02 §10); план — inline SVG, не кандидат"}
   toggle: {required: false, attr: data-motion, states: [system, reduced, full], placement: sticky-header, remember: false}
   scroll: {smooth: false, tail_ms_max: 0, jacking: never}
   transitions: {kind: none}

@@ -19,7 +19,7 @@
 | `before-after.tsv` | 540 пар «до / после»: колонки ux `before, after, rule_ref, lang, why` + `genre`, `marker_id`, `evidence` (доказательность) |
 | `README.md` | этот файл |
 
-Утилиты — `../../scripts/text/copydeck.py` и `99-raw/tools/before_after_build.py` (описание — `../../scripts/text/README.md`, разделы J).
+Утилита — `scripts/text/copydeck.py`: copy deck и пустой `why` в `before-after.tsv` (`before-after`); описание — `scripts/text/README.md`.
 
 ## Выжимка (10 строк)
 
@@ -34,7 +34,7 @@
 5. Обещание первого экрана — `promise` (свои варианты или `from` на слот) → `product.goal` kimi; поля брифа сверяются как
    текст страницы (урок «Кварца»).
 6. Варианты сверяются «как выбранные» (`check --all-variants`: копия страницы с одной заменой, отклонённые не сверяются),
-   итоги — в `variant.checks`; выбирает человек вслепую по листу `export-variants` (мета тоже).
+   итоги — в отчёте; выбирает человек: `select` открыто или вслепую по листу `export-variants` (мета тоже).
 7. `lint_allow` снимает только находки линтера C (с причиной); находки сверки и формата — правкой текста или фактов.
 8. Второй язык — отдельный deck с `source_lang`, `adaptation {mode, audience_note, voice_line}` и своим `facts.yaml` с теми же
    id; числа — без запятой тысяч с пометкой: ограничение сверки B2, не норма языка (норма EN — «9,800», H `08/02` §7).
@@ -58,7 +58,7 @@
 
 | Статус | Слот (выбранный вариант) | Страница |
 |---|---|---|
-| `draft` | `slot_id`, `slot_type`, `variants[{id, text, status}]`; при 2+ вариантах — `chosen` | `page_id`, `page_type`, `sections` |
+| `draft` | `slot_id`, `slot_type`, `variants[{id, text, status}]`; `chosen` при 2+ вариантах — когда вариант вышел из `draft` | `page_id`, `page_type`, `sections` |
 | `checked` | + `chosen`, `fact_ids`, `claim_flags`, записи `lint` и `claims` с 0 error и актуальным `text_hash`; факты находятся и публикуемы | + `meta`; все выбранные тексты ≥ checked |
 | `approved` | + `review {by, at}` человека (не утилиты) или `approval` страницы; 0 `[PLACEHOLDER]` | + `approval {by, at}`; все тексты approved; title и description заполнены |
 | `rejected` | вариант с `reason`; выбранным быть не может | страница с `reason`; не проверяется и не выгружается |
@@ -82,13 +82,13 @@
 ```bash
 T=../../scripts/text/copydeck.py
 python3 $T check DECK --update OUT.yaml --promote          # claims → lint → validate; записи и draft → checked
-python3 $T check DECK --all-variants --update OUT.yaml     # варианты «как выбранные» → variant.checks
+python3 $T check DECK --all-variants                      # варианты «как выбранные» — отчётом
 python3 $T export-variants OUT.yaml -o sheet.md --key key.yaml --seed N
 python3 $T approve OUT.yaml --page ID --by "заказчик" -o APPROVED.yaml
 python3 $T validate APPROVED.yaml --final
 python3 $T export-kimi APPROVED.yaml --page ID --strict --out pkg/ --merge-into brief.yaml --meaning meaning.yaml
 python3 $T --selftest                                      # 111 проверок (112 с jsonschema: venv-J)
-python3 99-raw/tools/before_after_build.py                 # before-after.tsv; --selftest — 18 проверок
+python3 $T before-after --check                           # пустой why в before-after.tsv — из rule_ref (--write — заполнить)
 python3 ../../scripts/text/run_checks.py     # пять проверок всех примеров
 ```
 

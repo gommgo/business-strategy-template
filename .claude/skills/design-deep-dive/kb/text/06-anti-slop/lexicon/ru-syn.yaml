@@ -1,10 +1,10 @@
 # Русский синтаксис (группа SYN). Основа: гайд заказчика Б2, §C, §E п.8, 14–19; humanizer-ru п.2, 4, 8, 13–16, 27, 28,
 # 33, 35 (MIT, ff990df; регулярки п.13 и п.27 — по scripts/lint.py с доработкой под тире и «мы»); ВП:ИИПАРАЛЛЕЛЬ,
 # ВП:ЛОЖДИА, ВП:ИИТАВТ; WP:AISIGNS «Negative parallelisms», «Rule of three». Регулярные приближения морфологии
-# (деепричастия, родительные, пассив) — уровень не выше warning; точнее — анализатор с pymorphy3 (venv-C).
+# (деепричастия, родительные, пассив) — уровень не выше warning; точнее — анализатор с pymorphy3.
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   group: SYN
   lang: ru
@@ -49,8 +49,8 @@ rules:
     message: "«Не X, а Y»: законно, когда контраст — суть позиционирования; как тик — слоп. Считается в плотности."
     replacement: "оставить одно на страницу, где противопоставление несёт смысл; остальные — прямым утверждением"
     examples: {bad: "Мы не продаём курсы, а меняем мышление.", good: "Мы продаём курсы по бухгалтерии."}
-    source: "гайд Б2 («не X, а Y»); PLAN.md «Жанры» (переносится с порогом по жанру); Gesso not-x-but-y-cadence (FLAG)"
-    evidence: "[спорно]: порог по жанру — D"
+    source: "гайд Б2 («не X, а Y»); решение базы (переносится с порогом по жанру); Gesso not-x-but-y-cadence (FLAG)"
+    evidence: "[спорно]: порог по жанру — thresholds.yaml"
     threshold_ref: "03-corpus-measured/thresholds.yaml#genres.<жанр>.analyzers.not_x_but_y"
   - id: ru-syn-triad-evaluative
     marker_id: COPY-M-SYN-04
@@ -122,7 +122,7 @@ rules:
     replacement: "если вопрос взят из голоса клиента — оставить один; иначе утверждение с выгодой"
     examples: {bad: "Хотите увеличить продажи? Устали от рутины?", good: "Продажи растут, когда заявки не теряются."}
     source: "гайд Б2 («риторические вопросы»); ux 07/06 §6.2 (вопрос как форма законен)"
-    evidence: "[спорно]: для лендинга — по голосу клиента (B2), порог — D"
+    evidence: "[спорно]: для лендинга — по голосу клиента (voc.yaml), порог — thresholds.yaml"
   - id: ru-syn-gerund-tail
     marker_id: COPY-M-SYN-08
     level: warning

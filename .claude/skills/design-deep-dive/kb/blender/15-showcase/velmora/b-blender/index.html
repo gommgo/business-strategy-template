@@ -2,8 +2,7 @@
 <!-- Дуэль Velmora · Blender: тот же приём «мышь ведёт видео», та же разметка и тот же движок scrub.js, что у страницы нейросети
      (velmora/ai/01-mouse-scrub/) — отличается только источник кадров: облёт флакона отрендерен в Blender 5.2.2 (Cycles),
      61 кадр дуги 25° + наезд (как у Kling 3), плюс «полный круг 360°» по кнопке (36 кадров через 10°, 64 спп). Постер = кадр 0 (LCP).
-     reduce / Save-Data — 0 байт медиа, облёт по кнопке. Дорожка VD, фазы 2–3, 25–26.09.2026. Сборка — 99-raw/experiments/VD/
-     (01-build/velmora.py → 08-enc/build_seq.py → 09-page/make_page.py). -->
+     reduce / Save-Data — 0 байт медиа, облёт по кнопке. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -18,7 +17,7 @@
   .stage { touch-action: pan-y; }
   @media (hover: hover) and (pointer: fine) { .stage { cursor: ew-resize; } }
   .stage__media { background: #050607; }
-  /* VD3 (26.09, ворота телефона): постер на 1 px шире сцены (под overflow:hidden не видно) — площадь LCP постера 207 648 px²
+  /* постер на 1 px шире сцены (под overflow:hidden не видно) — площадь LCP постера 207 648 px²
      вместо 207 236: кандидат-видео движка (207 648) уже не бывает строго крупнее, LCP остаётся постером (lcp_exp: bbC) */
   .stage__media > picture { inset: -1px; width: auto; height: auto; }
   .stage__media > picture > img, .stage__media > img { transition: opacity .6s var(--ease); object-position: 60% 50%; }
@@ -169,7 +168,7 @@
   </div>
 </section>
 
-<footer class="foot">Дуэль Velmora · 15-showcase, дорожка VD, фазы 2–3 (25–26.09.2026) · <a href="../ai/01-mouse-scrub/index.html">страница нейросети</a> ·
+<footer class="foot">Дуэль Velmora · <a href="../ai/01-mouse-scrub/index.html">страница нейросети</a> ·
   кадры отрендерены в Blender Cycles на своей машине, 0 ₽; шрифт Noto Serif Display (OFL).</footer>
 
 <script type="application/json" id="scrub-manifest">{"source": "Blender 5.2.2 · Cycles 128 спп + OIDN · 25° + наезд 12 %, 61 кадр · 0 ₽ · 26.09.2026", "fps": 12, "frames_video": 61, "duration": 5.0833, "step": 1, "video": {"orbit-h264-g1": {"src": "assets/orbit-h264-g1.mp4", "codec": "h264", "gop": 1, "crf": 22, "bytes": 2030721, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-h264-g4": {"src": "assets/orbit-h264-g4.mp4", "codec": "h264", "gop": 4, "crf": 22, "bytes": 1331328, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-h264-g8": {"src": "assets/orbit-h264-g8.mp4", "codec": "h264", "gop": 8, "crf": 22, "bytes": 1107894, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-av1-g1": {"src": "assets/orbit-av1-g1.mp4", "codec": "av1", "gop": 1, "crf": 32, "bytes": 1156106, "type": "video/mp4; codecs=\"av01.0.05M.10\""}, "orbit-av1-g4": {"src": "assets/orbit-av1-g4.mp4", "codec": "av1", "gop": 4, "crf": 32, "bytes": 671882, "type": "video/mp4; codecs=\"av01.0.05M.10\""}, "orbit-av1-g8": {"src": "assets/orbit-av1-g8.mp4", "codec": "av1", "gop": 8, "crf": 32, "bytes": 515097, "type": "video/mp4; codecs=\"av01.0.05M.10\""}}, "frames": {"seq-avif-1280": {"pattern": "assets/seq-avif-1280/f{i}.avif", "count": 61, "format": "avif", "width": 1280, "height": 720, "bytes": 1333019}, "seq-webp-1280": {"pattern": "assets/seq-webp-1280/f{i}.webp", "count": 61, "format": "webp", "width": 1280, "height": 720, "bytes": 1753072}, "seq-avif-960": {"pattern": "assets/seq-avif-960/f{i}.avif", "count": 61, "format": "avif", "width": 960, "height": 540, "bytes": 894142}}}</script>

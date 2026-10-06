@@ -1,12 +1,11 @@
-# site-brief-creative-fields.yaml — поля брифа подачи: правка creative к site-brief v0 (ранний выпуск C1)
-# creative-research · 01-creative-direction · волна 1 · агент A · 2026-09-24 · статус: предложение для site (A, P, J)
+# site-brief-creative-fields.yaml — поля брифа подачи: правка creative к site-brief v0
 #
 # Что это: не параллельный формат, а правка к ../../../site/01-foundations/site-brief.schema.json v0
-# ($id urn:app-design:site:site-brief:0, сверено 2026-09-24 15:00; sha256 c297ca596b78 на момент S0). В v0 уже есть
-# поля creative: ambition{level, by_page[], note}, brand{…} (структура brand.json kimi), references[] (ref:<id> | url, role,
+# ($id urn:app-design:site:site-brief:0, сверено 2026-09-24 15:00; sha256 c297ca596b78). В v0 уже есть
+# поля creative: ambition{level, by_page[], note}, brand{…} (структура brand.json), references[] (ref:<id> | url, role,
 # take, dont_take, source, note). Ниже: что оставить, что добавить, что переименовать, JSON Schema-фрагменты для v0.1,
-# таблица «поле kimi → поле site-brief», банк вопросов и примеры.
-# Проверка: 99-raw/experiments/A/02-c1-check/c1_check.py — схема site v0 с этими фрагментами (в памяти, файл site не трогается)
+# банк вопросов и примеры.
+# Проверка: схема site v0 с этими фрагментами (в памяти, файл site не трогается)
 # проходит пример site «Отвес» без изменений (обратная совместимость) и примеры ниже; отрицательные случаи падают.
 # Определения уровней и профили бюджета — ../ambition-levels.yaml; подача секций — treatment.v0.schema.json (рядом).
 
@@ -14,10 +13,9 @@ c1:
   version: 0
   status: proposal
   checked_at: "2026-09-24"
-  owner: "creative-research · A (волна 1)"
+  owner: "creative · 01-creative-direction"
   applies_to: "urn:app-design:site:site-brief:0"
   proposes: "site-brief v0.1: изменения только аддитивные, пример site-brief.example.yaml остаётся валидным"
-  sync_point: "C1 (контракт тройки v2 §5): creative → site (A, P); пакет в ../site-research/99-raw/notes/sync/ складывает оркестратор"
 
 # ------------------------------------------------------------------------------------------------------------------
 # 1. Сводка решений
@@ -26,28 +24,28 @@ decisions:
     - "/ambition/level — L0|L1|L2 (id словаря site ambition_level; определения — ambition-levels.yaml)"
     - "/ambition/by_page[] {page, level, why} — уровень отдельной страницы многостраничника"
     - "/ambition/note — причина и оговорки словами"
-    - "/brand — структура brand.json kimi (_meta, colors 9 ролей, fonts с кириллицей, logo, imagery, voice); путь совпадает с kimi"
-    - "/references[] {ref | url, role, take, dont_take, source, note}; пространство ref: для записей библиотеки B — принято"
-    - "/policies/preloader — off по умолчанию, on только в L2-кампании с rationale (решение заказчика п. 13) — без изменений"
+    - "/brand — структура brand.json (_meta, colors 9 ролей, fonts с кириллицей, logo, imagery, voice)"
+    - "/references[] {ref | url, role, take, dont_take, source, note}; пространство ref: для записей библиотеки референсов — принято"
+    - "/policies/preloader — off по умолчанию, on только в L2-кампании с rationale — без изменений"
   add:
-    - {path: "/ambition/source", why: "отличить умолчание по типу (решение заказчика п. 13) от выбора заказчика и вывода Claude; при source ≠ default причина обязательна (note)"}
+    - {path: "/ambition/source", why: "отличить умолчание по типу от выбора заказчика и вывода Claude; при source ≠ default причина обязательна (note)"}
     - {path: "/ambition/by_section_role[]", why: "«уровни по секциям» на этапе брифа — по ролям секций словаря site (секций ещё нет); только понижение или подтверждение: уровень секции ≤ уровня страницы; секции конверсии всегда L0"}
     - {path: "/ambition/motion_cap", why: "потолок движения поверх уровня: аудитория 45+, вестибулярная чувствительность, госсектор, «без анимаций» от заказчика — визуально L1, движение subtle"}
-    - {path: "/ambition/allow", why: "«разрешённые приметы» — явно заказанные заказчиком приёмы, которые иначе считаются почерком генератора: вход флага k3_checks.py --allow (kimi 08/02 п.6) и снятие запрета бан-листа T0; контракт v2 §8 (предложение kimi)"}
-    - {path: "/ambition/forbid", why: "запреты заказчика: эффекты, клише и дословные слова («никакого фиолетового», «без видео») → design_system.bans kimi и exclusions паспорта визуала ai-media"}
-    - {path: "/brand/expression", why: "выражение бренда на сайте (контракт v2 §2: владелец creative): что обязательно, что свободно, чего избегать, насколько строго держаться бренда; выбранное направление art-direction"}
-    - {path: "/references[]/applies_to", why: "где применяется референс (секция по роли, блок или страница): «из одного референса — не больше одной секции» (PLAN риск 7; kimi 07/03 §1)"}
-    - {path: "/references[]/captured", why: "референс-URL скоропортящийся: дата и вьюпорт снятия (kimi references[].captured)"}
-    - {path: "/references[]/role (+ color, material, imagery, effect)", why: "в мудбордах подачи часто нужны палитра и свет, фактура, язык картинок, конкретный эффект — у kimi роль свободной строкой, у паспорта визуала ai-media есть palette, material, effect"}
+    - {path: "/ambition/allow", why: "«разрешённые приметы» — явно заказанные заказчиком приёмы, которые иначе считаются почерком генератора: вход ключей --allow утилиты макета (kb/common/tells.yaml#checks) и снятие запрета бан-листа"}
+    - {path: "/ambition/forbid", why: "запреты заказчика: эффекты, клише и дословные слова («никакого фиолетового», «без видео») → design_system.bans брифа холста и exclusions паспорта визуала ai-media"}
+    - {path: "/brand/expression", why: "выражение бренда на сайте (kb/common/owners.md § Темы: владелец creative): что обязательно, что свободно, чего избегать, насколько строго держаться бренда; выбранное направление art-direction"}
+    - {path: "/references[]/applies_to", why: "где применяется референс (секция по роли, блок или страница): «из одного референса — не больше одной секции» (cd 06/02 §3)"}
+    - {path: "/references[]/captured", why: "референс-URL скоропортящийся: дата и вьюпорт снятия"}
+    - {path: "/references[]/role (+ color, material, imagery, effect)", why: "в мудбордах подачи часто нужны палитра и свет, фактура, язык картинок, конкретный эффект — у исполнителя макета роль свободной строкой, у паспорта визуала ai-media есть palette, material, effect"}
   rename:
-    - "переименований в брифе нет: расширения аддитивны, пример site и строки site-brief.kimi-map.tsv не ломаются"
+    - "переименований в брифе нет: расширения аддитивны, пример site не ломается"
     - "в treatment: слоты словаря site visual-role, effect-ref, motion-level → ключи visual_role, effects[].ref, motion_level (snake_case, как все ключи page-plan); id слотов в vocabulary.yaml не меняются"
   tighten:
-    - {path: "/references[] take и dont_take", from: "необязательные массивы", to: "обязательны, ≥ 1 строка каждый", why: "референс без «что взять / чего не брать» превращается в клон или в пересказ (kimi 07/03 §1: Do not take — всегда); ломается только пустой референс — в примерах site их нет"}
+    - {path: "/references[] take и dont_take", from: "необязательные массивы", to: "обязательны, ≥ 1 строка каждый", why: "референс без «что взять / чего не брать» превращается в клон или в пересказ (cd 06/02 §3: Do not take — всегда); ломается только пустой референс — в примерах site их нет"}
   reject:
-    - {what: "бюджет в брифе (budget_profile, числа)", why: "профиль выводится: <page_type>@<level> (page-plan, budgets.yaml P); заказчик чисел не задаёт"}
+    - {what: "бюджет в брифе (budget_profile, числа)", why: "профиль выводится: <page_type>@<level> (page-plan, budgets.yaml site); заказчик чисел не задаёт"}
     - {what: "палитра, шрифты, тезис, макроструктура в брифе", why: "это решения art-direction (creative) и page-plan (site); в брифе — только исходники бренда и пожелания (03-site-brief.md выжимка п.21)"}
-    - {what: "вопрос о вкусе прилагательными («современно или классически?»)", why: "kimi 07/01 §4.1; Anthropic «Prompting Opus 5.5»: общие слова меняют один дефолт на другой"}
+    - {what: "вопрос о вкусе прилагательными («современно или классически?»)", why: "Anthropic «Prompting Opus 5.5»: общие слова меняют один дефолт на другой"}
 
 # ------------------------------------------------------------------------------------------------------------------
 # 2. Поля (описание для людей и агентов). fill — как x-fill site: customer | claude | default | derive | sister:creative.
@@ -57,7 +55,7 @@ fields:
     type: "enum L0 | L1 | L2"
     required: "при project.status proposed | approved (уже в v0)"
     fill: default
-    rule: "умолчание по primary_page_type — ambition-levels.yaml defaults_by_page_type (решение заказчика п. 13: сервисы L0, лендинги L1, кампании L2); меняется только словом заказчика или выводом Claude с причиной"
+    rule: "умолчание по primary_page_type — ambition-levels.yaml defaults_by_page_type (сервисы L0, лендинги L1, кампании L2); меняется только словом заказчика или выводом Claude с причиной"
     example: L1
 
   - path: /ambition/source
@@ -78,20 +76,20 @@ fields:
     type: "enum none | subtle | expressive | cinematic"
     required: нет
     fill: "claude или customer"
-    rule: "decisions.motion.level kimi = min(соответствие уровня, motion_cap); визуальный уровень не меняется"
+    rule: "decisions.motion.level входа холста = min(соответствие уровня, motion_cap); визуальный уровень не меняется"
     when: "аудитория 45+ (Reinecke 2013 через ui 13/02 §3.1), B2G, регулируемые отрасли, вестибулярная чувствительность аудитории, слово заказчика"
     example: subtle
 
   - path: /ambition/allow
-    type: "{markers: [ключи k3_checks.py 1.0 ALLOW_KEYS], effects: [effect:<id>], why: строка}"
+    type: "{markers: [ключи --allow утилиты макета], effects: [effect:<id>], why: строка}"
     required: "нет; why обязателен, если markers или effects не пусты"
     fill: customer
     values_markers: [warm, accent-word, serif, eyebrow, photo-hero, center-hero, stats, cards, gradient, glass, pill, dots, arrows, mono, numbered, marquee, chrome, caps]
-    rule: "только то, что заказчик назвал сам (или что в бренде: кремовый фон брендбука, антиква фирменного шрифта); решения арт-директора по критериям «приём или клише» (H) — в art-direction, а не в брифе; в kimi уходит объединение обоих списков"
+    rule: "только то, что заказчик назвал сам (или что в бренде: кремовый фон брендбука, антиква фирменного шрифта); решения арт-директора по критериям «приём или клише» (creative 08/01 §1) — в art-direction, а не в брифе; исполнителю макета уходит объединение обоих списков"
     example: "{markers: [stats, marquee], effects: [effect:marquee-logos], why: «заказчик: цифры и логотипы клиентов — из фактов, хотим на видном месте»}"
 
   - path: /ambition/forbid
-    type: "{effects: [effect:<id>], cliches: [строки или cliche:<id> реестра H], words: [дословно от заказчика], why: строка}"
+    type: "{effects: [effect:<id>], cliches: [строки или cliche:<id> реестра клише], words: [дословно от заказчика], why: строка}"
     required: нет
     fill: customer
     rule: "words — цитаты заказчика без перевода в «наши» термины; Claude переводит их в effects, cliches и exclusions art-direction и показывает в «Going with»"
@@ -106,14 +104,14 @@ fields:
       must_keep: "[{aspect, what, source}] — что обязательно узнаётся; aspect: logo | color | typography | shape | material | pattern | imagery | motion | layout"
       free: "[aspect] — что арт-директор решает свободно"
       avoid: "[{what, why}] — запреты бренда (цвета конкурентов, «не как у банков»)"
-      direction: "{art_direction_ref, chosen, chosen_by, date} — выбранное направление art-direction (контракт v2 §3 п.5)"
+      direction: "{art_direction_ref, chosen, chosen_by, date} — выбранное направление art-direction (kb/common/owners.md § Форматы обмена, № 5)"
     example: "{mode: open, must_keep: [{aspect: logo, what: «словесный знак „Отвес“», source: «сообщение заказчика»}], free: [color, typography, material, motion], direction: {art_direction_ref: «art-direction.json#/directions/1», chosen: «a», chosen_by: «заказчик», date: «2026-09-25»}}"
 
   - path: /references[]
     type: "{ref | url, role, applies_to, take[≥1], dont_take[≥1], source, captured, note}"
     required: "role, take, dont_take; ref или url"
-    fill: "customer (свои) · claude (найденные по библиотеке B) · sister:creative (записи библиотеки)"
-    rule: "3–5 референсов; для лендинга — 1 композиция + 1 типографика + 1 блок-решение (цена, доказательство) + 0–1 движение (kimi 07/03 §1); один референс — одна секция (applies_to); контент, логотип, картинки и цвета чужого бренда не берутся никогда; права — только для внутренней работы (решение заказчика 4)"
+    fill: "customer (свои) · claude (найденные по библиотеке референсов) · sister:creative (записи библиотеки)"
+    rule: "3–5 референсов; для лендинга — 1 композиция + 1 типографика + 1 блок-решение (цена, доказательство) + 0–1 движение (cd 06/02 §3); один референс — одна секция (applies_to); контент, логотип, картинки и цвета чужого бренда не берутся никогда; права — только для внутренней работы"
     roles:
       keep: [composition, typography, rhythm, motion, block-solution, brand, structure, other]
       add: [color, material, imagery, effect]
@@ -126,7 +124,7 @@ schema_patch:
     type: object
     additionalProperties: false
     required: [level]
-    description: "Уровень амбиций подачи. Определения, разрешено и обязательно, профили бюджета — creative (../creative/01-creative-direction/ambition-levels.yaml); умолчания — решение заказчика п. 13: сервисы L0, лендинги L1, кампании L2."
+    description: "Уровень амбиций подачи. Определения, разрешено и обязательно, профили бюджета — creative (../creative/01-creative-direction/ambition-levels.yaml); умолчания: сервисы L0, лендинги L1, кампании L2."
     x-owner: "creative (определения); site — поле"
     x-fill: default
     properties:
@@ -153,7 +151,7 @@ schema_patch:
           allOf:
             - if: {properties: {role: {enum: [lead-form, pricing]}}}
               then: {properties: {level: {const: L0}}}
-      motion_cap: {enum: [none, subtle, expressive, cinematic], description: "Потолок движения kimi поверх уровня."}
+      motion_cap: {enum: [none, subtle, expressive, cinematic], description: "Потолок движения поверх уровня."}
       allow:
         type: object
         additionalProperties: false
@@ -162,7 +160,7 @@ schema_patch:
             type: array
             uniqueItems: true
             items: {enum: [warm, accent-word, serif, eyebrow, photo-hero, center-hero, stats, cards, gradient, glass, pill, dots, arrows, mono, numbered, marquee, chrome, caps]}
-            description: "Ключи --allow k3_checks.py 1.0 (kimi-research/99-raw/tools/k3_checks.py ALLOW_KEYS, 2026-09-24)."
+            description: "Ключи --allow утилиты макета (kb/common/tells.yaml#checks)."
           effects: {type: array, uniqueItems: true, items: {type: string, pattern: "^effect:[a-z0-9]+(-[a-z0-9]+)*$"}}
           why: {type: string, minLength: 5}
         allOf:
@@ -225,7 +223,7 @@ schema_patch:
     required: [role, take, dont_take]
     anyOf: [{required: [ref]}, {required: [url]}]
     properties:
-      ref: {type: string, pattern: "^ref:[a-z0-9]+(-[a-z0-9]+)*$", description: "id записи библиотеки референсов creative B."}
+      ref: {type: string, pattern: "^ref:[a-z0-9]+(-[a-z0-9]+)*$", description: "id записи библиотеки референсов creative."}
       url: {type: string}
       role: {enum: [composition, typography, rhythm, motion, block-solution, brand, structure, color, material, imagery, effect, other]}
       applies_to: {type: string, pattern: "^(page|section-role:[a-z0-9]+(-[a-z0-9]+)*|block:[a-z0-9]+(-[a-z0-9]+)*)$", description: "Где применяется: page, section-role:<id> или block:<id>."}
@@ -236,40 +234,7 @@ schema_patch:
       note: {type: string}
 
 # ------------------------------------------------------------------------------------------------------------------
-# 4. Совместимость с kimi: «поле kimi → поле site-brief (или откуда берётся)». brief.yaml — ../../../kimi-research/07-brief-handoff/
-# templates/brief.yaml (2026-09-24 04:10); проекция — site-brief.kimi-map.tsv (site, J: site_brief_to_kimi.py). Здесь — строки,
-# которые касаются подачи; строки site не повторяются (у site: 117–181).
-kimi_crosswalk:
-  - {kimi: "site.cta.label", from: "copy-deck text, слот cta-label", rule: derive, note: "не бриф"}
-  - {kimi: "site.cta.target", from: "/conversion/target", rule: map, note: "site"}
-  - {kimi: "site.sections[{id, job}]", from: "page-plan sections[].id, job", rule: derive, note: "не бриф; порядок и работа секций — site"}
-  - {kimi: "direction.macrostructure", from: "page-plan page.macrostructure_family", rule: map, note: "grid → grid-led, document → document-led, poster → poster-led, flow → document-led (site C); выбор из macrostructure_alternatives фиксирует art-direction"}
-  - {kimi: "direction.visual_thesis", from: "art-direction concept.thesis", rule: claude_fills, note: "creative"}
-  - {kimi: "direction.paper · display_style · accent_rule · imagery", from: "art-direction directions[chosen].axes + visual_language", rule: claude_fills, note: "оси kimi 07/01 §2.4 = оси направлений A"}
-  - {kimi: "design_system.style", from: "art-direction concept.thesis (одна фраза)", rule: claude_fills}
-  - {kimi: "design_system.knobs · palette · type_scale · spacing · layout · motion_tokens", from: "marketing-tokens.json (D, E) через art-direction.visual_language + /brand", rule: claude_fills, note: "brand.status verified → palette из brand.colors"}
-  - {kimi: "design_system.bans", from: "/ambition/forbid (words, effects, cliches) + /policies (site) + art-direction exclusions", rule: derive}
-  - {kimi: "design_system.visual_mood", from: "art-direction concept.mood", rule: claude_fills, note: "справочно, в задачу не идёт"}
-  - {kimi: "references[].role", from: "/references[].role", rule: map, note: "composition → «композиция hero» (или «композиция <секция>» по applies_to), typography → «типографика», rhythm → «ритм секций», motion → «движение», block-solution → «блок-решение», color → «палитра и свет», material → «материал и фактура», imagery → «язык картинок», effect → «эффект»"}
-  - {kimi: "references[].take · dont_take", from: "/references[].take · dont_take", rule: copy}
-  - {kimi: "references[].captured", from: "/references[].captured", rule: copy, note: "для ref: — дата записи библиотеки"}
-  - {kimi: "references[].file · measured", from: "—", rule: claude_fills, note: "снимок и замер measure_ui.py делает Claude (kimi 07/03 §2)"}
-  - {kimi: "brand", from: "/brand (без expression)", rule: copy, note: "brand.json kimi не знает expression"}
-  - {kimi: "brand.expression → DESIGN.md", from: "/brand/expression", rule: derive, note: "предложение kimi: раздел DESIGN.md «Brand expression» (must keep / free / avoid); до принятия — строки decisions.extra и design_system.bans"}
-  - {kimi: "decisions.motion.level", from: "/ambition/level → ambition-levels.yaml maps_to.kimi; min с /ambition/motion_cap; treatment page.motion_level важнее", rule: map, note: "L0 → subtle (none для сервисов), L1 → expressive, L2 → cinematic только с готовыми роликами или рендером, иначе expressive"}
-  - {kimi: "decisions.motion.thesis", from: "treatment page.motion_system.thesis (до page-plan — /ambition/note)", rule: derive}
-  - {kimi: "decisions.motion.moments", from: "treatment effects[] + motion-spec (I, волна 3)", rule: claude_fills}
-  - {kimi: "decisions.motion.library", from: "treatment page.motion_system.library; иначе по уровню: L0 css, L1 css или gsap@3, L2 gsap@3 + lenis@1", rule: derive}
-  - {kimi: "decisions.three_d.mode", from: "page-plan 3d-слоты + уровень (L0 — none)", rule: derive}
-  - {kimi: "decisions.variants", from: "art-direction: 1, если направление выбрано; 2–3, если нет (разные оси)", rule: derive}
-  - {kimi: "build.perf.first_screen_kb_mobile", from: "ambition-levels.yaml levels[уровень].budgets.page.first_screen_mb.mobile × 1000 (landing-lead-services@L1 — first_screen_mb_lead_services)", rule: derive, note: "до budgets.yaml P; 1 МБ = 1000 КБ, как в page_accept.py и brief.yaml"}
-  - {kimi: "build.perf.hero_image_kb", from: "ambition-levels.yaml budgets.effects.hero_image_kb.desktop", rule: derive}
-  - {kimi: "build.perf.lcp_s_mobile", from: "ambition-levels.yaml budgets.page.lcp_s_lab.mobile", rule: derive}
-  - {kimi: "k3_checks.py --allow", from: "/ambition/allow.markers ∪ art-direction decisions (allowed markers)", rule: derive, note: "контракт v2 §8: поле брифа вместо ручного флага"}
-  - {kimi: "questions[]", from: "/questions[] с block ambition | brand | references", rule: copy, note: "только answered и assumed (правило site A/02)"}
-
-# ------------------------------------------------------------------------------------------------------------------
-# 5. Вопросы заказчику по полям подачи (в общем сообщении ≤ 7 вопросов; из подачи — не больше двух; вкус прилагательными
+# 4. Вопросы заказчику по полям подачи (в общем сообщении ≤ 7 вопросов; из подачи — не больше двух; вкус прилагательными
 # не спрашивать). Формулировки — заготовки, слова для заказчика — text. brief_block — значение questions[].block брифа
 # (здесь другое имя ключа, чтобы vocab_lint site не читал его как id блока).
 questions_bank:
@@ -280,7 +245,7 @@ questions_bank:
   - {brief_block: ambition, q: "Чего точно не хотите видеть (цвета, приёмы, анимации)?", form: "свободно", default: "запретов нет, кроме общих правил", affects: ["/ambition/forbid"], when: "только если заказчик выразил неприятие или прислал антиреференс"}
 
 # ------------------------------------------------------------------------------------------------------------------
-# 6. Примеры (фрагменты брифа; проверяются c1_check.py внутри полного брифа). Факты — только из файлов сестёр.
+# 5. Примеры (фрагменты брифа). Факты — только из файлов сестёр.
 examples:
 
   otves_lead_services:        # «Отвес» (site-brief.example.yaml site; факты text facts-service-renovation.yaml)
@@ -293,7 +258,7 @@ examples:
         - {role: pricing, level: L0, why: "калькулятор цены — без эффектов"}
       motion_cap: expressive
       forbid: {effects: ["effect:video-loop-hero", "effect:3d-scene"], why: "лидогенерация: вес и отвлечение на странице с формой"}
-      note: "Умолчание лендинга L1 (решение заказчика п. 13) с L0-блоками конверсии; основной трафик — телефон с Яндекс Карт."
+      note: "Умолчание лендинга L1 с L0-блоками конверсии; основной трафик — телефон с Яндекс Карт."
     brand:
       name: "Отвес"
       status: none
@@ -303,9 +268,9 @@ examples:
         free: [color, typography, material, motion, imagery, pattern]
         avoid: [{what: "«строительный» набор: каски, оранжево-чёрная лента, 3D-рендеры интерьеров", why: "клише категории; у заказчика есть настоящие фото объектов"}]
     references:
-      - {ref: "ref:example-steps-plumb-line", role: rhythm, applies_to: "section-role:how-it-works", take: ["вертикальная линия-ось через этапы; номер этапа крупнее заголовка в 2–3 раза"], dont_take: ["цвета, шрифты, иллюстрации и тексты источника"], source: creative-library, note: "ПРИМЕР ФОРМАТА: id условный — библиотеки B на 2026-09-24 ещё нет"}
+      - {ref: "ref:example-steps-plumb-line", role: rhythm, applies_to: "section-role:how-it-works", take: ["вертикальная линия-ось через этапы; номер этапа крупнее заголовка в 2–3 раза"], dont_take: ["цвета, шрифты, иллюстрации и тексты источника"], source: creative-library, note: "ПРИМЕР ФОРМАТА: id условный"}
 
-  okoshko_saas:              # «Окошко» (демо-бриф site E/03; факты text E facts-demo-saas-okoshko.yaml)
+  okoshko_saas:              # «Окошко» (демо-бриф site; факты text — facts-demo-saas-okoshko.yaml)
     ambition:
       level: L1
       source: default
@@ -320,7 +285,7 @@ examples:
         mode: open
         must_keep: [{aspect: logo, what: "название «Окошко» словесным знаком"}]
         free: [color, typography, shape, motion, imagery]
-        avoid: [{what: "мокап дашборда в рамке браузера как единственный визуал", why: "признак сходимости генераторов (kimi 05/03, Kilo)"}]
+        avoid: [{what: "мокап дашборда в рамке браузера как единственный визуал", why: "признак сходимости генераторов (Kilo)"}]
 
   campaign_forced_level:     # кампания с решением заказчика и прелоадером
     ambition:

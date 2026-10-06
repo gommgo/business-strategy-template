@@ -1,5 +1,5 @@
 {
- "model": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/03-device-mockup/phone_phone.glb",
+ "model": "phone_phone.glb",
  "file_kb": 30.9,
  "config": {
   "ver": "0.186.0",
@@ -46,28 +46,28 @@
    "el": 20,
    "calls": 10,
    "triangles": 4694,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/03-device-mockup/web/phone_phone/web_view_0_az35_el20.png"
+   "file": "web/phone_phone/web_view_0_az35_el20.png"
   },
   {
    "az": 0,
    "el": 5,
    "calls": 10,
    "triangles": 4694,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/03-device-mockup/web/phone_phone/web_view_1_az0_el5.png"
+   "file": "web/phone_phone/web_view_1_az0_el5.png"
   },
   {
    "az": 90,
    "el": 5,
    "calls": 10,
    "triangles": 4694,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/03-device-mockup/web/phone_phone/web_view_2_az90_el5.png"
+   "file": "web/phone_phone/web_view_2_az90_el5.png"
   },
   {
    "az": 200,
    "el": 35,
    "calls": 10,
    "triangles": 4694,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/03-device-mockup/web/phone_phone/web_view_3_az200_el35.png"
+   "file": "web/phone_phone/web_view_3_az200_el35.png"
   }
  ],
  "frame_time": {
@@ -76,5 +76,5 @@
   "frames": 120
  },
  "console": [],
- "sheet": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/03-device-mockup/web/phone_phone/web_sheet.png"
+ "sheet": "web/phone_phone/web_sheet.png"
 }

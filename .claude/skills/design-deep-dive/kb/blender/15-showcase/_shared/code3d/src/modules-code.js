@@ -1,4 +1,4 @@
-// modules-code.js · общий код 3D «Звена» (_shared/code3d, дорожка CD) · процедурные модули (v2 J2 + деталь v3) и их материалы,
+// modules-code.js · общий код 3D «Звена» (_shared/code3d) · процедурные модули (v2 + деталь v3) и их материалы,
 // скан (плоскость отсечения + светящаяся кромка). Гибрид подменяет модули на GLB (glb-modules.js), материалы и скан — общие.
 import {
   Group, Mesh, LatheGeometry, CylinderGeometry, BoxGeometry, TorusGeometry, ExtrudeGeometry, Shape, Vector2, Vector3, Color, Plane, Box3,
@@ -10,7 +10,7 @@ import { L1, L2 } from './rig.js';
 import { SCREWS, addScrew, ringTicks, seamX, seamY, decalCylY, decalCapX, CABLE_AZ } from './detail.js';
 
 // ---------- светодиодная полоса кольца-замка (фаза 2): лак кольца светится слабо (ниже сжатия Neutral — цвет бренда не розовеет),
-// яркость вспышки несёт узкая полоса посередине пояска (атрибут band = uv.y открытого цилиндра: 0…1 поперёк пояска) — как LED у ассета Z
+// яркость вспышки несёт узкая полоса посередине пояска (атрибут band = uv.y открытого цилиндра: 0…1 поперёк пояска) — как LED у ассета Blender
 export function ledPatch(m) {
   const U = { uLedK: { value: 0 }, uLedColor: { value: new Color('#ff6a2a') } };
   m.userData.led = U;
@@ -37,7 +37,7 @@ export function makeMaterials(hq, F, LK = {}) {
     shell: P({ color: '#f2f2f0', roughness: hq ? 0.36 : 0.3, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.08 }),
     dark: P({ color: '#3a3e45', roughness: 0.48, metalness: 0.08, clearcoat: 0.5, clearcoatRoughness: 0.22 }),
     // приём 7 (texture): точёный графит — металл с круговой анизотропией: UV токарного профиля идут по окружности, направление 0 даёт
-    // радиальную полосу-блик, как на задней крышке часов (паспорт Z §4 «графит точёный»); 0 байт карт. Без флага — матовый v2
+    // радиальную полосу-блик, как на задней крышке часов (zveno/art-direction.md §4 «графит точёный»); 0 байт карт. Без флага — матовый v2
     cap: F.texture ? new MeshPhysicalMaterial({ color: '#50555e', roughness: 0.3, metalness: 0.9, anisotropy: 0.8, anisotropyRotation: 0 })
       : P({ color: '#4b5058', roughness: 0.62, metalness: 0.05, clearcoat: 0.2, clearcoatRoughness: 0.45 }),
     alu: P({ color: '#b7bdc5', roughness: hq ? 0.4 : 0.36, metalness: 1, anisotropy: 0.35, anisotropyRotation: Math.PI / 2 }),

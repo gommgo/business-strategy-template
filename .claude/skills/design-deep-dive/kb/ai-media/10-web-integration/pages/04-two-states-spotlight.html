@@ -2,7 +2,7 @@
 <!-- 04 · Hero с двумя состояниями: «ночь» — основа, «рассвет» открывается прожектором за курсором; кнопка переключает
      состояние целиком (касание, клавиатура, reduce); две выровненные петли 6 с, общий старт и одна кнопка паузы;
      постеры — кадры 0 обеих петель (LCP — постер основы); градиент сверху под навигацию, снизу — в цвет следующей секции.
-     Агент J, волна 3, 23.09.2026 · проверено: 99-raw/experiments/J/08-effects и 06-pages-measure (Chromium 153). -->
+     Проверено: Chromium 153. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -28,7 +28,7 @@
   .hero__scrim { background: linear-gradient(180deg, rgb(10 12 16 / .55) 0, rgb(10 12 16 / 0) 140px),
                             linear-gradient(90deg, rgb(10 12 16 / .62) 0%, rgb(10 12 16 / .42) 42%, rgb(10 12 16 / 0) 68%),
                             linear-gradient(0deg, var(--paper) 0, rgb(0 0 0 / 0) 120px); }
-  @media (max-width: 699px) {   /* телефон: текст сверху по яркому небу — скрим сверху вниз (альфа из проверки F83, J/06) */
+  @media (max-width: 699px) {   /* телефон: текст сверху по яркому небу — скрим сверху вниз (альфа из проверки F83, ai-media 10/03) */
     .hero__scrim { background: linear-gradient(180deg, rgb(10 12 16 / .80) 0%, rgb(10 12 16 / .68) 50%, rgb(10 12 16 / .15) 72%, rgb(10 12 16 / 0) 84%),
                               linear-gradient(0deg, var(--paper) 0, rgb(0 0 0 / 0) 96px); }
     .hero.is-dawn .hero__scrim { background: linear-gradient(180deg, rgb(243 239 231 / .44) 0%, rgb(243 239 231 / .30) 55%, rgb(243 239 231 / 0) 75%),

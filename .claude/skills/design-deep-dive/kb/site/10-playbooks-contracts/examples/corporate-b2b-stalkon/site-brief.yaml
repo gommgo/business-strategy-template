@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · корпоративный многостраничник B2B · вымышленный завод «Сталькон». Бриф и факты вымышлены.
+# ПРИМЕР v1 · корпоративный многостраничник B2B · вымышленный завод «Сталькон». Бриф и факты вымышлены.
 version: 1
 checked: '2026-09-24'
 intake:
@@ -9,7 +9,7 @@ intake:
 project:
   slug: stalkon
   status: draft
-  prepared_by: Claude (агент site J, демо-пример; бриф и факты вымышлены)
+  prepared_by: Claude (демо-пример; бриф и факты вымышлены)
 site_type: corporate-site
 primary_page_type: home-multipage
 business:
@@ -81,7 +81,7 @@ constraints:
   - ru
   legal_category:
   - general
-  legal_note: 'Пример J v1: бриф, ответы и факты вымышлены.'
+  legal_note: 'Пример v1: бриф, ответы и факты вымышлены.'
   hosting: 'не задан — допущение: хостинг в РФ (формы с ПД; q-hosting)'
   integrations:
   - CRM — не задана (q-crm)
@@ -110,7 +110,7 @@ analytics:
   system: yandex-metrica
   call_tracking: false
   ab_testing: later
-  note: Цели по conversion.action и secondary_actions (события — P, events.yaml).
+  note: Цели по conversion.action и secondary_actions (события — events.yaml).
 search:
   engines:
   - yandex
@@ -134,11 +134,11 @@ languages:
   scope: selected-pages
 pages:
   mode: by-type
-  note: карта по умолчанию corporate-site (G 01 §2.1) + документы и вакансии — site-map.yaml
+  note: карта по умолчанию corporate-site (site 06/01 §2.1) + документы и вакансии — site-map.yaml
 ambition:
   level: L1
   source: default
-  note: 'корпоративный сайт: главная и хабы L1, внутренние L0 (решение 20)'
+  note: 'корпоративный сайт: главная и хабы L1, внутренние L0'
 brand:
   ref: brand.yaml
 assets_available:

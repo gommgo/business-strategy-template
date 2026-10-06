@@ -293,8 +293,8 @@ def bake_normal_from_high(high, low, size=1024, extrusion_pct=1.5, samples=4):
 
 ```bash
 # gltf-transform 4.5.0, gltfpack 1.2 (нативный, с BasisU) — [проверено: 99-raw/experiments/G/04-doc-snippets; числа — G/02, G/03]
-BASE=/home/mm/Документы/app-design/blender-research/99-raw/tools
-export PATH="$BASE/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$BASE/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
+BASE=$DDD_HOME
+export PATH="$BASE/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$BASE/bin/gltfpack-1.2:$PATH"
 IN=/abs/path/asset_low.glb
 OUT=/abs/path/asset
 cd "$BASE/node"

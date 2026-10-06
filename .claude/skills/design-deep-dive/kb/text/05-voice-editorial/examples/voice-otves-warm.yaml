@@ -1,10 +1,10 @@
 # voice-otves-warm.yaml — пример 2 из 3: тёплый локальный сервис (ремонт квартир, лидогенерация, приоритет 1 заказчика)
-# text-research · F · 2026-09-24 · формат: ../voice.schema.yaml (voice_version 1)
+# Формат: ../voice.schema.yaml (voice_version 1)
 #
-# Бренд «Отвес» — ВЫМЫШЛЕННАЯ студия ремонта (Нижний Новгород) из примеров B2 и B1. Факты — ../../02-strategy-messaging/
-# examples/facts-service-renovation.yaml; смысл — ../../02-strategy-messaging/examples/meaning-otves.yaml. Прилагательные
-# «честные, аккуратные, свои» — демо-бриф агента F (в брифе B1 их нет), помечены как сырьё. Образцы строк — ai-self (писал
-# агент F), прошли claims_check.py и copy_lint.py: 99-raw/experiments/F/04-voice-samples/README.md.
+# Бренд «Отвес» — ВЫМЫШЛЕННАЯ студия ремонта (Нижний Новгород) из примеров фактов и смысла. Факты —
+# ../../02-strategy-messaging/examples/facts-service-renovation.yaml; смысл —
+# ../../02-strategy-messaging/examples/meaning-otves.yaml. Прилагательные «честные, аккуратные, свои» — демо-бриф голоса
+# (в брифе смысла их нет), помечены как сырьё. Образцы строк — ai-self, прошли claims_check.py и copy_lint.py.
 # Что показывает пример: тепло без сахара; люди по именам; цифры «на руках»; сцена из факта (Ильяхов: факт → сценарий);
 # юмор — лёгкий и только там, где не деньги; слова клиента («двушка») в словаре «говорим»; английский — адаптация для
 # англоязычных жителей Нижнего Новгорода (пояснить Яндекс Карты, «работы без материалов»).
@@ -27,7 +27,7 @@ scope:
     - {surface: marketing-site, voice: brand}
     - {surface: lead-emails, voice: brand, note: "письмо со сметой и напоминание о замере — голосом бренда, без шуток о деньгах"}
     - {surface: transactional-emails, voice: product, note: "«Замер назначен на 12:00, 3 октября» — коротко, «робот» (ux 07/03 §1.3)"}
-    - {surface: legal, voice: neutral-legal, note: "договор, согласие на ПДн, реквизиты — точность прежде голоса (H)"}
+    - {surface: legal, voice: neutral-legal, note: "договор, согласие на ПДн, реквизиты — точность прежде голоса (text 08/01)"}
 
 derived_from:
   purpose: "Сделать ремонт квартиры в Нижнем Новгороде предсказуемым для хозяина: срок в рабочих днях, цена «от» с тем, что не входит, гарантия на работы по пункту договора."
@@ -40,7 +40,7 @@ derived_from:
   basis:
     - {kind: brief, ref: "meaning-otves.yaml: сегменты, возражения «затянут сроки», «вырастет смета»"}
     - {kind: voc, ref: "отзыв Анны К. (fact:review-anna-k): «двушку», «Прораб каждый вечер присылал фото», «Смета не выросла ни на рубль»"}
-    - {kind: competitor-page, ref: "типовые формулировки категории (перечень выше) — вывод агента F по опыту B1, страницы конкурентов не снимались"}
+    - {kind: competitor-page, ref: "типовые формулировки категории (перечень выше) — вывод агента, страницы конкурентов не снимались"}
     - {kind: assumption, ref: "прилагательные «честные, аккуратные, свои»", question_id: q-character}
 
 summary: >-
@@ -52,7 +52,7 @@ key_phrase:
   ru: "по договору"
   en: "in the contract"
   rule: "рядом со сроком, сметой и гарантией; не чаще двух раз на экран"
-  basis: {kind: inferred, ref: "факты B2: срок по договору (кейс 47 из 50), гарантия — п. 7.2 договора"}
+  basis: {kind: inferred, ref: "факты: срок по договору (кейс 47 из 50), гарантия — п. 7.2 договора"}
 
 principles:
   - id: numbers-in-hand
@@ -72,7 +72,7 @@ principles:
     execution:
       - "Прораба, мастеров и клиентов называем по имени, если в facts.yaml есть разрешение (Сергей Лапин; Анна К.)"
       - "О себе — «мы» (студия); «я» — только в письме с подписью прораба или директора"
-      - "Отзыв клиента не переписываем под голос бренда: кавычки — это его слова (B2)"
+      - "Отзыв клиента не переписываем под голос бренда: кавычки — это его слова (text 02/03 §5.1)"
     is_not: "Не панибратство: без «друзья», «дорогие наши», уменьшительных и обращения по имени к незнакомому посетителю."
     do: ["Ваш прораб — Сергей Лапин, 11 лет в ремонте."]
     dont: ["Наша дружная команда профессионалов сделает всё в лучшем виде."]
@@ -138,12 +138,12 @@ vocabulary:
     - {term: "в кратчайшие сроки", use_instead: "срок в рабочих днях из факта", reason: "неизмеримо", level: warning}
     - {term: "уютн* гнёздышк*", use_instead: "описать результат фактом или сценой", reason: "сюсюканье (пара «мы / мы не»)", level: warning}
     - {term: "ремонт* мечты", use_instead: "описать результат фактом", reason: "обещание чувства без факта", level: warning}
-    - {term: "лучш*", unless: "в цитате клиента или с фактом-исследованием", use_instead: "рейтинг 4,8 из 5 с источником и датой", reason: "превосходная степень без критерия (never_claim:nc-best-in-city, H)", level: error}
+    - {term: "лучш*", unless: "в цитате клиента или с фактом-исследованием", use_instead: "рейтинг 4,8 из 5 с источником и датой", reason: "превосходная степень без критерия (never_claim:nc-best-in-city, text 08/01)", level: error}
     - {term: "идеальн*", use_instead: "гарантия на работы, срок по договору", reason: "обещание, которое нельзя проверить", level: warning}
     - {term: "косяк*", use_instead: "недочёт, ошибка", reason: "просторечие (пара «просто, но не простецки»)", level: warning}
   use_with_care:
-    - {term: "под ключ", condition: "в названии услуги, заголовке и мета (слово запроса — G); не как оценку «всё сделаем под ключ и качественно»"}
-    - {term: "бесплатно", condition: "только с условием в той же строке: «в черте города» (fact:estimate-free, H: COPY-L-FREE-01)"}
+    - {term: "под ключ", condition: "в названии услуги, заголовке и мета (слово запроса — text 07/01); не как оценку «всё сделаем под ключ и качественно»"}
+    - {term: "бесплатно", condition: "только с условием в той же строке: «в черте города» (fact:estimate-free, COPY-L-FREE-01)"}
   spellings:
     - {preferred: "м²", variants: ["кв.м", "кв. м.", "м2"], lang: ru}
     - {preferred: "Нижний Новгород", variants: ["Н. Новгород", "Н.Новгород"], lang: ru, note: "город полностью; «НН» — только в хэштегах"}
@@ -172,14 +172,14 @@ tone_map:
   - {situation: complaint-response, axes_delta: {formality: -1, humor: -2, enthusiasm: -1}, rules: ["признать, назвать шаг и срок; без «приносим извинения за доставленные неудобства»"]}
 
 taboos:
-  - {id: fear-of-contractors, what: "пугать «ужасами прошлых подрядчиков» и чужими ошибками", why: "нормализует проблему (Чалдини) и сравнивает с конкурентами без факта (H)"}
+  - {id: fear-of-contractors, what: "пугать «ужасами прошлых подрядчиков» и чужими ошибками", why: "нормализует проблему (Чалдини) и сравнивает с конкурентами без факта (text 08/01)"}
   - {id: jokes-on-money, what: "шутки о сроках, деньгах и вкусе хозяина", why: "юмор снижает доверие к источнику; цена ошибки для клиента высокая"}
   - {id: estimate-never-changes, what: "«смета никогда не меняется» голосом компании", why: "это слова одного отзыва, не пункт договора", refs: ["never_claim:nc-no-extra-cost-promise"]}
 
 claims_boundaries_ref: "../../02-strategy-messaging/examples/facts-service-renovation.yaml#never_claim"
 
 samples:
-  # --- русский (10 типов слотов) — ai-self, факты B2
+  # --- русский (10 типов слотов) — ai-self, факты facts.yaml
   - {id: ru-headline, slot_type: headline, lang: ru, situation: hero, text: "Ремонтируем квартиры в Нижнем Новгороде с 2014 года", fact_ids: ["fact:company-since-2014"], principle_ids: [numbers-in-hand]}
   - {id: ru-subheadline, slot_type: subheadline, lang: ru, situation: hero, text: "За это время сдали 1 146 квартир. На работы даём гарантию 3 года — это пункт 7.2 договора.", fact_ids: ["fact:flats-completed", "fact:guarantee-3-years"], principle_ids: [numbers-in-hand]}
   - {id: ru-hero-proof, slot_type: hero-proof, lang: ru, situation: hero, text: "4,8 из 5 на Яндекс Картах — 214 оценок (Яндекс Карты, 01.09.2026)", fact_ids: ["fact:rating-yandex-maps"], note: "источник и дата рядом — требование факта (use.requires_nearby)"}
@@ -191,7 +191,7 @@ samples:
   - {id: ru-price-note, slot_type: pricing-price-note, lang: ru, situation: pricing-terms, text: "Работы под ключ — от 9 800 ₽ за м², без материалов. Договор до 31 октября 2026 года — скидка 10 % на работы.", fact_ids: ["fact:price-from-per-m2", "fact:promo-october-10"], principle_ids: [numbers-in-hand]}
   - {id: ru-email-subject, slot_type: email-subject, lang: ru, situation: lead-email, text: "Смета на ремонт вашей квартиры готова", fact_ids: []}
   # --- английский (адаптация: англоязычные жители города; пояснить Яндекс Карты и «работы без материалов»)
-  - {id: en-headline, slot_type: headline, lang: en, situation: hero, adaptation_of: ru-headline, text: "Apartment renovation in Nizhny Novgorod since 2014", fact_ids: ["fact:company-since-2014"], lint_allow: [{rule: "ux-4-2-07", reason: "«since 2014» — время, а не причина; правило ux 07/06 §4.2 срабатывает ложно (предложение C)"}]}
+  - {id: en-headline, slot_type: headline, lang: en, situation: hero, adaptation_of: ru-headline, text: "Apartment renovation in Nizhny Novgorod since 2014", fact_ids: ["fact:company-since-2014"], lint_allow: [{rule: "ux-4-2-07", reason: "«since 2014» — время, а не причина; правило ux 07/06 §4.2 срабатывает ложно"}]}
   - {id: en-subheadline, slot_type: subheadline, lang: en, situation: hero, adaptation_of: ru-subheadline, text: "1,146 apartments renovated and handed over. Our work comes with a 3-year warranty, written into clause 7.2 of the contract.", fact_ids: ["fact:flats-completed", "fact:guarantee-3-years"]}
   - {id: en-hero-proof, slot_type: hero-proof, lang: en, situation: hero, adaptation_of: ru-hero-proof, text: "Rated 4.8 out of 5 from 214 ratings on Yandex Maps, the local maps and reviews app (as of 1 September 2026)", fact_ids: ["fact:rating-yandex-maps"], note: "адаптация: объяснить, что такое Яндекс Карты; без «главного приложения страны» — это утверждение без факта"}
   - {id: en-cta-label, slot_type: cta-label, lang: en, situation: hero, adaptation_of: ru-cta-label, text: "Book a measuring visit", fact_ids: []}
@@ -246,6 +246,6 @@ open_questions:
 
 review:
   method: editor
-  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review (99-raw/experiments/F/04-voice-samples)"
-  by: "агент F (ai-self)"
+  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review"
+  by: "ai-self"
   date: "2026-09-24"

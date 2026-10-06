@@ -1,11 +1,11 @@
 # legal-requirements.yaml — требования закона к элементам сайта: юрисдикция × элемент страницы × норма × дата.
-# Владелец — site I (волна 2). НЕ ЮРИДИЧЕСКОЕ ЗАКЛЮЧЕНИЕ: справочник рисков для агента-генератора; спорное помечено
+# Владелец — site (08-legal-trust-a11y). НЕ ЮРИДИЧЕСКОЕ ЗАКЛЮЧЕНИЕ: справочник рисков для агента-генератора; спорное помечено
 # `label: спорно`; решения, от которых зависят деньги клиента, — к юристу заказчика.
 # Разбор и обоснование — 08-legal-trust-a11y/01-law-ru-eu.md (§ указаны в поле `doc`).
 # Ссылки из других форматов — `req:<id>` (пространство `req` в 02-site-types/vocabulary.yaml).
 # Поля:
 #   id           LR-<JUR>-<NN>
-#   jurisdiction ru | eu (id словаря B; kz, by, us, other — не покрыты)
+#   jurisdiction ru | eu (id словаря; kz, by, us, other — не покрыты)
 #   element      form | consent | cookie-banner | footer | pricing | reviews | ads | policy-page | offer-page | analytics |
 #                chat-widget | newsletter | vacancy
 #   requirement  что должно быть на странице (действие для генератора)
@@ -16,14 +16,14 @@
 #                serious — позиция надзора или высокий риск, выпуск только с решением заказчика;
 #                advice  — практика или неполная проверка
 #   label        стандарт | регулятор | спорно | практика | не проверено (метки базы)
-#   check        как проверить (DOM | NET | DOC | HUM — ручная/юрист) — вход для K и page_gates.py (P)
+#   check        как проверить (DOM | NET | DOC | HUM — ручная/юрист) — вход для чек-листа (09-ai-generation-evaluation) и page_gates.py
 #   applies_when условие применения
 #   refs         блоки, слоты, правила сестёр (с пространством имён)
 #   sanction     размер штрафа юрлицу (КоАП, ред. от 26.07.2026) — ориентир риска
 #   checked      дата сверки с источником
 version: 1
 checked: 2026-09-24
-default_jurisdiction: ru          # решение заказчика 11: РФ по умолчанию, ЕС — профиль брифа
+default_jurisdiction: ru          # РФ по умолчанию, ЕС — профиль брифа
 disclaimer: "Не юридическое заключение. Редакции законов — на 2026-09-24; перед запуском сайта сверить с юристом."
 
 requirements:
@@ -131,7 +131,7 @@ requirements:
     regulator_position: null
     severity: serious
     label: стандарт
-    check: "HUM: у каждого поля в lead-forms.yaml (F) заполнено why; лишних полей нет"
+    check: "HUM: у каждого поля в lead-forms.yaml заполнено why; лишних полей нет"
     applies_when: "любая форма"
     refs: [block:lead-form, block:quiz, "site:05-01", "V:Br5O0hAaqt8 15:24"]
     sanction: "КоАП 13.11 ч. 1 — 150–300 тыс. ₽ (обработка, несовместимая с целями)"
@@ -408,10 +408,10 @@ requirements:
       специалиста.
     norm: "38-ФЗ ст. 24 ч. 1 п. 2–3, 5; ч. 3; ч. 7 (закон в ред. от 04.08.2026)"
     source_url: "https://www.consultant.ru/document/cons_doc_LAW_58968/8fbc3d05dbc778e17bfc1b45fb7339df525c1985/"
-    regulator_position: "УФАС — дела по медицинской рекламе (Коми ПК/1782/24 от 27.03.2024 — у text H)"
+    regulator_position: "УФАС — дела по медицинской рекламе (Коми ПК/1782/24 от 27.03.2024 — у text 08/01)"
     severity: blocker
     label: стандарт
-    check: "HUM/IMG: нет галерей «до/после» и отзывов-благодарностей на странице медуслуги; есть предупреждение (≥ 5 % площади — text H)"
+    check: "HUM/IMG: нет галерей «до/после» и отзывов-благодарностей на странице медуслуги; есть предупреждение (≥ 5 % площади — text 08/01)"
     applies_when: "brief.constraints.legal_category = medical"
     refs: [block:case-study, block:gallery, block:testimonial-cards, copy-rule:COPY-L-MED-01, copy-rule:COPY-L-MED-02]
     sanction: "КоАП 14.3 ч. 5 [не проверено] / ч. 1 — 100–500 тыс. ₽"
@@ -428,7 +428,7 @@ requirements:
       не редактирует тексты, помечает отзывы за вознаграждение.
     norm: "38-ФЗ ст. 5 ч. 3 п. 10 (недостоверные сведения о рекомендациях); ЗоЗПП ст. 8, 10 (достоверность); ГОСТ Р ИСО 20488-2023 (добровольный, п. 5.6, 6.8, 7.2, 7.6)"
     source_url: "https://meganorm.ru/Data/813/81352.pdf"
-    regulator_position: "ФАС 821/23: отзывы в специальных разделах — не реклама; вынесенные на лендинг — часть рекламы (text H §7)"
+    regulator_position: "ФАС 821/23: отзывы в специальных разделах — не реклама; вынесенные на лендинг — часть рекламы (text 08/01 §7)"
     severity: blocker
     label: стандарт
     check: "DOC: каждый отзыв — факт testimonial с source и permission (facts.yaml); HUM — политика отзывов на сайте"

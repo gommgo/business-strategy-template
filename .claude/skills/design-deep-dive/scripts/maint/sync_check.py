@@ -127,14 +127,17 @@ def run_generator(g: dict, today: str) -> dict:
             "output": output, "what": g.get("what", ""), "derived": g.get("derived", ""), "xfail": xfail or ""}
 
 
-def check_generators(data: dict, only: set[str] | None = None) -> tuple[list[dict], int]:
+def check_generators(data: dict, only: set[str] | None = None, today: str | None = None) -> tuple[list[dict], int]:
+    """Строки генераторов; `{today}` — опорная дата фикстур `fixture_project.today()` (`today` — своя дата
+    самопроверки)."""
     gens = [g for g in data.get("generators") or [] if not only or g["id"] in only]
     unknown = sorted((only or set()) - {g["id"] for g in data.get("generators") or []})
     if unknown:
         raise DataError(f"нет генератора {', '.join(unknown)}")
     rows, bad = [], 0
+    today = today or (fixture_project.today() if gens else "")
     for g in gens:
-        res = run_generator(g, str(data.get("today", "")))
+        res = run_generator(g, today)
         rows.append(res)
         bad += res["status"] == "FAIL"
         head = f"{res['status']:<6}{res['id']:<24}{res['seconds']:>6.1f} с  {res['what']}"
@@ -286,10 +289,11 @@ def selftest() -> int:
         probe.write_text("import sys, pathlib\n"
                          "a = sys.argv[1:]\n"
                          "if a[0] == 'code': sys.exit(int(a[1]))\n"
+                         "if a[0] == 'day': sys.exit(0 if a[1] == a[2] else 1)\n"
                          "root = pathlib.Path(a[1])\n"
                          "ok = (root / 'docs' / 'projects' / a[2]).is_dir() and a[3] == '2026-01-02'\n"
                          "print('корень', root, 'проект', a[2]); sys.exit(0 if ok else 1)\n", encoding="utf-8")
-        gens = {"today": "2026-01-02", "generators": [
+        gens = {"generators": [
             {"id": "ok", "run": f"{probe} code 0"},
             {"id": "fail", "run": f"{probe} code 1", "derived": "kb/x.yaml"},
             {"id": "ok-codes", "run": f"{probe} code 1", "ok": [0, 1]},
@@ -297,13 +301,16 @@ def selftest() -> int:
             {"id": "xpass", "run": f"{probe} code 0", "xfail": "известно"},
             {"id": "fixture", "fixture": "minimal", "steps": [f"{probe} code 0", f"{probe} root {{root}} {{slug}} {{today}}"]},
         ]}
-        (rows, bad), out = quiet(check_generators, gens)
+        (rows, bad), out = quiet(check_generators, gens, None, "2026-01-02")
         st = {r["id"]: r["status"] for r in rows}
         ok_if("генератор: коды и xfail — OK, FAIL, OK по ok, XFAIL, XPASS",
               st == {"ok": "OK", "fail": "FAIL", "ok-codes": "OK", "xfail": "XFAIL", "xpass": "XPASS", "fixture": "OK"}
               and bad == 1)
         ok_if("FAIL называет производный файл", "производный файл: kb/x.yaml" in out)
         ok_if("фикстура: подстановки {root}, {slug}, {today} и шаги по порядку", st["fixture"] == "OK")
+        (rows, _), _ = quiet(check_generators, {"generators": [
+            {"id": "day", "run": f"{probe} day {{today}} {fixture_project.today()}"}]})
+        ok_if("{today} без своей даты — опорная дата фикстур fixture_project.today()", rows[0]["status"] == "OK")
         try:
             quiet(check_generators, {"generators": [{"id": "x", "run": "scripts/нет/такой.py"}]})
             ok_if("нет утилиты — ошибка данных", False)

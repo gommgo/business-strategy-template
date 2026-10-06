@@ -1,4 +1,4 @@
-"""zkin — кинематика «Звена» как в scene.js (оси three) → матрицы Blender. Дорожка Z.
+"""zkin — кинематика «Звена» как в scene.js (оси three) → матрицы Blender.
 
 three: матрица модуля M_k = T(разнос·out) · W_k · R_xyz(er·out·0,5; er·out; er·out·0,3), где W_k — мировая матрица шарнира
 (цепочка T(смещение) · R(ось, угол)). Euler 'XYZ' three = Rx·Ry·Rz (не как mathutils). В Blender: B = C · M3 · C⁻¹,

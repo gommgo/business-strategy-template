@@ -55,7 +55,6 @@ gltfpack 1.2, three.js r186, Chromium (Playwright) на Intel Iris Xe.
 
 ```bash
 # Python 3 + Blender 5.2.2 + Playwright — [проверено: 99-raw/experiments/E/22, E/24; ../../scripts/blender/README.md]
-cd /home/mm/Документы/app-design/blender-research
 python3 ../../scripts/blender/gltf_check.py /abs/path/model.glb                                   # валидатор + inspect + подсказки
 python3 ../../scripts/blender/gltf_web_inspect.py /abs/path/model.glb --out /abs/path/three.json  # что создал three r186
 python3 ../../scripts/blender/gltf_diff.py /abs/path/scene.blend /abs/path/diff --glb /abs/path/model.glb --views 3
@@ -589,8 +588,8 @@ export("/abs/out/instances_raw.glb", "instances")
 
 ```bash
 # gltf-transform 4.5.0, gltfpack 1.2 (нативный) — [проверено]
-BASE=/home/mm/Документы/app-design/blender-research/99-raw/tools
-export PATH="$BASE/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$BASE/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
+BASE=$DDD_HOME
+export PATH="$BASE/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$BASE/bin/gltfpack-1.2:$PATH"
 cd "$BASE/node"
 npx --no-install gltf-transform optimize /abs/out/hero_raw.glb /abs/out/hero.glb --compress meshopt --texture-compress webp --texture-size 2048 --simplify false
 npx --no-install gltf-transform optimize /abs/out/scene_raw.glb /abs/out/scene.glb --compress meshopt --texture-compress webp --flatten false --join false --simplify false

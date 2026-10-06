@@ -5,7 +5,8 @@
 кегль — чтобы page_gates.py (--axe) отличил «H1, лид, призыв, согласие» (B) от прочего текста (S). axe-core — из
 npm-зависимостей окружения скилла ($DDD_HOME/node, ставит install.sh). Без кликов и ввода; баннер cookie не трогается
 (состояние «первый визит»); десктоп 1440×900.
-Запуск одной страницы (замок браузера — снаружи; код-репо — соседним чекаутом
+Замок браузера утилита берёт сама на время прогона (kbpaths.lock); вложенный вызов из процесса, который его уже держит,
+не ждёт. Запуск одной страницы (код-репо — соседним чекаутом
 ../strategy/.claude/skills/design-deep-dive/scripts/site/run_axe_targets.py): run_axe_targets.py ID URL MARKET OUTDIR
 """
 import json
@@ -21,14 +22,14 @@ from playwright.sync_api import sync_playwright  # noqa: E402
 
 pid, url, market, outdir = sys.argv[1:5]
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 AXE_JS = str(kbpaths.node_modules('axe-core', 'axe.min.js'))
 AXE = open(AXE_JS, encoding='utf-8').read()
 RULES = ['color-contrast', 'link-name', 'button-name', 'label', 'meta-viewport', 'target-size', 'image-alt', 'frame-title',
          'html-has-lang', 'html-lang-valid']
 res = {'id': pid, 'url': url, 'market': market, 'date': time.strftime('%Y-%m-%d %H:%M'), 'viewport': '1440x900'}
-with sync_playwright() as p:
+with kbpaths.lock('browser'), sync_playwright() as p:
     br = p.chromium.launch(headless=True)
     ctx = br.new_context(viewport={'width': 1440, 'height': 900}, locale='ru-RU' if market == 'ru' else 'en-US')
     page = ctx.new_page()

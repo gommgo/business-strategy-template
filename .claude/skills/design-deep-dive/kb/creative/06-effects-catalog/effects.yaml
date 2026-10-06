@@ -1,11 +1,9 @@
-# effects.yaml — каталог эффектов подачи (creative-research, агент F, волна 2).
+# effects.yaml — каталог эффектов подачи.
 # Схема: effects.schema.json. Нормы — 01-effects-catalog.md; метод и сводка замеров — 03-effects-lab-method.md.
 # Числа cost.* и fallback.*.measured — медианы effect_bench.py (лаборатория, Iris Xe; эмуляция телефона ≠ телефон).
-# Собирается скриптом 99-raw/experiments/F/07-yaml/build_effects.py — правьте entries.py и пересобирайте.
 version: '0.3'
 checked_at: '2026-09-25'
-owner: 'creative F (волна 2) + продолжатель F2; правки аудита X — S1 (волна 4, 2026-09-25: roles → effect_role, reduce stations, limits параллакса и магнита,
-  page-transition L1)'
+owner: creative · 06-effects-catalog
 doc: 06-effects-catalog/01-effects-catalog.md
 method: '06-effects-catalog/03-effects-lab-method.md; effect_bench.py: Chromium 153.0.8010.12 и WebKit 26.6 (Playwright 1.63), десктоп 1440×900, Pixel 7
   + CPU ×4, reduce, без JS, без WebGL, без vsync'
@@ -24,38 +22,8 @@ families:
 - {id: 3d, name_ru: 3D (ссылки на blender), doc: 01-effects-catalog.md §11}
 - {id: number, name_ru: Числа, doc: 01-effects-catalog.md §2}
 - {id: page, name_ru: 'Страничные: плавная прокрутка, прелоадер, переключатель движения', doc: '01-effects-catalog.md §1.5, §5, §11'}
-- {id: micro, name_ru: 'Микровзаимодействия: диалог, аккордеон, кнопки, карточки, шапка (F2)', doc: 01-effects-catalog.md §12}
-- {id: vector, name_ru: 'Векторная анимация: Lottie, Rive (рантаймы и цена — G)', doc: 01-effects-catalog.md §13}
-id_map:
-- {old: 'effect:hero-entrance-once', new: 'effect:hero-entrance-once', note: без изменений}
-- {old: 'effect:split-text-reveal', new: 'effect:split-text-reveal', note: без изменений}
-- {old: 'effect:kinetic-headline', new: 'effect:kinetic-headline', note: 'без изменений; вариант «буквы от курсора» вынесен в effect:variable-font-pointer'}
-- {old: 'effect:scroll-reveal-system', new: 'effect:scroll-reveal-system', note: без изменений}
-- {old: 'effect:scroll-driven-progress', new: 'effect:scroll-driven-progress', note: без изменений}
-- {old: 'effect:pin-scrub-story', new: 'effect:pin-scrub-story', note: без изменений}
-- {old: 'effect:horizontal-scroll', new: 'effect:horizontal-scroll', note: без изменений}
-- {old: 'effect:parallax-layers', new: 'effect:parallax-layers', note: без изменений}
-- {old: 'effect:marquee-logos', new: 'effect:marquee-logos', note: без изменений}
-- {old: 'effect:marquee-text', new: 'effect:marquee-text', note: без изменений}
-- {old: 'effect:shader-bg', new: 'effect:shader-bg', note: без изменений}
-- {old: 'effect:mesh-gradient-css', new: 'effect:mesh-gradient-css', note: без изменений}
-- {old: 'effect:holo-shader-bg', new: 'effect:holo-shader-bg', note: без изменений}
-- {old: 'effect:grain-overlay', new: 'effect:grain-overlay', note: без изменений}
-- {old: 'effect:video-loop-hero', new: 'effect:video-loop-hero', note: без изменений}
-- {old: 'effect:video-scrub', new: 'effect:video-scrub', note: 'без изменений; external — blender:01-01#15.3, ai-media 10/02 §9'}
-- {old: 'effect:image-sequence', new: 'effect:image-sequence', note: 'без изменений; external — blender:01-01#14.1'}
-- {old: 'effect:3d-object', new: 'effect:3d-object', note: без изменений; external — реализация и ворота у blender}
-- {old: 'effect:3d-scene', new: 'effect:3d-scene', note: без изменений; external — реализация и ворота у blender}
-- {old: 'effect:cursor-accent', new: 'effect:cursor-accent', note: 'без изменений; вариант «подсветка рамок» — implementation.variants[border]'}
-- {old: 'effect:custom-cursor', new: 'effect:custom-cursor', note: без изменений}
-- {old: 'effect:magnetic-cta', new: 'effect:magnetic-cta', note: без изменений}
-- {old: 'effect:view-transition', new: 'effect:view-transition', note: без изменений}
-- {old: 'effect:page-transition', new: 'effect:page-transition', note: без изменений}
-- {old: 'effect:smooth-scroll', new: 'effect:smooth-scroll', note: без изменений}
-- {old: 'effect:counter-up', new: 'effect:counter-up', note: без изменений}
-- {old: 'effect:mask-reveal', new: 'effect:mask-reveal', note: без изменений}
-- {old: 'effect:sticky-stack', new: 'effect:sticky-stack', note: без изменений}
-- {old: 'effect:cinemagraph', new: 'effect:cinemagraph', note: без изменений}
+- {id: micro, name_ru: 'Микровзаимодействия: диалог, аккордеон, кнопки, карточки, шапка', doc: 01-effects-catalog.md §12}
+- {id: vector, name_ru: 'Векторная анимация: Lottie, Rive (рантаймы и цена — 07-stack-implementation)', doc: 01-effects-catalog.md §13}
 effects:
 - id: split-text-reveal
   name_ru: Раскрытие заголовка по строкам или словам
@@ -98,12 +66,12 @@ effects:
     pause_required: false
     flashes: none
     note: 'aria-label на родителе + aria-hidden у кусков (SplitText aria: ''auto'')'
-  cliche: {risk: mid, status: 'saturated (H: с 2025; C: split-заголовки у 25 из 49)', registry_id: 'cliche:split-text-reveal', turn: 'одна система на страницу:
+  cliche: {risk: mid, status: 'saturated (с 2025; split-заголовки у 25 из 49)', registry_id: 'cliche:split-text-reveal', turn: 'одна система на страницу:
       по строкам для display, без побуквенного на кириллице; не на каждом H2'}
   rules: ['H1 первого экрана не разбивать: текст рисуется до JS (LCP 40 мс), затем прячется и выезжает — «мелькание»; прятать до JS = задержка LCP', 'по
       строкам (mask: ''lines'') или словам; шаг 60–90 мс; вся сцена ≤ 1000 мс; один раз', 'разбивать после document.fonts.ready; autoSplit: true — пересплит
       при смене ширины', 'библиотеку грузить только когда эффект включён: десктоп без reduce ≈ 30 КБ br (gsap + SplitText), при reduce — 0']
-  evidence: ['[проверено]', '[данные: C 03-live-sites-measured/01 §4 — split-заголовки 25 из 49, SplitText 8]', '[документация:
+  evidence: ['[проверено]', '[данные: 03-live-sites-measured/01 §4 — split-заголовки 25 из 49, SplitText 8]', '[документация:
       GSAP SplitText 3.13+ (mask, aria, autoSplit)]']
   checked_at: '2026-09-25'
   cost:
@@ -120,20 +88,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 16.2,
-        lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 47.5, lcp_ms: 96, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 58, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 58, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 15.9,
-        lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 51, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 47, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 8067.2, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 518.6,
-        lcp_ms: 44, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 44, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         own: {bytes_br: 2493, task_ms_s_desk: 13.4, task_ms_s_mob: 36.8, cls: 0, motion_pct_s: 0.0, lcp_ms: 64}
         none: {bytes_br: 2493, task_ms_s_desk: 12.1, task_ms_s_mob: 20.6, cls: 0, motion_pct_s: 0.0, lcp_ms: 60, frame_ms_unlimited: 0.12}
@@ -178,10 +145,10 @@ effects:
     pause_required: false
     flashes: below-3-per-s
     note: aria-label хранит исходный текст; символы — aria-hidden
-  cliche: {risk: mid, status: нет в реестре H v0.1 (приём «хакерской» подачи), registry_id: null}
+  cliche: {risk: mid, status: нет в реестре клише v0.1 (приём «хакерской» подачи), registry_id: null}
   rules: ['ширину запирать до старта: width + white-space: nowrap + overflow: clip; только min-width → CLS 0,16 на телефоне', только короткие подписи ≤
       24 знаков; не заголовки и не числа, на тач-экранах по наведению не запускать (pointerType !== 'mouse')]
-  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/08-remeasure — после исправления ширины]']
+  evidence: ['[проверено]', '[проверено: после исправления ширины]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2221
@@ -196,18 +163,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 9.3, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 9.3, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 32.1,
-        lcp_ms: 108, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
-      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 54, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        lcp_ms: 108, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 54, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.0, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 11.0, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 59, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        content_ok: true}
+      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 57.6, f_fps_low: 56.2, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 11.4,
-        lcp_ms: 56, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 56, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         naive: {bytes_br: 2221, task_ms_s_desk: 9.0, task_ms_s_mob: 29.0, cls: 0.163, motion_pct_s: 0.0, lcp_ms: 44}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -253,7 +220,7 @@ effects:
       а не «потому что умеем»'}
   rules: [строка без переноса в контейнере фиксированной высоты — соседи не сдвигаются (CLS 0), 'каждый кадр — шейпинг и раскладка строки: только один заголовок
       в зоне видимости']
-  evidence: ['[проверено]', '[V:luAqYCd_TC8 14:30] вариативная ось по прокрутке (W2)']
+  evidence: ['[проверено]', '[V:luAqYCd_TC8 14:30] вариативная ось по прокрутке']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 4816
@@ -269,20 +236,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 16.5,
-        lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 26.5, lcp_ms: 88, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 12.8,
-        lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 61, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 53, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 856.3, f_fps_low: 357.1, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 134.3,
-        lcp_ms: 56, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 56, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: variable-font-pointer
@@ -336,17 +302,17 @@ effects:
     cls: 0.001
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0.001, cls_after_fonts: 0.001, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.005,
-        TaskDuration_ms_per_s: 35.1, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 35.1, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 20.9,
-        lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
-      wk: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 24, idle_motion_pct_s: 0.0, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 24, idle_motion_pct_s: 0.0, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 9.1, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 9.1, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 57, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 568.9, f_fps_low: 526.3, loaf_ms: 0, cls_scen: 0.0, cls_after_fonts: 0.0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 131.9,
-        lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/06-unl}
+        lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         no-cells: {bytes_br: 3351, task_ms_s_desk: 34.7, task_ms_s_mob: 24.1, cls: 0.03, motion_pct_s: 0.0, lcp_ms: 56}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -399,20 +365,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 16.7, lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 16.7, lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 22.3,
-        lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
-      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 50, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/08-remeasure}
+        lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 50, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 10.7, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 10.7, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 62, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 50, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 719.2, f_fps_low: 555.6, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 284.6,
-        lcp_ms: 64, lcp_tag: text, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 64, lcp_tag: text, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: rotating-badge
@@ -453,7 +418,7 @@ effects:
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:circular-rotating-text'}
   rules: ['вращать обёртку div с will-change: transform, а не <svg>: вращение <svg> в Chromium не композитится — 36 мс/с главного потока на десктопе и 127
       мс/с на телефоне CPU ×4', оборот 15–30 с; не больше одного на страницу]
-  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/08-remeasure — вариант div]']
+  evidence: ['[проверено]', '[проверено: вариант div]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2536
@@ -468,15 +433,15 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.286, idle_motion_after_pct: 0.279,
-        TaskDuration_ms_per_s: 11.0, lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 11.0, lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.384, TaskDuration_ms_per_s: 24.0,
-        lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
-      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.239, lcp_ms: 57, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.239, lcp_ms: 57, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 6.7, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 6.7, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 8877.3, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.286, TaskDuration_ms_per_s: 460.6,
-        lcp_ms: 44, lcp_tag: text, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 44, lcp_tag: text, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         svg-rotate: {bytes_br: 2536, task_ms_s_desk: 37.3, task_ms_s_mob: 92.3, cls: 0, motion_pct_s: 0.286, lcp_ms: 56, frame_ms_unlimited: 0.43}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -517,10 +482,10 @@ effects:
     pause_required: false
     flashes: none
     note: 'непрочитанные слова — цвет с контрастом ≥ 3 : 1 при кегле ≥ 24 px (у нас #7b8086 на #eceee9 = 3,41 : 1), а не прозрачность 0,2'
-  cliche: {risk: mid, status: рост 2024–2026 (кандидат W2), registry_id: null}
+  cliche: {risk: mid, status: рост 2024–2026 (кандидат), registry_id: null}
   rules: ['одна view-timeline на абзац, диапазон слова по индексу: cover calc(22% + i/n·38%) … +2 %', 'разбиение на слова — при сборке (статический HTML),
       не JS', только display-текст ≥ 28 px]
-  evidence: ['[проверено]', '[V:ufHQG7fDLQc 13:41] подсветка слов в сцене прокрутки basement (W2)', '[проверено: color.py
+  evidence: ['[проверено]', '[V:ufHQG7fDLQc 13:41] подсветка слов в сцене прокрутки basement', '[проверено: color.py
       — 3,41 : 1]']
   checked_at: '2026-09-25'
   cost:
@@ -537,20 +502,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 18.8,
-        lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 38.5, lcp_ms: 112, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 59, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 59, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 13.8,
-        lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 57, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 5260.6, f_fps_low: 2500.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 508.9,
-        lcp_ms: 56, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 56, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: counter-up
@@ -604,20 +568,19 @@ effects:
     cls: 0.001
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.582, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 10.6,
-        lcp_ms: 48, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 48, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0.001, probe_ms: 16, idle_motion_pct_s: 0.194, TaskDuration_ms_per_s: 38.4, lcp_ms: 132,
-        scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.679, lcp_ms: 65, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/03-batch-A}
+        scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.679, lcp_ms: 65, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 10.8,
-        lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 53, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.53, lcp_ms: 57, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 8268.0, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0.002, probe_ms: 16, idle_motion_pct_s: 0.346, TaskDuration_ms_per_s: 521.8,
-        lcp_ms: 48, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 48, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: marquee-logos
@@ -657,10 +620,10 @@ effects:
     note: пауза при наведении и фокусе — удобство, но не замена кнопке (тач и клавиатура)
   assets: {note: 'логотипы — SVG клиента из фактов (ai-media 01/01 §2.3: 5–12 шт., 24–40 px, ≤ 30 КБ на ряд; генерировать нельзя)'}
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:marquee-strip', turn: 'реальные логотипы из фактов, скорость 30–60 px/с, одна строка'}
-  rules: ['скорость 30–60 px/с (C: Stripe 30, Trevor Noah 40, Lama Lama 48; у генератора макета — 155–164, почерк генератора); длительность = ширина дорожки / скорость (JS)
+  rules: ['скорость 30–60 px/с (Stripe 30, Trevor Noah 40, Lama Lama 48; у генератора макета — 155–164, почерк генератора); длительность = ширина дорожки / скорость (JS)
       или запас 48 с', 'два одинаковых списка, второй aria-hidden; анимация translateX(-100 %) — шов не виден', 'видимая кнопка паузы на странице (WCAG
       2.2.2), 44 px; движение ≈ 0,6 % пикселей/с — «дыхание»']
-  evidence: ['[проверено]', '[данные: C 03/01 §4 — бегущая строка у 6 из 49; пауза у 1 из 20 страниц с петлями]', '[стандарт:
+  evidence: ['[проверено]', '[данные: creative 03/01 §4 — бегущая строка у 6 из 49; пауза у 1 из 20 страниц с петлями]', '[стандарт:
       WCAG 2.2.2]']
   checked_at: '2026-09-24'
   cost:
@@ -676,17 +639,16 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.634, idle_motion_after_pct: 0.595, TaskDuration_ms_per_s: 17.0,
-        lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.616, TaskDuration_ms_per_s: 38.2, lcp_ms: 176, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.622, lcp_ms: 77, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.622, lcp_ms: 77, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 10.1,
-        lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.1, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 76, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.689, lcp_ms: 67, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.659, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.689, lcp_ms: 67, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.659, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: marquee-text
@@ -724,9 +686,9 @@ effects:
     pause_required: true
     loop_control: [pause-button]
     flashes: none
-    note: 'дорожка aria-hidden, текст — одной строкой в sr-only заголовке (D: 04-visual-language/01)'
+    note: 'дорожка aria-hidden, текст — одной строкой в sr-only заголовке (04-visual-language/01)'
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:marquee-strip'}
-  rules: ['крупные слова дают 3,8–4,6 % меняющихся пикселей/с — «заметная» петля по E §5.4: не под читаемым текстом, L1–L2', 'кегль 168 px с обводкой, сдвиг
+  rules: ['крупные слова дают 3,8–4,6 % меняющихся пикселей/с — «заметная» петля по creative 05/01 §5.4: не под читаемым текстом, L1–L2', 'кегль 168 px с обводкой, сдвиг
       из rAF — 8,4 мс на кадр без vsync: дорого для «приправы»; CSS-вариант дешевле по главному потоку', 'реакция на скорость прокрутки ограничена (≤ 900
       px/с на вход, k = 0,35) — строка не «улетает»']
   evidence: ['[проверено]']
@@ -745,20 +707,20 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 3.765, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 15.7,
-        lcp_ms: 68, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 68, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 2.09, TaskDuration_ms_per_s: 46.1, lcp_ms: 116, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 3.759, lcp_ms: 125, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 13.8,
-        lcp_ms: 64, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 64, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 104, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 2.544, lcp_ms: 61, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.1, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.1, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 118.7, f_fps_low: 56.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 3.998, TaskDuration_ms_per_s: 14.2,
-        lcp_ms: 44, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/06-unl}
+        lcp_ms: 44, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         css: {bytes_br: 2588, task_ms_s_desk: 16.9, task_ms_s_mob: 46.7, cls: 0, motion_pct_s: 4.624, lcp_ms: 56}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -817,19 +779,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 5.6, lcp_ms: 84, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 5.6, lcp_ms: 84, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 18.8,
-        lcp_ms: 120, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 146, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 120, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 146, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.0, lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 11.0, lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.1, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 61, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 104, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.1, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 104, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.1, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 57.7, f_fps_low: 56.8, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 9.5,
-        lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         fade: {bytes_br: 2041, task_ms_s_desk: 8.2, task_ms_s_mob: 26.0, cls: 0, motion_pct_s: 13.084, lcp_ms: 40}
         none: {bytes_br: 2041, task_ms_s_desk: 8.8, task_ms_s_mob: 36.9, cls: 0, motion_pct_s: 0.0, lcp_ms: 60}
@@ -879,9 +840,9 @@ effects:
   cliche: {risk: high, status: dated (как одинаковое появление на всех секциях), registry_id: 'cliche:section-fade-up', turn: 'разные примитивы по ролям,
       часть секций без появления, один раз на элемент'}
   rules: ['2–3 примитива по ролям: текст — сдвиг 16 px + прозрачность 560 мс; медиа — clip-path 800 мс; карточки — каскад ≤ 3, шаг 70 мс', 'зона IO без
-      обрезки снизу (rootMargin 0 0 −4 %, threshold 0,01) + «добор» у конца: с −12 % и 0,12 в Chromium 1 из 6 последних элементов не появился никогда (F/09)',
+      обрезки снизу (rootMargin 0 0 −4 %, threshold 0,01) + «добор» у конца: с −12 % и 0,12 в Chromium 1 из 6 последних элементов не появился никогда',
     один раз на элемент (IO unobserve); без JS и при reduce всё видно]
-  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/08-remeasure, 09-reveal-bottom]', '[данные: C 03/01 §4 —
+  evidence: ['[проверено]', '[данные: creative 03/01 §4 —
       появление текста у 17 из 49, система ≥ 5 элементов у 10]']
   checked_at: '2026-09-25'
   cost:
@@ -898,20 +859,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 19.9, lcp_ms: 44, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 19.9, lcp_ms: 44, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 79.3,
-        lcp_ms: 80, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: false, src: 99-raw/experiments/F/08-remeasure}
-      wk: {f_fps: 61.6, f_fps_low: 47.6, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 50, scroll_tail_ms: 22, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/08-remeasure}
+        lcp_ms: 80, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: false}
+      wk: {f_fps: 61.6, f_fps_low: 47.6, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 50, scroll_tail_ms: 22, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 10.1, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 10.1, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 52, scroll_tail_ms: 22,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 55.2, f_fps_low: 40.0, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 44, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 6188.0, f_fps_low: 3333.3, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 498.2,
-        lcp_ms: 44, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 44, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         sda: {bytes_br: 3081, task_ms_s_desk: 30.6, task_ms_s_mob: 97.0, cls: 0, motion_pct_s: 0.0, lcp_ms: 60}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -970,20 +930,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.4, lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 11.4, lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 41.9,
-        lcp_ms: 124, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 55, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 124, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 55, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.8, lcp_ms: 64, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 17.8, lcp_ms: 64, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 45, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 37, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 7600.0, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 527.0,
-        lcp_ms: 52, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 52, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: parallax-layers
@@ -1028,8 +987,8 @@ effects:
     note: слои — SVG кодом или картинки со слоями (ai-media)
   cliche: {risk: mid, status: dated как «параллакс на каждом экране», registry_id: 'cliche:parallax-everything', turn: 'одна сцена, где глубина — смысл
       (горы, город, продукт)'}
-  rules: ['разница скоростей слоёв ≤ 40 % — предел уровня (норма E 05-motion/01 §6.2, токен motion.marketing.scroll.parallax-ratio-max 0.4); умолчание лаборатории
-      и рецептов — 30 % (X-08); текст едет вместе со страницей', без масштаба и поворота крупных слоёв; на телефоне — половина амплитуды]
+  rules: ['разница скоростей слоёв ≤ 40 % — предел уровня (норма 05-motion/01 §6.2, токен motion.marketing.scroll.parallax-ratio-max 0.4); умолчание лаборатории
+      и рецептов — 30 %; текст едет вместе со страницей', без масштаба и поворота крупных слоёв; на телефоне — половина амплитуды]
   evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
@@ -1046,20 +1005,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 12.5, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 12.5, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 42.8,
-        lcp_ms: 132, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 82, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 132, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 82, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.6, lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 17.6, lcp_ms: 60, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 40, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 55, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 6147.4, f_fps_low: 3333.3, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 492.6,
-        lcp_ms: 56, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 56, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: svg-line-draw
@@ -1113,20 +1071,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 14.7, lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 14.7, lcp_ms: 40, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 54.4,
-        lcp_ms: 104, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 104, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 22.5, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 22.5, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 51, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 43, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 1723.4, f_fps_low: 909.1, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 80, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 220.3,
-        lcp_ms: 40, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 40, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: pin-scrub-story
@@ -1167,7 +1124,7 @@ effects:
     no_support: шаги стопкой
     reduce:
       strategy: stations
-      note: 'станции: без закрепления, шаги стопкой в конечных состояниях (treatment v1 stations, E 05-motion/01 §4.2; было custom до S1 2026-09-25, X-05)'
+      note: 'станции: без закрепления, шаги стопкой в конечных состояниях (treatment v1 stations, 05-motion/01 §4.2)'
       measured: {idle_motion_pct_s: 0.0, infinite_running: 0, draw_calls_per_frame: 0.0, videos_playing: 0, content_ok: true, bytes_br: 3899}
   mobile: {behavior: simplified, disabled_below_px: 768, note: 'без закрепления, шаги стопкой; GSAP не грузится'}
   a11y:
@@ -1175,11 +1132,11 @@ effects:
     pause_required: false
     flashes: none
     note: 'клавиатура и якоря не ломаются: нативная прокрутка'
-  cliche: {risk: low, status: 'норма жанра L1–L2 (watchlist H: scroll-film)', registry_id: null}
+  cliche: {risk: low, status: 'норма жанра L1–L2 (watchlist реестра клише: scroll-film)', registry_id: null}
   rules: ['длина закрепления — одно число на уровень, токены motion.marketing.scroll: pin-l1-max-vh — одна сцена L1, pin-l2-max-vh — одна секция
       L2 (сверяет spec_check.py); шаги делят длину сцены: число шагов × длина шага — не больше предела уровня', 'GSAP грузить только при ≥ 768 px и без reduce: 45,7 КБ br десктоп, 3,9 КБ телефон', 'scrub 0,5–1;
       не закреплять форму и тарифы', 'вариант CSS (sticky + view-timeline) — 0 КБ JS, но без поддержки Firefox — остаётся стопка']
-  evidence: ['[проверено]', '[данные: C 03/01 §4 — ScrollTrigger 19 из 49, закрепление 5]']
+  evidence: ['[проверено]', '[данные: creative 03/01 §4 — ScrollTrigger 19 из 49, закрепление 5]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 45751
@@ -1194,18 +1151,17 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 22.3,
-        lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 29.9, lcp_ms: 108, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 58, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 58, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 13.6,
-        lcp_ms: 48, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 48, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 62, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 55, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true}
       variants:
         css: {bytes_br: 3820, task_ms_s_desk: 14.8, task_ms_s_mob: 33.1, cls: 0, motion_pct_s: 0.0, lcp_ms: 84}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -1228,7 +1184,7 @@ effects:
     libs: []
     demo: lab/sticky-stack/
     support: {animation-timeline: 'animation-timeline: Chrome 115+, Safari 26+, Firefox — только за флагом (BCD по blender 09/03, 2026-09-23); работает
-        в Chromium 153 и WebKit 26.6 Playwright [проверено 2026-09-24]', timeline-scope: 'Chrome 116+, Safari 26+ (сверить у G)'}
+        в Chromium 153 и WebKit 26.6 Playwright [проверено 2026-09-24]', timeline-scope: 'Chrome 116+, Safari 26+ (сверить по 07-stack-implementation/stack.yaml)'}
     code_ref: 01-effects-catalog.md §5.2
   fallback:
     no_js:
@@ -1262,20 +1218,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 10.9, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 10.9, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 62.4,
-        lcp_ms: 148, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 22.1, f_fps_low: 12.2, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 65, scroll_tail_ms: 23, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 148, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 22.1, f_fps_low: 12.2, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 65, scroll_tail_ms: 23, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 16.5, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 16.5, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 60.2, f_fps_low: 55.6, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 53, scroll_tail_ms: 8,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 20.3, f_fps_low: 4.2, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
+      wkmob: {f_fps: 20.3, f_fps_low: 4.2, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 4549.1, f_fps_low: 2500.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 492.9,
-        lcp_ms: 60, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 60, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: horizontal-scroll
@@ -1283,7 +1237,7 @@ effects:
   name_en: horizontal scroll (pinned)
   family: pin
   cost:
-    note: 'CLS pin (position: fixed) зависит от прохода: 0 (F2/15, бенч), 0,346 (F/08), 1,33 = 0,35 + 0,99 (F2/15, атрибуция с прокруткой до отпускания);
+    note: 'CLS pin (position: fixed) зависит от прохода: 0 (бенч), 0,346, 1,33 = 0,35 + 0,99 (атрибуция с прокруткой до отпускания);
       ?pin=sticky и ?pin=transform — 0; cost.cls — худший из прогонов'
     bytes_br: 45454
     js_kb_br: 42.0
@@ -1298,20 +1252,20 @@ effects:
     cls: 0.346
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 28.3, lcp_ms: 72, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
+        TaskDuration_ms_per_s: 28.3, lcp_ms: 72, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 24.0,
-        lcp_ms: 112, lcp_tag: P, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
+        lcp_ms: 112, lcp_tag: P, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 57, lcp_tag: H1, scroll_tail_ms: 5, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
+        content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 15.8, lcp_ms: 92, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
+        TaskDuration_ms_per_s: 15.8, lcp_ms: 92, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 64, lcp_tag: H1, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 58, lcp_tag: P, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 8.6, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 8.6, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 3395.4, f_fps_low: 1666.7, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 428.4,
-        lcp_ms: 80, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/15-hscroll-cls/bench}
+        lcp_ms: 80, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         css: {bytes_br: 3523, task_ms_s_desk: 15.2, task_ms_s_mob: 22.2, cls: 0, motion_pct_s: 0.0, lcp_ms: 52, frame_ms_unlimited: 0.14}
         native: {bytes_br: 3167, task_ms_s_desk: 9.6, task_ms_s_mob: 23.2, cls: 0, motion_pct_s: 0.0, lcp_ms: 44}
@@ -1337,8 +1291,8 @@ effects:
     - {id: css, type: css, demo: 'lab/horizontal-scroll/?v=css', note: 'sticky + view-timeline, 0 КБ JS'}
     - {id: native, type: css, demo: 'lab/horizontal-scroll/?v=native', note: нативная лента со snap — фолбэк и телефон}
     - {id: pin-transform, type: js, demo: 'lab/horizontal-scroll/?pin=transform', note: 'pinType: ''transform'' — CLS 0; риск дрожания на нативной прокрутке
-        документа (E/02)'}
-    - {id: pin-sticky, type: js, demo: 'lab/horizontal-scroll/?pin=sticky', note: 'CSS sticky + скраб GSAP без pin — CLS 0, рекомендуемая схема (F2)'}
+        документа'}
+    - {id: pin-sticky, type: js, demo: 'lab/horizontal-scroll/?pin=sticky', note: 'CSS sticky + скраб GSAP без pin — CLS 0, рекомендуемая схема'}
     stack_ref: 07-stack-implementation/stack.yaml#gsap-scrolltrigger
     code_ref: 01-effects-catalog.md §5.3
   fallback:
@@ -1356,14 +1310,14 @@ effects:
     pause_required: false
     flashes: none
     note: лента — tabindex=0 и aria-label; порядок DOM = порядок чтения
-  cliche: {risk: mid, status: 'не в реестре H; перехват оси — спорно (A: запрещено на L0–L1)', registry_id: null}
+  cliche: {risk: mid, status: 'не в реестре клише; перехват оси — спорно (ambition-levels.yaml: запрещено на L0–L1)', registry_id: null}
   rules: ['pin обёртки + tween x = −(ширина − окно); end: +=ширина; scrub 1; invalidateOnRefresh', '≤ 5 панелей; на телефоне — нативный свайп, а не перехват',
     'закрепление — CSS sticky + скраб GSAP без pin: pin по умолчанию (position: fixed) даёт CLS при прокрутке — 0,35 в момент закрепления и 0,99 в момент
-      отпускания (атрибуция LayoutShift: div.hs__sticky; прокрутка — не «ввод» для CLS); pinType: ''transform'' и sticky — 0 (F2/15); «первый экран» ни
-      при чём', 'pinType: ''transform'' — только если нужен именно pin: на нативной прокрутке документа возможно дрожание (E/02, запись глазами — живая
+      отпускания (атрибуция LayoutShift: div.hs__sticky; прокрутка — не «ввод» для CLS); pinType: ''transform'' и sticky — 0; «первый экран» ни
+      при чём', 'pinType: ''transform'' — только если нужен именно pin: на нативной прокрутке документа возможно дрожание (запись глазами — живая
       фаза)']
-  evidence: ['[проверено]', '[данные: C 03/01 §4 — горизонтальная секция у 2 из 49]', '[проверено: 99-raw/experiments/F/15-hscroll-cls
-      — атрибуция сдвигов и варианты pin]', '[проверено у E: 99-raw/experiments/E/02-scroll-scene — pin 1,6–2,0, transform 0]']
+  evidence: ['[проверено]', '[данные: creative 03/01 §4 — горизонтальная секция у 2 из 49]', '[проверено:
+      атрибуция сдвигов и варианты pin]', '[проверено: pin 1,6–2,0, transform 0]']
   checked_at: '2026-09-25'
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
@@ -1405,13 +1359,13 @@ effects:
     flashes: none
     note: 'anchors: true; поиск по странице и Tab работают — скролл остаётся нативным'
   cliche: {risk: high, status: saturated, registry_id: 'cliche:smooth-scroll-default', turn: 'только когда есть сцена, которой нужна синхронизация'}
-  rules: ['хвост после шага колеса ≤ 1,0 с (C: Lenis 0,8–1,4 с, нативно ≤ 0,06 с)', 'autoRaf: true, anchors: true; не на L0–L1', 'lerp по умолчанию 0,15
-      (S1 2026-09-25, X-10): хвост по motion_check 0.1.3 (десктоп) — 0,1 → 1,28 с (K2), 0,12 → 1,09–1,13 с (FAIL EG-PERF-03), 0,15 → 0,90 с, 0,2 → 0,72
-      с; формула 99 % (0,6 с при 0,12) занижает хвост — мерить; cost.measured ниже снят F при прежнем 0,1 (974 мс); токен motion.marketing.scroll.lenis-lerp
+  rules: ['хвост после шага колеса ≤ 1,0 с (Lenis 0,8–1,4 с, нативно ≤ 0,06 с)', 'autoRaf: true, anchors: true; не на L0–L1', 'lerp по умолчанию 0,15:
+      хвост по motion_check 0.1.3 (десктоп) — 0,1 → 1,28 с, 0,12 → 1,09–1,13 с (FAIL EG-PERF-03), 0,15 → 0,90 с, 0,2 → 0,72
+      с; формула 99 % (0,6 с при 0,12) занижает хвост — мерить; cost.measured ниже снят при lerp 0,1 (974 мс); токен motion.marketing.scroll.lenis-lerp
       = 0,15', 'на L2-странице — только вместе с effect:motion-toggle (EG-A11Y-12): «Меньше движения» — lenis.destroy(); демо lab/smooth-scroll — страница
       эффекта без переключателя, прогон L2 даёт S EG-A11Y-12 ожидаемо (lab.json gate_note)']
   evidence: ['[проверено]', '[документация: lenis README 1.3.26 — respectReducedMotion, autoRaf, anchors]', '[данные:
-      C 03/01 §10]', '[проверено]']
+      creative 03/01 §10]', '[проверено]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 7055
@@ -1427,20 +1381,20 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 19.3, lcp_ms: 56, scroll_tail_ms: 974, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 19.3, lcp_ms: 56, scroll_tail_ms: 974, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 45.3,
-        lcp_ms: 112, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 112, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 79, scroll_tail_ms: 1005, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 20.5, lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 20.5, lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 57, scroll_tail_ms: 38,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 59, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.4, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.4, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 7781.7, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 521.8,
-        lcp_ms: 64, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 64, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         lerp-0.2: {bytes_br: 7055, task_ms_s_desk: 21.7, task_ms_s_mob: 47.9, cls: 0, motion_pct_s: 0.0, lcp_ms: 48}
         native: {bytes_br: 2183, task_ms_s_desk: 12.5, task_ms_s_mob: 39.7, cls: 0, motion_pct_s: 0.0, lcp_ms: 48, frame_ms_unlimited: 0.12}
@@ -1500,20 +1454,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 16.9, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/10-nojs-fix}
+        TaskDuration_ms_per_s: 16.9, lcp_ms: 56, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 27.2,
-        lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 140, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 84, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 140, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 9.4, lcp_ms: 44, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 9.4, lcp_ms: 44, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 61.8, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 40, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 46, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 12.4, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/10-nojs-fix}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 12.4, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 2373.1, f_fps_low: 1250.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 507.7,
-        lcp_ms: 52, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 52, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: view-transition
@@ -1535,7 +1488,7 @@ effects:
     libs: []
     demo: lab/view-transition/
     stack_ref: 07-stack-implementation/stack.yaml#view-transitions-same-document
-    support: {startViewTransition: 'Chrome 111+, Safari 18+; Firefox — по G (07-stack-implementation, BCD); работает в Chromium 153 и WebKit 26.6 [проверено]'}
+    support: {startViewTransition: 'Chrome 111+, Safari 18+; Firefox — по 07-stack-implementation (BCD); работает в Chromium 153 и WebKit 26.6 [проверено]'}
     code_ref: 01-effects-catalog.md §6.1
   fallback:
     no_js:
@@ -1552,10 +1505,10 @@ effects:
     pause_required: false
     flashes: none
     note: aria-live у сменяемой области
-  cliche: {risk: low, status: watchlist H (View Transitions), registry_id: null}
+  cliche: {risk: low, status: watchlist реестра клише (View Transitions), registry_id: null}
   rules: ['общий view-transition-name — один элемент на состояние; группа 420 мс, текст — перекрёстно 260 мс', без поддержки — тот же DOM-апдейт без обёртки
       (if (!document.startViewTransition) render())]
-  evidence: ['[проверено]', '[данные: C 03/01 §4 — VT объявлены у 1 из 49]']
+  evidence: ['[проверено]', '[данные: creative 03/01 §4 — VT объявлены у 1 из 49]']
   checked_at: '2026-09-24'
   cost:
     bytes_br: 2141
@@ -1570,16 +1523,16 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 26.9, lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 26.9, lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 59.8, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 24, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 143.0,
-        lcp_ms: 152, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 57.8, f_fps_low: 40.0, loaf_ms: 0, probe_ms: 40, idle_motion_pct_s: 0.0, lcp_ms: 161, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 152, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 57.8, f_fps_low: 40.0, loaf_ms: 0, probe_ms: 40, idle_motion_pct_s: 0.0, lcp_ms: 161, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 23.5, lcp_ms: 84, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 23.5, lcp_ms: 84, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 63.7, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 40, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 76, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 41.0, f_fps_low: 16.9, loaf_ms: 0, probe_ms: 64, idle_motion_pct_s: 0.0, lcp_ms: 98, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 41.0, f_fps_low: 16.9, loaf_ms: 0, probe_ms: 64, idle_motion_pct_s: 0.0, lcp_ms: 98, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: page-transition
@@ -1621,7 +1574,7 @@ effects:
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: ['обе страницы: @view-transition { navigation: auto; } и общие view-transition-name; 0 КБ JS', 'L1 — только нативный кросс-документный VT как прогрессивное
       улучшение (@supports, без поддержки — обычная навигация), анимация только при prefers-reduced-motion: no-preference, ≤ 400 мс на многостраничнике
-      (E 05-motion/02 §8.3); решение оркестратора 2026-09-25 (X-21, вариант 1)', 'переходы на библиотеках (Barba, Swup), JS-переходы с заставкой или шторкой
+      (05-motion/02 §8.3)', 'переходы на библиотеках (Barba, Swup), JS-переходы с заставкой или шторкой
       — L2 (limits.library_level_min); прелоадер между страницами — нет']
   evidence: ['[проверено]']
   checked_at: '2026-09-24'
@@ -1637,16 +1590,15 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 0.3,
-        lcp_ms: 36, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 36, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: -14.2, lcp_ms: 72,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 52.3, f_fps_low: 25.6, loaf_ms: 0, idle_motion_pct_s: 0.0, lcp_ms: 17, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 52.3, f_fps_low: 25.6, loaf_ms: 0, idle_motion_pct_s: 0.0, lcp_ms: 17, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0.182, cls_after_fonts: 0, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: -9.2,
-        lcp_ms: 36, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkrm: {f_fps: 62.1, f_fps_low: 58.8, loaf_ms: 0, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 33, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 41.2, f_fps_low: 16.9, loaf_ms: 0, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 36, draw_calls_per_frame: 0.0, content_ok: true}
+      wkrm: {f_fps: 62.1, f_fps_low: 58.8, loaf_ms: 0, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 33, draw_calls_per_frame: 0.0, content_ok: true}
+      wkmob: {f_fps: 41.2, f_fps_low: 16.9, loaf_ms: 0, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: custom-cursor
@@ -1681,9 +1633,9 @@ effects:
     pause_required: false
     flashes: none
     note: на полях ввода и тексте — системный курсор; фокус не трогать
-  cliche: {risk: mid, status: 'saturated (C: 10 из 49)', registry_id: 'cliche:custom-cursor-follower'}
+  cliche: {risk: mid, status: 'saturated (10 из 49)', registry_id: 'cliche:custom-cursor-follower'}
   rules: [кольцо догоняет с λ ≈ 18 (≈ 120 мс); цикл rAF по требованию, 'cursor: none только на html.has-cursor; поля ввода — cursor: auto']
-  evidence: ['[проверено]', '[данные: C 03/01 §4]']
+  evidence: ['[проверено]', '[данные: creative 03/01 §4]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2512
@@ -1699,18 +1651,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 22.3, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 22.3, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 27.7,
-        lcp_ms: 120, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 58, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 120, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 58, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 18.0, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 18.0, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 56, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 55, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 55, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 557.9, f_fps_low: 57.8, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 74.7,
-        lcp_ms: 72, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 72, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: cursor-accent
@@ -1766,18 +1718,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 22.9, lcp_ms: 60, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 22.9, lcp_ms: 60, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 44.7,
-        lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.6, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 17.6, lcp_ms: 76, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.7, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 78, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 86, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 86, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 94.6, f_fps_low: 56.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 24, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 31.1,
-        lcp_ms: 52, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 52, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         border: {bytes_br: 2249, task_ms_s_desk: 23.1, task_ms_s_mob: 36.1, cls: 0, motion_pct_s: 0.0, lcp_ms: 68, frame_ms_unlimited: 10.48}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -1816,7 +1768,7 @@ effects:
     flashes: none
     note: зона клика не уходит больше чем на 8 px
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:magnetic-button'}
-  rules: ['радиус 1,6 размера кнопки, смещение ≤ 8 px (≤ 25 % высоты кнопки — норма E 05-motion/03 §1.4; было 10 px до S1 2026-09-25, X-09), подпись +40
+  rules: ['радиус 1,6 размера кнопки, смещение ≤ 8 px (≤ 25 % высоты кнопки — норма 05-motion/03 §1.4), подпись +40
       %', только одна главная кнопка на экран]
   evidence: ['[проверено]']
   checked_at: '2026-09-25'
@@ -1833,18 +1785,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 12.8, lcp_ms: 44, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 12.8, lcp_ms: 44, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 31.0,
-        lcp_ms: 108, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 108, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.4, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 17.4, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 50, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.6, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 57.4, f_fps_low: 56.2, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 12.8,
-        lcp_ms: 36, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 36, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: tilt-card
@@ -1879,7 +1831,7 @@ effects:
     wcag: [2.3.3]
     pause_required: false
     flashes: none
-  cliche: {risk: mid, status: 'higgsfield: tilt — «приправа», не вау [мнение вендора]; нет в реестре H', registry_id: null}
+  cliche: {risk: mid, status: 'higgsfield: tilt — «приправа», не вау [мнение вендора]; нет в реестре клише', registry_id: null}
   rules: ['≤ 7°, perspective 900 px, возврат 500 мс', 'один ключевой ряд, не все карточки сайта']
   evidence: ['[проверено]']
   checked_at: '2026-09-25'
@@ -1897,18 +1849,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 27.8, lcp_ms: 80, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 27.8, lcp_ms: 80, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 35.4,
-        lcp_ms: 112, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 60.7, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 112, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 60.7, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 16.9, lcp_ms: 112, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 16.9, lcp_ms: 112, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 57, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 7094.0, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 397.3,
-        lcp_ms: 128, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 128, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: hover-distort-dom
@@ -1962,18 +1914,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 24, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 15.3, lcp_ms: 60, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 15.3, lcp_ms: 60, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 28.5,
-        lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 96, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 15.9, lcp_ms: 88, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 15.9, lcp_ms: 88, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 88, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.7, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.7, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 340.8, f_fps_low: 56.8, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 128, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 40.5,
-        lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: shader-bg
@@ -2019,7 +1971,7 @@ effects:
       — токены марки из CSS, свет уходит от текста, без периодического качания'}
   rules: ['1 полноэкранный треугольник, 1 вызов; DPR ≤ 1 (телефон 0,75)', 'цикл только при видимости, без паузы и reduce; скрытая вкладка — стоп', 'дрейф
       непериодический (шум с деформацией домена); доля движения ≤ 2,5 %/с («дыхание»)']
-  evidence: ['[проверено]', '[проверено у blender: 09/04 §1 — 1 вызов, 1,45 мс/кадр]', '[данные: C 03/01 §5, §13 — шейдерный
+  evidence: ['[проверено]', '[проверено у blender: 09/04 §1 — 1 вызов, 1,45 мс/кадр]', '[данные: creative 03/01 §5, §13 — шейдерный
       фон у 20 из 49]']
   checked_at: '2026-09-24'
   cost:
@@ -2036,21 +1988,20 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 40, idle_motion_pct_s: 2.08, idle_motion_after_pct: 0.245, TaskDuration_ms_per_s: 14.4,
-        lcp_ms: 108, draw_calls_per_frame: 1.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 108, draw_calls_per_frame: 1.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 2.392, TaskDuration_ms_per_s: 31.8, lcp_ms: 148, draw_calls_per_frame: 1.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.532, lcp_ms: 125, draw_calls_per_frame: 1.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.532, lcp_ms: 125, draw_calls_per_frame: 1.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, TaskDuration_ms_per_s: 10.0,
-        lcp_ms: 92, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        lcp_ms: 92, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 138, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
-      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.422, lcp_ms: 155, draw_calls_per_frame: 1.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
+      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.422, lcp_ms: 155, draw_calls_per_frame: 1.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       nogl: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 9.7, lcp_ms: 108, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/03-batch-A}
+        content_ok: true}
       unl: {f_fps: 2246.4, f_fps_low: 2500.0, loaf_ms: 749, cls_scen: 0, cls_after_fonts: 0, probe_ms: 1848, idle_motion_pct_s: 11.133, TaskDuration_ms_per_s: 552.4,
-        lcp_ms: 124, draw_calls_per_frame: 1.0, content_ok: true, src: 99-raw/experiments/F/06-unl}
+        lcp_ms: 124, draw_calls_per_frame: 1.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: mesh-gradient-css
@@ -2109,18 +2060,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 28.8, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 28.8, lcp_ms: 56, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 114.1,
-        lcp_ms: 104, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 77, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 104, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 77, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.1, lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 17.1, lcp_ms: 52, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 81, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 93, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 93, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 2140.7, f_fps_low: 2000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 258.6,
-        lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/06-unl}
+        lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         blobs: {bytes_br: 2094, task_ms_s_desk: 18.2, task_ms_s_mob: 55.4, cls: 0, motion_pct_s: 0.0, lcp_ms: 64, frame_ms_unlimited: 0.13}
         static: {bytes_br: 2094, task_ms_s_desk: 6.4, task_ms_s_mob: 18.3, cls: 0, motion_pct_s: 0.0, lcp_ms: 40}
@@ -2181,19 +2132,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 15.0, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 15.0, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 44.1,
-        lcp_ms: 124, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 235, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 124, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 235, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 15.6, lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 15.6, lcp_ms: 100, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 117, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 209, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 209, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 5899.2, f_fps_low: 3333.3, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 447.3,
-        lcp_ms: 192, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 192, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         drive-js: {bytes_br: 2271, task_ms_s_desk: 16.7, task_ms_s_mob: 51.2, cls: 0, motion_pct_s: 0.0, lcp_ms: 40, frame_ms_unlimited: 9.59}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -2243,18 +2193,18 @@ effects:
     flashes: none
   cliche: {risk: mid, status: saturated, registry_id: 'cliche:iridescent-holo', turn: 'перелив = продукт (голограмма, плёнка); окно тонов марки вместо радуги;
       веб-вид, а не рендер (MAT-07 blender)'}
-  rules: ['модель F2 — дифракционная решётка: яркая полоса блика идёт за углом зрения (курсор, сглаживание λ = 6; тач — прокрутка), в ней спектр по порядку
+  rules: ['модель — дифракционная решётка: яркая полоса блика идёт за углом зрения (курсор, сглаживание λ = 6; тач — прокрутка), в ней спектр по порядку
       и второй порядок 0,35, ориентация решётки меняется пятнами («мозаика» защитной голограммы), штрихи ≈ 5 px (±10 % яркости), белое ядро, тёмная «металлическая»
-      основа; 2 шума на пиксель', 'первая модель F (тонкая плёнка + френель) глазами — тусклые размытые пятна, «радуга ИИ», а не материал (F2/14, пары «до
+      основа; 2 шума на пиксель', 'первая модель (тонкая плёнка + френель) глазами — тусклые размытые пятна, «радуга ИИ», а не материал (пары «до
       → после»): перелив читается материалом только как узкая яркая полоса со структурой', 'по умолчанию — окно тонов марки (?palette=brand): полный спектр
       на тёмном — узнаваемая «ИИ-радуга» (cliche:iridescent-holo, пурпурный край — cliche:purple-neon-band); спектр — только если продукт буквально голограмма',
     'текст — на скриме ≥ 0,84 под всей текстовой колонкой (десктоп) или сверху вниз (телефон); полоса в покое — вне колонки (uOff: десктоп 0,18, телефон
-      0,36 — над текстом); худший контраст из 7 положений полосы по границам текста ≥ 4,5 : 1 (F2/14 contrast.py)', 'ориентация решётки неподвижна во времени:
+      0,36 — над текстом); худший контраст из 7 положений полосы по границам текста ≥ 4,5 : 1', 'ориентация решётки неподвижна во времени:
       штрихи считаются от абсолютных координат, и дрейф ориентации сдвигал их — 3,8 %/с в покое; неподвижная — 0–0,02 %/с, полоса движется только от указателя
       или прокрутки; бюджет ≤ 2 мс GPU на эффект (blender 09/04 §10)', 'без WebGL — CSS-фольга той же конструкции: полоса тонов марки на @property --p от
       курсора, штрихи repeating-linear-gradient']
-  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/14-holo-look — оценка глазами до → после, контраст, перемер]',
-    '[гипотеза: «материал продукта» — оценка F2 глазами; показ людям — живая фаза]']
+  evidence: ['[проверено]', '[проверено: оценка глазами до → после, контраст, перемер]',
+    '[гипотеза: «материал продукта» — оценка глазами; показ людям — живая фаза]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 5354
@@ -2270,22 +2220,20 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 20.3, lcp_ms: 100, lcp_tag: H1, draw_calls_per_frame: 1.0, content_ok: true, src: 99-raw/experiments/F/14-holo-look/bench}
+        TaskDuration_ms_per_s: 20.3, lcp_ms: 100, lcp_tag: H1, draw_calls_per_frame: 1.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 47.6,
-        lcp_ms: 160, lcp_tag: P, draw_calls_per_frame: 1.0, content_ok: true, src: 99-raw/experiments/F/14-holo-look/bench}
-      wk: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 180, lcp_tag: H1, draw_calls_per_frame: 1.0, content_ok: true,
-        src: 99-raw/experiments/F/14-holo-look/bench}
+        lcp_ms: 160, lcp_tag: P, draw_calls_per_frame: 1.0, content_ok: true}
+      wk: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 180, lcp_tag: H1, draw_calls_per_frame: 1.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 12.2, lcp_ms: 116, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/14-holo-look/bench}
+        TaskDuration_ms_per_s: 12.2, lcp_ms: 116, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 114, lcp_tag: H1, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/14-holo-look/bench}
-      wkmob: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 121, lcp_tag: P, draw_calls_per_frame: 1.0, content_ok: true,
-        src: 99-raw/experiments/F/14-holo-look/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/14-holo-look/bench}
+        content_ok: true}
+      wkmob: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 121, lcp_tag: P, draw_calls_per_frame: 1.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true}
       nogl: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 12.8,
-        lcp_ms: 96, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/14-holo-look/bench}
+        lcp_ms: 96, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       unl: {f_fps: 1711.7, f_fps_low: 3333.3, loaf_ms: 333, cls_scen: 0, cls_after_fonts: 0, probe_ms: 1448, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 821.1,
-        lcp_ms: 108, lcp_tag: H1, draw_calls_per_frame: 1.0, content_ok: true, src: 99-raw/experiments/F/14-holo-look/bench}
+        lcp_ms: 108, lcp_tag: H1, draw_calls_per_frame: 1.0, content_ok: true}
       variants:
         brand: {bytes_br: 5354, task_ms_s_desk: 22.8, task_ms_s_mob: 60.2, cls: 0, motion_pct_s: 0.015, lcp_ms: 60, frame_ms_unlimited: 0.52}
         css-foil: {bytes_br: 5354, task_ms_s_desk: 8.1, task_ms_s_mob: 17.9, cls: 0, motion_pct_s: 0.0, lcp_ms: 56}
@@ -2327,7 +2275,7 @@ effects:
     note: 'зерно под текстом (слой в isolation: isolate)'
   cliche: {risk: low, status: 'saturated, низкий риск', registry_id: 'cliche:grain-overlay'}
   rules: ['SVG feTurbulence тайлом 220 px (0,3 КБ), 6–9 %, soft-light', 'в видео зерно не запекать: H.264 ×2,5 веса, а зерно всё равно теряется (SSIM 0,68)']
-  evidence: ['[проверено]', '[проверено: 99-raw/experiments/F/04-hero-video — зерно в видео]']
+  evidence: ['[проверено]', '[проверено: зерно в видео]']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2278
@@ -2342,19 +2290,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 7.3, lcp_ms: 92, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 7.3, lcp_ms: 92, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 29.6,
-        lcp_ms: 252, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 279, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 252, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 279, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0.172, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 20.8, lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 20.8, lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 119, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 193, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 193, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.8, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 57.8, f_fps_low: 56.8, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 7.8,
-        lcp_ms: 96, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 96, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         animated: {bytes_br: 2278, task_ms_s_desk: 17.0, task_ms_s_mob: 60.2, cls: 0, motion_pct_s: 0.0, lcp_ms: 60}
         canvas: {bytes_br: 2095, task_ms_s_desk: 41.1, task_ms_s_mob: 150.8, cls: 0, motion_pct_s: 0.0, lcp_ms: 64, frame_ms_unlimited: 0.44}
@@ -2431,10 +2378,10 @@ effects:
     note: контраст по худшему месту фона под панелью
   cliche: {risk: mid, status: saturated (стекло на карточках — дефолт 2020–22), registry_id: 'cliche:glassmorphism-panels'}
   rules: ['над движущимся фоном стекло стоит 7,5 мс на кадр без vsync (drive=js, 3 панели, blur 24) — 45 % бюджета 60 Гц на Iris Xe; 6 панелей и blur 48
-      — 7,6 мс (цена почти не растёт с числом панелей)', 'лимит стекла — одна норма базы (X-24, S1 2026-09-25): ≤ 2 слоя в видимой зоне (над прокручиваемым
-      видео или WebGL — ≤ 1; D 04/03 §4.1, E 05/03 §2.4) + цена кадра по замеру (главный поток ≤ контроль + 25 мс/с на телефоне CPU ×4 — порог-кандидат
-      F); ≤ 6 на странице — фильтр профиля marketing_audit D3, а не норма; демо по умолчанию — 3 панели для замера цены, не образец (было panels_in_view_max:
-      3)', фолбэк @supports и prefers-reduced-transparency — плотная заливка с тем же контрастом]
+      — 7,6 мс (цена почти не растёт с числом панелей)', 'лимит стекла — одна норма базы: ≤ 2 слоя в видимой зоне (над прокручиваемым
+      видео или WebGL — ≤ 1; creative 04/03 §4.1, creative 05/03 §2.4) + цена кадра по замеру (главный поток ≤ контроль + 25 мс/с на телефоне CPU ×4 — порог-кандидат);
+      ≤ 6 на странице — фильтр профиля marketing_audit D3, а не норма; демо по умолчанию — 3 панели для замера цены, не образец',
+      фолбэк @supports и prefers-reduced-transparency — плотная заливка с тем же контрастом]
   evidence: ['[проверено]']
   checked_at: '2026-09-25'
   cost:
@@ -2451,19 +2398,18 @@ effects:
     cls: 0.062
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0.062, probe_ms: 16, idle_motion_pct_s: 2.089, idle_motion_after_pct: 6.232,
-        TaskDuration_ms_per_s: 15.5, lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/10-nojs-fix}
+        TaskDuration_ms_per_s: 15.5, lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 59.8, f_fps_low: 59.5, loaf_ms: 58, cls_scen: 0, cls_after_fonts: 0, probe_ms: 24, idle_motion_pct_s: 3.563, TaskDuration_ms_per_s: 101.8,
-        lcp_ms: 224, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.844, lcp_ms: 403, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 224, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.844, lcp_ms: 403, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0.062, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.4, lcp_ms: 132, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 17.4, lcp_ms: 132, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 111, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.086, lcp_ms: 423, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/10-nojs-fix}
+        content_ok: true}
+      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.086, lcp_ms: 423, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 8483.0, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 2.043, TaskDuration_ms_per_s: 433.7,
-        lcp_ms: 112, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 112, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         n1: {bytes_br: 2504, task_ms_s_desk: 13.3, task_ms_s_mob: 36.4, cls: 0, motion_pct_s: 2.252, lcp_ms: 128}
         n6: {bytes_br: 2504, task_ms_s_desk: 14.9, task_ms_s_mob: 36.7, cls: 0, motion_pct_s: 2.288, lcp_ms: 76}
@@ -2527,18 +2473,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 2.126,
-        TaskDuration_ms_per_s: 13.7, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 13.7, lcp_ms: 68, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 37.1,
-        lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
-      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 41, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 41, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 5.4, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        TaskDuration_ms_per_s: 5.4, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 50, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.3, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/08-remeasure}
+        content_ok: true}
+      wkmob: {f_fps: 62.5, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.3, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 9025.8, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 450.6,
-        lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/06-unl}
+        lcp_ms: 48, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         shadow: {bytes_br: 1831, task_ms_s_desk: 21.4, task_ms_s_mob: 52.3, cls: 0, motion_pct_s: 0.0, lcp_ms: 68, frame_ms_unlimited: 0.51}
         static: {bytes_br: 1831, task_ms_s_desk: 6.9, task_ms_s_mob: 13.1, cls: 0, motion_pct_s: 0.0, lcp_ms: 44}
@@ -2583,7 +2529,7 @@ effects:
       loading="lazy" или с предзагрузкой за экран до входа в окно: кадр под clip-path: inset(100%) браузер считает невидимым и лениво не грузит — он
       появился бы в уже открытой маске', 'два класса движения: one-shot — раскрытие по времени при входе кадра в окно; scroll-linked — раскрытие по
       шкале view() самого кадра (animation-timeline) на тех же clip-path и transform, без JS; без поддержки шкал прокрутки кадр стоит раскрытым']
-  evidence: ['[проверено]', '[V:xQnJLYTVl_E 24:06] окно в форме логотипа — кандидат W2']
+  evidence: ['[проверено]', '[V:xQnJLYTVl_E 24:06] окно в форме логотипа — кандидат']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2263
@@ -2599,20 +2545,20 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.484, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 27.7, lcp_ms: 116, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 27.7, lcp_ms: 116, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 59.8, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 2.472, TaskDuration_ms_per_s: 39.0,
-        lcp_ms: 124, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 124, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wk: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.003, lcp_ms: 168, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.9, lcp_ms: 100, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 11.9, lcp_ms: 100, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 39, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.002, lcp_ms: 128, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 1.0, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 8078.9, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.409, TaskDuration_ms_per_s: 531.3,
-        lcp_ms: 72, lcp_tag: DIV, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 72, lcp_tag: DIV, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         shape: {bytes_br: 2389, task_ms_s_desk: 24.5, task_ms_s_mob: 40.8, cls: 0, motion_pct_s: 0.0, lcp_ms: 64}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -2668,20 +2614,19 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 20.5, lcp_ms: 80, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 20.5, lcp_ms: 80, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 36.1,
-        lcp_ms: 144, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 33, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 144, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 33, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.4, lcp_ms: 72, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 11.4, lcp_ms: 72, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 33, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 36, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.9, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 2660.2, f_fps_low: 1428.6, loaf_ms: 96, cls_scen: 0, cls_after_fonts: 0, probe_ms: 120, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 288.9,
-        lcp_ms: 40, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 40, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: video-loop-hero
@@ -2728,10 +2673,10 @@ effects:
     ai_media: [VID-HERO-LOOP]
     blender: ['blender:01-01#15.1', 'blender:12-08']
   cliche: {risk: mid, status: saturated (hero-media-veil; eternal-slowmo), registry_id: 'cliche:hero-media-veil'}
-  rules: [рецепт — 02-hero-video-background.md, 'демо lab/video-loop-hero — «громкая» петля 56–63 %/с (K2): образец L2 (первый экран, пауза видна сразу,
+  rules: [рецепт — 02-hero-video-background.md, 'демо lab/video-loop-hero — «громкая» петля 56–63 %/с: образец L2 (первый экран, пауза видна сразу,
       текст на подложке); для L1 — антипример ворот EG-A11Y-22 (громких окон L1 — 0; motion_check 0.1.3: 3 окна, S) — на L1 петля ≤ 5 %/с или effect:cinemagraph
-      (E 05/01 §5.4; X-22, X-26)', 'текст над петлёй — на подложке ≥ 0,6: лид rgb(13 15 18 / .72), скрим телефона до надзаголовка (S1 2026-09-25, X-26):
-      F83 (motion_check --f83) H1 4,82 : 1, лид 11,01 : 1 (было 3,68 — B)']
+      (creative 05/01 §5.4)', 'текст над петлёй — на подложке ≥ 0,6: лид rgb(13 15 18 / .72), скрим телефона до надзаголовка:
+      F83 (motion_check --f83) H1 4,82 : 1, лид 11,01 : 1']
   evidence: ['[проверено]', '[проверено]', '[проверено]']
   checked_at: '2026-09-25'
   cost:
@@ -2747,20 +2692,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0.018, probe_ms: 16, idle_motion_pct_s: 55.855, idle_motion_after_pct: 68.607,
-        TaskDuration_ms_per_s: 13.1, lcp_ms: 80, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 13.1, lcp_ms: 80, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 68.844, TaskDuration_ms_per_s: 40.2,
-        lcp_ms: 144, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 61.7, f_fps_low: 55.6, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 57.202, lcp_ms: 152, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 144, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 61.7, f_fps_low: 55.6, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 57.202, lcp_ms: 152, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 10.0, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 10.0, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 96, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 61.5, f_fps_low: 52.6, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 74.98, lcp_ms: 142, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 61.5, f_fps_low: 52.6, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 74.98, lcp_ms: 142, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 58.2, f_fps_low: 57.8, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 55.855, TaskDuration_ms_per_s: 9.5,
-        lcp_ms: 64, lcp_tag: VIDEO, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 64, lcp_tag: VIDEO, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         h264: {bytes_br: 368854, task_ms_s_desk: 11.4, task_ms_s_mob: 43.7, cls: 0, motion_pct_s: 0.0, lcp_ms: 220}
         naive: {bytes_br: 368854, task_ms_s_desk: 10.0, task_ms_s_mob: 30.4, cls: 0, motion_pct_s: 0.0, lcp_ms: 168}
@@ -2802,7 +2745,7 @@ effects:
   assets:
     ai_media: [VID-CINEMAGRAPH]
   cliche: {risk: low, status: н/д, registry_id: null}
-  rules: ['без атрибута loop: один проход ≤ 5 с, последний кадр = первый', '≤ 300 КБ (A L0): у нас AV1 66 КБ / H.264 117 КБ']
+  rules: ['без атрибута loop: один проход ≤ 5 с, последний кадр = первый', '≤ 300 КБ (уровень L0): у нас AV1 66 КБ / H.264 117 КБ']
   evidence: ['[проверено]', '[проверено]']
   checked_at: '2026-09-25'
   cost:
@@ -2818,19 +2761,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 1.761, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.4, lcp_ms: 60, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 11.4, lcp_ms: 60, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 1.682, TaskDuration_ms_per_s: 38.3,
-        lcp_ms: 196, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.8, lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        lcp_ms: 196, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.8, lcp_ms: 136, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 7.3, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        TaskDuration_ms_per_s: 7.3, lcp_ms: 64, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.1, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 88, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
-      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.023, lcp_ms: 120, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/11-wkmob}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/05-batch-BG}
+        content_ok: true}
+      wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.023, lcp_ms: 120, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.4, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 58.1, f_fps_low: 57.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 1.79, TaskDuration_ms_per_s: 8.8,
-        lcp_ms: 60, lcp_tag: IMG, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/13-unl}
+        lcp_ms: 60, lcp_tag: IMG, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: video-scrub
@@ -3096,7 +3038,7 @@ effects:
     libs: []
     demo: null
     external_ref: ['blender:01-02#26']
-  cost: {bytes_br: null, note: правила — E 05-motion/02; запрещён на продуктовых страницах (blender 01/02 п.26)}
+  cost: {bytes_br: null, note: правила — 05-motion/02; запрещён на продуктовых страницах (blender 01/02 п.26)}
   fallback:
     no_js: постер или статичный кадр
     no_webgl: постер
@@ -3117,7 +3059,7 @@ effects:
   name_en: reduce-motion toggle / global pause
   family: page
   purpose: Дать посетителю одной видимой кнопкой остановить все петли (WCAG 2.2.2) и выбрать режим «меньше» или «полное» движение вопреки системе (L2 —
-    обязательно, A CRV-AL-12; E 05-motion/01 §4.4).
+    обязательно, CRV-AL-12; 05-motion/01 §4.4).
   effect_role: [feedback]
   level_min: L0
   limits: {per_page: 1, target_px_min: 44}
@@ -3152,20 +3094,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 3.942, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 12.7, lcp_ms: 132, lcp_tag: H1, draw_calls_per_frame: 0.01, content_ok: true, src: 99-raw/experiments/F/12-motion-toggle/bench}
+        TaskDuration_ms_per_s: 12.7, lcp_ms: 132, lcp_tag: H1, draw_calls_per_frame: 0.01, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 3.201, TaskDuration_ms_per_s: 26.1,
-        lcp_ms: 168, lcp_tag: H1, draw_calls_per_frame: 0.02, content_ok: true, src: 99-raw/experiments/F/12-motion-toggle/bench}
-      wk: {f_fps: 64.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 3.179, lcp_ms: 147, lcp_tag: H1, draw_calls_per_frame: 0.03, content_ok: true,
-        src: 99-raw/experiments/F/12-motion-toggle/bench}
+        lcp_ms: 168, lcp_tag: H1, draw_calls_per_frame: 0.02, content_ok: true}
+      wk: {f_fps: 64.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 3.179, lcp_ms: 147, lcp_tag: H1, draw_calls_per_frame: 0.03, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.4, lcp_ms: 80, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/12-motion-toggle/bench}
+        TaskDuration_ms_per_s: 11.4, lcp_ms: 80, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 64.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 147, lcp_tag: H1, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/12-motion-toggle/bench}
-      wkmob: {f_fps: 64.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.813, lcp_ms: 148, lcp_tag: P, draw_calls_per_frame: 0.03, content_ok: true,
-        src: 99-raw/experiments/F/12-motion-toggle/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 1.566, TaskDuration_ms_per_s: 1.1, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/12-motion-toggle/bench}
+        content_ok: true}
+      wkmob: {f_fps: 64.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 1.813, lcp_ms: 148, lcp_tag: P, draw_calls_per_frame: 0.03, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 1.566, TaskDuration_ms_per_s: 1.1, draw_calls_per_frame: 0, content_ok: true}
       nogl: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 1.357, TaskDuration_ms_per_s: 13.8,
-        lcp_ms: 88, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/12-motion-toggle/bench}
+        lcp_ms: 88, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         start-reduced: {bytes_br: 58200, task_ms_s_desk: 34.6, task_ms_s_mob: 77.7, cls: 0, motion_pct_s: 0.0, lcp_ms: 32}
         start-full: {bytes_br: 58200, task_ms_s_desk: 13.7, task_ms_s_mob: 29.8, cls: 0, motion_pct_s: 3.614, lcp_ms: 48}
@@ -3189,18 +3129,18 @@ effects:
     flashes: none
     note: 'нативные радио в fieldset с legend «Движение»; состояние — aria-live; фокус виден; одна кнопка на все петли (W3C: «single mechanism… affects
       all these elements»)'
-  cliche: {risk: low, status: 'н/д (C: переключателя нет ни у одной из 49)', registry_id: null}
+  cliche: {risk: low, status: 'н/д (переключателя нет ни у одной из 49)', registry_id: null}
   rules: ['три состояния на <html data-motion>: нет атрибута — как в системе, reduced — меньше, full — полное вопреки ОС; выбор — localStorage, ставится
       строкой в <head> до стилей (повторный визит не «взрывается»)', 'CSS-движение объявлять только когда оно разрешено: @media (prefers-reduced-motion:
-      no-preference) { :root:not([data-motion=reduced]) … } и :root[data-motion=full] …; токены --mm-* E сами дают 0 мс и 0 px', 'JS-движение подписывать
+      no-preference) { :root:not([data-motion=reduced]) … } и :root[data-motion=full] …; токены --mm-* сами дают 0 мс и 0 px', 'JS-движение подписывать
       на Motion.on(): WebGL — один статичный кадр и cancelAnimationFrame (0 вызовов), видео — pause() + hidden (постер, 0 новых байт), GSAP — gsap.context().revert(),
       Lenis — destroy() и new Lenis({respectReducedMotion: false})', 'Lenis 1.3.26 (respectReducedMotion: true по умолчанию) и gsap.matchMedia видят только
       системную настройку: без ручного управления «Полное» при системном reduce не работает, а «Меньше» не снимает скраб и Lenis', видна при любой прокрутке
       (липкая шапка) или у каждой секции с петлёй; сегменты ≥ 44 px; ширину подписи состояния резервировать (иначе сдвиг шапки при загрузке), 'скраб на
-      такой странице — без pin (sticky + ScrollTrigger scrub): pin через position: fixed даёт CLS 1,6–2,0 (E/02)']
-  evidence: ['[проверено]', '[данные: C 03/01 §5 — переключателя нет у 49 из 49]', '[V:_ZdZh-ESOHY 06:08] переключатель
-      на странице = класс reduce-motion на контейнере (W1)', '[стандарт: WCAG 2.2.2 Understanding — single mechanism; 2.3.3 — site-wide setting]', '[документация:
-      Lenis README 1.3.26 — respectReducedMotion, Reduced motion]', '[проверено у E: 99-raw/experiments/E/03-motion-tokens — токены в 5 состояниях]']
+      такой странице — без pin (sticky + ScrollTrigger scrub): pin через position: fixed даёт CLS 1,6–2,0']
+  evidence: ['[проверено]', '[данные: creative 03/01 §5 — переключателя нет у 49 из 49]', '[V:_ZdZh-ESOHY 06:08] переключатель
+      на странице = класс reduce-motion на контейнере', '[стандарт: WCAG 2.2.2 Understanding — single mechanism; 2.3.3 — site-wide setting]', '[документация:
+      Lenis README 1.3.26 — respectReducedMotion, Reduced motion]', '[проверено: токены в 5 состояниях]']
   checked_at: '2026-09-24'
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
@@ -3218,7 +3158,7 @@ effects:
     duration_ms: [250, 300]
     props: [opacity, transform, overlay (discrete), display (discrete)]
     properties: [opacity, transform]
-    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
+    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2
   implementation:
     type: css
     libs: []
@@ -3249,7 +3189,7 @@ effects:
       0,98', '@starting-style — начальный кадр входа; transition … overlay и display с allow-discrete — иначе выход мгновенный; ::backdrop — вместе с окном',
     'WebKit 26.6 без overlay: вход анимируется, выход обрывается (на 60 мс уже display: none) — прогрессивное улучшение, прыжка нет [проверено]', 'движение
       — только внутри @media (prefers-reduced-motion: no-preference); reduce — проявление 180 мс']
-  evidence: ['[проверено]', '[V:UcXWY057YuQ 03:44] @starting-style + allow-discrete (W1)', '[документация: MDN/BCD @starting-style,
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 03:44] @starting-style + allow-discrete', '[документация: MDN/BCD @starting-style,
       overlay — 2026-09-24]']
   checked_at: '2026-09-25'
   cost:
@@ -3265,18 +3205,16 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 18.6, lcp_ms: 68, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 18.6, lcp_ms: 68, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 46.8,
-        lcp_ms: 104, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wk: {f_fps: 62.8, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 39, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 104, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.8, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 39, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 15.1, lcp_ms: 52, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 15.1, lcp_ms: 52, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 64.1, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 37, lcp_tag: H1, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wkmob: {f_fps: 63.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 43, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        content_ok: true}
+      wkmob: {f_fps: 63.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 43, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       variants:
         none: {bytes_br: 3085, task_ms_s_desk: 14.5, task_ms_s_mob: 30.1, cls: 0, motion_pct_s: 0.0, lcp_ms: 40}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
@@ -3295,7 +3233,7 @@ effects:
     duration_ms: [200, 300]
     props: [block-size (раскладка), content-visibility (discrete), transform (значок)]
     properties: [block-size, transform]
-    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
+    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2
   implementation:
     type: css
     libs: []
@@ -3324,10 +3262,10 @@ effects:
     note: 'нативные details/summary: роль, состояние и клавиатура — из коробки'
   cliche: {risk: low, status: норма интерфейса, registry_id: null}
   rules: ['::details-content { block-size: 0; overflow-y: clip } + [open]::details-content { block-size: auto } + :root { interpolate-size: allow-keywords
-      }; content-visibility … allow-discrete держит текст видимым до конца закрытия', 'анимация высоты — раскладка на каждом кадре (исключение из E 03 §2.1
+      }; content-visibility … allow-discrete держит текст видимым до конца закрытия', 'анимация высоты — раскладка на каждом кадре (исключение из creative 05/03 §2.1
       п.9 только для раскрытия по клику): CLS 0 и при 250, и при 800 мс (сдвиги идут за кликом), но главный поток телефона ×4 — 70,7 мс/с при 250 мс и 163,4
       при 800 мс против 35,6 без анимации → ≤ 300 мс', 'эксклюзивный аккордеон — <details name=''faq''>, без JS']
-  evidence: ['[проверено]', '[V:UcXWY057YuQ 08:44] ::details-content + interpolate-size (W1)']
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 08:44] ::details-content + interpolate-size']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2775
@@ -3342,18 +3280,16 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 25.0, lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 25.0, lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 70.7,
-        lcp_ms: 96, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wk: {f_fps: 64.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 40, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 96, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 64.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 40, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 12.3, lcp_ms: 40, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 12.3, lcp_ms: 40, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 64.0, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 41, lcp_tag: H1, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wkmob: {f_fps: 63.7, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 41, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        content_ok: true}
+      wkmob: {f_fps: 63.7, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 41, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       variants:
         dur-800: {bytes_br: 2775, task_ms_s_desk: 33.3, task_ms_s_mob: 163.4, cls: 0, motion_pct_s: 0.0, lcp_ms: 32}
         none: {bytes_br: 2775, task_ms_s_desk: 15.3, task_ms_s_mob: 35.6, cls: 0, motion_pct_s: 0.0, lcp_ms: 32}
@@ -3373,7 +3309,7 @@ effects:
     duration_ms: [250, 300]
     props: [clip-path]
     properties: [clip-path]
-    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
+    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2
   implementation:
     type: css
     libs: []
@@ -3400,8 +3336,8 @@ effects:
   cliche: {risk: low, status: н/д, registry_id: null}
   rules: ['раскрывать clip-path по полной коробке кнопки (inset(0 0 0 calc(100% − 3rem) round …) → inset(0 round …)): раскладка не меняется', 'наведение
       — не «ввод» для CLS (hadRecentInput ставят клик, касание, клавиша): раскрытие шириной (grid 0fr → 1fr, width → max-content) — CLS 0,0028 за 3 наведения
-      и 2,0–2,3 мс/с раскладки; clip-path — 0 и 0 (F2/16)', 'тач (hover: none) — подписи видны всегда; фокус с клавиатуры раскрывает так же, как наведение']
-  evidence: ['[проверено]', '[V:UcXWY057YuQ 06:53] width 2.5rem → max-content (W1)']
+      и 2,0–2,3 мс/с раскладки; clip-path — 0 и 0', 'тач (hover: none) — подписи видны всегда; фокус с клавиатуры раскрывает так же, как наведение']
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 06:53] width 2.5rem → max-content']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2895
@@ -3417,20 +3353,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.1, lcp_ms: 44, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 17.1, lcp_ms: 44, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 21.0,
-        lcp_ms: 112, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 42, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 112, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 42, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 12.5, lcp_ms: 64, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 12.5, lcp_ms: 64, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.6, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 40, lcp_tag: H1, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wkmob: {f_fps: 62.1, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 41, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        content_ok: true}
+      wkmob: {f_fps: 62.1, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 41, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 532.3, f_fps_low: 57.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 60.8,
-        lcp_ms: 76, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 76, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         grid: {bytes_br: 2895, task_ms_s_desk: 19.0, task_ms_s_mob: 20.5, cls: 0.003, motion_pct_s: 0.0, lcp_ms: 40, frame_ms_unlimited: 0.9}
         interp: {bytes_br: 2895, task_ms_s_desk: 20.7, task_ms_s_mob: 20.5, cls: 0.003, motion_pct_s: 0.0, lcp_ms: 36, frame_ms_unlimited: 1.53}
@@ -3451,7 +3385,7 @@ effects:
     duration_ms: [450, 550]
     props: [transform (rotateY), opacity (reduce)]
     properties: [transform, opacity]
-    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
+    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2
   implementation:
     type: css
     libs: []
@@ -3471,12 +3405,12 @@ effects:
     pause_required: false
     flashes: none
     note: паритет :hover / :focus-within; оборот скрыт opacity + pointer-events (не visibility) — ссылка в порядке Tab
-  cliche: {risk: mid, status: н/д в реестре H; «переворот всех карточек» — приём 2010-х, registry_id: null, turn: 'один ряд с настоящей информацией на обороте,
+  cliche: {risk: mid, status: н/д в реестре клише; «переворот всех карточек» — приём 2010-х, registry_id: null, turn: 'один ряд с настоящей информацией на обороте,
       не декор'}
   rules: ['громкое — только в @media (prefers-reduced-motion: no-preference): rotateY 180° 500 мс; тихая ветка по умолчанию — проявление оборота [V:_ZdZh-ESOHY
       04:05]', 'грани position: absolute, лицу transform: rotateY(0) и z-index 2, обеим -webkit-backface-visibility: hidden — классическая схема для Safari',
-    Playwright-WebKit на Linux не соблюдает backface-visibility даже у эталона (F2/16 flip_min.html) — проверка переворота в Safari только на iPhone]
-  evidence: ['[проверено]', '[V:_ZdZh-ESOHY 03:31–05:05] переворот и reduce-ветка (W1)']
+    Playwright-WebKit на Linux не соблюдает backface-visibility даже у эталона — проверка переворота в Safari только на iPhone]
+  evidence: ['[проверено]', '[V:_ZdZh-ESOHY 03:31–05:05] переворот и reduce-ветка']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 2956
@@ -3492,20 +3426,18 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 17.1, lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 17.1, lcp_ms: 48, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 35.9,
-        lcp_ms: 112, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 112, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      wk: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 14.9, lcp_ms: 52, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 14.9, lcp_ms: 52, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 51, lcp_tag: H1, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true,
-        src: 99-raw/experiments/F/16-micro/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        content_ok: true}
+      wkmob: {f_fps: 62.4, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 56, lcp_tag: P, draw_calls_per_frame: 0.0, content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 0.5, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 3204.5, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 167.0,
-        lcp_ms: 44, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 44, lcp_tag: H1, draw_calls_per_frame: 0.0, content_ok: true}
   verified: {chromium: '153.0.8010.12 (Playwright 1.63, headless shell, ANGLE GL, Iris Xe)', webkit: 26.6 (Playwright WebKit 2359)}
   status: measured
 - id: header-shrink-on-scroll
@@ -3522,7 +3454,7 @@ effects:
     scroll_vh: null
     props: [transform, opacity]
     properties: [transform, opacity]
-    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
+    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2
   implementation:
     type: css
     libs: []
@@ -3553,7 +3485,7 @@ effects:
   rules: ['animation-timeline: scroll(root) + animation-range: 0 160px; только transform/opacity: плашка scaleY 1 → 60/96 от верха, строка translateY −18
       px, логотип scale 0,78, подпись и тень — opacity', 'не анимировать height/padding шапки в потоке: раскладка на каждом кадре и CLS (прокрутка — не
       «ввод»): 0,0004 у шапки 96 → 60 px против 0 у transform — мало, но растёт с высотой', 'тень — отдельный слой с opacity, а не box-shadow (перерисовка)']
-  evidence: ['[проверено]', '[V:UcXWY057YuQ 09:51] shrinking-header-shadow (W1)']
+  evidence: ['[проверено]', '[V:UcXWY057YuQ 09:51] shrinking-header-shadow']
   checked_at: '2026-09-25'
   cost:
     bytes_br: 3384
@@ -3569,20 +3501,20 @@ effects:
     cls: 0.0
     measured:
       desk: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 15.0, lcp_ms: 44, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 15.0, lcp_ms: 44, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       mob: {f_fps: 60.0, f_fps_low: 59.5, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 32, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 27.4,
-        lcp_ms: 100, lcp_tag: P, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 100, lcp_tag: P, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wk: {f_fps: 61.7, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 45, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        content_ok: true}
       rm: {f_fps: 60.0, f_fps_low: 59.9, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0,
-        TaskDuration_ms_per_s: 11.8, lcp_ms: 36, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        TaskDuration_ms_per_s: 11.8, lcp_ms: 36, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       wkrm: {f_fps: 62.3, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, idle_motion_after_pct: 0.0, lcp_ms: 55, lcp_tag: H1, scroll_tail_ms: 0,
-        draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        draw_calls_per_frame: 0.0, content_ok: true}
       wkmob: {f_fps: 62.2, f_fps_low: 58.8, loaf_ms: 0, probe_ms: 16, idle_motion_pct_s: 0.0, lcp_ms: 51, lcp_tag: P, scroll_tail_ms: 0, draw_calls_per_frame: 0.0,
-        content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
-      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 9.0, draw_calls_per_frame: 0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        content_ok: true}
+      nojs: {loaf_ms: 0, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 9.0, draw_calls_per_frame: 0, content_ok: true}
       unl: {f_fps: 7003.9, f_fps_low: 5000.0, loaf_ms: 0, cls_scen: 0, cls_after_fonts: 0, probe_ms: 16, idle_motion_pct_s: 0.0, TaskDuration_ms_per_s: 453.6,
-        lcp_ms: 52, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true, src: 99-raw/experiments/F/16-micro/bench}
+        lcp_ms: 52, lcp_tag: H1, scroll_tail_ms: 0, draw_calls_per_frame: 0.0, content_ok: true}
       variants:
         class: {bytes_br: 3384, task_ms_s_desk: 12.9, task_ms_s_mob: 41.0, cls: 0, motion_pct_s: 0.0, lcp_ms: 32, frame_ms_unlimited: 0.14}
         height: {bytes_br: 3384, task_ms_s_desk: 15.2, task_ms_s_mob: 39.4, cls: 0.001, motion_pct_s: 0.0, lcp_ms: 28, frame_ms_unlimited: 0.81}
@@ -3608,9 +3540,9 @@ effects:
     libs:
     - {name: 'lottie-web (light, SVG)', version: 5.13.0, kb_br: 41.6, license: MIT}
     - {name: '@lottiefiles/dotlottie-web', version: 0.80.0, kb_br: 391.3, license: MIT, optional: true}
-  cost: {bytes_br: 41600, js_kb_br: 41.6, gpu: paint (SVG) / canvas, note: 'по G (99-raw/experiments/G/01-lib-cost, 2026-09-24): lottie-web light 41,6 КБ
+  cost: {bytes_br: 41600, js_kb_br: 41.6, gpu: paint (SVG) / canvas, note: 'по 07-stack-implementation (2026-09-24): lottie-web light 41,6 КБ
       br, TBT 25 мс; dotLottie 12,2 КБ + wasm 379,1 КБ br и 0,95 с скрипта за ≈ 3,2 с проигрывания против 0,15 с у lottie-web SVG (одна анимация 200×200)
-      — F не мерил; плюс вес самого JSON'}
+      — в лаборатории каталога не мерено; плюс вес самого JSON'}
   fallback:
     no_js: статичный SVG или PNG выразительного кадра
     reduce: {strategy: static-poster, note: 'goToAndStop на выразительном кадре, без петли'}
@@ -3622,16 +3554,16 @@ effects:
     loop_control: [pause-button, stops-within-5s]
     flashes: none
     note: контейнер aria-hidden или role=img с подписью; петля > 5 с — общая пауза
-  assets: {note: 'только свой или явно лицензированный JSON: лицензии LottieFiles противоречивы (B2); сверять свойства AE с таблицей поддержки веб-рендера
+  assets: {note: 'только свой или явно лицензированный JSON: лицензии LottieFiles противоречивы; сверять свойства AE с таблицей поддержки веб-рендера
       до анимации'}
-  cliche: {risk: mid, status: dated (реестр H) — стоковые анимации LottieFiles «на любой вкус», registry_id: 'cliche:stock-lottie', turn: 'своя анимация
+  cliche: {risk: mid, status: dated (реестр клише) — стоковые анимации LottieFiles «на любой вкус», registry_id: 'cliche:stock-lottie', turn: 'своя анимация
       по бренду, а не каталог'}
   rules: ['Lottie — для неинтерактивных петель и иллюстраций; состояния и входы — Rive (effect:rive-state-interaction) [V:iqtCk5cY5Xs 14:24]', 'SVG-рендер
-      lottie-web дешевле dotLottie по главному потоку (0,15 против 0,95 с скрипта за 3,2 с, G/01); dotLottie — если много анимаций или темы, wasm — setWasmUrl
+      lottie-web дешевле dotLottie по главному потоку (0,15 против 0,95 с скрипта за 3,2 с); dotLottie — если много анимаций или темы, wasm — setWasmUrl
       на свой домен (по умолчанию jsDelivr)', 'вне экрана — стоп (IntersectionObserver), петля > 5 с — пауза, reduce — стоп-кадр; библиотеку грузить по
       условию']
-  evidence: ['[проверено у G: 99-raw/experiments/G/01-lib-cost; 07-stack-implementation/stack.yaml#lottie-web, #dotlottie-web]', '[V:iqtCk5cY5Xs 06:13–14:24,
-      26:41–30:46] выбор Lottie/Rive, замер Pixel 7 — данные низкой надёжности (W2)']
+  evidence: ['[проверено: 07-stack-implementation/stack.yaml#lottie-web, #dotlottie-web]', '[V:iqtCk5cY5Xs 06:13–14:24,
+      26:41–30:46] выбор Lottie/Rive, замер Pixel 7 — данные низкой надёжности']
   checked_at: '2026-09-25'
 - id: rive-state-interaction
   name_ru: Интерактивная анимация с состояниями (Rive)
@@ -3652,8 +3584,8 @@ effects:
     stack_ref: 07-stack-implementation/stack.yaml#rive
     libs:
     - {name: '@rive-app/canvas-lite', version: 2.43.1, kb_br: 314.9, license: MIT}
-  cost: {bytes_br: 314900, js_kb_br: 42.5, gpu: canvas (wasm), note: 'по G (G/01, 2026-09-24): canvas-lite 42,5 КБ + wasm 272,4 КБ br, TBT 38 мс; canvas
-      49,0 + 613,0 КБ br, TBT 71 мс (без .riv) — F не мерил; память у Rive на порядок меньше Lottie [V:iqtCk5cY5Xs 28:43] (один телефон)'}
+  cost: {bytes_br: 314900, js_kb_br: 42.5, gpu: canvas (wasm), note: 'по 07-stack-implementation (2026-09-24): canvas-lite 42,5 КБ + wasm 272,4 КБ br, TBT 38 мс; canvas
+      49,0 + 613,0 КБ br, TBT 71 мс (без .riv) — в лаборатории каталога не мерено; память у Rive на порядок меньше Lottie [V:iqtCk5cY5Xs 28:43] (один телефон)'}
   fallback:
     no_js: статичная картинка + обычная кнопка или ссылка HTML (текст и CTA — не в .riv)
     reduce: {strategy: final-state, note: 'смена состояний мгновенно, без петель ожидания'}
@@ -3669,8 +3601,8 @@ effects:
     canvas-lite без Text и Audio — 272 против 613 КБ br wasm; RuntimeLoader.setWasmUrl на свой домен (по умолчанию jsDelivr/unpkg), 'делать в редакторе
       Rive с нуля: конвертированные из Lottie файлы теряют анимацию и падают [V:iqtCk5cY5Xs 29:45]; бесплатная версия — водяной знак (2023, тарифы 2026
       не проверены)']
-  evidence: ['[проверено у G: 99-raw/experiments/G/01-lib-cost; 07-stack-implementation/stack.yaml#rive]', '[V:iqtCk5cY5Xs 14:24–31:31] Rive: состояния,
-      входы, где выигрывает (W2)']
+  evidence: ['[проверено: 07-stack-implementation/stack.yaml#rive]', '[V:iqtCk5cY5Xs 14:24–31:31] Rive: состояния,
+      входы, где выигрывает']
   checked_at: '2026-09-25'
 - id: light-sweep
   name_ru: Блик по кадру
@@ -3759,7 +3691,7 @@ effects:
     attention_cost: 0
     props: [opacity, transform, overlay (discrete), display (discrete)]
     properties: [opacity, transform]
-    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2 (E)
+    rules_ref: 05-motion/03-micro-motion-and-performance.md §1–§2
   implementation:
     type: js
     libs: []

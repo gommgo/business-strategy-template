@@ -35,7 +35,7 @@
 ```python
 # Blender 5.2.2 — [проверено] рецепт 10: 900 GN-инстансов → EXT_mesh_gpu_instancing
 import sys, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "10-instance-field"

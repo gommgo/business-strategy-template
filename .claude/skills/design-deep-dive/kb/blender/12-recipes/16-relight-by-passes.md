@@ -3,8 +3,8 @@
 Испытание 15-showcase · рецепт по итогам фаз 1–2 · агент RC, 26.09.2026; итог ночи SD3–SD4 (тени по карте сверху, цена кадра, телефон,
 ворота) — `99-raw/experiments/SD/HANDOFF-3.md`, `15-showcase/sdano/README.md` · черновик — `99-raw/experiments/SD/HANDOFF-2.md §7` ·
 Blender 5.2.2 (Cycles CPU, многочастный EXR), OpenImageIO из Blender, Pillow 11.3 + SciPy (системный Python), WebGL2 без библиотек,
-esbuild 0.28.2 · пример — «Сдано» C «фонарик инженера»: страница `15-showcase/sdano/c-hybrid/`, исходники `99-raw/experiments/SD/`
-(`scripts/run_v2.py`, `scripts/passes_convert.py`, `pagebuild/fx_assets.py`, `pagebuild/src/fonarik.js`) · пробел базы: выжимка
+esbuild 0.28.2 · пример — «Сдано» C «фонарик инженера»: страница `15-showcase/sdano/c-hybrid/`, исходники `examples/16-relight-by-passes/src/`
+(`examples/16-relight-by-passes/src/{run_v2.py,passes_convert.py,fx_assets.py,fonarik.js}`) · пробел базы: выжимка
 `15-showcase/_shared/digests/03-web-delivery.md` A.1 п. 14 («шейдера параллакса или переосвещения в базе нет»).
 
 ## Выжимка рецепта
@@ -81,7 +81,7 @@ esbuild 0.28.2 · пример — «Сдано» C «фонарик инжен�
 ## 3. Blender: проходы в многочастный EXR
 
 ```python
-# [проверено: 99-raw/experiments/SD/scripts/run_v2.py, запуск SD-v2 25.09 19:45] Blender 5.2.2 — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/16-relight-by-passes/src/run_v2.py, запуск SD-v2 25.09 19:45] Blender 5.2.2 — отрывок [не исполняется] # run: skip
     catcher = bpy.data.objects.get("SD_ShadowCatcher")
     catcher.hide_render = True
     st = bpy.data.collections.get("STAGE")
@@ -115,7 +115,7 @@ esbuild 0.28.2 · пример — «Сдано» C «фонарик инжен�
 Чтение частей EXR и перевод нормалей в пространство камеры (тот же код — в `passes_convert.py`, чтобы не рендерить заново):
 
 ```python
-# [проверено: 99-raw/experiments/SD/scripts/passes_convert.py, запуск SD-passconv] Blender 5.2.2 + OIIO — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/16-relight-by-passes/src/passes_convert.py, запуск SD-passconv] Blender 5.2.2 + OIIO — отрывок [не исполняется] # run: skip
 def read_parts(path):
     inp = oiio.ImageInput.open(path)
     chans = {}
@@ -148,7 +148,7 @@ w −0,6…8,5), оси камеры `R, U, F`. Точка пикселя с в�
 (глубина = 30 + s). Отсюда `h = 0,8165·w − 0,57735·(d − 30)` — точная реконструкция в 8 битах.
 
 ```python
-# [проверено: 99-raw/experiments/SD/pagebuild/fx_assets.py, main()] Python 3 + Pillow + SciPy — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/16-relight-by-passes/src/fx_assets.py, main()] Python 3 + Pillow + SciPy — отрывок [не исполняется] # run: skip
     d = dmin + (da[..., 0] * 256 + da[..., 1]) / 65535 * (dmax - dmin)
     Hh, Wh = d.shape
     w = FR["w1"] - (np.arange(Hh) + 0.5) / Hh * (FR["w1"] - FR["w0"])
@@ -171,10 +171,10 @@ w −0,6…8,5), оси камеры `R, U, F`. Точка пикселя с в�
 ## 5. Шейдер: свет фонаря, тень по высоте, полумрак
 
 Отрывок ниже — шейдер SD2 (экранный марш по «теневой» высоте, 32 шага); итог SD3 заменил тень картой высот сверху (выжимка п. 8, §6) —
-актуальный код — `99-raw/experiments/SD/pagebuild/src/fonarik.js`.
+актуальный код — `examples/16-relight-by-passes/src/fonarik.js`.
 
 ```js
-// [проверено: 99-raw/experiments/SD/pagebuild/src/fonarik.js, фрагментный шейдер (сборка 21:20)] WebGL2 GLSL ES 3.0 — отрывок
+// [проверено: 12-recipes/examples/16-relight-by-passes/src/fonarik.js, фрагментный шейдер (сборка 21:20)] WebGL2 GLSL ES 3.0 — отрывок
 vec3 world(vec2 uv, float h) { float u = FR.x + uv.x * (FR.y - FR.x), w = FR.w - uv.y * (FR.w - FR.z);
   return u * R + w * U + ((0.81649658 * w - h) / 0.57735027) * F; }
 vec2 toUV(vec3 p) { return vec2((dot(p, R) - FR.x) / (FR.y - FR.x), (FR.w - dot(p, U)) / (FR.w - FR.z)); }

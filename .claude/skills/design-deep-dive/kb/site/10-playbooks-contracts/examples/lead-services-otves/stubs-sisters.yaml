@@ -1,6 +1,6 @@
-# ЗАГЛУШКИ J с id форматов сестёр (text copy-deck, creative treatment) — не тексты и не подача.
+# ЗАГЛУШКИ с id форматов сестёр (text copy-deck, creative treatment) — не тексты и не подача.
 copy_deck_stub:
-  x_stub: 'ЗАГЛУШКА J: формат copy-deck text (../../../../text/10-templates-recipes/copy-deck.schema.json) — только id; тексты
+  x_stub: 'ЗАГЛУШКА: формат copy-deck text (../../../../text/10-templates-recipes/copy-deck.schema.json) — только id; тексты
     пишет text'
   site: otves-remont-nn
   page_id: home
@@ -651,8 +651,8 @@ copy_deck_stub:
       missing_ids: []
       text: '[PLACEHOLDER: nav-label — copy-deck text]'
 treatment_stub:
-  x_stub: 'ЗАГЛУШКА J: treatment creative (urn:app-design:creative:treatment:0) — в плане home уже стоит treatment из опыта
-    creative A/02; здесь — только список секций для art-direction'
+  x_stub: 'ЗАГЛУШКА: treatment creative (urn:app-design:creative:treatment:0) — в плане home уже стоит treatment;
+    здесь — только список секций для art-direction'
   page: home
   level: L1
   sections:

@@ -7,10 +7,10 @@
   "approved_by": null,
   "checked_at": "2026-09-24",
   "refs": {
-    "brief": "../../../site-research/01-foundations/site-brief.example.yaml",
+    "brief": "../../../site/10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml",
     "meaning": "../../../text/02-strategy-messaging/examples/meaning-otves.yaml",
     "facts": "../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml",
-    "page_plans": ["../../../site-research/04-blocks/examples/page-plan-lead-services-otves.yaml"]
+    "page_plans": ["../../../site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml"]
   },
   "inputs": {
     "site_type": "landing-site",
@@ -32,7 +32,7 @@
     "source": "default",
     "budget_profile": "landing-lead-services@L1",
     "motion_cap": "expressive",
-    "rationale": "Лидогенерация услуг — L1 по решению заказчика п. 13, но с L0-блоками конверсии (форма, калькулятор) и весом первого экрана L0 на телефоне (горячий трафик с карт 40 %). Фирменный приём один и спокойный — линия-отвес через этапы работы.",
+    "rationale": "Лидогенерация услуг — L1 по умолчанию, но с L0-блоками конверсии (форма, калькулятор) и весом первого экрана L0 на телефоне (горячий трафик с карт 40 %). Фирменный приём один и спокойный — линия-отвес через этапы работы.",
     "by_section_role": [{"role": "lead-form", "level": "L0"}, {"role": "pricing", "level": "L0"}, {"role": "hero", "level": "L1", "why": "фото прораба и один приём; без тяжёлого медиа"}]
   },
   "concept": {
@@ -88,7 +88,7 @@
       "first_viewport": "Заголовок антиквой «Срок и смета — в договоре», фрагмент сметы и кнопка замера",
       "imagery": "типографика; фото прораба ниже",
       "motion": "без движения",
-      "risk": "Пункты договора не подтверждены (missing:estimate-change-policy, deadline-terms); антиква — примета K3 serif",
+      "risk": "Пункты договора не подтверждены (missing:estimate-change-policy, deadline-terms); антиква — примета overused-display-font",
       "cost": "дёшево",
       "level_fit": ["L0"]
     },
@@ -134,7 +134,7 @@
     "date": "2026-09-24",
     "why": "Рекомендуемое (строка q-brand «Направление A»): держится на фактах (прораб, цена, рейтинг, гарантия), один спокойный приём, совпадает с макроструктурой split-studio плана site. Статус proposed — заказчик не ответил.",
     "rejected": [
-      {"id": "b", "why": "пункты договора не подтверждены; антиква — примета K3"},
+      {"id": "b", "why": "пункты договора не подтверждены; антиква — примета overused-display-font"},
       {"id": "c", "why": "нет разрешений на фото объектов"},
       {"id": "d", "why": "канон — дверь для заказчика, не рекомендация"}
     ]
@@ -146,7 +146,7 @@
     "type": {"display": "Onest", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
     "composition": ["диптих: текст ↔ доказательство, стороны чередуются (split-studio)", "вертикальная линия по левому полю этапов"],
     "surfaces": ["светлое нейтральное поле; без фактур бетона и дерева"],
-    "imagery": {"kinds": ["photo"], "subject": "прораб на объекте, реальные этапы работ", "source_policy": "только фото заказчика с согласиями; ИИ-люди в роли команды и клиентов запрещены (решение заказчика п. 13)", "people_policy": "real-only", "product_policy": "real-photo-only"},
+    "imagery": {"kinds": ["photo"], "subject": "прораб на объекте, реальные этапы работ", "source_policy": "только фото заказчика с согласиями; ИИ-люди в роли команды и клиентов запрещены", "people_policy": "real-only", "product_policy": "real-photo-only"},
     "theme": "light"
   },
   "motion_system": {
@@ -202,7 +202,7 @@
   },
   "lifecycle": {
     "version": "0.1",
-    "history": [{"version": "0.1", "date": "2026-09-24", "change": "4 направления к брифу site A", "by": "Claude (пример A/01)"}],
+    "history": [{"version": "0.1", "date": "2026-09-24", "change": "4 направления к брифу site", "by": "Claude (пример)"}],
     "review_by": "2027-03-24",
     "on_brand_change": "при появлении логотипа — сверить красный акцент и словесный знак; линия-отвес остаётся приёмом, если бренд назван «Отвес»"
   }

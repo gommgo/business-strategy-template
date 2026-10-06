@@ -1,20 +1,20 @@
 # head-kit.yaml — обязательный head, доступ для ботов и структурированные данные по типам страниц.
-# Владелец: site-research, агент H (волна 2; сверка флагов, site_checks, находки G/01 и W2 — продолжатель H2).
+# Владелец: site (07-seo-geo-performance-analytics).
 # Правила — в 01-seo-google-yandex.md (SEO) и 02-geo-ai-search.md (GEO).
 # Поля плана страницы: ../04-blocks/page-plan.schema.json → page.seo.{indexable, canonical, h1, structured_data, ssr_required, notes}.
 # Поля брифа: ../01-foundations/site-brief.schema.json → search.{engines, ai_answers, ai_bots_policy, regions, existing_site, profiles}.
 # Слова title, description, FAQ, «ответ первым» — text: ../../text/07-seo-geo-copy/meta-rules.yaml, geo-checklist.yaml.
-# Картинки OG и фавиконы — ai-media; скорость и вес — P (budgets.yaml, page-gates.yaml); боты и robots.txt — crawlers.yaml.
+# Картинки OG и фавиконы — ai-media; скорость и вес — budgets.yaml, page-gates.yaml; боты и robots.txt — crawlers.yaml.
 # Серьёзность: B — блокер (страница не попадает в поиск или ответы ИИ), S — серьёзно (теряется показ или сниппет),
-# D — желательно. Соответствие шкале чек-листа SITE- — K (волна 3).
+# D — желательно. Соответствие шкале чек-листа SITE- — 09-ai-generation-evaluation/02-site-checklist.md.
 
 version: 1.0
 checked: 2026-09-24
-status: released            # draft → released (H2, 2026-09-24) → v1 базы (J и K, волна 3)
-owner: site H (волна 2)
+status: released
+owner: site
 
 plan_fields:
-  # Как заполнять page.seo в page-plan (E, 04-blocks/page-plan.schema.json). Умолчания по типам — раздел page_types.
+  # Как заполнять page.seo в page-plan (04-blocks/page-plan.schema.json). Умолчания по типам — раздел page_types.
   indexable:
     type: boolean
     rule: false → <meta name="robots" content="noindex"> в сыром HTML; страница остаётся доступной для обхода (не Disallow), иначе noindex не прочтут
@@ -47,7 +47,7 @@ plan_fields:
       (спасибо, личный кабинет)
   notes:
     type: string
-    rule: свободные заметки H для исполнителя (например, «вариант hero по UTM — сервером, canonical без параметров»)
+    rule: свободные заметки для исполнителя (например, «вариант hero по UTM — сервером, canonical без параметров»)
 
 head_base:
   # Для каждой индексируемой страницы. check — флаг geo_probe.py (../../scripts/site/geo_probe.py) или способ проверки.
@@ -106,11 +106,11 @@ head_base:
   - id: hk-hreflang
     element: '<link rel="alternate" hreflang="ru" href="…"> на каждую версию + x-default'
     rule: >-
-      только если есть языковые версии (структура — G); на каждой версии ссылки на все, включая себя; взаимные; коды ISO 639-1
+      только если есть языковые версии (структура — site 06); на каждой версии ссылки на все, включая себя; взаимные; коды ISO 639-1
       (+ ISO 3166-1); для Яндекса — только в HTML (sitemap с hreflang Яндекс больше не поддерживает); canonical — на свою
       языковую версию
     severity: S
-    check: 'head.hreflang_n, hreflang_xdefault; взаимность — ia_probe.py (G)'
+    check: 'head.hreflang_n, hreflang_xdefault; взаимность — ia_probe.py'
     evidence: '[проверено] hreflang в <head> — у 6 из 19 многостраничников; в sitemap — у heisenbug (196 из 196 URL), такие связи Яндекс не читает (../06-multipage-ia/02-navigation-linking-i18n.md §5.5, §6)'
   - id: hk-jsonld-placement
     element: '<script type="application/ld+json">…</script>'
@@ -126,7 +126,7 @@ head_base:
     check: 'head.favicon, head.manifest'
 
 access_gates:
-  # Доступ для поисковых и ИИ-ботов. Строки для page-gates.yaml (P, K). Боты и их поведение — crawlers.yaml.
+  # Доступ для поисковых и ИИ-ботов. Строки для page-gates.yaml. Боты и их поведение — crawlers.yaml.
   - id: hk-access-status
     rule: 'индексируемая страница отдаёт 200 без редиректа по UA и JS; удалённая — 404 или 410; перенос — 301 (302 только на время)'
     severity: B
@@ -136,7 +136,7 @@ access_gates:
       несуществующий URL → HTTP 404 со страницей 404 (не 200 и не редирект на главную — soft 404); в SPA — серверный 404 или
       noindex через JS (Google JS SEO basics)
     severity: B
-    check: 'запрос к /h-probe-<случайное> → 404 (ia_probe.py G; ручная проверка)'
+    check: 'запрос к /h-probe-<случайное> → 404 (ia_probe.py; ручная проверка)'
     evidence: '[проверено] мягкая 404 — linear, ilyabirman (2 из 19); SPA: серверный 404 или JS-редирект на URL с серверным 404 [V:0yedoWKPgo4 21:36]'
   - id: hk-access-robots-file
     rule: >-
@@ -210,7 +210,7 @@ jsonld_policy:
     organization:
       where: главная или about-page
       google: 'обязательных свойств нет; рекомендовано name, alternateName, legalName, url, logo, sameAs, description, address, contactPoint, telephone, email, foundingDate, taxID, vatID'
-      fields_from_brief: 'brand.name → name; business.legal_name → legalName (реквизиты подвала — I); ИНН → taxID; search.profiles[].url → sameAs'
+      fields_from_brief: 'brand.name → name; business.legal_name → legalName (реквизиты подвала — site 08); ИНН → taxID; search.profiles[].url → sameAs'
       same_as_rule: 'только профили, которыми владеет организация и которые открываются: Яндекс Бизнес, Google Business Profile, 2ГИС, VK, Telegram, YouTube, Wikidata (если есть элемент), Википедия (если статья о ней)'
       example: |
         {"@context":"https://schema.org","@graph":[
@@ -232,11 +232,11 @@ jsonld_policy:
       google: 'отдельного rich result нет; тип даёт однозначность сущности (provider → @id организации, areaServed, serviceType, offers с ценой «от» из facts)'
       rule: 'цена в Offer только если та же цена видна на странице; priceCurrency=RUB'
     breadcrumb:
-      where: 'страницы многостраничника, где видны крошки (правило G — глубина ≥ 2 у разделов с хабом, ../06-multipage-ia/02-navigation-linking-i18n.md §2.1)'
+      where: 'страницы многостраничника, где видны крошки (правило site 06 — глубина ≥ 2 у разделов с хабом, ../06-multipage-ia/02-navigation-linking-i18n.md §2.1)'
       google: 'itemListElement → ListItem(position, name, item; у последнего item можно опустить); показ в выдаче — только на десктопе (с 01.2025)'
       rule: >-
         разметка = видимые крошки: видимые крошки без BreadcrumbList — добавить разметку; разметка без видимого блока — убрать
-        ([проверено] 4 сайта и 1 сайт). Несколько трейлов (решение H по спору G, ../06-multipage-ia/02-navigation-linking-i18n.md
+        ([проверено] 4 сайта и 1 сайт). Несколько трейлов (../06-multipage-ia/02-navigation-linking-i18n.md
         §2.1): Google их допускает — «If there are multiple ways to navigate to a page on your site, you can specify multiple
         breadcrumb trails», в его примере в разметке два трейла, а видимый блок один (Breadcrumb, просмотр 2026-09-24); польза не
         измерена. По умолчанию генератор пишет один трейл — по parent, равный видимому; второй — только для страницы в двух
@@ -304,7 +304,7 @@ page_types:
   pricing-page: {indexable: true, canonical: self, structured_data: [BreadcrumbList, SoftwareApplication], ssr_required: true, sitemap: true,
     notes: 'цены и условия — текстом; Offer с ценами только если совпадают с видимыми'}
   comparison-page: {indexable: true, canonical: self, structured_data: [BreadcrumbList], ssr_required: true, sitemap: true,
-    notes: 'оценки конкурентов не размечать; корректность сравнения — I (38-ФЗ ст. 5)'}
+    notes: 'оценки конкурентов не размечать; корректность сравнения — site 08 (38-ФЗ ст. 5)'}
   alternatives-page: {indexable: true, canonical: self, structured_data: [Article, BreadcrumbList], ssr_required: true, sitemap: true}
   case-page: {indexable: true, canonical: self, structured_data: [Article, BreadcrumbList], ssr_required: true, sitemap: true}
   case-list-page: {indexable: true, canonical: self, structured_data: [CollectionPage, BreadcrumbList], ssr_required: true, sitemap: true}
@@ -313,9 +313,9 @@ page_types:
   about-page: {indexable: true, canonical: self, structured_data: [AboutPage, Organization], ssr_required: true, sitemap: true,
     notes: 'Organization — здесь или на главной, не в двух местах с разными данными'}
   team-page: {indexable: true, canonical: self, structured_data: [BreadcrumbList], ssr_required: true, sitemap: true,
-    notes: 'ProfilePage — на странице одного человека; реальные люди с разрешением (I)'}
+    notes: 'ProfilePage — на странице одного человека; реальные люди с разрешением (site 08)'}
   reviews-page: {indexable: true, canonical: self, structured_data: [BreadcrumbList], ssr_required: true, sitemap: true,
-    notes: 'отзывы о себе не размечать Review/AggregateRating ради звёзд; источник и дата — текстом (F, I); рейтинг в Яндексе — через Яндекс Бизнес'}
+    notes: 'отзывы о себе не размечать Review/AggregateRating ради звёзд; источник и дата — текстом (site 05, site 08); рейтинг в Яндексе — через Яндекс Бизнес'}
   faq-page: {indexable: true, canonical: self, structured_data: [BreadcrumbList], ssr_required: true, sitemap: true,
     notes: 'FAQPage — по желанию, без ожидания сниппета (Google снял 2026-05-07); ответы — текстом, открыты в HTML'}
   contacts-page: {indexable: true, canonical: self, structured_data: [ContactPage, LocalBusiness], ssr_required: true, sitemap: true,
@@ -329,25 +329,25 @@ page_types:
   article-page: {indexable: true, canonical: self, structured_data: [Article, BreadcrumbList], ssr_required: true, sitemap: true,
     notes: 'автор — реальный человек; datePublished и dateModified — правдивые'}
   thank-you-page: {indexable: false, canonical: self, structured_data: [], ssr_required: false, sitemap: false,
-    notes: 'noindex в meta; не закрывать в robots.txt (иначе noindex не прочтут); цель аналитики — P'}
+    notes: 'noindex в meta; не закрывать в robots.txt (иначе noindex не прочтут); цель аналитики — events.yaml'}
   not-found-page: {indexable: false, canonical: none, structured_data: [], ssr_required: false, sitemap: false,
     notes: 'HTTP-код 404 обязателен (не 200, не редирект на главную); ссылки на главные разделы'}
   legal-page: {indexable: true, canonical: self, structured_data: [], ssr_required: true, sitemap: true,
-    notes: 'без nofollow (ничего не даёт); доступны из подвала каждой страницы (I)'}
-  # + 5 активных типов словаря v1 (G 06-multipage-ia/01 §2; S1, волна 4, 2026-09-25, по правилам H выше; 5 типов proposed — после решения владельца)
+    notes: 'без nofollow (ничего не даёт); доступны из подвала каждой страницы (site 08)'}
+  # + 5 активных типов словаря v1 (site 06/01 §2); 5 типов proposed — после решения владельца
   specialist-page: {indexable: true, canonical: self, structured_data: [ProfilePage, Person, BreadcrumbList], ssr_required: true, sitemap: true,
-    notes: 'один реальный человек с разрешением (I); ProfilePage + mainEntity Person (recipes.profile_page); данные совпадают с видимыми'}
+    notes: 'один реальный человек с разрешением (site 08); ProfilePage + mainEntity Person (recipes.profile_page); данные совпадают с видимыми'}
   location-page: {indexable: true, canonical: self, structured_data: [LocalBusiness, BreadcrumbList], ssr_required: true, sitemap: true,
     notes: 'только при ≥ 2 адресах; у филиала свой LocalBusiness с @id; адрес, телефон, часы — как в Яндекс Бизнесе (recipes.local_business)'}
   program-catalog-page: {indexable: true, canonical: self, structured_data: [CollectionPage, BreadcrumbList], ssr_required: true, sitemap: true,
-    notes: 'программы — ссылками <a href> в HTML; фильтры (направление, уровень, длительность) — Disallow шаблона или noindex, не оба (crawlers.yaml rt-infinite-spaces); ItemList нет в перечне plan_fields — решение H'}
+    notes: 'программы — ссылками <a href> в HTML; фильтры (направление, уровень, длительность) — Disallow шаблона или noindex, не оба (crawlers.yaml rt-infinite-spaces); ItemList нет в перечне plan_fields'}
   documents-page: {indexable: true, canonical: self, structured_data: [BreadcrumbList], ssr_required: true, sitemap: true,
-    notes: 'лицензии, сертификаты, СРО — факты credential (I); номера и даты текстом, сканы — с подписью'}
+    notes: 'лицензии, сертификаты, СРО — факты credential (site 08); номера и даты текстом, сканы — с подписью'}
   search-results-page: {indexable: false, canonical: none, structured_data: [], ssr_required: false, sitemap: false,
     notes: 'новый сайт — Disallow шаблона поиска одним правилом (site_checks hk-site-search-pages); уже в индексе — сначала noindex, Disallow после выпадения; не оба; ботам не 5xx'}
 
 positions_2026:
-  # Ответы на вопросы E (волна 2) и частые решения генератора. Подробно — 01-seo-google-yandex.md §4.
+  # Частые решения генератора. Подробно — 01-seo-google-yandex.md §4.
   faq_markup: >-
     FAQ rich result Google не показывается с 2026-05-07, документация удалена 2026-06-15; у Яндекса FAQ-сниппета из
     schema.org нет. Блок FAQ живёт ради людей и ответов на возражения; FAQPage — по желанию, только на видимом тексте;
@@ -359,7 +359,7 @@ positions_2026:
   self_reviews: >-
     Отзывы о своей организации на своём сайте (в JSON-LD или виджетом Яндекс Карт/Google) не дают звёзд: «ineligible for star
     review feature». Разметку Review/AggregateRating для себя не добавлять; рейтинг в Яндексе — через Яндекс Бизнес; отзывы на
-    странице — текстом с источником и датой (F, I) [документация].
+    странице — текстом с источником и датой (site 05, site 08) [документация].
   not_found: 'Страница 404 отдаёт HTTP 404; soft 404 (200 или редирект на главную) — дефект B [документация].'
   sitelinks_search_box: 'SearchAction не нужен (Google снял 11.2024); не вредит [документация].'
   howto_course_info_learning_video: 'Сняты Google (2023, 2025-11); не добавлять [документация].'
@@ -387,7 +387,7 @@ yandex:
     rule: 'сайт добавлен в Вебмастер: регион (при локальном бизнесе), «Видимость сайта в Алисе AI», рендеринг JS — «не выполнять», если SSR/SSG'
 
 checks:
-  # Что geo_probe.py проверяет автоматически (флаг → правило → серьёзность). Остальное — ручная проверка или ia_probe.py (G).
+  # Что geo_probe.py проверяет автоматически (флаг → правило → серьёзность). Остальное — ручная проверка или ia_probe.py.
   - {flag: page-status-*, rule: hk-access-status, severity: B}
   - {flag: antibot-challenge, rule: hk-access-waf, severity: B}
   - {flag: tls-untrusted-chain, rule: hk-access-tls, severity: B}
@@ -438,13 +438,13 @@ info_flags:
   - {flag: cloudflare-managed-robots, note: 'managed-блок Cloudflare запрещает обучение восьми ботам — сверить с search.ai_bots_policy; при allow-all это S'}
 
 site_checks:
-  # Уровень сайта (многостраничник): ia_probe.py (G) + geo_probe.py. Структура — G (../06-multipage-ia/), техника — здесь.
+  # Уровень сайта (многостраничник): ia_probe.py + geo_probe.py. Структура — ../06-multipage-ia/, техника — здесь.
   - id: hk-site-sitemap
     rule: >-
       sitemap.xml отвечает 200 и XML (не 301 на главную), объявлен строкой Sitemap в robots.txt; в нём только абсолютные
       канонические URL с ответом 200 (без редиректов и noindex) и честным lastmod; ≤ 50 000 URL и 50 МБ на файл (01 §2.4)
     severity: S
-    check: 'ia_probe.py (G): sitemap, коды URL, относительные <loc>'
+    check: 'ia_probe.py: sitemap, коды URL, относительные <loc>'
     evidence: '[проверено] не объявлен в robots.txt — 4 из 20; URL с редиректом — 6; относительные <loc> — ilyabirman (241 из 241); sitemap kontur — 301 на главную'
   - id: hk-site-soft-404
     rule: 'случайный несуществующий URL → 404 на каждом шаблоне сайта, не только на главной (hk-access-404)'
@@ -490,11 +490,11 @@ sources:
   - {id: yandex-prohibition, title: 'Как запретить индексирование (noindex, noscript, Алиса)', date: 2026-09-24, url: 'https://yandex.ru/support/webmaster/ru/adding-site/indexing-prohibition'}
   - {id: yandex-services, title: 'Услуги (фид YML)', date: 2026-09-11, url: 'https://yandex.ru/support/webmaster/ru/search-appearance/offices/about'}
   - {id: meta-crawlers, title: 'Meta Web Crawlers (OG в первых 1 МБ)', date: 2026-05-21, url: 'https://developers.facebook.com/docs/sharing/webmasters/web-crawlers'}
-  - {id: h01, title: 'Опыт H/01: geo_probe.py на 116 страницах корпуса text D', date: 2026-09-24, url: '../99-raw/experiments/H/01-geo-probe-corpus-d/README.md'}
-  - {id: h02, title: 'Опыт H/02: geo_probe.py на 52 посадочных выборки M (пересчёт X2 — 69 из 70 итоговой)', date: 2026-09-24, url: '../99-raw/experiments/H/02-geo-probe-sample-m/README.md'}
-  - {id: g01, title: 'Опыт G/01: ia_probe.py на 20 многостраничниках', date: 2026-09-24, url: '../99-raw/experiments/G/01-ia-probe/README.md'}
-  - {id: g-06-02, title: 'G: навигация, перелинковка, языки (крошки §2.1, ссылки §3.6, языки §5.5, живые сайты §6)', date: 2026-09-24, url: '../06-multipage-ia/02-navigation-linking-i18n.md'}
+  - {id: h01, title: 'Замер geo_probe.py на 116 страницах корпуса text', date: 2026-09-24}
+  - {id: h02, title: 'Замер geo_probe.py на 52 посадочных из замера живых страниц (пересчёт — 69 из 70 итоговой выборки)', date: 2026-09-24}
+  - {id: g01, title: 'Замер ia_probe.py на 20 многостраничниках', date: 2026-09-24}
+  - {id: g-06-02, title: 'Навигация, перелинковка, языки (крошки §2.1, ссылки §3.6, языки §5.5, живые сайты §6)', date: 2026-09-24, url: '../06-multipage-ia/02-navigation-linking-i18n.md'}
   - {id: google-breadcrumb, title: 'Breadcrumb (BreadcrumbList) structured data — multiple breadcrumb trails', date: 2026-09-24, url: 'https://developers.google.com/search/docs/appearance/structured-data/breadcrumb'}
   - {id: yandex-clean-param, title: 'Директива Clean-param (параметры, которые удаляются автоматически)', date: 2026-09-24, url: 'https://yandex.ru/support/webmaster/ru/robot-workings/clean-param'}
   - {id: yandex-crawl-delay, title: 'Директива Crawl-delay (не учитывается с 2018-02-22)', date: 2026-09-24, url: 'https://yandex.ru/support/webmaster/ru/robot-workings/crawl-delay'}
-  - {id: w2-digests, title: 'Дайджесты W2: Splitt «Maybe it isn’t JavaScript» (2024-10-23), SOTR 113 «Should you block your Search result pages?» (2026-07-30)', date: 2026-09-24, url: '../91-videos/digests/0yedoWKPgo4.md'}
+  - {id: w2-digests, title: 'Видео: Splitt «Maybe it isn’t JavaScript» (2024-10-23), SOTR 113 «Should you block your Search result pages?» (2026-07-30)', date: 2026-09-24}

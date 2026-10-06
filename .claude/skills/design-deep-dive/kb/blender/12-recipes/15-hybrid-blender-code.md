@@ -2,8 +2,8 @@
 
 Испытание 15-showcase · рецепт по итогам фаз 1–2 · агент RC, 26.09.2026 · Blender 5.2.2 (glTF-IO 5.2.40), gltf-transform 4.5.0,
 нативный gltfpack 1.2 (BasisU внутри), three 0.186.0, Chromium headless / Iris Xe · доказательства — «Звено» C (дорожка Z: ассет,
-`99-raw/experiments/Z/zweb_all.py`; дорожка CD: гибридный крюк `15-showcase/_shared/code3d/`), клавиатура «Ё» C (дорожка KB:
-`99-raw/experiments/KB/06-export/`, `08-pages/src/model_c.js`) · проверки RC — `99-raw/notes/trial/RC-checks/`.
+`examples/15-hybrid-blender-code/src/zweb_all.py`; дорожка CD: гибридный крюк `15-showcase/_shared/code3d/`), клавиатура «Ё» C (дорожка KB:
+`examples/17-khr-materials-variants/src/export_web.py`, `examples/15-hybrid-blender-code/src/model_c.js`) · проверки RC — `99-raw/notes/trial/RC-checks/`.
 
 ## Выжимка рецепта
 
@@ -87,7 +87,7 @@
 больше, чем материалов в меше [проверено: Z `HANDOFF-2.md §2`].
 
 ```python
-# [проверено: 99-raw/experiments/Z/zweb_all.py, запуск run_c_export.sh 25.09 21:30] Blender 5.2.2 — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/15-hybrid-blender-code/src/zweb_all.py, запуск run_c_export.sh 25.09 21:30] Blender 5.2.2 — отрывок [не исполняется] # run: skip
 # --- разнести модули, слои и кабель в пространстве на время запекания (AO — только своё)
 for e in movers:
     mw = e.matrix_world.copy(); e.parent = None; e.matrix_world = mw
@@ -128,8 +128,8 @@ for m in mats:
 
 ```bash
 # run: skip — [проверено] постобработка без слияния
-T=/home/mm/Документы/app-design/blender-research/99-raw/tools
-export PATH="$T/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$T/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
+T=$DDD_HOME
+export PATH="$T/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$T/bin/gltfpack-1.2:$PATH"
 cd $T/node && npx --no-install gltf-transform optimize zveno_raw.glb zveno.glb --compress meshopt --texture-compress webp \
   --flatten false --join false --palette false --simplify false                   # «Звено»: узлы модулей и материалы по ролям целы
 gltfpack -i kb_web_raw.glb -o kb_desk.glb -cc -tw -kn -ke -km -vtf -vpf             # клавиатура, десктоп (KB3): WebP, атлас 2048
@@ -197,7 +197,7 @@ S = createScene(canvas, { context: gl, dprMax: mqMobile.matches ? 1.25 : 1.5, qu
 варианта (`customProgramCacheKey`).
 
 ```js
-// [проверено: 99-raw/experiments/KB/08-pages/src/model_c.js, buildModelC()] three r186 — отрывок
+// [проверено: 12-recipes/examples/15-hybrid-blender-code/src/model_c.js, buildModelC()] three r186 — отрывок
 function patchUV(mat) {
   if (mat.userData.kbPatched) return mat;
   mat.userData.kbPatched = true;
@@ -226,7 +226,7 @@ function patchUV(mat) {
 ## 7. Страница C: постер = LCP, 3D после `load`, 0 кадров в покое
 
 ```js
-// [проверено: 99-raw/experiments/KB/08-pages/src/main_3d.js и page.js; ворота KB 11-gates/c_kb2/] — отрывок
+// [проверено: 12-recipes/examples/15-hybrid-blender-code/src/main_3d.js и page.js] — отрывок
   if (reduceMQ.matches) {                        // reduce: three не грузится, 0 кадров WebGL
     startPage(createAdapterB({ pressFrames: cfg.staticPressFrames, turnFrames: cfg.staticTurnFrames }));
     logTiming({ mode: 'reduce-static' });
@@ -331,7 +331,7 @@ KB2 (B, C и A клавиатуры) — 20:14–21:40, машина 3331 с [п
 
 ## Ссылки
 
-Крюк и контракт — `15-showcase/_shared/code3d/README.md`; ассет — `99-raw/experiments/Z/HANDOFF-2.md`, `zweb_all.py`, `run_c_post.sh`;
-клавиатура — `99-raw/experiments/KB/HANDOFF-2.md`, `06-export/`, `08-pages/src/`, `15-showcase/keyboard/README.md`; экспорт — пресеты E
+Крюк и контракт — `15-showcase/_shared/code3d/README.md`; ассет — `99-raw/experiments/Z/HANDOFF-2.md`, `examples/15-hybrid-blender-code/src/zweb_all.py`, `examples/15-hybrid-blender-code/src/zbuild.py`, `run_c_post.sh`;
+клавиатура — `99-raw/experiments/KB/HANDOFF-2.md`, `examples/17-khr-materials-variants/src/export_web.py`, `examples/15-hybrid-blender-code/src/`, `15-showcase/keyboard/README.md`; экспорт — пресеты E
 `../08-export-gltf/04-validation-pitfalls-presets.md §7`, выжимка `15-showcase/_shared/digests/03-web-delivery.md` D; запекание базы —
 `../08-export-gltf/02` §5–6; страница — `../09-web-runtime/examples/hero-lazy/`; варианты — `17-khr-materials-variants.md`; код — `14-product-in-code.md`.

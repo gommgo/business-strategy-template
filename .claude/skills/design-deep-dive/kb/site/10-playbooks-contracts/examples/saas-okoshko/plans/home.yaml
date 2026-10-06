@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · план лендинга SaaS — перевод плана E v0.9 в v1; подача — treatment creative A/02.
+# ПРИМЕР v1 · план лендинга SaaS; подача — treatment creative.
 page_plan_version: '1'
 checked: '2026-09-24'
 status: proposed
@@ -52,7 +52,7 @@ page:
     - traffic_source: referral
       awareness: product-aware
       share: 0.1
-    rule: Смысла (meaning) у демо нет — уровни по таблице C 02 §4. Порядок под solution-aware (0,7); для problem-aware из соцсетей (0,2)
+    rule: Смысла (meaning) у демо нет — уровни по таблице site 03/02 §4. Порядок под solution-aware (0,7); для problem-aware из соцсетей (0,2)
       — секция проблемы третьей; отдельная страница не нужна (различается один признак)
   traffic:
   - traffic_source: paid-search
@@ -124,11 +124,11 @@ page:
         slots:
         - hero.headline
         - hero.eyebrow
-      event_param: hero_variant (параметр события — P)
+      event_param: hero_variant (параметр события — events.yaml)
   length:
     sections_min: 7
     sections_max: 11
-    basis: 'C 02 §1.3: SaaS 7–11'
+    basis: 'site 03/02 §1.3: SaaS 7–11'
   budget_profile: landing-saas@L1
   ambition_level: L1
   navigation:
@@ -142,7 +142,7 @@ page:
     indexable: true
     h1: hero.headline
     ssr_required: true
-    notes: разметка SoftwareApplication и Offer — решение H; цены тарифов — текстом в HTML
+    notes: разметка SoftwareApplication и Offer — по head-kit.yaml; цены тарифов — текстом в HTML
     canonical: self
     structured_data:
     - Organization
@@ -168,7 +168,7 @@ page:
     - req:LR-RU-19
     - req:LR-RU-22
     - req:LR-RU-24
-    notes: 'регистрация и оплата — в продукте (/signup): согласие и оферта там (I); не юридическое заключение'
+    notes: 'регистрация и оплата — в продукте (/signup): согласие и оферта там (site 08); не юридическое заключение'
   analytics:
     systems:
     - yandex-metrica
@@ -176,7 +176,7 @@ page:
     - start-trial
     - message
     load_after_consent: true
-    notes: trial-start и sign-up-complete — события продукта на /signup (P); на лендинге — cta-click с параметром места
+    notes: trial-start и sign-up-complete — события продукта на /signup (events.yaml); на лендинге — cta-click с параметром места
   treatment:
     art_direction_ref: ../../../../../creative/01-creative-direction/examples/art-direction-okoshko.json#/directions/0
     motion_level: expressive
@@ -487,7 +487,7 @@ sections:
       note: логотипов клиентов с согласием нет — блок logo-wall не ставится
   notes:
     structure: логотипы — только после письменных согласий (missing:client-logos)
-    legal: числа — с датой и источником (I)
+    legal: числа — с датой и источником (site 08)
   treatment:
     level: L0
     visual_role: support
@@ -745,7 +745,7 @@ sections:
       - disclaimer
   notes:
     legal: не обещать «без неявок» (never_claim nc-zero-noshow) и рост выручки (nc-revenue-growth)
-    structure: типичный результат рядом с лучшим — text B2 §5.4
+    structure: типичный результат рядом с лучшим — text 02/03 §5.4
   treatment:
     level: L0
     visual_role: support
@@ -935,7 +935,7 @@ sections:
       event: event:cta-click
   notes:
     seo: цены обоих периодов — текстом в HTML
-    legal: условия отмены и возврата — ссылкой рядом (I)
+    legal: условия отмены и возврата — ссылкой рядом (site 08)
     conversion: состав тарифов — одинаковым набором строк; пункты составов дописывает text по фактам
   events:
   - trigger: view
@@ -1051,7 +1051,7 @@ sections:
       binds:
       - qa-4-a
   notes:
-    seo: ответы — в HTML; FAQPage — решение H
+    seo: ответы — в HTML; FAQPage — по head-kit.yaml
   treatment:
     level: L0
     visual_role: calm
@@ -1113,7 +1113,7 @@ sections:
       action: message
       target:
         kind: messenger
-        value: чат поддержки или Telegram — F
+        value: чат поддержки или Telegram — site 05
       style: secondary
       label: cta-secondary-label
       event: event:messenger-click
@@ -1204,7 +1204,7 @@ overlays:
       style: primary
       label: cta-label
       event: event:cta-click
-  notes: запас снизу для панели встроенного браузера (C 02 §4)
+  notes: запас снизу для панели встроенного браузера (site 03/02 §4)
 - id: cookie
   block: cookie-banner
   state: auto
@@ -1216,7 +1216,7 @@ overlays:
       slot: cta-label
     - id: reject
       slot: cta-label
-  notes: Метрика — после согласия (I, P)
+  notes: Метрика — после согласия (site 08, site 07)
 - id: chat
   block: chat-widget
   state: 'off'
@@ -1231,4 +1231,4 @@ open_questions:
 - Логотипы салонов с согласием (missing:client-logos) — блок logo-wall не ставится
 - Интеграции (missing:integrations-list) — секция integrations не ставится до списка
 - Состав тарифов по пунктам — одинаковый набор строк у всех тарифов; пункты — из фактов (text)
-- Форма регистрации и письмо подтверждения (missing:confirm-link-expiry) — F и text; экран регистрации — ux 05-01
+- Форма регистрации и письмо подтверждения (missing:confirm-link-expiry) — site 05 и text; экран регистрации — ux 05-01

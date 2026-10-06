@@ -26,7 +26,7 @@ voice.schema.yaml: схема и смысловые проверки.
      бренда рядом не нужен; brand.facts_ref ему обязателен, только когда образцы ссылаются на факты;
   5. отрицательные мутации (только --selftest; профиль бренда и голос продукта): каждая обязана дать ошибку схемы или
      смысловую ошибку.
-Выход: 0 — всё прошло; 1 — есть ошибки. Итог печатается и пишется в $DDD_HOME/out/text/validate_voice.last-run.txt.
+Выход: 0 — всё прошло; 1 — есть ошибки; 2 — нет jsonschema. Итог печатается и пишется в $DDD_HOME/out/text/validate_voice.last-run.txt.
 """
 import copy
 import re
@@ -38,7 +38,8 @@ import yaml
 try:
     import jsonschema
 except ImportError:  # pragma: no cover
-    sys.exit("нужен jsonschema: запускайте Python окружения скилла")
+    print("validate_voice: нужен jsonschema — запускайте Python окружения скилла", file=sys.stderr)
+    sys.exit(2)
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE.parent / "lib"))

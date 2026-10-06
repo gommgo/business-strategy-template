@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:creative:motion-spec:1",
   "title": "motion-spec v1 — спецификация движения страницы для исполнителя (страница → секции → моменты, раскадровка, видео-референсы)",
-  "description": "Владелец — creative. Движение передаётся исполнителю таймлайном, а не прилагательными: у каждого момента — класс, функция, триггер, элемент, свойства from → to, длительность (мс, токен или доля базы) или диапазон прокрутки (vh, % прогресса), кривая-токен, стаггер, повтор, прерывание, reduce, телефон, пауза. Числа — из marketing-tokens.json motion.marketing (E); эффекты — effects.yaml (F); секции и слоты — page-plan v1 (site); подача секции — treatment v1 (motion_spec_ref → #/sections/<id>); свойства — не шире уровня страницы (01-creative-direction/ambition-levels.yaml#levels.motion_hints.properties_allowed). Проекция во вход холста — x-canvas-map; строки моментов, блок движения и JSON чисел на секцию для модуля эффекта — ../../scripts/creative/spec_check.py moments, motion-md, values. Сверка записи со спецификацией — motion_check.py. Документ: 09-ai-execution-evaluation/02-motion-spec-storyboard-handoff.md.",
+  "description": "Владелец — creative. Движение передаётся исполнителю таймлайном, а не прилагательными: у каждого момента — класс, функция, триггер, элемент, свойства from → to, длительность (мс, токен или доля базы) или диапазон прокрутки (vh, % прогресса), кривая-токен, стаггер, повтор, прерывание, reduce, телефон, пауза. Числа — из marketing-tokens.json motion.marketing; эффекты — effects.yaml; секции и слоты — page-plan v1 (site); подача секции — treatment v1 (motion_spec_ref → #/sections/<id>); свойства — не шире уровня страницы (01-creative-direction/ambition-levels.yaml#levels.motion_hints.properties_allowed). Проекция во вход холста — x-canvas-map; строки моментов, блок движения и JSON чисел на секцию для модуля эффекта — ../../scripts/creative/spec_check.py moments, motion-md, values. Сверка записи со спецификацией — motion_check.py. Документ: 09-ai-execution-evaluation/02-motion-spec-storyboard-handoff.md.",
   "x-version": "1.0",
   "x-checked": "2026-09-29",
   "x-status": "draft",
@@ -62,8 +62,8 @@
       "properties": {
         "page_plan": {"type": "string", "description": "page-plan v1 (site) — источник id секций, слотов, групп."},
         "art_direction": {"type": "string"},
-        "tokens": {"type": "string", "description": "marketing-tokens.json проекта (motion.marketing — E)."},
-        "effects": {"type": "string", "description": "06-effects-catalog/effects.yaml (F)."},
+        "tokens": {"type": "string", "description": "Файл токенов проекта (DTCG): ветка `motion` — шкала движения проекта; `spec_check.py spec` читает её вместе с токенами базы."},
+        "effects": {"type": "string", "description": "06-effects-catalog/effects.yaml."},
         "copy_deck": {"type": "string", "description": "copy-deck v1 (text) — длина текстов для движения текста."},
         "block_treatments": {"type": "string"}
       }
@@ -97,7 +97,7 @@
     "token-ref": {
       "type": "string",
       "pattern": "^motion\\.marketing\\.[a-z0-9-]+\\.[a-z0-9-]+$",
-      "description": "Путь токена marketing-tokens.json, например motion.marketing.duration.reveal."
+      "description": "Путь токена `motion.marketing.<группа>.<имя>` базы (`marketing-tokens.json`) или проекта (`refs.tokens`)."
     },
     "duration": {
       "type": "object",
@@ -166,7 +166,7 @@
           "type": "number",
           "minimum": 0,
           "maximum": 1,
-          "description": "Доля элемента в зоне (E 05-motion/02 §2.3: 0,15–0,25)."
+          "description": "Доля элемента в зоне (creative 05/02 §2.3: 0,15–0,25)."
         },
         "root_margin": {"type": "string"},
         "once": {"type": "boolean"},
@@ -196,7 +196,7 @@
           "type": "object",
           "additionalProperties": false,
           "required": ["start", "end"],
-          "description": "Доли прогресса сцены 0–1 (сцена задаётся долями, а не временем — E 05-motion/02 §4.1).",
+          "description": "Доли прогресса сцены 0–1 (сцена задаётся долями, а не временем — creative 05/02 §4.1).",
           "properties": {
             "start": {"type": "number", "minimum": 0, "maximum": 1},
             "end": {"type": "number", "minimum": 0, "maximum": 1}
@@ -208,7 +208,7 @@
         },
         "subject": {
           "$ref": "#/$defs/target",
-          "description": "Чей view() задаёт диапазон scroll-scrub (по умолчанию — сам target). Опыт I/02: диапазон по списку, а линия короче списка → конец линии отстаёт от маркеров до 98 px; subject = сама линия → 0 px."
+          "description": "Чей view() задаёт диапазон scroll-scrub (по умолчанию — сам target). Диапазон по списку, а линия короче списка → конец линии отстаёт от маркеров до 98 px; subject = сама линия → 0 px."
         },
         "axis": {"enum": ["block", "inline"], "default": "block"}
       }
@@ -221,11 +221,11 @@
         "id": {"$ref": "#/$defs/id"},
         "class": {
           "enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition"],
-          "description": "E 05-motion/01 §1.3: от класса зависят 2.2.2, reduce, бюджет внимания."
+          "description": "creative 05/01 §1.3: от класса зависят 2.2.2, reduce, бюджет внимания."
         },
         "purpose": {
           "enum": ["attention", "guide", "inform", "continuity", "orient", "narrate", "feedback", "personality", "loading"],
-          "description": "Функция движения (Paquet [V:J6aNMFZogyk 04:14]; W1): движение без функции — кандидат на удаление."
+          "description": "Функция движения (Paquet [V:J6aNMFZogyk 04:14]): движение без функции — кандидат на удаление."
         },
         "transition_type": {
           "enum": ["entrance", "exit", "persistent"],
@@ -286,7 +286,7 @@
             "idle_pixels_pct_s_max": {
               "type": "number",
               "minimum": 0,
-              "description": "Громкость петли: «дыхание» ≤ 2,5 %/с; > 5 % — громкий слой (E 05-motion/01 §5.4)."
+              "description": "Громкость петли: «дыхание» ≤ 2,5 %/с; > 5 % — громкий слой (creative 05/01 §5.4)."
             }
           }
         },
@@ -350,7 +350,7 @@
         },
         "lcp": {
           "enum": ["is-lcp", "not-lcp"],
-          "description": "is-lcp — элемент — кандидат LCP: без анимации или вход по норме CRV-AL-09 (01-creative-direction/ambition-levels.yaml): transform со сдвигом ≤ 24 px, clip-path или opacity от 0,01; не из opacity: 0 и не маской строк (E 05-motion/02 §10)."
+          "description": "is-lcp — элемент — кандидат LCP: без анимации или вход по норме CRV-AL-09 (01-creative-direction/ambition-levels.yaml): transform со сдвигом ≤ 24 px, clip-path или opacity от 0,01; не из opacity: 0 и не маской строк (creative 05/02 §10)."
         },
         "params": {
           "type": "object",
@@ -448,12 +448,12 @@
         "describe": {"type": "string", "description": "Кадр, который можно прочитать и на котором можно остановиться."},
         "anchor": {
           "$ref": "#/$defs/target",
-          "description": "Станция = момент, когда якорь (маркер шага, заголовок, кадр) на линии окна anchor_line; надёжнее доли at при разной высоте шагов. Якорь — точка, а не группа: элемент с data-anchor-point (маркер шага) внутри группы; центр шага и центр маркера различаются на полвысоты шага (K/02: −27…−98 px у v1.0)."
+          "description": "Станция = момент, когда якорь (маркер шага, заголовок, кадр) на линии окна anchor_line; надёжнее доли at при разной высоте шагов. Якорь — точка, а не группа: элемент с data-anchor-point (маркер шага) внутри группы; центр шага и центр маркера различаются на полвысоты шага (замер: −27…−98 px)."
         },
         "anchor_line": {"enum": ["viewport-center", "viewport-top", "viewport-bottom"], "default": "viewport-center"}
       },
       "anyOf": [{"required": ["at"]}, {"required": ["anchor"]}],
-      "description": "Станция скраба — кадр, на котором можно остановиться. Допуск проверки — ±24 px включительно после округления до целого (край цели минус линия окна, tip_offset_px; I shoot_stations.py и K motion_check.py; X-57, S1 2026-09-25)."
+      "description": "Станция скраба — кадр, на котором можно остановиться. Допуск проверки — ±24 px включительно после округления до целого (край цели минус линия окна, tip_offset_px; motion_check.py; X-57)."
     },
     "frame": {
       "type": "object",
@@ -481,7 +481,7 @@
           "enum": ["keyframe", "onion-skin", "contact-sheet", "wireframe"],
           "description": "onion-skin — «advanced wireframe»: полупрозрачные положения объекта вдоль пути [V:Ulgy6xIrdPg 14:57]."
         },
-        "check": {"type": "string", "description": "Что должно совпасть на кадре записи (для motion_check K)."}
+        "check": {"type": "string", "description": "Что должно совпасть на кадре записи (для motion_check)."}
       }
     },
     "reference": {
@@ -490,7 +490,7 @@
       "required": ["id", "kind", "source", "take", "do_not_take"],
       "properties": {
         "id": {"$ref": "#/$defs/id"},
-        "ref": {"type": "string", "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Запись библиотеки B, если есть."},
+        "ref": {"type": "string", "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Запись библиотеки референсов, если есть."},
         "kind": {
           "enum": ["video", "frames", "prototype-video"],
           "description": "video — ролик mp4 (лежит в design/<surface>/motion/, исполнителю не передаётся); frames — лист 3×3 и кадры с таймкодами: так видео-референс доходит до исполнителя; prototype-video — ролик-прототип (Figma, After Effects, лабораторная страница)."
@@ -539,7 +539,7 @@
               "to": {"type": "string", "pattern": "^[0-9]{2}:[0-9]{2}(\\.[0-9])?$"},
               "what": {
                 "type": "string",
-                "description": "Объект + свойство + число (B 02-references-moodboards/03 §3.2), не прилагательное."
+                "description": "Объект + свойство + число (creative 02/03 §3.2), не прилагательное."
               },
               "maps_to": {"type": "array", "items": {"$ref": "#/$defs/id"}, "description": "id моментов этой спецификации."}
             }
@@ -568,7 +568,7 @@
           "properties": {
             "pin": {
               "enum": ["none", "sticky", "pin-transform", "pin-padding"],
-              "description": "sticky или pinType transform — без CLS (E/02: 0 против 1,6–2,0 у pin-padding)."
+              "description": "sticky или pinType transform — без CLS (замер: 0 против 1,6–2,0 у pin-padding)."
             },
             "length_vh": {
               "type": "number",
@@ -657,7 +657,7 @@
               "gate": {
                 "type": "string",
                 "pattern": "^EG-[A-Z0-9]+-[0-9]+$",
-                "description": "id ворот 09-ai-execution-evaluation/effect-gates.yaml (K), которые проверяют пункт."
+                "description": "id ворот 09-ai-execution-evaluation/effect-gates.yaml, которые проверяют пункт."
               },
               "metric": {
                 "type": "string",
@@ -666,7 +666,7 @@
               }
             }
           },
-          "description": "Проверки записи против замысла (вход motion_check.py K)."
+          "description": "Проверки записи против замысла (вход motion_check.py)."
         },
         "notes": {"type": "string"},
         "fallback": {
@@ -718,7 +718,7 @@
           "properties": {
             "required": {
               "type": "boolean",
-              "description": "L2 — всегда; L1 — при петле с page-toggle или ≥ 2 scroll-linked секциях (E 05-motion/01 §4.4)."
+              "description": "L2 — всегда; L1 — при петле с page-toggle или ≥ 2 scroll-linked секциях (creative 05/01 §4.4)."
             },
             "attr": {"const": "data-motion"},
             "states": {
@@ -729,7 +729,7 @@
             "placement": {"enum": ["sticky-header", "first-loop", "footer"]},
             "remember": {"type": "boolean"}
           },
-          "description": "Переключатель «меньше движения» = единая пауза: кнопка с aria-pressed и именем («Меньше движения», «Пауза анимации»), атрибут data-motion на <html>: нет — как в системе; reduced; full; paused (E 05-motion/01 §4.4, токены D). У G (07-stack/02 §2.1) значение reduce — motion_check принимает оба; предложение G — перейти на reduced."
+          "description": "Переключатель «меньше движения» = единая пауза: кнопка с aria-pressed и именем («Меньше движения», «Пауза анимации»), атрибут data-motion на <html>: нет — как в системе; reduced; full; paused (creative 05/01 §4.4, creative 07/02 §2.1); motion_check принимает и значение reduce."
         },
         "scroll": {
           "type": "object",
@@ -781,7 +781,7 @@
             "long_frames_pct_max": {"type": "number", "minimum": 0},
             "cls_scroll_max": {"type": "number", "minimum": 0}
           },
-          "description": "Бюджет движения страницы; motion_check применяет его как «строже или равно» ворот уровня effect-gates.yaml (K): мягче ворот — предупреждение."
+          "description": "Бюджет движения страницы; motion_check применяет его как «строже или равно» ворот уровня effect-gates.yaml: мягче ворот — предупреждение."
         },
         "never": {
           "type": "array",
@@ -799,8 +799,8 @@
       "data-group": "<группа-N> на экземпляр группы (step-2, row-1)",
       "data-fx": "<имя> на декоративный элемент подачи (target <секция>.fx-<имя>)",
       "data-moment": "<id момента> на элемент, который двигает момент, если это не слот целиком",
-      "data-effect": "<id эффекта effects.yaml> — загрузчик модуля эффекта G",
-      "data-anchor-point": "на точку якоря станции внутри группы (маркер шага) — зонд станций берёт её вместо центра группы (K/02; X-57)"
+      "data-effect": "<id эффекта effects.yaml> — загрузчик модуля эффекта (creative 07/02 §6)",
+      "data-anchor-point": "на точку якоря станции внутри группы (маркер шага) — зонд станций берёт её вместо центра группы (X-57)"
     },
     "resolve_order": ["[data-moment=<id момента>]", "[data-section=<s>] [data-slot=<x>] | [data-group=<g>] | [data-fx=<f>]", "#<s> [data-slot=<x>]", "selector_hint"]
   }

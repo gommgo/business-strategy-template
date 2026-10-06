@@ -2,8 +2,7 @@
 <!-- Приём 1 · «мышь ведёт видео»: облёт флакона SC-03 (Kling 3 std 5 с 720p, 50 ₽) — горизонталь указателя выбирает кадр,
      сцена догоняет плавно (lerp 160 мс), при неподвижной руке — холостой дрейф с кнопкой паузы (WCAG 2.2.2).
      Доставка — на выбор в «лаборатории» ниже: видео с коротким GOP (AV1 / H.264, GOP 1 / 4 / 8) или секвенция кадров на canvas.
-     Постер = декодированный кадр 0 финального AV1 (LCP). reduce / Save-Data — 0 байт медиа, облёт по кнопке.
-     Агент B, сессия 4, 25.09.2026. Сборка ассетов — 99-raw/experiments/B/10-scrub-delivery/build_scrub.py. -->
+     Постер = декодированный кадр 0 финального AV1 (LCP). reduce / Save-Data — 0 байт медиа, облёт по кнопке. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -63,7 +62,7 @@
 </head>
 <body>
 <header class="topbar">
-  <a class="crumb" href="../index.html"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>Галерея приёмов</a>
+  <span class="crumb"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M10 3 5 8l5 5"/></svg>Галерея приёмов</span>
   <span class="spacer"></span><span>01 / 08</span>
 </header>
 
@@ -104,8 +103,8 @@
     <li><b>Вес на проводе</b><span>постер 18 КБ · мышь: 61 кадр AVIF 1 250 КБ («грубо → точно») · касание: AV1 GOP 4 — 998 КБ (запас H.264 — 1 660 КБ)</span></li>
     <li><b>Как сделано</b><span>без звука → BT.601 → BT.709 с полными тегами → AV1 CRF 32 / H.264 CRF 22, ключ каждые 4 кадра → <code>scrub.js</code></span></li>
   </ul>
-  <p class="note lab-note">Исходник: <a href="../../../../experiments/_polza/SC/2026-09-25/SC-03-kling-orbit-velmora__kling-v3__gen_2214660770481180673.mp4">SC-03 · kling/v3 · 3,7 МБ</a>
-    (кадр-вход <a href="../../../../experiments/_polza/SC/2026-09-25/SC-02-product-designed-sunburst-2k__openai-gpt-image-2.5-sunburst__gen_2214658960213676033.png">SC-02 Sunburst 2K</a>);
+  <p class="note lab-note">Исходник: SC-03 · kling/v3 · 3,7 МБ
+    (кадр-вход SC-02 Sunburst 2K);
     флакон и надпись VELMORA придуманы моделью по брифу витрины. Метка AIGC Kling в файлах сохранена.</p>
 
   <div class="cols" style="margin-top:40px">
@@ -164,7 +163,7 @@
   </div>
 </section>
 
-<footer class="foot">Галерея приёмов продукта заказчика · ai-media-research, фаза 5, сессия 4 (25.09.2026) · <a href="../index.html">все приёмы</a> ·
+<footer class="foot">Галерея приёмов продукта заказчика · ai-media ·
   ассет сгенерирован нейросетью (Kling 3, GPT Image 2.5) — метки вендора сохранены.</footer>
 
 <script type="application/json" id="scrub-manifest">{"source": "SC-03 · kling/v3 std 5 с 720p · 50 ₽ · 25.09.2026", "fps": 24, "frames_video": 121, "duration": 5.0417, "step": 2, "video": {"orbit-h264-g1": {"src": "assets/orbit-h264-g1.mp4", "codec": "h264", "gop": 1, "crf": 22, "bytes": 3248250, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-h264-g4": {"src": "assets/orbit-h264-g4.mp4", "codec": "h264", "gop": 4, "crf": 22, "bytes": 1700036, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-h264-g8": {"src": "assets/orbit-h264-g8.mp4", "codec": "h264", "gop": 8, "crf": 22, "bytes": 1294233, "type": "video/mp4; codecs=\"avc1.64001f\""}, "orbit-av1-g1": {"src": "assets/orbit-av1-g1.mp4", "codec": "av1", "gop": 1, "crf": 32, "bytes": 2114304, "type": "video/mp4; codecs=\"av01.0.05M.10\""}, "orbit-av1-g4": {"src": "assets/orbit-av1-g4.mp4", "codec": "av1", "gop": 4, "crf": 32, "bytes": 1021393, "type": "video/mp4; codecs=\"av01.0.05M.10\""}, "orbit-av1-g8": {"src": "assets/orbit-av1-g8.mp4", "codec": "av1", "gop": 8, "crf": 32, "bytes": 680313, "type": "video/mp4; codecs=\"av01.0.05M.10\""}}, "frames": {"seq-avif-1280": {"pattern": "assets/seq-avif-1280/f{i}.avif", "count": 61, "format": "avif", "width": 1280, "height": 720, "bytes": 1279539}, "seq-webp-1280": {"pattern": "assets/seq-webp-1280/f{i}.webp", "count": 61, "format": "webp", "width": 1280, "height": 720, "bytes": 1592746}, "seq-avif-960": {"pattern": "assets/seq-avif-960/f{i}.avif", "count": 61, "format": "avif", "width": 960, "height": 540, "bytes": 875967}}}</script>

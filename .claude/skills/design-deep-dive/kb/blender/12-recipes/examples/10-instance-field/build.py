@@ -1,4 +1,4 @@
-# Сгенерировано K/01 из 12-recipes/10-instance-field.md — блоки python в напечатанном виде, по порядку.
+# Сгенерировано run_recipes.py из 12-recipes/10-instance-field.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 35
 # Blender 5.2.2 — [проверено] рецепт 10: 900 GN-инстансов → EXT_mesh_gpu_instancing

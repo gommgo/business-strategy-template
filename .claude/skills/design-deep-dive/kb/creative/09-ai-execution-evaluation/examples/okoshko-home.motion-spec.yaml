@@ -1,7 +1,6 @@
 # Пример motion-spec v1 — «Окошко», главная (SaaS, L1). Учебный.
-# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
 # Проверка: spec_check.py spec … --plan ../site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml --overlay okoshko-home.treatment.yaml
-# Приём: sticky-окно расписания + смена состояний по прокрутке текста (CSS sticky + view(), 0 КБ JS). Уроки опыта I/02 учтены сразу:
+# Приём: sticky-окно расписания + смена состояний по прокрутке текста (CSS sticky + view(), 0 КБ JS). Учтено:
 # subject диапазона — текст ряда, станции по якорям, пометка неявки через clip-path своего ряда, ветка unsupported.
 motion_spec_version: "1.0"
 id: okoshko-home
@@ -132,5 +131,5 @@ sections:
     reduce: {strategy: no-motion-needed, describe: "как есть"}
     mobile: {strategy: same, describe: "кнопка на всю ширину"}
 open_questions:
-  - "В плане site hero несёт effect:hero-entrance-once (target hero.visual), art-direction A — «hero без появления». Пример следует art-direction; site — поправить план при v1 примеров."
+  - "В плане site hero несёт effect:hero-entrance-once (target hero.visual), art-direction — «hero без появления». Пример следует art-direction."
   - "Длина sticky-сцены 150vh (потолок L1) требует коротких текстов функций (≈ 50vh на ряд): ограничение для text (copy-deck) — длина card-body."

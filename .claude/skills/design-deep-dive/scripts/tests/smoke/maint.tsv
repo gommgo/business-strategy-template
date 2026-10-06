@@ -5,6 +5,7 @@ scripts/maint/check_links.py	maint	help; run: --selftest
 scripts/maint/ctx_monitor.py	maint	help; run: --selftest	
 scripts/maint/data/accept.yaml	data	data	
 scripts/maint/data/fixtures.yaml	data	data	
+scripts/maint/data/notlinks.tsv	data	data	
 scripts/maint/data/sync.yaml	data	data	
 scripts/maint/data/traces.tsv	data	data	
 scripts/maint/fixture_gen.py	maint	help; run: --selftest	

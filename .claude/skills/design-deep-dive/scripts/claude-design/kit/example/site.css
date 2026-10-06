@@ -1,4 +1,4 @@
-/* site.css — компоненты «Спицы» на токенах (пример kit, агент D, 2026-09-25). Только var(--…) из tokens.css:
+/* site.css — компоненты «Спицы» на токенах (пример kit). Только var(--…) из tokens.css:
    правка вида всего макета — в tokens.css, а не здесь. Раскладка — flex/grid + gap. */
 
 *, *::before, *::after { box-sizing: border-box; }

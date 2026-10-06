@@ -1,4 +1,4 @@
-"""brender.py — кадры B (предрендер) для страниц «Ё», фаза 2 (v2, дорожка KB2).
+"""brender.py — кадры B (предрендер) для страниц «Ё» (v2).
 
 python3 scripts/blender/slot_run.py --heavy --label b-<режим> -- python3 scripts/blender/blender_run.py brender.py \
     --blend kb_snow.blend --timeout 900 -- РЕЖИМ [аргументы]

@@ -5,10 +5,10 @@
 
 Запуск — два способа (оба в фоне, --factory-startup, ничего не сохраняют):
 
-  python3 99-raw/tools/bpy_probe.py <команда> [аргументы] [--out file.json]
+  python3 scripts/blender/bpy_probe.py <команда> [аргументы] [--out file.json]
       сам запускает Blender без окна и печатает чистый JSON (удобно агенту: одна команда, парсится json.loads);
-  python3 99-raw/tools/blender_run.py 99-raw/tools/bpy_probe.py -- <команда> [аргументы] [--out file.json]
-      через общий запускатель (журнал в 99-raw/experiments/_logs/); JSON — между строками
+  python3 scripts/blender/blender_run.py scripts/blender/bpy_probe.py -- <команда> [аргументы] [--out file.json]
+      через общий запускатель (журнал в $DDD_HOME/out/blender/logs/); JSON — между строками
       BPY_PROBE_JSON_BEGIN / BPY_PROBE_JSON_END. Вывод blender_run обрезается до 400 строк — для больших
       ответов (type Object, nodes GeometryNodeTree) добавляй --out.
 
@@ -43,18 +43,18 @@
                                          looks, аддоны, пути
 
 Примеры:
-  python3 99-raw/tools/bpy_probe.py node ShaderNodeMix data_type=RGBA
-  python3 99-raw/tools/bpy_probe.py node ShaderNodeBsdfPrincipled
-  python3 99-raw/tools/bpy_probe.py op export_scene.gltf --out /tmp/gltf_params.json
-  python3 99-raw/tools/bpy_probe.py type Object.rotation_mode
-  python3 99-raw/tools/bpy_probe.py enum scene.render.engine
-  python3 99-raw/tools/bpy_probe.py nodes GeometryNodeTree instance
-  python3 99-raw/tools/bpy_probe.py search smooth
-  python3 99-raw/tools/bpy_probe.py deprecated
-  python3 99-raw/tools/blender_run.py 99-raw/tools/bpy_probe.py -- node ShaderNodeMix data_type=RGBA
+  python3 scripts/blender/bpy_probe.py node ShaderNodeMix data_type=RGBA
+  python3 scripts/blender/bpy_probe.py node ShaderNodeBsdfPrincipled
+  python3 scripts/blender/bpy_probe.py op export_scene.gltf --out /tmp/gltf_params.json
+  python3 scripts/blender/bpy_probe.py type Object.rotation_mode
+  python3 scripts/blender/bpy_probe.py enum scene.render.engine
+  python3 scripts/blender/bpy_probe.py nodes GeometryNodeTree instance
+  python3 scripts/blender/bpy_probe.py search smooth
+  python3 scripts/blender/bpy_probe.py deprecated
+  python3 scripts/blender/blender_run.py scripts/blender/bpy_probe.py -- node ShaderNodeMix data_type=RGBA
 
 Коды выхода: 0 — ответ получен; 3 — ответ с полем "error" (неизвестный тип/оператор; есть did_you_mean);
-1 — Blender упал; 124 — таймаут. Проверено: Blender 5.2.2 LTS (2026-09-22), агент B blender-research.
+1 — Blender упал; 124 — таймаут. Проверено: Blender 5.2.2 LTS.
 """
 import ast
 import json
@@ -64,7 +64,7 @@ import re
 import shutil
 import subprocess
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 
 MARK_BEGIN = "BPY_PROBE_JSON_BEGIN"

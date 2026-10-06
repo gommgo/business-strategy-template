@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# build.sh · общий код 3D «Звена» (_shared/code3d, дорожка CD) · сборка без сети из npm-trial
+# build.sh · общий код 3D «Звена» (_shared/code3d) · сборка без сети из npm-зависимостей скилла
 # (three 0.186.0, postprocessing 6.39.5, n8ao 2.0.1, esbuild 0.28.2)
 #   build.sh OUT_JS_DIR [--glb] [--ktx2] [--no-studio] [--no-ik] [--no-world] [--no-post] [--no-detail] [--no-beam] [--no-trail]
 #     → OUT_JS_DIR/three-scene.js (вход, import из main.js) + OUT_JS_DIR/chunks/ (three, пост, GLB-загрузчик — отдельными чанками:
@@ -8,7 +8,7 @@
 #   --ktx2 (крюк v2, включает --glb) — KTX2Loader отдельным чанком (качается, только если GLB с KHR_texture_basisu) + транскодер
 #       basis (three 0.186.0: basis_transcoder.js + .wasm, Apache-2.0) копией в OUT_JS_DIR/basis/ — со своего домена, без CDN.
 #   Флаги --no-* выбрасывают код приёма из бандла (define __CD_*__=false) — так меряется вес приёма в КБ br.
-# Пример (гибрид C): _shared/code3d/build.sh $R/15-showcase/zveno/c-hybrid/js --glb
+# Пример (гибрид C): _shared/code3d/build.sh zveno/c-hybrid/js --glb
 set -euo pipefail
 export PATH="${DDD_NODE:+$(dirname "$DDD_NODE"):}$PATH"  # перенос: node — из PATH или DDD_NODE
 N="${DDD_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/design-deep-dive}/node/node_modules"  # перенос: npm-зависимости скилла (scripts/package.json)

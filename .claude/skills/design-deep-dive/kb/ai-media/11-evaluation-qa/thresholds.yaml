@@ -1,8 +1,8 @@
-# Пороги автоматической приёмки ассетов — читает ../../scripts/ai-media/asset_audit.py (агент K, волна 3).
-# Проверено: 2026-09-23. Каждый порог: value + source (файл базы §, опыт или документ) + status:
+# Пороги автоматической приёмки ассетов — читает ../../scripts/ai-media/asset_audit.py.
+# Проверено: 2026-09-23. Каждый порог: value + source (статья базы § или документ) + status:
 #   calibrated  — откалиброван опытом базы на эталоне или замере (число в источнике);
 #   position    — позиция базы по опыту на синтетике или по аналогии (без калибровки на выходах моделей);
-#   uncalibrated — эвристика K, пересмотреть по фазе 5 (задания K-01…K-06, 99-raw/phase5/K-plan.md).
+#   uncalibrated — эвристика, пересмотреть по живому прогону.
 # Переопределение из паспорта визуала (--dna, блок acceptance) — asset_audit.py audit_paths(); проверка полноты —
 # `python3 ../../scripts/ai-media/asset_audit.py thresholds --check`.
 schema: asset-audit-thresholds/1
@@ -10,76 +10,76 @@ checked_at: "2026-09-23"
 thresholds:
   image:
     ratio_tolerance: {value: 0.02, status: position,
-      source: "K: отклонение пропорции > 2 % — модель не выдержала aspect_ratio; нестандартные 1928×1072 Kling = 0,4 % (I 09-video-pipeline/03 §6)"}
+      source: "отклонение пропорции > 2 % — модель не выдержала aspect_ratio; нестандартные 1928×1072 Kling = 0,4 % (ai-media 09/03 §6)"}
     hero_master_min_px: {value: 2560, status: calibrated,
-      source: "A 01-web-assets-landscape/01-asset-slots-by-page-type.md выжимка п. 4 (мастер hero ≥ 2560 px, полноэкранный — 3840; замер лидеров)"}
+      source: "ai-media 01/01 выжимка п. 4 (мастер hero ≥ 2560 px, полноэкранный — 3840; замер лидеров)"}
     colorfulness_q3: {value: 54.5, status: calibrated,
-      source: "A 01-web-assets-landscape/03 §6.1.1 — Q3 фото лидеров (A/04: 51 картинка, 15 сайтов); выше — смотреть глазом, не брак"}
-    sat_share_q3: {value: 0.075, status: calibrated, source: "A 01/03 §6.1.1 (A/04), Q3 фото лидеров"}
-    hdr_index_q3: {value: 0.35, status: calibrated, source: "A 01/03 §6.1.1 (A/04), Q3 фото лидеров 0,349"}
-    clip_hi_q3: {value: 0.14, status: calibrated, source: "A 01/03 §6.1.1 (A/04), Q3 фото лидеров; к рендерам на белом не применять"}
+      source: "ai-media 01/03 §6.1.1 — Q3 фото лидеров (51 картинка, 15 сайтов); выше — смотреть глазом, не брак"}
+    sat_share_q3: {value: 0.075, status: calibrated, source: "ai-media 01/03 §6.1.1, Q3 фото лидеров"}
+    hdr_index_q3: {value: 0.35, status: calibrated, source: "ai-media 01/03 §6.1.1, Q3 фото лидеров 0,349"}
+    clip_hi_q3: {value: 0.14, status: calibrated, source: "ai-media 01/03 §6.1.1, Q3 фото лидеров; к рендерам на белом не применять"}
     colorfulness_max_rel: {value: 1.2, status: position,
-      source: "F/04 README и 06-art-direction-consistency/04 (судья F-04): colorfulness ≤ эталон бренда × 1,2; паспорт visual-dna acceptance.colorfulness_max_rel"}
-    hdr_index_max_delta: {value: 0.1, status: position, source: "F/04 README: hdr_index ≤ эталон + 0,1 (фильтр даёт +0,12…+0,18)"}
+      source: "ai-media 06/04: colorfulness ≤ эталон бренда × 1,2; паспорт visual-dna acceptance.colorfulness_max_rel"}
+    hdr_index_max_delta: {value: 0.1, status: position, source: "ai-media 06/04: hdr_index ≤ эталон + 0,1 (фильтр даёт +0,12…+0,18)"}
     filter_colorfulness_rel: {value: 1.5, status: calibrated,
-      source: "F/04 README: «Instagram-фильтр» = colorfulness > +50 % и hdr_index > +0,1 к эталону (синтетический фильтр ×1,9–2,2 на 3 CC0-фото)"}
+      source: "ai-media 06/04: «Instagram-фильтр» = colorfulness > +50 % и hdr_index > +0,1 к эталону (синтетический фильтр ×1,9–2,2 на 3 CC0-фото)"}
     warm_b_max: {value: 4.0, status: calibrated,
-      source: "A 01/03 §5.2 IMG-M04 и §6.1.1: b* нейтралей > +4 — жёлтый сдвиг; у 9 из 51 фото лидеров это стиль → warn только при нейтральном белом в паспорте"}
+      source: "ai-media 01/03 §5.2 IMG-M04 и §6.1.1: b* нейтралей > +4 — жёлтый сдвиг; у 9 из 51 фото лидеров это стиль → warn только при нейтральном белом в паспорте"}
     soft_probe_scale: {value: 2, status: uncalibrated,
       source: "08-image-post-processing/02-upscale-edit-outpaint.md §1.2: консервативное увеличение — Lanczos ×2 (копия из половинного размера: гладкий рендер — SSIMULACRA2 86,2, ткань 74,7, органический узор 52,2); проба резкости источника — кадр против своей копии вдвое меньшего размера, граница — encoding.ssimulacra2_hero_min; гладкий сюжет проходит границу без увеличения — только info"}
-    purple_share_max: {value: 0.5, status: position, source: "A 01/03 §6.1 IMG-M05: доля пурпура 270–320° > 0,5 без пурпура в бренде (в замере 1 из 83)"}
+    purple_share_max: {value: 0.5, status: position, source: "ai-media 01/03 §6.1 IMG-M05: доля пурпура 270–320° > 0,5 без пурпура в бренде (в замере 1 из 83)"}
   composition:
     center_offset_min: {value: 0.08, status: position,
-      source: "F/04 composition_metrics.py: |centroid_x − 0,5| < 0,08 — «строго по центру» (IMG-M09); рендер x 0,3/0,5/0,7 → 0,302/0,501/0,693"}
-    centroid_x_min: {value: 0.62, status: position, source: "F/04 README, судья F-04: объект в правой трети при зоне текста слева"}
-    blobs_max: {value: 3, status: position, source: "F/04 (blobs — пятна значимости) и W2-12 «≤ 3 элемента»; откалибровано на синтетике и 3 фото"}
+      source: "composition_metrics.py (ai-media 06/04): |centroid_x − 0,5| < 0,08 — «строго по центру» (IMG-M09); рендер x 0,3/0,5/0,7 → 0,302/0,501/0,693"}
+    centroid_x_min: {value: 0.62, status: position, source: "ai-media 06/04: объект в правой трети при зоне текста слева"}
+    blobs_max: {value: 3, status: position, source: "ai-media 06/04 (blobs — пятна значимости) и правило «≤ 3 элемента»; откалибровано на синтетике и 3 фото"}
   text_zone:
     edge_density_max: {value: 0.06, status: calibrated,
-      source: "F/02 README: зона под текст — плотность краёв ≤ 0,06 (небо и стены 0,001–0,06; листва и архитектура 0,16–0,52); 06/03 §2"}
+      source: "ai-media 06/03 §2: зона под текст — плотность краёв ≤ 0,06 (небо и стены 0,001–0,06; листва и архитектура 0,16–0,52)"}
     scrim_percentile: {value: 99.9, status: calibrated,
-      source: "F/02 (дополнение F2): скрим по p99,9 — буквы читаются 64/64, затем проверка WCAG F83 по худшему пикселю (p100 проходит 64/64)"}
-    contrast_min: {value: 4.5, status: calibrated, source: "WCAG 2.x SC 1.4.3 и техника F83 (W3C); F/02"}
+      source: "ai-media 06/03: скрим по p99,9 — буквы читаются 64/64, затем проверка WCAG F83 по худшему пикселю (p100 проходит 64/64)"}
+    contrast_min: {value: 4.5, status: calibrated, source: "WCAG 2.x SC 1.4.3 и техника F83 (W3C); ai-media 06/03"}
     scrim_alpha_warn: {value: 0.55, status: position,
-      source: "K по F/02: альфа скрима по p100 — медиана 0,48, p90 0,53; выше 0,55 — «серая коробка», сначала композиция и цвет текста"}
+      source: "ai-media 06/03: альфа скрима по p100 — медиана 0,48, p90 0,53; выше 0,55 — «серая коробка», сначала композиция и цвет текста"}
   palette:
     de_ok: {value: 0.05, status: position, source: "F-05 и vlm_to_dna.palette_check: цвет паспорта найден, если ΔE OKLab ≤ 0,05 до палитры, снятой с картинки"}
-    min_matched: {value: 3, status: position, source: "F-05 (F-plan): «≥ 3 из 5 hex в ΔE ≤ 0,05»"}
+    min_matched: {value: 3, status: position, source: "F-05: «≥ 3 из 5 hex в ΔE ≤ 0,05»"}
   cutout:
-    transparent_frac_min: {value: 0.2, status: position, source: "H 08-image-post-processing/01 §5: альфа есть — transparent_frac > 0,2 для объекта в кадре"}
-    halo_px_max: {value: 2.0, status: calibrated, source: "H 08/01 §5 и alpha_check.py halo: ореол ≤ 2 px (H/01, эталон Blender)"}
-    margin_min_frac: {value: 0.02, status: position, source: "H 08/01 §7: поле вокруг объекта ≥ 2 % стороны"}
-    glass_partial_min: {value: 0.3, status: calibrated, source: "H 08/01 §5: стекло — доля полупрозрачных пикселей тела ≥ 30 % (H/01: нейросети дают 0,92–0,97 непрозрачного)"}
-    fiber_partial_min: {value: 0.03, status: position, source: "H 08/01 §5: волокна не «подстрижены» — полупрозрачных ≥ 3 % площади объекта"}
-    iou_min_solid: {value: 0.95, status: calibrated, source: "H 08/01 §5: IoU с эталонной альфой ≥ 0,95 для твёрдых объектов (лучшие методы H/01)"}
-    iou_min_fibers: {value: 0.85, status: calibrated, source: "H 08/01 §5: IoU ≥ 0,85 для волос и меха"}
-    band_mae_x1000_max: {value: 150, status: position, source: "H 08/01 §5: ошибка края ≤ 150 ×10⁻³ (позиция H по лучшим методам H/01)"}
+    transparent_frac_min: {value: 0.2, status: position, source: "ai-media 08/01 §5: альфа есть — transparent_frac > 0,2 для объекта в кадре"}
+    halo_px_max: {value: 2.0, status: calibrated, source: "ai-media 08/01 §5 и alpha_check.py halo: ореол ≤ 2 px (эталон Blender)"}
+    margin_min_frac: {value: 0.02, status: position, source: "ai-media 08/01 §7: поле вокруг объекта ≥ 2 % стороны"}
+    glass_partial_min: {value: 0.3, status: calibrated, source: "ai-media 08/01 §5: стекло — доля полупрозрачных пикселей тела ≥ 30 % (нейросети дают 0,92–0,97 непрозрачного)"}
+    fiber_partial_min: {value: 0.03, status: position, source: "ai-media 08/01 §5: волокна не «подстрижены» — полупрозрачных ≥ 3 % площади объекта"}
+    iou_min_solid: {value: 0.95, status: calibrated, source: "ai-media 08/01 §5: IoU с эталонной альфой ≥ 0,95 для твёрдых объектов (лучшие методы)"}
+    iou_min_fibers: {value: 0.85, status: calibrated, source: "ai-media 08/01 §5: IoU ≥ 0,85 для волос и меха"}
+    band_mae_x1000_max: {value: 150, status: position, source: "ai-media 08/01 §5: ошибка края ≤ 150 ×10⁻³ (позиция базы по лучшим методам)"}
   edit:
-    leak_frac_max: {value: 0.02, status: calibrated, source: "H 08/02 §2.2 (edit_check.py 0.2; C1-12): outside_leak_frac ≤ 0,02"}
-    leak_de: {value: 5.0, status: calibrated, source: "edit_check.py: изменённым считается пиксель с ΔE00 > 5 (H/03)"}
-    global_drift_max: {value: 2.0, status: calibrated, source: "H 08/02 §2.2: общий дрейф цвета ΔE00 ≤ 2 (иначе --match-color; «как модель» 3,33 → 0,9)"}
+    leak_frac_max: {value: 0.02, status: calibrated, source: "ai-media 08/02 §2.2 (edit_check.py 0.2): outside_leak_frac ≤ 0,02"}
+    leak_de: {value: 5.0, status: calibrated, source: "edit_check.py: изменённым считается пиксель с ΔE00 > 5 (ai-media 08/02)"}
+    global_drift_max: {value: 2.0, status: calibrated, source: "ai-media 08/02 §2.2: общий дрейф цвета ΔE00 ≤ 2 (иначе --match-color; «как модель» 3,33 → 0,9)"}
     target_changed_min: {value: 0.2, status: position, source: "edit_check.py: NO_EDIT, если в цели изменено < 20 % пикселей"}
-    edges_iou_min: {value: 0.9, status: position, source: "H 08/02 §2.2 (W6-4): геометрия при правке света/цвета — edges_iou ≥ 0,9"}
-    protect_ssim_min: {value: 0.9, status: position, source: "H 08/02 §2.2 (A-3): защищённый товар SSIM ≥ 0,9 и ΔE00 медиана ≤ 5"}
+    edges_iou_min: {value: 0.9, status: position, source: "ai-media 08/02 §2.2: геометрия при правке света/цвета — edges_iou ≥ 0,9"}
+    protect_ssim_min: {value: 0.9, status: position, source: "ai-media 08/02 §2.2: защищённый товар SSIM ≥ 0,9 и ΔE00 медиана ≤ 5"}
     outpaint_edge_sharpness_min: {value: 0.85, status: calibrated,
-      source: "H 08/02 §4.3 (edit_check.py 0.2 outpaint): SSIM центра ≥ 0,9 И ΔE00 ≤ 3 И резкость краёв ≥ 0,85 (размытие 2 px → 0,744)"}
-    noedit_changed_min: {value: 0.002, status: uncalibrated, source: "K: безмасочная правка изменила < 0,2 % кадра — правки нет"}
-    maskless_changed_max: {value: 0.5, status: uncalibrated, source: "K: изменено > 50 % кадра — перерисовка, а не правка (PaintBench: модели меняют в 50–1400 раз больше нужного, H 08/02 §2.1)"}
-    extra_regions_tolerance: {value: 2, status: uncalibrated, source: "K: изменённых областей больше заказанных + 2 — подозрение на утечку"}
+      source: "ai-media 08/02 §4.3 (edit_check.py 0.2 outpaint): SSIM центра ≥ 0,9 И ΔE00 ≤ 3 И резкость краёв ≥ 0,85 (размытие 2 px → 0,744)"}
+    noedit_changed_min: {value: 0.002, status: uncalibrated, source: "безмасочная правка изменила < 0,2 % кадра — правки нет"}
+    maskless_changed_max: {value: 0.5, status: uncalibrated, source: "изменено > 50 % кадра — перерисовка, а не правка (PaintBench: модели меняют в 50–1400 раз больше нужного, ai-media 08/02 §2.1)"}
+    extra_regions_tolerance: {value: 2, status: uncalibrated, source: "изменённых областей больше заказанных + 2 — подозрение на утечку"}
     derived_mask_dilate_frac: {value: 0.02, status: uncalibrated,
-      source: "K: маска из разницы расширяется на 2 % стороны перед композитом; для удаления объекта — 8–10 % (H 08/02 §2.4)"}
-    feather_frac: {value: 0.03, status: calibrated, source: "H 08/02 §2.4: растушёвка композита при удалении ≈ 3 % стороны (контур не виден, ΔE p95 2,07)"}
+      source: "маска из разницы расширяется на 2 % стороны перед композитом; для удаления объекта — 8–10 % (ai-media 08/02 §2.4)"}
+    feather_frac: {value: 0.03, status: calibrated, source: "ai-media 08/02 §2.4: растушёвка композита при удалении ≈ 3 % стороны (контур не виден, ΔE p95 2,07)"}
     local_shift_de: {value: 3.0, status: position,
-      source: "K/02: после робастной подгонки цвета остаток неизменённых зон — медиана ΔE00 0,7–0,9 (H/03); связная область > 3 — локальный сдвиг (утечка слабее порога 5 edit_check)"}
-    local_shift_min_frac: {value: 0.01, status: uncalibrated, source: "K/02: область ≥ 1 % площади «вне цели» (H/03: утечка-угол 13 %, «призраки» удаления 0,8–3 %; мельче — шум и JPEG)"}
+      source: "ai-media 11/01: после робастной подгонки цвета остаток неизменённых зон — медиана ΔE00 0,7–0,9; связная область > 3 — локальный сдвиг (утечка слабее порога 5 edit_check)"}
+    local_shift_min_frac: {value: 0.01, status: uncalibrated, source: "ai-media 11/01: область ≥ 1 % площади «вне цели» (утечка-угол 13 %, «призраки» удаления 0,8–3 %; мельче — шум и JPEG)"}
   texture:
-    seam_ratio_max: {value: 1.3, status: calibrated, source: "H 08/03 §2.2 (tile_check.py): ≤ 1,3 бесшовно — тайлы Poly Haven после ресайза 0,87–1,23"}
-    seam_ratio_fail: {value: 1.5, status: calibrated, source: "H 08/03 §2.2: > 1,5 — чинить (tile_check.py cut или заделка маской)"}
+    seam_ratio_max: {value: 1.3, status: calibrated, source: "ai-media 08/03 §2.2 (tile_check.py): ≤ 1,3 бесшовно — тайлы Poly Haven после ресайза 0,87–1,23"}
+    seam_ratio_fail: {value: 1.5, status: calibrated, source: "ai-media 08/03 §2.2: > 1,5 — чинить (tile_check.py cut или заделка маской)"}
   video:
     seam_local_max: {value: 1.5, status: position,
-      source: "I 09-video-pipeline/01 §1.1: seam_ratio_local ≤ 1,5 по файлу как есть — порог мезонина без потерь и выхода модели (пульс H.264: 0,98 → 3,4)"}
+      source: "ai-media 09/01 §1.1: seam_ratio_local ≤ 1,5 по файлу как есть — порог мезонина без потерь и выхода модели (пульс H.264: 0,98 → 3,4)"}
     seam_encoded_max: {value: 2.5, status: position,
       source: "10-web-integration/02-video-delivery.md §6.1 и CONTRADICTIONS.md X20: шов петли после кодирования ≤ 2,5 — пульс ключевого кадра (шов мезонина 0,8 → AV1 CRF 28 — 2,40, H.264 CRF 22 — 1,76)"}
-    cut_ratio_max: {value: 10, status: position, source: "I 09/01 §1.1: склейка — локальный пик cut_ratio ≥ 10 (selftest 25,7); в монтаже этим же порогом находятся склейки планов и принимается стык петли как склейка"}
+    cut_ratio_max: {value: 10, status: position, source: "ai-media 09/01 §1.1: склейка — локальный пик cut_ratio ≥ 10 (selftest 25,7); в монтаже этим же порогом находятся склейки планов и принимается стык петли как склейка"}
     dead_pair_frac: {value: 0.25, status: position,
       source: "09-video-pipeline/01-seamless-loops.md §1.1: «мёртвая» пара кадров — движение ниже 0,25 медианы (dead_start, dead_end, static_frac, dup_last, повторы кадров внутри ролика)"}
     dead_trim_max: {value: 3, status: position,
@@ -93,80 +93,80 @@ thresholds:
       source: "WCAG 2.2 SC 2.3.1 (A): не больше трёх вспышек в любую секунду; 10-web-integration/02-video-delivery.md §5.2; EG-A11Y-04"}
     flash_area_frac_min: {value: 0.25, status: calibrated, source: "WCAG 2.2 SC 2.3.1: порог общей вспышки — 25 % поля 10°; EG-A11Y-04"}
     flash_field_css_px: {value: [341, 256], status: calibrated, source: "WCAG 2.2 SC 2.3.1: поле 10° — прямоугольник 341×256 CSS px (при 1024×768); EG-A11Y-04"}
-    event_ratio_warn: {value: 3, status: uncalibrated, source: "K/03: всплеск движения ×3 к соседям (вспышка 40×40 px на 4 кадра — 3,36; чистая петля 1,22, H.264 CRF 23 — 1,66) — «событие в фоновой петле» (VID-M18, A 01/03 §5.3), только info"}
-    head_tail_min: {value: 0.5, status: position, source: "I 09/01 §1.1: head/tail_motion ≥ 0,5 — движение не угасает"}
-    static_frac_max: {value: 0.3, status: position, source: "I 09/01 §1.1: static_frac (относительный, v0.2) ≤ 0,3"}
+    event_ratio_warn: {value: 3, status: uncalibrated, source: "ai-media 11/01: всплеск движения ×3 к соседям (вспышка 40×40 px на 4 кадра — 3,36; чистая петля 1,22, H.264 CRF 23 — 1,66) — «событие в фоновой петле» (VID-M18, ai-media 01/03 §5.3), только info"}
+    head_tail_min: {value: 0.5, status: position, source: "ai-media 09/01 §1.1: head/tail_motion ≥ 0,5 — движение не угасает"}
+    static_frac_max: {value: 0.3, status: position, source: "ai-media 09/01 §1.1: static_frac (относительный, v0.2) ≤ 0,3"}
     motion_vs_control_min: {value: 0.5, status: position,
-      source: "I 09/01 §1.1–§2: «живость» ≥ 50 % от i2v-контроля того же кадра — единственный признак равномерно слабого движения (C2)"}
-    cam_shift_max_px: {value: 1.0, status: position, source: "I 09/01 §1.1: глобальный сдвиг кадра < 1 px для петли и синемаграфа (ползущая камера 0,1 px/кадр → 13,9)"}
-    color_de_max: {value: 2.0, status: position, source: "I 09/01 §1.1: seam_dE00 и color_drift_dE00 < 2"}
-    flicker_max: {value: 2.0, status: uncalibrated, source: "K/03: отклонение средней яркости кадра от медианы 11 соседних > 2 из 255 — «дышит» (VID-M14), только info"}
-    cinemagraph_drift_max: {value: 1.0, status: calibrated, source: "I 09/02 §3: drift_max < 1,0 (шум кодека; заморозка по маске 0,23–0,25)"}
+      source: "ai-media 09/01 §1.1–§2: «живость» ≥ 50 % от i2v-контроля того же кадра — единственный признак равномерно слабого движения (ai-media 04/03)"}
+    cam_shift_max_px: {value: 1.0, status: position, source: "ai-media 09/01 §1.1: глобальный сдвиг кадра < 1 px для петли и синемаграфа (ползущая камера 0,1 px/кадр → 13,9)"}
+    color_de_max: {value: 2.0, status: position, source: "ai-media 09/01 §1.1: seam_dE00 и color_drift_dE00 < 2"}
+    flicker_max: {value: 2.0, status: uncalibrated, source: "ai-media 11/01: отклонение средней яркости кадра от медианы 11 соседних > 2 из 255 — «дышит» (VID-M14), только info"}
+    cinemagraph_drift_max: {value: 1.0, status: calibrated, source: "ai-media 09/02 §3: drift_max < 1,0 (шум кодека; заморозка по маске 0,23–0,25)"}
     quiet_motion_med: {value: 0.3, status: position,
-      source: "I 09/01 §1.2–§1.3: тихие петли лидеров motion_med 0,13–0,2 — зона, где пульс ключевого кадра спорит со швом; тот же уровень — граница «почти неподвижных концов»: шов у них принимается по абсолютной разнице кадров не выше этого числа"}
-    mezzanine_kbps_min: {value: 15000, status: uncalibrated, source: "K: битрейт ниже 15 Мбит/с у H.264/AV1 — скорее финальный сжатый файл, а не мезонин CRF 10"}
-    loop_len_min_s: {value: 4, status: position, source: "I 09/01 §4: петля hero 4–8 с (короче 4 с повтор заметен)"}
-    loop_len_max_s: {value: 10, status: position, source: "A 01/01 выжимка п. 13 (петля 6–10 с) и I 09/01 §4"}
+      source: "ai-media 09/01 §1.2–§1.3: тихие петли лидеров motion_med 0,13–0,2 — зона, где пульс ключевого кадра спорит со швом; тот же уровень — граница «почти неподвижных концов»: шов у них принимается по абсолютной разнице кадров не выше этого числа"}
+    mezzanine_kbps_min: {value: 15000, status: uncalibrated, source: "битрейт ниже 15 Мбит/с у H.264/AV1 — скорее финальный сжатый файл, а не мезонин CRF 10"}
+    loop_len_min_s: {value: 4, status: position, source: "ai-media 09/01 §4: петля hero 4–8 с (короче 4 с повтор заметен)"}
+    loop_len_max_s: {value: 10, status: position, source: "ai-media 01/01 выжимка п. 13 (петля 6–10 с) и ai-media 09/01 §4"}
     motion_keep_min: {value: 0.75, status: position,
-      source: "J 10-web-integration/02 §6.1 (J/05 results_crf_sweep.json): motion_med финала / мастера-мезонина ≥ 0,75, иначе CRF ниже; AV1 CRF 36 тихих петель 0,24–0,77, H.264 CRF 18 — 0,81–1,01; K: H.264 CRF 35 ряби K/03 — 0,67, CRF 23 — 1,03"}
+      source: "ai-media 10/02 §6.1: motion_med финала / мастера-мезонина ≥ 0,75, иначе CRF ниже; AV1 CRF 36 тихих петель 0,24–0,77, H.264 CRF 18 — 0,81–1,01; H.264 CRF 35 ряби — 0,67, CRF 23 — 1,03"}
   video_alpha:
-    bg_ok_min: {value: 0.95, status: position, source: "I 09/02 §1.5: доля фона в ΔE00 ≤ 5 от ключа во всех кадрах ≥ 0,95"}
-    key_de: {value: 5, status: position, source: "I 09/02 §1.5 (video_loop_check.py chroma --de 5)"}
-    obj_drift_max_pct_w: {value: 2.0, status: position, source: "I 09/02 §1.5: дрейф объекта ≤ 2 % ширины"}
+    bg_ok_min: {value: 0.95, status: position, source: "ai-media 09/02 §1.5: доля фона в ΔE00 ≤ 5 от ключа во всех кадрах ≥ 0,95"}
+    key_de: {value: 5, status: position, source: "ai-media 09/02 §1.5 (video_loop_check.py chroma --de 5)"}
+    obj_drift_max_pct_w: {value: 2.0, status: position, source: "ai-media 09/02 §1.5: дрейф объекта ≤ 2 % ширины"}
   series:
-    hue_spread_max_deg: {value: 10, status: calibrated, source: "F/06: одна съёмка 5,7°, четыре локации 104° → серия ≤ 10° (06/02)"}
-    hue_break_deg: {value: 25, status: calibrated, source: "F/06: распад серии > 25° (две локации 27,8°)"}
-    pal_de_mean_max: {value: 0.045, status: calibrated, source: "F/06: ΔE палитр OKLab средн ≤ 0,045 (одна съёмка 0,038)"}
-    pal_de_break: {value: 0.06, status: calibrated, source: "F/06: распад > 0,06 (четыре локации 0,091)"}
-    sd_L_max: {value: 0.04, status: calibrated, source: "F/06: разброс светлоты sd_L ≤ 0,04"}
-    phash_dup_max: {value: 10, status: position, source: "F/06: pHash Хэмминг < 10 из 64 — дубль сюжета"}
+    hue_spread_max_deg: {value: 10, status: calibrated, source: "ai-media 06/02: одна съёмка 5,7°, четыре локации 104° → серия ≤ 10°"}
+    hue_break_deg: {value: 25, status: calibrated, source: "ai-media 06/02: распад серии > 25° (две локации 27,8°)"}
+    pal_de_mean_max: {value: 0.045, status: calibrated, source: "ai-media 06/02: ΔE палитр OKLab средн ≤ 0,045 (одна съёмка 0,038)"}
+    pal_de_break: {value: 0.06, status: calibrated, source: "ai-media 06/02: распад > 0,06 (четыре локации 0,091)"}
+    sd_L_max: {value: 0.04, status: calibrated, source: "ai-media 06/02: разброс светлоты sd_L ≤ 0,04"}
+    phash_dup_max: {value: 10, status: position, source: "ai-media 06/02: pHash Хэмминг < 10 из 64 — дубль сюжета"}
   text:
     fail_min_ocr_score: {value: 0.9, status: calibrated,
-      source: "K/01 (714 синтетических баннеров): брак без человека — только при уверенности OCR ≥ 0,9 и надёжном классе; ложный брак 1/144 верных строк"}
-    fail_min_line_h_px: {value: 16, status: calibrated, source: "K/01: брак без человека — строка ≥ 16 px; мельче ошибки OCR на фото и JPEG растут"}
-    unrequested_min_chars: {value: 2, status: calibrated, source: "K/01: 23 картинки без текста — ни одной строки из ≥ 2 букв/цифр с уверенностью ≥ 0,6"}
-    unrequested_min_score: {value: 0.6, status: calibrated, source: "K/01: единичные ложные «надписи» — «2» 0,39, «____» у маски"}
+      source: "ai-media 11/01 (714 синтетических баннеров): брак без человека — только при уверенности OCR ≥ 0,9 и надёжном классе; ложный брак 1/144 верных строк"}
+    fail_min_line_h_px: {value: 16, status: calibrated, source: "ai-media 11/01: брак без человека — строка ≥ 16 px; мельче ошибки OCR на фото и JPEG растут"}
+    unrequested_min_chars: {value: 2, status: calibrated, source: "ai-media 11/01: 23 картинки без текста — ни одной строки из ≥ 2 букв/цифр с уверенностью ≥ 0,6"}
+    unrequested_min_score: {value: 0.6, status: calibrated, source: "ai-media 11/01: единичные ложные «надписи» — «2» 0,39, «____» у маски"}
   slop:
-    cluster_markers: {value: 3, status: position, source: "A 01/03 §5.1: диагноз «слоп» — ≥ 3 маркеров на ассете (мнение A по аналогии с ui 11/04)"}
-    key_slot_markers: {value: 2, status: position, source: "A 01/03 §5.1: 2 маркера в ключевом слоте (hero, товар); паспорт visual-dna acceptance.markers_max = 1"}
+    cluster_markers: {value: 3, status: position, source: "ai-media 01/03 §5.1: диагноз «слоп» — ≥ 3 маркеров на ассете (мнение базы по аналогии с ui 11/04)"}
+    key_slot_markers: {value: 2, status: position, source: "ai-media 01/03 §5.1: 2 маркера в ключевом слоте (hero, товар); паспорт visual-dna acceptance.markers_max = 1"}
   svg:
-    icon_kb_max: {value: 10, status: position, source: "A 01/01 §2 (тарифы, иконки ≤ 10 КБ); свои иконки G/01 — 241–662 байта"}
-    illustration_kb_max: {value: 40, status: position, source: "A 01/01 §2 (404 и пустые состояния ≤ 40 КБ); иллюстрации Recraft после svgo 68–123 КБ → <img>/AVIF (G/02)"}
+    icon_kb_max: {value: 10, status: position, source: "ai-media 01/01 §2 (тарифы, иконки ≤ 10 КБ); свои иконки (ai-media 07/01) — 241–662 байта"}
+    illustration_kb_max: {value: 40, status: position, source: "ai-media 01/01 §2 (404 и пустые состояния ≤ 40 КБ); иллюстрации Recraft после svgo 68–123 КБ → <img>/AVIF (ai-media 07/02)"}
     check_icons_flags: {value: "коридор Lucide 1.47", status: calibrated,
-      source: "G/01 check_icons.py: вес 0,7–1,55, поле ≥ 0,95 px, зазор ≥ 1,9 px, узкий фон ≤ 3 px², центр ≤ 1,6 px, сетка ≥ 30 % (калибровка на 20 иконках Lucide)"}
+      source: "check_icons.py (ai-media 07/01): вес 0,7–1,55, поле ≥ 0,95 px, зазор ≥ 1,9 px, узкий фон ≤ 3 px², центр ≤ 1,6 px, сетка ≥ 30 % (калибровка на 20 иконках Lucide)"}
   og:
-    size: {value: [1200, 630], status: calibrated, source: "A 01/01 §2.7: 1200×630 (1,91:1) у 16 из 36 OG лидеров; Facebook рекомендует ≥ 1200×630; ключевое внутри 1100×530"}
-    formats: {value: ["PNG", "JPEG"], status: calibrated, source: "A 01/01 §2.7: PNG или JPEG, не AVIF (AVIF-OG — 1 из выборки)"}
-    kb_max: {value: 300, status: calibrated, source: "A 01/01 §2.7: ≤ 300 КБ (медиана лидеров 132 КБ, Q3 324)"}
+    size: {value: [1200, 630], status: calibrated, source: "ai-media 01/01 §2.7: 1200×630 (1,91:1) у 16 из 36 OG лидеров; Facebook рекомендует ≥ 1200×630; ключевое внутри 1100×530"}
+    formats: {value: ["PNG", "JPEG"], status: calibrated, source: "ai-media 01/01 §2.7: PNG или JPEG, не AVIF (AVIF-OG — 1 из выборки)"}
+    kb_max: {value: 300, status: calibrated, source: "ai-media 01/01 §2.7: ≤ 300 КБ (медиана лидеров 132 КБ, Q3 324)"}
   encoding:
-    ssimulacra2_hero_min: {value: 80, status: calibrated, source: "H 08-image-post-processing/04 §1.2: SSIMULACRA2 ≥ 80 — hero и крупные фото (avif_pick.sh)"}
-    ssimulacra2_min: {value: 70, status: calibrated, source: "H 08/04 §1.2: ≥ 70 — второстепенные, карточки, фоны секций"}
+    ssimulacra2_hero_min: {value: 80, status: calibrated, source: "ai-media 08/04 §1.2: SSIMULACRA2 ≥ 80 — hero и крупные фото (avif_pick.sh)"}
+    ssimulacra2_min: {value: 70, status: calibrated, source: "ai-media 08/04 §1.2: ≥ 70 — второстепенные, карточки, фоны секций"}
   budget:
     image:
-      hero_kb: {value: 150, status: calibrated, source: "A 01/01 §2: hero ≤ 150 КБ десктоп"}
+      hero_kb: {value: 150, status: calibrated, source: "ai-media 01/01 §2: hero ≤ 150 КБ десктоп"}
       hero_mobile_kb: {value: 80, status: calibrated,
-        source: "A 01/01 §7 (таблица бюджетов: hero-картинка, телефон ≤ 80 КБ) и выжимка п. 4 (свой кадр 4:5 или 9:16); позиция по замеру лидеров — 01/02 §4.3"}
-      section_kb: {value: 120, status: calibrated, source: "A 01/01 §2: фичи ≤ 120 КБ на картинку"}
-      product_kb: {value: 150, status: calibrated, source: "A 01/01 §2: галерея товара ≤ 150 КБ на кадр"}
-      og_kb: {value: 300, status: calibrated, source: "A 01/01 §2.7"}
-      texture_kb: {value: 30, status: calibrated, source: "A 01/01 §2: текстура-плитка ≤ 30 КБ"}
+        source: "ai-media 01/01 §7 (таблица бюджетов: hero-картинка, телефон ≤ 80 КБ) и выжимка п. 4 (свой кадр 4:5 или 9:16); позиция по замеру лидеров — 01/02 §4.3"}
+      section_kb: {value: 120, status: calibrated, source: "ai-media 01/01 §2: фичи ≤ 120 КБ на картинку"}
+      product_kb: {value: 150, status: calibrated, source: "ai-media 01/01 §2: галерея товара ≤ 150 КБ на кадр"}
+      og_kb: {value: 300, status: calibrated, source: "ai-media 01/01 §2.7"}
+      texture_kb: {value: 30, status: calibrated, source: "ai-media 01/01 §2: текстура-плитка ≤ 30 КБ"}
     video:
-      hero_1080_kb: {value: 1500, status: calibrated, source: "A 01/01 выжимка п. 13: петля 1080p ≤ 1,5 МБ (I 09/03 §2: тихая 6 с AV1 230–310 КБ)"}
-      hero_720_kb: {value: 600, status: calibrated, source: "A 01/01 выжимка п. 13: телефон 720p ≤ 600 КБ"}
+      hero_1080_kb: {value: 1500, status: calibrated, source: "ai-media 01/01 выжимка п. 13: петля 1080p ≤ 1,5 МБ (ai-media 09/03 §2: тихая 6 с AV1 230–310 КБ)"}
+      hero_720_kb: {value: 600, status: calibrated, source: "ai-media 01/01 выжимка п. 13: телефон 720p ≤ 600 КБ"}
   judge:
     trust_agreement_min: {value: 0.8, status: position,
-      source: "E-helper-judging «Рекомендации» п. 16: доверие к VLM при согласии ≥ 75–80 % с решающими голосами (GPT-4 ↔ эксперты Chatbot Arena 76–81 %)"}
-    prefilter_agreement_min: {value: 0.7, status: position, source: "K: 70–80 % — только предфильтр грубого брака, решение за человеком"}
-    min_pairs: {value: 20, status: calibrated, source: "E-helper-judging §12.2: 20–30 решающих голосов на пару хватает выбрать лидера; Уилсон 14/20 = [0,48; 0,86]"}
+      source: "ai-media 11/02 выжимка п. 17 и §6: доверие к VLM при согласии ≥ 75–80 % с решающими голосами (GPT-4 ↔ эксперты Chatbot Arena 76–81 %)"}
+    prefilter_agreement_min: {value: 0.7, status: position, source: "70–80 % — только предфильтр грубого брака, решение за человеком"}
+    min_pairs: {value: 20, status: calibrated, source: "ai-media 11/02: 20–30 решающих голосов на пару хватает выбрать лидера; Уилсон 14/20 = [0,48; 0,86]"}
     wilson_low_min: {value: 0.65, status: position,
-      source: "02-vlm-critic-and-rubrics.md выжимка п. 17 и §6 (E-helper «Рекомендации» п. 16): уровень «сортировать» — согласие ≥ trust_agreement_min и нижняя граница 95 % интервала Уилсона ≥ 0,65"}
+      source: "02-vlm-critic-and-rubrics.md выжимка п. 17 и §6: уровень «сортировать» — согласие ≥ trust_agreement_min и нижняя граница 95 % интервала Уилсона ≥ 0,65"}
     f1_min: {value: 0.8, status: position,
       source: "поиск дефектов меряют F1 против разметки человека (common/judge.md §6); 0,8 — text copy-rubric.yaml#calibration.f1_min, site site-rubric.json#calibration.f1_min (NN/g)"}
     unsure_share_max: {value: 0.2, status: position,
       source: "02-vlm-critic-and-rubrics.md §6.4: доля ответов «не уверен» выше 20 % — пересчитать калибровку (сигнал плохого вопроса, §2.1)"}
     disagree_sessions: {value: 3, status: position,
       source: "02-vlm-critic-and-rubrics.md §6.4: расхождение судьи и заказчика в 3 сессиях подряд — пересчитать калибровку; сессия расходится, если согласие в ней ниже prefilter_agreement_min"}
-    swap_consistency_min: {value: 0.8, status: position, source: "Arena Bench (E-helper §2): два прогона со сменой сторон; D2-03: согласованность повторов ≥ 90 % ответов"}
+    swap_consistency_min: {value: 0.8, status: position, source: "Arena Bench: два прогона со сменой сторон; D2-03: согласованность повторов ≥ 90 % ответов"}
     position_bias_max: {value: 0.15, status: position, source: "LMArena журнал 12.05.2026: перевес левой стороны → поправка; |доля A − 0,5| > 0,15 — судья смещён"}
 ocr_models:
   engine: "RapidOCR 3.9.2 (Apache-2.0) + onnxruntime 1.30, Python окружения скилла ($DDD_HOME/venv, scripts/install.sh --groups ocr)"
@@ -174,4 +174,4 @@ ocr_models:
   rec_ru: {file: "$DDD_HOME/models/ocr/eslav_PP-OCRv5_rec_mobile.onnx", sha256: "08705d6721849b1347d26187f15a5e362c431963a2a62bfff4feac578c489aab"}
   rec_sniff: {file: "$DDD_HOME/models/ocr/en_PP-OCRv5_rec_mobile.onnx", sha256: "c3461add59bb4323ecba96a492ab75e06dda42467c9e3d0c18db5d1d21924be8"}
   alt: ["cyrillic_PP-OCRv5_rec_mobile.onnx 90f761b4…", "ch_PP-OCRv5_det_mobile.onnx 4d97c44a…"]
-  source: "99-raw/experiments/K/01-ocr-cyrillic (README, RESULTS.md)"
+  source: "ai-media 11/01"

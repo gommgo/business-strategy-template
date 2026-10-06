@@ -1,5 +1,5 @@
-# en-okoshko-saas.yaml — пример copy deck v1.1 (10-templates-recipes, J3, 2026-09-24): английская АДАПТАЦИЯ лендинга SaaS
-# ru-okoshko-saas.yaml (основа — E3). Тексты — ai-self J3. Факты — facts/facts-demo-saas-okoshko-en.yaml (копия ДЕМО-фактов E
+# en-okoshko-saas.yaml — пример copy deck v1.1 (10-templates-recipes): английская АДАПТАЦИЯ лендинга SaaS
+# ru-okoshko-saas.yaml. Тексты — ai-self. Факты — facts/facts-demo-saas-okoshko-en.yaml (ДЕМО-факты
 # на английском, те же id; не публиковать). Адаптация сокращает страницу: тариф «Сеть», SMS, годовая скидка и FAQ сняты.
 copy_deck:
   version: 1
@@ -18,11 +18,11 @@ copy_deck:
   copy_slots_ref: ../../04-copy-by-block/copy-slots.yaml
   jurisdiction: ru
   legal_category: [general]
-  authors: ['J3 (ai-self, 2026-09-24)']
+  authors: ['агент (ai-self, 2026-09-24)']
   notes: >-
-    Адаптация для англоязычных владельцев салонов в РФ: цены в рублях (компания в РФ, H), время поддержки — «Moscow time»,
-    перевод цитаты помечен рядом (B2 §5.1); порядок секций исходника сохранён, лишние для этой аудитории слоты сняты.
-    voice_ref — профиль F «Графа» (сдержанный B2B, en_form: you) как ближайший: своего профиля у «Окошка» нет (решение J3).
+    Адаптация для англоязычных владельцев салонов в РФ: цены в рублях (компания в РФ), время поддержки — «Moscow time»,
+    перевод цитаты помечен рядом (text 02/03 §5.1); порядок секций исходника сохранён, лишние для этой аудитории слоты сняты.
+    voice_ref — профиль «Графа» (сдержанный B2B, en_form: you) как ближайший: своего профиля у «Окошка» нет.
   pages:
   - page_id: okoshko-solution-aware
     page_type: landing-saas
@@ -36,7 +36,7 @@ copy_deck:
       chosen: a
       fact_ids: [reminders, self-booking-link]
       claim_flags: [fact-property]
-      basis: 'как в исходнике: механизм для solution-aware (E 03 §3.2)'
+      basis: 'как в исходнике: механизм для solution-aware (text 04/03 §3.2)'
     meta:
       title: 'Booking with Telegram reminders for barbershops — Okoshko'
       description: 'Clients book through your link and get a Telegram reminder 24 hours and 2 hours before the visit. Free for 14 days, no card required.'

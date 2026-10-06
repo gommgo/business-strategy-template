@@ -6,6 +6,6 @@ example: true
 description: лендинг promo с исходниками холста и артефактом ДС демо «Спица»; копий и kit.json нет
 project: otves-remont-nn
 extends: [minimal]
-unmarked: [files/design/promo/canvas/project, files/design/_design-system/project]   # формат артефактов холста
+unmarked: [files/design/promo/canvas/project, files/design/_design-system/project]   # форматы артефактов холста и ДС
 layers:
   - files: files

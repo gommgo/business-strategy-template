@@ -23,7 +23,7 @@
 ```python
 # Blender 5.2.2 — [проверено]
 import sys
-SNIPPETS = "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets"
+SNIPPETS = "../../scripts/blender"   # от корня базы kb/blender
 if SNIPPETS not in sys.path:
     sys.path.insert(0, SNIPPETS)
 import bpyx
@@ -38,7 +38,7 @@ import bpyx
 # первый вызов в сеансе (и после каждой правки bpyx.py):
 import sys, importlib
 sys.dont_write_bytecode = True        # иначе reload может взять устаревший .pyc (правка в ту же секунду, тот же размер)
-p = "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets"
+p = "../../scripts/blender"           # от корня базы kb/blender; в MCP — полный путь к этой папке
 if p not in sys.path:
     sys.path.insert(0, p)
 import bpyx
@@ -105,7 +105,7 @@ bpyx.scene_report()
 ```python
 # Blender 5.2.2 — [проверено] (3,1 с; GLB валиден: 0 ошибок Khronos)
 import os, sys
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 OUT = os.path.abspath("out")
@@ -137,7 +137,6 @@ bpyx.scene_report()        # SCENE_REPORT {"objects": 11, "tris": 5102, "materia
 ## Тесты
 
 ```bash
-cd /home/mm/Документы/app-design/blender-research
 python3 ../../scripts/blender/blender_run.py ../../scripts/blender/test_bpyx.py -- 99-raw/experiments/B/40-bpyx-tests
 # тот же набор в модуле bpy из PyPI: среда venv-bpy удалена 23.09.2026 — пересоздать по ../../scripts/blender/README.md и запустить её python с test_bpyx.py
 ```

@@ -53,7 +53,7 @@ def mkl_params(src, ref):
 def apply_mkl(img, params, strength=1.0):
     ms, mr, T = params; X = to_oklab(img.reshape(-1, 3)); Y = (X - ms) @ T.T + mr; Y = X + strength * (Y - X)
     return from_oklab(Y).reshape(img.shape)
-def write_cube(fn, func, n=33, title="F/05"):
+def write_cube(fn, func, n=33, title="LUT"):
     g = np.linspace(0, 1, n); b, gg, r = np.meshgrid(g, g, g, indexing="ij")    # R меняется быстрее всего
     lattice = np.stack([r, gg, b], -1).reshape(-1, 3); out = np.clip(func(lattice.reshape(1, -1, 3)).reshape(-1, 3), 0, 1)
     with open(fn, "w") as f:

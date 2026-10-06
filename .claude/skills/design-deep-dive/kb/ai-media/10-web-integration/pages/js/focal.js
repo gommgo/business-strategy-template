@@ -1,5 +1,5 @@
-// focal.js — object-position по фокусной точке спецификации для бокса object-fit: cover (агент J, волна 3).
-// Формула — агент F (06-art-direction-consistency/03-composition-for-web.md §3.2, проверена в Chromium 5/5, ошибка ≤ 0,002):
+// focal.js — object-position по фокусной точке спецификации для бокса object-fit: cover.
+// Формула — 06-art-direction-consistency/03-composition-for-web.md §3.2 (проверена в Chromium 5/5, ошибка ≤ 0,002):
 //   s = max(bw/iw, bh/ih); px = (fx·iw·s − tx·bw) / (iw·s − bw), с обрезкой в [0; 1].
 // data-focal='{"16:9":[fx,fy,tx,ty], "4:5":[…]}' — ключ по соотношению выбранного файла (арт-дирекшн <picture>),
 // tx, ty — где в боксе должна оказаться точка (по умолчанию = fx, fy).

@@ -1,21 +1,21 @@
 # geo-rules.yaml — автоматизируемые проверки GEO- и SEO-текста для линтера copy_lint.py (профили geo, article и страницы).
-# text-research · волна 2 · агент G · 2026-09-24. Полный чек-лист GEO (включая то, что проверяют судья, сверка с фактами
+# Полный чек-лист GEO (включая то, что проверяют судья, сверка с фактами
 # и человек) — 07-seo-geo-copy/geo-checklist.yaml; обоснования — 07-seo-geo-copy/03-geo-copy.md.
 #
-# Формат — спецификация C (06-anti-slop/02-linter-spec-and-profiles.md §2); файл подключён в 06-anti-slop/profiles.yaml →
-# external_rules. Что уже делает C и здесь не повторяется: размытая атрибуция (ru/en-lex-vague-attribution — в профиле geo
+# Формат — спецификация линтера (06-anti-slop/02-linter-spec-and-profiles.md §2); файл подключён в 06-anti-slop/profiles.yaml →
+# external_rules. Что уже делают словари 06-anti-slop/lexicon/ и здесь не повторяется: размытая атрибуция (ru/en-lex-vague-attribution — в профиле geo
 # error), риторический вопрос-подводка (error в geo), анонс «Давайте разберёмся» (ru-ton-announce), шаблонный вопрос FAQ
 # (ru-mkt-faq-template), выгода без факта (ru-cnt-vague-benefit), штамп вступления, «Заключение»/«Подводя итог».
-# Числа и факты сверяет claims_check.py (B2), право — claims-rules.yaml (H).
+# Числа и факты сверяет claims_check.py, право — claims-rules.yaml.
 #
-# Слоты GEO-слоя (временный словарь 99-raw/notes/temp-vocabulary-v0.yaml): geo-answer, definition, faq-q, faq-a,
+# Слоты GEO-слоя (словарь — 04-copy-by-block/copy-slots.yaml): geo-answer, definition, faq-q, faq-a,
 # article-summary («коротко»), article-lead, article-heading, article-paragraph; в Markdown с --genre geo абзац — geo-answer,
 # с --genre article — article-paragraph, заголовок с «?» — faq-q.
-# Тест загрузки: python3 ../../scripts/text/copy_lint.py --selftest; python3 99-raw/experiments/G/00-rules-load/test_rules.py
+# Тест загрузки: python3 ../../scripts/text/copy_lint.py --selftest
 
 date: 2026-09-24
 version: 1
-owner: G (волна 2)
+owner: text/07-seo-geo-copy
 status: provisional
 
 defaults:
@@ -64,7 +64,7 @@ rules:
     message: "Относительное время без даты («в этом году», «недавно»): ответ живёт в сводках месяцами и теряет смысл; устаревшая информация — частая причина, по которой страницу не цитируют."
     replacement: "абсолютная дата или период: «в 2026 году», «с 1 марта 2026 года», «на 1 сентября 2026 года»"
     examples: {bad: "В этом году цены на отделку выросли.", good: "По прайсу 2026 года «Отвес» считает ремонт под ключ от 9 800 ₽ за м² без материалов."}
-    source: "Google «Influence your byline dates» (обновлено 2025-12-10): видимая дата; Google SQRG 11.09.2025 §18.0 (устаревшие страницы — низкий Needs Met для запросов о текущем); Tian и др. 2026: «Outdated Information» в таксономии провалов цитирования; Martinez 2026 (arXiv 2607.14035) §7.2: даты — «useful but non-universal signals»; B2 canonical: «дата или источник»"
+    source: "Google «Influence your byline dates» (обновлено 2025-12-10): видимая дата; Google SQRG 11.09.2025 §18.0 (устаревшие страницы — низкий Needs Met для запросов о текущем); Tian и др. 2026: «Outdated Information» в таксономии провалов цитирования; Martinez 2026 (arXiv 2607.14035) §7.2: даты — «useful but non-universal signals»; 02-strategy-messaging/facts.schema.yaml canonical: «дата или источник»"
     evidence: "[документация] + [исследование] (обзор)"
 
   # --- ответ отвечает, а не уходит от вопроса --------------------------------------------------------------------------
@@ -79,7 +79,7 @@ rules:
     examples: {bad: "Стоимость ремонта рассчитывается индивидуально и зависит от многих факторов.", good: "Ремонт под ключ стоит от 9 800 ₽ за м² без материалов; итог зависит от площади, состояния стен и выбранной отделки."}
     source: "Сливинский (Яндекс), 12.2025 [V:AbqU-GxAYs8 1:05:28]: прятать цену — «в большинстве случаев плохо», исключение — где цену нельзя дать без искажения, тогда объяснить почему; Google «Creating helpful…» (обновлено 2025-12-10): «leave readers feeling like they need to search again»; higgsfield seo.md GEO Pitfalls 4 «Contact us for pricing» [практика]; Tian и др. 2026: «Information Scarcity» («fluffy, lacks citeable facts»)"
     evidence: "[документация] + [практика]"
-    note: "исключение Сливинского (нестандартное оборудование, дизайн-проект) — lint_allow с причиной и объяснением на странице; право цены — H"
+    note: "исключение Сливинского (нестандартное оборудование, дизайн-проект) — lint_allow с причиной и объяснением на странице; право цены — 08-russian-legal-typography"
 
   - id: geo-unsourced-stat
     level: warning
@@ -91,9 +91,9 @@ rules:
     message: "Доля, кратность или «N из M» без источника и даты в том же предложении: для ответа нейросети это непроверяемое число, а в опытах GEO (Aggarwal, KDD 2024) «статистику» модель выдумывала по заданию."
     replacement: "каноническая формулировка факта: кто посчитал + значение + дата: «По данным CRM «Отвеса» на 1 сентября 2026 года, 38 % заказов — двушки» (или убрать число)"
     examples: {bad: "Мы сдаём 97 % объектов в срок — в 2 раза чаще конкурентов.", good: "По данным Яндекс Карт на 1 сентября 2026 года, рейтинг «Отвеса» — 4,8 из 5 по 214 оценкам."}
-    source: "Aggarwal и др., KDD 2024 (arXiv 2311.09735) + код github.com/GEO-optim/GEO (`stats_optimization_mine`: «Add positive, compelling statistics (even if hypothetical)»); Puerto и др., NeurIPS 2025 C-SEO Bench: Statistics снижает место цитирования в 19 из 24 настроек; Martinez 2026 §7.2: «not to “add numbers,” but to provide relevant, verifiable, dated, and properly attributed evidence»; B2 facts.schema.yaml canonical"
+    source: "Aggarwal и др., KDD 2024 (arXiv 2311.09735) + код github.com/GEO-optim/GEO (`stats_optimization_mine`: «Add positive, compelling statistics (even if hypothetical)»); Puerto и др., NeurIPS 2025 C-SEO Bench: Statistics снижает место цитирования в 19 из 24 настроек; Martinez 2026 §7.2: «not to “add numbers,” but to provide relevant, verifiable, dated, and properly attributed evidence»; 02-strategy-messaging/facts.schema.yaml canonical"
     evidence: "[исследование] + [стандарт базы]"
-    note: "хороший пример — canonical демо-факта rating-yandex-maps («Отвес», B2); в тексте страницы любое число — только с fact_ids (claims_check.py)"
+    note: "хороший пример — canonical демо-факта rating-yandex-maps («Отвес»); в тексте страницы любое число — только с fact_ids (claims_check.py)"
 
   # --- набивка и спам ------------------------------------------------------------------------------------------------
   - id: geo-keyword-stuffing
@@ -157,7 +157,7 @@ rules:
     message: "Подзаголовок-ярлык («Введение», «Особенности», «Overview»): не говорит, что в разделе, — ни человеку при сканировании, ни поиску, который показывает раздел отдельно."
     replacement: "подзаголовок-вопрос или вывод раздела: «Особенности» → «Чем ремонт в новостройке отличается от вторички»"
     examples: {bad: "Особенности", good: "Чем ремонт в новостройке отличается от вторички"}
-    source: "Google ai-optimization-guide (обновлено 2026-07-10): «organized by paragraphs and sections, along with headings that provide a clear structure»; Google featured snippets и «Read more» deep links ведут к разделу; higgsfield seo.md GEO п.6 [практика]; C ru-struct (не покрывает статейные ярлыки, кроме «Заключения»)"
+    source: "Google ai-optimization-guide (обновлено 2026-07-10): «organized by paragraphs and sections, along with headings that provide a clear structure»; Google featured snippets и «Read more» deep links ведут к разделу; higgsfield seo.md GEO п.6 [практика]; 06-anti-slop/lexicon/ru-struct.yaml (не покрывает статейные ярлыки, кроме «Заключения»)"
     evidence: "[документация] + [практика]"
 
   # --- манипуляция моделью: ворота ------------------------------------------------------------------------------------

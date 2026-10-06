@@ -1,7 +1,7 @@
-# motion-spec v1 — «Сдано», вариант B (Blender, L0). 15-showcase · дорожка SD · фаза 2 (SD2) · 2026-09-25.
-# Основа — motion-spec A (l0-sdano, агент J); отличия: цель отметок — булавки HTML на изометрии Blender (.plan__pins .pin, 4 шт.),
+# motion-spec v1 — «Сдано», вариант B (Blender, L0).
+# Основа — motion-spec A (l0-sdano); отличия: цель отметок — булавки HTML на изометрии Blender (.plan__pins .pin, 4 шт.),
 # LCP — кадр изометрии (<img>, не H1), новый момент act-stamp (клип штампа «СДАНО» на «Образце акта», один раз при появлении).
-# Проверка схемой: creative-research/99-raw/tools/venv-I/bin/python scripts/creative/spec_check.py spec <файл>
+# Проверка схемой: $DDD_HOME/venv/bin/python scripts/creative/spec_check.py spec <файл>
 # Сверка сборки: python3 scripts/creative/motion_check.py <index.html> --level L0 --spec <этот файл>
 motion_spec_version: "1.0"
 id: sdano-b-blender
@@ -107,7 +107,7 @@ sections:
         trigger: {type: in-view, threshold: 0.6, once: true}
         model: time
         tracks:
-          - {property: opacity, from: 0.01, to: 1, unit_note: "видимый результат — оттиск «СДАНО» на акте; движение штампа — внутри клипа Blender 38 кадров @24 = 1,58 с (VP9 webm 54 КБ, запас H.264 mp4 55 КБ), без loop; последний кадр = постер WebP; ошибка декодера или клип не доиграл за 4,5 с — сразу кадр конца (SD3)"}
+          - {property: opacity, from: 0.01, to: 1, unit_note: "видимый результат — оттиск «СДАНО» на акте; движение штампа — внутри клипа Blender 38 кадров @24 = 1,58 с (VP9 webm 54 КБ, запас H.264 mp4 55 КБ), без loop; последний кадр = постер WebP; ошибка декодера или клип не доиграл за 4,5 с — сразу кадр конца"}
         duration: {share: 2.83}
         easing: {token: motion.marketing.easing.out-expo}
         repeat: once

@@ -24,14 +24,14 @@
     "must_keep": ["лесной зелёный #1F4D3A", "золото #C9A227 как второй акцент этикетки", "банка «ЛЕСНАЯ ОБЖАРКА» — настоящий товар (рендер E-10)"],
     "customer_words": ["тёплый, ремесленный, спокойный"],
     "assets": "рендер банки (blender, свой), кадр утреннего стола у окна (F-04), синемаграф пара 5 с, 3D-иконки фич",
-    "constraints": ["демо ассетов, а не лендинга (решение заказчика п. 13)", "все утверждения — missing до facts.yaml", "без обещаний о здоровье (meaning boundaries)"]
+    "constraints": ["демо ассетов, а не лендинга", "все утверждения — missing до facts.yaml", "без обещаний о здоровье (meaning boundaries)"]
   },
   "ambition": {
     "level": "L0",
     "source": "claude",
     "budget_profile": "landing-product@L0",
     "motion_cap": "subtle",
-    "rationale": "Учебное сравнение уровней (опыт A/01): тот же бренд на L0. Умолчание лендинга — L1 (решение п. 13); L0 выбран для показа сдержанного режима: характер «спокойный», покупка повторная, основной визит — с телефона утром; смелость — в одном кадре, а не в эффектах."
+    "rationale": "Учебное сравнение уровней: тот же бренд на L0. Умолчание лендинга — L1; L0 выбран для показа сдержанного режима: характер «спокойный», покупка повторная, основной визит — с телефона утром; смелость — в одном кадре, а не в эффектах."
   },
   "concept": {
     "design_read": "Читаю это как: промо кофе в зёрнах для тех, кто варит дома по утрам, язык документальной утренней съёмки и спокойной типографики, тянется к одному большому кадру и настоящему предмету",
@@ -82,12 +82,12 @@
       "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "condensed", "accent_hue": "chromatic-other", "macrostructure": "stat-led", "imagery": "typographic", "energy": "measured"},
       "palette": {"background": "#F4F4F3", "surface": "#FFFFFF", "text": "#141414", "accent": "#1F4D3A", "on_accent": "#FFFFFF"},
       "color_strategy": "restrained",
-      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "замена X 2026-09-25: Oswald → Sofia Sans Condensed (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
+      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "Sofia Sans Condensed вместо Oswald (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
       "signature_move": {"what": "Дата ближайшей обжарки крупным узким шрифтом в первом экране, под ней — кривая температуры обжарки тонкой линией", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "свежесть проверяется датой, а не словом «свежий»"},
       "first_viewport": "Крупная дата «обжарка — среда» на всю ширину, строка о доставке и кнопка; маленький кадр банки справа",
       "imagery": "типографика и тонкая график-линия кодом (SVG)",
       "motion": "без движения",
-      "risk": "Без фактов даты обжарки (missing:roast-schedule) образ пуст; «ряд цифр» — примета K3 stats",
+      "risk": "Без фактов даты обжарки (missing:roast-schedule) образ пуст; «ряд цифр» — примета stats-row",
       "cost": "дёшево: типографика и SVG",
       "level_fit": ["L0", "L1"]
     },
@@ -99,7 +99,7 @@
       "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "rounded", "accent_hue": "chromatic-other", "macrostructure": "narrative-workflow", "imagery": "illustration", "energy": "calm"},
       "palette": {"background": "#FFFFFF", "surface": "#F4F4F3", "text": "#1C1B18", "accent": "#1F4D3A", "on_accent": "#FFFFFF"},
       "color_strategy": "restrained",
-      "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "замена X 2026-09-25: Nunito → Commissioner (cyrillic-display-fonts.yaml: Nunito — average, Commissioner — good)"},
+      "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "Commissioner вместо Nunito (cyrillic-display-fonts.yaml: Nunito — average, Commissioner — good)"},
       "signature_move": {"what": "Переключатель способа заваривания меняет схему помола и пропорции на карточке", "where": "section-role:how-it-works", "effects": [], "min_level": "L0", "concept_link": "снимает страх «я не бариста» делом, а не обещанием"},
       "first_viewport": "Слева заголовок и кнопка, справа карточка рецепта с переключателем «турка · френч-пресс · воронка»",
       "imagery": "плоские схемы кодом и 3D-иконки способов",
@@ -134,7 +134,7 @@
     "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL"},
     "composition": ["объект в правой трети, текст слева на ровной стене 45 %", "секции без каскада появления"],
     "surfaces": ["тёплое светлое поле штукатурки — из кадра, а не декоративная «бумага»"],
-    "imagery": {"kinds": ["photo", "3d"], "subject": "утренний стол у окна, банка, чашка, лён, крафт", "source_policy": "рендеры blender и снимки заказчика; генерация по паспорту ai-media после фазы 5", "people_policy": "real-only", "product_policy": "real-photo-only"},
+    "imagery": {"kinds": ["photo", "3d"], "subject": "утренний стол у окна, банка, чашка, лён, крафт", "source_policy": "рендеры blender и снимки заказчика; генерация по паспорту ai-media", "people_policy": "real-only", "product_policy": "real-photo-only"},
     "theme": "light"
   },
   "motion_system": {
@@ -187,7 +187,7 @@
   },
   "lifecycle": {
     "version": "0.1",
-    "history": [{"version": "0.1", "date": "2026-09-24", "change": "учебный вариант L0 к демо ai-media", "by": "Claude (пример A/01)"}],
+    "history": [{"version": "0.1", "date": "2026-09-24", "change": "учебный вариант L0 к демо ai-media", "by": "Claude (пример)"}],
     "review_by": "2027-03-24",
     "on_brand_change": "при утверждении брендбука — пересобрать palette, type и handoff.visual_dna; при смене уровня на L2 — см. art-direction-forest-roast-l2.json"
   }

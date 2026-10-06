@@ -64,7 +64,7 @@ from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qsl, quote, urlencode, urljoin, urlparse, urlunparse
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("creative"))
 JOURNAL = os.path.join(str(kbpaths.cache("creative", "refs")), "journal.tsv")
@@ -73,8 +73,6 @@ CONFIG = os.path.expanduser("~/.config")
 LIB_HOME = os.environ.get("CREATIVE_REFS_HOME") or os.path.expanduser("~/.local/share/creative-refs")
 MODES_FILE = os.path.join(CONFIG, "creative-refs", "modes.json")
 ARENA_TOKEN = os.path.join(CONFIG, "arena", "token")
-LOCK_TRIAD = kbpaths.lock_path("browser")          # общий слот тройки (утилиты и опыты)
-LOCK_OURS = kbpaths.lock_path("browser", "creative")                    # слот creative (утилиты и опыты)
 LOCK_REFS = kbpaths.lock_path("browser-refs")      # слот клиента референсов: один браузер клиента на машину
 BRAVE = kbpaths.brave()                 # Brave: DDD_BRAVE или PATH
 ENGINE_DEFAULT = os.environ.get("REFS_ENGINE", "brave")   # brave | chromium
@@ -93,7 +91,7 @@ PAGES_DEFAULT, PAGES_MAX = 3, 5      # порций выдачи на один �
 ENRICH_BATCH = 12                    # ссылок на одну партию «ассистента»
 PREVIEW_PX = 800                     # превью — WebP, длинная сторона ≤ 800 px
 ARENA_GAP_S = 2.5                    # ≤ 24 запросов в минуту к Are.na (гостевой лимит 30/мин)
-UA_API = "creative-research-refs/1.0 (internal research tool)"   # только robots.txt, Are.na API и CDN Are.na
+UA_API = "design-deep-dive-refs/1.0 (internal research tool)"   # только robots.txt, Are.na API и CDN Are.na
 
 SERVICES = {
     "dribbble": {"url": "https://dribbble.com/session/new", "domains": ("dribbble.com",),
@@ -873,7 +871,7 @@ def block_signal(page, status):
 
 @contextmanager
 def browser(ad, headed=False, engine=None):
-    """Две блокировки браузера (общая тройки → creative), блокировка профиля, постоянный контекст Brave 153 (или Chromium
+    """Слот браузера клиента референсов (LOCK_REFS), блокировка профиля, постоянный контекст Brave 153 (или Chromium
     Playwright). Без stealth, без подмены UA и navigator.webdriver. Закрытие — штатное (браузер дописывает базу cookie)."""
     svc = ad.name
     engine = engine or ENGINE_DEFAULT
@@ -2751,7 +2749,7 @@ def cmd_arena_push(lib, board, channel, dry=False, title=None):
         ch, _ = arena_req("GET", f"/v3/channels/{quote(channel)}", token=token)
     except Stop:
         ch, _ = arena_req("POST", "/v3/channels", {"title": title or board, "visibility": "private",
-                                                   "description": "Мудборд creative-research · только для внутренней работы"}, token=token)
+                                                   "description": "Мудборд design-deep-dive · только для внутренней работы"}, token=token)
     if ch.get("visibility") not in ("private",):
         raise Stop(f"канал «{channel}» не private ({ch.get('visibility')}) — выгрузка чужих работ туда запрещена")
     n = 0
@@ -3333,7 +3331,7 @@ def cmd_selftest(sample_dir=None):
 
 # ---------------------------------------------------------------- командная строка
 def main():
-    ap = argparse.ArgumentParser(description="Клиент референсов creative-research (вход заказчика, поиск, библиотека, мудборд).")
+    ap = argparse.ArgumentParser(description="Клиент референсов (вход заказчика, поиск, библиотека, мудборд).")
     sub = ap.add_subparsers(dest="cmd", required=True)
     lg = sub.add_parser("login", help="окно входа для заказчика")
     lg.add_argument("service", choices=sorted(SERVICES))

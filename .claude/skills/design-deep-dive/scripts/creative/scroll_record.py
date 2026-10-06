@@ -18,10 +18,14 @@
   python3 scroll_record.py URL OUT_DIR [--mobile] [--reduced-motion] [--steps 12] [--dwell 1.5] [--wait 6000]
                            [--locale en-US] [--timeout 150] [--keep-video] [--tmpdir DIR]
 Выход: OUT_DIR/record[_mobile][_rm].json, OUT_DIR/sheet[_mobile][_rm]_NN.jpg; одна строка JSON-сводки в stdout.
-Браузер — один за раз, под замком браузера снаружи; UA не подделывается. На статичной странице движение 0 %, на
-лабораторной — по секциям.
+Браузер — один за раз: утилита берёт замок браузера сама (kbpaths.lock), вложенный вызов из процесса, который его уже
+держит, не ждёт; UA не подделывается. ffmpeg и ffprobe — через kbpaths (переменные DDD_FFMPEG, DDD_FFPROBE, $DDD_HOME/bin,
+PATH). На статичной странице движение 0 %, на лабораторной — по секциям.
 """
 import argparse, glob, io, json, math, os, shutil, subprocess, sys, tempfile, time
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # scripts/lib
+import kbpaths  # noqa: E402
 
 VERSION = "scroll_record.py 1.0"
 # WebGL через ANGLE на видеокарте и WebGPU
@@ -33,7 +37,7 @@ NOISE = 0.2      # %: ниже — шум сжатия
 
 
 def ffprobe_size(path):
-    p = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0", path],
+    p = subprocess.run([kbpaths.ffprobe(), "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0", path],
                        capture_output=True, text=True, timeout=60)
     w, h = (int(x) for x in p.stdout.strip().split(",")[:2])
     return w, h
@@ -44,7 +48,7 @@ def read_frames(path, fps=FPS, width=AW):
     import numpy as np
     w0, h0 = ffprobe_size(path)
     h = int(round(h0 * width / w0 / 2)) * 2
-    cmd = ["ffmpeg", "-hide_banner", "-loglevel", "error", "-threads", "4", "-i", path, "-vf", f"fps={fps},scale={width}:{h}",
+    cmd = [kbpaths.ffmpeg(), "-hide_banner", "-loglevel", "error", "-threads", "4", "-i", path, "-vf", f"fps={fps},scale={width}:{h}",
            "-f", "rawvideo", "-pix_fmt", "rgb24", "-"]
     p = subprocess.run(cmd, capture_output=True, timeout=900)
     buf = p.stdout; n = len(buf) // (width * h * 3)
@@ -88,7 +92,7 @@ def find_flash(frames, path=None, fps=FPS):
     try:
         w0, h0 = ffprobe_size(path); w = 64; h = max(2, int(round(h0 * w / w0 / 2)) * 2)
         s = max(0.0, coarse - 0.5)
-        p = subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss", f"{s:.3f}", "-i", path, "-t", "1.0", "-vf", f"fps=25,scale={w}:{h}",
+        p = subprocess.run([kbpaths.ffmpeg(), "-hide_banner", "-loglevel", "error", "-ss", f"{s:.3f}", "-i", path, "-t", "1.0", "-vf", f"fps=25,scale={w}:{h}",
                             "-f", "rawvideo", "-pix_fmt", "rgb24", "-"], capture_output=True, timeout=120)
         n = len(p.stdout) // (w * h * 3)
         for i in range(n):
@@ -128,7 +132,7 @@ def main():
           "dwell_s": a.dwell, "wait_ms": a.wait, "locale": a.locale, "log": []}
     ev = []  # (t_отн, событие, данные)
     from playwright.sync_api import sync_playwright
-    with sync_playwright() as pw:
+    with kbpaths.lock("browser"), sync_playwright() as pw:   # замок браузера — на время записи
         b = pw.chromium.launch(headless=True, args=GPU_ARGS)
         st["browser"] = b.version
         rm = "reduce" if a.reduced_motion else "no-preference"

@@ -968,10 +968,10 @@ def _selftest():
         ok = ok and bool(cond)
         print(("OK   " if cond else "FAIL ") + msg)
 
-    today = dt.date(2026, 9, 29)
     me = str(Path(__file__).resolve())
     kbpaths.use("tests")
     import fixture_project
+    today = dt.date.fromisoformat(fixture_project.today())    # опорная дата фикстур: ключ today данных сверки
 
     def cli(*args, cwd):
         return subprocess.run([sys.executable, me, *map(str, args)], cwd=cwd, capture_output=True, text=True)
@@ -979,7 +979,7 @@ def _selftest():
     with fixture_project.built("package-landing") as fx, tempfile.TemporaryDirectory(prefix="ddd-ready-cwd-") as cwd:
         root, slug = fx.root, fx.slug
         surf = docpaths.surface(slug, "promo", root)
-        r = cli("build", slug, "promo", "--repo", root, "--today", "2026-09-29", cwd=cwd)
+        r = cli("build", slug, "promo", "--repo", root, "--today", today.isoformat(), cwd=cwd)
         path = docpaths.design(slug, "ready", surface="promo", repo=root)
         check("build из чужой рабочей папки с --repo — код 0, файл design/promo/ready.yaml записан",
               r.returncode == 0 and path.is_file())
@@ -1000,10 +1000,10 @@ def _selftest():
         check("status not-ready: макета нет — блокеры называют единицы",
               data["status"] == "not-ready" and any(b.startswith("spasibo: макета нет") for b in data["blockers"]))
         check("форма ready.yaml (R-STRUCT-008) — без замечаний", not form_errors(data))
-        r = cli("check", slug, "--repo", root, "--today", "2026-09-29", "--json", cwd=cwd)
+        r = cli("check", slug, "--repo", root, "--today", today.isoformat(), "--json", cwd=cwd)
         check("check сразу после build — код 0, находок нет", r.returncode == 0 and not F.parse_lines(r.stdout))
         text = path.read_text(encoding="utf-8")
-        r = cli("build", slug, "promo", "--repo", root, "--today", "2026-09-29", cwd=cwd)
+        r = cli("build", slug, "promo", "--repo", root, "--today", today.isoformat(), cwd=cwd)
         check("повторная сборка — те же байты («без изменений»)",
               path.read_text(encoding="utf-8") == text and "без изменений" in r.stdout)
         path.write_text(text.replace("surface: promo\n", "example: true\nsurface: promo\n"), encoding="utf-8")
@@ -1090,7 +1090,7 @@ def _selftest():
         # работе)
         def ci(stage):
             return subprocess.run([sys.executable, str(HERE / "canvas_input.py"), "build", slug, "promo", "--stage",
-                                   stage, "--repo", str(root), "--today", "2026-09-29"], capture_output=True, text=True,
+                                   stage, "--repo", str(root), "--today", today.isoformat()], capture_output=True, text=True,
                                   cwd=cwd)
 
         ci("wireframe")
@@ -1192,9 +1192,9 @@ def _selftest():
         root, slug = fx.root, fx.slug
         surf = docpaths.surface(slug, "promo", root)
         ci = subprocess.run([sys.executable, str(HERE / "canvas_input.py"), "build", slug, "promo", "--stage",
-                             "wireframe", "--repo", str(root), "--today", "2026-09-29"], capture_output=True, text=True,
+                             "wireframe", "--repo", str(root), "--today", today.isoformat()], capture_output=True, text=True,
                             cwd=cwd)
-        r = cli("build", slug, "promo", "--repo", root, "--today", "2026-09-29", cwd=cwd)
+        r = cli("build", slug, "promo", "--repo", root, "--today", today.isoformat(), cwd=cwd)
         data = yaml_mod().safe_load(docpaths.design(slug, "ready", surface="promo", repo=root).read_text(
             encoding="utf-8"))
         ab = data["units"][0]["after_build"]
@@ -1202,7 +1202,7 @@ def _selftest():
               "(I2, K1, L2 …), единица home, профиль landing-lead-services@L1",
               ci.returncode == 0 and r.returncode == 0 and {"I2", "K1", "L2"} <= set(ab) and "A1" not in ab
               and data["units"][0]["id"] == "home" and data["units"][0]["budget_profile"] == "landing-lead-services@L1")
-        r = cli("check", slug, "promo", "--repo", root, "--today", "2026-09-29", cwd=cwd)
+        r = cli("check", slug, "promo", "--repo", root, "--today", today.isoformat(), cwd=cwd)
         check("input-landing: check сразу после build — код 0", r.returncode == 0 and "0 error" in r.stdout)
     with fixture_project.built("package-cabinet") as fx:
         root, slug = fx.root, fx.slug
@@ -1266,7 +1266,7 @@ def _selftest():
               and len(cov_lines["plan-dashboard"]) == 1 and "KpiTile" in cov_lines["plan-dashboard"][0]
               and not any(v for u, v in cov_lines.items() if u != "plan-dashboard")
               and not any(w in x for x in d["blockers"] for w in ("ДС", "FSD", "покрытие")))
-        r = subprocess.run([sys.executable, me, "build", slug, "office", "--repo", str(root), "--today", "2026-09-29"],
+        r = subprocess.run([sys.executable, me, "build", slug, "office", "--repo", str(root), "--today", today.isoformat()],
                            capture_output=True, text=True)
         check("build: решения заказчика — строками «решение заказчика: …» с единицами",
               r.returncode == 0 and f"{DECIDE}FSD-карты нет — not-found, plan-dashboard" in r.stdout)

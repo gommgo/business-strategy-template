@@ -25,14 +25,14 @@
     "customer_words": ["Нравятся сайты Teenage Engineering и Nothing", "не хотим «как у всех» — никакого бежевого"],
     "references_given": ["refs/01-grid.jpg — сетка и подача предмета (скриншот заказчика)", "refs/02-type.jpg — масштаб заголовка", "refs/03-preorder.jpg — блок цены и брони"],
     "assets": "логотип SVG, GLB-модель лампы от дизайнера, 6 фото прототипа",
-    "constraints": ["первый экран телефона ≤ 1,5 МБ", "без обещаний про здоровье глаз (text: nc-eyes-health)", "без счётчика «осталось N» и таймера", "без зачёркнутой «старой» цены: товар ещё не продавался (text B2, 38-ФЗ ст. 5)"]
+    "constraints": ["первый экран телефона ≤ 1,5 МБ", "без обещаний про здоровье глаз (text: nc-eyes-health)", "без счётчика «осталось N» и таймера", "без зачёркнутой «старой» цены: товар ещё не продавался (text 08/01, 38-ФЗ ст. 5)"]
   },
   "ambition": {
     "level": "L1",
     "source": "default",
     "budget_profile": "landing-product@L1",
     "motion_cap": "expressive",
-    "rationale": "Промо товара — умолчание L1 (решение заказчика п. 13). Трафик тёплый, но с телефона из Telegram: вес первого экрана как у L0 (≤ 1,5 МБ). Один фирменный приём (свет теплеет в секции how) и один 3D-объект после LCP; цена и бронь — L0.",
+    "rationale": "Промо товара — умолчание L1. Трафик тёплый, но с телефона из Telegram: вес первого экрана как у L0 (≤ 1,5 МБ). Один фирменный приём (свет теплеет в секции how) и один 3D-объект после LCP; цена и бронь — L0.",
     "by_section_role": [{"role": "pricing", "level": "L0", "why": "цена и условия брони читаются, а не смотрятся"}]
   },
   "concept": {
@@ -67,7 +67,7 @@
       "axes": {"paper": "light", "paper_temperature": "cool", "display_style": "wide", "accent_hue": "cool", "macrostructure": "split-studio", "imagery": "photo", "energy": "measured"},
       "palette": {"background": "#F5F7FA", "surface": "#FFFFFF", "text": "#0E1220", "muted": "#4A5263", "accent": "#2B3BFF", "on_accent": "#FFFFFF"},
       "color_strategy": "restrained",
-      "type": {"display": "Unbounded", "text": "Golos Text", "cyrillic_checked": true, "license": "OFL", "note": "кириллица — fontsource subsets (kimi 07/03 §4.4, 2026-09-24)"},
+      "type": {"display": "Unbounded", "text": "Golos Text", "cyrillic_checked": true, "license": "OFL", "note": "кириллица — fontsource subsets (2026-09-24)"},
       "signature_move": {"what": "Подписи-выноски у деталей лампы на фото прототипа, как в паспорте изделия", "where": "section-role:hero", "effects": [], "min_level": "L0", "concept_link": "паспорт показывает устройство вещи, а не хвалит её"},
       "first_viewport": "Слева крупный заголовок в 2 строки (72/40 px) и кнопка «Забронировать за 990 ₽», под ней строка о возврате брони; справа фото прототипа на светлом поле с 3 выносками",
       "imagery": "6 фото прототипа на светлом поле; 3D-лампа в отдельной секции",
@@ -84,7 +84,7 @@
       "axes": {"paper": "light", "paper_temperature": "neutral", "display_style": "condensed", "accent_hue": "cool", "macrostructure": "stat-led", "imagery": "typographic", "energy": "lively"},
       "palette": {"background": "#F3F5F8", "surface": "#FFFFFF", "text": "#16181D", "accent": "#2B3BFF", "on_accent": "#FFFFFF", "extra": [{"hex": "#F2B267", "role": "образец 2700 K (только в демонстрации света)", "share_max": 0.1}]},
       "color_strategy": "full-palette",
-      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "узкий гротеск с кириллицей — проверить подмножество до сборки; замена X 2026-09-25: Oswald → Sofia Sans Condensed (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
+      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "узкий гротеск с кириллицей — проверить подмножество до сборки; Sofia Sans Condensed вместо Oswald (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
       "signature_move": {"what": "Прокрутка ведёт свет по шкале 5000 → 2700 K: фон секции и образец страницы теплеют, крупное число кельвинов меняется", "where": "section-role:how-it-works", "effects": ["effect:scroll-driven-progress"], "min_level": "L1", "concept_link": "страница делает то, что делает лампа"},
       "first_viewport": "Крупное «2700–5000 K» во всю ширину, под ним одна строка обещания и кнопка; фото лампы маленьким кадром справа внизу",
       "imagery": "типографика и два кадра страницы книги под разным светом",
@@ -106,7 +106,7 @@
       "first_viewport": "Разворот: слева заголовок антиквой и кнопка, справа фото раскрытой книги под светом лампы; поле с одной сноской-ценой",
       "imagery": "съёмка страницы книги под лампой (заказчик или рендер blender)",
       "motion": "без движения, кроме отклика",
-      "risk": "Книжная тема тянет к «кремовой бумаге и антикве» — кластер ИИ 2025–26 (ui 11/04 §4.1) и примета K3 serif",
+      "risk": "Книжная тема тянет к «кремовой бумаге и антикве» — кластер ИИ 2025–26 (ui 11/04 §4.1) и примета overused-display-font",
       "cost": "дёшево, но нужна своя съёмка",
       "level_fit": ["L0", "L1"]
     },
@@ -132,10 +132,10 @@
     "chosen": "a",
     "chosen_by": "customer",
     "date": "2026-09-24",
-    "why": "Заказчик выбрал A (ответ 3 в kimi F/03): ближе к TE и Nothing, без бежевого. Главный приём страницы взят из B: свет теплеет по прокрутке в секции how — это показывает механизм и совпадает с «Going with» F/03.",
+    "why": "Заказчик выбрал A: ближе к TE и Nothing, без бежевого. Главный приём страницы взят из B: свет теплеет по прокрутке в секции how — это показывает механизм.",
     "merged_from": ["b"],
     "rejected": [
-      {"id": "c", "why": "антиква и книжная тема тянут к кремовой колее и примете K3 serif"},
+      {"id": "c", "why": "антиква и книжная тема тянут к кремовой колее и примете overused-display-font"},
       {"id": "d", "why": "тёмный фон + один яркий акцент — кластер шаблонов; нужна дорогая вечерняя съёмка"}
     ]
   },
@@ -153,7 +153,7 @@
     "surfaces": ["светлое холодное поле без фактур; глубина только у 3D-лампы"],
     "imagery": {"kinds": ["photo", "3d"], "subject": "прототип лампы на светлом поле; страница книги под 5000 K и 2700 K", "source_policy": "фото прототипа и GLB — от заказчика; страница книги — съёмка заказчика или рендер blender; текст в кадре не генерировать", "people_policy": "none", "product_policy": "real-photo-only"},
     "theme": "light",
-    "d_refs": ["04-visual-language/01 (дисплейные роли — D, волна 1)", "04-visual-language/03 (подача продукта — D)"]
+    "d_refs": ["04-visual-language/01 (дисплейные роли)", "04-visual-language/03 (подача продукта)"]
   },
   "motion_system": {
     "thesis": "Движется только свет: в секции how страница книги теплеет от 5000 K к 2700 K по мере прокрутки; остальное неподвижно, отклик кнопки 2 px",
@@ -206,7 +206,7 @@
       {"what": "model-viewer (бандл с three, br)", "kb": 240, "device": "both", "load": "on-interaction"}
     ],
     "overrides": [
-      {"metric": "effects.js_3d_kb_br.mobile", "value": 240, "why": "model-viewer 4 весит 240 КБ br (blender A/03) при потолке 200; грузится только по нажатию «Рассмотреть» и не входит в первый экран", "approved_by": "арт-директор (Claude), пример"}
+      {"metric": "effects.js_3d_kb_br.mobile", "value": 240, "why": "model-viewer 4 весит 240 КБ br (blender 01/03) при потолке 200; грузится только по нажатию «Рассмотреть» и не входит в первый экран", "approved_by": "арт-директор (Claude), пример"}
     ]
   },
   "handoff": {

@@ -3494,6 +3494,7 @@ def selftest():
     import tempfile
     kbpaths.use("tests")
     import fixture_project as FP
+    today = FP.today()                                    # опорная дата фикстур: ключ today данных сверки обслуживания
     ok = True
 
     def check(msg, cond):
@@ -3537,7 +3538,7 @@ def selftest():
         return docpaths.surface(fx.slug, name, fx.root)
 
     def build(fx, surface, stage, prune=True, units=None):
-        ctx = assemble(fx.slug, surf_of(fx, surface), fx.root, stage, maps, "2026-09-29", units, units is not None)
+        ctx = assemble(fx.slug, surf_of(fx, surface), fx.root, stage, maps, today, units, units is not None)
         write_input(ctx.files, ctx.input_dir, prune)
         return ctx
 
@@ -3560,9 +3561,9 @@ def selftest():
         check("INPUT.md: copy deck — отпечаток text_hash, прочие — sha256",
               any(r["id"].startswith("copy-deck") and r["fingerprint"].startswith("text_hash:") for r in rows)
               and any(r["fingerprint"].startswith("sha256:") for r in rows))
-        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, "2026-09-29")
+        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, today)
         check(f"лендинг, wireframe: check — 0 error ({F.summary(items)})", not rules_of(items, "error"))
-        lx = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", loose, "2026-09-29")
+        lx = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", loose, today)
         un = [f for f in lx.rep.items if f.rule == "R-FRESH-003"]
         check("поле схемы без правила — вход собирается, R-FRESH-003 warning называет поле и карту",
               len(un) == 1 and un[0].severity == "warning" and "/extra_field" in un[0].message
@@ -3587,7 +3588,7 @@ def selftest():
         check("пробелы INPUT.md — тем же утверждением, что находки, число после существительного",
               re.search(r"текстовые слоты плана без текста в copy deck — \d+: ", gaps)
               and not re.search(r"\d+ текстовых|текст\(ов\)", gaps))
-        again = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        again = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         check("повторная сборка — те же байты",
               all((inp / n).read_text(encoding="utf-8") == t for n, t in again.files.items()))
         brief = yaml_mod().safe_load((inp / BRIEF).read_text(encoding="utf-8"))
@@ -3648,14 +3649,14 @@ def selftest():
         # правка источника без сборки — вход устарел
         pp = docpaths.site(fx.slug, "promo", "plans", "home.yaml", repo=fx.root)
         pp.write_text(pp.read_text(encoding="utf-8") + "# правка плана\n", encoding="utf-8")
-        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, "2026-09-29")
+        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, today)
         check("правка плана без build — R-FRESH-002 warning, без R-FRESH-003",
               "R-FRESH-002" in rules_of(items, "warning") and "R-FRESH-003" not in rules_of(items))
         build(fx, "promo", "wireframe")
         bp = inp / BRIEF
         bp.write_text(bp.read_text(encoding="utf-8").replace("stage: wireframe", "stage: mockup"), encoding="utf-8")
         (inp / "notes.md").write_text("заметка\n", encoding="utf-8")
-        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, "2026-09-29")
+        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, today)
         check("правка файла входа руками и лишний файл — R-FRESH-003 error",
               sum(1 for f in items if f.rule == "R-FRESH-003" and f.severity == "error") >= 2)
         build(fx, "promo", "wireframe")
@@ -3664,15 +3665,15 @@ def selftest():
         (inp / INPUT).write_text(body_only.replace("## Источники", f"Этап: wireframe; {MANUAL}.\n\n## Источники", 1),
                                  encoding="utf-8")
         (inp / "facts.md").write_text((inp / "facts.md").read_text(encoding="utf-8") + "\n", encoding="utf-8")
-        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, "2026-09-29")
+        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, today)
         check("вход с пометкой «собран без утилиты», не равный сборке, — R-FRESH-002, без R-FRESH-003",
               "R-FRESH-002" in rules_of(items) and "R-FRESH-003" not in rules_of(items))
         (inp / INPUT).write_text(body_only, encoding="utf-8")
-        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        items, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         check("вход без манифеста утилиты и без пометки — R-FRESH-003", "R-FRESH-003" in rules_of(items, "error"))
         build(fx, "promo", "wireframe")
         # макет на неутверждённых текстах
-        m = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        m = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
         check("mockup при copy deck не approved — R-MAT-012 error о статусе текстов",
               any(f.rule == "R-MAT-012" and f.severity == "error" and "тексты не того статуса" in f.message
                   for f in m.rep.items))
@@ -3710,10 +3711,10 @@ def selftest():
         deck = docpaths.site(fx.slug, "promo", "copy", "home.yaml", repo=fx.root)
         approved = re.sub(r"status: (assumed|draft|checked)", "status: approved", deck.read_text(encoding="utf-8"))
         deck.write_text(approved, encoding="utf-8")
-        m = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        m = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
         check("mockup при утверждённых текстах — нет находки о статусе текстов",
               not any("тексты не того статуса" in f.message for f in m.rep.items))
-        d = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "directions", maps, "2026-09-29")
+        d = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "directions", maps, today)
         dsecs, _n = cd.parse_copy_md(d.files.get("pages/home/copy.md", ""))
         types = {x.get("slot_type") for p in cd.pages_of(cd.deck_root(yaml_mod().safe_load(deck.read_text("utf-8"))))
                  for s in cd.sections_of(p) for x in cd.slots_of(s)
@@ -3730,7 +3731,7 @@ def selftest():
         h1["variants"].append({"id": "b", "text": "Ремонт квартир под ключ: смета до договора", "status": "approved",
                                "source": "ai-self"})
         deck.write_text(yaml_mod().safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        d2 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "directions", maps, "2026-09-29")
+        d2 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "directions", maps, today)
         cm = d2.files["pages/home/copy.md"]
         check("directions: варианты H1 — списком в шапке copy.md (id, статус, текст), в строке слота — выбранный; "
               "шапка синтаксис copy.md не ломает",
@@ -3749,27 +3750,27 @@ def selftest():
         first = ["без золота в акценте", "имя не по центру поверх ролика"]
         adoc["directions"][0].update({"bans": first, "notes": "артборд — на тёмной бумаге"})
         adoc["directions"][1]["bans"] = ["без неона"]
-        adoc["x-direction-bans"] = {ids[0]: ["запрет из расширения проекта"]}
+        adoc["x-team-memo"] = {ids[0]: ["заметка из расширения проекта"]}
         adoc["decisions"][0]["k3_allow"] = "center-hero"
         adoc["exclusions"]["k3_allow"] = ["photo-hero"]
         adp.write_text(json.dumps(adoc, ensure_ascii=False, indent=1), encoding="utf-8")
 
         def brief_of(stage):
-            c = assemble(fx.slug, surf_of(fx, "promo"), fx.root, stage, maps, "2026-09-29")
+            c = assemble(fx.slug, surf_of(fx, "promo"), fx.root, stage, maps, today)
             b = yaml_mod().safe_load(c.files[BRIEF])
             return c, b, [x for x in get(b, "design_system", "bans", default=[]) if x.get("from") == "art-direction"]
         dc, db, dad = brief_of("directions")
         own = {x["id"]: x.get("bans") for x in db["directions"]}
         ad_src = next(s for s in dc.sources.values() if s.id == "art-direction")
         fp_ext = dc.fingerprint(ad_src)
-        ad_src.data.pop("x-direction-bans")
+        ad_src.data.pop("x-team-memo")
         check("вход directions: запреты двух направлений (поле directions[].bans арт-дирекции) — каждый список только "
-              "у своего артборда (directions[].bans), заметка направления (notes) — с ним; расширение x-direction-bans "
+              "у своего артборда (directions[].bans), заметка направления (notes) — с ним; расширение проекта (x-team-memo) "
               "вход не читает, отпечаток арт-дирекции оно не меняет; запреты exclusions арт-дирекции в общий бан-лист "
               "не идут — строка пробелов",
               own[ids[0]] == first and own[ids[1]] == ["без неона"] and all(own[i] is None for i in ids[2:])
               and db["directions"][0].get("notes") == "артборд — на тёмной бумаге"
-              and "запрет из расширения проекта" not in dc.files[BRIEF] and dc.fingerprint(ad_src) == fp_ext
+              and "заметка из расширения проекта" not in dc.files[BRIEF] and dc.fingerprint(ad_src) == fp_ext
               and not dad and get(db, "design_system", "bans")
               and any("запреты арт-дирекции (exclusions) во вход не идут" in g for g in dc.gaps))
         _wc, wb, wad = brief_of("wireframe")
@@ -3787,7 +3788,7 @@ def selftest():
         check("направление не выбрано — запретов арт-дирекции в бан-листе wireframe нет, причина — строкой пробелов",
               not nad and any("направление не выбрано (choice.chosen)" in g for g in nc.gaps))
         adp.write_text(adt, encoding="utf-8")
-        mo = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "motion", maps, "2026-09-29")
+        mo = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "motion", maps, today)
         mb = yaml_mod().safe_load(mo.files[BRIEF])
         check("motion: motion.md, decisions.motion.level по уровням, без page.yaml и copy.md",
               "pages/home/motion.md" in mo.files and get(mb, "decisions", "motion", "level") in MOTION_ORDER
@@ -3798,7 +3799,7 @@ def selftest():
         # copy deck страницы нет — совет с каркасом из плана
         hidden = deck.with_name("home.yaml.off")
         deck.rename(hidden)
-        nd = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        nd = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         hidden.rename(deck)
         cov = next((f for f in nd.rep.items if f.rule == "R-COV-002" and f.ref == "home"), None)
         check("copy deck страницы нет — R-COV-002 с советом «каркас из плана — copydeck.py skeleton»",
@@ -3810,7 +3811,7 @@ def selftest():
         dpage["x-reviewed-by"] = "редактор (заметка проекта)"
         cd.slots_of(cd.sections_of(dpage)[0])[0]["x-note"] = {"who": "аналитик", "text": "заметка к слоту"}
         deck.write_text(yaml_mod().safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         check("x-* у страницы и во вложенном слоте copy deck — расширения, не поля: R-FRESH-003 нет",
               "R-FRESH-003" not in rules_of(x.rep.items))
         deck.write_text(dt, encoding="utf-8")
@@ -3838,7 +3839,7 @@ def selftest():
         def stitched():
             """Стык страницы home на макете по текущему copy deck: (сборка с находками стыка, страница)."""
             deck.write_text(yaml_mod().safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
-            c = Ctx(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+            c = Ctx(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
             src = c.load("page-plan", plan_path, page="home")
             pg = Page("home", src.data, src)
             attach_deck(c, pg)
@@ -3870,23 +3871,23 @@ def selftest():
         chk = docpaths.design(fx.slug, "review", surface="promo", repo=fx.root) / "checks.json"
         chk.parent.mkdir(parents=True, exist_ok=True)
         chk.write_text(json.dumps({"example": True, "findings": [{"tell": "LOOK-THREE-CARDS"}]}), encoding="utf-8")
-        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
         check("review/checks.json — не источник входа и не бан-лист",
               not any("checks.json" in str(s.path) for s in x.sources.values())
               and "прошлая итерация" not in x.files[BRIEF])
         chk.unlink()
         bf = docpaths.site(fx.slug, "promo", "brief", repo=fx.root)
         bf.write_text(bf.read_text(encoding="utf-8") + "extra_note: поле вне схемы\n", encoding="utf-8")
-        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        x = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         un = [f for f in x.rep.items if f.rule == "R-FRESH-003"]
         check("поле источника без правила x-canvas-map — R-FRESH-003 warning с именем поля и советом «x-… или убрать»",
               len(un) == 1 and un[0].severity == "warning" and "/extra_note" in un[0].message
               and "x-…" in un[0].fix)
-        r = cli("build", fx.slug, "promo", "--stage", "wireframe", "--repo", fx.root, "--today", "2026-09-29")
+        r = cli("build", fx.slug, "promo", "--stage", "wireframe", "--repo", fx.root, "--today", today)
         check(f"build с непокрытым полем — вход записан, код 0 (код {r.returncode})",
               r.returncode == 0 and "/extra_note" in (inp / INPUT).read_text(encoding="utf-8"))
     with FP.built("input-site") as fx:
-        ctx = assemble(fx.slug, surf_of(fx, "corp"), fx.root, "wireframe", maps, "2026-09-29")
+        ctx = assemble(fx.slug, surf_of(fx, "corp"), fx.root, "wireframe", maps, today)
         pages = [n.split("/")[1] for n in ctx.files if n.endswith("/page.yaml")]
         check(f"многостраничник: страницы входа по карте и планам ({len(pages)}): главная первой",
               pages and pages[0] == "home" and len(pages) == 15 and "consent" not in pages)
@@ -3916,10 +3917,10 @@ def selftest():
               all(p in gap for p in pages if p not in ("home", "about")) and len(part.outside) == len(pages) - 2)
         foreign = [f for f in part.rep.items if f.ref.split("#")[0] in part.outside]
         check("находок страниц вне партии во входе нет", not foreign)
-        items, cc = check_surface(fx.slug, surf_of(fx, "corp"), fx.root, None, maps, "2026-09-29")
+        items, cc = check_surface(fx.slug, surf_of(fx, "corp"), fx.root, None, maps, today)
         check(f"check без ключа — партия из units входа, вход свежий ({F.summary(items)})",
               cc.units == ["home", "about"] and not rules_of(items) & {"R-FRESH-002", "R-FRESH-003"})
-        mk = assemble(fx.slug, surf_of(fx, "corp"), fx.root, "mockup", maps, "2026-09-29", ["home"], True)
+        mk = assemble(fx.slug, surf_of(fx, "corp"), fx.root, "mockup", maps, today, ["home"], True)
         errs = [f for f in mk.rep.items if f.severity == "error"]
         check(f"--page home, mockup: error — тексты home, факты и токенов ДС нет ({len(errs)}); план ассетов, "
               "арт-дирекция и ДС — warning",
@@ -3940,11 +3941,11 @@ def selftest():
         abd = yaml_mod().safe_load(abt)
         had = (abd["core"].pop("postures"), abd["core"].pop("pointer"), abd["constraints"].pop("accessibility"))
         abp.write_text(yaml_mod().safe_dump(abd, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        bare = assemble(fx.slug, surf_of(fx, "office"), fx.root, "mockup", maps, "2026-09-29")
+        bare = assemble(fx.slug, surf_of(fx, "office"), fx.root, "mockup", maps, today)
         abd["core"]["postures"] = [dict(had[0][0], posture="transient")]
         abd["constraints"]["accessibility"] = "not-specified"
         abp.write_text(yaml_mod().safe_dump(abd, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        wrong = assemble(fx.slug, surf_of(fx, "office"), fx.root, "mockup", maps, "2026-09-29")
+        wrong = assemble(fx.slug, surf_of(fx, "office"), fx.root, "mockup", maps, today)
         abp.write_text(abt, encoding="utf-8")
         check("бриф на вид без копий слоя проекта (постуры, указатель, цель доступности) — файлы входа те же байт в "
               "байт: постуры — таблица «Постура» user.md, цель доступности — vision; копия, не равная источнику, вход "
@@ -3960,7 +3961,7 @@ def selftest():
         cm = "\n".join(x for x in ctx.files["copy.md"].splitlines() if x.startswith("| `"))
         check(f"кабинет: copy.md — тексты только approved строк ({len(ok_rows)}), остальные — заглушка",
               all(r.text in cm for r in ok_rows if r.text) and cm.count(C.TEXT_PLACEHOLDER) == len(bad_rows))
-        items, _c = check_surface(fx.slug, surf_of(fx, "office"), fx.root, None, maps, "2026-09-29")
+        items, _c = check_surface(fx.slug, surf_of(fx, "office"), fx.root, None, maps, today)
         gate = [f for f in items if f.rule == "R-MAT-012" and f.kind == "texts"]
         check(f"кабинет, mockup на неутверждённых строках texts.md ({len(bad_rows)}) — одна R-MAT-012 error проверки "
               f"входа вместо R-MAT-003 ({F.summary(items)})",
@@ -3976,7 +3977,7 @@ def selftest():
               len(voice) == 1 and voice[0].severity == "warning"
               and voice[0].path == docpaths.rel(docpaths.voice(fx.slug, repo=fx.root), fx.root)
               and "тексты во входе — из texts.md, сверка с голосом — после профиля голоса (этап meaning)" in gaps)
-        wf, _c = check_surface(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29")
+        wf, _c = check_surface(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, today)
         check(f"кабинет, wireframe на тех же строках — без error ({F.summary(wf)})", not rules_of(wf, "error"))
         acc = ctx.files[ACCEPT]
         check("ACCEPTANCE.md кабинета: состояния по набору, класс экрана по by_viewport, нет A3",
@@ -3993,7 +3994,7 @@ def selftest():
         T = mod("tree")
         keys = C.batch_scope(lay, T.parse_layer(lay), ["plan-dashboard"])["keys"]
         _ok, bad_pd = C.text_rows(lay, "mockup", keys)
-        pd = assemble(fx.slug, surf_of(fx, "office"), fx.root, "mockup", maps, "2026-09-29", ["plan-dashboard"], True)
+        pd = assemble(fx.slug, surf_of(fx, "office"), fx.root, "mockup", maps, today, ["plan-dashboard"], True)
         gate = [f for f in pd.rep.items if f.rule == "R-MAT-012" and f.kind == "texts"]
         demo = json.loads(pd.files["demo-data.json"])
         sts = {r.get("id") for r in parse_acceptance(pd.files[ACCEPT])[0] if str(r.get("id")).startswith("ST-")}
@@ -4007,9 +4008,9 @@ def selftest():
               and pd.units == ["plan-dashboard"] and "вне партии: not-found, request-card" in pd.files[INPUT])
         scr = lay.screens["requests-list"].path
         scr.write_text(scr.read_text(encoding="utf-8").replace("status: stable", "status: draft", 1), encoding="utf-8")
-        full = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29")
+        full = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, today)
         second = [f for f in full.rep.items if f.rule == "R-MAT-011" and f.message.startswith("второй вход")]
-        part = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29", ["plan-dashboard"],
+        part = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, today, ["plan-dashboard"],
                         True)
         check("экран draft в партии — R-MAT-011 warning (PRE — доклад), без error; вне партии — строка пробелов со "
               "статусом, без находки",
@@ -4019,9 +4020,9 @@ def selftest():
         card = lay.screens["request-card"].path
         ct = card.read_text(encoding="utf-8")
         card.write_text(re.sub(r"(?m)^name: .*$", "name: Карточка: заявка", ct, count=1), encoding="utf-8")
-        broken = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29")
+        broken = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, today)
         mine = [f for f in broken.rep.items if f.ref.split("#")[0] == "request-card"]
-        aside = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29", ["plan-dashboard"],
+        aside = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, today, ["plan-dashboard"],
                          True)
         card.write_text(ct, encoding="utf-8")
         check("двоеточие в name экрана — одна находка о разборе записи (R-MAT-011 с причиной), без находок о статусе "
@@ -4030,7 +4031,7 @@ def selftest():
               and "frontmatter" in mine[0].message and "request-card (не разбирается)" in aside.files[INPUT])
     with FP.built("package-cabinet") as fx:
         ctx = build(fx, "office", "mockup")
-        items, _c = check_surface(fx.slug, surf_of(fx, "office"), fx.root, None, maps, "2026-09-29")
+        items, _c = check_surface(fx.slug, surf_of(fx, "office"), fx.root, None, maps, today)
         check(f"кабинет на утверждённых текстах (package-cabinet), mockup: check — 0 error ({F.summary(items)})",
               not rules_of(items, "error"))
         fm, _b, _r = read_manifest(ctx.input_dir / INPUT)
@@ -4038,7 +4039,7 @@ def selftest():
                  for day in ("2026-11-30", "2026-12-01")]
         check("опорная дата демо-набора — дата сборки входа в манифесте (demo_anchor); два check в другие дни — вход "
               "свежий",
-              fm.get(DEMO_ANCHOR) == "2026-09-29" == json.loads(ctx.files[DEMO_FILE])["anchor"]
+              fm.get(DEMO_ANCHOR) == today == json.loads(ctx.files[DEMO_FILE])["anchor"]
               and all(not rules_of(x) & {"R-FRESH-002", "R-FRESH-003"} for x in later))
         check("итог INPUT.md макета без ошибок — вход по phases.md: принятый вайрфрейм или его пропуск, ДС в холсте",
               "вход без ошибок: этап можно публиковать, когда готов его вход по phases.md (принятый вайрфрейм или его "
@@ -4167,7 +4168,7 @@ def selftest():
                                   "`canvas:promo` |\n"
                                   "| `u-mark` | `design/_assets/marks/mark.svg` | — | `footer-mark` | "
                                   "`canvas:promo` |\n"), encoding="utf-8")
-        m = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        m = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
 
         def asset_rows(page):
             t = mod("layer").tables(m.files[f"pages/{page}/assets.md"])[0]
@@ -4255,7 +4256,7 @@ def selftest():
         art.write_text(at0.replace(mark_row, mark_row
                                    + f"| `u-sample` | `{demo2}` | — | `hero-visual` | `canvas:promo` |\n"
                                    f"| `u-work` | `{demo3}` | — | — | `canvas:promo` |\n"), encoding="utf-8")
-        m2 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        m2 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
         hp.write_text(pt0, encoding="utf-8")
         art.write_text(at0, encoding="utf-8")
         t2 = mod("layer").tables(m2.files["pages/home/assets.md"])[0]
@@ -4295,7 +4296,7 @@ def selftest():
         build(fx, "promo", "mockup")
 
         def stale():
-            found, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, "2026-09-29")
+            found, _c = check_surface(fx.slug, surf_of(fx, "promo"), fx.root, None, maps, today)
             return sorted({f.ref for f in found if f.rule == "R-FRESH-002"})
         clean, units0 = stale(), unit_sources(fx.slug, "promo", "home", fx.root)
         at = art.read_text(encoding="utf-8")
@@ -4321,7 +4322,7 @@ def selftest():
 
         def outside(value):
             return at.replace(head6, head7).replace(row6, f"{row6} {value} |")
-        c0 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        c0 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
         art.write_text(outside("запись на странице «Подача»"), encoding="utf-8")
         c1 = build(fx, "promo", "mockup")
         art.write_text(outside("только живая страница"), encoding="utf-8")
@@ -4339,7 +4340,7 @@ def selftest():
                           "2026-09-29, ответ на вопрос холста.\n\n## Проверки макета", 1)
         art.write_text(four, encoding="utf-8")
         wide = stale()
-        w4 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        w4 = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
         art.write_text(at, encoding="utf-8")
         vp4 = get(Y.safe_load(w4.files[BRIEF]), "build", "viewports", default={})
         fm4, fm0 = (Y.safe_load(c.files[INPUT].split("---\n", 2)[1]) for c in (w4, c0))
@@ -4368,7 +4369,7 @@ def selftest():
         tp = docpaths.design(fx.slug, "tokens", repo=fx.root)
         tp.write_text(json.dumps({"$extensions": {DB.EXT_MODES: {"base": "dark"}},
                                   "color": {"bg": {"$type": "color", "$value": "#101010"}}}), encoding="utf-8")
-        dark = acc_context(Ctx(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29"), None, None,
+        dark = acc_context(Ctx(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today), None, None,
                            None)
         tp.unlink()
         check(f"токены ДС с base: dark — темы приёмки [dark] ({', '.join(dark['themes'])})",
@@ -4395,7 +4396,7 @@ def selftest():
         cd.chosen_variant(ready).update({"text": "Здравствуйте! Хочу вызвать замерщика.", "status": "assumed"})
         dsec["slots"].append(ready)
         dk.write_text(Y.safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        w = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        w = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         page = Y.safe_load(w.files["pages/home/page.yaml"])
         psec = next(s for s in page["sections"] if s["id"] == "lead-form")
         texts = {(s["section_id"], sl["slot_id"]): sl["text"]
@@ -4424,10 +4425,10 @@ def selftest():
             cd.chosen_variant(first_sl)["text"] = f"Текст образца {sid}"
             cd.deck_root(dd)["pages"].append(smp)
         dk.write_text(Y.safe_dump(dd, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        flat = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        flat = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         splan["page"]["template"] = True
         sp.write_text(Y.safe_dump(splan, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        tpl = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, "2026-09-29")
+        tpl = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "wireframe", maps, today)
         got = sorted(n for n in tpl.files if n.startswith("pages/spasibo-"))
         check("шаблон коллекции с образцами в copy deck (page_id свой, site_page_id — id плана): два образца — две "
               "папки pages/<id образца>/copy.md с текстами образца и строкой о шаблоне; page.yaml у образца нет; "
@@ -4459,10 +4460,10 @@ def selftest():
              "license": "права у заказчика (демо)"},
             {"slot": "hero-visual", "file": "hero-draft.glb", "status": "draft"}]}, allow_unicode=True),
             encoding="utf-8")
-        mo = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "motion", maps, "2026-09-29")
+        mo = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "motion", maps, today)
         name = "pages/home/models/hero-visual.glb.json"
         back = base64.b64decode(json.loads(mo.files[name])["data"]) if name in mo.files else None
-        mk = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, "2026-09-29")
+        mk = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "mockup", maps, today)
         check("модель 3D-слота на этапе motion: принятая модель манифеста ассетов — файлом models/<слот>.glb.json "
               "({\"data\": base64}), декодируется в исходный GLB; строка «модель — текстом» в assets.md; модель draft "
               "не идёт; файл модели — источник манифеста; на макете файла модели нет",
@@ -4472,7 +4473,7 @@ def selftest():
               and any(s.id == "asset-model" for s in mo.sources.values()) and name in mo.files[INPUT]
               and not any("/models/" in n for n in mk.files))
         _DATA["model_text_max_mb"] = 0.001
-        heavy = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "motion", maps, "2026-09-29")
+        heavy = assemble(fx.slug, surf_of(fx, "promo"), fx.root, "motion", maps, today)
         del _DATA["model_text_max_mb"]
         big = [f for f in heavy.rep.items if f.rule == "R-MAT-011"]
         check("модель текстом тяжелее предела model_text_max_mb — R-MAT-011 warning с размером и пределом, файла "
@@ -4489,7 +4490,7 @@ def selftest():
         bdoc = yaml_mod().safe_load(brand.read_text(encoding="utf-8"))
         bdoc["logo"] = {"files": ["design/_assets/logo.svg"], "never": ["не растягивать знак"]}
         brand.write_text(yaml_mod().safe_dump(bdoc, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        d0 = assemble(fx.slug, surf, fx.root, "directions", maps, "2026-09-29")
+        d0 = assemble(fx.slug, surf, fx.root, "directions", maps, today)
         tdoc = json.loads(adt)
         cdoc = next(x for x in tdoc["directions"] if x["id"] == tdoc["choice"]["chosen"])
         tdoc["visual_language"]["palette"] = {"background": "#101418", "text": "#F2F2F0", "accent": "#D7263D"}
@@ -4548,19 +4549,19 @@ def selftest():
                                                                                        "этап treatment", 1)
               and "этап treatment" in t.files["pages/home/copy.md"] and sorted(t.files) == sorted(d0.files)
               and t.units == ["home"] and not rules_of(t.rep.items) & {"R-FRESH-003", "R-MAT-012"})
-        found, _c = check_surface(fx.slug, surf, fx.root, None, maps, "2026-09-29")
+        found, _c = check_surface(fx.slug, surf, fx.root, None, maps, today)
         check("вход treatment на диске: проверка берёт этап из манифеста — вход свежий, ошибок нет",
               read_manifest(t.input_dir / INPUT)[0].get("stage") == "treatment"
               and not {f.rule for f in found} & {"R-FRESH-002", "R-FRESH-003", "R-FRESH-004"}
               and not F.count(found)["error"])
-        d1 = assemble(fx.slug, surf, fx.root, "directions", maps, "2026-09-29")
+        d1 = assemble(fx.slug, surf, fx.root, "directions", maps, today)
         check("варианты подачи и прототип вход directions не меняют: его файлы, кроме манифеста, — байт в байт",
               {n: x for n, x in d1.files.items() if n != INPUT} == {n: x for n, x in d0.files.items() if n != INPUT}
               and "treatment_variants" not in d1.files[BRIEF] and "prototypes" not in d1.files[BRIEF])
         tdoc["prototype"] = {"status": "none"}
         del tdoc["treatment_variants"], tdoc["choice"]
         adp.write_text(json.dumps(tdoc, ensure_ascii=False, indent=1), encoding="utf-8")
-        t2 = assemble(fx.slug, surf, fx.root, "treatment", maps, "2026-09-29")
+        t2 = assemble(fx.slug, surf, fx.root, "treatment", maps, today)
         said = [f.message for f in t2.rep.items if f.rule == "R-MAT-012" and f.severity == "warning"]
         tb2 = yaml_mod().safe_load(t2.files[BRIEF])
         check("вход treatment без выбранного направления и без вариантов подачи — две R-MAT-012 warning и строки "
@@ -4570,7 +4571,7 @@ def selftest():
               and not {"treatment_variants", "prototypes"} & set(tb2) and not get(tb2, "direction", "name"))
         adp.write_text(adt, encoding="utf-8")
         # строки моментов — с токенами движения проекта: ветка motion файла refs.tokens спецификации
-        mo = assemble(fx.slug, surf, fx.root, "motion", maps, "2026-09-29")
+        mo = assemble(fx.slug, surf, fx.root, "motion", maps, today)
         sp = next(s.path for s in mo.sources.values() if s.id == "motion-spec")
         spt = sp.read_text(encoding="utf-8")
         sdoc = yaml_mod().safe_load(spt)
@@ -4589,13 +4590,13 @@ def selftest():
             return [next((x for x in lines if mark in x), "") for lines in
                     (c.files["pages/home/motion.md"].splitlines(), moments)]
         sp.write_text(yaml_mod().safe_dump(sdoc, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        own = assemble(fx.slug, surf, fx.root, "motion", maps, "2026-09-29")
+        own = assemble(fx.slug, surf, fx.root, "motion", maps, today)
         sdoc["refs"].pop("tokens")
         sp.write_text(yaml_mod().safe_dump(sdoc, allow_unicode=True, sort_keys=False), encoding="utf-8")
-        bare = assemble(fx.slug, surf, fx.root, "motion", maps, "2026-09-29")
+        bare = assemble(fx.slug, surf, fx.root, "motion", maps, today)
         sp.write_text(spt, encoding="utf-8")
         own_tokens.unlink()
-        same = assemble(fx.slug, surf, fx.root, "motion", maps, "2026-09-29")
+        same = assemble(fx.slug, surf, fx.root, "motion", maps, today)
         check("строки моментов: длительность токеном движения проекта (refs.tokens спецификации) — его значением в "
               "motion.md и в брифе, файл токенов проекта — источник манифеста; без токенов проекта длительность по "
               "шкале базы не читается («?»), у спецификации без токенов проекта вход без отличий",
@@ -4604,10 +4605,10 @@ def selftest():
               and not any(s.path.name == "own.tokens.json" for s in bare.sources.values())
               and same.files == mo.files)
     with FP.built("cabinet-demo") as fx:
-        ctx = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, "2026-09-29")
+        ctx = assemble(fx.slug, surf_of(fx, "office"), fx.root, "wireframe", maps, today)
         check("кабинет без ДС — пробел в INPUT.md", "ДС нет" in ctx.files[INPUT])
         try:
-            assemble(fx.slug, surf_of(fx, "office"), fx.root, "treatment", maps, "2026-09-29")
+            assemble(fx.slug, surf_of(fx, "office"), fx.root, "treatment", maps, today)
             said = ""
         except F.ToolError as e:
             said = str(e)

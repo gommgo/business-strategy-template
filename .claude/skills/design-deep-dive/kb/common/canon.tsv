@@ -100,7 +100,7 @@ ai-media: секции, слоты и типы страниц — из слов�
 Предложения text к словарю site без решения (слов-07…12)	site/02-site-types/vocabulary.yaml#slot	закрыто	TR-53	text/99-raw/handoff-to-neighbours.md
 Каркас текстов секции — из анатомии блока и плана, не по роли (site-16)	site/04-blocks/blocks.yaml	закрыто	TR-54	.claude/skills/design-deep-dive/scripts/text/copydeck.py
 Три опоры сообщения purpose / process / proof — пример иерархии (cs-12)	text/02-strategy-messaging/message-hierarchy.schema.yaml	закрыто	TR-55	—
-«≈ 14 конфликтов тройки» — конфликты site со всеми соседями; раскладка по узлам	common/CONTRADICTIONS.md §Сайт и соседи	закрыто	TR-56	research/design-build/phase-2/SYNTHESIS.md
+«≈ 14 конфликтов тройки» — конфликты site со всеми соседями; раскладка по узлам	common/CONTRADICTIONS.md §Сайт и соседи	закрыто	TR-56	
 3D-слот плана называет рецепт; рецепты blender — с тегами словаря site (B1)	site/10-playbooks-contracts/schemas/page-plan.schema.json	закрыто	TR-57	blender/12-recipes/00-how-to-use.md
 404 и «спасибо»: структура — site, тексты — text (В-31)	site/05-conversion-funnels/01-cta-and-lead-capture.md §10	закрыто	TR-58	text/04-copy-by-block/04-form-emails-notifications.md
 Иерархия ворот: страница → эффекты → ассеты → проверки исполнителя	site/07-seo-geo-performance-analytics/03-performance-budgets-gates.md §4	закрыто	GT-01	site/07-seo-geo-performance-analytics/page-gates.yaml; site/07-seo-geo-performance-analytics/03-performance-budgets-gates.md §6; site/09-ai-generation-evaluation/02-site-checklist.md §8; creative/09-ai-execution-evaluation/effect-gates.yaml; creative/09-ai-execution-evaluation/03-verification-loop-and-gates.md §3.1; creative/01-creative-direction/03-ambition-levels.md §4.4; creative/01-creative-direction/ambition-levels.yaml; site/99-raw/notes/triad-contract-2026-09-24.md §2
@@ -156,7 +156,7 @@ UX-* и AC-* на странице сайта — только через мар
 Компонент в screens (`ui:`), компонент ДС и слайс FSD `shared-ui`	common/components.yaml#outside	закрыто	CM-10	—
 Виджеты окна бота и виджеты системы mobile — не типы словаря	common/components.yaml#crosswalk	закрыто	CM-11	—
 Облик (`variant`, `size`, `gap`) вне словаря; атрибуты узлов в дереве экранов	common/components.yaml#types	закрыто	CM-12	—
-Словарь меток `usage` ui: 94 метки, грань «Слот» — 40	ui/14-recipes/08-tokens-export.md §Шаг 4	закрыто	CM-13	research/design-build/phase-2/SYNTHESIS.md §6.12
+Словарь меток `usage` ui: 94 метки, грань «Слот» — 40	ui/14-recipes/08-tokens-export.md §Шаг 4	закрыто	CM-13	
 Классы эталона `app.css` и типы словаря	common/components.yaml#types	закрыто	CM-14	—
 Блок «Дизайн-система» контракта генерации и пакет ДС ui 12/04 §2.6	ui/12-ai-generated-ui/04-steering-brief-prompts-pipeline.md §2.6	закрыто	CM-15	ux/13-app-types/04-master-procedure-brief-to-screens.md §26
 Тост: срок жизни и какие события идут тостом	ux/04-components-patterns/08-notifications-toasts-banners.md §3.2	закрыто	CM-16	ui/06-components-visual/05-feedback-and-overlays.md §3.4; ui/06-components-visual/README.md; ui/06-components-visual/glossary.md §2; ui/06-components-visual/08-values-by-system-table.md; ui/14-recipes/06-app-shell-and-pages.md; ui/00-glossary/glossary.md; ux/03-layout-placement/04-placement-conventions-and-redundancy.md §8

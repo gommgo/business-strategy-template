@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""F/06 series_metrics.py — согласованность серии картинок без платных судей.
-Python 3.13, numpy, Pillow; палитра и OKLab — ../05-color/palette.py. [проверено: 99-raw/experiments/F/06-series-metrics]
+"""series_metrics.py — согласованность серии картинок без платных судей.
+Python 3.13, numpy, Pillow; палитра и OKLab — palette.py рядом.
 Для набора: σ средней светлоты L, σ медианы хромы C, круговой разброс оттенка хроматических пикселей (°),
 b* нейтралей (σ), попарный ΔE палитр (симметричная adherence, OKLab), pHash (Хэмминг из 64) — дубли и разнообразие.
 CLI: python3 series_metrics.py IMG1 IMG2 … [--ref REF1 REF2 …] → JSON (с --ref — ещё ΔE каждой картинки к палитре эталона)."""
 import sys, os, json, itertools, numpy as np
 from PIL import Image
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # перенос: palette.py — рядом
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # palette.py — рядом
 from palette import load, to_oklab, palette, adherence
 def phash(p):
     g = np.asarray(Image.open(p).convert("L").resize((32, 32), Image.LANCZOS)).astype(np.float64)

@@ -1,8 +1,8 @@
 <!doctype html>
-<!-- Демо-лендинг «Лесная обжарка» — собран рецептами 14-recipes/ (агент M, волна 3, 24.09.2026).
-     Сейчас — на своих и CC0-материалах: рендеры Blender (hero, 3D-иконки, банка E), процедурный пар (синемаграф), CC0 Poly Haven
-     (мешковина), иконки Lucide (ISC); ИИ-генераций на странице НЕТ. После фазы 5 файлы подменяются 1:1 по именам
-     (карта слот → задание — README.md). Шаблон доставки — 10-web-integration/pages/00-hero-summary.html (J). -->
+<!-- Демо-лендинг «Лесная обжарка» — собран рецептами 14-recipes/.
+     Сейчас — на своих и CC0-материалах: рендеры Blender (hero, 3D-иконки, банка), процедурный пар (синемаграф), CC0 Poly Haven
+     (мешковина), иконки Lucide (ISC); ИИ-генераций на странице НЕТ. После генераций файлы подменяются 1:1 по именам
+     (карта слот → задание — README.md). Шаблон доставки — 10-web-integration/pages/00-hero-summary.html. -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -144,13 +144,13 @@
 </section>
 
 <footer>
-  <div class="row"><span>© Лесная обжарка — демо-бренд базы ai-media-research</span><a href="#ai">Об ИИ-контенте</a></div>
+  <div class="row"><span>© Лесная обжарка — демо-бренд базы ai-media</span><a href="#ai">Об ИИ-контенте</a></div>
   <details id="ai"><summary>Об ИИ-контенте</summary>
-    <p>На этой демо-странице изображения — рендеры и открытые материалы (CC0), генераций ИИ нет. В версии после живой фазы часть
+    <p>На этой демо-странице изображения — рендеры и открытые материалы (CC0), генераций ИИ нет. В версии после генераций часть
        изображений создаётся или меняется с помощью ИИ: в файлах — машиночитаемая метка, товар везде настоящий.</p></details>
 </footer>
 <script>
-  // object-position видео = как у постера (focal.js считает для <img>) — приём страницы J 00
+  // object-position видео = как у постера (focal.js считает для <img>) — приём страницы 10-web-integration/pages/00-hero-summary.html
   const img = document.querySelector('.hero__media img'), vid = document.querySelector('.hero__media video');
   new MutationObserver(() => { vid.style.objectPosition = img.style.objectPosition; }).observe(img, {attributes: true, attributeFilter: ['style']});
 </script>

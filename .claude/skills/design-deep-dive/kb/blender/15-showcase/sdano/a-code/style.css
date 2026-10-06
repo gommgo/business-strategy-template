@@ -1,4 +1,4 @@
-/* style.css · L0 «Сдано» · агент J · 2026-09-25 · Chromium 153 / WebKit 26.6
+/* style.css · L0 «Сдано» · Chromium 153 / WebKit 26.6
    Концепция «акт осмотра»: белая бумага, чёрная тушь, одна красная пометка дефекта; смелость — в плане квартиры и типографике,
    не в эффектах. Движение: отклик 120–200 мс и одно появление первого экрана ≤ 600 мс (L0, ambition-levels.yaml). */
 :root {
@@ -47,7 +47,7 @@ a { color: inherit; }
 .hero__in { max-width: var(--size-container); margin: 0 auto; padding: clamp(28px, 5vw, 72px) var(--space-page-x) clamp(32px, 5vw, 80px);
   display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(24px, 4vw, 64px); align-items: center; min-height: var(--size-hero-min-offer); }
 .hero__eyebrow { color: var(--c-muted); margin: 0 0 18px; }
-/* H1 30 знаков: роль display-l ограничена 72 px — ≤ 3 строки на 1440 и ≤ 3 на 390 (kimi T8: ≤ 2–4 строки); трекинг не туже −0,03 em (Golos: касание −0,04) */
+/* H1 30 знаков: роль display-l ограничена 72 px — ≤ 3 строки на 1440 и ≤ 3 на 390 (правило исполнителя макета: ≤ 2–4 строки); трекинг не туже −0,03 em (Golos: касание −0,04) */
 .hero__title { font: 800 clamp(2.5rem, 1.5rem + 3.9vw, 4.5rem)/0.98 var(--font-display); letter-spacing: -0.03em; margin: 0 0 var(--space-stack-display); text-wrap: balance; }
 .hero__lead { font-size: var(--type-lead-hero); line-height: var(--lh-lead); max-width: var(--size-measure-lead); margin: 0 0 14px; color: var(--c-ink-2); }
 .hero__proof { font-weight: 600; margin: 0 0 28px; padding-left: 14px; border-left: 3px solid var(--c-mark); }
@@ -139,7 +139,7 @@ a { color: inherit; }
 /* форма — конверсия, L0: без эффектов */
 .lead { border-top: 2px solid var(--c-ink); }
 .lead__in { display: grid; grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); gap: clamp(24px, 4vw, 64px); }
-.form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; max-width: 640px; }   /* J1: форма ≤ 640 px */
+.form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px 20px; max-width: 640px; }   /* форма ≤ 640 px */
 .field { display: grid; gap: 6px; font-weight: 600; font-size: .95rem; }
 .field input { font: 400 1.0625rem/1.3 var(--font-text); padding: 0 14px; border: 1px solid #8d9199; border-radius: 0; background: #fff; color: var(--c-ink); height: 54px; }   /* B3: одна высота у text и date */
 .field input:focus-visible { outline: 3px solid var(--c-mark); outline-offset: 0; border-color: var(--c-ink); }

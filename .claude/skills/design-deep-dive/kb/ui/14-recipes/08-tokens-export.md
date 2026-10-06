@@ -24,7 +24,7 @@ to implement this version… do not reference this version as authoritative».
 | `$type` наследуется от ближайшей группы; инструменты **MUST NOT** угадывать тип по значению | `"$type": "dimension"` на группе |
 | `dimension` — объект `{value, unit}`, единица `px` или `rem`, обязательна даже при нуле | `{"value": 16, "unit": "px"}` |
 | `em` и `%` в `dimension` не поддерживаются: трекинг считается в px на каждую роль | −0.01em при 20 px = −0.2px |
-| `lineHeight` внутри составного `typography` **MUST** быть числом (множителем кегля) | `1.428571`, в CSS `calc(20 / 14)` |
+| `lineHeight` внутри составного `typography` **MUST** быть числом (множителем кегля) | `1.428571`, в CSS `1.428572` |
 | `shadow` может быть объектом или массивом объектов | многослойная тень выражается штатно |
 | Цвет — объект с `colorSpace` и `components`; `hex` только шестизначный, `alpha` отдельным полем | `{"colorSpace": "oklch", "components": [0.5465, 0.2455, 262.87], "hex": "#155dfc"}` |
 | Ссылаться можно только на токен целиком, не на группу | `{color.accent.600}` |

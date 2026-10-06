@@ -130,7 +130,7 @@ python3 ../../scripts/creative/motion_check.py report --in DIR --level L1 --gate
 3. **Правка исполнителю** — блок «чего не ставить» (`08/01` §6.2), `properties_allowed` и `never` в `motion-spec` (`09/02` §5),
    «не улучшай сверх списка»; секцию целиком — только при блокере в её главном приёме.
 4. **Повтор** в новую папку и сравнение `gates.json`: новый FAIL — регрессия, пункт откатить (`09/03` §1.1); ложное срабатывание —
-   доказать другим замером (зонд покоя `../../scripts/creative/idle_probe.py`, кадр станции) и записать
+   доказать другим замером (зонд покоя — два снимка счётчика вызовов WebGL в одной паузе, кадр станции) и записать
    `x-gate-exception`.
 
 ## Выжимка: 48 правил по этапам «уровень → концепция → референсы → язык → движение → эффекты → стек → клише → спецификация → проверка → рецепты»
@@ -345,7 +345,7 @@ python3 ../../scripts/creative/motion_check.py report --in DIR --level L1 --gate
 
 ## Утилиты
 
-Самотесты: X 2026-09-25 (`wave4-X-audit.md` §4) — `orch_check.py all --selftest-tools` 120 файлов, 0 ошибок, `refs_client.py` 39
+Самотесты: X 2026-09-25 (`wave4-X-audit.md` §4) — `refs_client.py` 39
 OK, `effect_bench.py` 48/48; S2b 2026-09-25 — `marketing_audit.py` 0.1.1 — 31 OK, `motion_check.py` 0.1.3 — 45 OK,
 `check_links.py` 27/27. Ключи — `../../scripts/creative/README.md`; проверки после S1 и S1b — `99-raw/reports/wave4-S1-mechanics.md`. Запуск
 — из корня базы.
@@ -357,9 +357,9 @@ OK, `effect_bench.py` 48/48; S2b 2026-09-25 — `marketing_audit.py` 0.1.1 — 3
 | `99-raw/tools/effect_bench.py` (F, F2) | прогон лабораторных страниц: главный поток к контролю, CLS, движение в покое, клик-зонд, вес, WebKit и iPhone-режим | `run --pages <id>\|all --modes desk,mob,rm,nojs,nogl,wk,wkmob,unl --out DIR`; `summary --in DIR`; `--selftest` | `06-effects-catalog/lab/<id>/` → `results.jsonl`, `summary.json` | `06/03` |
 | `../../scripts/creative/marketing_audit.py` 0.1.1 (K, S1) | профиль `marketing` поверх `ui_audit.py` + MKT-T, MKT-C, MKT-M и 13 примет `cliche:*` | `СТРАНИЦА --level L0\|L1\|L2 --out DIR [--allow cliche:…]`; `--selftest` | страница → `.marketing.md`, `.marketing.json`, `.fix.txt` | `09/03` §4 |
 | `../../scripts/creative/motion_check.py` 0.1.3 (K, K2) | проверка движения и цены: 5 режимов, 2.2.2 поведением, вспышки, reduce всей страницы, переключатель нажатием, F83, сверка с `motion-spec` | `ЦЕЛЬ --level … [--spec …] [--f83 SEL] [--contrast SEL]`; `report --in DIR --gates`; `--selftest` | страница → `gates.md`, `gates.json`, `fix.txt`, листы кадров | `09/03` §1–3, §5 |
-| `../../scripts/maint/orch_check.py`, `check_links.py`, `extract_for_audit.py`, `ctx_watch.py` (оркестратор) | приёмка папки (разделы, метки, YAML и JSON, README, самотесты); перекрёстные ссылки (пути, `→ §`, `[S#]`, `[V:<id> mm:ss]`, `[проверено: …]`); извлечения для аудита | `orch_check.py all --selftest-tools`; `check_links.py [--only а,б] [--selftest]`; `extract_for_audit.py` | база → отчёты; `99-raw/notes/wave4/extracts/` | `../../scripts/creative/README.md` |
+| `../../scripts/maint/check_links.py`, `extract_for_audit.py`, `ctx_watch.py` (оркестратор) | перекрёстные ссылки (пути, `→ §`, `[S#]`, `[V:<id> mm:ss]`, `[проверено: …]`); извлечения для аудита | `check_links.py [--only а,б] [--selftest]`; `extract_for_audit.py` | база → отчёты; `99-raw/notes/wave4/extracts/` | `../../scripts/creative/README.md` |
 | `99-raw/tools/sources_collect.py` (S1, S1b) | сводная библиография из разделов «Источники» | без ключей — пересборка; `--check` | файлы базы → `90-sources/sources.tsv` и `90-sources/README.md` | `90-sources/README.md` |
-| опытные проверки (venv `99-raw/tools/venv-A`, `venv-I`, `venv-J`) | `spec_check.py` (I) — `treatment`, `motion-spec`, `block-treatments.yaml`, проекции в пакет; `registry_check.py` (H) — реестр и ссылки `cliche:`; `validate_stack.py` (G); `recipe_check.py` (J) — рецепты, id, журнал вариативности; `ad_check.py` (A) — примеры `art-direction`; `build_effects.py`, `check_refs.py` (F) — сборка и сверка `effects.yaml`; `idle_probe.py` (J) — холст в покое; `cls_sources.py` (F2) — атрибуция CLS | `../../scripts/creative/spec_check.py`, `../../scripts/creative/registry_check.py`, `../../scripts/creative/validate_stack.py`, `../../scripts/creative/recipe_check.py`, `../../scripts/creative/ad_check.py`, `99-raw/experiments/F/07-yaml/`, `../../scripts/creative/idle_probe.py`, `99-raw/experiments/F/12-motion-toggle/cls_sources.py` | YAML и JSON базы → ошибки, проекции, отчёты | README опытов |
+| опытные проверки (venv `99-raw/tools/venv-A`, `venv-I`, `venv-J`) | `spec_check.py` (I) — `treatment`, `motion-spec`, `block-treatments.yaml`, проекции в пакет; `registry_check.py` (H) — реестр, ссылки `cliche:` и статусы клише `effects.yaml`; `validate_stack.py` (G); `recipe_check.py` (J) — рецепты, id, журнал вариативности; `ad_check.py` (A) — примеры `art-direction`; `cls_sources.py` (F2) — атрибуция CLS | `../../scripts/creative/spec_check.py`, `../../scripts/creative/registry_check.py`, `../../scripts/creative/validate_stack.py`, `../../scripts/creative/recipe_check.py`, `../../scripts/creative/ad_check.py`, `99-raw/experiments/F/12-motion-toggle/cls_sources.py` | YAML и JSON базы → ошибки, проекции, отчёты | README опытов |
 | скопированные (13, без изменений) | `fetch.py`, `render_fetch.py`, `site_probe.py`, `measure_ui.py`, `ui_audit.py`, `color.py`, `asset_inventory.py`, `page_accept.py` (F83 по буквам; его вызывает `motion_check.py --f83`), `yt_dl.py`, `vtt2md.py`, `yt_transcript.py`, `yt_frames.py`, `transcribe_local.py` | — | — | `../../scripts/creative/README.md` («Скопировано», «Оговорки») |
 
 ## Метки и что ненадёжно
@@ -475,7 +475,7 @@ Unseen (unseen.co, illoca.unseen.co, hubtown.co.in) в рубрике K — по
 | **`05-motion/`** (E) `01-motion-principles-and-access.md` | классы движения, поправки П1–П13 к соседям, WCAG 2.2.2, 2.3.1, 2.3.3, reduce, переключатель, бюджет внимания, громкость, «парение», длительности и кривые |
 | `02-choreography-scroll-transitions.md` | ритм, система появления, SDA против ScrollTrigger, pin и скраб, горизонталь, параллакс, Lenis, переходы страниц, прелоадер, LCP-безопасное появление |
 | `03-micro-motion-and-performance.md` | наведение, CTA, курсор, магнит, движение текста; цена свойств, LoAF, INP, телефон, слабые устройства |
-| **`06-effects-catalog/`** (F, F2) `effects.yaml` · `effects.schema.json` | 56 эффектов (v0.3: L0 16, L1 31, L2 9): уровень, пределы, цена, фолбэки, reduce, телефон, клише, `effect_role`, ссылки blender и ai-media; сборка `99-raw/experiments/F/07-yaml/build_effects.py` |
+| **`06-effects-catalog/`** (F, F2) `effects.yaml` · `effects.schema.json` | 59 эффектов (v0.3: L0 19, L1 31, L2 9): уровень, пределы, цена, фолбэки, reduce, телефон, клише, `effect_role`, ссылки blender и ai-media; правится по месту, сверка — `registry_check.py` и `spec_check.py levels --check` |
 | `01-effects-catalog.md` · `lab/` | нормы по семействам (текст, строка, прокрутка, закрепление, переходы, курсор, фоны, поверхности, маски, микровзаимодействия, Lottie и Rive); 42 лабораторные страницы, витрина `lab/index.html` |
 | `02-hero-video-background.md` · `03-effects-lab-method.md` | видео-фон hero как рецепт; метод `effect_bench.py`: режимы, метрики, ограничения |
 | **`07-stack-implementation/`** (G) `01-stack-choice.md` · `stack.yaml` | лестница стоимости, «уровень × эффект → стек», GSAP и лицензия, Motion, SDA, Lenis, VT, WebGL, Lottie и Rive, no-code, «не брать», фреймворки; 51 запись + 8 платформ `constraints.cms` |
@@ -541,6 +541,7 @@ Unseen (unseen.co, illoca.unseen.co, hubtown.co.in) в рубрике K — по
 ## Как обновлять
 
 Процедуры — `PLAN.md` «Как расширять базу». Коротко: число живёт в одном машиночитаемом месте (YAML, токены, схема), тексты
-ссылаются на него; `effects.yaml` — только сборкой `99-raw/experiments/F/07-yaml/build_effects.py`; после правок —
-`python3 ../../scripts/maint/orch_check.py all --selftest-tools` и `python3 ../../scripts/maint/check_links.py` (0 новых ERROR); скоропортящееся
+ссылаются на него; `effects.yaml` правится по месту: схема `effects.schema.json` описывает поля, сверка — `../../scripts/creative/registry_check.py` и
+`../../scripts/creative/spec_check.py levels --check`, схема проходит метасхему при приёмке правки (`../../scripts/maint/accept.py`); после
+правок — `python3 ../../scripts/maint/check_links.py` (0 новых ERROR); скоропортящееся
 — с версией и датой.

@@ -1,5 +1,5 @@
 # Blender 5.2.2 — [проверено] сцена для «путь камеры + клип на прокрутке»
-# Запуск: python3 99-raw/tools/blender_run.py 99-raw/experiments/F2/03-camera-path/build_scene.py -- OUT_DIR
+# Запуск: python3 scripts/blender/blender_run.py kb/blender/09-web-runtime/examples/camera-path-scroll/build_scene.py -- OUT_DIR
 # Даёт: OUT_DIR/scene.glb (кольца-галерея, пол, стопка плит с клипом сборки, пустышки hotspot_*),
 #       OUT_DIR/cam_path.json (точки кривой в осях three: [x, z, -y], метры), OUT_DIR/build_report.json
 import bpy, json, math, os, sys

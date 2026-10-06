@@ -17,8 +17,13 @@
   renderer — WebGL2, GPU, число draw calls и треугольников первого кадра, info.memory (геометрии, текстуры), ошибки консоли.
 Нужен для матрицы «Blender → glTF → three»: какие атрибуты дошли, какие UV-каналы у карт, как назначено цветовое
 пространство, какие имена у узлов (sanitizeNodeName: «Cube.001» → «Cube001»).
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву
+процессов — утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 import functools, http.server, json, os, shutil, socketserver, sys, tempfile, threading
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
+import kbpaths  # noqa: E402
 
 PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@__VER__/build/three.module.js",
@@ -150,7 +155,7 @@ def inspect(model, ver="0.186.0", anim_sample=None, gpu="gl"):
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     logs = []
     try:
-        with sync_playwright() as pw:
+        with kbpaths.lock("browser"), sync_playwright() as pw:
             b = pw.chromium.launch(headless=True, args=GPU_ARGS[gpu])
             p = b.new_page()
             p.on("console", lambda m: logs.append(f"{m.type}: {m.text}") if m.type in ("error", "warning") else None)

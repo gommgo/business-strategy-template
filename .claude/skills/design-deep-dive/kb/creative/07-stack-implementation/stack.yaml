@@ -7,10 +7,10 @@ version: 0.1
 checked_at: 2026-09-24
 status: draft
 measure:
-  size_br: "минимальный бандл: esbuild 0.25.12, ESM, minify, production, brotli q11 (как blender A/03); число — сценарий «типовая инициализация», словарь — ключ сцены: {<сцена>: КБ}; wasm — отдельно; 99-raw/experiments/G/01-lib-cost/sizes.json"
+  size_br: "минимальный бандл: esbuild 0.25.12, ESM, minify, production, brotli q11 (как в базе blender); число — сценарий «типовая инициализация», словарь — ключ сцены: {<сцена>: КБ}; wasm — отдельно"
   size_net_kb: "вес по сети на странице (CDP, как ворота): {<сцена или способ загрузки>: КБ}; источник — refs записи"
-  init_tbt_ms: "Chromium 153.0.8010.12 headless, CPU ×4, холодный кэш, 5 прогонов: медиана и [мин, макс]; TBT до «готово» + 3 с; load average 6,8–10,3 — сравнивать порядок, не единицы мс; results.jsonl, summary.md"
-  support: "@mdn/browser-compat-data 8.1.3 (2026-09-24T13:25Z) и web-features 3.39.0; текущие: Chrome 154, Edge 153, Firefox 156, Safari 27; 99-raw/experiments/G/00-registry/support.json"
+  init_tbt_ms: "Chromium 153.0.8010.12 headless, CPU ×4, холодный кэш, 5 прогонов: медиана и [мин, макс]; TBT до «готово» + 3 с; load average 6,8–10,3 — сравнивать порядок, не единицы мс"
+  support: "@mdn/browser-compat-data 8.1.3 (2026-09-24T13:25Z) и web-features 3.39.0; текущие: Chrome 154, Edge 153, Firefox 156, Safari 27"
   alive: "npm registry (дата релиза последней версии, стабильных релизов за 365 дней) и GitHub API (звёзды, pushed_at), 2026-09-24"
 budget_ref: "../01-creative-direction/ambition-levels.yaml#levels[*].budgets.effects.js_presentation_kb_br (по уровню)"
 vocab:
@@ -51,7 +51,7 @@ entries:
     when: "декоративное — без фолбэка; смысловое (текст, цифры, шаги) — фолбэк IO или GSAP; pin-scrub-story на CSS — только декоративный"
     alternatives: [intersection-observer, gsap-scrolltrigger, motion]
     risks: ["нет Firefox → содержимое обязано быть видно без анимации", "шорткат animation после animation-timeline сбрасывает таймлайн", "scroll-timeline-polyfill не использовать"]
-    alive: {kind: web-standard, practice: "C: 2 из 49 наградных сайтов"}
+    alive: {kind: web-standard, practice: "2 из 49 наградных сайтов"}
     refs: ["01-stack-choice.md §3.1", "S7, S8, S10"]
 
   - id: css-scroll-triggered
@@ -83,9 +83,9 @@ entries:
     levels: [L1, L2]
     status: default
     alternatives: [gsap-flip]
-    risks: ["после VT со сменой раскладки — ScrollTrigger.refresh() (G/02)", "reduce: не запускать (проверка matchMedia)"]
+    risks: ["после VT со сменой раскладки — ScrollTrigger.refresh()", "reduce: не запускать (проверка matchMedia)"]
     alive: {kind: web-standard}
-    refs: ["01-stack-choice.md §5", "02-implementation-patterns.md §7", "G/02"]
+    refs: ["01-stack-choice.md §5", "02-implementation-patterns.md §7"]
 
   - id: view-transitions-cross-document
     name: "View Transitions, cross-document (@view-transition { navigation: auto }, pageswap/pagereveal)"
@@ -102,7 +102,7 @@ entries:
     alternatives: [swup, astro-client-router]
     risks: ["Firefox — обычная навигация", "состояние (видео, WebGL) между страницами не сохраняется — тогда swup/Astro"]
     alive: {kind: web-standard}
-    refs: ["01-stack-choice.md §5", "S10, S11", "G/02"]
+    refs: ["01-stack-choice.md §5", "S10, S11"]
 
   - id: waapi
     name: "Web Animations API (element.animate, getAnimations, commitStyles)"
@@ -134,7 +134,7 @@ entries:
     alternatives: [css-scroll-driven, css-scroll-triggered]
     risks: ["requestIdleCallback нет в Safari — фолбэк setTimeout"]
     alive: {kind: web-standard}
-    refs: ["02-implementation-patterns.md §3", "G/01", "G/03"]
+    refs: ["02-implementation-patterns.md §3"]
 
   - id: css-registered-properties
     name: "@property / CSS.registerProperty (анимация градиентов, углов, чисел)"
@@ -148,7 +148,7 @@ entries:
     levels: [L0, L1, L2]
     status: default
     alternatives: [shader-code]
-    risks: ["анимированный градиент на весь экран — цена перерисовки (меряет F)"]
+    risks: ["анимированный градиент на весь экран — цена перерисовки (замер — 06-effects-catalog)"]
     alive: {kind: web-standard}
     refs: ["01-stack-choice.md §2"]
 
@@ -164,9 +164,9 @@ entries:
     levels: [L0, L1, L2]
     status: default
     alternatives: [dotlottie-web, lottie-web]
-    risks: ["кнопка паузы у петли > 5 с", "reduce — постер, 0 байт видео", "вес видео — отдельная метрика (C, A)"]
+    risks: ["кнопка паузы у петли > 5 с", "reduce — постер, 0 байт видео", "вес видео — отдельная метрика"]
     alive: {kind: web-standard}
-    refs: ["F: видео-фон hero как рецепт", "ai-media 10/*"]
+    refs: ["../06-effects-catalog/02-hero-video-background.md", "ai-media 10/*"]
 
   - id: shader-code
     name: "Свой фрагментный шейдер на голом WebGL2 (1 полноэкранный треугольник)"
@@ -220,9 +220,9 @@ entries:
     status: conditional
     when: "L1 — одна закреплённая сцена или сюжет, который должен работать в Firefox; L2 — сцены прокрутки"
     alternatives: [css-scroll-driven, motion]
-    risks: ["ScrollTrigger.refresh() после смены раскладки, шрифтов, VT (G/02)", "C: ScrollTrigger у 23 из 49 наградных"]
+    risks: ["ScrollTrigger.refresh() после смены раскладки, шрифтов, VT", "ScrollTrigger у 23 из 49 наградных"]
     alive: {last_release: 2026-04-13, releases_12m: 4}
-    refs: ["01-stack-choice.md §3.2", "02-implementation-patterns.md §7", "G/01, G/02"]
+    refs: ["01-stack-choice.md §3.2", "02-implementation-patterns.md §7"]
 
   - id: gsap-splittext
     name: "GSAP SplitText 3.13+ (aria, autoSplit, mask, deepSlice, propIndex)"
@@ -311,9 +311,9 @@ entries:
     status: default
     when: "только L2; anchors: true; один цикл с gsap.ticker; respectReducedMotion (по умолчанию true)"
     alternatives: [gsap-scrollsmoother, locomotive-scroll]
-    risks: ["не сочетать с CSS scroll-snap (есть lenis/snap), ScrollSmoother, Locomotive", "iframe не прокручивается колесом", "@studio-freight/lenis — старое имя", "C: на телефоне не отключается у наградных"]
+    risks: ["не сочетать с CSS scroll-snap (есть lenis/snap), ScrollSmoother, Locomotive", "iframe не прокручивается колесом", "@studio-freight/lenis — старое имя", "на телефоне не отключается у наградных"]
     alive: {last_release: 2026-08-05, releases_12m: 15, stars: 16000, pushed: 2026-09-22, dist_tags: {dev: "2.0.0-dev.5", framer: "1.3.25-framer"}}
-    refs: ["01-stack-choice.md §4", "S6", "G/01, G/02"]
+    refs: ["01-stack-choice.md §4", "S6"]
 
   - id: motion
     name: "Motion (motion.dev) — animate (hybrid), scroll, inView, stagger"
@@ -322,7 +322,7 @@ entries:
     version: "13.4.3"
     released: 2026-09-24
     license: MIT
-    license_caveats: ["splitText, motion/three, motion/vgpu, премиум-компоненты — Motion+ (платно: разовая оплата, lifetime; установка по токену; S1 2026-09-25 по кэшу motion.dev)"]
+    license_caveats: ["splitText, motion/three, motion/vgpu, премиум-компоненты — Motion+ (платно: разовая оплата, lifetime; установка по токену; по motion.dev на 2026-09-25)"]
     size_br: {animate: 18.3, "animate+scroll+inView": 20.6}
     init_tbt_ms: {median: 0, range: [0, 0]}
     support: {browsers: "все современные; scroll() использует ScrollTimeline, где он есть"}
@@ -333,7 +333,7 @@ entries:
     alternatives: [gsap, css-scroll-driven, waapi]
     risks: ["частые релизы (75 за 12 мес.) — фиксировать версию", "framer-motion = тот же код под старым именем"]
     alive: {last_release: 2026-09-24, releases_12m: 75, stars: 33717, pushed: 2026-09-24}
-    refs: ["01-stack-choice.md §3.3", "S5", "G/01"]
+    refs: ["01-stack-choice.md §3.3", "S5"]
 
   - id: motion-mini
     name: "Motion mini (motion/mini) — animate на WAAPI"
@@ -365,7 +365,7 @@ entries:
     use_for: [effect:hero-entrance-once, effect:scroll-reveal-system, effect:view-transition]
     levels: [L1, L2]
     status: conditional
-    when: "только если сайт уже на React/Next (C: продуктовые главные Stripe, Linear, Vercel, Apple)"
+    when: "только если сайт уже на React/Next (продуктовые главные Stripe, Linear, Vercel, Apple)"
     alternatives: [gsap]
     risks: ["React ради анимации не помещается в слой «подача» L1"]
     alive: {last_release: 2026-09-24}
@@ -441,7 +441,7 @@ entries:
     use_for: [effect:page-transition]
     levels: [L2]
     status: legacy-only
-    when: "существующий сайт на Barba (C: 4 из 49, Webflow-студии)"
+    when: "существующий сайт на Barba (4 из 49, Webflow-студии)"
     alternatives: [swup, view-transitions-cross-document]
     risks: ["0 релизов за 12 мес., push 2024-12-02", "о View Transitions — ничего"]
     alive: {last_release: 2024-08-12, releases_12m: 0, stars: 12984, pushed: 2024-12-02}
@@ -501,7 +501,7 @@ entries:
     alternatives: ["CSS scroll-snap (0 КБ)"]
     risks: ["автопрокрутка > 5 с — пауза (WCAG 2.2.2)"]
     alive: {last_release: 2026-08-26, releases_12m: 15}
-    refs: ["C: swiper у 4 из 49"]
+    refs: ["../03-live-sites-measured/01-effects-sites-measured.md: swiper у 4 из 49"]
 
   # ---------------------------------------------------------------- рантаймы графики и анимации
   - id: three
@@ -511,7 +511,7 @@ entries:
     version: "0.186.1"
     released: 2026-09-24
     license: MIT
-    size_br: {cube: 107.7, gltf-decoders: 158, webgpu: 171, webgpu-tsl: 193}   # cube — G/01; остальное — blender A/03
+    size_br: {cube: 107.7, gltf-decoders: 158, webgpu: 171, webgpu-tsl: 193}   # cube — свой замер; остальное — из базы blender
     size_net_kb: {bundler-own-domain: 174, importmap-jsdelivr-min-remap: 243, importmap-jsdelivr-min: 401}   # JS первого 3D-кадра, Pixel 7 + CPU ×4, 1,6 Мбит/с — blender 09/01 §1.1
     init_tbt_ms: {median: 49, range: [40, 108], scenario: "куб, 1 кадр"}
     support: {webgl2: "high 2024-03-20", webgpu: "не Baseline: Chrome 144 (BCD api.GPU), Safari 26, Firefox 141 частично"}
@@ -522,7 +522,7 @@ entries:
     alternatives: [ogl, paper-shaders, model-viewer]
     risks: ["ломает API почти каждый релиз — Migration Guide", "ради одного шейдера — избыточно"]
     alive: {last_release: 2026-09-24, releases_12m: 12, stars: 115840, pushed: 2026-09-24}
-    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md", "../../blender/09-web-runtime/01-threejs-core.md §1.1–1.2", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1", "G/01"]
+    refs: ["../../blender/01-web-3d-landscape/03-runtime-landscape.md", "../../blender/09-web-runtime/01-threejs-core.md §1.1–1.2", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1"]
 
   - id: react-three-fiber
     name: "React Three Fiber 9 + drei 10"
@@ -530,7 +530,7 @@ entries:
     package: "@react-three/fiber"
     version: "9.8.0 (blender, 2026-09-22)"
     license: MIT
-    size_br: {r3f-scene: 249, r3f-drei: 286, r3f-drei-post: 345, r3f-webgpu: 400}   # blender A/03, A/08
+    size_br: {r3f-scene: 249, r3f-drei: 286, r3f-drei-post: 345, r3f-webgpu: 400}   # из базы blender
     init_tbt_ms: null
     support: {react: ">=19 <19.4"}
     use_for: [effect:3d-scene, effect:3d-object]
@@ -549,7 +549,7 @@ entries:
     version: "4.3.1"
     released: 2026-06-04
     license: Apache-2.0
-    size_br: {npm-bundle: 240}          # blender A/03
+    size_br: {npm-bundle: 240}          # из базы blender
     size_net_kb: {jsdelivr-min: 282}    # dist/model-viewer.min.js по сети — blender 13/02 §1
     init_tbt_ms: null
     support: {webgl: true}
@@ -588,7 +588,7 @@ entries:
     version: "0.0.81"
     released: 2026-09-17
     license: Apache-2.0
-    size_br: {mesh-gradient-minimal: 5.9}   # минимальный импорт ShaderMount — G/01
+    size_br: {mesh-gradient-minimal: 5.9}   # минимальный импорт ShaderMount
     size_net_kb: {jsdelivr-page: 119}      # страница с пакетом через jsDelivr — blender 09/04 §2.4, 13/02
     init_tbt_ms: {median: 0, range: [0, 38]}
     support: {webgl2: true}
@@ -597,9 +597,9 @@ entries:
     status: default
     when: "один шейдерный фон: setSpeed(0) вне экрана и при reduce — постер"
     alternatives: [ogl, shader-code, css-registered-properties]
-    risks: ["версия 0.0.x — API может меняться", "пресеты узнаваемы — клише (H)"]
+    risks: ["версия 0.0.x — API может меняться", "пресеты узнаваемы — клише (../08-uniqueness-anti-slop/cliche-registry.yaml)"]
     alive: {last_release: 2026-09-17, releases_12m: 27, stars: 3478, pushed: 2026-09-17}
-    refs: ["01-stack-choice.md §6.1", "../../blender/09-web-runtime/04-shaders-effects-catalog-impl.md §2.4", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1", "G/01, G/03"]
+    refs: ["01-stack-choice.md §6.1", "../../blender/09-web-runtime/04-shaders-effects-catalog-impl.md §2.4", "../../blender/13-tools-atlas/02-web-runtime-libraries.md §1"]
 
   - id: pixi
     name: "PixiJS 8 (2D WebGL/WebGPU-движок)"
@@ -616,7 +616,7 @@ entries:
     status: conditional
     when: "эффект — 2D-сцена с тысячами спрайтов или фильтрами; для фона и курсора — не брать"
     alternatives: [ogl, shader-code]
-    risks: ["C: 0 из 49 наградных"]
+    risks: ["0 из 49 наградных"]
     alive: {last_release: 2026-09-17, releases_12m: 14, stars: 48222, pushed: 2026-09-24}
     refs: ["01-stack-choice.md §6.1"]
 
@@ -637,7 +637,7 @@ entries:
     alternatives: [dotlottie-web, html-media]
     risks: ["0 релизов за 12 мес., 857 открытых issues", "петля > 5 с — пауза"]
     alive: {last_release: 2025-05-21, releases_12m: 0, stars: 32125, pushed: 2025-09-01}
-    refs: ["01-stack-choice.md §6.2", "G/01"]
+    refs: ["01-stack-choice.md §6.2"]
 
   - id: dotlottie-web
     name: "dotLottie-web (ThorVG wasm; .lottie и JSON; DotLottieWorker)"
@@ -656,7 +656,7 @@ entries:
     alternatives: [lottie-web, html-media]
     risks: ["wasm по умолчанию с jsDelivr (запас unpkg)", "вендор: «~500 KB compressed»"]
     alive: {last_release: 2026-08-28, releases_12m: 40, stars: 884, pushed: 2026-09-16}
-    refs: ["01-stack-choice.md §6.2", "S15", "G/01"]
+    refs: ["01-stack-choice.md §6.2", "S15"]
 
   - id: rive
     name: "Rive web runtime (@rive-app/canvas, canvas-lite, webgl2)"
@@ -675,7 +675,7 @@ entries:
     alternatives: [dotlottie-web, lottie-web]
     risks: ["wasm по умолчанию с jsDelivr/unpkg — RuntimeLoader.setWasmUrl", "документация — <script> с unpkg @latest"]
     alive: {last_release: 2026-09-23, releases_12m: 45, stars: 968, pushed: 2026-09-24}
-    refs: ["01-stack-choice.md §6.2", "S14", "G/01"]
+    refs: ["01-stack-choice.md §6.2", "S14"]
 
   - id: spline-runtime
     name: "Spline runtime (@splinetool/runtime)"
@@ -748,7 +748,7 @@ entries:
     when: "многостраничник с контентом; решение о платформе — site (constraints.cms: none/custom)"
     alternatives: [vite-static, next]
     risks: ["сотни экспериментальных dist-tags — ставить latest с фиксацией версии"]
-    alive: {last_release: 2026-09-24, releases_12m: 118, practice: "C: 2 из 49, медиана JS 366 КБ"}
+    alive: {last_release: 2026-09-24, releases_12m: 118, practice: "2 из 49, медиана JS 366 КБ"}
     refs: ["01-stack-choice.md §8", "S11"]
 
   - id: next
@@ -765,7 +765,7 @@ entries:
     status: conditional
     when: "сайт уже на React/Next или маркетинг рядом с приложением"
     alternatives: [astro, vite-static]
-    risks: ["C: медиана JS 1 143 КБ за сессию у сайтов на Next/React (n 17)"]
+    risks: ["медиана JS 1 143 КБ за сессию у сайтов на Next/React (n 17)"]
     alive: {last_release: 2026-09-22, releases_12m: 85}
     refs: ["01-stack-choice.md §8"]
 
@@ -778,7 +778,7 @@ entries:
   - {id: typed-js, name: "typed.js 3", kind: avoid, package: typed.js, version: "3.0.0", released: 2026-01-24, license: GPL-3.0, size_br: null, init_tbt_ms: null, levels: [], status: avoid, alternatives: ["свой печатающийся текст ≈ 1 КБ с aria-label"], risks: ["копилефт GPL-3.0 в коммерческом бандле (2.1.0 была MIT)"], alive: {releases_12m: 1}, refs: ["01-stack-choice.md §7"]}
   - {id: vanta, name: "Vanta.js", kind: avoid, package: vanta, version: "0.5.24", released: 2022-09-16, license: MIT, size_br: null, init_tbt_ms: null, levels: [], status: avoid, alternatives: [paper-shaders, shader-code], risks: ["мёртв, тянет three"], alive: {releases_12m: 0}, refs: ["01-stack-choice.md §7"]}
   - {id: scroll-timeline-polyfill, name: "scroll-timeline polyfill", kind: avoid, package: null, version: null, license: null, size_br: null, init_tbt_ms: null, levels: [], status: avoid, alternatives: [intersection-observer], risks: ["Chrome: «not feature complete and has a lot of known issues»"], alive: {}, refs: ["S10"]}
-  - {id: bsmnt-scrollytelling, name: "@bsmnt/scrollytelling (basement.studio)", kind: avoid, package: "@bsmnt/scrollytelling", version: "0.3.3", released: 2024-02-22, license: MIT, size_br: null, init_tbt_ms: null, levels: [], status: avoid, alternatives: [gsap-scrolltrigger], risks: ["застой: релиз и push 2024-02-22; docs — заглушки; peer gsap >=3, react >=18 (W2)"], alive: {releases_12m: 0, stars: 1662}, refs: ["01-stack-choice.md §7", "91-videos/digests/ufHQG7fDLQc.md"]}
+  - {id: bsmnt-scrollytelling, name: "@bsmnt/scrollytelling (basement.studio)", kind: avoid, package: "@bsmnt/scrollytelling", version: "0.3.3", released: 2024-02-22, license: MIT, size_br: null, init_tbt_ms: null, levels: [], status: avoid, alternatives: [gsap-scrolltrigger], risks: ["застой: релиз и push 2024-02-22; docs — заглушки; peer gsap >=3, react >=18"], alive: {releases_12m: 0, stars: 1662}, refs: ["01-stack-choice.md §7", "[V:ufHQG7fDLQc]"]}
   - {id: motionone, name: "@motionone/dom", kind: avoid, package: "@motionone/dom", version: "10.18.0", released: 2024-06-02, license: MIT, size_br: null, init_tbt_ms: null, levels: [], status: avoid, alternatives: [motion], risks: ["влился в motion"], alive: {releases_12m: 0}, refs: ["01-stack-choice.md §7"]}
 
 # ---------------------------------------------------------------- платформы заказчика (site-brief constraints.cms)
@@ -815,7 +815,7 @@ platforms:
     build: false
     native_motion: "Interactions with GSAP (визуальный билдер Webflow на GSAP)"
     libraries: "GSAP ядро и плагины — галочками в Site settings → GSAP integration (хостит Webflow); прочее — внешним скриптом"
-    levels: {L0: "да", L1: "да", L2: "да (C: 7 из 49 наградных на Webflow)"}
+    levels: {L0: "да", L1: "да", L2: "да (7 из 49 наградных на Webflow)"}
     limits: ["бандл gsap+ST (111,7 КБ min) не влезает в 50 000 символов — только интеграция из настроек или внешний файл"]
     checked_at: 2026-09-24
     refs: ["01-stack-choice.md §10", "S3, S4"]

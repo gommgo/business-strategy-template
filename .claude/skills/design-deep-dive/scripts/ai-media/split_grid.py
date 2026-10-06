@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""F/06 split_grid.py — разрезать сетку R×C одной генерации на ячейки: поиск светлых/ровных «желобов», иначе — равное деление.
+"""split_grid.py — разрезать сетку R×C одной генерации на ячейки: поиск светлых/ровных «желобов», иначе — равное деление.
 Python 3.13, numpy, Pillow. CLI: python3 split_grid.py GRID.png OUTDIR [rows cols]"""
 import sys, os, numpy as np
 from PIL import Image

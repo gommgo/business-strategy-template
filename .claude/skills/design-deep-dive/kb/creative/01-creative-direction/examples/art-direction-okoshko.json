@@ -7,9 +7,9 @@
   "approved_by": null,
   "checked_at": "2026-09-24",
   "refs": {
-    "brief": "../../../site-research/99-raw/experiments/E/03-saas-demo-brief/site-brief-okoshko-demo.yaml",
-    "facts": "../../../text-research/99-raw/experiments/E/facts-demo-saas-okoshko.yaml",
-    "page_plans": ["../../../site-research/04-blocks/examples/page-plan-saas-okoshko.yaml"]
+    "brief": "../../../site/10-playbooks-contracts/examples/saas-okoshko/site-brief.yaml",
+    "facts": "../../../text/10-templates-recipes/examples/facts/facts-demo-saas-okoshko.yaml",
+    "page_plans": ["../../../site/10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml"]
   },
   "inputs": {
     "site_type": "landing-site",
@@ -31,7 +31,7 @@
     "source": "default",
     "budget_profile": "landing-saas@L1",
     "motion_cap": "expressive",
-    "rationale": "SaaS-лендинг — умолчание L1 (решение п. 13). Фирменный приём — продукт в работе (закреплённая сцена расписания); тарифы — L0; холодный мобильный трафик из соцсетей → первый экран ≤ 2 МБ, сцена после LCP.",
+    "rationale": "SaaS-лендинг — умолчание L1. Фирменный приём — продукт в работе (закреплённая сцена расписания); тарифы — L0; холодный мобильный трафик из соцсетей → первый экран ≤ 2 МБ, сцена после LCP.",
     "by_section_role": [{"role": "pricing", "level": "L0"}]
   },
   "concept": {
@@ -82,7 +82,7 @@
       "axes": {"paper": "mid", "paper_temperature": "cool", "display_style": "rounded", "accent_hue": "cool", "macrostructure": "conversational-faq", "imagery": "ui", "energy": "lively"},
       "palette": {"background": "#E9EEF3", "surface": "#FFFFFF", "text": "#101820", "accent": "#1F6FEB", "on_accent": "#FFFFFF"},
       "color_strategy": "restrained",
-      "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "замена X 2026-09-25: Nunito → Commissioner (cyrillic-display-fonts.yaml: Nunito — average, Commissioner — good)"},
+      "type": {"display": "Commissioner", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "Commissioner вместо Nunito (cyrillic-display-fonts.yaml: Nunito — average, Commissioner — good)"},
       "signature_move": {"what": "Пузыри сообщений появляются по одному при прокрутке, как в чате", "where": "section-role:how-it-works", "effects": ["effect:scroll-reveal-system"], "min_level": "L1", "concept_link": "неявки снимает сообщение — его и показываем"},
       "first_viewport": "Телефон с одним напоминанием «Завтра в 14:00, мастер Руслан» и кнопкой пробного периода рядом",
       "imagery": "сообщения, свёрстанные кодом (не скриншот мессенджера)",
@@ -99,12 +99,12 @@
       "axes": {"paper": "dark", "paper_temperature": "neutral", "display_style": "condensed", "accent_hue": "warm", "macrostructure": "stat-led", "imagery": "typographic", "energy": "lively"},
       "palette": {"background": "#121418", "surface": "#1C1F24", "text": "#F2F2EE", "accent": "#F5C518", "on_accent": "#121418"},
       "color_strategy": "committed",
-      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "замена X 2026-09-25: Oswald → Sofia Sans Condensed (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
+      "type": {"display": "Sofia Sans Condensed", "text": "Golos Text", "cyrillic_checked": false, "license": "OFL", "note": "Sofia Sans Condensed вместо Oswald (cyrillic-display-fonts.yaml: Oswald — avoid, type.today «нельзя»)"},
       "signature_move": {"what": "Перекидные цифры табло один раз показывают долю неявок до и после (fact:noshow-average, fact:case-noshow-kazan)", "where": "section-role:proof-stats", "effects": ["effect:counter-up"], "min_level": "L1", "concept_link": "расписание — это табло; результат — число"},
       "first_viewport": "Крупное табло «сегодня 14:00 — занято» и одна строка обещания с кнопкой",
       "imagery": "типографика",
       "motion": "одно перелистывание цифр",
-      "risk": "Почти-чёрный + жёлтый акцент — кластер ui 11/04 №2; ряд цифр — примета K3 stats; счётчики — клише",
+      "risk": "Почти-чёрный + жёлтый акцент — кластер ui 11/04 №2; ряд цифр — примета stats-row; счётчики — клише",
       "cost": "дёшево",
       "level_fit": ["L1", "L2"]
     },
@@ -166,11 +166,11 @@
     {"section": "funktsii", "level": "L1", "effects": ["effect:sticky-stack"], "purpose": "signature", "why": "журнал заполняется сам"}
   ],
   "decisions": [
-    {"id": "d-stats-row", "technique": "k3:stats (ряд цифр)", "decision": "twist",
+    {"id": "d-stats-row", "technique": "примета stats-row (ряд цифр)", "decision": "twist",
      "criteria": {"concept": {"result": "pass", "note": "неявки — главный довод, их число из фактов"}, "brand": {"result": "na"}, "execution": {"result": "pass", "note": "только fact:salons-count, fact:noshow-average, fact:rating-rustore; без счётчиков"}, "epoch": {"result": "pass", "note": "насыщен: поворот — статичные числа с датой источника"}, "singularity": {"result": "pass", "note": "один ряд"}},
      "why": "Ряд цифр оставлен по брифу (ambition.allow stats), без анимации от нуля", "k3_allow": "stats"},
     {"id": "d-dashboard-frame", "technique": "cliche:dashboard-in-browser-frame", "decision": "avoid",
-     "criteria": {"concept": {"result": "fail", "note": "рамка показывает браузер, а не работу"}, "brand": {"result": "na"}, "execution": {"result": "na"}, "epoch": {"result": "fail", "note": "сходимость генераторов (kimi 05/03, Kilo)"}, "singularity": {"result": "na"}},
+     "criteria": {"concept": {"result": "fail", "note": "рамка показывает браузер, а не работу"}, "brand": {"result": "na"}, "execution": {"result": "na"}, "epoch": {"result": "fail", "note": "сходимость генераторов (Kilo)"}, "singularity": {"result": "na"}},
      "why": "Скриншоты без рамок устройств"}
   ],
   "exclusions": {
@@ -200,7 +200,7 @@
   },
   "lifecycle": {
     "version": "0.1",
-    "history": [{"version": "0.1", "date": "2026-09-24", "change": "4 направления для демо SaaS", "by": "Claude (пример A/01)"}],
+    "history": [{"version": "0.1", "date": "2026-09-24", "change": "4 направления для демо SaaS", "by": "Claude (пример)"}],
     "review_by": "2027-03-24",
     "on_brand_change": "если появится логотип и цвет — пересобрать palette и accent_rule; сетка дня остаётся"
   }

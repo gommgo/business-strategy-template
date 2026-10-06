@@ -1,4 +1,4 @@
-// three r186 — hero «постер → 3D после LCP» (эталон F1, собран из 99-raw/experiments/F1/02-hero-variants/hero.js).
+// three r186 — hero «постер → 3D после LCP» (эталон).
 // Сборка: npx esbuild hero.js --bundle --format=esm --splitting --minify --outdir=dist --legal-comments=none
 // Постер и 3D — из одного GLB и одной пары тонмаппинга (Neutral); canvas прозрачный — фон рисует CSS.
 const CFG = Object.assign({

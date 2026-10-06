@@ -1,8 +1,8 @@
-/* fonts.css · рабочие примеры 10-recipes/examples · агент J · волна 3 · 2026-09-25 · Chromium 153 / WebKit 26.6
+/* fonts.css · рабочие примеры creative 10-recipes/examples · Chromium 153 / WebKit 26.6
    Шрифты — OFL-1.1, пакеты @fontsource-variable 5.3.x (npm, 2026-09-25), самохостинг (без CDN: EG-WEIGHT-10).
    Подмножества cyrillic + latin: браузер качает latin из-за пробелов, цифр и знаков (U+0000-00FF) — это ≈ 2/3 веса шрифта.
-   Метрические фолбэки посчитаны по строке русского текста против Liberation Sans (метрики Arial):
-   [проверено: 99-raw/experiments/J/00-vendor/fallback_metrics.py → fallback_metrics.json]. Способ — D (04-visual-language/marketing-tokens.css). */
+   Метрические фолбэки посчитаны по строке русского текста против Liberation Sans (метрики Arial)
+   [проверено]. Способ — creative 04-visual-language/marketing-tokens.css. */
 
 /* Golos Text — L0 «Приёмка» (display 800 + текст 400) */
 @font-face { font-family: "Golos Text"; font-style: normal; font-display: swap; font-weight: 400 900;

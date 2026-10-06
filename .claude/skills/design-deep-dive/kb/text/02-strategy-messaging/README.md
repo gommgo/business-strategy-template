@@ -18,8 +18,10 @@
 | `examples/hierarchy-otves-problem-aware.yaml`, `hierarchy-otves-product-aware.yaml` | две иерархии одной услуги под разный трафик (поиск по проблеме и бренд) |
 | `examples/hierarchy-kvarts-problem-aware.yaml` | иерархия предзаказа для трафика из книжных Telegram-каналов |
 
-Проверка схем и примеров: `99-raw/tools/venv-B1/bin/python ../../scripts/text/validate_meaning.py`
-(0 ошибок, отрицательные случаи 14 из 14). Опыты — `99-raw/experiments/B1/`.
+Проверка схем и примеров: `~/.cache/design-deep-dive/venv/bin/python ../../scripts/text/validate_meaning.py`
+(0 ошибок, отрицательные случаи 14 из 14). Опыты — `99-raw/experiments/B1/`. Сверка смысла:
+`chain_inputs.py meaning-claims --meaning M --brief B -o OUT`; места фактов (`use`) на проекции не
+сверяются — она не страница.
 
 **Выжимка B1 (10 строк).**
 1. Смысл начинается с альтернатив клиента (включая «ничего не делать»), а не с функций и не с категории.
@@ -47,7 +49,7 @@
 | `examples/facts-kvarts.yaml` | исправленный инвентарь «Кварца» (kimi F/03): F9 «сборка в Казани» снят, «датчик», «касание», «первая партия» — в `missing`; зачёркнутая цена запрещена местом |
 | `examples/facts-service-renovation.yaml` | услуга с лидогенерацией («Отвес», синтетика): CRM-число, рейтинг Яндекс Карт со снимком, отзыв с разрешением и журналом правок, отзыв с разрешением «pending», кейс, гарантия по договору, цена «от», акция с датой, прораб с согласием, реквизиты в `missing` (ворота), пробелы под опоры B1 |
 
-Проверка: `99-raw/tools/venv-B2/bin/python ../../scripts/text/validate_facts.py` (метасхема, 2 примера
+Проверка: `~/.cache/design-deep-dive/venv/bin/python ../../scripts/text/validate_facts.py` (метасхема, 2 примера
 facts, пример voc, 19 отрицательных случаев); сверка — `python3 ../../scripts/text/claims_check.py --selftest`; опыты —
 `99-raw/experiments/B2/01–05`.
 

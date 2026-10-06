@@ -29,10 +29,11 @@ $DDD_HOME/out/project/design_audit/<slug>/): findings.jsonl и summary.json — 
 Ключи summary.json: tool, project, surface, root, today, utilities, called (утилита → итоги вызовов, «код N» — код
 выхода), surfaces (surface, type, web_kind, route, input_stage — этап действующего входа холста, accepted — единицы с
 принятым макетом, ready — статус манифеста готовности ready.yaml: ready · partial · not-ready, null — манифеста нет),
-counts, notes, reading, visual. Код 2 в called: у text/copydeck.py и text/claims_check.py — «есть error» (их находки —
-в отчёте по правилам или отброшены по реестру), у утилит project/ — сбой вызова или окружения. Заметки сводки
-(notes) называют и обходы copy deck с причинами: claims_allow — поле allowed вывода copydeck.py check, lint_allow — его
-заметки.
+counts, notes, reading, visual. Коды в called — один порядок утилит скилла: 0 — error нет; 1 — есть error (находки
+вызванной утилиты — в отчёте по правилам или отброшены по реестру); 2 — сбой вызова или окружения; 3 у
+text/copydeck.py check — сверка фактов не отработала: заметка сводки с причиной, находки сверки copy deck неполны.
+Заметки сводки (notes) называют и обходы copy deck с причинами: claims_allow — поле allowed вывода copydeck.py check,
+lint_allow — его заметки.
 
 Тяжесть — по правилу реестра: где правило зависит от этапа, этап выводится из статусов файлов (вход холста страницы
 или поверхности, закрытый copy deck, закрытая арт-дирекция, вердикт REVIEW.md); у находки валидатора — его уровень
@@ -115,6 +116,7 @@ CLOSED = {"site-brief": ("approved",), "meaning": ("approved",), "hierarchy": ("
           "motion-spec": ("approved",)}
 ACCEPTED = ("accepted", "accepted_with_notes")
 TEXT_GATE_STAGES = ("mockup", "motion")                   # этапы входа холста под гейтом 2: тексты — утверждённые
+COPYDECK_NO_CLAIMS = 3                                    # особый исход copydeck.py check: сверка фактов не отработала
 SITE_FILES = ("site-brief.yaml", "meaning.yaml", "site-map.yaml")
 SITE_DIRS = ("hierarchy", "plans", "copy")
 DESIGN_SURF = ("art-direction.json", "visual-dna.json", "assets", "motion", "canvas", "input", "review", "ready.yaml")
@@ -845,6 +847,11 @@ class Audit:
             if not isinstance(r.data, dict):
                 self.notes.append(f"copydeck.py check {p.name}: не отработал ({last_line(r.err) or r.rc})")
                 continue
+            if r.rc == COPYDECK_NO_CLAIMS:                   # причина — находка COPY-D-TOOL сверки, она в COPY_SKIP
+                why = next((str(x.get("message") or "") for x in r.data.get("findings") or []
+                            if x.get("rule") == "COPY-D-TOOL" and x.get("tool") == "claims"), "")
+                self.notes.append(f"copydeck.py check {p.name}: сверка фактов не отработала — находки сверки неполны"
+                                  + (f" ({why[:200]})" if why else ""))
             approved = {pg.get("page_id") for pg in deck.get("pages") or [] if isinstance(pg, dict)
                         and pg.get("status") == "approved"}
             for x in r.data.get("findings") or []:
@@ -2925,7 +2932,6 @@ def _selftest():
         ok = ok and bool(cond)
         print(("OK   " if cond else "FAIL ") + msg)
 
-    today = dt.date(2026, 9, 29)
     cat = rules_catalog()
     ids = {r for r, _t, _s in cat}
     check(f"реестр rules.md читается: {len(cat)} правил, id не повторяются, все категории — из десяти",
@@ -2934,6 +2940,7 @@ def _selftest():
           set(READING) <= ids and set(VISUAL) == {r for r in ids if r.startswith("R-VIS")})
     kbpaths.use("tests")
     import fixture_project
+    today = dt.date.fromisoformat(fixture_project.today())    # опорная дата фикстур: ключ today данных сверки
     me = str(Path(__file__).resolve())
     base, ds = {}, {}
     for name, slug in (("package-landing", "otves-remont-nn"), ("package-cabinet", "otves-office")):
@@ -3568,6 +3575,26 @@ def _selftest():
               and not [n for n in n_none if n.startswith("обходы")]
               and aa.notes == ["обходы claims_allow copy deck spasibo.yaml — 1: COPY-F-NUM @ spasibo/confirmation/title"
                                " — номер шага, не утверждение (аналитик)"])
+
+        class NoClaims(Tools):
+            """copydeck.py check с особым исходом: сверка фактов не отработала (вывод есть, причина — COPY-D-TOOL)."""
+
+            def run(self, name, args, json_out=False, timeout=240):
+                if name != "text/copydeck.py":
+                    return super().run(name, args, json_out, timeout)
+                self.note(name, f"код {COPYDECK_NO_CLAIMS}")
+                return Run(COPYDECK_NO_CLAIMS, data={"findings": [{"tool": "claims", "level": "error", "rule": "COPY-D-TOOL",
+                                                                   "where": "—", "message": "claims_check.py не отработал "
+                                                                   "(код 2): вход не разбирается"}], "allowed": [], "notes": []})
+
+        aa = Audit(slug, root, today=today)
+        with tempfile.TemporaryDirectory(prefix="ddd-audit-deck-") as td:
+            aa.tools = NoClaims(td)
+            aa.copy_decks("promo")
+        check("copydeck.py check с кодом 3 (сверка фактов не отработала) — заметка сводки с причиной; находки COPY-D-TOOL "
+              "в отчёте нет",
+              any(n.startswith("copydeck.py check ") and "сверка фактов не отработала" in n and "вход не разбирается" in n
+                  for n in aa.notes) and not aa.rep.items)
         v0, _n = with_tools("vocab")
         dp.write_text(re.sub(r"page_type: \S+", "page_type: no-such-page-type", dtext, count=1), encoding="utf-8")
         v1, _n = with_tools("vocab")

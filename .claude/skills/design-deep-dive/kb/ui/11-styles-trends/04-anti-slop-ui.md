@@ -322,7 +322,11 @@ and next session it makes them again.» Рабочая схема — замкн
   const strokes = uniq([...document.querySelectorAll('svg')]
     .map(s => s.getAttribute('stroke-width') || cs(s).strokeWidth).filter(Boolean));
   // 29: transition: all
-  const transAll = vis.filter(el => cs(el).transitionProperty === 'all');
+  const transAll = vis.filter(el => {
+    const s = cs(el);
+    return s.transitionProperty.split(',')[0].trim() === 'all' &&
+           s.transitionDuration.split(',').some(d => parseFloat(d) > 0);
+  });
 
   return {
     m5_lowContrastGray: css.includes('#9ca3af') || css.includes('text-gray-400'),

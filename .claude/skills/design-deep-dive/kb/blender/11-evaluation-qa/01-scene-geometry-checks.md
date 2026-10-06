@@ -50,7 +50,7 @@ Blender 5.2.2 LTS, glTF-IO 5.2.40, mcp-for-blender 2.0.3 (валидатор б�
 | где | как | вывод |
 |---|---|---|
 | MCP (`execute_blender_code`) | отправить текст `scene_check.py` целиком; паспорт — в свойстве коллекции или заменой строки `PASSPORT = None` | последняя строка `SCENE_CHECK {json}` |
-| фон, один или много `.blend` | `python3 ../../scripts/blender/qa_pipeline.py scene a.blend b.blend --passports map.json` | сводка в stdout, полный JSON `--out`; код выхода 0 pass / 1 review / 2 fail / 3 сбой |
+| фон, один или много `.blend` | `python3 ../../scripts/blender/qa_pipeline.py scene a.blend b.blend --passports map.json` | сводка в stdout, полный JSON `--out`; код выхода 0 — замер выполнен (вердикт в JSON), 2 — сбой; с `--strict` — 0 pass / 3 review / 1 fail |
 | внутри своего скрипта в фоне | `exec(code, {"bpy": bpy})` с перехватом stdout (как делает MCP) | то же |
 
 `qa_pipeline.py scene` в том же процессе прогоняет `preflight()` агента E (`../08-export-gltf/04 §5`): потери экспорта (процедуры,
@@ -58,10 +58,9 @@ shape keys при apply, цветовые пространства, UV > 4). З�
 
 ```bash
 # Python 3 + Blender 5.2.2 — [проверено] два ноутбука: протокол C1/12 и «первая попытка» sonnet
-cd /home/mm/Документы/app-design/blender-research
 python3 ../../scripts/blender/qa_pipeline.py scene 99-raw/experiments/C1/12-protocol-objects/out/laptop.blend \
   99-raw/experiments/C1/11-naive-first-try/out/sonnet/sonnet_laptop.blend \
-  --passports 99-raw/experiments/J/01-calibration/passports.json || [ $? -le 2 ]   # 1–2 — вердикт, 3 — сбой запуска
+  --passports 99-raw/experiments/J/01-calibration/passports.json   # код 0 — замер выполнен, вердикт — в JSON; 2 — сбой
 ```
 
 Вывод (сокращён): `laptop.blend` — `pass`; `sonnet_laptop.blend` — `fail`: `dims_mismatch` (0,70 × 0,96 × 0,59 м против
@@ -90,7 +89,7 @@ cam.location = (0.6, -0.9, 0.5)
 cam.rotation_euler = (math.radians(65), 0, math.radians(33))
 bpy.context.scene.camera = cam
 P = {"dims_m": [0.30, 0.20, 0.125], "touch": [["Box_Lid", "Box_Base"]], "on_ground": True}
-code = open("/home/mm/Документы/app-design/blender-research/99-raw/tools/scene_check.py", encoding="utf-8").read()
+code = open("../../scripts/blender/scene_check.py", encoding="utf-8").read()
 code = code.replace("\nPASSPORT = None\n", "\nPASSPORT = " + repr(P) + "\n", 1)
 buf = io.StringIO()
 with redirect_stdout(buf):
@@ -235,7 +234,7 @@ sun = bpy.data.objects.new("Key", bpy.data.lights.new("Key", "AREA"))
 bpy.context.scene.collection.objects.link(sun)
 buf = io.StringIO()
 with redirect_stdout(buf):
-    exec(open("/home/mm/Документы/app-design/blender-research/99-raw/tools/scene_check.py", encoding="utf-8").read(), {"bpy": bpy})
+    exec(open("../../scripts/blender/scene_check.py", encoding="utf-8").read(), {"bpy": bpy})
 res = json.loads(buf.getvalue().strip().splitlines()[-1][len("SCENE_CHECK "):])
 print(res["verdict"], res["codes"], res["metrics"]["passport"])
 assert res["verdict"] == "pass", res["codes"]

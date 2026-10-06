@@ -1,5 +1,5 @@
 {
- "model": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/sculpture_pearl_23.glb",
+ "model": "sculpture_pearl_23.glb",
  "file_kb": 117.2,
  "config": {
   "ver": "0.186.0",
@@ -44,28 +44,28 @@
    "el": 20,
    "calls": 3,
    "triangles": 26400,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/web/sculpture_pearl_23/web_view_0_az35_el20.png"
+   "file": "web/sculpture_pearl_23/web_view_0_az35_el20.png"
   },
   {
    "az": 0,
    "el": 5,
    "calls": 3,
    "triangles": 26400,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/web/sculpture_pearl_23/web_view_1_az0_el5.png"
+   "file": "web/sculpture_pearl_23/web_view_1_az0_el5.png"
   },
   {
    "az": 90,
    "el": 5,
    "calls": 3,
    "triangles": 26400,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/web/sculpture_pearl_23/web_view_2_az90_el5.png"
+   "file": "web/sculpture_pearl_23/web_view_2_az90_el5.png"
   },
   {
    "az": 200,
    "el": 35,
    "calls": 3,
    "triangles": 26400,
-   "file": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/web/sculpture_pearl_23/web_view_3_az200_el35.png"
+   "file": "web/sculpture_pearl_23/web_view_3_az200_el35.png"
   }
  ],
  "frame_time": {
@@ -74,5 +74,5 @@
   "frames": 120
  },
  "console": [],
- "sheet": "/home/mm/Документы/app-design/blender-research/12-recipes/examples/04-abstract-sculpture/web/sculpture_pearl_23/web_sheet.png"
+ "sheet": "web/sculpture_pearl_23/web_sheet.png"
 }

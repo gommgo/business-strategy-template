@@ -7,7 +7,7 @@ semantic_meaning, semantic_hierarchy) на любом файле — для вы
 
 Запуск (Python окружения скилла, нужен jsonschema):
     python3 scripts/text/validate_any.py FILE.yaml [FILE2.yaml …]
-Тип файла — по ключу meaning_version или hierarchy_version. Код выхода: 0 — ошибок нет, 1 — есть.
+Тип файла — по ключу meaning_version или hierarchy_version. Код выхода: 0 — ошибок нет; 1 — есть; 2 — файлы не названы.
 """
 import os
 import sys
@@ -21,8 +21,8 @@ from jsonschema import Draft202012Validator  # noqa: E402
 def main():
     files = [a for a in sys.argv[1:] if not a.startswith("--")]
     if not files:
-        print(__doc__)
-        sys.exit(1)
+        print(__doc__, file=sys.stderr)
+        sys.exit(2)
     vm = Draft202012Validator(v.load(os.path.join(v.SM, "meaning.schema.yaml")))
     vh = Draft202012Validator(v.load(os.path.join(v.SM, "message-hierarchy.schema.yaml")))
     total = 0

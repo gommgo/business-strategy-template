@@ -1,7 +1,6 @@
 # hierarchy-kvarts-problem-aware.yaml — иерархия лендинга предзаказа «Кварц» для трафика из книжных Telegram-каналов
-# text-research · B1 · 2026-09-24 · формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
-# Смысл — meaning-kvarts.yaml; факты — facts-kvarts.yaml (B2). Сравнение с секциями brief.yaml kimi F/03 —
-# 99-raw/experiments/B1/01-briefs-to-meaning/README.md §1 (что меняется в сообщениях секций).
+# Формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
+# Смысл — meaning-kvarts.yaml; факты — facts-kvarts.yaml.
 
 hierarchy_version: 1
 date: "2026-09-24"
@@ -29,7 +28,7 @@ core_message:
   value_theme_refs: [val-no-fiddling]
   proof_ids: ["fact:auto-light", "fact:deposit-included"]
   must_not_say:
-    - "любые обещания про зрение и усталость (B2 nc-eyes-health, lift: never)"
+    - "любые обещания про зрение и усталость (never_claim nc-eyes-health, lift: never)"
     - "«датчик» — до ответа q-mechanism"
     - "«сборка в Казани», «первая партия — 300 ламп»"
 
@@ -132,6 +131,6 @@ proof_order: ["fact:auto-light", "fact:color-temperature", "missing:light-mechan
               "fact:shipping-date", "missing:legal-entity", "missing:preorder-offer"]
 
 not_said:
-  - "Отзывы и упоминания в СМИ — их нет (B2 nc-reviews, nc-press)"
+  - "Отзывы и упоминания в СМИ — их нет (never_claim nc-reviews, nc-press)"
   - "Таблица характеристик в первом экране — трафик из поста ещё не решил, нужна ли ему такая лампа"
   - "Счётчик «осталось N ламп», таймер"

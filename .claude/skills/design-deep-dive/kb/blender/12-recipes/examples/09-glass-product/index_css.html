@@ -24,7 +24,7 @@ const canvas = document.getElementById('c');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: bgMode === 'css' });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
 renderer.toneMapping = THREE.NeutralToneMapping;                     // пара к Blender «Khronos PBR Neutral»
-renderer.transmissionResolutionScale = 0.5;                         // −20 % цены прохода пропускания (F2)
+renderer.transmissionResolutionScale = 0.5;                         // −20 % цены прохода пропускания (blender 09/04 §3)
 const scene = new THREE.Scene();
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;   // металлу и стеклу нужно окружение

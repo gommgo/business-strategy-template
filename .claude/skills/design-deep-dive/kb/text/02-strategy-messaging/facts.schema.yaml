@@ -1,17 +1,16 @@
 # facts.schema.yaml — формат facts.yaml: белый список фактов сайта (общий формат тройки site · creative · text)
-# text-research · волна 1 · агент B2 · 2026-09-24 · версия формата 1 (v1 волны 1; черновик T1 — 07:06)
 #
 # Что это. JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — файл `facts.yaml` проекта: любое число, имя, дата,
 # цитата, логотип, рейтинг, цена и гарантия в текстах сайта ссылаются на запись `facts[]` с источником; чего нет —
 # `missing[]` и `[PLACEHOLDER: …]`; чего нельзя утверждать — `never_claim[]` (+ набор по умолчанию `x-never-claim-defaults`).
 # Правила и примеры — `03-proof-and-facts.md` §4–§7; сверка текстов — `../../scripts/text/claims_check.py`.
 #
-# Кто на это ссылается (контракт тройки v2 §3 п.10, п.15):
+# Кто на это ссылается (`kb/common/owners.md` § Форматы обмена):
 #   site-brief (site)   → `proof.facts_ref: <путь к facts.yaml>`; поля фактов в бриф не копируются;
 #   page-plan (site)    → слоты `data: [fact:<id>, …]`;
 #   copy-deck (text)    → `slots[].fact_ids: [<id>]` (в полях, где смешаны ссылки, — `fact:<id>`);
 #   вход холста         → `facts.md` («Факты», «Нет», «Нельзя утверждать») — проекция по `x-canvas-map`;
-#   schema.org (G, site H) → текст разметки = `canonical` факта (одна формулировка на все страницы).
+#   schema.org (text 07, site 07) → текст разметки = `canonical` факта (одна формулировка на все страницы).
 # Идентификаторы страниц, секций и слотов в `use` — словарь site `../site/02-site-types/vocabulary.yaml` (page_type,
 #   section_role, slot).
 # Демо-данные: `example: true` у файла или факта — вымышленные данные примера или макета; макет на них допустим,
@@ -34,7 +33,7 @@ description: >-
 date: "2026-09-29"
 x-version: 1
 x-status: "v1.1: совместима с v1 — новые поля (example, переводы с объектом счёта и оговоркой, запреты по языку) необязательны"
-x-owner: "text-research · 02-strategy-messaging · B2 (контракт тройки v2 §2, §3 п.10)"
+x-owner: "text · 02-strategy-messaging (kb/common/owners.md § Форматы обмена)"
 x-doc: "02-strategy-messaging/03-proof-and-facts.md"
 
 type: object
@@ -58,7 +57,7 @@ properties:
   jurisdiction:
     enum: [ru, eu, us, other]
     default: ru
-    description: "Право по умолчанию (решение заказчика 24.09.2026: РФ; ЕС — профиль по запросу). Нужно H и claims_check.py для выбора правил."
+    description: "Право по умолчанию: РФ; ЕС — профиль по запросу. Нужно правилам права (text 08/01) и claims_check.py для выбора правил."
   status:
     enum: [draft, confirmed]
     default: draft
@@ -132,7 +131,7 @@ $defs:
       contact: {type: string, description: "Канал связи (без паролей и токенов)."}
 
   kind:
-    description: "Вид факта или доказательства (контракт v2 §3 п.10 + 03-proof-and-facts.md §1). Описания — x-kinds."
+    description: "Вид факта или доказательства (kb/common/owners.md § Форматы обмена + 03-proof-and-facts.md §1). Описания — x-kinds."
     enum:
       - metric          # число, метрика, счётчик, срок, объём
       - property        # характеристика, свойство, функция, состав, комплектация
@@ -158,7 +157,7 @@ $defs:
       - forecast        # прогноз, расчёт будущего результата
 
   claim-class:
-    description: "Класс утверждения (03-proof-and-facts.md §3; требования и флаги права — x-claim-classes; правила H — 08-russian-legal-typography/claims-rules.yaml)."
+    description: "Класс утверждения (03-proof-and-facts.md §3; требования и флаги права — x-claim-classes; правила — 08-russian-legal-typography/claims-rules.yaml)."
     enum:
       - fact-number
       - fact-property
@@ -175,11 +174,11 @@ $defs:
       - testimonial-quote
       - rating
       - forecast
-      - origin              # предложение B2
-      - certification       # предложение B2
-      - eco-natural         # предложение B2
-      - company-details     # предложение B2
-      - purchase-terms      # предложение B2
+      - origin
+      - certification
+      - eco-natural
+      - company-details
+      - purchase-terms
 
   value:
     type: object
@@ -273,10 +272,10 @@ $defs:
         description: "Что из персональных данных и знаков разрешено показать."
       pd_consent:
         type: boolean
-        description: "Есть согласие субъекта на распространение персональных данных (152-ФЗ ст. 10.1; детали и форма — H). Обязательно, если shows содержит full-name, photo или сочетание, по которому человек узнаётся."
+        description: "Есть согласие субъекта на распространение персональных данных (152-ФЗ ст. 10.1; детали и форма — text 08/01). Обязательно, если shows содержит full-name, photo или сочетание, по которому человек узнаётся."
       image_consent:
         type: boolean
-        description: "Есть согласие на использование изображения гражданина (ГК РФ ст. 152.1; H)."
+        description: "Есть согласие на использование изображения гражданина (ГК РФ ст. 152.1; text 08/01)."
       withdrawn: {$ref: "#/$defs/date", description: "Дата отзыва разрешения: факт снимается со всех страниц."}
 
   use:
@@ -330,12 +329,12 @@ $defs:
   legal:
     type: object
     additionalProperties: false
-    description: "Юридические флаги и проверка (правила — H, claims-rules.yaml; не юридическое заключение)."
+    description: "Юридические флаги и проверка (правила — claims-rules.yaml; не юридическое заключение)."
     properties:
       flags:
         type: array
         items: {type: string}
-        description: "Флаги классов и норм, например 38fz-5-3-1, 38fz-5-5-6 (формат id — H)."
+        description: "Флаги классов и норм, например 38fz-5-3-1, 38fz-5-5-6 (формат id — text 08/01)."
       review:
         type: object
         additionalProperties: false
@@ -362,7 +361,7 @@ $defs:
       verified_customer: {type: boolean, description: "Подтверждено, что автор — реальный клиент (номер заказа, договор, публичный профиль)."}
       relation:
         enum: [customer, former-customer, partner, employee, expert, investor, gifted-product, paid, other]
-        description: "Связь с компанией. employee, investor, gifted-product, paid — раскрывать рядом (FTC 16 CFR 255, 465.5 для EN; H)."
+        description: "Связь с компанией. employee, investor, gifted-product, paid — раскрывать рядом (FTC 16 CFR 255, 465.5 для EN; text 08/01)."
 
   edit:
     type: object
@@ -386,7 +385,7 @@ $defs:
       what: {type: string, description: "Объект счёта на этом языке (values[].what): «apartments», «reviews»."}
       qualifier: {type: string, description: "Уточнение значения на этом языке (values[].qualifier): «within city limits»."}
       requires_nearby: {type: string, description: "Что стоит рядом на этом языке (use.requires_nearby): «Yandex Maps, as of 1 September 2026»."}
-      note: {type: string, description: "Адаптация, а не дословный перевод (решение заказчика п. 16); у цитат — пометка перевода."}
+      note: {type: string, description: "Адаптация, а не дословный перевод; у цитат — пометка перевода."}
 
   entity:
     type: object
@@ -427,7 +426,7 @@ $defs:
       canonical:
         type: string
         minLength: 1
-        description: "Одна полная формулировка для всех страниц, JSON-LD и ответов нейросетей (G): кто или что + значение с единицей + условие + дата или источник, если нужны. Пример: «По данным Яндекс Карт на 1 сентября 2026 года, рейтинг студии „Отвес“ — 4,8 из 5 по 214 отзывам.»"
+        description: "Одна полная формулировка для всех страниц, JSON-LD и ответов нейросетей (text 07/03): кто или что + значение с единицей + условие + дата или источник, если нужны. Пример: «По данным Яндекс Карт на 1 сентября 2026 года, рейтинг студии „Отвес“ — 4,8 из 5 по 214 отзывам.»"
       values:
         type: array
         items: {$ref: "#/$defs/value"}
@@ -462,7 +461,7 @@ $defs:
       schema_org:
         type: object
         additionalProperties: false
-        description: "Подсказка для разметки (решают G и site H): тип и свойство schema.org, в которые идёт canonical или values."
+        description: "Подсказка для разметки (решают text 07 и site 07): тип и свойство schema.org, в которые идёт canonical или values."
         properties:
           type: {type: string}
           property: {type: string}
@@ -609,7 +608,7 @@ $defs:
           date: {$ref: "#/$defs/date"}
 
 # ---------------------------------------------------------------------------------------------------------------------
-# Аннотации (не проверяются валидатором; читает claims_check.py и экспорт J)
+# Аннотации (не проверяются валидатором; читают claims_check.py и сборщик входа холста)
 
 x-kinds:
   metric: {name: "Число, метрика", needs: [values], example: "12 лет на рынке; 1 400 объектов; ответ за 15 минут"}
@@ -638,7 +637,7 @@ x-kinds:
 x-claim-classes:
   # needs — что обязано быть в факте, чтобы утверждение этого класса прошло сверку; needs_document — stated (со слов)
   # недостаточно, нужен документ, реестр или публичная страница; permission — нужно разрешение третьего лица;
-  # legal — флаг для H: none | check (проверить формулировку) | required (без проверки не публиковать);
+  # legal — флаг права: none | check (проверить формулировку) | required (без проверки не публиковать);
   # law — где нормы права к классу: таблица «класс → требование → норма» text 08/01 §2 и правила claims-rules.yaml с этим
   # классом (своего перечня норм здесь нет); default_never — id запрета по умолчанию.
   - id: fact-number
@@ -679,7 +678,7 @@ x-claim-classes:
   - id: guarantee
     name: "Гарантия"
     covers: "гарантия, возврат денег, «гарантируем результат», «вернём»"
-    needs: ["source.document | source.url", "legal.review (срок и случай гарантии — H, случай «Кварца»)"]
+    needs: ["source.document | source.url", "legal.review (срок и случай гарантии — text 08/01, случай «Кварца»)"]
     needs_document: true
     permission: false
     legal: check
@@ -776,7 +775,7 @@ x-claim-classes:
     law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: forecast"
     default_never: nc-forecast
   - id: origin
-    name: "Происхождение и производство (предложение B2)"
+    name: "Происхождение и производство"
     covers: "«сделано в России», «сборка в Казани», «собственное производство», страна происхождения"
     needs: [source.quote]
     needs_document: true
@@ -784,7 +783,7 @@ x-claim-classes:
     legal: check
     law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
   - id: certification
-    name: "Сертификаты, лицензии, одобрения (предложение B2)"
+    name: "Сертификаты, лицензии, одобрения"
     covers: "сертификат, декларация, ГОСТ, ISO, лицензия, аккредитация, «одобрено», «рекомендовано»"
     needs: ["source.document | source.url", "valid.until"]
     needs_document: true
@@ -793,7 +792,7 @@ x-claim-classes:
     law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
     default_never: nc-prices-terms
   - id: eco-natural
-    name: "Экологичность и натуральность (предложение B2)"
+    name: "Экологичность и натуральность"
     covers: "эко, натуральный, органический, без химии, биоразлагаемый, углеродно-нейтральный"
     needs: ["source.document"]
     needs_document: true
@@ -801,7 +800,7 @@ x-claim-classes:
     legal: required
     law: "08-russian-legal-typography/01-advertising-law-claims.md §2; claims-rules.yaml, claim_class: eco-natural"
   - id: company-details
-    name: "Реквизиты и контакты (предложение B2)"
+    name: "Реквизиты и контакты"
     covers: "юрлицо, ИНН, ОГРН, адрес, телефон, почта, часы работы, год основания"
     needs: [source]
     needs_document: false
@@ -809,9 +808,9 @@ x-claim-classes:
     legal: check
     law: "08-russian-legal-typography/01-advertising-law-claims.md §2"
   - id: purchase-terms
-    name: "Условия покупки (предложение B2)"
+    name: "Условия покупки"
     covers: "порядок оплаты, бронь, предоплата, доставка, отгрузка, сроки выполнения, возврат и обмен, пробный период"
-    needs: [source, "legal.review (сроки возврата и отказа — H, случай «Кварца»)"]
+    needs: [source, "legal.review (сроки возврата и отказа — text 08/01, случай «Кварца»)"]
     needs_document: false
     permission: false
     legal: check
@@ -886,10 +885,10 @@ x-canvas-map:
   never_claim_md: "строки never_claim[].text (на языке страницы — translations.<lang>.text) и набора x-never-claim-defaults, у которых lift: never или нет снимающего проверенного факта того же класса (legal-review — факта с legal.review.status: approved); запрет стоит только на непроверенном"
 
 x-site-brief-proof:
-  # Предложение site A для блока proof в site-brief (поля фактов не дублируются; контракт v2 §3 п.10).
+  # Блок proof в site-brief (поля фактов не дублируются; `kb/common/owners.md` § Форматы обмена).
   facts_ref: "путь к facts.yaml проекта (формат: text/02-strategy-messaging/facts.schema.yaml, facts_version: 1)"
   required_kinds: "виды фактов, без которых страница этого типа не публикуется (решает site по page_type; пример: landing-lead-services → company, price | offer-terms, contacts)"
-  wanted_kinds: "желательные виды доказательств по возражениям аудитории (B1 message-hierarchy: proof_ids опор)"
+  wanted_kinds: "желательные виды доказательств по возражениям аудитории (message-hierarchy: proof_ids опор)"
   collection: "{owner: роль у заказчика, agent: кто ведёт анкету proof-intake.md, asked: дата, due: дата, status: not-started | in-progress | done}"
   gaps: "не копировать — брать из facts.yaml missing[] (blocking: true — ворота публикации)"
 

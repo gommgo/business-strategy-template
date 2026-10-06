@@ -1,7 +1,7 @@
-# motion-spec v1 — рабочий пример L0 «Сдано» (лидогенерация услуг РФ). Рецепт 10-recipes/01-lead-services-l0.md.
-# creative-research · 10-recipes · агент J · волна 3 · 2026-09-25. Демо: компания и цифры вымышлены.
-# Проверка схемой: 99-raw/tools/venv-I/bin/python 99-raw/experiments/I/01-schemas/spec_check.py spec 10-recipes/examples/l0-sdano/motion-spec.yaml
-# Сверка сборки: python3 99-raw/tools/motion_check.py 10-recipes/examples/l0-sdano/index.html --level L0 --spec <этот файл>
+# motion-spec v1 — рабочий пример L0 «Сдано» (лидогенерация услуг РФ). Рецепт creative 10-recipes/01-lead-services-l0.md.
+# Демо: компания и цифры вымышлены.
+# Проверка схемой: $DDD_HOME/venv/bin/python scripts/creative/spec_check.py spec <этот файл>
+# Сверка сборки: python3 scripts/creative/motion_check.py index.html --level L0 --spec <этот файл>
 motion_spec_version: "1.0"
 id: sdano-home
 example: true
@@ -9,9 +9,9 @@ status: proposed
 checked_at: "2026-09-25"
 refs:
   page_plan: "../../recipes/01-lead-services-l0.recipe.yaml#/page_plan"
-  tokens: ../../../04-visual-language/marketing-tokens.json
-  effects: ../../../06-effects-catalog/effects.yaml
-  block_treatments: ../../../09-ai-execution-evaluation/block-treatments.yaml
+  tokens: ../../../../creative/04-visual-language/marketing-tokens.json
+  effects: ../../../../creative/06-effects-catalog/effects.yaml
+  block_treatments: ../../../../creative/09-ai-execution-evaluation/block-treatments.yaml
 level: L0
 executor: {target: any, harness: any, video_in: false}
 page:

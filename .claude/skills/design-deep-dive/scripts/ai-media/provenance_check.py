@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """provenance_check.py — бесплатная проверка провенанса ИИ-ассетов (0 ₽, без сети).
 
-Агент L, волна 3, 23.09.2026. Что ищет в каждом файле (картинка, SVG, видео):
+Что ищет в каждом файле (картинка, SVG, видео):
   * C2PA — через c2patool (validation_state, генератор, подписант, действия, digitalSourceType, ингредиенты, sidecar .c2pa);
   * IPTC/XMP — DigitalSourceType, AISystemUsed, AIPromptInformation, dcterms:provenance, Credit, Software… (exiftool -G1);
   * китайскую неявную метку AIGC (GB 45438-2025: Label/ContentProducer/ProduceID, подпись TC260PG) в тегах MP4/WebM;
@@ -9,7 +9,7 @@
   * строки-маркеры в байтах (c2pa, jumb, caBX, AIGC, SynthID, TC260, trainedAlgorithmicMedia…) — страховка на случай,
     если exiftool/c2patool не разобрали контейнер;
   * видимую метку в углах кадра — эвристика («строка символов» top-hat + плотность краёв; на фото ловит ≈ половину
-    надписей, 1 ложное из 10) + контактный лист углов corners.jpg — главное средство, смотреть глазами или VLM (K).
+    надписей, 1 ложное из 10) + контактный лист углов corners.jpg — главное средство, смотреть глазами или VLM.
 SynthID и другие невидимые водяные знаки локально НЕ детектируются: для них — Gemini app / Google Search «Is this AI
 generated?» (SynthID Google и OpenAI) и openai.com/verify (картинки OpenAI); утилита лишь подсказывает, где проверять.
 
@@ -23,7 +23,9 @@ generated?» (SynthID Google и OpenAI) и openai.com/verify (картинки O
   python3 provenance_check.py selftest [--keep DIR]
 
 Выход scan: JSON (полные записи) и Markdown-таблица; при --corners — corners.jpg (углы TL TR / BL BR каждого файла).
-Коды выхода: 0 — ок; 1 — ошибка аргументов/инструментов; 2 — selftest FAIL.
+Коды выхода: 0 — команда выполнена, самопроверка прошла; 1 — самопроверка не прошла; 2 — ошибка вызова или
+окружения: нет файла, программа (exiftool, ffmpeg) вернула ошибку, stamp отказался править файл с валидным C2PA
+без --force.
 """
 from __future__ import annotations
 
@@ -40,14 +42,14 @@ import tempfile
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-sys.path.insert(0, str(HERE.parent / "lib"))  # перенос: scripts/lib
+sys.path.insert(0, str(HERE.parent / "lib"))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 EXIFTOOL = os.environ.get("EXIFTOOL", kbpaths.which("exiftool"))
 C2PATOOL = os.environ.get("C2PATOOL", kbpaths.which("c2patool"))
 # Официальный список доверия C2PA (снимок 23.09.2026, 30 корней: Google, DigiCert, SSL.com, Adobe, TrustAsia…) — даёт «Trusted»
 TRUST_PEM = os.environ.get("C2PA_TRUST_PEM", str(kbpaths.cache("ai-media", "c2pa-trust-2026-09-23") / "C2PA-TRUST-LIST.pem"))
 USE_TRUST = False
-VERSION = "0.1.1 (L, 2026-09-23; C2PA в SVG — оркестратор, 2026-09-25)"
+VERSION = "0.1.1"
 
 IMG_EXT = {".png", ".jpg", ".jpeg", ".webp", ".avif", ".jxl", ".gif", ".tif", ".tiff", ".heic", ".heif", ".bmp"}
 VID_EXT = {".mp4", ".mov", ".m4v", ".webm", ".mkv"}
@@ -198,7 +200,7 @@ def exif_read(path: Path) -> dict:
 
 
 def ffprobe_read(path: Path) -> dict:
-    rc, so, _ = run(["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams", str(path)])
+    rc, so, _ = run([kbpaths.ffprobe(), "-v", "error", "-print_format", "json", "-show_format", "-show_streams", str(path)])
     if rc != 0:
         return {"error": "ffprobe"}
     d = json.loads(so)
@@ -256,7 +258,7 @@ def load_frames(path: Path, kind: str, tmp: Path):
         dur = info.get("duration") or 0
         for name, t in (("start", 0.0), ("mid", dur / 2), ("end", max(dur - 0.1, 0))):
             fp = tmp / f"{path.stem}_{name}.png"
-            rc, _, _ = run(["ffmpeg", "-v", "error", "-y", "-ss", f"{t:.3f}", "-i", str(path), "-frames:v", "1",
+            rc, _, _ = run([kbpaths.ffmpeg(), "-v", "error", "-y", "-ss", f"{t:.3f}", "-i", str(path), "-frames:v", "1",
                             str(fp)], timeout=60)
             if rc == 0 and fp.exists():
                 frames.append((name, Image.open(fp).convert("RGB")))
@@ -266,7 +268,7 @@ def load_frames(path: Path, kind: str, tmp: Path):
 def text_chain(g, H: int) -> int:
     """Длина самой длинной «строки символов» в области: white/black top-hat → компоненты размера буквы → цепочка
     соседей по x с одним уровнем по y. ≥ 6 — похоже на надпись («AI-generated»). Эвристика: на 8 CC0-фото
-    находит надпись 2,2–3,5 % высоты кадра в ≈ 50 % случаев, ложные срабатывания — 1 из 10 (L/01 README)."""
+    находит надпись 2,2–3,5 % высоты кадра в ≈ 50 % случаев, ложные срабатывания — 1 из 10."""
     import numpy as np
     from scipy import ndimage as nd
     best = 0
@@ -413,7 +415,7 @@ def summarize(rec: dict) -> dict:
         advice.append("подозрение на видимую метку в углу: смотреть corners.jpg; метки вендора не вырезать кропом "
                       "без решения по 04-agent-policy")
     if sv.get("recraft"):
-        advice.append("подпись Recraft: не удалять (Developer Terms 6.4); svgo — конфиг keep-signature (G/02)")
+        advice.append("подпись Recraft: не удалять (Developer Terms 6.4); svgo — конфиг keep-signature (ai-media 07/02)")
     if rec["kind"] == "svg" and (c2.get("present") or sv.get("c2pa_manifest_blocks")):
         advice.append("C2PA в <metadata> SVG: svgo preset-default (removeMetadata) удаляет его вместе с <metadata>; "
                       "мастер хранить побайтно, в чистке — отключить removeMetadata или вести паспорт/sidecar; "
@@ -471,6 +473,10 @@ def cmd_scan(a) -> int:
     out = Path(a.out) if a.out else None
     if out:
         out.mkdir(parents=True, exist_ok=True)
+    absent = [p for p in a.paths if not Path(p).exists()]
+    if absent:
+        print(f"нет файла или папки: {', '.join(absent)}", file=sys.stderr)
+        return 2
     recs, frames_all = [], []
     with tempfile.TemporaryDirectory(prefix="provcheck_") as td:
         for p in iter_paths(a.paths):
@@ -499,24 +505,27 @@ def cmd_scan(a) -> int:
 # ------------------------------------------------------------------ stamp
 def cmd_stamp(a) -> int:
     src, dst = Path(a.inp), Path(a.out)
+    if not src.is_file():
+        print(f"нет файла {src}", file=sys.stderr)
+        return 2
     c2 = c2pa_read(src) if kind_of(src) in ("image", "video") else {}
     if c2.get("present") and c2.get("state") in ("Valid", "Trusted") and not a.force:
         print("ОТКАЗ: у файла валидный C2PA — правка метаданных сломает подпись. Штампуйте производную "
               "(перекодированный файл) или --force.", file=sys.stderr)
-        return 1
+        return 2
     uri = DST[a.dst]
     if src.resolve() != dst.resolve():
         shutil.copyfile(src, dst)
     ext = dst.suffix.lower()
     if ext in (".webm", ".mkv"):
         tmp = dst.with_name(dst.stem + ".stamp" + dst.suffix)
-        cmd = ["ffmpeg", "-v", "error", "-y", "-i", str(dst), "-map", "0", "-c", "copy",
+        cmd = [kbpaths.ffmpeg(), "-v", "error", "-y", "-i", str(dst), "-map", "0", "-c", "copy",
                "-metadata", f"DIGITAL_SOURCE_TYPE={uri}", "-metadata", f"COMMENT=AI-generated ({a.dst})"]
         if a.system:
             cmd += ["-metadata", f"AI_SYSTEM={a.system}"]
         rc, _, se = run(cmd + [str(tmp)], timeout=300)
         if rc != 0:
-            print(se, file=sys.stderr); return 1
+            print(se, file=sys.stderr); return 2
         tmp.replace(dst)
     else:
         cmd = [EXIFTOOL, "-overwrite_original", "-q", f"-XMP-iptcExt:DigitalSourceType={uri}"]
@@ -528,7 +537,7 @@ def cmd_stamp(a) -> int:
             cmd.append(f"-XMP-photoshop:Credit={a.credit}")
         rc, so, se = run(cmd + [str(dst)])
         if rc != 0:
-            print(se or so, file=sys.stderr); return 1
+            print(se or so, file=sys.stderr); return 2
     print(f"{dst}: DigitalSourceType={a.dst} (+{dst.stat().st_size - src.stat().st_size} байт)")
     return 0
 
@@ -575,19 +584,23 @@ def cmd_selftest(a) -> int:
                                             system_version="0.1", credit=None, force=False))
     refused = cmd_stamp(argparse.Namespace(inp=str(signed), out=str(base / "signed_stamped.png"), dst="trained",
                                            system=None, system_version=None, credit=None, force=False))
+    no_file = cmd_stamp(argparse.Namespace(inp=str(base / "absent.png"), out=str(base / "absent_st.png"), dst="trained",
+                                           system=None, system_version=None, credit=None, force=False))
+    no_path = cmd_scan(argparse.Namespace(paths=[str(base / "absent")], out=None, corners=False, trust=False, json=None,
+                                          md=None))
     # видео с китайской меткой и её судьба при ремуксе
     mp4 = base / "aigc.mp4"
     aigc = json.dumps({"Label": "1", "ContentProducer": "selftest", "ProduceID": "42"})
-    run(["ffmpeg", "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=24:duration=2", "-f", "lavfi",
+    run([kbpaths.ffmpeg(), "-v", "error", "-y", "-f", "lavfi", "-i", "testsrc2=size=320x180:rate=24:duration=2", "-f", "lavfi",
          "-i", "sine=frequency=440:duration=2", "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", "-shortest",
          "-metadata", f"AIGC={aigc}", "-movflags", "use_metadata_tags", str(mp4)], timeout=120)
     plain = base / "remux_plain.mp4"
-    run(["ffmpeg", "-v", "error", "-y", "-i", str(mp4), "-c", "copy", str(plain)])
+    run([kbpaths.ffmpeg(), "-v", "error", "-y", "-i", str(mp4), "-c", "copy", str(plain)])
     keep = base / "remux_keep_an.mp4"
-    run(["ffmpeg", "-v", "error", "-y", "-i", str(mp4), "-map_metadata", "0", "-c:v", "copy", "-an", "-movflags",
+    run([kbpaths.ffmpeg(), "-v", "error", "-y", "-i", str(mp4), "-map_metadata", "0", "-c:v", "copy", "-an", "-movflags",
          "use_metadata_tags+faststart", str(keep)])
     webm = base / "keep.webm"
-    run(["ffmpeg", "-v", "error", "-y", "-i", str(mp4), "-map_metadata", "0", "-c:v", "libvpx-vp9", "-b:v", "200k",
+    run([kbpaths.ffmpeg(), "-v", "error", "-y", "-i", str(mp4), "-map_metadata", "0", "-c:v", "libvpx-vp9", "-b:v", "200k",
          "-an", "-deadline", "realtime", "-cpu-used", "8", str(webm)], timeout=180)
     svg = base / "recraft.svg"
     svg.write_text('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/>'
@@ -604,7 +617,8 @@ def cmd_selftest(a) -> int:
     check("производная AVIF: манифест потерян", not g("derived.avif").get("c2pa", {}).get("present"))
     check("stamp: XMP DigitalSourceType в AVIF", rc_stamp == 0 and "trainedAlgorithmicMedia" in
           g("derived_dst.avif").get("exif", {}).get("digital_source_type", []))
-    check("stamp отказывается править подписанный мастер", refused == 1)
+    check("stamp отказывается править подписанный мастер — код 2", refused == 2)
+    check("нет входного файла: stamp и scan — код 2", no_file == 2 and no_path == 2, f"stamp {no_file}, scan {no_path}")
     fl_m = g("marked.png").get("summary", {}).get("visible_suspect", [])
     fl_c = g("clean.png").get("summary", {}).get("visible_suspect", [])
     check("видимая метка в углу BR найдена", any(x.endswith("BR") for x in fl_m), str(fl_m))
@@ -618,7 +632,7 @@ def cmd_selftest(a) -> int:
     print(("SELFTEST PASS" if ok else "SELFTEST FAIL") + f"  ({base})")
     if not a.keep:
         shutil.rmtree(base, ignore_errors=True)
-    return 0 if ok else 2
+    return 0 if ok else 1
 
 
 def main() -> int:

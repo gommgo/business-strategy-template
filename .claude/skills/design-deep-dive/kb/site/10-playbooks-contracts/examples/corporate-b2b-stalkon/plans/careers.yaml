@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · план шаблона careers (careers-page, L0) — planlib.py; факты — демо J.
+# ПРИМЕР v1 · план шаблона careers (careers-page, L0); факты — демо.
 page_plan_version: '1'
 checked: '2026-09-24'
 status: draft
@@ -32,7 +32,7 @@ page:
   awareness: product-aware
   awareness_basis:
     from: assumption
-    rule: уровень по главному источнику страницы (C 01 §3.1)
+    rule: уровень по главному источнику страницы (site 03/01 §3.1)
   traffic:
   - traffic_source: internal
     temperature: warm

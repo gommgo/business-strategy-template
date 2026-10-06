@@ -1,4 +1,4 @@
-// R3F 9.8 + drei 10.7.8 + three r186 — hero-сцена для React-проекта (эксперимент F2/02-r3f-hero)
+// R3F 9.8 + drei 10.7.8 + three r186 — hero-сцена для React-проекта
 import { createRoot } from 'react-dom/client';
 import { Suspense, useEffect, useLayoutEffect, useState } from 'react';
 import * as THREE from 'three';

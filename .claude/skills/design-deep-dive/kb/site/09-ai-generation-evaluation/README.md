@@ -10,14 +10,15 @@
 | `01-generators-and-ai-landing-markers.md` | 472 | генераторы (Framer, Webflow, Wix, Tilda, Relume, v0, Lovable, Bolt, Durable, K3 — открытые материалы), шесть механизмов «медианного лендинга», маркеры по 12 группам, где ловятся и что разрешает бриф (`allow`), три демо под воротами (K/03), что из `page-plan` обязано попасть в TASK и блоки приёмки I–L |
 | `02-site-checklist.md` | 762 | сводный чек-лист: 248 пунктов `SITE-<БЛОК>-<NN>` в 15 блоках (B 74 · S 150 · D 24; способ DOM, LNT, AXE, SCR, IMG, JDG, HUM), каталог дефектов DEF-01…50 для процедуры J, профиль UX, автопроверки и ворота v1.2, быстрый набор, нормализация со смежными проверками |
 | `03-expert-review-and-judge.md` | 401 | экспертный протокол (8 осей диагностики, CCD Гарднера, конгруэнтность секций, пятисекундный тест, линзы, покрытие), находка и отчёт, рубрика судьи и когда ей верить |
-| `ai-landing-markers.yaml` | 1 130 | 51 маркер `AIL-01…51` v1.0 + кандидат AIL-52 (`status: proposed`, S1): признак, как обнаружить, порог, чем заменить, серьёзность, `allow`, источник, сверка с Hallmark и реестром клише creative (`crosswalk_external`) |
-| `site-checklist.yaml` | 3 915 | машиночитаемый чек-лист v1.0 (248 пунктов, 50 дефектов); **генерируется** `../../scripts/site/checklist_export.py` из файла 02, руками не править |
+| `ai-landing-markers.yaml` | 1 121 | 51 маркер `AIL-01…51` v1.0 + кандидат AIL-52 (`status: proposed`, S1): признак, как обнаружить, порог, чем заменить, серьёзность, `allow`, источник, сверка с Hallmark и реестром клише creative (`crosswalk_external`) |
+| `site-checklist.yaml` | 3 915 | машиночитаемый чек-лист v1.0 (248 пунктов, 50 дефектов); **генерируется** `../../../scripts/site/checklist_export.py` из файла 02, руками не править |
 | `ux-marketing-profile.tsv` | 435 | профиль 434 пунктов `UX-*` для сайта: keep 133 · modify 89 · off 156 · replaced 56; колонки `ux_id block ux_text_short site_action site_replacement reason source` |
-| `site-rubric.json` | 732 | рубрика судьи v1.0: 8 осей `SITE-R-01…08` (новый префикс id рубрики), 28 атомарных вопросов с `cap_if_no`, профиль без общего балла |
+| `ac-profile.tsv` | 247 | наследование для 246 автопроверок `AC-*` ux: действие и замена пункта `UX-*`, который автопроверка закрывает (keep 99 · modify 47 · off 43 · replaced 31 · n/a 26); колонки `ac_id closes site_action site_replacement line`; **генерируется** `../../../scripts/site/build_profile.py`, руками не править |
+| `site-rubric.json` | 726 | рубрика судьи v1.0: 8 осей `SITE-R-01…08` (новый префикс id рубрики), 28 атомарных вопросов с `cap_if_no`, профиль без общего балла |
 
-Утилиты и ворота (вне папки): `../../scripts/site/checklist_export.py` — YAML из Markdown (`--check` — совпадает, `--selftest` —
-16/16); `../../scripts/site/page_gates.py` v1.2 — ворота страницы по профилю (`--selftest` — 64/64) и строки
-`../07-seo-geo-performance-analytics/page-gates.yaml` v1.3 (63 строки; v1.2 — 62); раздел K в `../../scripts/site/README.md`.
+Утилиты и ворота (вне папки): `../../../scripts/site/checklist_export.py` — YAML из Markdown (`--check` — совпадает, `--selftest` —
+16/16); `../../../scripts/site/page_gates.py` v1.2 — ворота страницы по профилю (`--selftest` — 64/64) и строки
+`../07-seo-geo-performance-analytics/page-gates.yaml` v1.3 (63 строки; v1.2 — 62); раздел K в `../../../scripts/site/README.md`.
 
 Опыты: `99-raw/experiments/K/01-export/` — экспорт чек-листа и его повторная проверка; `K/02-ux-profile/` — профиль UX
 (`build_profile.py`) и ложные срабатывания UX-проверок на 8 страницах: 84 → 37, ложных 73 → 1; `K/03-gates-v1/` — ворота на

@@ -65,7 +65,7 @@ class H(http.server.SimpleHTTPRequestHandler):
 def start(root, port=0):
     precompress(root)
     # server_close() один не спасает: без allow_reuse_address bind на тот же порт после обслуженного запроса падает
-    # "Address already in use" (соединение в TIME_WAIT) — проверено 99-raw/experiments/U/09-serve-br-close.
+    # "Address already in use" (соединение в TIME_WAIT) [проверено].
     socketserver.ThreadingTCPServer.allow_reuse_address = True
     httpd = socketserver.ThreadingTCPServer(("127.0.0.1", port), functools.partial(H, directory=root))
     httpd.daemon_threads = True
@@ -75,7 +75,7 @@ def start(root, port=0):
     def _shutdown_then_close():                # J §3 п. 11: без server_close() порт остаётся занят — повторный
         _shutdown()                             # start() на том же порте падает "Address already in use"
         httpd.server_close()
-    httpd.shutdown = _shutdown_then_close       # любой вызывающий httpd.shutdown() теперь закрывает сокет следом
+    httpd.shutdown = _shutdown_then_close       # любой вызывающий httpd.shutdown() закрывает и сокет
     return httpd
 
 

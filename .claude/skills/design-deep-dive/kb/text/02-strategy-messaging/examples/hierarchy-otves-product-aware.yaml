@@ -1,8 +1,8 @@
 # hierarchy-otves-product-aware.yaml — иерархия лендинга «Отвес» для брендового трафика и карт (product-aware)
-# text-research · B1 · 2026-09-24 · формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
+# Формат: ../message-hierarchy.schema.yaml (hierarchy_version 1)
 # Та же студия и тот же смысл, что в hierarchy-otves-problem-aware.yaml; другой уровень осведомлённости: посетитель
 # уже знает «Отвес» (искал «Отвес ремонт отзывы», увидел карточку на Яндекс Картах, пришёл по рекомендации) и проверяет
-# перед звонком. Разница — опыт 99-raw/experiments/B1/02-two-hierarchies/.
+# перед звонком.
 
 hierarchy_version: 1
 date: "2026-09-24"

@@ -23,9 +23,9 @@ brand_expression_mode и references_given, решает заказчик): на�
 Предупреждения о согласованности документа: у эффекта из effects_by_section нет записи decisions[] (technique называет
 effect:<id>); снятую примету (lifted_markers) держит решение не вида use или twist; до выбора направления уровень требует
 больше пиков, чем один главный приём направления (section_distribution.peaks_min файла уровней); варианты подачи
-(treatment_variants) записаны без выбора направления; расширение x-direction-bans — не {id направления: [запрет]}, зовёт
-несуществующее направление или расходится с полем bans направления; трекинг заголовков, названный в type.note числом в
-em, ниже нормы гарнитуры из kb/creative/04-visual-language/cyrillic-display-fonts.yaml (tracking_touch и запас файла).
+(treatment_variants) записаны без выбора направления; трекинг заголовков, названный в type.note числом в em, ниже нормы
+гарнитуры из kb/creative/04-visual-language/cyrillic-display-fonts.yaml (tracking_touch и запас файла). Запреты
+направления — поле directions[].bans; расширения `x-*` проверка не читает.
 """
 import argparse
 import copy
@@ -226,16 +226,6 @@ def cross(ctx, ad):
                          f'(ambition-levels.yaml section_distribution.peaks_min) — назовите остальные пики до выбора')
         if ad.get('treatment_variants'):
             W.append('treatment_variants записаны без выбора направления (choice): варианты подачи — у выбранного направления')
-    xb = ad.get('x-direction-bans')
-    if xb is not None:
-        if not isinstance(xb, dict) or not all(isinstance(v, list) and all(isinstance(x, str) and x.strip() for x in v)
-                                               for v in xb.values()):
-            W.append('x-direction-bans — не {id направления: [запрет строкой]}')
-        else:
-            for k in sorted(set(xb) - set(dirs)):
-                W.append(f'x-direction-bans: направления {k} нет среди directions')
-            for k in sorted(k for k in xb if k in dirs and dirs[k].get('bans') and list(dirs[k]['bans']) != list(xb[k])):
-                W.append(f'направление {k}: запреты записаны полем bans и расширением x-direction-bans, списки расходятся')
     for where, tp in [(f'направление {d["id"]}', d.get('type') or {}) for d in ad['directions']] + \
                      [('visual_language', (ad.get('visual_language') or {}).get('type') or {})]:
         floor = ctx.tracking_floor(tp.get('display'))
@@ -449,13 +439,8 @@ def selftest(ctx):
                             d.update(status='proposed', treatment_variants=[{'id': 'v-calm', 'shows': 'первый экран без сцены'}])),
                  'treatment_variants записаны без выбора'))
     known = base['directions'][0]['id']
-    expect('x-direction-bans: список своему направлению — без предупреждений; чужой id и не список — предупреждение',
-           not check(ctx, dict(copy.deepcopy(base), **{'x-direction-bans': {known: ['без градиента в заголовках']}}))['warnings']
-           and warns(lambda d: d.update({'x-direction-bans': {'no-such-direction': ['без градиента']}}), 'no-such-direction нет среди directions')
-           and warns(lambda d: d.update({'x-direction-bans': {known: 'без градиента'}}), 'x-direction-bans — не'))
-    expect('x-direction-bans расходится с полем bans направления — предупреждение',
-           warns(lambda d: (d['directions'][0].update(bans=['без градиента в заголовках']),
-                            d.update({'x-direction-bans': {known: ['без капса в заголовках']}})), 'списки расходятся'))
+    r = check(ctx, dict(copy.deepcopy(base), **{'x-extra-notes': {known: 'без градиента', 'no-such-direction': 1}}))
+    expect('расширение x-* проверка не читает: схема проходит, предупреждений и ошибок нет', r['ok'] and not r['warnings'])
     # ритм уровня до выбора: уровень с peaks_min больше одного — предупреждение у каждого направления
     many = next((k for k in ctx.levels if ctx.peaks_min(k) > 1), None)
     d = copy.deepcopy(base)

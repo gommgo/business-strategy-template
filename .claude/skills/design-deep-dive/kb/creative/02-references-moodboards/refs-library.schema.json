@@ -1,8 +1,8 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "urn:app-design:creative:refs-library:1",
- "title": "Запись библиотеки референсов creative-research (refs-library/1)",
- "description": "Одна строка library.jsonl. Пишет refs_client.py (search, get, enrich, arena pull), правят lib tag и мудборд. Библиотека заказчика живёт ВНЕ базы (~/.local/share/creative-refs/, каталоги 700, файлы 600); в базе — только пример на публичных наградных сайтах (library-example/). Контракт тройки v2 §3 п.7; поле id — это <id> в ссылке ref:<id> брифа site (site-brief.schema.json $defs/reference). Волна 1 · агент B · 2026-09-24.",
+ "title": "Запись библиотеки референсов creative (refs-library/1)",
+ "description": "Одна строка library.jsonl. Пишет refs_client.py (search, get, enrich, arena pull), правят lib tag и мудборд. Библиотека заказчика живёт ВНЕ базы (~/.local/share/creative-refs/, каталоги 700, файлы 600); в базе — только пример на публичных наградных сайтах (library-example/). Формат обмена № 7 (kb/common/owners.md § Форматы обмена); поле id — это <id> в ссылке ref:<id> брифа site (site-brief.schema.json $defs/reference).",
  "type": "object",
  "additionalProperties": false,
  "required": [
@@ -228,7 +228,7 @@
       "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"
      },
      "uniqueItems": true,
-     "description": "id эффектов effects.yaml (F, волна 2): effect:marquee-logos, effect:pin-scrub-story; до выхода каталога — временные id с пометкой в notes."
+     "description": "id эффектов effects.yaml: effect:marquee-logos, effect:pin-scrub-story."
     },
     "section_type": {
      "type": "array",
@@ -268,7 +268,7 @@
       "null"
      ],
      "pattern": "^\\d{4}$",
-     "description": "Год публикации (для датировки приёма — H)."
+     "description": "Год публикации (для датировки приёма — creative 08/01 §2)."
     },
     "source_tags": {
      "type": "array",
@@ -305,7 +305,7 @@
      "other"
     ]
    },
-   "description": "Для чего годится: роли site-brief v0 (composition … other) + color, material, imagery, effect — как в art-direction.schema.json $defs/reference (A). Роль в конкретном брифе или мудборде выбирается при передаче (одна)."
+   "description": "Для чего годится: роли site-brief v0 (composition … other) + color, material, imagery, effect — как в art-direction.schema.json $defs/reference. Роль в конкретном брифе или мудборде выбирается при передаче (одна)."
   },
   "rights": {
    "type": "object",

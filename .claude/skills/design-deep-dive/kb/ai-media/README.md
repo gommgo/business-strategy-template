@@ -5,7 +5,7 @@
 212,68 ₽ (26), Gen-API 384 ₽ (30); журнал сходится с балансами до копейки, 17 обрывов сети разрешены по истории без двойных списаний
 (`99-raw/phase5/runs/README.md`, журнал `99-raw/experiments/_ledger.jsonl`). Итог базы (сессия 5): карта возможностей
 `14-recipes/04-capability-map.md`, шпаргалка агента `14-recipes/00-cheatsheet.md`, маршруты `13-routing-matrix/routing.yaml` v2
-(33 маршрута, 136 вариантов, `routing_check.py` — 0 ошибок), итоги A/B формы промта в `05-prompting/dialects.yaml` v0.4. Объём:
+(33 маршрута, 137 вариантов, `routing_check.py` — 0 ошибок), итоги A/B формы промта в `05-prompting/dialects.yaml` v0.4. Объём:
 15 тематических папок, 61 содержательный файл (28 781 строка) и README папок; 63 YAML-карточки моделей, 17 машиночитаемых рецептов,
 12 рубрик приёмки, `thresholds.yaml` (94 порога); глоссарий — 263 термина, библиография — 427 внешних источников; видео — каталог
 90 роликов, 31 дайджест с таймкодами, 90 транскриптов; 140 папок опытов (`99-raw/experiments/`, 1,1 ГБ, из них исходники генераций
@@ -53,7 +53,7 @@
 |---|---|---|---|---|
 | Фото-кадр (hero 16:9) | `14-recipes/01-hero-recipes.md` §1 → `06/01` §4, `06/03` §1–2, `05/03` §3 | `IMG-HERO-PHOTO`: `openai/gpt-image-2.5-sunburst` 2K 16:9 — 7; равные запасные — `openai/gpt-image-2.5-flare` 2K — 7, NB2 2K — 7,2 (E-08); блок композиции в промте обязателен (F-04) | `vlm_to_dna.py to-spec` → `prompt_compile.py compile` → `polza.py` → `avif_pick.sh 80` → `provenance_check.py stamp` | `asset_audit.py audit --mode image --slot hero --text-zone … --dna …`, рубрика `hero-photo`; предметы и руки — в увеличении; размер выхода = заказанному; ≤ 150 КБ |
 | Кадр для телефона | `14/01` §1; `10/01` §3; `06/03` §3.3–3.4 | свой мастер 3:4 или 4:5 по мастеру-референсу (MS-02: зона текста сверху) — 7; аутпейнт 16:9 → 9:16 перерисовывает центр (H-08) | `prompt_compile.py ratios` | `page_accept.py --mobile`: ≤ 80 КБ, LCP; `<source media width height>` |
-| Петля фона (hero) | `14/01` §2 → `05/04` §1, §3; `09/01` §1–3; `10/02` §2–6 | `VID-HERO-LOOP`: `bytedance/seedance-1.5-pro` [A, A] + `fixed_lens: "true"`, `generate_audio: "false"` — 720p 4 с 10,5 / 1080p 8 с 45; шов > 1,5 — RIFE-мост 8 кадров (0 ₽) | `video_loop_check.py loop --control` → `trim` → `../../scripts/ai-media/loop_rife_bridge.py` → кодирование J | `seam_ratio_local` ≤ 1,5, `motion_vs_control` ≥ 0,5; после кодирования шов ≤ 2,5; пауза, reduce = 0 байт |
+| Петля фона (hero) | `14/01` §2 → `05/04` §1, §3; `09/01` §1–3; `10/02` §2–6 | `VID-HERO-LOOP`: `bytedance/seedance-1.5-pro` [A, A] + `fixed_lens: "true"`, `generate_audio: "false"` — 720p 4 с 10,5 / 1080p 8 с 45; шов > 1,5 — мост `loop_rife_bridge.py`: длина — от шва и движения у концов (0 ₽) | `video_loop_check.py loop --control` → `trim` → `../../scripts/ai-media/loop_rife_bridge.py` → кодирование J | `seam_ratio_local` ≤ 1,5, `motion_vs_control` ≥ 0,5; после кодирования шов ≤ 2,5; пауза, reduce = 0 байт |
 | Видео по картинке: наезд, «дыхание», переход раздела | `14-recipes/04-capability-map.md` §2.3 → `05/04` §1; `09/03` | `VID-CAMERA`, `VID-ABSTRACT`: Seedance 1.5 Pro i2v 720p 4 с — 10,5, 1080p — 22,5; переход раздела — `grok-imagine-video-1-5` 720p — 12,15 (трансформация формы) | `vm_sheet.py` (`99-raw/phase5/runs/S4-capability/tools/`), `video_loop_check.py` | `motion_med`, SSIM кадра 0; звук и теги цвета — нормализовать |
 | Переход A → B, прокрутка и мышь ведут видео | `14/01` §5 → `10/02`; `99-raw/experiments/B/10-scrub-delivery/` | `VID-SCROLL`: Seedance 1.5 Pro FLF [A, B] 720p — 10,5 (кадр 0 = A, последний = B); облёт — `kling/v3` std 5 с — 50 | секвенция AVIF или AV1 GOP 4 (B/10) | SSIM концов ≥ 0,9; кадры A и B — одной точки съёмки |
 | Облёт товара с надписью | `14-recipes/04-capability-map.md` §2.2 → `09/04` | `VID-I2V-PRODUCT`: `kling/v3` std 5 с 720p — 50 (OCR надписи 11 из 11); по кадрам 3D-рендера — Seedance FLF — 10,5 | OCR по кадрам (`asset_audit.py ocr`) | надпись ≥ 95 % символов в ≥ 90 % кадров; товар клиента — только с его фото |
@@ -410,8 +410,8 @@ I-20) — «не нужно» (п. 12). Оплаченные, но неразо�
 | `VEC-ILLUSTR` | RouterAI `recraft/recraft-v4.1-vector` — 8,83 | Pro Vector — 33,11 (спот); Utility → vtracer — 3,86 | `svg-icon` · `illustration` | проверено (CM-01, CM-02) |
 | `VEC-PATTERN`, `VEC-ANIM`, `VEC-TRACE` | код (SVG/CSS, inline SVG + CSS); vtracer `--palette` — 0 | Lottie кодом; Gen-API `image-2-svg` — 1 | `svg-icon` (SSIM ≥ 0,95 у трассировки) | проверено: G/03, G/05 |
 
-Не маршруты (`routing.yaml` `not` и `defaults.not_routes`): 3D-модель по картинке (кроме управляемого поворота и ракурсов для
-FLF), V2V, премиумы для петли (Kling 3, GA Omni), Seedance 2.x для петли, альфа генерацией Riverflow, видео через RouterAI, Sora 2
+Не маршруты (`routing.yaml` `not` и `defaults.not_routes`): 3D-модель по картинке, V2V, премиумы для петли (Kling 3, GA Omni),
+Seedance 2.x для петли, альфа генерацией Riverflow, видео через RouterAI, Sora 2
 (API снят 24.09.2026), preview Omni после 30.09.2026, Luma Ray 3.2 `loop` (вне доступа), Midjourney (нет API, ToS). Выбыли 25.09 —
 MiniMax H3 Max, Topaz видео, Wan 3.0 (`defaults.unavailable_2026_09_25`); снятые и устаревающие id, включая прежний id Flare, —
 `defaults.deprecated` и `15/01 §2`–`§3`.
@@ -420,7 +420,7 @@ MiniMax H3 Max, Topaz видео, Wan 3.0 (`defaults.unavailable_2026_09_25`); �
 
 ```
 визуальная ДНК: токены UI + бренд → паспорт визуала            vlm_to_dna.py (from-tokens, grid, build, compare, lut, validate)
-план ассетов: секции → слоты → роль, размеры, бюджет, текст     YAML-шаблон 01/01 §8; asset_inventory.py (замер живых сайтов)
+план ассетов: секции → слоты → роль, размеры, бюджет, текст     YAML-шаблон 01/01 §8; asset_inventory.py (замер живых сайтов — обслуживание базы: этапы не зовут)
 спецификация ассета (JSON без привязки к модели)                asset-spec.schema.json v0.2; vlm_to_dna.py to-spec
 маршрутизация: код задачи → модель, параметры, цена, запас      routing.yaml v2 + routing_check.py 1.1; polza_catalog.py; mp_client.py snapshot
 компилятор промта → диалект семейства                           prompt_compile.py (compile, jobs, chain, ratios) + dialects.yaml v0.4
@@ -443,13 +443,13 @@ MiniMax H3 Max, Topaz видео, Wan 3.0 (`defaults.unavailable_2026_09_25`); �
 | `asset_audit.py` | приёмка ассета: 9 режимов, OCR кириллицы, рубрики, задания VLM-судьи, согласие с голосами | тесты 55/55; фаза 5: MS-01, MS-02, F-04 | `11/01 §2` |
 | `edit_check.py` | правка: утечка, дрейф, полярность маски, аутпейнт (3 критерия), композит | фаза 5: E-15, H-08, D2-06 | `08/02 §2` |
 | `provenance_check.py` | C2PA, XMP/IPTC, AIGC, подпись Recraft, C2PA в SVG, углы кадра; `stamp` производной | фаза 5: все 254 выхода (0.1.1 — C2PA в SVG) | `12/02 §5` |
-| `vlm_to_dna.py`, `stand_run.py`, `alpha_check.py`, `tile_check.py`, `avif_pick.sh`, `page_accept.py`, `asset_inventory.py`, `check_links.py` | паспорт визуала; стенд и слепые пары; альфа; шов текстуры; минимальный AVIF; приёмка страницы; инвентарь сайта; целостность базы | selftest и прогоны волн 2–4 (`../../scripts/ai-media/README.md`) | README утилит |
+| `vlm_to_dna.py`, `stand_run.py`, `alpha_check.py`, `tile_check.py`, `avif_pick.sh`, `page_accept.py`, `asset_inventory.py`, `check_links.py` | паспорт визуала; стенд и слепые пары; альфа; шов текстуры; минимальный AVIF; приёмка страницы; инвентарь сайта (обслуживание базы: этапы не зовут); целостность базы | selftest и прогоны волн 2–4 (`../../scripts/ai-media/README.md`) | README утилит |
 | `99-raw/phase5/runs/S4-capability/tools/` (`vm_sheet.py`, `svg_sheet.py recolor`, `d2_report.py`, `ab_sheet.py`, `cutout_sheet.py`) | листы видео-моделей и SVG, перекраска SVG в точную палитру, отчёт A/B формы промта, пары для показа, лист выреза | фаза 5 (агент A) | `99-raw/phase5/runs/S4-capability/run-menu.md` |
 | `video_loop_check.py`, `loop_rife_bridge.py` | петля: оценка шва и живости, мост на стыке кадрами RIFE (`rife-ncnn-vulkan` v4.6) | MS-03, MS-05 | `09/01 §1.1` |
 | `99-raw/experiments/3D/01-glb-pipeline/glb_pipeline.py`, `…/04-3d-to-video/compare_video.py` | доводка GLB в Blender фоном (масштаб, металл, Decimate, тень, turntable, ключевые кадры `kf_*`); держит ли видео-модель форму | фаза 5 (агент C) | `99-raw/experiments/3D/README.md` |
 
 Правила машины (`99-raw/prompts/_common-wave2.md`): Blender, тяжёлые модели и браузер — только под `flock` из
-`99-raw/tools/.locks/` (`asset_audit.py` и `page_accept.py` берут замки сами); перед тяжёлым — `free -g` ≥ 3 ГБ; фоновых
+`$DDD_HOME/locks/` (утилиты скилла берут замок сами — внешним `flock` их не оборачивать); перед тяжёлым — `free -g` ≥ 3 ГБ; фоновых
 процессов не оставлять; ключи — файлами `~/.config/{polza,routerai,genapi}/api_key` (права 600), не в чат; ключи RouterAI и Gen-API
 после сессии 4 — перевыпустить (`PLAN.md` «Решения заказчика» п. 16).
 
@@ -557,11 +557,11 @@ X44–X50.
 
 1. **Перед каждой живой сессией и раз в неделю**: `python3 ../../scripts/ai-media/polza_catalog.py snapshot`,
    `python3 ../../scripts/ai-media/mp_client.py snapshot --channel all`, `polza_catalog.py diff <прошлый> latest`,
-   `../../scripts/ai-media/channel_diff.py` → поправить `catalog_snapshots` в `routing.yaml` →
+   `../../scripts/ai-media/channel_diff.py` (обслуживание базы: этапы не зовут) → поправить `catalog_snapshots` в `routing.yaml` →
    `python3 ../../scripts/ai-media/routing_check.py` (0 ошибок) → `13/04 §2`. Урок 25.09: id модели меняется без анонса (Flare) — старый id
    переносить в `defaults.deprecated`, задания пересобирать.
 2. **Живые вызовы**: лимиты каналов в клиенте явно; цена разошлась > 10 % — стоп модели; две ошибки модели в блоке — модель
-   выбывает (`defaults.unavailable_<дата>`); обрыв POST — сначала история, потом повтор; сверка журнала с балансами — после каждой
+   выбывает (`defaults.unavailable` и `defaults.unavailable_<дата>`); обрыв POST — сначала история, потом повтор; сверка журнала с балансами — после каждой
    партии; Gen-API — цену брать из таблицы страницы модели (ступени), не из `cost` каталога.
 3. **Новая модель**: триаж 5 минут → `stand_run.py ministand --model ID` (11–12 генераций, 33–58 ₽) → вариант в `routing.yaml` с
    `final: false` до решения → `13/04 §4`.

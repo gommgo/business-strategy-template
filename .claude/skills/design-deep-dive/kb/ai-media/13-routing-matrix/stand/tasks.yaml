@@ -1,14 +1,14 @@
-# Стенд моделей ai-media-research · агент E, волна 2 · 2026-09-23
-# Каталог задач стенда (S*), пресеты моделей и рецепты заданий фазы 5 (E-NN). Сборка заданий:
-#   99-raw/tools/venv-D/bin/python ../../scripts/ai-media/stand_run.py build        → 99-raw/phase5/jobs/E-*.jsonl
-#   python3 ../../scripts/ai-media/stand_run.py estimate                             → сумма по тестам (для E-plan.md)
+# Стенд моделей ai-media — читает ../../scripts/ai-media/stand_run.py.
+# Каталог задач стенда (S*), пресеты моделей и рецепты заданий (E-NN). Сборка заданий:
+#   python3 ../../scripts/ai-media/stand_run.py build                                → $DDD_HOME/out/ai-media/stand/E-*.jsonl
+#   python3 ../../scripts/ai-media/stand_run.py estimate                             → сумма по тестам
 # Промт — закреплённый фактор: брифы (briefs/*.spec.json, схема 05-prompting/asset-spec.schema.json) компилирует
 # ../../scripts/ai-media/prompt_compile.py в диалект семейства по умолчанию (05-prompting/dialects.yaml); тексты, правки и
-# референс-оговорки — одинаковые буквальные строки для всех моделей. ПЕРЕКОМПИЛИРОВАТЬ ПЕРЕД ФАЗОЙ 5 версией D2.
+# референс-оговорки — одинаковые буквальные строки для всех моделей.
 version: 0.1
 checked_at: "2026-09-23"
-catalog_snapshot: 99-raw/cache/polza/2026-09-23
-compiler: "../../scripts/ai-media/prompt_compile.py (прототип D, 2026-09-23)"
+catalog_snapshot: "2026-09-23"
+compiler: "../../scripts/ai-media/prompt_compile.py"
 provider_default: {only: [mie], allow_fallbacks: false}
 seeds: [101, 202]            # только у моделей с параметром seed (qwen/image-2.1, bytedance/seedream-4)
 
@@ -17,12 +17,12 @@ models:
   sunburst-1k: {model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "1K"}}
   sunburst-2k: {model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "2K"}}
   sunburst-4k: {model: openai/gpt-image-2.5-sunburst, params: {image_resolution: "4K"}}
-  flare-1k:    {model: gpt-image-2-5-flare, params: {image_resolution: "1K"}}
+  flare-1k:    {model: openai/gpt-image-2.5-flare, params: {image_resolution: "1K"}}
   gpt2-1k:     {model: openai/gpt-5.4-image-2, params: {image_resolution: "1K"}}
   nb2-1k:      {model: google/gemini-3.1-flash-image-preview, params: {image_resolution: "1K"}}
   nb2lite:     {model: google/gemini-3.1-flash-lite-image, params: {}}
   nbpro-1k:    {model: google/gemini-3-pro-image-preview, params: {image_resolution: "1K"}, note: "если T5 фазы 0 ок — provider google-vertex/global/flex (≈7,94 ₽)"}
-  nbpro-2k:    {model: google/gemini-3-pro-image-preview, params: {image_resolution: "2K"}, note: "2K по цене 1K (13,50 ₽); Google: мелкий текст у NB Pro «still fails», текст — крупный и в 2K (W6, y-RQ48sfPgM)"}
+  nbpro-2k:    {model: google/gemini-3-pro-image-preview, params: {image_resolution: "2K"}, note: "2K по цене 1K (13,50 ₽); Google: мелкий текст у NB Pro «still fails», текст — крупный и в 2K [V:y-RQ48sfPgM]"}
   nbpro-4k:    {model: google/gemini-3-pro-image-preview, params: {image_resolution: "4K"}}
   sd5pro:      {model: seedream/5-pro-text-to-image, params: {quality: basic}, note: "basic = 1K; +0,30 ₽ за референс сверх первого"}
   sd45:        {model: bytedance/seedream-4.5, params: {quality: basic}, note: "basic = 2K"}
@@ -31,8 +31,9 @@ models:
   flux2pro-1k: {model: black-forest-labs/flux.2-pro, params: {image_resolution: "1K"}, note: "переписывает промт (disable_pup не выставлен)"}
   zimage:      {model: tongyi-mai/z-image, params: {}}
 
-# ---------------------------------------------------------------- каталог задач стенда (для фазы 5, перезапусков и мини-стенда)
-# metrics — автометрики stand_run.py metrics; judge — metric | vlm | votes; reg — входит в регрессионный набор новой модели
+# ---------------------------------------------------------------- каталог задач стенда (для прогонов, перезапусков и мини-стенда)
+# metrics — автометрики stand_run.py metrics; judge — metric | vlm | votes; reg — входит в регрессионный набор новой модели;
+# pipeline — задачу проверяет постобработка (post) или видео (video), в мини-стенд генерации она не входит
 tasks:
   S01: {code: IMG-HERO-PHOTO, title: "hero-интерьер без людей, зона текста слева 40 %", brief: briefs/S01-hero-interior.spec.json,
         metrics: [dims, text_zone, slop_color, palette_de], vlm: D-B1, judge: [votes, metric, vlm], reg: true}
@@ -68,24 +69,24 @@ tasks:
         judge: [metric, votes], reg: false, source: 99-raw/phase5/inputs/E/scene.png, target: 99-raw/phase5/inputs/E/scene_mask_cup_dilated.png}
   S16: {code: IMG-DRAFT, title: "черновик Z-Image → финал Flare: промтом или референсом", brief: literal,
         metrics: [phash, ssim_layout], judge: [vlm, votes], reg: false}
-  S17: {code: IMG-CUTOUT, owner: H, title: "нативная альфа против матирования (стекло, волосы)", judge: [metric], reg: true}
-  S18: {code: IMG-TEXTURE, owner: H, title: "бесшовность после сдвига 50 %", judge: [metric], reg: false}
-  S19: {code: IMG-OUTPAINT, owner: H, title: "16:9 → 21:9 и 4:5 с композитом центра", judge: [metric], reg: false}
-  S20: {code: IMG-UPSCALE, owner: H, title: "Topaz ×2 против Real-ESRGAN и перегенерации 4K", judge: [metric, votes], reg: false}
-  S21: {code: IMG-MOCKUP, title: "скриншот в устройстве (ожидаемый провал → композит)", judge: [metric], reg: false, phase5: later}
-  S22: {code: IMG-HERO-PHOTO, title: "анти-дефолт: левша пишет, часы 3:40, бокал налит на треть", judge: [vlm], reg: true, phase5: later,
+  S17: {code: IMG-CUTOUT, pipeline: post, title: "нативная альфа против матирования (стекло, волосы)", judge: [metric], reg: true}
+  S18: {code: IMG-TEXTURE, pipeline: post, title: "бесшовность после сдвига 50 %", judge: [metric], reg: false}
+  S19: {code: IMG-OUTPAINT, pipeline: post, title: "16:9 → 21:9 и 4:5 с композитом центра", judge: [metric], reg: false}
+  S20: {code: IMG-UPSCALE, pipeline: post, title: "Topaz ×2 против Real-ESRGAN и перегенерации 4K", judge: [metric, votes], reg: false}
+  S21: {code: IMG-MOCKUP, title: "скриншот в устройстве (ожидаемый провал → композит)", judge: [metric], reg: false}
+  S22: {code: IMG-HERO-PHOTO, title: "анти-дефолт: левша пишет, часы 3:40, бокал налит на треть", judge: [vlm], reg: true,
         prompts: ["A left-handed woman writing in a notebook with her left hand, close-up, natural light.",
                   "A wall clock showing exactly 3:40, analog face, plain wall, product photo.",
                   "A wine glass filled exactly one third with red wine on a white table, studio photo."]}
-  S23: {code: IMG-HERO-PHOTO, title: "сетка 36 подписанных объектов (связывание, счёт)", judge: [vlm], reg: true, phase5: later, source: "W2-11 [V:bH2nP-aCFjk 06:12]"}
-  S24: {code: IMG-BG-ABSTRACT, title: "лента 8:1 без повторов (только NB2 Lite)", judge: [metric], reg: false, phase5: later, source: C1-11}
+  S23: {code: IMG-HERO-PHOTO, title: "сетка 36 подписанных объектов (связывание, счёт)", judge: [vlm], reg: true, note: "[V:bH2nP-aCFjk 06:12]"}
+  S24: {code: IMG-BG-ABSTRACT, title: "лента 8:1 без повторов (только NB2 Lite)", judge: [metric], reg: false}
   S25: {code: IMG-HERO-PHOTO, title: "2K против 4K: зерно против «пластика»", judge: [votes], reg: false}
   S26: {code: ALL, title: "что реально отдаёт polza: 4K, видимый знак Seedream, метаданные", judge: [metric], reg: true}
-  V01: {code: VID-HERO-LOOP, owner: I, title: "петля [A,A]: шов, «живость», статичный коллапс", judge: [metric, votes]}
-  V02: {code: VID-CINEMAGRAPH, owner: I, title: "fixed_lens: дрейф фона", judge: [metric]}
-  V03: {code: VID-I2V-PRODUCT, owner: I, title: "логотип и надпись по кадрам", judge: [metric, votes]}
-  V04: {code: VID-ABSTRACT, owner: I, title: "абстрактный моушн-фон, дешёвый перебор", judge: [votes]}
-  V05: {code: VID-CAMERA, owner: I, title: "словарь камеры: наезд, орбита", judge: [metric]}
+  V01: {code: VID-HERO-LOOP, pipeline: video, title: "петля [A,A]: шов, «живость», статичный коллапс", judge: [metric, votes]}
+  V02: {code: VID-CINEMAGRAPH, pipeline: video, title: "fixed_lens: дрейф фона", judge: [metric]}
+  V03: {code: VID-I2V-PRODUCT, pipeline: video, title: "логотип и надпись по кадрам", judge: [metric, votes]}
+  V04: {code: VID-ABSTRACT, pipeline: video, title: "абстрактный моушн-фон, дешёвый перебор", judge: [votes]}
+  V05: {code: VID-CAMERA, pipeline: video, title: "словарь камеры: наезд, орбита", judge: [metric]}
 
 # ---------------------------------------------------------------- буквальные промты (одинаковые для всех моделей)
 literals:
@@ -145,69 +146,65 @@ literals:
     Image 1 is the style reference. Create a new illustration in exactly the same style — the same line weight, flat fills, palette, level of detail and framing — showing: {subject}. Do not copy the subject of image 1. No text.
   draft_prefix: "Image 1 is a rough draft: keep its composition, layout and camera exactly, and render it as a finished image following this description: "
 
-# ---------------------------------------------------------------- рецепты заданий фазы 5 (E-NN → 99-raw/phase5/jobs/E-NN-имя.jsonl)
-# job: task — бриф или literal; use — пресеты; samples — повторы (варианты); images/mask — входы (путь от корня проекта);
-# inputs_from — вход из другого теста (заглушка в inputs/E, оркестратор подставит файл); params — поверх пресета.
-phase5:
+# ---------------------------------------------------------------- рецепты заданий стенда (E-NN → E-NN-имя.jsonl в папке заданий)
+# job: task — бриф или literal; use — пресеты; samples — повторы (варианты); images/mask — входы (путь от папки заданий);
+# inputs_from — вход из другого теста (заглушка в inputs/E, файл подставляется перед прогоном); params — поверх пресета.
+recipes:
   - {test: E-01, file: E-01-polza-reality.jsonl, value: 3, order: 1, title: "что реально отдаёт polza: 4K и видимый знак Seedream",
      hypothesis: "mie не ставит видимый «AI-generated» у Seedream; 4K у Seedream 4 и Sunburst — настоящие ≥ 3800 px",
      judge: metric, success: "нет надписи справа внизу; длинная сторона ≥ 3800 px; поля model/provider в паспорте",
-     overlaps: [C1-2, C1-7, B-12, B-13, W5-11],
      jobs: [{task: S05, use: [sd4-4k], params: {aspect_ratio: "21:9"}, vote_groups: ["E-13/S05"]},
             {task: S01, use: [sunburst-4k], params: {aspect_ratio: "16:9"}, vote_groups: ["E-09/{model}"]}]}
   - {test: E-02, file: E-02-cyr-screen.jsonl, value: 3, order: 2, title: "кириллица, ступень 1: 9 моделей, EN-промт",
      hypothesis: "крупная русская строка дословна хотя бы у 2 моделей polza; мелкая строка со знаком −30 % ломается чаще",
      judge: metric, success: "строка = эталону по кодовым точкам после нормализации двойников; 0 латинских недвойников; 0 лишних слов",
-     overlaps: [C1-1, V-4, A-7, D-6, P-7], depends: [E-01],
+     depends: [E-01],
      jobs: [{task: S08, prompt: cyr_a_en, use: [sunburst-1k, flare-1k, gpt2-1k, nb2-1k, nbpro-2k, sd5pro, sd45, qwen21-1k, flux2pro-1k],
              params: {aspect_ratio: "16:9"}}]}
   - {test: E-03, file: E-03-cyr-card.jsonl, value: 3, order: 3, title: "кириллица, ступень 2: RU-промт, панграмма и «₽»",
      hypothesis: "панграмма (33 буквы) и «₽» ломают даже лидеров ступени 1", judge: metric,
-     success: "как E-02 для 4 строк; отдельно — все 33 буквы и U+20BD", overlaps: [C1-1], depends: [E-02],
+     success: "как E-02 для 4 строк; отдельно — все 33 буквы и U+20BD", depends: [E-02],
      note: "запускать только для моделей, давших в E-02 ≥ 1 дословную строку",
      jobs: [{task: S10, prompt: cyr_b_ru, use: [sunburst-1k, flare-1k, gpt2-1k, nb2-1k, sd5pro, qwen21-1k], params: {aspect_ratio: "16:9"}}]}
   - {test: E-04, file: E-04-cyr-form.jsonl, value: 3, order: 4, title: "кириллица: форма промта и устойчивость у 3 лучших",
      hypothesis: "EN-промт со строкой в кавычках не хуже полностью русского; лидер держит строки во 2-м повторе",
      judge: metric, success: "лидер: 3 из 3 картинок (E-02 + 2 здесь) с дословными строками 1 и 3",
-     overlaps: [D-6], depends: [E-02], note: "модели — 3 лучших из E-02 (по умолчанию sunburst, gpt2, nb2)",
+     depends: [E-02], note: "модели — 3 лучших из E-02 (по умолчанию sunburst, gpt2, nb2)",
      jobs: [{task: S08, prompt: cyr_a_en, use: [sunburst-1k, gpt2-1k, nb2-1k], params: {aspect_ratio: "16:9"}, variant_base: 2},
             {task: S08, prompt: cyr_a_ru, use: [sunburst-1k, gpt2-1k, nb2-1k], params: {aspect_ratio: "16:9"}, arm: ru}]}
   - {test: E-05, file: E-05-cyr-scene.jsonl, value: 2, order: 9, title: "кириллица в фото-сцене и язык случайных надписей",
      hypothesis: "вывеска в сцене пишется хуже баннера; русский промт NB2 рождает русские случайные вывески, запрет их убирает",
      judge: metric, success: "вывеска дословна у ≥ 1 модели; в RU-плече OCR находит кириллицу, в EN — нет, в RU+запрет — текста нет",
-     overlaps: [A-7, W5-9],
      jobs: [{task: S11, prompt: cyr_sign, use: [sunburst-1k, nb2-1k], params: {aspect_ratio: "16:9"}},
             {task: S11, prompt: street_en, use: [nb2-1k], params: {aspect_ratio: "16:9"}, arm: street-en},
             {task: S11, prompt: street_ru, use: [nb2-1k], params: {aspect_ratio: "16:9"}, arm: street-ru},
             {task: S11, prompt: street_ru_notext, use: [nb2-1k], params: {aspect_ratio: "16:9"}, arm: street-ru-notext}]}
   - {test: E-06, file: E-06-cyr-translate.jsonl, value: 2, order: 10, title: "перевод готового баннера правкой",
      hypothesis: "правка переводит 3 строки дословно и не трогает товар и фон", judge: metric,
-     success: "3 строки дословны; SSIM вне прямоугольника текста ≥ 0,95; этикетка банки читается", overlaps: [W3-5, W6-5],
+     success: "3 строки дословны; SSIM вне прямоугольника текста ≥ 0,95; этикетка банки читается",
      jobs: [{task: S12, prompt: cyr_translate, use: [sunburst-1k, nb2-1k], images: [99-raw/phase5/inputs/E/banner_en.png], params: {aspect_ratio: "16:9"}}]}
   - {test: E-08, file: E-08-hero.jsonl, value: 3, order: 5, title: "hero-фото: почерк моделей и пригодность для слота",
      hypothesis: "в конфигурации polza (без quality) GPT Image 2.5 сохраняет лидерство арен; NB2 перенасыщает; Flare ≈ Sunburst",
      judge: "votes + metric", success: "победитель выигрывает ≥ 70 % своих пар по вопросу «лучше для слота» и не хуже по «естественнее»",
-     overlaps: [A-1, C1-3, W3-4, W5-12, W1-1],
      jobs: [{task: S01, use: [sunburst-1k, flare-1k, nb2-1k, nbpro-2k, sd5pro, flux2pro-1k], vote_extra: "E-09/{model}"},
             {task: S02, use: [sunburst-1k, flare-1k, nb2-1k, nbpro-2k, sd5pro]}]}
   - {test: E-09, file: E-09-2k-4k.jsonl, value: 2, order: 11, title: "2K против 4K на фото-hero",
      hypothesis: "2K выглядит «более фото», чем 4K (зерно против пластика)", judge: votes,
      success: "2K выигрывает обе пары (Sunburst 2K↔4K из E-01, NB Pro 2K из E-08 ↔ 4K) у заказчика",
-     overlaps: [W1-1, W5-11], depends: [E-01, E-08],
+     depends: [E-01, E-08],
      jobs: [{task: S01, use: [sunburst-2k, nbpro-4k], params: {aspect_ratio: "16:9"}, vote_groups: ["E-09/{model}"]}]}
   - {test: E-10, file: E-10-product.jsonl, value: 3, order: 6, title: "товар по референсу в сцене",
      hypothesis: "этикетка и форма сохраняются у GPT 2.5 лучше, чем у NB2, Seedream 5 Pro и Qwen 2.1; вид сбоку труднее",
      judge: "metric + votes", success: "OCR «ЛЕСНАЯ ОБЖАРКА» дословно; силуэт и крышка совпадают (VLM/человек); ΔE зелёного этикетки ≤ 8",
-     overlaps: [C1-6, W2-4, W5-8, W5-10, A-3],
      jobs: [{task: S03, prefix: product_prefix, images: [99-raw/phase5/inputs/E/product_ref.png], use: [sunburst-1k, nb2-1k, sd5pro, qwen21-1k]},
             {task: S03, prefix: product_prefix, suffix: product_side, images: [99-raw/phase5/inputs/E/product_ref.png], use: [sunburst-1k, nb2-1k, sd5pro, qwen21-1k], arm: side, value: 2}]}
   - {test: E-11, file: E-11-illustr.jsonl, value: 2, order: 7, title: "плоская иллюстрация (эталон серии выбирает заказчик)",
      hypothesis: "второе место за Flare спорно между NB2 (AA) и Seedream 5 Pro (LMArena)", judge: "votes + vlm",
-     success: "победитель пар + ≥ 9/11 бинарных вопросов D-B2", overlaps: [C1-5],
+     success: "победитель пар + ≥ 9/11 бинарных вопросов D-B2",
      jobs: [{task: S04, use: [flare-1k, nb2-1k, sd5pro]}]}
   - {test: E-12, file: E-12-series.jsonl, value: 3, order: 8, title: "серия по стилевому эталону",
      hypothesis: "стиль серии (не персонаж) держит NB Pro или GPT 2.5 лучше Seedream 4.5 и NB2", judge: "votes + vlm + metric",
-     success: "победитель: обе картинки «того же стиля» (заказчик), ΔE доминант к эталону ≤ 6", overlaps: [C1-5, V-5, W1-6, F-*],
+     success: "победитель: обе картинки «того же стиля» (заказчик), ΔE доминант к эталону ≤ 6",
      depends: [E-11], note: "эталон — победитель E-11 (заглушка stub_16x9.png); метод F — постоянный фактор",
      jobs: [{task: S07, prompt: series_prefix, subject: "an open cardboard box with a checkmark card floating above it",
              images: [99-raw/phase5/inputs/E/stub_16x9.png], inputs_from: {"images[0]": "E-11#winner/0"}, use: [flare-1k, nbpro-2k, sd45, nb2-1k], params: {aspect_ratio: "16:9"}, arm: box},
@@ -215,24 +212,23 @@ phase5:
              images: [99-raw/phase5/inputs/E/stub_16x9.png], inputs_from: {"images[0]": "E-11#winner/0"}, use: [flare-1k, nbpro-2k, sd45, nb2-1k], params: {aspect_ratio: "16:9"}, arm: chart}]}
   - {test: E-13, file: E-13-bg-hex.jsonl, value: 2, order: 12, title: "абстрактный фон: попадание в 3 hex",
      hypothesis: "FLUX.2 попадает в hex точнее (hex документирован), но переписывание промта (pup) мешает", judge: metric,
-     success: "ΔE2000 доминант ≤ 5 для ≥ 2 из 3 цветов; зона под заголовок пустая", overlaps: [C1-8], depends: [E-01],
+     success: "ΔE2000 доминант ≤ 5 для ≥ 2 из 3 цветов; зона под заголовок пустая", depends: [E-01],
      jobs: [{task: S05, use: [flux2pro-1k, flare-1k, nb2-1k], vote_groups: ["E-13/S05"]}]}
   - {test: E-14, file: E-14-icons3d.jsonl, value: 2, order: 13, title: "4 clay-иконки сеткой 2×2",
      hypothesis: "сетка одной генерацией даёт единый свет и ракурс; Qwen 2.1 даёт сразу альфу", judge: "votes + metric",
-     success: "4 иконки в едином стиле (заказчик), клетки разрезаются без пересечений; у Qwen альфа есть", overlaps: [W2-10, W5-4, G-*],
+     success: "4 иконки в едином стиле (заказчик), клетки разрезаются без пересечений; у Qwen альфа есть",
      jobs: [{task: S06, use: [sunburst-1k, nb2-1k, sd45], vote_groups: ["E-14/S06"]},
             {task: S06, use: [qwen21-1k], params: {background: transparent, output_format: png}, arm: alpha, vote_groups: ["E-14/S06"]}]}
   - {test: E-15, file: E-15-edit.jsonl, value: 3, order: 14, title: "правка по инструкции: сравнение моделей",
      hypothesis: "GPT 2.5 выполняет и не трогает лишнее лучше NB2 и Seedream 5 Pro; маска Qwen 2.1 держит границу",
      judge: "metric + votes", success: "стена ΔE ≤ 6 к #1F5E3B; вне маски ΔE00 среднее ≤ 2 и SSIM ≥ 0,95; этикетка читается",
-     overlaps: [W2-1, W2-2, W4-3, W1-5, C1-12, B-14, D-3, H-edit],
      jobs: [{task: S14, prompt: edit_wall, images: [99-raw/phase5/inputs/E/scene.png], use: [sunburst-1k, nb2-1k, sd5pro], params: {aspect_ratio: "16:9"}, vote_groups: ["E-15/S14"]},
             {task: S14, prompt: edit_wall, images: [99-raw/phase5/inputs/E/scene.png], mask: 99-raw/phase5/inputs/E/scene_mask_wall.png, use: [qwen21-1k], params: {aspect_ratio: "16:9"}, arm: mask, vote_groups: ["E-15/S14"]},
             {task: S15, prompt: edit_cup, images: [99-raw/phase5/inputs/E/scene.png], use: [sunburst-1k, nb2-1k, sd5pro], params: {aspect_ratio: "16:9"}, value: 2, vote_groups: ["E-15/S15"]},
             {task: S15, prompt: edit_cup, images: [99-raw/phase5/inputs/E/scene.png], mask: 99-raw/phase5/inputs/E/scene_mask_cup_dilated.png, use: [qwen21-1k], params: {aspect_ratio: "16:9"}, arm: mask, value: 2, vote_groups: ["E-15/S15"]}]}
   - {test: E-16, file: E-16-draft.jsonl, value: 2, order: 15, title: "черновик Z-Image → финал Flare",
      hypothesis: "черновик как референс переносит композицию лучше, чем повтор промта", judge: vlm,
-     success: "VLM «та же раскладка» да в 2/2 для референса и ≤ 1/2 для промта", overlaps: [C1-9],
+     success: "VLM «та же раскладка» да в 2/2 для референса и ≤ 1/2 для промта",
      jobs: [{task: S04, use: [zimage], arm: draft, vote_groups: []},
             {task: S09, use: [zimage], arm: draft, vote_groups: []},
             {task: S04, use: [flare-1k], arm: final-prompt, vote_groups: ["E-16/S04"], vote_by_arm: true},
@@ -241,12 +237,12 @@ phase5:
             {task: S09, prefix: draft_prefix, images: [99-raw/phase5/inputs/E/stub_16x9.png], inputs_from: {"images[0]": "E-16/S09-draft#1/0"}, use: [flare-1k], arm: final-ref, vote_groups: ["E-16/S09"], vote_by_arm: true}]}
   - {test: E-17, file: E-17-latin-control.jsonl, value: 2, order: 16, title: "контроль латиницы на том же макете",
      hypothesis: "разница «латиница − кириллица» у NB2, Qwen и Seedream 4.5 больше, чем у GPT 2.x; Seedream 4.5 — лидер читаемости латиницы (Rapidata Text Coherence №1, WeGenBench Char F1 0,79)", judge: metric,
-     success: "3 строки дословны; сравнение с E-02 по тем же моделям", overlaps: [C1-15],
+     success: "3 строки дословны; сравнение с E-02 по тем же моделям",
      jobs: [{task: S13, prompt: lat_a_en, use: [nb2-1k, qwen21-1k, sd45], params: {aspect_ratio: "16:9"}}]}
 
 # ---------------------------------------------------------------- задания вне Media API polza
 external:
   - {test: E-07, file: E-07-recraft-cyr.routerai.json, value: 2, channel: routerai, model: recraft/recraft-v4.1, price_rub: 3.825,
-     price_source: "routerai.ru/api/v1/models, 23.09.2026 (99-raw/experiments/P/04-ru-aggregators/routerai_models.json)",
-     docs: "99-raw/cache/routerai.ru_docs_guides_overview_multimodal_image-generation_753f42c7.md", prompt: cyr_a_en,
-     overlaps: [W2-6, G-recraft], note: "Recraft V3 кириллицу не рендерит (набор символов); V4.x — «multi-language» без списка"}
+     price_source: "routerai.ru/api/v1/models, 23.09.2026",
+     docs: "routerai.ru/docs/guides/overview/multimodal/image-generation", prompt: cyr_a_en,
+     note: "Recraft V3 кириллицу не рендерит (набор символов); V4.x — «multi-language» без списка"}

@@ -89,7 +89,7 @@ def image_checks(path):
             "weight_center": [round(float((gx * blur).sum() / wsum / w), 3), round(float((gy * blur).sum() / wsum / h), 3)]}
 
 import os, shutil, tempfile
-C1 = "/home/mm/Документы/app-design/blender-research/99-raw/experiments/C1/12-protocol-objects/out/"
+C1 = "99-raw/experiments/C1/12-protocol-objects/out/"
 tmp = tempfile.mkdtemp()
 res = {}
 for k in ("mug", "laptop", "rocket", "logo"):

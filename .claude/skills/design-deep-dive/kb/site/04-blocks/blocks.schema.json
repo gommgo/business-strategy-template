@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:site:blocks:0.9",
   "title": "blocks.yaml v0.9 — каталог блоков сайта: анатомия, слоты, варианты, телефон, разметка, ссылки на правила",
-  "description": "ЗАМЕНЕНО v1: ../10-playbooks-contracts/schemas/blocks.schema.json (J, волна 3, 2026-09-24); эта схема v0.9 остаётся для файлов версии 0.9. Владелец — site-research (04-blocks, агент E, волна 2; v1 — J, волна 3). Id блоков, слотов, ролей — словарь B 02-site-types/vocabulary.yaml (проверка — ../../scripts/site/vocab_lint.py --keys-as-ids blocks=block). Визуальные варианты и эффекты блока — creative (block-treatments.yaml) по id блока; правила текста слотов — text (copy-slots.yaml) по id слота; медиа — ai-media (план ассетов 01/01 §8); 3D — blender (12-recipes). Схема проверяет форму; что слот разрешён блоку и что факт существует — site_validate.py (J) и опыт E/01.",
+  "description": "Заменена схемой v1 — ../10-playbooks-contracts/schemas/blocks.schema.json; эта схема v0.9 остаётся для файлов версии 0.9. Владелец — site (04-blocks). Id блоков, слотов, ролей — словарь 02-site-types/vocabulary.yaml (проверка — ../../scripts/site/vocab_lint.py --keys-as-ids blocks=block). Визуальные варианты и эффекты блока — creative (block-treatments.yaml) по id блока; правила текста слотов — text (copy-slots.yaml) по id слота; медиа — ai-media (план ассетов 01/01 §8); 3D — blender (12-recipes). Схема проверяет форму; что слот разрешён блоку и что факт существует — site_validate.py.",
   "type": "object",
   "additionalProperties": false,
   "patternProperties": {
@@ -21,7 +21,7 @@
     "blocks_version": {
       "type": "string",
       "pattern": "^0\\.9(\\.[0-9]+)?$|^1(\\.[0-9]+)*$",
-      "description": "Версия формата: 0.9 — черновик E к S1; 1 — итог J (волна 3)."
+      "description": "Версия формата: 0.9 — прежняя; 1 — действующая."
     },
     "checked": {
       "$ref": "#/$defs/date"
@@ -32,7 +32,7 @@
         "released",
         "v1"
       ],
-      "description": "draft — черновик к S1; released — после замечаний сестёр; v1 — J."
+      "description": "draft — черновик; released — после замечаний соседних баз; v1 — действующая версия."
     },
     "owner": {
       "type": "string"
@@ -77,7 +77,7 @@
     },
     "conventions": {
       "type": "array",
-      "description": "Сквозные правила для всех блоков (конвенции взаимодействия, разметка, телефон) — контракт §6.11, поправки PLAN.",
+      "description": "Сквозные правила для всех блоков (конвенции взаимодействия, разметка, телефон) — контракт §6.11.",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -114,7 +114,7 @@
     },
     "mobile_behaviors": {
       "type": "object",
-      "description": "Структурные приёмы телефона (C 03 §5.2 + E). Визуал — creative.",
+      "description": "Структурные приёмы телефона (site 03/03 §5.2 и 04-blocks). Визуал — creative.",
       "propertyNames": {
         "$ref": "#/$defs/mobile-behavior"
       },
@@ -124,7 +124,7 @@
     },
     "text_slot_defaults": {
       "type": "object",
-      "description": "Для каждого текстового слота словаря: класс длины и нужен ли факт — ВЫВЕДЕНО скриптом из copy-slots.yaml text (опыт 99-raw/experiments/E/02-…); назначение по умолчанию — def словаря и purpose copy-slots.yaml.",
+      "description": "Для каждого текстового слота словаря: класс длины и нужен ли факт — ВЫВЕДЕНО скриптом из copy-slots.yaml text; назначение по умолчанию — def словаря и purpose copy-slots.yaml.",
       "propertyNames": {
         "$ref": "#/$defs/id"
       },
@@ -308,7 +308,7 @@
             "generated-ok",
             "code"
           ],
-          "description": "Подлинность медиа (правило I; уместность ИИ — ai-media 12/04): real-only — только реальное с разрешением."
+          "description": "Подлинность медиа (правило site 08/02; уместность ИИ — ai-media 12/04): real-only — только реальное с разрешением."
         },
         "html": {
           "type": "string",
@@ -427,7 +427,7 @@
               }
             }
           ],
-          "description": "Для hero: какой политике первого экрана (C 03 §2.2) отвечает вариант — одно значение или список допустимых, когда вариант работает при нескольких политиках."
+          "description": "Для hero: какой политике первого экрана (site 03/03 §2.2) отвечает вариант — одно значение или список допустимых, когда вариант работает при нескольких политиках."
         },
         "hallmark": {
           "type": "array",
@@ -557,7 +557,7 @@
     "refs": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Ссылки на правила владельцев по id блока. site: conversion — F, seo — H, a11y — I (и ux), events — P, legal — I, ia — G, budget — P; соседи и сёстры: ux, creative, text, assets (ai-media), blender.",
+      "description": "Ссылки на правила владельцев по id блока. site: conversion — 05, seo — 07, a11y — 08 (и ux), events — 07, legal — 08, ia — 06, budget — 07; соседи и сёстры: ux, creative, text, assets (ai-media), blender.",
       "properties": {
         "structure": {
           "$ref": "#/$defs/ref-list"
@@ -634,7 +634,7 @@
             "off-by-default",
             "measurement-only"
           ],
-          "description": "off-by-default — блок существует, но выключен решением заказчика (capture-popup — решение 15)."
+          "description": "off-by-default — блок существует, но по умолчанию выключен (capture-popup)."
         },
         "replaced_by": {
           "$ref": "#/$defs/id"
@@ -730,7 +730,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Данные о блоке: частота C/01, M, text D; метки."
+          "description": "Данные о блоке: частота в замерах живых страниц и корпусе text; метки."
         },
         "note": {
           "type": "string"

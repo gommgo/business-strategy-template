@@ -53,10 +53,12 @@ POLZA_BASE_URL (https://polza.ai/api, общий с polza.py); бюджеты RO
 ($DDD_HOME/out/ai-media/_mp/<агент>/<дата>/). Ключ никогда не печатается и не пишется; Authorization уходит только на
 хост своего канала и не переносится при редиректе.
 
-Коды выхода (как у polza.py): 0 — успех; 1 — ошибка задания/проверки (в том числе незаполненный шаблон, задание оценки,
-3D-сеть); 2 — отказ по бюджету или цене; 3 — таймаут опроса (дожать: download ID --channel C --live); 4 — генерация
-failed / error / expired / cancelled или ответ без результата: тело и заголовки ответа канала — в паспорте задания
-(<тег>__<модель>__<id>.passport.json, поле response); 5 — HTTP-ошибка; 6 — ошибка скачивания.
+Коды выхода (как у polza.py): 0 — успех; 1 — ошибка задания или проверки (в том числе незаполненный шаблон, задание
+оценки, 3D-сеть); 2 — ошибка вызова или окружения (нет снимка каталога, файла, модели; не назван адрес баланса; файл
+задания не разбирается). Особые исходы: 3 — отказ по бюджету или цене; 4 — таймаут опроса (дожать: download ID
+--channel C --live); 5 — генерация failed / error / expired / cancelled или ответ без результата: тело и заголовки
+ответа канала — в паспорте задания (<тег>__<модель>__<id>.passport.json, поле response); 6 — отказ канала (HTTP-ошибка);
+7 — файл не скачан. У batch — наибольший код серии.
 """
 from __future__ import annotations
 
@@ -99,11 +101,12 @@ DEFAULT_LEDGER = kbpaths.out("ai-media") / "_ledger.jsonl"  # журнал за�
 DEFAULT_OUT_ROOT = kbpaths.out("ai-media", "_mp")
 P04 = kbpaths.data("ai-media")  # прайс Gen-API — scripts/ai-media/data/; каталог RouterAI — снимок snapshot
 MAX_PARALLEL = 3
-EXIT_OK, EXIT_JOB, EXIT_BUDGET, EXIT_TIMEOUT, EXIT_FAILED, EXIT_HTTP, EXIT_DOWNLOAD = 0, 1, 2, 3, 4, 5, 6
+EXIT_OK, EXIT_JOB, EXIT_USAGE = 0, 1, 2                  # 2 — ошибка вызова или окружения
+EXIT_BUDGET, EXIT_TIMEOUT, EXIT_FAILED, EXIT_HTTP, EXIT_DOWNLOAD = 3, 4, 5, 6, 7   # особые исходы
 RESPONSE_TEXT_MAX = 20000            # тело ответа не JSON в паспорте отказа: первые символы, остальное — длиной и sha256
 INLINE_WARN = 4 * 1024 * 1024        # больше — предупреждение (тело запроса тяжёлое)
 INLINE_MAX = 20 * 1024 * 1024        # больше — ошибка (дайте публичный URL)
-FX_ROUTERAI_DEFAULT = 109.285        # ₽/$ RouterAI к ценам OpenRouter (3,82498935 ₽ / $0,035 у Recraft V4.1; P/04)
+FX_ROUTERAI_DEFAULT = 109.285        # ₽/$ RouterAI к ценам OpenRouter (3,82498935 ₽ / $0,035 у Recraft V4.1)
 MP_PX = 1024 * 1024                  # 1 Мп у BFL = 1 048 576 px
 RECRAFT_STYLES_REF_USD = 0.005       # OpenRouter endpoints recraft-v4-styles-vector: input_reference $0,005 за запрос
 
@@ -287,10 +290,11 @@ def image_dims(data: bytes):
 
 
 def ffprobe(path: Path) -> dict | None:
-    if not shutil.which("ffprobe"):
+    prog = kbpaths.find("ffprobe", **kbpaths.BIN_LOOKUP["ffprobe"])
+    if not prog:
         return None
     try:
-        r = subprocess.run(["ffprobe", "-v", "error", "-print_format", "json", "-show_format", "-show_streams",
+        r = subprocess.run([prog, "-v", "error", "-print_format", "json", "-show_format", "-show_streams",
                             str(path)], capture_output=True, text=True, timeout=30)
         d = json.loads(r.stdout or "{}")
     except (subprocess.SubprocessError, json.JSONDecodeError):
@@ -378,7 +382,7 @@ def file_media(path: Path, mime: str) -> dict | None:
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# Токены: текст, картинки на вход, GPT Image на выход (порт калькулятора OpenAI из опыта C1/02)
+# Токены: текст, картинки на вход, GPT Image на выход (порт калькулятора OpenAI)
 # ---------------------------------------------------------------------------------------------------------------
 
 def text_tokens(s: str) -> int:
@@ -453,7 +457,7 @@ def gpt_image_tokens(family: str, w: int, h: int, q: str) -> int:
 
 
 # ---------------------------------------------------------------------------------------------------------------
-# Каталоги: RouterAI (+ эндпоинты OpenRouter), Gen-API (+ прайс P/04), polza (polza_catalog.Snapshot)
+# Каталоги: RouterAI (+ эндпоинты OpenRouter), Gen-API (+ прайс), polza (polza_catalog.Snapshot)
 # ---------------------------------------------------------------------------------------------------------------
 
 def latest_file(sub: str, fname: str, ref: str | None = None) -> Path | None:
@@ -950,6 +954,8 @@ class Ctx:
 
 def load_jobs(path: str) -> list[dict]:
     p = Path(path)
+    if not p.is_file():
+        raise SystemExit(f"нет файла задания {path}")
     text = p.read_text(encoding="utf-8")
     if p.suffix == ".jsonl":
         jobs = []
@@ -962,7 +968,10 @@ def load_jobs(path: str) -> list[dict]:
             except json.JSONDecodeError as e:
                 raise SystemExit(f"{path}:{i}: не JSON: {e}")
     else:
-        obj = json.loads(text)
+        try:
+            obj = json.loads(text)
+        except json.JSONDecodeError as e:
+            raise SystemExit(f"{path}: не JSON: {e}")
         jobs = obj if isinstance(obj, list) else [obj]
     m = CHANNEL_FROM_NAME.search(p.name)
     out = []
@@ -2319,7 +2328,7 @@ def genapi_urls(st: dict) -> list[str]:
             for k in ("url", "image", "video", "file", "svg"):
                 if isinstance(x.get(k), str):
                     add(x[k])
-            # A, сессия 4 (25.09.2026): у части сетей Gen-API `result` — объект с номерами файлов, например Bria FIBO
+            # у части сетей Gen-API `result` — объект с номерами файлов, например Bria FIBO
             # `{"0": url, "structured_prompt": {…}}` — раньше ссылка не находилась и успех падал в «нет ссылок result/output»
             for k, v in x.items():
                 if str(k).isdigit() or (isinstance(v, str) and v.startswith(("http://", "https://"))):
@@ -2350,7 +2359,7 @@ def genapi_result(run: Run, rid, st: dict, create, polls) -> int:
     if s != "success":
         return run.fail(rid, s, cost, st.get("error") or st.get("errors_validation") or st.get("result"))
     urls = genapi_urls(st)
-    # A, сессия 4 (25.09.2026): структурные данные ответа (Bria FIBO `structured_prompt`; у `bria-fibo-prompt` — только они,
+    # структурные данные ответа (Bria FIBO `structured_prompt`; у `bria-fibo-prompt` — только они,
     # без файла) сохраняются JSON-файлом рядом, а не теряются и не валят успешную задачу
     res = st.get("result")
     extra_json = None
@@ -2968,7 +2977,7 @@ def cmd_balance(ctx: Ctx, a):
     if not paths:
         say(f"{ch}: адрес чтения баланса канала не задан — задайте его ключом --path (GET из документации кабинета "
             f"канала, например --path /v1/…); у polza-chat и polza-images адреса известны", err=True)
-        return 2
+        return EXIT_USAGE
     for p, j, nums in read_balance(ctx.http(ch, read=True), paths):
         say(f"# {ch} GET {p}")
         say(jdump(redact_obj(shorten(j))))
@@ -3014,7 +3023,7 @@ def cmd_selftest(ctx: Ctx, a):
 
     no_ra, no_ga, no_pz = missing("ra"), missing("ga"), missing("pz")
 
-    # 1. формула токенов GPT Image = таблица опыта C1/02 (калькулятор OpenAI)
+    # 1. формула токенов GPT Image = таблица калькулятора OpenAI
     for fam, w, h, q, exp in [("gpt-image-2.5", 1024, 1024, "medium", 439), ("gpt-image-2.5", 1024, 1024, "high", 1756),
                               ("gpt-image-2.5", 1024, 1024, "max", 7024), ("gpt-image-2.5", 3840, 2160, "high", 3336),
                               ("gpt-image-2.5", 1536, 864, "medium", 280), ("gpt-image-2", 1024, 1024, "medium", 1756),
@@ -3118,7 +3127,7 @@ def cmd_selftest(ctx: Ctx, a):
             code, job, resp = refused("st-empty", {"Content-Type": "application/json", "X-Generation-Id": "gen-demo",
                                                    "Set-Cookie": "sid=1"},
                                       json.dumps({"data": [], "usage": {"cost": 0}, "detail": "format is not accepted"}).encode())
-            ok("ответ без картинок: код 4, запись failed с паспортом", code == EXIT_FAILED and job.get("state") == "failed"
+            ok("ответ без картинок: код 5, запись failed с паспортом", code == EXIT_FAILED and job.get("state") == "failed"
                and job.get("spent") == 0.0 and bool(resp), (code, job))
             ok("паспорт отказа: тело и заголовки ответа канала, cookie не сохранён",
                resp.get("http_status") == 200 and (resp.get("body") or {}).get("detail") == "format is not accepted"
@@ -3308,6 +3317,19 @@ def cmd_selftest(ctx: Ctx, a):
             os.environ.pop("ROUTERAI_KEY_FILE", None)
             os.environ.update({k: v for k, v in env.items() if v is not None})
             _SECRETS.discard("sk-selftest-read-0123456789")
+    with tempfile.TemporaryDirectory() as td:
+        (Path(td) / "broken.routerai.json").write_text("{не json", encoding="utf-8")
+        codes = []
+        for job_file in (Path(td) / "absent.routerai.json", Path(td) / "broken.routerai.json"):
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()) as said:
+                try:
+                    main(["estimate", str(job_file), "--ledger", str(Path(td) / "ledger.jsonl"), "--out", td])
+                except SystemExit as e:
+                    codes.append((e.code, bool(said.getvalue().strip())))
+                except Exception as e:  # noqa: BLE001
+                    codes.append((type(e).__name__, False))
+        ok("нет файла задания или не JSON: код 2 (ошибка вызова), строка в stderr", codes == [(EXIT_USAGE, True)] * 2,
+           codes)
     npass = sum(1 for _, c, _ in res if c)
     for name, c, got in res:
         say(f"{'PASS' if c else 'FAIL'}  {name}" + ("" if c else f"   ← {got}"))
@@ -3404,9 +3426,14 @@ def build_parser():
 
 def main(argv=None):
     a = build_parser().parse_args(argv)
-    ctx = Ctx(a)
     try:
+        ctx = Ctx(a)
         code = a.fn(ctx, a)
+    except SystemExit as e:         # текст вместо кода — ошибка вызова или окружения (нет снимка, файла, модели)
+        if not isinstance(e.code, str):
+            raise
+        say(e.code, err=True)
+        code = EXIT_USAGE
     except ApiError as e:
         say(f"ОШИБКА API: {e}", err=True)
         if isinstance(e.body, dict):

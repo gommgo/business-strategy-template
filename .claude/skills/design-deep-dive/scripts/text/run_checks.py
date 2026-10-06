@@ -3,7 +3,9 @@
 claims_check.py --legal-category → copy_lint.py → copydeck.py check → copydeck.py validate (+ validate на Python
 окружения скилла с jsonschema) → copydeck.py export (вход холста этапа wireframe: pages/<page-id>/copy.md и facts.md).
 JSON и выгрузки — в $DDD_HOME/out/text/run_checks/, сводка — таблицей Markdown (для 02-examples-ru.md и
-03-examples-en.md) и summary.json. Код выхода: 0 — ни одной ошибки, 2 — есть ошибки.
+03-examples-en.md) и summary.json. Код выхода: 0 — ни одной ошибки; 1 — есть ошибки (error в выводе проверок); 2 —
+ошибка вызова (нет файла примера, он не copy deck, ключ --md без файла) или проверка не отработала (утилита завершилась
+кодом 2 и выше: её вывод неполон — строка «не отработали» в stderr).
 Запуск: python3 scripts/text/run_checks.py [пример.yaml …] [--md table.md]"""
 import json, os, subprocess, sys, time, yaml
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))
@@ -34,13 +36,25 @@ def main(argv):
         return 0
     md_out = None
     if '--md' in argv:
-        i = argv.index('--md'); md_out = argv[i + 1]; argv = argv[:i] + argv[i + 2:]
+        i = argv.index('--md')
+        if i + 1 >= len(argv):
+            print('run_checks: --md без файла таблицы', file=sys.stderr)
+            return 2
+        md_out = argv[i + 1]; argv = argv[:i] + argv[i + 2:]
     files = argv or sorted(os.path.join(EX, f) for f in os.listdir(EX) if f.endswith('.yaml'))
+    decks = {}
+    for path in files:
+        try:
+            with open(path, encoding='utf-8') as fi:
+                decks[path] = yaml.safe_load(fi)['copy_deck']
+        except (OSError, yaml.YAMLError, KeyError, TypeError) as e:
+            print(f'run_checks: {path}: не copy deck ({type(e).__name__}: {e})', file=sys.stderr)
+            return 2
     os.makedirs(OUT, exist_ok=True)
     rows, summ = [], {}
     for path in files:
         name = os.path.splitext(os.path.basename(path))[0]
-        deck = yaml.safe_load(open(path, encoding='utf-8'))['copy_deck']
+        deck = decks[path]
         facts = os.path.normpath(os.path.join(os.path.dirname(path), deck['facts_ref']))
         cats = deck.get('legal_category') or ['general']
         cats = ','.join(cats if isinstance(cats, list) else [cats])
@@ -85,7 +99,11 @@ def main(argv):
     json.dump(summ, open(os.path.join(OUT, 'summary.json'), 'w', encoding='utf-8'), ensure_ascii=False, indent=1)
     if md_out:
         open(md_out, 'w', encoding='utf-8').write(table)
-    return 0 if all(v['error'] in (0, None) for s in summ.values() for v in s.values()) else 2
+    failed = [f"{n}: {k} (код {v['exit']})" for n, s in summ.items() for k, v in s.items() if v['exit'] not in (0, 1)]
+    if failed:
+        print('run_checks: не отработали — ' + '; '.join(failed), file=sys.stderr)
+        return 2
+    return 0 if all(v['error'] in (0, None) for s in summ.values() for v in s.values()) else 1
 
 
 if __name__ == '__main__':

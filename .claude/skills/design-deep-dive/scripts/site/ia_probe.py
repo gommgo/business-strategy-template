@@ -50,12 +50,12 @@ import urllib.robotparser
 import xml.etree.ElementTree as ET
 from collections import Counter, OrderedDict, defaultdict
 from html.parser import HTMLParser
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 
 VERSION = "1.1"
 UA_TOKEN = "ia_probe"
-USER_AGENT = ("Mozilla/5.0 (compatible; ia_probe/%s; site-research structure probe; "
+USER_AGENT = ("Mozilla/5.0 (compatible; ia_probe/%s; site structure probe; "
               "1 req/s, sitemap-only, no crawling)" % VERSION)
 MAX_REQUESTS_DEFAULT = 200
 MIN_DELAY = 1.0

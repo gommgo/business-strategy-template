@@ -1,4 +1,4 @@
-# vocabulary.yaml — единый словарь идентификаторов системы генеративного дизайна сайтов (site-research).
+# vocabulary.yaml — единый словарь идентификаторов системы генеративного дизайна сайтов (site).
 # Id не переименовываются: вышедший из употребления получает status: deprecated и replaced_by; новый id — запись в своём
 # пространстве имён (до подтверждения владельцем темы — status: proposed).
 # Описание и правила: 02-site-types/02-vocabulary-and-crosswalk.md; соответствие старым словарям соседей, сестёр и внешних
@@ -7,18 +7,18 @@
 # section-role:proof-logos, page-type:landing-saas. Чужие пространства (effect:, copy-rule:, fact:, task:, recipe:) здесь
 # не определяются — их ведут владельцы (foreign_prefixes).
 
-vocabulary: site-research
+vocabulary: site
 version: 1
 revision: 1
 status: released           # правки — только добавления и status: deprecated
 checked: 2026-09-24
-owner: "site-research · 02-site-types"
+owner: "site · 02-site-types"
 id_pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
 id_pattern_exceptions:
-  ambition_level: '^L[0-2]$'   # L0, L1, L2 — как в контракте тройки и PLAN creative
+  ambition_level: '^L[0-2]$'   # L0, L1, L2 — уровни амбиций подачи creative (ambition-levels.yaml)
 statuses:
   active: "действует"
-  proposed: "предложен, ждёт подтверждения владельца темы (C, E, G, creative, text); использовать можно с пометкой"
+  proposed: "предложен, ждёт подтверждения владельца темы (site 03, site 04, site 06, creative, text); использовать можно с пометкой"
   deprecated: "не использовать в новых файлах; replaced_by — замена; lint даёт предупреждение"
   out-of-scope: "вне рамок базы; нужен, чтобы метить, а не строить (замер, классификация)"
   measurement-only: "только для замеров и классификации; в site-brief, site-map, page-plan, blocks.yaml — ошибка"
@@ -47,10 +47,10 @@ foreign_prefixes:
   fact: "text — facts.yaml (инвентарь доказательств заказчика)"
   task: "ai-media — коды задач routing.yaml (IMG-HERO-PHOTO …)"
   recipe: "blender — 12-recipes"
-  event: "site P — events.yaml (волна 2)"
-  req: "site I — legal-requirements.yaml (волна 2)"
-  site-pre: "site K — входной контракт SITE-PRE-01…26 (09-ai-generation-evaluation, волна 3)"
-  def: "site K — каталог дефектов DEF-01…50 (09-ai-generation-evaluation, волна 3)"
+  event: "site — events.yaml (07-seo-geo-performance-analytics)"
+  req: "site — legal-requirements.yaml (08-legal-trust-a11y)"
+  site-pre: "site — входной контракт SITE-PRE-01…26 (09-ai-generation-evaluation)"
+  def: "site — каталог дефектов DEF-01…50 (09-ai-generation-evaluation)"
   ref: "creative — библиотека референсов (запись ref:<id>)"
 
 namespaces:
@@ -58,8 +58,8 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   site_type:
     name: "Тип сайта"
-    owner: "site B (v0), J (v1); карты сайтов по типам — G"
-    fields: "multipage — многостраничный ли; priority — приоритет заказчика (решение 10): 1 лидогенерация услуг РФ, 2 лендинг SaaS или продукта, 3 запуск или кампания L2, 4 корпоративный многостраничник, 0 — прочие в рамках"
+    owner: "site 02; карты сайтов по типам — site 06"
+    fields: "multipage — многостраничный ли; priority — приоритет заказчика: 1 лидогенерация услуг РФ, 2 лендинг SaaS или продукта, 3 запуск или кампания L2, 4 корпоративный многостраничник, 0 — прочие в рамках"
     values:
       - {id: landing-site, name: "Лендинг (одностраничный сайт)", def: "Сайт из одной посадочной страницы и служебных («спасибо», политика ПД, 404); одна цель — одно действие", multipage: false, priority: [1, 2, 3]}
       - {id: services-site, name: "Сайт услуг и локального бизнеса", def: "Клиника, салон, ремонт, юристы, автосервис: страницы услуг, цены, специалисты, отзывы, контакты; цель — запись, звонок, заявка", multipage: true, priority: [1]}
@@ -71,7 +71,7 @@ namespaces:
       - {id: school-site, name: "Школа и курсы", def: "Онлайн-школа или учебный центр: каталог программ, преподаватели, отзывы, цены; цель — заявка, покупка, пробный урок", multipage: true, priority: [0]}
       - {id: campaign-site, name: "Спецпроект или кампания из нескольких страниц", def: "Запуск, промо, коллаборация бренда из 2–6 страниц-глав (L2 по умолчанию); цель — внимание и одно действие", multipage: true, priority: [3]}
       - {id: ecommerce-store, name: "Интернет-магазин", def: "Каталог, корзина, оформление, оплата — вне рамок (будущая база); промо товара — page-type:landing-product", status: out-of-scope}
-      - {id: web-app, name: "Веб-сервис после входа", def: "Кабинет, админка, SaaS-продукт — ux-research и ui-research; с сайтом — два пакета с общим DESIGN.md", status: out-of-scope}
+      - {id: web-app, name: "Веб-сервис после входа", def: "Кабинет, админка, SaaS-продукт — ux и ui; с сайтом — два пакета с общим DESIGN.md", status: out-of-scope}
       - {id: media-portal, name: "Медиа и новостной портал", def: "Поток публикаций, рубрики, реклама площадки", status: out-of-scope}
       - {id: docs-site, name: "Документация и база знаний", def: "Справка, API, руководства продукта", status: out-of-scope}
       - {id: marketplace, name: "Площадка многих продавцов", def: "Каталог объявлений или товаров разных продавцов", status: out-of-scope}
@@ -79,7 +79,7 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   page_type:
     name: "Тип страницы"
-    owner: "site B (v0), J (v1); порядок секций — C, карты — G"
+    owner: "site 02; порядок секций — site 03, карты — site 06"
     fields: "class — landing | multipage | content | utility; genre — жанр text (landing, site-page, article); priority — как у site_type"
     values:
       # --- лендинги (могут жить и внутри многостраничника)
@@ -112,8 +112,8 @@ namespaces:
       - {id: contacts-page, name: "Контакты", def: "Адрес, карта, телефоны, мессенджеры, часы работы, реквизиты, форма", class: multipage, genre: site-page, priority: 4}
       - {id: careers-page, name: "Вакансии", def: "Работа в компании: условия, список вакансий, отклик", class: multipage, genre: site-page, priority: 0}
       - {id: form-page, name: "Страница формы", def: "Отдельная страница с формой: запрос демо, расчёт, запись, бриф", class: multipage, genre: site-page, priority: 0}
-      # --- v1 (J, волна 3): страницы многостраничника из карт G (06-multipage-ia/01 §2)
-      - {id: specialist-page, name: "Страница специалиста", def: "Один специалист: врач, преподаватель, эксперт, спикер — специализация, опыт, образование, услуги или программы, запись; персональные данные — с разрешением (I)", class: multipage, genre: site-page, priority: 1}
+      # --- страницы многостраничника из карт сайтов (06-multipage-ia/01 §2)
+      - {id: specialist-page, name: "Страница специалиста", def: "Один специалист: врач, преподаватель, эксперт, спикер — специализация, опыт, образование, услуги или программы, запись; персональные данные — с разрешением (site 08)", class: multipage, genre: site-page, priority: 1}
       - {id: location-page, name: "Страница филиала", def: "Филиал или точка: адрес, часы, как добраться, карта, телефон, специалисты точки; только при ≥ 2 адресах, у каждой — свои факты", class: multipage, genre: site-page, priority: 1}
       - {id: program-catalog-page, name: "Каталог программ", def: "Каталог программ школы с фильтрами (направление, уровень, длительность; фильтры noindex) и хабы направлений", class: multipage, genre: site-page, priority: 0}
       - {id: documents-page, name: "Документы и допуски", def: "Лицензии, сертификаты, СРО, допуски организации (факты credential) — не юридическая политика сайта", class: multipage, genre: site-page, priority: 4}
@@ -127,19 +127,19 @@ namespaces:
       # --- служебные
       - {id: thank-you-page, name: "Страница «спасибо»", def: "После действия: подтверждение, что будет дальше, следующий шаг", class: utility, genre: site-page, priority: 0}
       - {id: not-found-page, name: "Страница 404", def: "Что случилось, поиск или пути на главные разделы, главное действие", class: utility, genre: site-page, priority: 0}
-      - {id: legal-page, name: "Юридическая страница", def: "Политика обработки ПД, согласие, оферта, условия, политика cookie (право — I)", class: utility, genre: site-page, priority: 0}
+      - {id: legal-page, name: "Юридическая страница", def: "Политика обработки ПД, согласие, оферта, условия, политика cookie (право — site 08)", class: utility, genre: site-page, priority: 0}
       - {id: search-results-page, name: "Результаты поиска по сайту", def: "Результаты поиска по сайту: новый сайт — путь закрыт в robots.txt (Disallow), уже в индексе — noindex до выпадения, не оба; «ничего не найдено» — как 404 с путями", class: utility, genre: site-page, priority: 0}
       - {id: html-sitemap-page, name: "HTML-карта сайта", def: "Список разделов и страниц для людей на большом сайте (≥ сотни страниц); ссылка из подвала", class: utility, genre: site-page, priority: 0, status: proposed}
       # --- вне рамок
       - {id: ecommerce-catalog-page, name: "Каталог магазина", def: "Список товаров с фильтрами — вне рамок", status: out-of-scope}
       - {id: ecommerce-product-page, name: "Карточка товара магазина", def: "PDP с корзиной — вне рамок; промо товара — landing-product", status: out-of-scope}
-      - {id: web-app-screen, name: "Экран веб-сервиса", def: "Рабочий экран после входа — ux-research", status: out-of-scope}
+      - {id: web-app-screen, name: "Экран веб-сервиса", def: "Рабочий экран после входа — ux", status: out-of-scope}
 
   # ---------------------------------------------------------------------------------------------------------------
   section_role:
     name: "Роль секции в сюжете страницы"
-    owner: "site: id — B, определения, обязательность и порядок — C (волна 1); text — сюжет словами по ролям"
-    fields: "group — ступень сюжета: chrome, promise, problem, value, proof, offer, risk, action, info (черновик B для C)"
+    owner: "site: id — site 02, определения, обязательность и порядок — site 03; text — сюжет словами по ролям"
+    fields: "group — ступень сюжета: chrome, promise, problem, value, proof, offer, risk, action, info"
     values:
       - {id: header, name: "Шапка", def: "Логотип (ссылка на главную), навигация, контакт или призыв; включает строку объявления", group: chrome}
       - {id: hero, name: "Первый экран", def: "Обещание — что это и зачем; главный призыв или признак продолжения", group: promise}
@@ -164,7 +164,7 @@ namespaces:
       - {id: pricing, name: "Тарифы и цены", def: "Цена, тарифы, прайс", group: offer}
       - {id: comparison, name: "Сравнение", def: "С альтернативами (конкуренты, «сделать самому», бездействие) или между тарифами", group: offer}
       - {id: promo, name: "Спецпредложение", def: "Акция, скидка, бонус с честным сроком или ограничением", group: offer}
-      - {id: cross-sell, name: "Смежные предложения", def: "Приложение, смежные услуги, подарочные карты в хвосте страницы (предложение C: 10 из 30 страниц, позиция 0,82)", group: offer}
+      - {id: cross-sell, name: "Смежные предложения", def: "Приложение, смежные услуги, подарочные карты в хвосте страницы (10 из 30 страниц, позиция 0,82)", group: offer}
       - {id: guarantee, name: "Гарантии и снятие риска", def: "Возврат, договор, пробный период, бесплатный первый шаг", group: risk}
       - {id: objections, name: "Ответы на возражения", def: "Главные сомнения и ответы рядом с решением (не FAQ)", group: risk}
       - {id: faq, name: "Частые вопросы", def: "Остаточные вопросы о продукте, оплате, сроках", group: risk}
@@ -176,7 +176,7 @@ namespaces:
       - {id: event-program, name: "Программа", def: "Программа мероприятия или курса: расписание, модули, спикеры, площадка", group: info}
       - {id: article-body, name: "Тело статьи", def: "Текст статьи или справочного материала", group: info}
       - {id: related, name: "Связанные материалы", def: "Перелинковка: статьи, кейсы, услуги по теме", group: info}
-      - {id: seo-text, name: "SEO-текст", def: "Текст под поисковый запрос внизу страницы (предложение C: 5 из 30 страниц, позиция 0,73); польза и риск — H, text", group: info}
+      - {id: seo-text, name: "SEO-текст", def: "Текст под поисковый запрос внизу страницы (5 из 30 страниц, позиция 0,73); польза и риск — site 07, text", group: info}
       - {id: legal, name: "Юридическое", def: "Юридический документ, дисклеймер, маркировка рекламы", group: info}
       - {id: confirmation, name: "Подтверждение", def: "Действие принято: статус и следующий шаг («спасибо»)", group: info}
       - {id: not-found, name: "Страница не найдена", def: "Что случилось и куда идти (404)", group: info}
@@ -187,7 +187,7 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   block_family:
     name: "Семейство блоков"
-    owner: "site B (id), E (состав семейств и карточки блоков, волна 2)"
+    owner: "site 02 (id), site 04 (состав семейств и карточки блоков)"
     values:
       - {id: header-nav, name: "Шапка и навигация", def: "Шапка, строка объявления, навигация по странице, крошки"}
       - {id: hero, name: "Первый экран", def: "Варианты анатомии первого экрана"}
@@ -209,8 +209,8 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   block:
     name: "Блок (единица анатомии: назначение и набор слотов)"
-    owner: "site: id, семейство, строка — B; анатомия, варианты раскладки, слоты, мобильное поведение — E (blocks.yaml, волна 2); визуальные варианты и эффекты — creative по id блока; тексты слотов — text по id слота"
-    fields: "family — block_family; serves — роли, которые блок обычно реализует; detect — подсказка распознавания в DOM для замера (M), не норма. Разная раскладка одной анатомии (split, по центру, на весь экран) — вариант блока (E), не отдельный id"
+    owner: "site: id, семейство, строка — site 02; анатомия, варианты раскладки, слоты, мобильное поведение — site 04 (blocks.yaml); визуальные варианты и эффекты — creative по id блока; тексты слотов — text по id слота"
+    fields: "family — block_family; serves — роли, которые блок обычно реализует; detect — подсказка распознавания в DOM для замера (site 02/03), не норма. Разная раскладка одной анатомии (split, по центру, на весь экран) — вариант блока (site 04), не отдельный id"
     values:
       # --- header-nav
       - {id: header, family: header-nav, serves: [header], name: "Шапка", def: "Логотип → главная, навигация, контакт или призыв; на телефоне — кнопка меню", detect: "<header> или role=banner вверху; ссылка логотипа на /; ≥ 2 ссылок меню"}
@@ -225,7 +225,7 @@ namespaces:
       - {id: hero-stat, family: hero, serves: [hero, proof-stats], name: "Первый экран-число", def: "Одно крупное число из фактов как главный элемент", detect: "число кеглем ≥ h1 в первой секции"}
       - {id: hero-quote, family: hero, serves: [hero, testimonials], name: "Первый экран-цитата", def: "Отзыв или слова эксперта как главный элемент (дословно, с разрешением)", detect: "blockquote или кавычки + подпись в первой секции"}
       - {id: hero-letter, family: hero, serves: [hero, story], name: "Первый экран-письмо", def: "Обращение от первого лица без кнопок в первом экране", detect: "проза ≥ 60 слов, обращение, нет кнопок"}
-      - {id: hero-carousel, family: hero, serves: [hero], name: "Первый экран-карусель", def: "Несколько сменяющихся слайдов с разными обещаниями (для конверсии — спорно, F)", detect: "≥ 2 слайдов, стрелки или точки, автопрокрутка"}
+      - {id: hero-carousel, family: hero, serves: [hero], name: "Первый экран-карусель", def: "Несколько сменяющихся слайдов с разными обещаниями (для конверсии — спорно, site 05)", detect: "≥ 2 слайдов, стрелки или точки, автопрокрутка"}
       # --- proof
       - {id: logo-wall, family: proof, serves: [proof-logos, integrations], name: "Логотипы", def: "Ряд или сетка логотипов клиентов, партнёров, СМИ, спонсоров", detect: "≥ 4 мелких img, svg в ряд; alt — названия компаний; подпись «клиенты», «партнёры»"}
       - {id: stat-strip, family: proof, serves: [proof-stats], name: "Ряд цифр", def: "2–5 чисел с подписями (результаты, масштаб)", detect: "≥ 2 крупных чисел с %, +, «лет»; короткие подписи"}
@@ -262,7 +262,7 @@ namespaces:
       - {id: comparison-table, family: offer, serves: [comparison, pricing], name: "Таблица сравнения", def: "С альтернативами или между тарифами по строкам-признакам", detect: "таблица с ✓, ✗ по колонкам"}
       - {id: offer-details, family: offer, serves: [offer], name: "Состав и условия", def: "Что входит, сроки, формат, место, старт", detect: "«что входит», «условия», «сроки»"}
       - {id: key-facts, family: offer, serves: [offer, specs], name: "Ключевые параметры", def: "Ряд параметров предложения (старт, длительность, формат, место, цена «от») — не доказательство", detect: "2–6 пар «параметр: значение»"}
-      - {id: promo-offer, family: offer, serves: [promo], name: "Спецпредложение", def: "Акция с датой окончания или лимитом из фактов (честная срочность — F)", detect: "«акция», «скидка до», дата окончания, таймер"}
+      - {id: promo-offer, family: offer, serves: [promo], name: "Спецпредложение", def: "Акция с датой окончания или лимитом из фактов (честная срочность — site 05)", detect: "«акция», «скидка до», дата окончания, таймер"}
       - {id: guarantee, family: offer, serves: [guarantee], name: "Гарантия", def: "Условия возврата, договор, пробный период, бесплатный первый шаг", detect: "«гарантия», «вернём деньги», «договор»"}
       # --- conversion
       - {id: lead-form, family: conversion, serves: [lead-form, final-cta], name: "Форма заявки", def: "Секция с формой: имя, телефон или почта, комментарий, согласие", detect: "form с полями name, tel, email, textarea; чекбокс согласия"}
@@ -277,7 +277,7 @@ namespaces:
       # --- cta
       - {id: cta-band, family: cta, serves: [cta-band, final-cta], name: "Полоса призыва", def: "Заголовок, строка и 1–2 кнопки; промежуточная или финальная", detect: "заголовок + ≤ 2 кнопок без полей формы"}
       - {id: sticky-cta, family: cta, serves: [cta-band], name: "Липкая панель призыва", def: "Кнопка, закреплённая при прокрутке (обычно внизу на телефоне)", detect: "position fixed или sticky с кнопкой"}
-      - {id: capture-popup, family: cta, serves: [utility, lead-form], name: "Всплывающее окно захвата", def: "Модальное окно с формой по таймеру, прокрутке или уходу; по умолчанию выключено (решение заказчика 15)", detect: "модальное окно с формой без действия посетителя"}
+      - {id: capture-popup, family: cta, serves: [utility, lead-form], name: "Всплывающее окно захвата", def: "Модальное окно с формой по таймеру, прокрутке или уходу; по умолчанию выключено", detect: "модальное окно с формой без действия посетителя"}
       # --- faq
       - {id: faq, family: faq, serves: [faq, objections], name: "Вопросы и ответы", def: "Пары «вопрос — ответ»: аккордеон или открытый список", detect: "details/summary, aria-expanded, FAQPage, строки с «?»"}
       # --- about-team
@@ -289,7 +289,7 @@ namespaces:
       # --- contacts
       - {id: contact-details, family: contacts, serves: [contacts], name: "Контактные данные", def: "Адрес, телефоны, часы работы, мессенджеры, реквизиты", detect: "адрес, «часы работы», tel:, ИНН, ОГРН"}
       - {id: location-map, family: contacts, serves: [contacts, event-program], name: "Карта", def: "Карта с точкой и «как добраться»", detect: "iframe или скрипт Яндекс Карт, 2ГИС, Google Maps"}
-      - {id: service-area, family: contacts, serves: [contacts, offer], name: "Зона обслуживания", def: "Куда выезжаем: районы и города, условия и цена выезда, сроки — для выездных услуг (v1, E/J)", detect: "список районов или городов, «выезд», «работаем по», карта-зона без точки"}
+      - {id: service-area, family: contacts, serves: [contacts, offer], name: "Зона обслуживания", def: "Куда выезжаем: районы и города, условия и цена выезда, сроки — для выездных услуг", detect: "список районов или городов, «выезд», «работаем по», карта-зона без точки"}
       # --- portfolio-gallery
       - {id: portfolio-grid, family: portfolio-gallery, serves: [portfolio], name: "Сетка работ", def: "Проекты: картинка, название, ссылка на проект", detect: "≥ 4 карточек с картинкой и названием проекта"}
       - {id: gallery, family: portfolio-gallery, serves: [portfolio, story, about], name: "Фотогалерея", def: "Фото интерьера, работ, события сеткой или каруселью", detect: "сетка или карусель ≥ 4 фото без текста карточек; лайтбокс"}
@@ -307,7 +307,7 @@ namespaces:
       # --- footer
       - {id: footer, family: footer, serves: [footer], name: "Подвал", def: "Навигация, контакты, реквизиты, правовые ссылки, соцсети", detect: "<footer> или role=contentinfo"}
       # --- utility
-      - {id: cookie-banner, family: utility, serves: [utility], name: "Баннер cookie", def: "Уведомление или согласие на cookie (немодальное, равные «Принять» и «Отклонить» — I)", detect: "фиксированная панель со словами cookie, куки"}
+      - {id: cookie-banner, family: utility, serves: [utility], name: "Баннер cookie", def: "Уведомление или согласие на cookie (немодальное, равные «Принять» и «Отклонить» — site 08)", detect: "фиксированная панель со словами cookie, куки"}
       - {id: thank-you, family: utility, serves: [confirmation], name: "Спасибо", def: "Подтверждение действия, что будет дальше, следующий шаг", detect: "«спасибо», «заявка принята»"}
       - {id: not-found, family: utility, serves: [not-found], name: "Содержимое 404", def: "Объяснение и пути дальше", detect: "«404», «страница не найдена»"}
       - {id: legal-text, family: utility, serves: [legal], name: "Юридический текст", def: "Документ: политика, согласие, оферта, условия", detect: "длинный текст с пунктами 1.1, 1.2; «персональные данные»"}
@@ -318,7 +318,7 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   slot_kind:
     name: "Вид слота"
-    owner: "контракт тройки §3 п.3"
+    owner: "common/owners.md §Форматы обмена, формат page-plan"
     values:
       - {id: text, name: "Текст", def: "Назначение, длина, уровень заголовка; правила текста — text (copy-slots.yaml) по id слота"}
       - {id: media, name: "Медиа", def: "Картинка, видео, иконка, карта; коды задач и план ассетов — ai-media 01/01 §8"}
@@ -330,7 +330,7 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   slot:
     name: "Слот блока"
-    owner: "site: id слотов в blocks.yaml и page-plan (B, E); text — правила текстовых слотов по id (copy-slots.yaml); creative — значения treatment; ai-media — медиа по коду задачи"
+    owner: "site: id слотов в blocks.yaml и page-plan (site 02, site 04); text — правила текстовых слотов по id (copy-slots.yaml); creative — значения treatment; ai-media — медиа по коду задачи"
     fields: "kind — slot_kind; scope — section (по умолчанию) или page (мета страницы); fact_kinds — виды фактов text facts.schema.yaml для data-слотов; текстовые id совпадают со slot_type text (временный словарь text и copy-slots.yaml) — equal"
     values:
       # --- text: мета страницы (scope: page)
@@ -370,7 +370,7 @@ namespaces:
       - {id: pricing-plan-name, kind: text, name: "Название тарифа", def: "Имя плана или пакета"}
       - {id: pricing-plan-summary, kind: text, name: "Описание тарифа", def: "Кому подходит план"}
       - {id: pricing-price, kind: text, name: "Цена", def: "Цена из факта или прайса заказчика"}
-      - {id: price-old, kind: text, name: "Прежняя цена", def: "Зачёркнутая цена до скидки (право — I)"}
+      - {id: price-old, kind: text, name: "Прежняя цена", def: "Зачёркнутая цена до скидки (право — site 08)"}
       - {id: pricing-price-note, kind: text, name: "Условия цены", def: "«От», период, скидка, пробный период"}
       - {id: pricing-feature, kind: text, name: "Пункт состава тарифа", def: "Что входит в план"}
       - {id: spec-row, kind: text, name: "Строка характеристик", def: "«Параметр — значение»"}
@@ -389,7 +389,7 @@ namespaces:
       - {id: form-title, kind: text, name: "Заголовок формы", def: "Что получит посетитель"}
       - {id: form-lead, kind: text, name: "Ценность формы", def: "Что получите и зачем оставлять контакт"}
       - {id: form-next-steps, kind: text, name: "Что будет после отправки", def: "Кто, когда и как свяжется"}
-      - {id: form-consent, kind: text, name: "Согласие на обработку ПД", def: "Строка и ссылка на документ согласия (право — I)"}
+      - {id: form-consent, kind: text, name: "Согласие на обработку ПД", def: "Строка и ссылка на документ согласия (право — site 08)"}
       - {id: form-success, kind: text, name: "Сообщение «спасибо»", def: "Экран или блок после отправки"}
       # --- text: навигация, подвал, право
       - {id: nav-label, kind: text, name: "Пункт навигации", def: "Подпись пункта меню"}
@@ -397,8 +397,8 @@ namespaces:
       - {id: footer-legal, kind: text, name: "Реквизиты и правовые строки подвала", def: "Юрлицо, ИНН, ОГРН, адрес, копирайт"}
       - {id: contact-info, kind: text, name: "Контакты текстом", def: "Адрес, часы работы, телефон как текст"}
       - {id: disclaimer, kind: text, name: "Юридическая оговорка", def: "Предупреждение или оговорка у утверждения (противопоказания, «не оферта», условия)"}
-      - {id: ad-marking, kind: text, name: "Маркировка рекламы", def: "«Реклама», рекламодатель, токен erid у рекламного блока (38-ФЗ ст. 18.1 — I)"}
-      - {id: cookie-text, kind: text, name: "Текст баннера cookie", def: "Что за cookie и зачем; кнопки выбора (право — I)"}
+      - {id: ad-marking, kind: text, name: "Маркировка рекламы", def: "«Реклама», рекламодатель, токен erid у рекламного блока (38-ФЗ ст. 18.1 — site 08)"}
+      - {id: cookie-text, kind: text, name: "Текст баннера cookie", def: "Что за cookie и зачем; кнопки выбора (право — site 08)"}
       # --- text: статьи и GEO
       - {id: article-title, kind: text, name: "Заголовок статьи (H1)", def: "Тема статьи"}
       - {id: article-lead, kind: text, name: "Лид статьи", def: "О чём статья и кому"}
@@ -410,7 +410,7 @@ namespaces:
       - {id: article-sources, kind: text, name: "Источники статьи", def: "Список источников и ссылок"}
       - {id: geo-answer, kind: text, name: "Абзац-ответ", def: "Самодостаточный ответ для цитирования нейросетью"}
       - {id: definition, kind: text, name: "Определение", def: "Определение термина или сущности"}
-      # --- text: письма вокруг форм (механика — F, тексты — text)
+      # --- text: письма вокруг форм (механика — site 05, тексты — text)
       - {id: email-sender-name, kind: text, scope: page, name: "Имя отправителя", def: "Бренд или человек из бренда; без темы, призыва, имени получателя и эмодзи (text 04/04 §3.3)"}
       - {id: email-subject, kind: text, scope: page, name: "Тема письма", def: "Письмо после формы"}
       - {id: email-preheader, kind: text, scope: page, name: "Прехедер", def: "Строка после темы"}
@@ -426,7 +426,7 @@ namespaces:
       # --- media
       - {id: hero-visual, kind: media, name: "Главный визуал", def: "Главная картинка, видео-постер или рендер первого экрана; кандидат LCP"}
       - {id: background, kind: media, name: "Фон секции", def: "Фото, текстура, градиент, паттерн, видео-петля за контентом"}
-      - {id: photo, kind: media, name: "Фотография", def: "Люди, место, работа, событие — реальные (подлинность — I)"}
+      - {id: photo, kind: media, name: "Фотография", def: "Люди, место, работа, событие — реальные (подлинность — site 08)"}
       - {id: product-photo, kind: media, name: "Фото товара", def: "Товар как есть или в окружении"}
       - {id: screenshot, kind: media, name: "Скриншот или мокап", def: "Интерфейс продукта: настоящий скриншот, композит в рамке"}
       - {id: illustration, kind: media, name: "Иллюстрация", def: "Рисунок, 2D или 3D-иллюстрация фичи или идеи"}
@@ -439,7 +439,7 @@ namespaces:
       - {id: cover-image, kind: media, name: "Обложка", def: "Обложка статьи, кейса, материала"}
       - {id: document-image, kind: media, name: "Изображение документа", def: "Скан или фото лицензии, сертификата, диплома"}
       - {id: map, kind: media, name: "Карта", def: "Статичная картинка или виджет карты"}
-      - {id: qr-code, kind: media, name: "QR-код", def: "QR-код ссылки (магазин приложения, запись, оплата) кодом SVG; только десктоп и печать — на телефоне бесполезен (v1)"}
+      - {id: qr-code, kind: media, name: "QR-код", def: "QR-код ссылки (магазин приложения, запись, оплата) кодом SVG; только десктоп и печать — на телефоне бесполезен"}
       - {id: og-image, kind: media, scope: page, name: "Картинка превью ссылки", def: "Open Graph 1200×630 (ai-media 10/01 §7)"}
       - {id: favicon, kind: media, scope: page, name: "Фавиконы", def: "Набор иконок сайта"}
       # --- 3d
@@ -457,10 +457,10 @@ namespaces:
       # --- action
       - {id: cta-primary, kind: action, name: "Главный призыв", def: "Кнопка или ссылка к целевому действию страницы (action) с событием аналитики"}
       - {id: cta-secondary, kind: action, name: "Второстепенный путь", def: "Иным стилем: цены, демо, подробнее"}
-      - {id: form, kind: action, name: "Форма", def: "Поля, шаги, согласия, отправка (канон — ux 04/05; наборы полей — F)"}
+      - {id: form, kind: action, name: "Форма", def: "Поля, шаги, согласия, отправка (канон — ux 04/05; наборы полей — site 05)"}
       - {id: link, kind: action, name: "Ссылка", def: "На страницу сайта, якорь или внешний ресурс"}
       - {id: phone-link, kind: action, name: "Телефон", def: "Номер ссылкой tel:"}
-      - {id: messenger-link, kind: action, name: "Мессенджер", def: "Ссылка на мессенджер или чат (доступность каналов в РФ — F)"}
+      - {id: messenger-link, kind: action, name: "Мессенджер", def: "Ссылка на мессенджер или чат (доступность каналов в РФ — site 05)"}
       - {id: email-link, kind: action, name: "Почта", def: "Адрес ссылкой mailto:"}
       - {id: app-store-link, kind: action, name: "Магазин приложений", def: "App Store, Google Play, RuStore, AppGallery"}
       - {id: download-link, kind: action, name: "Скачивание", def: "Ссылка на файл"}
@@ -472,8 +472,8 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   macrostructure:
     name: "Макроструктура (форма страницы)"
-    owner: "site: id — B, свод, «когда брать» и семейства — C (`03-page-structure/01-narratives-and-section-order.md` §4, 12:40); подача формы — creative"
-    fields: "source — откуда форма; layout_family — семейство C: grid (сетка), document (документ), poster (плакат), flow (поток формы, новое у C); проекция в direction.macrostructure брифа холста: grid → grid-led, document → document-led, poster → poster-led, flow → document-led"
+    owner: "site: id — site 02, свод, «когда брать» и семейства — site 03 (`03-page-structure/01-narratives-and-section-order.md` §4); подача формы — creative"
+    fields: "source — откуда форма; layout_family — семейство (site 03/01 §4.1): grid (сетка), document (документ), poster (плакат), flow (поток формы); проекция в direction.macrostructure брифа холста: grid → grid-led, document → document-led, poster → poster-led, flow → document-led"
     values:
       - {id: bento-grid, layout_family: grid, name: "Бенто-сетка", def: "Модули разного размера: функции, цитаты, цифры, картинки в одной сетке", source: "hallmark:01"}
       - {id: long-document, layout_family: document, name: "Длинный документ", def: "Страница как письмо или эссе: проза со встроенными заголовками", source: "hallmark:02"}
@@ -499,7 +499,7 @@ namespaces:
       - {id: sales-longread, layout_family: document, name: "Продающий лонгрид", def: "Длинный лендинг услуг: много доводов и призывов по ходу (рынок РФ)", source: "рынок РФ; landing.csv"}
       - {id: quiz-funnel, layout_family: flow, name: "Квиз-воронка", def: "Квиз — главный путь страницы: короткое обещание → вопросы → контакт", source: "рынок РФ; landing.csv"}
       - {id: form-first, layout_family: flow, name: "Страница вокруг формы", def: "Короткая страница: обещание с формой → доказательства → повтор формы", source: "landing.csv"}
-      - {id: scroll-story, layout_family: poster, name: "Сайт-история", def: "Кино-прокрутка: сцены и главы, «вау» по ритму, призыв в конце (L2)", source: "сайт-референс W3; landing.csv"}
+      - {id: scroll-story, layout_family: poster, name: "Сайт-история", def: "Кино-прокрутка: сцены и главы, «вау» по ритму, призыв в конце (L2)", source: "сайт-референс; landing.csv"}
       - {id: pricing-first, layout_family: document, name: "Страница от цены", def: "Цена и тарифы — главное содержание, остальное отвечает на вопросы о выборе", source: "landing.csv"}
       - {id: comparison-led, layout_family: document, name: "Страница от сравнения", def: "Сравнение с альтернативами ведёт сюжет", source: "landing.csv"}
       - {id: event-schedule, layout_family: document, name: "Страница события", def: "Дата и место → программа → спикеры → билеты", source: "landing.csv"}
@@ -508,17 +508,17 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   first_screen_policy:
     name: "Политика первого экрана (поле page-plan)"
-    owner: "C (`03-page-structure/03-first-screen-and-mobile.md` §2.2 — условия и примеры); id — B по заметке C 12:40"
+    owner: "site 03 (`03-page-structure/03-first-screen-and-mobile.md` §2.2 — условия и примеры); id — site 02"
     values:
       - {id: offer-cta, name: "Обещание и призыв в hero", def: "По умолчанию: обещание (что это и результат) + главный призыв в потоке hero (кнопка или форма) + признак продолжения"}
       - {id: offer-cta-header, name: "Призыв в шапке", def: "Обещание + призыв в шапке или липкой панели без прокрутки + признак продолжения (главная, тарифы, кейс, портфолио)"}
-      - {id: poster, name: "Плакат", def: "Заявление или образ + видимый признак продолжения + призыв в шапке; только по условиям C (кампании L2, портфолио, письма, манифесты)"}
+      - {id: poster, name: "Плакат", def: "Заявление или образ + видимый признак продолжения + призыв в шапке; только по условиям site 03/03 §2.2 (кампании L2, портфолио, письма, манифесты)"}
 
   # ---------------------------------------------------------------------------------------------------------------
   action:
     name: "Действие посетителя (конверсионное)"
-    owner: "site B (id); события — P (events.yaml по этому пространству); формы и места призывов — F"
-    fields: "level — ТИПИЧНЫЙ уровень: macro (прямо ведёт к цели бизнеса) | micro (вторичное действие); макро-действие страницы назначает page-plan (download — макро на лид-магните, микро на SaaS-сайте; NN/g «Macro vs. Micro Conversions», 2024); вехи процесса (начал форму, шаг квиза) — события P, не action; commitment — порог действия для посетителя: low | medium | high [практика, синтез B]"
+    owner: "site 02 (id); события — site 07 (events.yaml по этому пространству); формы и места призывов — site 05"
+    fields: "level — ТИПИЧНЫЙ уровень: macro (прямо ведёт к цели бизнеса) | micro (вторичное действие); макро-действие страницы назначает page-plan (download — макро на лид-магните, микро на SaaS-сайте; NN/g «Macro vs. Micro Conversions», 2024); вехи процесса (начал форму, шаг квиза) — события site 07, не action; commitment — порог действия для посетителя: low | medium | high [практика, синтез]"
     values:
       - {id: lead-request, name: "Заявка", def: "Оставить контакт и описание задачи", level: macro, commitment: medium}
       - {id: request-quote, name: "Запрос расчёта", def: "Получить расчёт стоимости (часто через квиз или калькулятор)", level: macro, commitment: medium}
@@ -547,7 +547,7 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   awareness:
     name: "Осведомлённость посетителя (Шварц)"
-    owner: "site B (id); что меняет на странице — A и text B1 (02-awareness-hierarchy-objections.md)"
+    owner: "site 02 (id); что меняет на странице — site 01 и text 02/02 (02-awareness-hierarchy-objections.md)"
     values:
       - {id: unaware, name: "Не знает о проблеме", def: "Unaware: не осознаёт проблему или желание"}
       - {id: problem-aware, name: "Знает о проблеме", def: "Problem Aware: чувствует проблему, не знает решений"}
@@ -558,7 +558,7 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   traffic_temperature:
     name: "Температура трафика"
-    owner: "site B (id); A — что меняет"
+    owner: "site 02 (id); site 01 — что меняет"
     def: "Сила намерения посетителя, которую задаёт источник: cold — не искал, warm — ищет решение, hot — ищет продукт или бренд. Температура ≠ осведомлённость: тип первого экрана выбирается по уровню осведомлённости (meaning.awareness.by_source), температура — подсказка"
     values:
       - {id: cold, name: "Холодный", def: "Не искал: реклама в ленте, контентная площадка, блогер"}
@@ -567,7 +567,7 @@ namespaces:
 
   traffic_source:
     name: "Источник трафика"
-    owner: "site B (id); A — что меняет; P — UTM и атрибуция"
+    owner: "site 02 (id); site 01 — что меняет; site 07 — UTM и атрибуция"
     fields: "temperature_hint — типичная температура; channel — search, paid, social, owned, referral, ai, offline, internal"
     values:
       - {id: search-problem, name: "Поиск по проблеме", def: "Запрос о проблеме или симптоме", temperature_hint: cold, channel: search}
@@ -577,7 +577,7 @@ namespaces:
       - {id: paid-social, name: "Реклама в соцсетях", def: "Таргетированная реклама в лентах", temperature_hint: cold, channel: paid}
       - {id: paid-display, name: "Медийная реклама и сети", def: "РСЯ, медийные баннеры, видеореклама", temperature_hint: cold, channel: paid}
       - {id: retargeting, name: "Ретаргетинг", def: "Повторный показ тем, кто уже был на сайте", temperature_hint: warm, channel: paid}
-      - {id: influencer, name: "Блогеры и посевы", def: "Интеграции у блогеров и в каналах (реклама — маркировка, I)", temperature_hint: cold, channel: paid}
+      - {id: influencer, name: "Блогеры и посевы", def: "Интеграции у блогеров и в каналах (реклама — маркировка, site 08)", temperature_hint: cold, channel: paid}
       - {id: social-organic, name: "Соцсети без рекламы", def: "Посты, видео, сообщество бренда", temperature_hint: cold, channel: social}
       - {id: messenger, name: "Мессенджеры", def: "Каналы, чаты, боты", temperature_hint: warm, channel: owned}
       - {id: email, name: "Рассылка", def: "Письмо бренда", temperature_hint: hot, channel: owned}
@@ -592,38 +592,38 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   jurisdiction:
     name: "Юрисдикция (право страницы)"
-    owner: "site B (id); требования — I (legal-requirements.yaml)"
+    owner: "site 02 (id); требования — site 08 (legal-requirements.yaml)"
     fields: "support — default | profile | none"
     values:
-      - {id: ru, name: "Россия", def: "152-ФЗ, 38-ФЗ, ЗоЗПП — по умолчанию (решение заказчика 11)", support: default}
+      - {id: ru, name: "Россия", def: "152-ФЗ, 38-ФЗ, ЗоЗПП — по умолчанию", support: default}
       - {id: eu, name: "Евросоюз", def: "GDPR, ePrivacy, DSA, EAA — переключаемый профиль брифа по запросу", support: profile}
-      - {id: kz, name: "Казахстан", def: "Не покрыто базой v0", support: none}
-      - {id: by, name: "Беларусь", def: "Не покрыто базой v0", support: none}
-      - {id: us, name: "США", def: "Не покрыто базой v0 (упоминания FTC — у I и ai-media)", support: none}
-      - {id: other, name: "Другая", def: "Не покрыто базой v0: нужна консультация юриста", support: none}
+      - {id: kz, name: "Казахстан", def: "Не покрыто базой", support: none}
+      - {id: by, name: "Беларусь", def: "Не покрыто базой", support: none}
+      - {id: us, name: "США", def: "Не покрыто базой (упоминания FTC — у site 08 и ai-media)", support: none}
+      - {id: other, name: "Другая", def: "Не покрыто базой: нужна консультация юриста", support: none}
 
   # ---------------------------------------------------------------------------------------------------------------
   ambition_level:
     name: "Уровень амбиций подачи"
-    owner: "creative (определения, бюджеты эффектов, ambition-levels.yaml); site — только id и профили бюджета страницы (P)"
-    ref: "../creative/PLAN.md, «Стартовые позиции» §1, таблица уровней (стр. 238–253, [гипотеза] до агента A creative)"
+    owner: "creative (определения, бюджеты эффектов, ambition-levels.yaml); site — только id и профили бюджета страницы (site 07)"
+    ref: "../creative/01-creative-direction/ambition-levels.yaml"
     values:
-      - {id: L0, name: "Сдержанно", def: "Определение — creative; умолчание для сервисов (решение заказчика 15)"}
+      - {id: L0, name: "Сдержанно", def: "Определение — creative; умолчание для сервисов"}
       - {id: L1, name: "Выразительно", def: "Определение — creative; умолчание для лендингов"}
       - {id: L2, name: "Иммерсивно, «вау»", def: "Определение — creative; умолчание для кампаний"}
 
   # ---------------------------------------------------------------------------------------------------------------
   conversion_channel:
     name: "Канал приёма целевого действия"
-    owner: "site A (поле site-brief conversion.channels, v0 $defs.conversion-channel); механика и число полей — F (lead-forms.yaml); v1 — J"
-    fields: "Не путать с атрибутом channel у traffic_source (группа атрибуции P). Запрет «только мессенджер, недоступный части аудитории РФ» — F lead-forms.yaml forbidden"
+    owner: "site 01 (поле site-brief conversion.channels, $defs.conversion-channel); механика и число полей — site 05 (lead-forms.yaml)"
+    fields: "Не путать с атрибутом channel у traffic_source (группа атрибуции — site 07). Запрет «только мессенджер, недоступный части аудитории РФ» — site 05, lead-forms.yaml forbidden"
     values:
       - {id: form, name: "Форма", def: "Лид-форма на странице или отдельной странице (lead-forms.yaml)"}
       - {id: quiz, name: "Квиз", def: "Многошаговый опрос с контактом на последнем шаге (block:quiz)"}
       - {id: calculator, name: "Калькулятор", def: "Расчёт цены по 1–3 параметрам с формой результата (block:calculator)"}
       - {id: phone, name: "Телефон", def: "Звонок по tel: (коллтрекинг — analytics.call_tracking)"}
       - {id: callback, name: "Обратный звонок", def: "Форма «перезвоните мне» (block:callback-request)"}
-      - {id: messenger, name: "Мессенджер", def: "MAX, Telegram, WhatsApp, VK — по доступности аудитории (F 01 §6.3)"}
+      - {id: messenger, name: "Мессенджер", def: "MAX, Telegram, WhatsApp, VK — по доступности аудитории (site 05/01 §6.3)"}
       - {id: chat, name: "Чат на сайте", def: "Виджет чата; сбор контакта — как форма (req:LR-RU-23)"}
       - {id: email, name: "Почта", def: "mailto: или адрес для писем"}
       - {id: booking-widget, name: "Виджет записи", def: "Запись на время со слотами (block:booking-widget)"}
@@ -634,12 +634,12 @@ namespaces:
   # ---------------------------------------------------------------------------------------------------------------
   procedure_step:
     name: "Шаг процедуры «бриф → страницы»"
-    owner: "site J (процедура: 10-playbooks-contracts/01-procedure-brief-to-pages.md); имена шагов и каталог дефектов DEF-* — K (09-ai-generation-evaluation)"
-    fields: "order — порядок; artifact — что остаётся на выходе; check — входной контроль (SITE-PRE K, утилиты)"
+    owner: "site 10 (процедура: 10-playbooks-contracts/01-procedure-brief-to-pages.md); имена шагов и каталог дефектов DEF-* — site 09 (09-ai-generation-evaluation)"
+    fields: "order — порядок; artifact — что остаётся на выходе; check — входной контроль (SITE-PRE, утилиты)"
     values:
       - {id: intake, order: 1, name: "Разбор и бриф", def: "Разбор сообщения заказчика, вопросы, бриф draft → proposed → approved", artifact: "site-brief.yaml", check: "SITE-PRE-01…09; site_validate.py brief"}
       - {id: proof, order: 2, name: "Доказательства", def: "Анкета доказательств, facts.yaml с источниками, датами и разрешениями", artifact: "facts.yaml (формат text)", check: "SITE-PRE-05, 06; SB-P01"}
-      - {id: site-type, order: 3, name: "Тип сайта и плейбук", def: "Тип сайта и главной страницы по дереву B 01 §6; плейбук J 02/03", artifact: "site_type, primary_page_type, строка плейбука", check: "SITE-PRE-02"}
+      - {id: site-type, order: 3, name: "Тип сайта и плейбук", def: "Тип сайта и главной страницы по дереву site 02/01 §6; плейбук site 10/02, 10/03", artifact: "site_type, primary_page_type, строка плейбука", check: "SITE-PRE-02"}
       - {id: site-map, order: 4, name: "Карта сайта", def: "Страницы, шаблоны, общая шапка и подвал, перелинковка, языки, порядок сборки (многостраничник; лендинг — карта из 1 страницы и служебных)", artifact: "site-map.yaml", check: "SITE-PRE-10; site_validate.py map"}
       - {id: page-plan, order: 5, name: "Планы страниц", def: "page-plan на каждую страницу и шаблон: цель, трафик, форма, секции, слоты, события", artifact: "plans/*.yaml", check: "SITE-PRE-11…24; site_validate.py plan"}
       - {id: sister-sync, order: 6, name: "Синхронизация с сёстрами", def: "copy-deck (text), art-direction и treatment (creative), план ассетов (ai-media), 3D (blender)", artifact: "copy-deck, treatment, asset-plan, рецепты 3D", check: "SITE-PRE-25; plan_to_assets.py"}
@@ -649,4 +649,4 @@ namespaces:
       - {id: gates, order: 10, name: "Ворота и чек-лист", def: "Ворота страницы (page-gates.yaml) и чек-лист сайта SITE-*", artifact: "отчёт page_gates.py, чек-лист", check: "page_gates.py, site-checklist.yaml"}
       - {id: fix, order: 11, name: "Правки", def: "Один дефект — одна правка; полный повтор автопроверок после правки", artifact: "журнал правок", check: "DEF-46; повтор page_gates.py"}
       - {id: acceptance, order: 12, name: "Приёмка", def: "Приёмка заказчиком: блокирующие пробелы закрыты, заглушек нет", artifact: "акт приёмки", check: "DEF-48; COPY-C-04"}
-      - {id: measure, order: 13, name: "События и A/B", def: "События и цели после запуска, реестр экспериментов, A/B по методике P", artifact: "events, реестр экспериментов", check: "SITE-PRE-22; ab_plan.py"}
+      - {id: measure, order: 13, name: "События и A/B", def: "События и цели после запуска, реестр экспериментов, A/B по методике site 07/04", artifact: "events, реестр экспериментов", check: "SITE-PRE-22; ab_plan.py"}

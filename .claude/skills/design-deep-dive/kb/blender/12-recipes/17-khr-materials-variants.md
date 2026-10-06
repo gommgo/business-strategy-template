@@ -2,7 +2,7 @@
 
 Испытание 15-showcase · рецепт по итогам фаз 1–2 · агент RC, 26.09.2026 · Blender 5.2.2 LTS (glTF-IO 5.2.40), gltf-transform 4.5.0,
 нативный gltfpack 1.2, валидатор Khronos 2.0.0-dev.3.10, three 0.186.0, Chromium headless · доказательства — дорожка KB (клавиатура «Ё»):
-проба на 3 и 12 колпачках `99-raw/experiments/KB/04-variants/`, полная модель `06-export/`, страница C `08-pages/src/model_c.js`;
+проба на 3 и 12 колпачках `examples/17-khr-materials-variants/src/`, полная модель — `examples/17-khr-materials-variants/src/export_web.py`, страница C — `examples/15-hybrid-blender-code/src/model_c.js`;
 рецепт-кандидат — `15-showcase/keyboard/README.md` · проверки RC — `99-raw/notes/trial/RC-checks/rc_glb_checks.py` · пробел базы
 закрыт: README «Что не покрыто», выжимка `15-showcase/_shared/digests/03-web-delivery.md` A.1–A.2 п. 15.
 
@@ -51,7 +51,7 @@
 ## 2. Экспорт: условия 1 и 2 (Blender 5.2.2)
 
 ```python
-# [проверено: 99-raw/experiments/KB/04-variants/variants_export.py, запуск KB-variants 25.09 19:24] Blender 5.2.2 — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/17-khr-materials-variants/src/variants_export.py, запуск KB-variants 25.09 19:24] Blender 5.2.2 — отрывок [не исполняется] # run: skip
 prefs = bpy.context.preferences.addons["io_scene_gltf2"].preferences
 before = {"KHR_materials_variants_ui": prefs.KHR_materials_variants_ui,
           "scene_has_prop": "gltf2_KHR_materials_variants_variants" in bpy.types.Scene.bl_rna.properties}
@@ -83,7 +83,7 @@ for i, cwn in enumerate(CWS):
 Для многослотовых мешей (корпус: металл + фаска) — привязка на каждый слот:
 
 ```python
-# [проверено: 99-raw/experiments/KB/06-export/export_web.py, запуск KB2-export 25.09 20:30] Blender 5.2.2 — отрывок [не исполняется] # run: skip
+# [проверено: 12-recipes/examples/17-khr-materials-variants/src/export_web.py, запуск KB2-export 25.09 20:30] Blender 5.2.2 — отрывок [не исполняется] # run: skip
 def variants(me, slot_roles):
     """slot_roles: {индекс слота: ключ роли MW} → привязки вариантов (по умолчанию — «Снег»)."""
     me.gltf2_variant_mesh_data.clear()
@@ -115,15 +115,18 @@ def variants(me, slot_roles):
 | `kb_desk.glb` (полная модель) | `gltfpack -cc -tc -tq 8 -kn -ke -km -vtf -vpf` (KTX2) | 26 | 7 (без расцветки по замыслу) | 19 из 19 | RC-checks |
 | `kb_mob.glb` | `gltfpack -cc -tw -tl 512 -kn -ke -km -vtf -vpf` (WebP) | 26 | 7 | 19 из 19 | RC-checks |
 
-Проверка кодом (без three и сети — разбор JSON-чанка GLB), сколько примитивов несут варианты до и после упаковки:
+Проверка кодом (без three и сети — разбор JSON-чанка GLB), сколько примитивов несут варианты до и после упаковки.
+Блок ждёт три модели одного предмета — сырой экспорт («kb_web_raw.glb», его пишет `examples/17-khr-materials-variants/src/export_web.py`) и две после
+постобработки §3 («kb_desk.glb», «kb_mob.glb»); в базе их нет — подставьте в `KB` папку с моделями своего проекта, а числа в `assert`
+(26 примитивов, 19 с вариантами) замените своими.
 
 ```python
-# run: system
-# Python 3 — [проверено: 99-raw/notes/trial/RC-checks/rc_glb_checks.py, вывод rc_glb_checks.out.txt] только чтение GLB дорожки KB
+# run: skip [не исполняется] — блоку нужны три модели проекта: сырой экспорт и две после постобработки
+# Python 3 — [проверено] только чтение GLB
 import json
 import struct
 
-KB = "/home/mm/Документы/app-design/blender-research/99-raw/experiments/KB/06-export/out"
+KB = "<папка с моделями проекта>"
 
 
 def gj(path):
@@ -148,7 +151,7 @@ for f in ("kb_web_raw.glb", "kb_desk.glb", "kb_mob.glb"):
 Проба (все файлы §3 подряд, цвет пикселя в центре каждого колпачка):
 
 ```js
-// [проверено: 99-raw/experiments/KB/04-variants/web/src/test.js, run_three_test.py 25.09 19:26] three r186 — отрывок
+// [проверено: 12-recipes/examples/17-khr-materials-variants/src/test.js, run_three_test.py 25.09 19:26] three r186 — отрывок
 async function selectVariant(root, parser, ext, name) {
   const idx = ext.variants.findIndex((v) => v.name === name);
   const jobs = [];
@@ -170,7 +173,7 @@ async function selectVariant(root, parser, ext, name) {
 Страница C (колпачки уже собраны в `InstancedMesh`, у каждого — отображения исходного меша; материал колпачка патчится под атлас):
 
 ```js
-// [проверено: 99-raw/experiments/KB/08-pages/src/model_c.js, buildModelC() → setColorway] three r186 — отрывок
+// [проверено: 12-recipes/examples/15-hybrid-blender-code/src/model_c.js, buildModelC() → setColorway] three r186 — отрывок
   const getMat = async (idx, keycap) => {
     const key = `${idx}`;
     if (!mats.has(key)) mats.set(key, parser.getDependency('material', idx).then((m) => (keycap ? patchUV(m) : m)));
@@ -190,7 +193,7 @@ async function selectVariant(root, parser, ext, name) {
 ```
 
 Индекс варианта — по порядку `CWS` (`snow, graphite, linen`), а не по имени: в полной модели имена вариантов — «Снег», «Графит», «Лён»
-(`kbp.COLORWAYS[cw]["title"]`). Надёжнее — искать индекс по имени из `gltf.userData.gltfExtensions.KHR_materials_variants.variants`
+(`kbp.COLORWAYS[cw]["title"]`, модуль — `examples/13-wow-light-hero/src/kbp.py`). Надёжнее — искать индекс по имени из `gltf.userData.gltfExtensions.KHR_materials_variants.variants`
 (как в пробе) [проверено: KB — оба пути работают на своих файлах].
 
 ## 5. Числа
@@ -240,6 +243,6 @@ async function selectVariant(root, parser, ext, name) {
 
 ## Ссылки
 
-Рецепт-кандидат — `15-showcase/keyboard/README.md` («три условия»); опыты — `99-raw/experiments/KB/04-variants/`, `06-export/`, журнал
+Рецепт-кандидат — `15-showcase/keyboard/README.md` («три условия»); опыты — `examples/17-khr-materials-variants/src/`, журнал
 `KB/rules.md`, `KB/NOTES.md`; пример three — `99-raw/cache/three-r186-examples/webgl_loader_gltf_variants.html`; постобработка базы —
 `../08-export-gltf/04-validation-pitfalls-presets.md §7`; гибрид — `15-hybrid-blender-code.md`.

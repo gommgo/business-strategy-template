@@ -1,4 +1,4 @@
-# Сгенерировано K/01 из 12-recipes/02-icon-series.md — блоки «run: system» в напечатанном виде.
+# Сгенерировано run_recipes.py из 12-recipes/02-icon-series.md — блоки «run: system» в напечатанном виде.
 
 # ---- блок со строки 164
 # run: system — Python 3 + Pillow — [проверено] PNG 512² → AVIF/WebP 1×/2× + страница-сетка

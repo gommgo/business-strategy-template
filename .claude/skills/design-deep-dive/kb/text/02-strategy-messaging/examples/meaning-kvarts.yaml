@@ -1,12 +1,10 @@
-# meaning-kvarts.yaml — пример 2: смысл для лендинга предзаказа товара («Кварц», вымышленный продукт kimi F/03)
-# text-research · B1 · 2026-09-24 · формат: ../meaning.schema.yaml (meaning_version 1)
+# meaning-kvarts.yaml — пример 2: смысл для лендинга предзаказа товара («Кварц», вымышленный продукт)
+# Формат: ../meaning.schema.yaml (meaning_version 1)
 #
-# Вход: описание заказчика и ответы (../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/
-# 01-description-and-questions.md, brief.yaml); факты — ../examples/facts-kvarts.yaml (B2, исправленный инвентарь).
+# Вход: описание заказчика, его ответы на вопросы и бриф; факты — ../examples/facts-kvarts.yaml (исправленный инвентарь).
 # Что показывает пример: смысл, выведенный из брифа, в котором отличие держится на механизме, которого нет в фактах
 # («сама подстраивает» — как?): проверка «только мы можем это сказать» не пройдена, главный вопрос заказчику —
-# механизм; обещание здоровья — в границах (not_promised), а не в цели страницы (урок аудита KIMI §2.7).
-# Противоречия исходных текстов kimi с этим смыслом — 99-raw/experiments/B1/01-briefs-to-meaning/README.md §1.
+# механизм; обещание здоровья — в границах (not_promised), а не в цели страницы.
 
 meaning_version: 1
 date: "2026-09-24"
@@ -19,7 +17,7 @@ offering_summary:
     запоминает 4 сценария, заряжает телефон по USB-C (18 Вт). Предзаказ: бронь 990 ₽ входит в цену, первые 300 ламп —
     8 900 ₽, после предзаказа — 11 900 ₽; отгрузка — декабрь 2026.
   kind: physical-product
-  basis: {kind: brief, ref: "описание заказчика и ответы на вопросы, 2026-09-24 (kimi F/03 01 §1, §4)"}
+  basis: {kind: brief, ref: "описание заказчика и ответы на вопросы, 2026-09-24"}
 
 audience:
   - id: evening-readers
@@ -197,7 +195,7 @@ objections:
     where: [{section_role: pricing, slot_type: cta-note}, {section_role: faq}, {section_role: footer, slot_type: footer-legal}]
     awareness_stage: product-aware
     status: needs-proof
-    basis: {kind: inferred, ref: "предзаказ у неизвестной компании; missing legal-entity и preorder-offer — blocking у B2"}
+    basis: {kind: inferred, ref: "предзаказ у неизвестной компании; missing legal-entity и preorder-offer — blocking в facts.yaml"}
   - id: obj-does-it-work
     text: "А как она «сама» понимает, какой нужен свет?"
     type: risk
@@ -251,16 +249,16 @@ boundaries:
   not_for:
     - "читает в основном с экрана или электронной книги"
   not_promised:
-    - {text: "«без усталости глаз», «бережёт зрение» и любые обещания здоровья", claim_class: health, why: "запрет заказчика и 38-ФЗ (B2 nc-eyes-health, lift: never); в kimi это стояло в product.goal"}
+    - {text: "«без усталости глаз», «бережёт зрение» и любые обещания здоровья", claim_class: health, why: "запрет заказчика и 38-ФЗ (never_claim nc-eyes-health, lift: never); в исходном брифе это стояло в product.goal"}
     - {text: "«датчик меряет свет», пока механизм не подтверждён", claim_class: fact-property, why: "missing light-mechanism"}
-    - {text: "«сборка в Казани»", claim_class: origin, why: "известен только город компании (B2 company-city, missing assembly-place)"}
+    - {text: "«сборка в Казани»", claim_class: origin, why: "известен только город компании (факт company-city, missing assembly-place)"}
     - {text: "«первая партия — 300 ламп» как размер партии", claim_class: availability-scarcity, why: "заказчик назвал цену для первых 300 ламп, не размер партии (missing first-batch-size)"}
 
 message_hierarchy_ref: ["hierarchy-kvarts-problem-aware.yaml"]
-voice_ref: "черновик: на «вы», коротко; словарь заказчика — свет, книга, вечер; избегать — здоровье глаз, революционный, уникальный (kimi brief.yaml brand.voice)"
+voice_ref: "черновик: на «вы», коротко; словарь заказчика — свет, книга, вечер; избегать — здоровье глаз, революционный, уникальный (бриф заказчика, brand.voice)"
 proof_ref: "facts-kvarts.yaml"
 legal_category: [general]
-legal_note: "Предзаказ и дистанционная продажа — оферта, возврат брони, сведения о продавце (site I, H); обещания здоровья — запрет."
+legal_note: "Предзаказ и дистанционная продажа — оферта, возврат брони, сведения о продавце (site 08/01, text 08/01); обещания здоровья — запрет."
 languages:
   - {lang: ru, role: primary}
 

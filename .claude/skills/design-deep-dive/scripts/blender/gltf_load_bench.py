@@ -10,8 +10,13 @@
 транскодирование KTX2, декодирование PNG/JPEG/WebP (ImageBitmap), сборку сцены. Первый кадр: renderer.compile + render + gl.finish.
 Память GPU — оценка: атрибуты и индексы (байты массивов), текстуры: w×h×Bpp×(4/3 при мипмапах); Bpp: RGBA8 = 4,
 BC7/BC3/ASTC4x4/ETC2-RGBA = 1, BC1/ETC1/ETC2-RGB = 0.5.
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву
+процессов — утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 import functools, http.server, json, os, shutil, socketserver, sys, tempfile, threading
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
+import kbpaths  # noqa: E402
 
 PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@__VER__/build/three.module.js",
@@ -126,7 +131,7 @@ def bench(files, runs=3, ver="0.186.0", gpu="gl", throttle=None):
     threading.Thread(target=httpd.serve_forever, daemon=True).start()
     logs = []
     try:
-        with sync_playwright() as pw:
+        with kbpaths.lock("browser"), sync_playwright() as pw:
             b = pw.chromium.launch(headless=True, args=GPU_ARGS[gpu])
             ctx = b.new_context(viewport={"width": 800, "height": 600}); p = ctx.new_page()
             if throttle:

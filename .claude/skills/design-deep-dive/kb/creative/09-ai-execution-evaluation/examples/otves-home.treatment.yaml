@@ -1,11 +1,10 @@
 # Пример treatment v1 — «Отвес», главная (лидогенерация услуг РФ, L1). Учебный, вымышленные данные site.
-# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
 # Формат примеров базы — overlay по id секций v1: в проекте treatment живёт внутри page-plan (sections[].treatment, page.treatment),
 # здесь план site не копируется. Склейка и проверка:
-#   99-raw/tools/venv-I/bin/python ../../scripts/creative/spec_check.py plan \
+#   $DDD_HOME/venv/bin/python ../../scripts/creative/spec_check.py plan \
 #     ../site/10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml \
 #     --overlay 09-ai-execution-evaluation/examples/otves-home.treatment.yaml --spec 09-ai-execution-evaluation/examples/otves-home.motion-spec.yaml
-# Что изменено против treatment v0 в плане site: target пика — id v1 (how-it-works.step вместо kak-rabotaem.step); декоративная линия —
+# Подача: target пика — id v1 (how-it-works.step); декоративная линия —
 # fx-элемент; visual_variant из block-treatments.yaml; accents и signature_sections; motion_spec_ref; reduce.stations; mobile.note.
 overlay_version: "1.0"
 checked_at: "2026-09-24"

@@ -1,7 +1,7 @@
-# motion-spec v1 — рабочий пример L2 «Звено» (флагманский запуск продукта, «история продукта»). Рецепт 10-recipes/03-product-launch-l2.md.
-# creative-research · 10-recipes · агент J · волна 3 · 2026-09-25. Демо: бренд и характеристики вымышлены; 3D — код (three 0.186.1).
-# Проверка схемой: 99-raw/tools/venv-I/bin/python 99-raw/experiments/I/01-schemas/spec_check.py spec 10-recipes/examples/l2-zveno/motion-spec.yaml
-# Сверка сборки: python3 99-raw/tools/motion_check.py 10-recipes/examples/l2-zveno/index.html --level L2 --spec <этот файл>
+# motion-spec v1 — рабочий пример L2 «Звено» (флагманский запуск продукта, «история продукта»). Рецепт creative 10-recipes/03-product-launch-l2.md.
+# Демо: бренд и характеристики вымышлены; 3D — код (three 0.186.1).
+# Проверка схемой: $DDD_HOME/venv/bin/python scripts/creative/spec_check.py spec <этот файл>
+# Сверка сборки: python3 scripts/creative/motion_check.py index.html --level L2 --spec <этот файл>
 motion_spec_version: "1.0"
 id: zveno-launch
 example: true
@@ -9,9 +9,9 @@ status: proposed
 checked_at: "2026-09-25"
 refs:
   page_plan: "../../recipes/03-product-launch-l2.recipe.yaml#/page_plan"
-  tokens: ../../../04-visual-language/marketing-tokens.json
-  effects: ../../../06-effects-catalog/effects.yaml
-  block_treatments: ../../../09-ai-execution-evaluation/block-treatments.yaml
+  tokens: ../../../../creative/04-visual-language/marketing-tokens.json
+  effects: ../../../../creative/06-effects-catalog/effects.yaml
+  block_treatments: ../../../../creative/09-ai-execution-evaluation/block-treatments.yaml
 level: L2
 executor: {target: any, harness: any, video_in: false}
 page:
@@ -24,7 +24,7 @@ page:
   scroll: {smooth: false, tail_ms_max: 450, jacking: never}
   transitions: {kind: none}
   properties_allowed: [transform, opacity, stroke-dashoffset, "uniform:uScanC"]
-  # CD (15-showcase, 25.09.2026, вариант A «код v3»): JS эффектов до взаимодействия — three 118 + сцена 14 + motion.js 1 = 133 КБ br (телефон и десктоп);
+  # Вариант A «код v3»: JS эффектов до взаимодействия — three 118 + сцена 14 + motion.js 1 = 133 КБ br (телефон и десктоп);
   # чанк поста (95 КБ, только десктоп) грузится после готовности сцены. Бюджет примера v2 был 130 (124,4 факт); уровень L2 — JS 3D ≤ 250/350.
   budget: {loops_in_view_max: 0, loops_in_view_max_mobile: 0, first_screen_scene_ms_max: 1200, js_kb_br_effects_max: 150, long_frames_pct_max: 2, cls_scroll_max: 0.1}
   never:
@@ -61,9 +61,9 @@ sections:
         lcp: not-lcp
         reduce: {strategy: final-state, describe: "лид, кнопки и факты видны с первого кадра"}
         mobile: {strategy: same}
-      # MS-05 (предупреждение spec_check): class one-shot ≠ motion.kind scroll-linked у effect:3d-scene — ожидаемо: у сцены два момента
-      # на одном холсте (скраб сюжета и одно «пробуждение» по времени), а запись каталога держит один kind (X-64, CONTRADICTIONS.md; X2).
-      # Закрыто S1b 2026-09-25: effects.yaml 3d-scene motion.kind: [scroll-linked, one-shot], MS-05 принимает класс из списка — 0 предупреждений.
+      # MS-05 (spec_check): у сцены два момента на одном холсте — скраб сюжета (scroll-linked) и одно «пробуждение» по времени
+      # (one-shot); запись каталога держит оба: effects.yaml 3d-scene motion.kind: [scroll-linked, one-shot],
+      # MS-05 принимает класс из списка — 0 предупреждений.
       - id: hero-wake
         class: one-shot
         purpose: personality
@@ -105,7 +105,7 @@ sections:
       camera: track
       stations:
         # станции холста — долей at (шаги стоят по --at той же доли); якорь DOM не задаём: зонд станций мерит край цели, а цель —
-        # fixed-холст (край «+450 px» в прогоне K — не про сцену, 99-raw/experiments/J/02-l2-zveno/motion, прогон 1); сверка — кадром станции
+        # fixed-холст (край «+450 px» в отчёте зонда — не про сцену); сверка — кадром станции
         - {id: s1, at: 0.42, describe: "8 модулей разнесены влево-вправо по высоте, камера отъехала; панель «Разберём, чтобы показать» на середине окна"}
         - {id: s2, at: 0.8, describe: "основание, J1, J2, L1 на месте, J3 садится с доворотом кольца, верхние ещё в воздухе"}
         - {id: s3, at: 0.99, describe: "рука собрана и повернулась в рабочую позу (изгиб боком к камере)"}
@@ -130,7 +130,6 @@ sections:
       frames:
         - {id: mod-s1, at: {station: s1}, viewport: desktop, describe: "Разнесённые модули справа от центра, панель шага слева", check: "видны все 8 модулей, ни один не обрезан"}
         - {id: mod-s3, at: {station: s3}, viewport: desktop, describe: "Собранная рука в рабочей позе", check: "в покое 0 % движения"}
-      sheets: ["99-raw/experiments/J/02-l2-zveno/frames/sheet.jpg"]
     reduce: {strategy: stations, describe: "станции-картинки + тот же текст шагов"}
     mobile: {strategy: simplified, describe: "холст DPR 1,25, шаги — в нижней трети окна"}
     fallback: {no_js: "станции-картинки в потоке", unsupported: "нет WebGL — createScene бросает ошибку → класс gl-pending снят → станции-картинки"}
@@ -203,6 +202,6 @@ sections:
     mobile: {strategy: stacked, describe: "список точек над видом сверху"}
     budget: {js_kb_br: 0.3, loops_in_view: 0, load: eager}
 open_questions:
-  - "Моменты холста описаны через uniform:* (сцена сама интерполирует позы); motion_check сверяет их выборкой стилей canvas — нужна проверка станций зондом кадров (shoot_stations.py I/02) под 3D."
+  - "Моменты холста описаны через uniform:* (сцена сама интерполирует позы); motion_check сверяет их выборкой стилей canvas — нужна проверка станций зондом кадров под 3D."
   - "Сглаживание кадра 0,4 с — это не перехват прокрутки (scrollY родной), но хвост картинки; порог EG-PERF-03 меряет прокрутку, а не холст."
-  - "MS-05 у hero.hero-wake (class one-shot ≠ motion.kind scroll-linked у effect:3d-scene) — ожидаемое предупреждение: у 3D-сцены два класса моментов на одном холсте — скраб сюжета (scroll-linked) и одно пробуждение по времени (one-shot, 1,2 с; на 6-й секунде первый экран стоит — EG-A11Y-01 PASS, прогон J2 0.1.3). Исправление — у владельцев формата: motion.kind списком в effects.yaml (F) или допуск one-shot с model: time и repeat: once в MS-05 spec_check (I); CONTRADICTIONS.md X-64 (X2, 2026-09-25). Закрыто S1b 2026-09-25: motion.kind списком у 3d-scene (схема F x-version 0.3), MS-05 берёт класс из списка — spec_check 0/0/0."
+  - "MS-05 у hero.hero-wake (class one-shot ≠ motion.kind scroll-linked у effect:3d-scene): у 3D-сцены два класса моментов на одном холсте — скраб сюжета (scroll-linked) и одно пробуждение по времени (one-shot, 1,2 с; на 6-й секунде первый экран стоит — EG-A11Y-01 PASS); motion.kind у 3d-scene в effects.yaml задан списком, MS-05 берёт класс из списка — предупреждения нет."

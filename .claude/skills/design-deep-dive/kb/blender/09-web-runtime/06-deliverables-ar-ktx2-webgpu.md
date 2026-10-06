@@ -345,8 +345,8 @@ not yet supported»), KTX2-текстуры — через `setTextureUtils(WebG
 
 ```bash
 # gltf-transform 4.5.0 + toktx 4.4.2 (PATH), gltfpack 1.2 нативный — [проверено]
-R=/home/mm/Документы/app-design/blender-research/99-raw/tools
-export PATH="$R/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$R/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
+R=$DDD_HOME
+export PATH="$R/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$R/bin/gltfpack-1.2:$PATH"
 cd $R/node
 npx --no-install gltf-transform etc1s in.glb etc1s.glb                         # всё ETC1S: q128, compression 1, RDO — умолчания
 npx --no-install gltf-transform uastc etc1s.glb out.glb --slots "normalTexture" --rdo --rdo-lambda 0.25 --rdo-dictionary-size 65536 --zstd 22

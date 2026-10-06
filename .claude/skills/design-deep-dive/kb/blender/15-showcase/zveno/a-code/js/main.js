@@ -1,10 +1,10 @@
-// main.js · L2 «Звено» · агент J · 2026-09-25 · Chromium 153 / WebKit 26.6 · ≈ 1,6 КБ br
-// CD (15-showcase, 25.09.2026, «код v3»): сцена v3 (three 0.186.0), касание на телефоне ставит цель руке (IK), метка
-// hero-first-frame и строка «CD timing» в консоль; остальное — как у J.
+// main.js · L2 «Звено» · Chromium 153 / WebKit 26.6 · ≈ 1,6 КБ br
+// «Код v3»: сцена v3 (three 0.186.0), касание на телефоне ставит цель руке (IK), метка
+// hero-first-frame и строка «CD timing» в консоль.
 // Порядок: HTML со смыслом и постер (LCP) → после load + простоя — import('./three-scene.js') (three 0.186.1, ≈ 123 КБ br) → первый кадр →
 // постер гаснет. В reduce (ОС или кнопка «Меньше движения») сцена не грузится: страница — стопка станций-картинок (reduce: stations).
 // Без WebGL и без JS — то же. Холст рисует только при прокрутке, указателе и одноразовом «пробуждении» (0 кадров в покое).
-// J2 (световой проход, сцена v2 — 99-raw/experiments/J/04-light-pass/src/scene.js): телефон получает quality 'low' (Standard, без карты теней).
+// Телефон получает quality 'low' (Standard, без карты теней).
 const root = document.documentElement;
 let canvas = document.querySelector('.stage');
 const hero = document.querySelector('[data-section="hero"]');
@@ -42,8 +42,8 @@ function size(force) {
   S.resize(w, h, mqMobile.matches);
   // v3: рука тянется к указателю, но не заходит в колонку текста первого экрана (десктоп — правее текста, телефон — выше H1)
   if (S.ikBounds) {
-    // CD2: правый край — по СОДЕРЖИМОМУ (строки текста, кнопки), а не по блоку: .hero__actions — флекс-строка во всю ширину
-    // контейнера (край ≈ 1312 px из 1440) → minX упирался в 0,6, правее оси руки, и рука не тянулась к тексту вовсе (фаза 1)
+    // правый край — по СОДЕРЖИМОМУ (строки текста, кнопки), а не по блоку: .hero__actions — флекс-строка во всю ширину
+    // контейнера (край ≈ 1312 px из 1440) → minX упирался в 0,6, правее оси руки, и рука не тянулась к тексту вовсе
     const els = [...document.querySelectorAll('.hero__title, .hero__lead, .hero__actions, .hero__facts, .scene--modules .step')].filter((e) => e.offsetParent);
     const rg = document.createRange();
     const edge = (e) => { if (e.classList.contains('step')) return e.getBoundingClientRect().right; rg.selectNodeContents(e); return rg.getBoundingClientRect().right; };
@@ -64,7 +64,7 @@ function boot() {
     if (!gl) { root.classList.remove('gl-pending'); done(null); return; }
     const go = () => import('./three-scene.js').then(({ createScene }) => {
       if (reduced()) { done(null); loading = null; return; }
-      // CD3 (фаза 3): вид p3 — p2 + контровой свет в дымке за рукой (приём 8, десктоп) + след инструмента пунктиром при IK (приём 10)
+      // вид p3 — p2 + контровой свет в дымке за рукой (приём 8, десктоп) + след инструмента пунктиром при IK (приём 10)
       try { S = createScene(canvas, { context: gl, dprMax: mqMobile.matches ? 1.25 : 1.5, quality: mqMobile.matches ? 'low' : 'high', look: 'p3' }); }
       catch (e) { console.info('WebGL недоступен — страница остаётся на станциях-картинках'); root.classList.remove('gl-pending'); done(null); return; }
       window.__fx = { destroyAll: () => { if (S) { S.dispose(); S = null; } } };   // EG-CODE-01: чистое разрушение
@@ -117,7 +117,7 @@ addEventListener('pointerup', (e) => {
 }, { passive: true });
 document.addEventListener('visibilitychange', () => { if (document.hidden && S) S.stop(); });
 
-// кнопка «Меньше движения» (aria-pressed) поверх переключателя F2 motion.js: выбор побеждает ОС в обе стороны, помнится
+// кнопка «Меньше движения» (aria-pressed) поверх переключателя motion.js: выбор побеждает ОС в обе стороны, помнится
 function bindToggle() {
   if (!window.Motion) { btn.hidden = true; apply(); return; }
   btn.addEventListener('click', () => window.Motion.set(window.Motion.reduced() ? 'full' : 'reduced'));

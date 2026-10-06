@@ -1,7 +1,6 @@
-# hero-two-states.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#5; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+# hero-two-states.yaml — машиночитаемый рецепт; текст — 14-recipes/01-hero-recipes.md#5; схема — recipe.schema.json
 recipe_version: 1
 checked_at: '2026-09-25'
-author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
 id: hero-two-states
 title: Hero с двумя состояниями и прожектором за курсором
 doc: 14-recipes/01-hero-recipes.md#5
@@ -22,7 +21,7 @@ route:
       aspect_ratio: '16:9'
     price_rub: 7.0
     test: M-06
-    note: 'фаза 5: M-06 не запускался; правка «другой свет» NB2 2K (7,2 ₽) сгенерирована, сдвиг не мерен'
+    note: 'M-06 не запускался; правка «другой свет» NB2 2K (7,2 ₽) сгенерирована, сдвиг не мерен'
   - role: 'запас: сохранность остального'
     model: google/gemini-3.1-flash-image-preview
     params:
@@ -37,22 +36,13 @@ spec:
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E1.spec.json
 compile: scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --out $DDD_HOME/out/ai-media/<ассет>.jsonl
-phase5:
-  jobs:
-  - 99-raw/phase5/jobs/M-06-hero-evening-edit.jsonl
-  reuse:
-  - M-01
-  - J-03
-  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
 steps:
 - id: edit-check
   cmd: python3 ../../scripts/ai-media/edit_check.py check m01.png m06.png --out out/ (без маски; edges_iou ≥ 0,9)
   status: checked
-  evidence: 99-raw/experiments/H/03-edit-check
 - id: page
   cmd: python3 ../../scripts/ai-media/page_accept.py page04.html --out out/ --click "[data-state-toggle]" --contrast ".hero h1"
   status: checked
-  evidence: 99-raw/experiments/J/06-pages-measure
 accept:
   thresholds:
   - edit.edges_iou_min
@@ -70,9 +60,9 @@ provenance:
   dst: trained
   visible_label: false
 numbers:
-  phase5_spotlight: 'прожектор честен только на совмещённых кадрах: концы одного FLF с fixed_lens совпадают до пикселя, две отдельные генерации — нет — 99-raw/phase5/showcase/demos/05-spotlight/'
+  live_spotlight: 'прожектор честен только на совмещённых кадрах: концы одного FLF с fixed_lens совпадают до пикселя, две отдельные генерации — нет'
 status:
   local: checked
   generation: unchecked
 sources:
-- 91-videos/digests/SLnGJ9iezYo.md
+- '[V:SLnGJ9iezYo]'

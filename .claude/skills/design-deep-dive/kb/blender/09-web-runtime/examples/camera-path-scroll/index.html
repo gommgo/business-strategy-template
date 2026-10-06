@@ -64,7 +64,7 @@ const [gltf, path] = await Promise.all([
 scene.add(gltf.scene);
 const curve = new THREE.CatmullRomCurve3(path.points.map((p) => new THREE.Vector3(...p)), false, 'catmullrom', 0.5);
 
-// клип из Blender: play() один раз, дальше только setTime (не paused! см. 99-raw/experiments/F2/06-anim-damp)
+// клип из Blender: play() один раз, дальше только setTime (не paused! см. blender 09/03 §6)
 const mixer = new THREE.AnimationMixer(gltf.scene);
 const clip = gltf.animations[0];
 mixer.clipAction(clip).play();

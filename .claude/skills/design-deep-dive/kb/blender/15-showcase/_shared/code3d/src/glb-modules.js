@@ -1,5 +1,5 @@
-// glb-modules.js · общий код 3D «Звена» (_shared/code3d, дорожка CD, фаза 2) — ГИБРИДНЫЙ КРЮК: модули из GLB вместо процедурных.
-// Грузится отдельным чанком только при opts.glb (страница A его не качает). GLTFLoader + MeshoptDecoder (three 0.186.0, npm-trial).
+// glb-modules.js · общий код 3D «Звена» (_shared/code3d) — ГИБРИДНЫЙ КРЮК: модули из GLB вместо процедурных.
+// Грузится отдельным чанком только при opts.glb (страница A его не качает). GLTFLoader + MeshoptDecoder (three 0.186.0).
 //
 // Контракт GLB (подробно — _shared/code3d/README.md):
 //   • модуль = узел-ПУСТЫШКА с именем из ORDER (base, j1, j2, l1, j3, l2, wrist, grip) или extras {zveno_module: '<имя>'};
@@ -10,7 +10,7 @@
 //   • начинка сустава — узел j3_inner (или extras {zveno_inner: true}) с детьми по ролям; extras детей {spread, spin} — разведение
 //     слоёв по оси X (м при полном разведении) и вращение (доля угла ротора); без узла остаётся процедурная начинка кода;
 //   • реквизит — узел cable (или extras {zveno_prop: 'cable'}) ставится как в GLB (мировая матрица), процедурный кабель тогда выключен.
-// v2 (26.09): KTX2 — если в GLB есть KHR_texture_basisu, чанк ktx2.js (KTX2Loader) догружается сам; транскодер basis — со своего
+// v2: KTX2 — если в GLB есть KHR_texture_basisu, чанк ktx2.js (KTX2Loader) догружается сам; транскодер basis — со своего
 //   домена (js/basis/, кладёт build.sh --ktx2); без --ktx2 такой GLB — ошибка → модули кода. Начинка отдельным GLB — adaptInner().
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
@@ -142,7 +142,7 @@ function prepInner(innerNode, A) {
   return rep;
 }
 // узел начинки: по приоритету extras zveno_inner → имя j3_inner → имя inner; корень сцены glTF (gltf.scene) не узел —
-// (ловушка CD3: сцена с именем «inner» целиком принималась за начинку, слои не разводились)
+// (ловушка: сцена с именем «inner» целиком принималась за начинку, слои не разводились)
 function findInner(root) {
   let best = null, rank = 9;
   root.traverse((n) => {
@@ -193,7 +193,7 @@ export function adaptModules(gltf, o = {}) {
       n.updateMatrix(); h = n;
     } else {
       // узел модуля сам несёт меш: в его TRS может сидеть квантование (gltf-transform) — сбросить нельзя; геометрия берётся в
-      // мировых координатах GLB (ждём выгрузку модуля в начале координат, как j2.glb дорожки Z)
+      // мировых координатах GLB (ждём выгрузку модуля в начале координат)
       warnings.push(`${k}: узел «${n.name}» — меш, а не пустышка: мировой TRS узла сохранён (модуль должен лежать в начале координат)`);
       const mw = n.matrixWorld.clone();
       n.removeFromParent(); n.matrixAutoUpdate = false; n.matrix.copy(mw); n.matrix.decompose(n.position, n.quaternion, n.scale);

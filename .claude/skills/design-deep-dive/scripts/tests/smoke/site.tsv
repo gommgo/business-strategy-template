@@ -1,6 +1,6 @@
 path	kind	smoke	xfail
 scripts/site/README.md	data	data	
-scripts/site/ab_plan.py	utility	help; run: --selftest	
+scripts/site/ab_plan.py	utility	help; run: --selftest; run: srm 821588 815482 rc=1; run: size --base 0 --mde-rel 0.2 rc=2	
 scripts/site/build_profile.py	step	help; run: --check; run: --selftest	
 scripts/site/checklist_export.py	utility	help; run: --check	
 scripts/site/geo_probe.py	utility	help; run: --selftest	

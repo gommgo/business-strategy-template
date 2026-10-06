@@ -210,7 +210,7 @@ OpenAPI [S18][S19]; changelog v1.4.9 (22.04.2026): «Исправлены неп
 - Общий таймаут платформы — 600 с [S1]; `/v2/images/generations` и синхронные операции — 120 с [S5][S4].
 - KIE: 4K-апскейл Veo — 5–10 минут, `extend` — «от нескольких минут до десяти с лишним» [S21].
 - `polza.py`: 4 с для картинок, 8 с для видео (±15 % разброса), потолок 600 с / 1800 с (`--max-wait`); при
-  таймауте — код выхода 3 и запись `timeout` в журнале, дожать — `polza.py download <id> --live`
+  таймауте — код выхода 4 и запись `timeout` в журнале, дожать — `polza.py download <id> --live`
   `[проверено: B/01, сценарий 08]`.
 
 ### 3.3 Формы ответа `completed`
@@ -446,7 +446,7 @@ curl -sS -X POST https://polza.ai/api/v1/storage/upload \
 
 `HTTP 200` + `status: "failed"` + `error {code, message, metadata {raw, provider_name}}` (§3.4). Типичные причины по
 KIE: модерация контента, «Only English prompts are supported» у Veo без перевода, неверные кадры, таймаут
-провайдера [S21]. `polza.py` возвращает код 4 и пишет в журнал `failed` с `usage.cost_rub` (0, если его нет).
+провайдера [S21]. `polza.py` возвращает код 5 и пишет в журнал `failed` с `usage.cost_rub` (0, если его нет).
 
 ### 9.3 Повторы и идемпотентность
 
@@ -567,13 +567,13 @@ KIE: модерация контента, «Only English prompts are supported»
 ```bash
 # ключ — только в файл с правами 600; в чат, задания и заметки не вставлять
 mkdir -p ~/.config/polza && install -m 600 /dev/null ~/.config/polza/api_key && nano ~/.config/polza/api_key
-python3 ../../scripts/ai-media/polza.py balance --live        # /v2/balance + /v1/key: ключ жив, лимит виден (0 ₽)
+python3 ../../scripts/ai-media/polza.py balance               # /v2/balance + /v1/key: ключ жив, лимит виден (0 ₽)
 python3 ../../scripts/ai-media/polza_catalog.py snapshot && python3 ../../scripts/ai-media/polza_catalog.py diff 2026-09-23 latest
 ```
 
 Окружение: `POLZA_API_KEY` / `~/.config/polza/api_key`; `POLZA_BASE_URL` (по умолчанию `https://polza.ai/api`);
-`POLZA_CATALOG` (снимок; по умолчанию последний); `POLZA_LEDGER` (`99-raw/experiments/_ledger.jsonl`);
-`POLZA_OUT_ROOT` (`99-raw/experiments/_polza`); `POLZA_BUDGET_TOTAL` (2000); `POLZA_BUDGET_AGENT`; `POLZA_MAX_JOB` (60).
+`POLZA_CATALOG` (снимок; по умолчанию последний); `POLZA_LEDGER` (`$DDD_HOME/out/ai-media/_ledger.jsonl`);
+`POLZA_OUT_ROOT` (`$DDD_HOME/out/ai-media/_polza`); `POLZA_BUDGET_TOTAL` (2000); `POLZA_BUDGET_AGENT`; `POLZA_MAX_JOB` (60).
 
 ### 12.2 Задание
 
@@ -605,7 +605,7 @@ python3 ../../scripts/ai-media/polza_catalog.py snapshot && python3 ../../script
 | `upload FILE [--permanent] --live` | multipart в хранилище (`TEMP_UPLOAD` 24 ч / `PERMANENT`) | 0 ₽ |
 | `ops ID extend\|upscale_1080p\|upscale_4k [--params JSON] --live` | операция Veo | **да** |
 | `ledger [--sum] [--agent X] [--tail N]` | журнал: суммы по агентам, резерв неоднозначных | нет |
-| `balance --live`, `history ID --live` | баланс и лимит ключа; история генерации | 0 ₽ |
+| `balance`, `history ID --live` | баланс и лимит ключа; история генерации | 0 ₽ |
 
 Коды выхода: 0 — успех; 1 — ошибка задания/проверки; 2 — отказ бюджета/цены; 3 — таймаут опроса (дожать `download`);
 4 — `failed`/`cancelled`; 5 — HTTP-ошибка; 6 — ошибка скачивания.
@@ -619,7 +619,7 @@ python3 ../../scripts/ai-media/polza_catalog.py snapshot && python3 ../../script
    отказ (`--allow-unknown-price`); `/v2/balance.available` и `/v1/key.limit_remaining` ≥ оценки.
 4. Событие `submit` в журнал **до** отправки (резерв), загрузка крупных файлов в хранилище, `POST /v1/media` с
    `"async": true`, событие `created`.
-5. Опрос 4/8 с с разбросом, печать смены статусов; `timeout` → код 3.
+5. Опрос 4/8 с с разбросом, печать смены статусов; `timeout` → код 4.
 6. `completed` → скачивание всех URL (атомарно, sha256), `/v1/history/generations/{id}` для провайдера, паспорт,
    событие `completed` с `usage.cost_rub`.
 
@@ -663,7 +663,7 @@ python3 ../../scripts/ai-media/polza_catalog.py snapshot && python3 ../../script
 
 | № | Модель и параметры | ₽ | Что решает |
 |---|---|---|---|
-| T0 | `balance --live`, `status aig_x --live` | 0 | ключ и лимит, формы баланса и ошибки 404 |
+| T0 | `balance`, `status aig_x --live` | 0 | ключ и лимит, формы баланса и ошибки 404 |
 | T1 | `tongyi-mai/z-image`, 16:9 | 1,40 | протокол: код POST, id, статусы, форма `data`, `usage.cost_rub`, хост CDN, заголовки лимитов, история по `aig_…`; повтор — кэш (0 ₽) |
 | T2 | `qwen/image-2.1`, 1:1, 1K, `background: transparent`, `output_format: png` | 3,00 | принимаются ли поля вне OpenAPI DTO; есть ли альфа |
 | T3 | `grok-imagine-video-1-5`, 480p, `duration: "1"` | 1,62 | видео-цикл и цена за секунду |
@@ -673,7 +673,7 @@ python3 ../../scripts/ai-media/polza_catalog.py snapshot && python3 ../../script
 | T7 | Z-Image + `negative_prompt` (`--allow-unknown`) | 0 / 1,40 | строгость к лишним полям |
 | T8 | `openai/gpt-image-2.5-sunburst` без `image_resolution` (`--no-fill`) | 4 / 11 | default каталога или запасная ступень `[]` |
 
-После серии — `polza.py ledger --sum` против `/v2/balance.spentAmount` и `/v1/history/generations`. Если T8 даст
+После серии — `polza.py ledger --balance --baseline RUB` и `/v1/history/generations`. Если T8 даст
 11 ₽, правило «ценовые параметры — всегда явно» становится обязательным для всех агентов (клиент уже так делает).
 
 **Итог 25.09.2026** (заход 1 фазы 5, 09:07–09:50; протокол — 20,76 ₽ с B2-03) `[проверено]`:

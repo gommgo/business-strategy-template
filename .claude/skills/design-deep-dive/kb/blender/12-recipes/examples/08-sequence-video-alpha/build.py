@@ -1,4 +1,4 @@
-# Сгенерировано K/01 из 12-recipes/08-sequence-video-alpha.md — блоки python в напечатанном виде, по порядку.
+# Сгенерировано run_recipes.py из 12-recipes/08-sequence-video-alpha.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 37
 # Blender 5.2.2 — [проверено] рецепт 08: вращение 360° импортированного GLB → PNG RGBA

@@ -1,10 +1,10 @@
-# Маркетинговые шаблоны (группа MKT) — русский. Задание C: «ваш надёжный партнёр», «мы не просто…», «больше, чем…»,
+# Маркетинговые шаблоны (группа MKT) — русский. Состав: «ваш надёжный партнёр», «мы не просто…», «больше, чем…»,
 # заголовок «X, который Y», универсальные выгоды, шаблонный FAQ, слабые CTA, запрещённые первые фразы Hallmark
-# (copy.md «Banned opening lines», MIT) в русской версии. Превосходная степень и «№ 1» — сигнал для права (H, 38-ФЗ
+# (copy.md «Banned opening lines», MIT) в русской версии. Превосходная степень и «№ 1» — сигнал для права (text 08/01, 38-ФЗ
 # ст. 5); механика срочности и дефицита — ux 06/04 и site; здесь — только текст.
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   group: MKT
   lang: ru
@@ -33,7 +33,7 @@ rules:
     message: "«Больше, чем просто X» — вариант «это не просто X»."
     replacement: "сказать, что именно входит: «В кофейне 30 мест и зона для ноутбуков»"
     examples: {bad: "Это больше, чем просто кофейня.", good: "В кофейне 30 мест и зона для ноутбуков."}
-    source: "задание C (маркетинговые шаблоны); humanizer-ru п.13; Russell и др. 2025 (Table 12: «it's not about ___ it's about ___»)"
+    source: "humanizer-ru п.13; Russell и др. 2025 (Table 12: «it's not about ___ it's about ___»)"
     evidence: "[практика]"
   - id: ru-mkt-headline-which
     marker_id: COPY-M-MKT-04
@@ -44,7 +44,7 @@ rules:
     message: "Заголовок-шаблон «X, который Y» («Сервис, который понимает ваш бизнес»)."
     replacement: "назвать результат или категорию с фактом: «Бухгалтерия для кофеен: зарплата за 10 минут»"
     examples: {bad: "Сервис, который понимает ваш бизнес", good: "Бухгалтерия для кофеен: зарплата за 10 минут"}
-    source: "задание C; Hallmark copy.md (distribution-default openers); ui 11/01 («Build the future of work») через аудит UI §6"
+    source: "Hallmark copy.md (distribution-default openers); ui 11/01 («Build the future of work»)"
     evidence: "[практика]"
   - id: ru-mkt-universal-benefits
     marker_id: COPY-M-MKT-05
@@ -54,7 +54,7 @@ rules:
     message: "Универсальная выгода, подходящая любому продукту («экономьте время и деньги», «выведите бизнес на новый уровень»)."
     replacement: "выгода с числом и механизмом: «сократите приём заявки с 20 до 5 минут»"
     examples: {bad: "Экономьте время и деньги — выведите бизнес на новый уровень!", good: "Сократите приём заявки с 20 до 5 минут."}
-    source: "задание C; Hallmark copy.md («promises a feeling without naming a feature»); ux 07/06 §1 («всё, что нужно»)"
+    source: "Hallmark copy.md («promises a feeling without naming a feature»); ux 07/06 §1 («всё, что нужно»)"
     evidence: "[практика]"
   - id: ru-mkt-faq-template
     marker_id: COPY-M-MKT-06
@@ -62,9 +62,9 @@ rules:
     slot_types: [faq-q, section-title, card-title]
     pattern: '^\s*(?:почему\s+(?:стоит\s+)?(?:выбирают|выбрать)\s+(?:именно\s+)?(?:нас|нашу\s+компанию)|почему\s+мы|какие\s+(?:у\s+вас|ваши)\s+преимущества|чем\s+вы\s+отличаетесь\s+от\s+(?:конкурентов|других)|почему\s+(?:вам\s+)?стоит\s+(?:обратиться|работать)\s+(?:к\s+нам|с\s+нами))\s*\??\s*$'
     message: "Шаблонный вопрос FAQ, который задаёт компания, а не клиент."
-    replacement: "вопросы — из голоса клиента (B2): цена, сроки, гарантия, что если не подойдёт"
+    replacement: "вопросы — из голоса клиента (voc.yaml): цена, сроки, гарантия, что если не подойдёт"
     examples: {bad: "Почему стоит выбрать именно нас?", good: "Сколько стоит выезд замерщика?"}
-    source: "задание C («шаблонный FAQ»); B2 (голос клиента); аудит контракта §6 п.10 (FAQ как блок — решает site)"
+    source: "text 02/04 (голос клиента); kb/common/owners.md § Общие правила тройки (FAQ как блок — решает site)"
     evidence: "[практика]"
   - id: ru-mkt-weak-cta
     marker_id: COPY-M-MKT-07
@@ -74,7 +74,7 @@ rules:
     message: "Кнопка без результата («Узнать больше», «Отправить», «Подробнее»)."
     replacement: "глагол + результат: «Получить расчёт за 15 минут», «Записаться на замер»"
     examples: {bad: "Узнать больше", good: "Получить расчёт за 15 минут"}
-    source: "ux 07/06 §3.2, §4.1 (Подробнее, Submit, Learn more); Hallmark copy.md «Buttons»; задание C (CTA «Узнать больше»)"
+    source: "ux 07/06 §3.2, §4.1 (Подробнее, Submit, Learn more); Hallmark copy.md «Buttons»"
     evidence: "[консенсус]"
   - id: ru-mkt-generic-cta
     marker_id: COPY-M-MKT-07
@@ -84,8 +84,8 @@ rules:
     message: "Действие без результата («Оставить заявку»): законно, но слабее кнопки с результатом."
     replacement: "назвать, что человек получит: «Получить смету», «Записаться на бесплатный замер»"
     examples: {bad: "Оставить заявку", good: "Получить смету за 1 день"}
-    source: "ux 07/02 (CTA-матрица); Hallmark copy.md «Specific verbs»; формулы CTA — агент E (волна 2)"
-    evidence: "[практика]; норму закрепит E по корпусу D"
+    source: "ux 07/02 (CTA-матрица); Hallmark copy.md «Specific verbs»; формулы CTA — text 04/01"
+    evidence: "[практика]; норма — copy-slots.yaml (cta-label)"
   - id: ru-mkt-banned-openers
     marker_id: COPY-M-MKT-08
     level: warning
@@ -94,8 +94,8 @@ rules:
     message: "Запрещённая первая фраза (русская версия списка Hallmark): «Добро пожаловать в мир…», «Инновационные решения», «нового поколения», «Откройте для себя»."
     replacement: "первая строка — конкретика: названное место, дата, вертикаль, число; нет материала — спросить у заказчика одно существительное или глагол"
     examples: {bad: "Добро пожаловать в мир инновационных решений нового поколения", good: "Бухгалтерия для кофеен: зарплата за 10 минут"}
-    source: "Hallmark skills/hallmark/references/copy.md «Banned opening lines» (MIT; Built for the modern team, Unleash your [X], Where X meets Y, Empower your…, Reimagine the way you…, Supercharge your workflow, Innovative solutions, Seamless integration, In today's digital landscape, Next-generation) — русские эквиваленты [мнение] агента C"
-    evidence: "[практика]; русские эквиваленты [не проверено] частотой — D"
+    source: "Hallmark skills/hallmark/references/copy.md «Banned opening lines» (MIT; Built for the modern team, Unleash your [X], Where X meets Y, Empower your…, Reimagine the way you…, Supercharge your workflow, Innovative solutions, Seamless integration, In today's digital landscape, Next-generation) — русские эквиваленты [мнение]"
+    evidence: "[практика]; русские эквиваленты [не проверено] частотой"
   - id: ru-mkt-benefit-speak
     marker_id: COPY-M-MKT-09
     level: warning
@@ -103,7 +103,7 @@ rules:
     message: "Глагол-обещание без механизма («прокачайте», «трансформируйте», «выведет на новый уровень»)."
     replacement: "конкретный глагол и объект: «подключите CRM и отвечайте на заявки за 5 минут»"
     examples: {bad: "Прокачайте продажи и трансформируйте бизнес.", good: "Подключите CRM и отвечайте на заявки за 5 минут."}
-    source: "Gesso benefit-speak (elevate, supercharge, streamline, empower, unleash…); impeccable marketing-buzzword; русские эквиваленты [мнение] агента C"
+    source: "Gesso benefit-speak (elevate, supercharge, streamline, empower, unleash…); impeccable marketing-buzzword; русские эквиваленты [мнение]"
     evidence: "[практика]"
   - id: ru-mkt-superlatives
     marker_id: COPY-M-MKT-10
@@ -114,8 +114,8 @@ rules:
     message: "Превосходная степень или «№ 1» без подтверждения — примета пустой рекламы; право — COPY-L-SUP-01 (claims-rules.yaml)."
     replacement: "критерий и источник из facts.yaml («№ 1 по числу отзывов на Яндекс Картах в Твери, сентябрь 2026») или убрать"
     examples: {bad: "Лучший сервис в городе и лидер рынка.", good: "Сервис с рейтингом 4,8 на Яндекс Картах."}
-    source: "PLAN.md риск 6 (38-ФЗ ст. 5 — H); WP:AISIGNS (новые модели избегают «the best» — превосходная степень не примета ИИ, а риск права)"
-    evidence: "[стандарт] для права — H; как примета слопа [спорно]"
+    source: "38-ФЗ ст. 5 (text 08/01); WP:AISIGNS (новые модели избегают «the best» — превосходная степень не примета ИИ, а риск права)"
+    evidence: "[стандарт] для права — text 08/01; как примета слопа [спорно]"
   - id: ru-mkt-label-headings
     marker_id: COPY-M-MKT-11
     level: warning
@@ -126,7 +126,7 @@ rules:
     replacement: "заголовок-утверждение: «Сдаём объект за 30 дней — или платим неустойку»; в навигации многостраничника ярлык законен"
     note: "конвенции «Частые вопросы», «Вопросы и ответы», «Контакты» — вне шаблона (CONTRADICTIONS X24)"
     examples: {bad: "Наши преимущества", good: "Сдаём объект за 30 дней"}
-    source: "PLAN.md «Жанры» (outline-тест на лендинге инвертирован: заголовки складываются в сюжет); ux 07/06 §3.2 (гиперонимы); PLAN.md поправка к ux 07/06 §3.2 (в навигации — конвенция)"
+    source: "06-anti-slop/01 §10 (outline-тест на лендинге инвертирован: заголовки складываются в сюжет); ux 07/06 §3.2 (гиперонимы); поправка к ux 07/06 §3.2 (в навигации — конвенция)"
     evidence: "[практика]"
   - id: ru-mkt-false-urgency
     marker_id: COPY-M-MKT-12

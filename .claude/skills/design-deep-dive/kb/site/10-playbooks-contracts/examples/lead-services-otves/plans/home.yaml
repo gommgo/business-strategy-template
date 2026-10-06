@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · план главной (лендинг) — перевод плана E v0.9 в v1; подача — treatment creative (опыт A/02 creative).
+# ПРИМЕР v1 · план главной (лендинг); подача — treatment creative.
 page_plan_version: '1'
 checked: '2026-09-24'
 status: proposed
@@ -58,7 +58,7 @@ page:
       awareness: product-aware
       share: 0.15
     rule: 'Порядок — под solution-aware (Директ, доля 0,5). Для product-aware (карты и рекомендации, 0,4) рейтинг площадки — в первом
-      экране, кейс и рейтинг — в первой половине. Отдельная страница не нужна: различается один признак из четырёх (C 02 §3.4)'
+      экране, кейс и рейтинг — в первой половине. Отдельная страница не нужна: различается один признак из четырёх (site 03/02 §3.4)'
   traffic:
   - traffic_source: paid-search
     temperature: warm
@@ -125,11 +125,11 @@ page:
         slots:
         - hero.headline
         - hero.subheadline
-      event_param: hero_variant (параметр события — P)
+      event_param: hero_variant (параметр события — events.yaml)
   length:
     sections_min: 8
     sections_max: 12
-    basis: 'C 02 §1.3: ЛУ 8–12; дорогая услуга с высоким риском — к верхнему краю (12 секций без шапки и подвала)'
+    basis: 'site 03/02 §1.3: ЛУ 8–12; дорогая услуга с высоким риском — к верхнему краю (12 секций без шапки и подвала)'
   budget_profile: landing-lead-services@L1
   ambition_level: L1
   navigation:
@@ -143,7 +143,7 @@ page:
     indexable: true
     h1: hero.headline
     ssr_required: true
-    notes: разметка (LocalBusiness, Service) — решение H (head-kit.yaml); Директ ведёт на канонический адрес с utm-метками
+    notes: разметка (LocalBusiness, Service) — по head-kit.yaml; Директ ведёт на канонический адрес с utm-метками
     canonical: self
     structured_data:
     - LocalBusiness
@@ -187,7 +187,7 @@ page:
     - message
     - download
     load_after_consent: true
-    notes: id событий — P (events.yaml); вариант hero — параметр события
+    notes: id событий — events.yaml; вариант hero — параметр события
   treatment:
     art_direction_ref: ../../../../../creative/01-creative-direction/examples/art-direction-otves.json#/directions/0
     motion_level: expressive
@@ -312,7 +312,7 @@ sections:
       action: message
       target:
         kind: messenger
-        value: канал — F (доступность мессенджеров в РФ)
+        value: канал — site 05 (доступность мессенджеров в РФ)
       style: channel
       event: event:messenger-click
   mobile:
@@ -539,7 +539,7 @@ sections:
       binds:
       - exclude-1-text
   notes:
-    structure: 'у ЛУ состав и цена — 2–4-я секция (C/01: цена — медиана 0,31)'
+    structure: 'у ЛУ состав и цена — 2–4-я секция (site 03/01: цена — медиана 0,31)'
   treatment:
     level: L0
     visual_role: calm
@@ -608,7 +608,7 @@ sections:
         ref: lead-forms.yaml#calculator-inline
         consent: separate-checkbox
         success: inline
-      note: 'поля: площадь м², тип работ — F'
+      note: 'поля: площадь м², тип работ — site 05'
       event: event:calculator-result
     - id: cta
       slot: cta-primary
@@ -708,7 +708,7 @@ sections:
       intent: записаться на замер
     - id: consent
       slot: form-consent
-      intent: отдельное согласие на обработку ПД для ответа на заявку (I)
+      intent: отдельное согласие на обработку ПД для ответа на заявку (site 08)
     - id: next-steps
       slot: form-next-steps
       intent: прораб перезвонит и договорится о дне замера — срок ответа не подтверждён
@@ -752,12 +752,12 @@ sections:
       action: message
       target:
         kind: messenger
-        value: канал — F
+        value: канал — site 05
       style: channel
       event: event:messenger-click
   notes:
-    conversion: первая форма после цены (C 01 §3.2); поля и антиспам — F
-    legal: согласие — отдельный документ /consent (152-ФЗ, с 01.09.2025 — I)
+    conversion: первая форма после цены (site 03/01 §3.2); поля и антиспам — site 05
+    legal: согласие — отдельный документ /consent (152-ФЗ, с 01.09.2025 — site 08)
     a11y: подписи над полями, ошибки у поля
   events:
   - trigger: start
@@ -999,7 +999,7 @@ sections:
       - summary
       on_missing: rewrite-without
   notes:
-    legal: кейс и отзыв — с разрешением (permission granted в фактах); типичный срок рядом не показан — фактов нет (text B2 §5.4)
+    legal: кейс и отзыв — с разрешением (permission granted в фактах); типичный срок рядом не показан — фактов нет (text 02/03 §5.4)
   treatment:
     level: L0
     visual_role: support
@@ -1052,7 +1052,7 @@ sections:
         value: карточка организации на Яндекс Картах (бриф search.profiles)
       style: link
   notes:
-    seo: AggregateRating о себе на своём сайте — решение H
+    seo: AggregateRating о себе на своём сайте — по head-kit.yaml
     legal: рейтинг — с датой снимка; срок пересмотра факта 2026-11-01
   treatment:
     level: L0
@@ -1286,7 +1286,7 @@ sections:
       binds:
       - qa-4-a
   notes:
-    seo: ответы — в HTML; FAQPage — решение H
+    seo: ответы — в HTML; FAQPage — по head-kit.yaml
     structure: блокер «смета вырастет» закрыт раньше (kak-rabotaem, garantiya); здесь — остаток
   treatment:
     level: L0
@@ -1476,11 +1476,11 @@ overlays:
         value: 'tel: номер компании из брифа'
       style: channel
       event: event:phone-click
-  notes: ≤ 72 px + safe area; вместе с шапкой ≤ 20 % высоты экрана (C 03 §4.2–4.3)
+  notes: ≤ 72 px + safe area; вместе с шапкой ≤ 20 % высоты экрана (site 03/03 §4.2–4.3)
 - id: cookie
   block: cookie-banner
   state: auto
-  when: Метрика — только после согласия (I, P)
+  when: Метрика — только после согласия (site 08, site 07)
   slots:
     text:
     - id: text
@@ -1491,7 +1491,7 @@ overlays:
     - id: reject
       slot: cta-label
       intent: отклонить — равный вес
-  notes: 'немодальный, не закрывает призыв hero на телефоне (C/02: у 3 из 27 закрывал)'
+  notes: 'немодальный, не закрывает призыв hero на телефоне (site 03/03: у 3 из 27 закрывал)'
   hide_when: []
 - id: chat
   block: chat-widget
@@ -1501,7 +1501,7 @@ overlays:
 - id: popup
   block: capture-popup
   state: 'off'
-  notes: 'решение заказчика 15; бриф policies.capture_popup: off'
+  notes: 'бриф policies.capture_popup: off'
   hide_when: []
 open_questions:
 - Реквизиты для подвала (missing:legal-details, blocking) — без них не публикуем (бриф q-legal-details)
@@ -1511,5 +1511,5 @@ open_questions:
 - Срок ответа на заявку (бриф q-response-time) — строка next-steps без срока до ответа
 - Фото объектов «до/после» (missing:before-after-photos) — кейс без фото до ответа
 - Текст объявлений Директа (бриф q-direct-ad) — варианты variant_map сверить с объявлениями
-- Наборы полей формы и калькулятора — F (lead-forms.yaml); id событий — P (events.yaml); разметка — H; согласие и баннер — I
+- Наборы полей формы и калькулятора — lead-forms.yaml; id событий — events.yaml; разметка — head-kit.yaml; согласие и баннер — site 08
 - 'q-zamer-slots: нет расписания замерщика → набор consultation-request вместо booking (lead-forms.yaml)'

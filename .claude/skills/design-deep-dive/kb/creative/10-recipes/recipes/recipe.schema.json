@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:creative:recipe:0",
-  "title": "Рецепт эффектной страницы от брифа до кода (creative-research · 10-recipes · J · волна 3)",
-  "description": "Машиночитаемая половина рецепта NN-<тип>-<уровень>.md. Ссылки на чужие id — с пространством имён (block:, effect:, cliche:, recipe:) или по файлу соседа. Проверка: 99-raw/tools/venv-J/bin/python ../../scripts/creative/recipe_check.py 10-recipes/recipes/*.recipe.yaml (схема + id блоков site, эффектов F, клише H, ворот K + журнал вариативности ≥ 4 из 8 осей). checked_at 2026-09-25.",
+  "title": "Рецепт эффектной страницы от брифа до кода (creative · 10-recipes)",
+  "description": "Машиночитаемая половина рецепта NN-<тип>-<уровень>.md. Ссылки на чужие id — с пространством имён (block:, effect:, cliche:, recipe:) или по файлу соседа. Проверка: $DDD_HOME/venv/bin/python ../../scripts/creative/recipe_check.py 10-recipes/recipes/*.recipe.yaml (схема + id блоков site, эффектов, клише, ворот + журнал вариативности ≥ 4 из 8 осей). checked_at 2026-09-25.",
   "type": "object",
   "additionalProperties": false,
   "required": ["recipe_version", "id", "title_ru", "status", "checked_at", "page_type", "level", "budget_profile", "inputs", "concept", "ledger", "page_plan", "motion", "stack", "assets", "copy", "budget", "gates", "decisions", "errors"],
@@ -10,7 +10,7 @@
     "recipe_version": {"const": "0.1"},
     "id": {"type": "string", "pattern": "^recipe:[a-z0-9]+(-[a-z0-9]+)*$"},
     "title_ru": {"type": "string", "minLength": 10},
-    "status": {"enum": ["draft", "proposed", "verified"], "description": "verified — есть рабочий пример, прошедший ворота K (0 FAIL B и S)"},
+    "status": {"enum": ["draft", "proposed", "verified"], "description": "verified — есть рабочий пример, прошедший ворота эффектов (0 FAIL B и S)"},
     "checked_at": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
     "site_type": {"type": "string", "description": "site_type словаря site (landing-site, corporate-site, campaign-site, portfolio-site …)"},
     "page_type": {"type": "string", "description": "page_type словаря site (landing-lead-services, landing-saas, landing-campaign …)"},
@@ -24,7 +24,7 @@
       "properties": {
         "site_example": {"type": "string"}, "playbook": {"type": "string"}, "art_direction_example": {"type": "string"},
         "copy_deck_example": {"type": "string"}, "asset_plan_example": {"type": "string"}, "treatment_example": {"type": "string"},
-        "motion_spec_example": {"type": "string"}, "kimi": {"type": "string"}, "video": {"type": "array", "items": {"type": "string", "pattern": "^V:[A-Za-z0-9_-]{11} \\d{1,2}:\\d{2}"}}
+        "motion_spec_example": {"type": "string"}, "video": {"type": "array", "items": {"type": "string", "pattern": "^V:[A-Za-z0-9_-]{11} \\d{1,2}:\\d{2}"}}
       }
     },
     "concept": {
@@ -40,7 +40,7 @@
     "ledger": {
       "type": "object", "additionalProperties": false,
       "required": ["paper", "display_style", "accent_hue", "macrostructure", "hero_architecture", "main_technique", "motion_signature", "corner_language"],
-      "description": "8 осей журнала вариативности H (08-uniqueness-anti-slop/02 §3.2): рецепты подряд различаются ≥ 4 осями; смена только палитры = 1 ось.",
+      "description": "8 осей журнала вариативности (08-uniqueness-anti-slop/02 §3.2): рецепты подряд различаются ≥ 4 осями; смена только палитры = 1 ось.",
       "properties": {
         "paper": {"enum": ["light", "light-warm", "mid", "dark", "dark-warm"]},
         "display_style": {"enum": ["serif", "grotesque", "condensed", "wide", "mono", "rounded", "script"]},

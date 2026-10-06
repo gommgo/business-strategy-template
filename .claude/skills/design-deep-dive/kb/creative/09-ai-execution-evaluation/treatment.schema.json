@@ -76,17 +76,17 @@
       "type": "array",
       "maxItems": 6,
       "items": {"$ref": "#/$defs/effect-use"},
-      "description": "Эффекты секции — ссылки на effects.yaml. Цена, фолбэк, reduce и телефон эффекта — в effects.yaml (F); здесь — где, зачем и с какими параметрами он применён; время и прокрутка — в motion-spec."
+      "description": "Эффекты секции — ссылки на effects.yaml. Цена, фолбэк, reduce и телефон эффекта — в effects.yaml; здесь — где, зачем и с какими параметрами он применён; время и прокрутка — в motion-spec."
     },
     "background": {"$ref": "#/$defs/background"},
     "composition": {"$ref": "#/$defs/composition"},
     "display_role": {
       "enum": ["none", "display-s", "display-m", "display-l", "display-xl", "display-poster", "display-quote"],
-      "description": "Роль дисплейной типографики главного заголовка секции (токены type.* marketing-tokens.json, D 04-visual-language/01 §2): poster — 1–2 слова ≤ 12 знаков; xl — H1 ≤ 20; l — 21–38 (text-only); m — split ≤ 36; s — H2; quote — выдержка ≤ 120. Длину сверяет spec_check.py по выбранному варианту copy-deck."
+      "description": "Роль дисплейной типографики главного заголовка секции (токены type.* marketing-tokens.json, creative 04/01 §2): poster — 1–2 слова ≤ 12 знаков; xl — H1 ≤ 20; l — 21–38 (text-only); m — split ≤ 36; s — H2; quote — выдержка ≤ 120. Длину сверяет spec_check.py по выбранному варианту copy-deck."
     },
     "visual_variant": {
       "$ref": "#/$defs/id",
-      "description": "Визуальный вариант блока из block-treatments.yaml (I) — поверх структурного variant блока site; id уникален внутри блока."
+      "description": "Визуальный вариант блока из block-treatments.yaml — поверх структурного variant блока site; id уникален внутри блока."
     },
     "loops": {
       "type": "integer",
@@ -105,7 +105,7 @@
       "uniqueItems": true,
       "maxItems": 2,
       "items": {"type": "string", "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$"},
-      "description": "Записи библиотеки референсов B, по которым сделана секция. Один референс — не больше одной секции страницы (проверка скриптом)."
+      "description": "Записи библиотеки референсов, по которым сделана секция. Один референс — не больше одной секции страницы (проверка скриптом)."
     },
     "motion_spec_ref": {
       "type": "string",
@@ -119,7 +119,7 @@
     "flash_check": {"$ref": "#/$defs/flash-check"},
     "lcp_note": {
       "type": "string",
-      "description": "Для первого экрана: какой элемент — кандидат LCP и как он появляется (без анимации или вход по норме CRV-AL-09: transform со сдвигом ≤ 24 px, clip-path или opacity от 0,01; не из opacity: 0, не маской строк — E 05-motion/02 §10)."
+      "description": "Для первого экрана: какой элемент — кандидат LCP и как он появляется (без анимации или вход по норме CRV-AL-09: transform со сдвигом ≤ 24 px, clip-path или opacity от 0,01; не из opacity: 0, не маской строк — creative 05/02 §10)."
     },
     "viewer": {
       "type": "object",
@@ -207,7 +207,7 @@
       "then": {"required": ["background"], "properties": {"background": {"required": ["text_contrast"]}}}
     },
     {
-      "$comment": "Видео, секвенция или прелоадер — проверка вспышек (WCAG 2.3.1; E 05-motion/01 §3.4).",
+      "$comment": "Видео, секвенция или прелоадер — проверка вспышек (WCAG 2.3.1; creative 05/01 §3.4).",
       "if": {"anyOf": [
         {"required": ["background"], "properties": {"background": {"required": ["kind"], "properties": {"kind": {"enum": ["video-loop", "sequence"]}}}}},
         {"required": ["effects"], "properties": {"effects": {"contains": {"properties": {"ref": {"enum": ["effect:video-loop-hero", "effect:cinemagraph", "effect:video-scrub", "effect:image-sequence", "effect:alpha-video-object", "effect:preloader"]}}}}}}
@@ -229,7 +229,7 @@
     "id": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
     "level": {
       "enum": ["L0", "L1", "L2"],
-      "description": "Уровень амбиций: L0 сдержанно, L1 выразительно, L2 иммерсивно («вау») — ambition-levels.yaml (A)."
+      "description": "Уровень амбиций: L0 сдержанно, L1 выразительно, L2 иммерсивно («вау») — ambition-levels.yaml."
     },
     "motion-level": {
       "enum": ["none", "subtle", "expressive", "cinematic"],
@@ -237,24 +237,24 @@
     },
     "visual-role": {
       "enum": ["peak", "accent", "support", "calm", "pause", "chrome"],
-      "description": "Место секции в ритме (E 05-motion/02 §1.2): peak — главный приём сцены (pin-скраб, 3D, горизонталь, видео-скраб, секвенция); accent — один приём малой силы без закрепления и скраба; support — системное появление; calm — только отклик (чтение, доказательства, форма, цены); pause — смена темпа без плотного текста; chrome — шапка, подвал, баннеры. Счёт по уровню — 01-creative-direction/ambition-levels.yaml: пики и акценты — section_distribution, секции с signature-эффектом — signature_moves_max; сверяет spec_check.py."
+      "description": "Место секции в ритме (creative 05/02 §1.2): peak — главный приём сцены (pin-скраб, 3D, горизонталь, видео-скраб, секвенция); accent — один приём малой силы без закрепления и скраба; support — системное появление; calm — только отклик (чтение, доказательства, форма, цены); pause — смена темпа без плотного текста; chrome — шапка, подвал, баннеры. Счёт по уровню — 01-creative-direction/ambition-levels.yaml: пики и акценты — section_distribution, секции с signature-эффектом — signature_moves_max; сверяет spec_check.py."
     },
     "target": {
       "type": "string",
       "pattern": "^(section|[a-z0-9]+(-[a-z0-9]+)*(\\.[a-z0-9]+(-[a-z0-9]+)*){0,2})$",
-      "description": "Куда применено: section; «<id секции>.<id слота>» (hero.headline); «<id секции>.<группа>» (how-it-works.step — все экземпляры step-N); «<id секции>.<группа-N>.<элемент>» (product-demo.row-1.media); «<id секции>.fx-<имя>» — декоративный элемент подачи, которого нет в плане (линия, маркер). Id — v1 page-plan (роль или блок), не старые id E site; разрешение — spec_check.py. В разметке исполнителя — data-section, data-slot, data-group, data-fx, data-moment, data-effect (motion-spec.schema.json x-dom-contract)."
+      "description": "Куда применено: section; «<id секции>.<id слота>» (hero.headline); «<id секции>.<группа>» (how-it-works.step — все экземпляры step-N); «<id секции>.<группа-N>.<элемент>» (product-demo.row-1.media); «<id секции>.fx-<имя>» — декоративный элемент подачи, которого нет в плане (линия, маркер). Id — v1 page-plan (роль или блок); разрешение — spec_check.py. В разметке исполнителя — data-section, data-slot, data-group, data-fx, data-moment, data-effect (motion-spec.schema.json x-dom-contract)."
     },
     "effect-use": {
       "type": "object",
       "additionalProperties": false,
       "required": ["ref"],
       "properties": {
-        "ref": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$", "description": "id эффекта effects.yaml (F); наличие в каталоге и уровень — spec_check.py."},
+        "ref": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$", "description": "id эффекта effects.yaml; наличие в каталоге и уровень — spec_check.py."},
         "target": {"$ref": "#/$defs/target"},
         "trigger": {"enum": ["load", "in-view", "scroll", "pin-scroll", "hover", "pointer", "click", "idle-loop", "page-transition"]},
         "purpose": {"enum": ["signature", "support", "feedback"], "description": "signature — фирменный приём страницы (art-direction signature_move или пик); support — поддерживает систему; feedback — отклик на действие."},
-        "class": {"enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"], "description": "Класс движения E 05-motion/01 §1.3 (= effects.yaml motion.kind); по умолчанию — из каталога; несовпадение — предупреждение spec_check.py."},
-        "impl": {"enum": ["css", "css-sda", "waapi", "gsap", "motion", "webgl", "lottie", "rive", "video", "svg"], "description": "Слой реализации (предложение G): модуль эффекта с data-effect; версии — stack.yaml."},
+        "class": {"enum": ["one-shot", "scroll-linked", "loop", "pointer", "transition", "static"], "description": "Класс движения creative 05/01 §1.3 (= effects.yaml motion.kind); по умолчанию — из каталога; несовпадение — предупреждение spec_check.py."},
+        "impl": {"enum": ["css", "css-sda", "waapi", "gsap", "motion", "webgl", "lottie", "rive", "video", "svg"], "description": "Слой реализации (creative 07/02 §6): модуль эффекта с data-effect; версии — stack.yaml."},
         "params": {
           "type": "object",
           "additionalProperties": {"type": ["number", "string", "boolean"]},
@@ -274,7 +274,7 @@
           "description": "surface — фон страницы; inverse — инверсная секция; tint — тонированная; gradient — статичный CSS-градиент; mesh-gradient — mesh кодом (CSS/SVG, без WebGL); pattern, grain — фактура; image — фото или картинка; video-loop — немая петля; sequence — видео-скраб или секвенция кадров сцены; shader — WebGL-шейдер; webgl-3d — 3D-сцена; transparent — поверх общего фона."
         },
         "tone": {"enum": ["light", "mid", "dark"]},
-        "token": {"type": "string", "description": "Токен marketing-tokens.json (D), например color.surface.inverse."},
+        "token": {"type": "string", "description": "Токен marketing-tokens.json, например color.surface.inverse."},
         "media_slot": {"type": "string", "description": "id media-слота этой секции (page-plan v1 slots.media[].id)."},
         "effect": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$"},
         "text_contrast": {"enum": ["aa", "aa-large", "aaa"], "default": "aa", "description": "Цель контраста текста на фоне (F83 в самой светлой точке зоны текста и по кадрам видео — ai-media 10/03 §1)."},
@@ -284,12 +284,12 @@
     "composition": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Визуальная композиция поверх структурного варианта блока site. Нормы — D 04-visual-language/02.",
+      "description": "Визуальная композиция поверх структурного варианта блока site. Нормы — creative 04/02.",
       "properties": {
         "align": {"enum": ["left", "center", "right"]},
         "asymmetry": {"enum": ["none", "mild", "strong"]},
         "bleed": {"enum": ["none", "edge", "full"]},
-        "text_media": {"enum": ["text-left", "text-right", "text-over", "text-under", "text-only", "media-led"], "description": "→ text_zone плана ассетов ai-media (D 02 §2.1)."},
+        "text_media": {"enum": ["text-left", "text-right", "text-over", "text-under", "text-only", "media-led"], "description": "→ text_zone плана ассетов ai-media (creative 04/02 §2.1)."},
         "overlap": {"type": "boolean"},
         "density": {"enum": ["airy", "default", "dense"]},
         "height": {"enum": ["content", "partial", "full", "scene"], "description": "scene — длиннее экрана (закреплённая сцена): длина в vh — в motion-spec."}
@@ -299,7 +299,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["strategy"],
-      "description": "Поведение при prefers-reduced-motion и data-motion=reduced (reduce, not remove; таблица «приём → reduce» E 05-motion/01 §4.2).",
+      "description": "Поведение при prefers-reduced-motion и data-motion=reduced (reduce, not remove; таблица «приём → reduce» creative 05/01 §4.2).",
       "properties": {
         "strategy": {
           "enum": ["final-state", "crossfade", "static-poster", "stations", "no-motion-needed", "custom"],
@@ -325,7 +325,7 @@
       "type": "object",
       "additionalProperties": false,
       "required": ["method", "result"],
-      "description": "WCAG 2.3.1: ≤ 3 общих и красных вспышек в секунду или площадь ≤ 0,006 ср (E 05-motion/01 §3.4).",
+      "description": "WCAG 2.3.1: ≤ 3 общих и красных вспышек в секунду или площадь ≤ 0,006 ср (creative 05/01 §3.4).",
       "properties": {
         "method": {"enum": ["frames-60fps", "peat", "ai-media-accept", "not-applicable"], "description": "frames-60fps — покадрово по записи; peat — инструмент PEAT; ai-media-accept — приёмка ассета ai-media; not-applicable — источник без смен яркости (статичный постер)."},
         "result": {"enum": ["pass", "fail", "pending"]},
@@ -368,7 +368,7 @@
             "primitives": {
               "type": "array", "uniqueItems": true, "maxItems": 3,
               "items": {"enum": ["fade-up", "type-unmask", "sweep", "number-tick", "line-draw", "none"]},
-              "description": "Система появления — 2–3 примитива, закреплённые за ролями (E 05-motion/02 §2.2)."
+              "description": "Система появления — 2–3 примитива, закреплённые за ролями (creative 05/02 §2.2)."
             },
             "library": {
               "type": "array", "uniqueItems": true,

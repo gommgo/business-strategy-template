@@ -1,5 +1,5 @@
 # Blender 5.2.2 — аудит сцены для агента (отправляется целиком через execute_blender_code или запускается в фоне)
-# [проверено: 99-raw/experiments/C1/10-scene-audit]. Совместим с BLENDER_MCP_SAFE_MODE (нет lambda/os/numpy/time/class).
+# [проверено]. Совместим с BLENDER_MCP_SAFE_MODE (нет lambda/os/numpy/time/class).
 # Печатает ОДНУ последнюю строку: AUDIT {json}. Флаги (коды каталога 04-ai-agents-mcp/05, группы M2–M6):
 #   default_cube_left, default_names, unapplied_scale, negative_scale, origin_far, floating, below_ground,
 #   interpenetration, ngons, nonmanifold, raw_sharp_edges, smooth_across_hard_edges, faceted_curved,

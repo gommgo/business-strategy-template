@@ -1,5 +1,4 @@
 # voc.schema.yaml — формат voc.yaml: голос клиента (voice of customer) — источники, закодированные фрагменты, темы
-# text-research · волна 1 · агент B2 · 2026-09-24 · версия формата 1
 #
 # Что это. JSON Schema (draft 2020-12) в YAML. Экземпляр — `voc.yaml` проекта: откуда взяты слова клиентов (отзывы,
 # интервью о переключении, обращения в поддержку, записи продаж, опросы, форумы), дословные фрагменты с кодами (задача,
@@ -8,9 +7,9 @@
 #
 # Граница с facts.yaml: голос клиента — сырьё для слов и смысла; **цитата на странице — только через facts.yaml**
 # (факт `kind: testimonial` с разрешением). Парафраз темы — не цитата и не отзыв: без кавычек и без подписи.
-# Ссылки из других форматов — `voc:<id темы>` (B1: meaning.schema.yaml, message-hierarchy.schema.yaml — поле voc_ids).
+# Ссылки из других форматов — `voc:<id темы>` (meaning.schema.yaml, message-hierarchy.schema.yaml — поле voc_ids).
 # Персональные данные: в voc.yaml — без ФИО, телефонов, почты, адресов; исходники с ПДн — у заказчика (`storage`),
-# основание обработки — `sources[].legal` (152-ФЗ; детали — H).
+# основание обработки — `sources[].legal` (152-ФЗ; детали — text 08/01).
 #
 # Проверка: `python3 ../../scripts/text/validate_facts.py` (Python окружения скилла; метасхема и пример
 # `examples[0]` ниже).
@@ -24,7 +23,7 @@ description: >-
   отдельным методом (importance.method).
 date: "2026-09-29"
 x-version: 1
-x-owner: "text-research · 02-strategy-messaging · B2"
+x-owner: "text · 02-strategy-messaging"
 x-doc: "02-strategy-messaging/04-voice-of-customer.md"
 
 type: object

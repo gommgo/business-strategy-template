@@ -30,19 +30,20 @@ page_gates.py --geo):
   geo_probe.py --selftest
 
 Правила: ≤ 1 запроса в секунду на хост; формы не отправляет, ничего не вводит, по рекламе не ходит; браузер — только
-с --render и только под блокировками $DDD_HOME/locks/browser.lock и $DDD_HOME/locks/site/browser.lock.
+с --render и только под замками браузера, общим и site (kbpaths.lock): утилита берёт их сама, вложенный вызов из
+процесса, который их уже держит, не ждёт.
 Зависимости: Python 3.13, requests, PyYAML; для --render — Playwright + Chromium.
 """
-import json, os, re, sys, time, csv, fcntl, socket, hashlib
+import contextlib, json, os, re, sys, time, csv, socket, hashlib
 from html.parser import HTMLParser
 from urllib.parse import urlsplit, urlunsplit, urljoin, quote, unquote
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('site'))
 CRAWLERS = os.path.join(ROOT, '07-seo-geo-performance-analytics', 'crawlers.yaml')
-LOCKS = [kbpaths.lock_path('browser'), kbpaths.lock_path('browser', 'site')]
+LOCKS = (('browser', None), ('browser', 'site'))   # замки браузера для отрисовки: общий, затем site
 VERSION = '0.9'
 
 UA_BROWSER = ('Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -625,31 +626,28 @@ def mem_available_gb():
 
 
 class BrowserLocks:
+    """Замки браузера на время отрисовки: общий, затем site — kbpaths.lock; wait — общий предел ожидания обоих, с.
+    Замок, который уже держит этот процесс или его предок, повторно не берётся и не ждётся."""
     def __init__(self, wait=900):
-        self.wait = wait; self.fhs = []
+        self.wait = wait; self.stack = None; self.waited = 0.0
 
     def __enter__(self):
         t0 = time.time()
-        for p in LOCKS:
-            os.makedirs(os.path.dirname(p), exist_ok=True)
-            fh = open(p, 'a+')
-            while True:
-                try:
-                    fcntl.flock(fh, fcntl.LOCK_EX | fcntl.LOCK_NB); break
-                except BlockingIOError:
-                    if time.time() - t0 > self.wait:
-                        raise TimeoutError('блокировка браузера занята > %d с: %s' % (self.wait, p))
-                    time.sleep(2)
-            self.fhs.append(fh)
+        self.stack = contextlib.ExitStack()
+        try:
+            for name, dom in LOCKS:
+                left = max(self.wait - (time.time() - t0), 0.0)
+                self.stack.enter_context(kbpaths.lock(name, dom, timeout=left, poll=2))
+        except BaseException:
+            self.stack.close()
+            raise
         self.waited = round(time.time() - t0, 1)
         return self
 
     def __exit__(self, *a):
-        for fh in reversed(self.fhs):
-            try:
-                fcntl.flock(fh, fcntl.LOCK_UN); fh.close()
-            except Exception:
-                pass
+        if self.stack is not None:
+            self.stack.close()
+            self.stack = None
 
 
 RENDER_JS = r"""() => {
@@ -1066,6 +1064,23 @@ Content-Signal: search=yes, ai-train=no
     lr2 = llms_report({'status': 200, 'final_url': 'https://ex.ru/', 'bytes': 50, 'headers': {'content-type': 'text/html'},
                        'body': b'<!doctype html><html><body>home</body></html>'})
     ck('llms.txt как HTML-заглушка', (lr2['valid'], lr2['is_html'], lr2['redirected_away']), (False, True, True))
+    import tempfile
+    home0 = os.environ.get('DDD_HOME')
+    with tempfile.TemporaryDirectory() as td:   # замки — во временном $DDD_HOME: чужой прогон с браузером не ждём
+        os.environ['DDD_HOME'] = td
+        try:
+            with BrowserLocks(wait=5) as outer:
+                held = (kbpaths.lock_held('browser'), kbpaths.lock_held('browser', 'site'))
+                with BrowserLocks(wait=5) as inner:
+                    nested = inner.waited
+            ck('замки отрисовки: общий и site взяты через kbpaths.lock', held, (True, True))
+            ck('замки отрисовки: вложенный вход под взятыми замками не ждёт', nested < 1 and outer.waited < 1, True)
+            ck('замки отрисовки: после выхода свободны', kbpaths.lock_held('browser') or kbpaths.lock_held('browser', 'site'), False)
+        finally:
+            if home0 is None:
+                os.environ.pop('DDD_HOME', None)
+            else:
+                os.environ['DDD_HOME'] = home0
     print(f'итог: {ok} PASS, {bad} FAIL')
     return bad == 0
 

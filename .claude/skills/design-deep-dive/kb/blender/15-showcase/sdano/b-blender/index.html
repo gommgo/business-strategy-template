@@ -4,11 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Сдано — приёмка квартиры в новостройке с инженером · B (Blender)</title>
-<meta name="description" content="Инженер технадзора проверит квартиру по 147 пунктам и составит акт осмотра с фото. Демо-страница рецепта 01 базы creative-research.">
-<!-- 15-showcase «Сдано» · вариант B (Blender) · фаза 2 · дорожка SD · 2026-09-25. Визуал — Blender 5.2 (Cycles), номера и подписи — HTML; тексты, форма и структура — как в A.
-     Исходник — рабочий пример L0 · рецепт 10-recipes/01-lead-services-l0.md · агент J · волна 3 · 2026-09-25 · Chromium 153 / WebKit 26.6
+<meta name="description" content="Инженер технадзора проверит квартиру по 147 пунктам и составит акт осмотра с фото. Демо-страница рецепта 01 базы creative.">
+<!-- «Сдано» · вариант B (Blender). Визуал — Blender 5.2 (Cycles), номера и подписи — HTML; тексты, форма и структура — как в A.
+     Исходник — рабочий пример L0 · рецепт creative 10-recipes/01-lead-services-l0.md · Chromium 153 / WebKit 26.6
      Демо: компания «Сдано», цены и цифры вымышлены. Ассеты — только код (SVG, CSS) и шрифты OFL. JS подачи — 0 байт. -->
-<!-- оба подмножества шрифта первого экрана: цифры, «», — и двоеточие русского текста — в latin (F2: без неё CLS загрузки 0,15) -->
+<!-- оба подмножества шрифта первого экрана: цифры, «», — и двоеточие русского текста — в latin (без неё CLS загрузки 0,15) -->
 <link rel="preload" href="_shared/fonts/golos-text/golos-text-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="_shared/fonts/golos-text/golos-text-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="_shared/fonts.css">
@@ -204,7 +204,7 @@
   <div class="container foot__in">
     <p><b>Сдано</b> · технадзор при&nbsp;приёмке новостроек · ИНН 0000000000</p>
     <p><a id="policy" href="#policy">Политика обработки персональных данных</a></p>
-    <p class="foot__demo">Демо-страница базы creative-research (рецепт 01, уровень L0): компания, цены и&nbsp;цифры вымышлены.</p>
+    <p class="foot__demo">Демо-страница базы creative (рецепт 01, уровень L0): компания, цены и&nbsp;цифры вымышлены.</p>
   </div>
 </footer>
 
@@ -229,7 +229,7 @@
     io.observe(document.querySelector('.hero__actions'));
     io.observe(document.querySelector('.form'));
   }
-  /* штамп «СДАНО» (SD2/SD3, ≈ 0,45 КБ): рядом с актом — кадр начала, при 60 % в кадре клип играет один раз; reduce и без JS —
+  /* штамп «СДАНО» (≈ 0,45 КБ): рядом с актом — кадр начала, при 60 % в кадре клип играет один раз; reduce и без JS —
      кадр конца; ошибка декодера или клип не доиграл за 4,5 с — тоже кадр конца (зона штампа не остаётся пустой) */
   var sb = document.querySelector('.doc__stamp3d');
   if (sb && 'IntersectionObserver' in window && !matchMedia('(prefers-reduced-motion: reduce)').matches) {

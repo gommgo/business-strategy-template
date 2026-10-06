@@ -1,7 +1,7 @@
 {
   "dna_version": "0.1",
   "id": "forest-roast",
-  "brand": "Демо «Лесная обжарка»: обжарочная кофе в зёрнах, D2C, Россия («тёплый, ремесленный, спокойный»); цвета этикетки — 99-raw/phase5/inputs/E/label.json",
+  "brand": "Демо «Лесная обжарка»: обжарочная кофе в зёрнах, D2C, Россия («тёплый, ремесленный, спокойный»)",
   "checked_at": "2026-09-24",
   "status": "draft",
   "approved_by": null,
@@ -179,7 +179,7 @@
       "render3d",
       "video"
     ],
-    "note": "выведено из токенов (R5), зерно 1,5 % — позиция M; утвердить глазом на canaries в фазе 5"
+    "note": "выведено из токенов (R5), зерно 1,5 %; утвердить глазом на canaries"
   },
   "light": {
     "direction": "right",
@@ -349,7 +349,7 @@
   "provenance": {
     "created_by": "script",
     "runs": 0,
-    "notes": "vlm_to_dna.py from-tokens (tokens.json) → ручное заполнение M 24.09.2026: фото-блок, свет справа (как F-04 B), сюжеты, canaries; эталоны бренда — после фазы 5 (F-04, E-10)"
+    "notes": "vlm_to_dna.py from-tokens (tokens.json) → ручное заполнение: фото-блок, свет справа (как F-04 B), сюжеты, canaries; эталоны бренда — после генераций (F-04, E-10)"
   },
   "materials": [
     "glazed off-white ceramic",

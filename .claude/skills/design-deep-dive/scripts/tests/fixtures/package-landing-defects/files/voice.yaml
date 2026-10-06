@@ -1,10 +1,10 @@
 # voice-otves-warm.yaml — пример 2 из 3: тёплый локальный сервис (ремонт квартир, лидогенерация, приоритет 1 заказчика)
-# text-research · F · 2026-09-24 · формат: ../voice.schema.yaml (voice_version 1)
+# Формат: ../voice.schema.yaml (voice_version 1)
 #
 # Бренд «Отвес» — ВЫМЫШЛЕННАЯ студия ремонта (Нижний Новгород) из примеров B2 и B1. Факты — ../../02-strategy-messaging/
 # examples/facts-service-renovation.yaml; смысл — ../../02-strategy-messaging/examples/meaning-otves.yaml. Прилагательные
 # «честные, аккуратные, свои» — демо-бриф агента F (в брифе B1 их нет), помечены как сырьё. Образцы строк — ai-self (писал
-# агент F), прошли claims_check.py и copy_lint.py: 99-raw/experiments/F/04-voice-samples/README.md.
+# (в брифе смысла их нет), помечены как сырьё. Образцы строк — ai-self, прошли claims_check.py и copy_lint.py.
 # Что показывает пример: тепло без сахара; люди по именам; цифры «на руках»; сцена из факта (Ильяхов: факт → сценарий);
 # юмор — лёгкий и только там, где не деньги; слова клиента («двушка») в словаре «говорим»; английский — адаптация для
 # англоязычных жителей Нижнего Новгорода (пояснить Яндекс Карты, «работы без материалов»).
@@ -247,6 +247,6 @@ open_questions:
 
 review:
   method: editor
-  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review (99-raw/experiments/F/04-voice-samples)"
-  by: "агент F (ai-self)"
+  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review"
+  by: "ai-self"
   date: "2026-09-24"

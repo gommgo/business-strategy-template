@@ -5,7 +5,7 @@
   "description": "Единый бриф сайта (лендинг или многостраничный сайт) для тройки site · text · creative; бриф холста — его проекция по ключу x-canvas-map. Владелец схемы — site (01-foundations/03-site-brief.md). Блок meaning — схема text ($ref), proof — ссылка на facts.yaml text, ambition, references и выражение бренда — поля creative; бренд продукта — ссылкой brand.ref на файл бренда слоя дизайна (kb/common/brand.schema.yaml); тема — блок themes. Пустое поле — решение, отданное модели: минимум по типу сайта задан условиями allOf ниже. Идентификаторы site_type, page_type, action, traffic_source, jurisdiction, conversion_channel — словарь 02-site-types/vocabulary.yaml.",
   "x-version": 1,
   "x-checked": "2026-09-24",
-  "x-owner": "site-research · v0 — агент A (01-foundations, волна 1); v1 — агент J (10-playbooks-contracts/schemas, волна 3)",
+  "x-owner": "site · 01-foundations (бриф сайта); форма — site 10-playbooks-contracts",
   "x-doc": "01-foundations/03-site-brief.md",
   "x-canvas-map": {
     "source": "site-brief",
@@ -367,10 +367,10 @@
   "x-fill-legend": {
     "customer": "знает только заказчик: спросить (факты — свободным ответом)",
     "claude": "Claude выводит сам из брифа и материалов и показывает в блоке «Going with»",
-    "default": "умолчание решения заказчика (PLAN.md «Решения заказчика» п. 10–15); меняется только по слову заказчика",
+    "default": "умолчание базы знаний; меняется только по слову заказчика",
     "derive": "вычисляется из других полей брифа",
-    "sister:text": "заполняет text-research (meaning, facts.yaml, copy-deck)",
-    "sister:creative": "заполняет creative-research (уровень амбиций, референсы, выражение бренда)"
+    "sister:text": "заполняет text (meaning, facts.yaml, copy-deck)",
+    "sister:creative": "заполняет creative (уровень амбиций, референсы, выражение бренда)"
   },
   "type": "object",
   "required": [
@@ -457,7 +457,7 @@
               "items": {
                 "type": "string"
               },
-              "description": "Исходные значения: конверсия в заявку, доля квалифицированных, отказы в форме (P 04)."
+              "description": "Исходные значения: конверсия в заявку, доля квалифицированных, отказы в форме (site 07/04)."
             },
             "research": {
               "type": "array",
@@ -541,8 +541,8 @@
     },
     "site_type": {
       "$ref": "#/$defs/site-type",
-      "description": "Тип сайта (словарь B). Задаёт карту страниц по умолчанию (G) и плейбук (J); вместе с primary_page_type — минимум полей брифа.",
-      "x-owner": "site (B — словарь; A — выбор в брифе)",
+      "description": "Тип сайта (словарь 02-site-types/vocabulary.yaml). Задаёт карту страниц по умолчанию (site 06) и плейбук (site 10); вместе с primary_page_type — минимум полей брифа.",
+      "x-owner": "site 02 (словарь); site 01 (выбор в брифе)",
       "x-fill": "claude"
     },
     "primary_page_type": {
@@ -676,7 +676,7 @@
       "type": "object",
       "additionalProperties": false,
       "description": "Как принимается решение о покупке: меняет длину страницы, долю доказательств и силу призыва (01-how-visitors-decide.md §6).",
-      "x-owner": "site (A)",
+      "x-owner": "site 01",
       "x-fill": "claude",
       "properties": {
         "market": {
@@ -764,8 +764,8 @@
       "required": [
         "action"
       ],
-      "description": "Целевое действие страницы или сайта. Текст кнопки — copy-deck text; механика форм — F.",
-      "x-owner": "site (A — поле; B — словарь action; F — механика)",
+      "description": "Целевое действие страницы или сайта. Текст кнопки — copy-deck text; механика форм — site 05.",
+      "x-owner": "site 01 (поле); site 02 (словарь action); site 05 (механика)",
       "x-fill": "claude",
       "properties": {
         "action": {
@@ -805,7 +805,7 @@
           "items": {
             "$ref": "#/$defs/conversion-channel"
           },
-          "description": "Каналы, через которые принимается действие (временные id; механика и число полей — F)."
+          "description": "Каналы, через которые принимается действие (временные id; механика и число полей — site 05)."
         },
         "secondary_actions": {
           "type": "array",
@@ -821,7 +821,7 @@
         },
         "qualification_note": {
           "type": "string",
-          "description": "Какие заявки нужны и какие нет (качество лида против числа; поля — F)."
+          "description": "Какие заявки нужны и какие нет (качество лида против числа; поля — site 05)."
         },
         "thank_you": {
           "type": "string",
@@ -830,7 +830,7 @@
         "response_time_promised": {
           "type": "boolean",
           "default": false,
-          "description": "Страница обещает срок ответа («перезвоним за 15 минут»): тогда обязателен response_time_ref — факт с регламентом (F 03 §3.3)."
+          "description": "Страница обещает срок ответа («перезвоним за 15 минут»): тогда обязателен response_time_ref — факт с регламентом (site 05/03 §3.3)."
         }
       },
       "allOf": [
@@ -859,7 +859,7 @@
       "required": [
         "sources"
       ],
-      "description": "Источники и температура трафика — поле site (ответ на вопрос 1 text B1). Осведомлённость по источникам — meaning.awareness.by_source (text).",
+      "description": "Источники и температура трафика — поле site. Осведомлённость по источникам — meaning.awareness.by_source (text).",
       "x-owner": "site",
       "x-fill": "customer",
       "properties": {
@@ -915,7 +915,7 @@
               },
               "in_app_browser": {
                 "type": "boolean",
-                "description": "Источник открывается во встроенном браузере соцсети или мессенджера (C 02 §4): липкие слои и формы проверять там."
+                "description": "Источник открывается во встроенном браузере соцсети или мессенджера (site 03/02 §4): липкие слои и формы проверять там."
               }
             }
           }
@@ -932,8 +932,8 @@
         "kind",
         "summary"
       ],
-      "description": "Что посетитель получает за целевое действие (обмен). Поле site; meaning.offer ссылается сюда (ответ на вопрос 2 text B1). Числа и условия — только ссылками на facts.yaml.",
-      "x-owner": "site (A — поле; F — механика оффера; text — слова)",
+      "description": "Что посетитель получает за целевое действие (обмен). Поле site; meaning.offer ссылается сюда. Числа и условия — только ссылками на facts.yaml.",
+      "x-owner": "site 01 (поле); site 05 (механика оффера); text (слова)",
       "x-fill": "customer",
       "properties": {
         "kind": {
@@ -1001,8 +1001,8 @@
       }
     },
     "meaning": {
-      "description": "Блок «смысл» — схема text-research (meaning.schema.yaml, B1): аудитория, задачи, осведомлённость, позиционирование, ценностное предложение, возражения, снятие риска. Поля site (traffic, offer, conversion.action) здесь только ссылками.",
-      "x-owner": "text (B1)",
+      "description": "Блок «смысл» — схема text (02-strategy-messaging/meaning.schema.yaml): аудитория, задачи, осведомлённость, позиционирование, ценностное предложение, возражения, снятие риска. Поля site (traffic, offer, conversion.action) здесь только ссылками.",
+      "x-owner": "text",
       "x-fill": "sister:text",
       "allOf": [
         {
@@ -1042,10 +1042,10 @@
             },
             "open_questions": {
               "maxItems": 0,
-              "description": "Внутри site-brief вопросы живут в общем журнале questions[] (поле block: meaning); ответ на вопрос 4 text B1."
+              "description": "Внутри site-brief вопросы живут в общем журнале questions[] (поле block: meaning)."
             },
             "legal_category": {
-              "description": "Внутри site-brief — constraints.legal_category (ответ на вопрос 5 text B1); здесь не заполнять."
+              "description": "Внутри site-brief — constraints.legal_category; здесь не заполнять."
             }
           },
           "not": {
@@ -1059,7 +1059,7 @@
     "meaning_ref": {
       "type": "string",
       "description": "Путь к отдельному meaning.yaml (формат text), если смысл ведётся отдельным файлом. Не вместе с meaning.",
-      "x-owner": "text (B1)",
+      "x-owner": "text",
       "x-fill": "sister:text"
     },
     "proof": {
@@ -1069,8 +1069,8 @@
         "facts_ref",
         "required_kinds"
       ],
-      "description": "Инвентарь доказательств — только ссылкой на facts.yaml (формат text B2, контракт v2 §3 п.10). Пробелы не копировать: они в facts.yaml missing[] (blocking: true — ворота публикации).",
-      "x-owner": "site (A — поля связи; F — механика доказательств; I — подлинность); формат фактов — text (B2)",
+      "description": "Инвентарь доказательств — только ссылкой на facts.yaml (формат text, контракт v2 §3 п.10). Пробелы не копировать: они в facts.yaml missing[] (blocking: true — ворота публикации).",
+      "x-owner": "site 01 (поля связи); site 05 (механика доказательств); site 08 (подлинность); формат фактов — text",
       "x-fill": "customer",
       "properties": {
         "facts_ref": {
@@ -1139,7 +1139,7 @@
         "jurisdiction"
       ],
       "description": "Ограничения: право, платформа, стек, сроки, бюджет.",
-      "x-owner": "site (I — право; J — стек и CMS)",
+      "x-owner": "site 08 (право); site 10 (стек и CMS)",
       "x-fill": "customer",
       "properties": {
         "jurisdiction": {
@@ -1163,7 +1163,7 @@
         },
         "legal_category": {
           "$ref": "urn:app-design:text:meaning:1#/properties/legal_category",
-          "description": "Отраслевой режим формулировок (перечень text B1; general — «ничего особого»). Рядом с юрисдикцией — ответ на вопрос 5 text B1."
+          "description": "Отраслевой режим формулировок (перечень text; general — «ничего особого»). Стоит рядом с юрисдикцией."
         },
         "legal_note": {
           "type": "string"
@@ -1188,7 +1188,7 @@
         },
         "hosting": {
           "type": "string",
-          "description": "Где размещается сайт и формы (важно для локализации ПД в РФ — I)."
+          "description": "Где размещается сайт и формы (важно для локализации ПД в РФ — site 08)."
         },
         "integrations": {
           "type": "array",
@@ -1216,7 +1216,7 @@
         "legal_intake": {
           "type": "object",
           "additionalProperties": false,
-          "description": "Ответы заказчика на правовые вопросы до плана страниц (I 08-legal-trust-a11y/01 §6 шаг 1): из них выводятся page.legal планов и набор req:LR-* (legal-requirements.yaml). Не юридическое заключение.",
+          "description": "Ответы заказчика на правовые вопросы до плана страниц (site 08/01 §6 шаг 1): из них выводятся page.legal планов и набор req:LR-* (legal-requirements.yaml). Не юридическое заключение.",
           "x-owner": "site (I — вопросы и нормы; заказчик — ответы)",
           "x-fill": "customer",
           "properties": {
@@ -1310,8 +1310,8 @@
     "policies": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Решения по спорным приёмам. Умолчания — решения заказчика п. 15 (PLAN.md); включение — только с условиями F и согласием заказчика.",
-      "x-owner": "site (F — условия; заказчик — решение)",
+      "description": "Решения по спорным приёмам. Умолчания — в default полей; включение — только с условиями site 05 и согласием заказчика.",
+      "x-owner": "site 05 (условия); заказчик (решение)",
       "x-fill": "default",
       "properties": {
         "capture_popup": {
@@ -1321,7 +1321,7 @@
             "on"
           ],
           "default": "off",
-          "description": "Окно сбора контакта: off — по умолчанию (решение заказчика 15); engaged — немодальная панель после вовлечения (F 01 §11, block:capture-popup вариант engaged-slide-in); on — иное окно по условиям F. engaged и on — только с rationale и согласием заказчика."
+          "description": "Окно сбора контакта: off — по умолчанию; engaged — немодальная панель после вовлечения (site 05/01 §11, block:capture-popup вариант engaged-slide-in); on — иное окно по условиям site 05. engaged и on — только с rationale и согласием заказчика."
         },
         "exit_intent": {
           "enum": [
@@ -1336,7 +1336,7 @@
             "on"
           ],
           "default": "off",
-          "description": "Сторонний чат (вес, доступность, согласие на ПД — P и I)."
+          "description": "Сторонний чат (вес, доступность, согласие на ПД — site 07 и site 08)."
         },
         "preloader": {
           "enum": [
@@ -1352,11 +1352,11 @@
             "none"
           ],
           "default": "auto",
-          "description": "auto — по юрисдикции и составу скриптов (I)."
+          "description": "auto — по юрисдикции и составу скриптов (site 08)."
         },
         "rationale": {
           "type": "string",
-          "description": "Почему включён приём, выключенный по умолчанию (условия F, дата согласия заказчика). Для engaged и on — условия F 01 §11 и дата согласия заказчика."
+          "description": "Почему включён приём, выключенный по умолчанию (условия site 05, дата согласия заказчика). Для engaged и on — условия site 05/01 §11 и дата согласия заказчика."
         }
       },
       "allOf": [
@@ -1412,8 +1412,8 @@
       "required": [
         "system"
       ],
-      "description": "Аналитика и цели. События выводятся из conversion.action (P, events.yaml); правовые условия — I.",
-      "x-owner": "site (P)",
+      "description": "Аналитика и цели. События выводятся из conversion.action (07-seo-geo-performance-analytics/events.yaml); правовые условия — site 08.",
+      "x-owner": "site 07",
       "x-fill": "default",
       "properties": {
         "system": {
@@ -1438,7 +1438,7 @@
             "planned"
           ],
           "default": "later",
-          "description": "Планируются ли A/B — методика и выборка у P."
+          "description": "Планируются ли A/B — методика и выборка — site 07/04."
         },
         "note": {
           "type": "string"
@@ -1448,8 +1448,8 @@
     "search": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Входы заказчика для SEO и технической части GEO (правила — H, волна 2).",
-      "x-owner": "site (H)",
+      "description": "Входы заказчика для SEO и технической части GEO (правила — site 07/01 и 07/02).",
+      "x-owner": "site 07",
       "x-fill": "customer",
       "properties": {
         "engines": {
@@ -1497,7 +1497,7 @@
             "ask"
           ],
           "default": "ask",
-          "description": "Разрешать ли ИИ-ботам поиск и обучение — решение заказчика; варианты и боты — H (crawlers.yaml). Если заказчик промолчал — allow-all (H: 07-…/crawlers.yaml policies; исключение — «текст и есть продукт»)."
+          "description": "Разрешать ли ИИ-ботам поиск и обучение — решение заказчика; варианты и боты — 07-seo-geo-performance-analytics/crawlers.yaml. Если заказчик промолчал — allow-all (crawlers.yaml policies; исключение — «текст и есть продукт»)."
         },
         "regions": {
           "type": "array",
@@ -1514,7 +1514,7 @@
             },
             "keep_urls": {
               "type": "boolean",
-              "description": "Сохранять адреса или ставить редиректы (G, H)."
+              "description": "Сохранять адреса или ставить редиректы (site 06, site 07)."
             },
             "has_search_traffic": {
               "type": "boolean"
@@ -1523,7 +1523,7 @@
         },
         "profiles": {
           "type": "array",
-          "description": "Профили компании вне сайта (сущность и sameAs для H).",
+          "description": "Профили компании вне сайта (сущность и sameAs для разметки — site 07).",
           "items": {
             "type": "object",
             "additionalProperties": false,
@@ -1564,7 +1564,7 @@
       "type": "array",
       "minItems": 1,
       "description": "Языковые версии сайта: владелец списка — site; meaning.languages обязан совпадать по набору (проверка валидатора). Второй язык — адаптация, а не перевод (решение заказчика).",
-      "x-owner": "site (G — структура)",
+      "x-owner": "site 06 (структура)",
       "x-fill": "customer",
       "items": {
         "type": "object",
@@ -1615,8 +1615,8 @@
       "required": [
         "mode"
       ],
-      "description": "Нужные страницы: определить по типу сайта (карта по умолчанию — G, плейбуки — J) или списком.",
-      "x-owner": "site (G)",
+      "description": "Нужные страницы: определить по типу сайта (карта по умолчанию — site 06, плейбуки — site 10) или списком.",
+      "x-owner": "site 06",
       "x-fill": "claude",
       "properties": {
         "mode": {
@@ -1674,7 +1674,7 @@
       "required": [
         "level"
       ],
-      "description": "Уровень амбиций подачи. Определения, разрешено и обязательно, профили бюджета — creative (../creative/01-creative-direction/ambition-levels.yaml v0.1); умолчания — решения заказчика 15 и 20 (сервисы L0, лендинги L1, кампании L2; лидогенерация услуг — L0 при горячем мобильном трафике ≥ 50 % и price_band low|mid; внутренние страницы — таблица defaults_by_page_type).",
+      "description": "Уровень амбиций подачи. Определения, разрешено и обязательно, профили бюджета — creative (../creative/01-creative-direction/ambition-levels.yaml v0.1); умолчания (сервисы L0, лендинги L1, кампании L2; лидогенерация услуг — L0 при горячем мобильном трафике ≥ 50 % и price_band low|mid; внутренние страницы — таблица defaults_by_page_type).",
       "x-owner": "creative (определения); site — поле и правило «страница ≤ сайт»",
       "x-fill": "default",
       "properties": {
@@ -2223,7 +2223,7 @@
       }
     },
     {
-      "$comment": "Лендинг (landing-site): тип посадочной страницы обязателен и относится к классу landing словаря B.",
+      "$comment": "Лендинг (landing-site): тип посадочной страницы обязателен и относится к классу landing словаря.",
       "if": {
         "required": [
           "site_type"
@@ -2757,7 +2757,7 @@
       }
     },
     "site-type": {
-      "description": "Тип сайта — пространство site_type словаря B (02-site-types/vocabulary.yaml v0 draft, revision 1, 2026-09-24): landing-site — одностраничный, остальные — многостраничные. Вне рамок (ecommerce-store, web-app, media-portal, docs-site, marketplace) брифом site не описываются.",
+      "description": "Тип сайта — пространство site_type словаря (02-site-types/vocabulary.yaml v0 draft, revision 1, 2026-09-24): landing-site — одностраничный, остальные — многостраничные. Вне рамок (ecommerce-store, web-app, media-portal, docs-site, marketplace) брифом site не описываются.",
       "x-vocabulary": "site_type (v1)",
       "enum": [
         "landing-site",
@@ -2772,7 +2772,7 @@
       ]
     },
     "page-type": {
-      "description": "Тип страницы — пространство page_type словаря v1 (43 id в рамках: 33 v0 + 5 G + 5 proposed); ecommerce-*, web-app-screen — вне рамок.",
+      "description": "Тип страницы — пространство page_type словаря v1 (43 id в рамках: 33 v0 + 5 от 06-multipage-ia + 5 proposed); ecommerce-*, web-app-screen — вне рамок.",
       "x-vocabulary": "page_type (v1)",
       "enum": [
         "landing-lead-services",
@@ -2821,7 +2821,7 @@
       ]
     },
     "landing-page-type": {
-      "description": "Тип посадочной страницы (класс landing словаря B) — задаёт минимум брифа для landing-site.",
+      "description": "Тип посадочной страницы (класс landing словаря) — задаёт минимум брифа для landing-site.",
       "enum": [
         "landing-lead-services",
         "landing-saas",
@@ -2835,7 +2835,7 @@
       ]
     },
     "action-id": {
-      "description": "Целевое действие — пространство action словаря B (v0 draft, revision 1), только уровень macro: главное и вторые действия брифа. Micro (view-pricing, watch-video, explore-product, read-more, log-in) — промежуточные события P, не цель брифа. События аналитики строятся по этим id (P, events.yaml).",
+      "description": "Целевое действие — пространство action словаря (v0 draft, revision 1), только уровень macro: главное и вторые действия брифа. Micro (view-pricing, watch-video, explore-product, read-more, log-in) — промежуточные события аналитики, не цель брифа. События аналитики строятся по этим id (07-seo-geo-performance-analytics/events.yaml).",
       "x-vocabulary": "action (v1, level: macro)",
       "enum": [
         "lead-request",
@@ -2859,8 +2859,8 @@
       ]
     },
     "conversion-channel": {
-      "description": "Канал приёма действия — пространство conversion_channel словаря v1 (механика — F). Не путать с атрибутом channel у traffic_source.",
-      "x-vocabulary": "conversion_channel (словарь v1, J)",
+      "description": "Канал приёма действия — пространство conversion_channel словаря v1 (механика — site 05). Не путать с атрибутом channel у traffic_source.",
+      "x-vocabulary": "conversion_channel (словарь v1)",
       "enum": [
         "form",
         "quiz",
@@ -2877,7 +2877,7 @@
       ]
     },
     "traffic-source": {
-      "description": "Источник трафика — пространство traffic_source словаря B (v0 draft): 9 id временного словаря text + 6 предложений text B1 + 3 id B (paid-display, influencer, internal).",
+      "description": "Источник трафика — пространство traffic_source словаря (v0 draft): 9 id временного словаря text + 6 предложений text + 3 id site (paid-display, influencer, internal).",
       "x-vocabulary": "traffic_source (v1)",
       "enum": [
         "search-problem",

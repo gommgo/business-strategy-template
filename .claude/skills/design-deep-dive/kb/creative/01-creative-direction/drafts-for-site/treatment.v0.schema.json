@@ -2,24 +2,16 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:app-design:creative:treatment:0",
   "title": "treatment v0 — подача секции page-plan (корень) и страницы ($defs/page)",
-  "description": "Подсхема контейнера treatment{} плана страницы site (page-plan v0.9, контракт тройки v2 §2 и §3 п.12). Владелец — creative-research. Ранний выпуск C1 (волна 1, агент A); финальную версию v1 делает агент I (волна 3, 09-ai-execution-evaluation/treatment.schema.json). Секция: $ref на этот $id; страница: $ref на этот $id + #/$defs/page. Имена слотов словаря site приняты (visual-role → visual_role, effect-ref → effects[].ref, motion-level → motion_level): ключи в snake_case, как остальные ключи page-plan. Значения уровней и потолки — ambition-levels.yaml; правила, которые требуют роли секции или уровня страницы (секции конверсии не выше L0, число пиков, уровень секции ≤ уровня страницы), схема видеть не может — их проверяет скрипт (99-raw/experiments/A/02-c1-check/c1_check.py; у site — site_validate.py J, у creative — ворота K).",
+  "description": "Подсхема контейнера treatment{} плана страницы site (page-plan v0.9; kb/common/owners.md § Темы и § Форматы обмена, № 12). Владелец — creative. Версия v1 — 09-ai-execution-evaluation/treatment.schema.json. Секция: $ref на этот $id; страница: $ref на этот $id + #/$defs/page. Имена слотов словаря site приняты (visual-role → visual_role, effect-ref → effects[].ref, motion-level → motion_level): ключи в snake_case, как остальные ключи page-plan. Значения уровней и потолки — ambition-levels.yaml; правила, которые требуют роли секции или уровня страницы (секции конверсии не выше L0, число пиков, уровень секции ≤ уровня страницы), схема видеть не может — их проверяет скрипт (у site — site_validate.py, у creative — ворота эффектов).",
   "x-version": 0,
   "x-checked": "2026-09-24",
-  "x-status": "draft (C1)",
-  "x-owner": "creative-research · 01-creative-direction · агент A (v0); I (v1, волна 3)",
+  "x-status": "draft",
+  "x-owner": "creative · 01-creative-direction",
   "x-doc": "01-creative-direction/03-ambition-levels.md §6 (treatment и распределение по секциям); 02-art-direction-document.md (связь с art-direction)",
   "x-site-slots": {
     "visual-role": "visual_role",
-    "effect-ref": "effects[].ref (effect:<id> из effects.yaml, до волны 2 — временные id, список x-effect-ids-v0)",
+    "effect-ref": "effects[].ref (effect:<id> из effects.yaml; id версии v0 — список x-effect-ids-v0)",
     "motion-level": "motion_level"
-  },
-  "x-kimi-projection": {
-    "motion_level (секций) и $defs/page.motion_level": "decisions.motion.level — максимум по странице (none < subtle < expressive < cinematic)",
-    "$defs/page.motion_system.thesis": "decisions.motion.thesis",
-    "$defs/page.motion_system.library": "decisions.motion.library и build.allowed_packages",
-    "effects[] + motion_spec_ref": "decisions.motion.moments (формат моментов T7: триггер → элемент → свойство, мс, кривая) — через motion-spec I",
-    "reduce, mobile": "строки TASK.md «Motion» и ACCEPTANCE E-блок",
-    "background.kind shader | webgl-3d": "decisions.three_d.mode и allowed_packages"
   },
   "x-effect-ids-v0": [
     "effect:hero-entrance-once", "effect:split-text-reveal", "effect:kinetic-headline", "effect:scroll-reveal-system",
@@ -30,7 +22,7 @@
     "effect:page-transition", "effect:smooth-scroll", "effect:counter-up", "effect:mask-reveal", "effect:sticky-stack",
     "effect:cinemagraph"
   ],
-  "x-effect-ids-note": "Временные id до effects.yaml агента F (волна 2); F может переименовать с записью replaced_by — тогда v1 схемы I сменит перечень.",
+  "x-effect-ids-note": "Id версии v0; соответствие id каталога эффектов — 06-effects-catalog/effects.yaml, id_map.",
   "type": "object",
   "additionalProperties": false,
   "patternProperties": {
@@ -46,29 +38,29 @@
     },
     "motion_level": {
       "$ref": "#/$defs/motion-level",
-      "description": "Уровень движения секции в шкале kimi (контракт v2 §3 п.12: соответствие уровням амбиций — creative). По умолчанию — $defs/page.motion_level."
+      "description": "Уровень движения секции (шкала — $defs/motion-level; соответствие уровням амбиций — creative). По умолчанию — $defs/page.motion_level."
     },
     "effects": {
       "type": "array",
       "maxItems": 6,
       "items": {"$ref": "#/$defs/effect-use"},
-      "description": "Эффекты секции — ссылки на effects.yaml. Цена, фолбэк, reduce и телефон самого эффекта — в effects.yaml (F); здесь — где и зачем он применён."
+      "description": "Эффекты секции — ссылки на effects.yaml. Цена, фолбэк, reduce и телефон самого эффекта — в effects.yaml; здесь — где и зачем он применён."
     },
     "background": {"$ref": "#/$defs/background"},
     "composition": {"$ref": "#/$defs/composition"},
     "display_role": {
       "enum": ["none", "display-s", "display-m", "display-l", "display-xl"],
-      "description": "Роль дисплейной типографики главного заголовка секции — токены marketing-tokens.json (D, волна 1); числа clamp у D."
+      "description": "Роль дисплейной типографики главного заголовка секции — токены marketing-tokens.json; числа clamp — там же."
     },
     "visual_variant": {
       "$ref": "#/$defs/id",
-      "description": "Визуальный вариант блока из block-treatments.yaml (I, волна 3) — поверх структурного variant блока site. До волны 3 не заполнять."
+      "description": "Визуальный вариант блока из block-treatments.yaml — поверх структурного variant блока site."
     },
     "loops": {
       "type": "integer",
       "minimum": 0,
       "maximum": 5,
-      "description": "Сколько непрерывных движений одновременно видно в секции (бегущая строка, живой фон, видео-петля, Lottie-петля). Потолок по уровню — бюджет внимания (ambition-levels.yaml motion_hints; нормы — E)."
+      "description": "Сколько непрерывных движений одновременно видно в секции (бегущая строка, живой фон, видео-петля, Lottie-петля). Потолок по уровню — бюджет внимания (ambition-levels.yaml motion_hints; нормы — 05-motion/)."
     },
     "loop_control": {
       "enum": ["pause-button", "stops-within-5s", "not-parallel-content"],
@@ -81,11 +73,11 @@
       "uniqueItems": true,
       "maxItems": 2,
       "items": {"type": "string", "pattern": "^ref:[a-z0-9]+(-[a-z0-9]+)*$"},
-      "description": "Записи библиотеки референсов B, по которым сделана секция. Один референс — не больше одной секции страницы (проверка скриптом)."
+      "description": "Записи библиотеки референсов, по которым сделана секция. Один референс — не больше одной секции страницы (проверка скриптом)."
     },
     "motion_spec_ref": {
       "type": "string",
-      "description": "Путь к motion-spec секции (I, волна 3): таймлайн, триггеры, свойства, длительности, кривые, reduce, телефон."
+      "description": "Путь к motion-spec секции: таймлайн, триггеры, свойства, длительности, кривые, reduce, телефон."
     },
     "budget": {"$ref": "#/$defs/budget"},
     "status": {"enum": ["draft", "proposed", "approved"], "default": "draft"},
@@ -162,18 +154,18 @@
     },
     "motion-level": {
       "enum": ["none", "subtle", "expressive", "cinematic"],
-      "description": "Шкала движения kimi (07-brief-handoff/01 §6.2): none — только отклик; subtle — тезис и ≤ 3 момента, transform/opacity; expressive — моменты при прокрутке; cinematic — сюжет на готовых роликах или рендере. Соответствие уровням: L0 → none|subtle, L1 → ≤ expressive, L2 → любой (ambition-levels.yaml maps_to.kimi)."
+      "description": "Шкала движения: none — только отклик; subtle — тезис и ≤ 3 момента, transform/opacity; expressive — моменты при прокрутке; cinematic — сюжет на готовых роликах или рендере. Соответствие уровням: L0 → none|subtle, L1 → ≤ expressive, L2 → любой (ambition-levels.yaml maps_to.claude_design)."
     },
     "visual-role": {
       "enum": ["peak", "accent", "support", "calm", "pause", "chrome"],
-      "description": "Место секции в ритме «спокойно ↔ эффектно»: peak — пик, главный приём сцены («вау»); accent — выразительная секция с одним приёмом малой силы; support — обычная секция с системным появлением; calm — спокойная (чтение, доказательства, форма, цены), движение — отклик; pause — визуальная пауза, смена темпа (кадр на весь экран, цитата, манифест, смена фона) без плотного текста; chrome — шапка, подвал, баннеры, вне ритма. Число пиков по уровню — ambition-levels.yaml section_distribution; хореография — E."
+      "description": "Место секции в ритме «спокойно ↔ эффектно»: peak — пик, главный приём сцены («вау»); accent — выразительная секция с одним приёмом малой силы; support — обычная секция с системным появлением; calm — спокойная (чтение, доказательства, форма, цены), движение — отклик; pause — визуальная пауза, смена темпа (кадр на весь экран, цитата, манифест, смена фона) без плотного текста; chrome — шапка, подвал, баннеры, вне ритма. Число пиков по уровню — ambition-levels.yaml section_distribution; хореография — 05-motion/."
     },
     "effect-use": {
       "type": "object",
       "additionalProperties": false,
       "required": ["ref"],
       "properties": {
-        "ref": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$", "description": "id эффекта (effects.yaml F; до волны 2 — x-effect-ids-v0)."},
+        "ref": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$", "description": "id эффекта (effects.yaml; id версии v0 — x-effect-ids-v0)."},
         "target": {"type": "string", "description": "К чему применён: «секция.слот» (hero.headline), элемент анатомии блока (visual, steps) или section."},
         "trigger": {"enum": ["load", "in-view", "scroll", "pin-scroll", "hover", "click", "idle-loop", "page-transition"]},
         "purpose": {"enum": ["signature", "support", "feedback"], "description": "signature — фирменный приём страницы (art-direction.signature_move или пик); support — поддерживает систему; feedback — отклик на действие. Ключ не role: в page-plan role — роль секции (section_role), линтер site читает его так."},
@@ -189,8 +181,8 @@
           "enum": ["surface", "inverse", "tint", "gradient", "mesh-gradient", "pattern", "grain", "image", "video-loop", "shader", "webgl-3d", "transparent"],
           "description": "surface — фон страницы; inverse — инверсная секция (тёмная на светлой странице и наоборот); tint — тонированная; gradient — статичный CSS-градиент; mesh-gradient — mesh кодом (CSS или SVG, без WebGL); pattern, grain — фактура; image — фото или картинка; video-loop — немая петля; shader — WebGL-шейдер; webgl-3d — 3D-сцена; transparent — секция поверх общего фона страницы."
         },
-        "tone": {"enum": ["light", "mid", "dark"], "description": "Светлота фона (ось «бумага» kimi 07/01 §2.4: тёмная L < 30 %, средняя, светлая L > 85 %)."},
-        "token": {"type": "string", "description": "Токен цвета или градиента marketing-tokens.json (D), например color.surface.inverse."},
+        "tone": {"enum": ["light", "mid", "dark"], "description": "Светлота фона (ось «бумага», cd 06/01 §5: тёмная L < 30 %, средняя, светлая L > 85 %)."},
+        "token": {"type": "string", "description": "Токен цвета или градиента marketing-tokens.json, например color.surface.inverse."},
         "media_slot": {"type": "string", "description": "id media-слота этой секции (для image, video-loop) — связь с планом ассетов ai-media."},
         "effect": {"type": "string", "pattern": "^effect:[a-z0-9]+(-[a-z0-9]+)*$", "description": "Эффект фона (shader, mesh-gradient, grain)."},
         "text_contrast": {"enum": ["aa", "aa-large", "aaa"], "default": "aa", "description": "Цель контраста текста на этом фоне (F83 в самой светлой точке зоны текста — ai-media 10/03 §1)."},
@@ -200,7 +192,7 @@
     "composition": {
       "type": "object",
       "additionalProperties": false,
-      "description": "Визуальная композиция поверх структурного варианта блока site (variant): выравнивание, асимметрия, вылет, текст ↔ медиа. Нормы и числа — D (04-visual-language/02).",
+      "description": "Визуальная композиция поверх структурного варианта блока site (variant): выравнивание, асимметрия, вылет, текст ↔ медиа. Нормы и числа — creative 04/02.",
       "properties": {
         "align": {"enum": ["left", "center", "right"]},
         "asymmetry": {"enum": ["none", "mild", "strong"]},
@@ -261,8 +253,8 @@
           "type": "object",
           "additionalProperties": false,
           "properties": {
-            "thesis": {"type": "string", "maxLength": 240, "description": "Тезис движения одной фразой (→ decisions.motion.thesis kimi)."},
-            "library": {"type": "array", "uniqueItems": true, "items": {"enum": ["css", "waapi", "gsap", "scrolltrigger", "splittext", "lenis", "motion", "three", "ogl", "lottie", "rive", "view-transitions", "other"]}, "description": "Что разрешено исполнителю (стек и версии — stack.yaml G)."},
+            "thesis": {"type": "string", "maxLength": 240, "description": "Тезис движения одной фразой (→ decisions.motion.thesis брифа холста)."},
+            "library": {"type": "array", "uniqueItems": true, "items": {"enum": ["css", "waapi", "gsap", "scrolltrigger", "splittext", "lenis", "motion", "three", "ogl", "lottie", "rive", "view-transitions", "other"]}, "description": "Что разрешено исполнителю (стек и версии — stack.yaml)."},
             "smooth_scroll": {"type": "boolean", "default": false},
             "page_transitions": {"enum": ["none", "view-transitions", "library", "custom"], "default": "none"},
             "reduce_toggle": {"type": "boolean", "description": "Переключатель «меньше движения» на странице (обязателен на L2 — CRV-AL-12)."},
@@ -270,7 +262,7 @@
           }
         },
         "theme": {"enum": ["light", "dark", "mixed"]},
-        "tokens_ref": {"type": "string", "description": "Путь к marketing-tokens.json проекта (D)."},
+        "tokens_ref": {"type": "string", "description": "Путь к marketing-tokens.json проекта."},
         "peaks": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}, "description": "id секций-пиков (visual_role peak) — сверка скриптом."},
         "budget_overrides": {
           "type": "array",

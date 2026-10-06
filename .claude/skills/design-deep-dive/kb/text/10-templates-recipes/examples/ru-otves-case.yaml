@@ -1,5 +1,5 @@
-# ru-otves-case.yaml — пример copy deck v1.1 (10-templates-recipes, J3, 2026-09-24): страница кейса (case-page) «Отвеса».
-# Тексты — ai-self J3. Факты — ../../02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленная студия B2,
+# ru-otves-case.yaml — пример copy deck v1.1 (10-templates-recipes): страница кейса (case-page) «Отвеса».
+# Тексты — ai-self. Факты — ../../02-strategy-messaging/examples/facts-service-renovation.yaml (вымышленная студия,
 # синтетические данные: не публиковать). Эта страница проходит весь путь: check --update --promote → approve →
 # validate --final (демо-факты примера — error: публикация только на фактах заказчика) → export --stage mockup (вход
 # холста: copy.md и facts.md).
@@ -15,12 +15,12 @@ copy_deck:
   meaning_ref: ../../02-strategy-messaging/examples/meaning-otves.yaml
   jurisdiction: ru
   legal_category: [general]
-  authors: ['J3 (ai-self, 2026-09-24)']
+  authors: ['агент (ai-self, 2026-09-24)']
   notes: >-
-    Кейс по E 03 §4.4: ситуация → результат числом с базой и сроком → слова клиента с рамкой типичности → гарантия и цена →
+    Кейс по text 04/03 §4.4: ситуация → результат числом с базой и сроком → слова клиента с рамкой типичности → гарантия и цена →
     действие. Имя клиента — только в отзыве (у факта кейса permission.shows — город). Прораб к объекту не привязан: в
     фактах нет, кто вёл этот ремонт (пробел foreman-per-object — rewrite-without). Подвал с реквизитами — общий для сайта
-    (пробел legal-details); на странице кейса нет оплаты и брони, блок продавца H здесь не обязателен.
+    (пробел legal-details); на странице кейса нет оплаты и брони, блок продавца (COPY-L-DIST-01) здесь не обязателен.
   pages:
   - page_id: case-sormovo-54
     page_type: case-page
@@ -30,7 +30,7 @@ copy_deck:
     cta_primary: case-sormovo-54/final/cta
     promise:
       from: case-sormovo-54/case/title
-      basis: 'факт case-two-room-47-days — главное доказательство страницы (B1: опора «срок по договору»)'
+      basis: 'факт case-two-room-47-days — главное доказательство страницы (опора иерархии «срок по договору»)'
     meta:
       title: 'Двушка 54 м² в Сормове за 47 рабочих дней — кейс студии «Отвес»'
       description: 'Ремонт двушки 54 м² в Сормовском районе под ключ: 47 рабочих дней при сроке по договору 50, акт подписан 30 мая 2026 года. Гарантия на работы — 3 года.'
@@ -38,7 +38,7 @@ copy_deck:
       og_description: 'Как прошёл ремонт двушки под ключ: 47 рабочих дней при сроке по договору 50.'
       fact_ids: [case-two-room-47-days, guarantee-3-years]
       review_by: '2027-09-24'
-      notes: 'Шаблон G case-page: «{задача клиента}: {результат числом} — кейс {бренд}»; description — ситуация, что сделали, результат с датой.'
+      notes: 'Шаблон case-page (meta-rules.yaml): «{задача клиента}: {результат числом} — кейс {бренд}»; description — ситуация, что сделали, результат с датой.'
     sections:
     - section_id: case
       section_role: case-studies
@@ -95,7 +95,7 @@ copy_deck:
         chosen: a
         fact_ids: [review-anna-k]
         claim_flags: [testimonial-quote]
-        notes: 'Цитата дословно (verbatim факта), правка отзывов — только пунктуация (H: ГК ст. 1266).'
+        notes: 'Цитата дословно (verbatim факта), правка отзывов — только пунктуация (ГК ст. 1266).'
       - slot_id: author
         slot_type: testimonial-attribution
         group: review-1
@@ -111,7 +111,7 @@ copy_deck:
         chosen: a
         fact_ids: []
         claim_flags: []
-        notes: 'Рамка типичности рядом с цитатой о смете (B2 §5.4; COPY-F-TYPICALITY — напоминание, а не ошибка).'
+        notes: 'Рамка типичности рядом с цитатой о смете (text 02/03 §5.4; COPY-F-TYPICALITY — напоминание, а не ошибка).'
     - section_id: guarantee
       section_role: guarantee
       message: 'Гарантия 3 года на работы — пункт 7.2 договора'

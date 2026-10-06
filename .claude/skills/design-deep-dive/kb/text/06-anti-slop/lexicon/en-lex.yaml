@@ -6,7 +6,7 @@
 # coincidental — density and clusters matter (min_count, marker density analyzer).
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   group: LEX
   lang: en

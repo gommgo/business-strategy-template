@@ -86,7 +86,8 @@ kimi (`site.sections[].id` — свободные) и временный сло�
    сигнал, не дефект сдачи).
 3. B или J: принимает (строка в `vocabulary.yaml`, `status: proposed` до подтверждения владельцем темы), сводит с
    существующим (строка crosswalk `equal` или `narrower`) или отклоняет с причиной в отчёте.
-4. После правки: `python3 99-raw/experiments/B/02-crosswalk/build_crosswalk.py` (проверка ссылок), `vocab_lint.py --selftest`.
+4. После правки: `python3 ../../../scripts/site/vocab_lint.py --check-crosswalk` (проверка ссылок),
+   `vocab_lint.py --selftest`.
 - **Принято в волне 1** (заметки M, журнал text): роли `header`, `services`, `promo`, `audience`, `other`
   (measurement-only) и блоки `service-cards`, `audience-grid` (M); источники трафика `retargeting`, `maps-local`,
   `social-organic`, `marketplace`, `messenger`, `offline` (text B1); роль `specs`, слоты `spec-row`, `price-old`,
@@ -176,7 +177,8 @@ kimi (`site.sections[].id` — свободные) и временный сло�
   `spec-row`, `image-caption`, `announcement`) + `article-date`, `article-sources` (предложение G text) + 8 новых site:
   `disclaimer` (оговорка у утверждения), `ad-marking` («Реклама», рекламодатель, erid — 38-ФЗ ст. 18.1), `event-meta`
   (дата, время, место), `quiz-question`, `quiz-option`, `result-summary` (итог квиза или калькулятора), `contact-info`
-  (адрес, часы), `cookie-text`. Мета-слоты и письма — `scope: page`.
+  (адрес, часы), `cookie-text`. Мета-слоты и письма — `scope: page`. `messenger-prefill` — готовое сообщение мессенджера
+  (текст, уровень секции).
 - `media` (17): `hero-visual`, `background`, `photo`, `product-photo`, `screenshot`, `illustration`, `icon`, `logo` (клиента,
   партнёра, СМИ — не генерировать), `brand-logo`, `avatar`, `video`, `diagram`, `cover-image`, `document-image`, `map`,
   `og-image`, `favicon`. Коды задач (`task:IMG-HERO-PHOTO` …) и план ассетов — ai-media (`01-asset-slots-by-page-type.md §8`).
@@ -200,7 +202,7 @@ Macro: `lead-request`, `request-quote`, `callback-request`, `call`, `message`, `
 ### 4.7. `macrostructure` и `first_screen_policy`
 
 21 форма Hallmark (kebab-case названия, `source: hallmark:NN`) и 8 вне Hallmark: `sales-longread`, `quiz-funnel`,
-`form-first` (рынок РФ и `landing.csv`), `scroll-story` (kimi W3, `landing.csv`), `pricing-first`, `comparison-led`,
+`form-first` (рынок РФ и `landing.csv`), `scroll-story` (сайт-референс W3, `landing.csv`), `pricing-first`, `comparison-led`,
 `event-schedule`, `directory` (`landing.csv`). C принял все 29 id и свёл их в `../03-page-structure/01-narratives-and-section-order.md`
 §4.2 с семейством `layout_family`: grid (8), document (11), poster (8), flow (2 — `quiz-funnel`, `form-first`; новое семейство C
 для страниц, где убеждение идёт через ввод посетителя). Ось kimi `grid-led` / `document-led` / `poster-led` — группы Hallmark
@@ -214,7 +216,8 @@ flow → `document-led` (или `flow-led` — предложение kimi от 
 
 - `awareness` — 5 уровней Шварца (id text как есть); что меняют на странице — A и text B1
   (`../text/02-strategy-messaging/02-awareness-hierarchy-objections.md`).
-- `traffic_temperature` — cold, warm, hot; `traffic_source` — 18 (9 text + 6 предложений B1 + `paid-display`, `influencer`,
+- `traffic_temperature` — cold, warm, hot; `def` пространства: температура ≠ осведомлённость;
+  `traffic_source` — 18 (9 text + 6 предложений B1 + `paid-display`, `influencer`,
   `internal`); `temperature_hint` — типичная температура, не правило; `channel` — группа для атрибуции (P).
 - `jurisdiction` — `ru` (по умолчанию, решение 11), `eu` (профиль по запросу), `kz`, `by`, `us`, `other` (не покрыты v0).
 - `ambition_level` — `L0`, `L1`, `L2`; определения и бюджеты — `../creative/PLAN.md`, «Стартовые позиции» §1
@@ -225,29 +228,30 @@ flow → `document-led` (или `flow-led` — предложение kimi от 
 ### 5.1. Формат
 
 Колонки строго: `source_base	source_file	source_section	source_vocab	source_term	namespace	our_id	relation	note`. Пути
-соседей — относительные от корня базы (`../ai-media/...`); внешние — путь клона или URL с датой. `relation`
+соседей — относительные от корня базы (`../ai-media/...`); внешние — URL, в скобках — файл репозитория или дата. `relation`
 описывает **источник относительно нашего id**: `equal` — тот же смысл; `narrower` — термин источника уже (наш шире);
 `broader` — термин источника шире (по строке на каждый наш id); `related` — пересекаются; `none` — пары нет, `our_id` пуст,
-причина в `note`. Файл генерируется скриптом `99-raw/experiments/B/02-crosswalk/build_crosswalk.py` — руками не править:
-скрипт проверяет, что каждый `our_id` есть в словаре, и падает при ошибке.
+причина в `note`. Таблицу сверяет `vocab_lint.py --check-crosswalk`: колонки строго по формату, `relation` — из перечня,
+каждый `our_id` есть в словаре своего пространства, у `none` — `our_id` пуст и причина в `note`.
 
 ### 5.2. Покрытие (2026-09-24 12:35, перепроверено 12:49)
 
 | Источник | Строк | Что покрыто |
 |---|---|---|
-| text-research | 228 | временный словарь целиком (6 жанров, 18 `page_type`, 28 ролей, 63 `slot_type`, 5 `awareness`, 3 температуры, 9 источников), 69 `slot_type` + составной `hero-core` из `copy-slots.yaml`, 13 `page_type` корпуса, 13 предложений агентов text |
-| ai-media-research | 192 | `01/01` §2.1 (19 слотов), §3 (8 типов), §8 (`page_type` плана — проекция всех наших типов, `section`, id слотов примеров, `role`), `asset-spec.schema.json` (`page_type` — проекция, `role.section`, `role.slot`, `role.priority`, `text_zone.purpose`), рубрики (`slot`), `routing.yaml` (24 слага), `sites.csv` (19 значений `type`) |
+| text | 234 | временный словарь целиком (6 жанров, 18 `page_type`, 28 ролей, 63 `slot_type`, 5 `awareness`, 3 температуры, 9 источников), 69 `slot_type` + составной `hero-core` из `copy-slots.yaml`, 13 `page_type` корпуса, 13 предложений агентов text |
+| ai-media | 213 | `01/01` §2.1 (19 слотов), §3 (8 типов), §8 (`page_type` плана — проекция всех наших типов, `section`, id слотов примеров, `role`), `asset-spec.schema.json` (`page_type` — проекция, `role.section`, `role.slot`, `role.priority`, `text_zone.purpose`), рубрики (`slot`), `routing.yaml` (24 слага), `sites.csv` (19 значений `type`) |
 | hallmark | 85 | 21 макроструктура, 14 доменов трио, 50 архетипов (H1–H9, S1–S5, F1–F6, C1–C4, T1–T4, Ft1–Ft8, N1a–N13) |
 | tilda | 53 | 28 префиксов индекса блоков (2021, вторично) + 25 функциональных блоков Tilda Education |
 | ui-ux-pro-max | 34 | 34 паттерна `landing.csv` |
 | schema.org | 23 | 11 подтипов `WebPage` + 10 типов сущностей |
-| kimi-research | 22 | `brief.yaml` (`project.type`, `direction.macrostructure`, `site.sections[].id`, `product.primary_action`), скелеты K3 §3.3, типы и результаты W3, `07/01` §2.2 |
 | relume | 18 | категории библиотеки (неполно: список рисуется скриптом) |
-| blender-research | 16 | 12 рецептов, 3 цели страницы `01/02` §7 |
+| blender | 16 | 12 рецептов, 3 цели страницы `01/02` §7 |
 | unbounce | 13 | 13 «типов» лендингов |
-| ux-research | 1 | CTA OOUX (омоним) |
+| jack-roberts | 10 | карточка брифа скилла: типы сайта и результаты |
+| claude-design | 9 | словарь брифа холста: `project.type`, `direction.macrostructure`, `site.sections[].id`, `product.primary_action`, признаки описания §2 |
+| ux | 1 | CTA OOUX (омоним) |
 
-Всего 685 строк: equal 349, related 158, broader 84, narrower 42, none 52. Все термины временного словаря text и
+Всего 709 строк: equal 350, related 156, broader 110, none 51, narrower 42. Все термины временного словаря text и
 `copy-slots.yaml` — `equal`: переименований у сестры не требуется.
 
 ### 5.3. Как пользоваться
@@ -297,7 +301,7 @@ flow → `document-led` (или `flow-led` — предложение kimi от 
 - Где запускать: E — на `blocks.yaml` и примерах `page-plan`; G — на `site-map`; K — на чек-листе (Markdown: префиксные
   ссылки); J — на всех YAML базы и итоговых примерах; M — классы замера с `--allow-measurement`.
 - Своё: `python3 ../../scripts/site/vocab_lint.py 04-blocks/blocks.yaml --keys-as-ids blocks=block`; чужое:
-  `--no-default-map --map site.sections.id=section_role --crosswalk 02-site-types/crosswalk.tsv --source-base kimi-research`.
+  `--no-default-map --map site.sections.id=section_role --crosswalk 02-site-types/crosswalk.tsv --source-base claude-design`.
 - Проверено: `--selftest` 9/9 (опыт B/04); на плане ассетов ai-media — 16 id, 12 сопоставлены через crosswalk, 3 — «нет пары» по
   делу; на брифе «Кварц» — 4 самодельных id секций (опыт B/03). Ограничения: не проверяет, что слот разрешён блоку и что факт
   существует — это `site_validate.py` (J).
@@ -331,7 +335,7 @@ flow → `document-led` (или `flow-led` — предложение kimi от 
 - [ ] Ссылки на чужие id — с префиксом (`effect:`, `fact:`, `task:`, `recipe:`)?
 - [ ] Каждый слот `data` ссылается на факт нужного вида?
 - [ ] Значения `treatment` и уровней — из creative, а не придуманы site?
-- [ ] После правки словаря пересобран `crosswalk.tsv` (скрипт без ошибок)?
+- [ ] После правки словаря сверен `crosswalk.tsv` (`vocab_lint.py --check-crosswalk` без ошибок)?
 - [ ] Для чужих форматов линтер запущен с картой путей?
 
 ## Открытые вопросы и противоречия
@@ -348,15 +352,15 @@ flow → `document-led` (или `flow-led` — предложение kimi от 
 
 - [S1] Контракт тройки v2.1, `99-raw/notes/triad-contract-2026-09-24.md` §2, §3, §6 п.1 — рамка словаря.
 - [S2] Аудит MEDIA §4.8, аудит KIMI §2.3, §2.8, §8.2 — `99-raw/notes/audit-2026-09-24/`.
-- [S3] Временный словарь text, `../text/99-raw/notes/temp-vocabulary-v0.yaml` (06:51) — 189 строк; сверено скриптом.
+- [S3] Временный словарь text v0 (06:51) — 189 строк; сверено скриптом.
 - [S4] `../text/04-copy-by-block/copy-slots.yaml` (11:14; прочитан 11:35, перепроверен 12:49) — 69 slot_type.
 - [S5] `../text-research/03-corpus-measured/corpus.tsv` — 13 значений `page_type`; `../site-research/99-raw/notes/sync/T1-text-2026-09-24/facts.schema.yaml` — 22 вида фактов.
 - [S6] NN/g «Macro vs. Micro Conversions», 2024-07-19, https://www.nngroup.com/articles/micro-conversions/ — уровни действий.
 - [S7] ai-media `01-web-assets-landscape/01-asset-slots-by-page-type.md` §2.1, §3, §8; `05-prompting/asset-spec.schema.json`; `11-evaluation-qa/rubrics/*.json`; `13-routing-matrix/routing.yaml` (v1, 2026-09-24); `01-web-assets-landscape/sites.csv`.
 - [S8] kimi `07-brief-handoff/templates/brief.yaml`; `05-reviews-practice/03-default-look-k3.md` §3.3; `91-videos/digests/weoV4dm-X1A.md`; `99-raw/experiments/F/03-package-from-description/landing-kvarts/brief.yaml`.
 - [S9] blender `12-recipes/00-how-to-use.md` §1; `01-web-3d-landscape/02-when-3d-budgets-loading.md` §7.
-- [S10] Hallmark (MIT) `references/macrostructures.md`, `structure.md`, `component-cookbook.md`, `SKILL.md` стр. 286 — клон в `../kimi-research/99-raw/cache/repos/Nutlope__hallmark/`.
-- [S11] ui-ux-pro-max (MIT) `data/landing.csv` — клон `../kimi-research/99-raw/cache/repos/nextlevelbuilder__ui-ux-pro-max-skill/`.
+- [S10] Hallmark (MIT) `references/macrostructures.md`, `structure.md`, `component-cookbook.md`, `SKILL.md` стр. 286 — https://github.com/Nutlope/hallmark.
+- [S11] ui-ux-pro-max (MIT) `data/landing.csv` — https://github.com/nextlevelbuilder/ui-ux-pro-max-skill.
 - [S12] Relume Library — https://www.relume.io/react/marketing-components, дока «How to use the Relume Webflow Library» (2026-09-24) — мнение вендора, неполно.
 - [S13] Индекс блоков Tilda, https://roman-kosov.ru/blocks/ (2021-08-25) — вторично; Tilda Education «Анатомия лендинга», https://tilda.education/courses/landing-page/anatomiya-landing-page/ (2024) — мнение вендора.
 - [S14] schema.org «WebPage», https://schema.org/WebPage (2026-09-24) — спецификация.

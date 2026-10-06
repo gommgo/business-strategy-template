@@ -3,13 +3,13 @@
 Волна 3 · агент K · 23.09.2026 · Blender 5.2.2 LTS, glTF-IO 5.2.40, gltf-transform 4.5.0, gltfpack 1.2, three r186, model-viewer 4.3.1,
 Chromium (Playwright, Iris Xe) · эксперименты `../99-raw/experiments/K/` (01 прогонщик рецептов, 02–10 страницы и ворота) · заметки
 `../99-raw/notes/wave3/K-notes.md` · отчёт `../99-raw/reports/wave3-K-report.md` · **рецепты 13–17** — агент RC по испытанию
-15-showcase, 26.09.2026 (доказательства — дорожки `../99-raw/experiments/{Z,CD,KB,SD,VD}/`, проверки — `../99-raw/notes/trial/RC-checks/`,
+15-showcase (исходники отрывков — `examples/<рецепт>/src/`, проверки — `../99-raw/notes/trial/RC-checks/`,
 заметки — `../99-raw/notes/trial/RC-notes.md`). Всего **17 рецептов**.
 
-Исполняемость: **все блоки `python` 12 файлов 01–12 исполнены в напечатанном виде** прогонщиком `K/01-run-recipes/run_recipes.py`
-(Blender-блоки — в `blender -b`, блоки `# run: system` — системным Python 3); JS/HTML-блоки — фрагменты страниц `examples/*/index.html`,
-каждая открыта в Chromium (`web_view.py --page` / `site_probe.py`). Рецепты 13–17 — отрывки скриптов и страниц дорожек, исполненных
-там (`[не исполняется] # run: skip`), и 3 из 3 блоков `# run: system` (`run_doc_blocks.py`). Итог прогона — в конце этого файла.
+Исполняемость: **все блоки `python` 12 файлов 01–12 исполнены в напечатанном виде** прогонщиком `../../../scripts/blender/run_recipes.py`
+(Blender-блоки — в `blender -b`, блоки `# run: system` — Python окружения скилла); JS/HTML-блоки — фрагменты страниц `examples/*/index.html`,
+каждая открыта в Chromium (`web_view.py --page` / `site_probe.py`). Рецепты 13–17 — отрывки скриптов и страниц (`[не исполняется] # run: skip`;
+исходники отрывков — `examples/<рецепт>/src/`) и 2 из 2 блоков `# run: system` (`run_doc_blocks.py`). Итог прогона — в конце этого файла.
 
 ## Файлы
 
@@ -93,6 +93,6 @@ Chromium (Playwright, Iris Xe) · эксперименты `../99-raw/experiment
 
 Примеры ≤ 5 МБ на рецепт: PNG-кадры секвенции 08 (5,1 МБ) удалены после кодирования (кроме первого) — `build.py` пересоздаёт их за 18 с.
 
-Рецепты 13–17 (26.09.2026, RC): `run_doc_blocks.py` — блоки `# run: system` 3 из 3; остальное — отрывки исполненных скриптов дорожек
+Рецепты 13–17 (RC): `run_doc_blocks.py` — блоки `# run: system` 2 из 2; остальное — отрывки исполненных скриптов дорожек
 (`# run: skip`) и JS (итог — `../99-raw/notes/trial/RC-checks/run_doc_blocks_13-17_06.json`); примеры живут на страницах
-`../15-showcase/<предмет>/` и в `../99-raw/experiments/<дорожка>/`, а не в `examples/`.
+`../15-showcase/<предмет>/`, исходники отрывков — в `examples/<рецепт>/src/`.

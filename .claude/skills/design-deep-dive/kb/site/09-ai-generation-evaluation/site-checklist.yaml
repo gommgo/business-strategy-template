@@ -1,14 +1,14 @@
-# Машиночитаемая версия 09-ai-generation-evaluation/02-site-checklist.md (сводный чек-лист сайта, агент K).
+# Машиночитаемая версия 09-ai-generation-evaluation/02-site-checklist.md (сводный чек-лист сайта).
 # Сгенерировано scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.
 version: "1.0"
-generated_at: "2026-10-02 11:15"
-checked: "2026-10-02"
+generated_at: "2026-10-06 02:49"
+checked: "2026-10-06"
 source_md: "09-ai-generation-evaluation/02-site-checklist.md"
 source_md_meta: "Свод правил базы в форме «да / нет» для проверки плана, собранной страницы и сайта: **248 пунктов в 15 блоках** плюс каталог"
 items_count: 248
 defects_count: 50
 severity_scale: {B: блокер, S: серьёзно, D: желательно}
-severity_note: "серьёзность на маршруте «визит → действие» (поправка PLAN №10), назначена агентом K, не измерена; [спорно] — не выше S"
+severity_note: "серьёзность на маршруте «визит → действие» — оценка, не замер; [спорно] — не выше S"
 check_method_codes: {DOM: dom, LNT: script, AXE: script, SCR: scenario, IMG: visual, JDG: judge, HUM: human}
 check_method_note: "первый способ — основной; JDG и HUM не ставят автоматических ворот (auto_gate: false)"
 steps: [step:intake, step:proof, step:site-type, step:site-map, step:page-plan, step:sister-sync, step:plan-check, step:package, step:build-loop, step:gates, step:fix, step:acceptance, step:measure]

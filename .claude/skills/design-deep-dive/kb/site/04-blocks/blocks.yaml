@@ -9,9 +9,7 @@
 # if-available (при наличии у заказчика) | by-variant (задаёт вариант). Длина текстового слота — класс порядка величины
 # (length_classes), по умолчанию из text_slot_defaults (выведено скриптом из copy-slots.yaml).
 # Ссылки на правила (refs): site:<папка>-<файл>#§, соседи — <база>:<папка>-<файл>#§; ссылка без § — на файл целиком.
-# Буквы в заметках — разделы базы site: B — 02-site-types, C — 03-page-structure, E — 04-blocks, F — 05-conversion-funnels,
-# G — 06-multipage-ia, H — 07-seo-geo-performance-analytics (01, 02, head-kit.yaml), P — тот же раздел (03, 04,
-# events.yaml), I — 08-legal-trust-a11y.
+# Адреса в заметках: «site 05» — раздел базы site (05-conversion-funnels), «site 03/02 §2.3» — папка, файл и раздел статьи.
 # Проверка (от корня скилла): scripts/site/site_validate.py --all — схема и связи каталога (коды BL-*);
 # scripts/site/vocab_lint.py kb/site/04-blocks/blocks.yaml --keys-as-ids blocks=block — id словаря.
 
@@ -24,17 +22,17 @@ vocabulary: {ref: ../02-site-types/vocabulary.yaml, version: 1, revision: 1, che
 conventions:
   - {id: dom-order, rule: "Визуальный порядок секций = порядок DOM на всех экранах; секции не переставлять CSS (order, row-reverse, grid-area); внутри ряда «текст ↔ медиа» сторона медиа меняется колонкой сетки при неизменном DOM «текст → медиа»", label: "[стандарт] WCAG 1.3.2, 2.4.3", ref: "site:03-03#5.1"}
   - {id: one-h1, rule: "Один H1 на странице — в hero (слот headline) или article-title; секции — H2 (section-title), карточки и шаги — H3; уровни не пропускать", label: "[практика] + [стандарт] WCAG 1.3.1", ref: "site:07-01"}
-  - {id: landmarks, rule: "<header> (banner) — только шапка сайта; hero и секции — <section> внутри <main> с aria-labelledby на свой заголовок; <footer> (contentinfo) — подвал; H1 не в шапке", label: "[практика]; поправка PLAN №4, №15", ref: "site:08-03"}
+  - {id: landmarks, rule: "<header> (banner) — только шапка сайта; hero и секции — <section> внутри <main> с aria-labelledby на свой заголовок; <footer> (contentinfo) — подвал; H1 не в шапке", label: "[практика]", ref: "site:08-03"}
   - {id: logo-home, rule: "Логотип слева ведёт на главную на всех страницах, включая посадочные без меню", label: "[исследование] ux 02-02 §7", ref: "ux:02-02#7"}
   - {id: no-fact-no-block, rule: "Число, отзыв, логотип клиента, награда, рейтинг, цена, срок акции, человек на фото — только из facts.yaml (data-слот fact:<id>); блок с requires_facts без фактов не строится, а не заполняется выдумкой", label: "[контракт §3 п.10]", ref: "site:08-02"}
-  - {id: cta-repeat, rule: "Одно главное действие на страницу, но его призыв повторяется: шапка, hero, после доказательств, финал, липкий на телефоне; второй путь — иным стилем (style: secondary)", label: "[консенсус]; поправка PLAN №1", ref: "site:05-01"}
+  - {id: cta-repeat, rule: "Одно главное действие на страницу, но его призыв повторяется: шапка, hero, после доказательств, финал, липкий на телефоне; второй путь — иным стилем (style: secondary)", label: "[консенсус]", ref: "site:05-01"}
   - {id: collapse-not-cut, rule: "На телефоне детали сворачиваются (accordion), сетки — в колонку (stack), ленты — с видимым краем (rail); смысловой текст, цены, условия, доказательства и призыв не убираются", label: "[документация] Google mobile-first; [исследование] ux 09-03 §7", ref: "site:03-03#5.2"}
   - {id: breakpoints, rule: "Две границы: 60rem (~960 px) — раскладка: сетки в колонку, наклоны и обрезки снимаются, липкие панели отлипают; 40rem (~640 px) — типографика и плотность: дисплей на шаг меньше, метки полей в строку, аннотации — легендой", label: "[мнение вендора] Hallmark component-cookbook"}
   - {id: target-size, rule: "Цель ≥ 24 × 24 CSS px или с зазором (WCAG 2.2 AA 2.5.8); на таче каждая цель ≥ 44 × 44 зоной нажатия, видимый контрол может быть меньше (2.5.5 AAA, Apple HIG); Hallmark ошибочно называет 44 px уровнем AA", label: "[стандарт]", ref: "site:08-03"}
   - {id: html-first, rule: "Смысловой текст, цены, условия, ответы FAQ, призывы и ссылки — в исходном HTML до скриптов и эффектов; ИИ-краулеры JS не исполняют", label: "[документация]", ref: "site:07-02"}
   - {id: motion-pause, rule: "Автодвижение дольше 5 с (карусель, бегущая строка, видео-петля, шейдер) — с паузой; карусели не прокручиваются сами по умолчанию; prefers-reduced-motion — статичный кадр", label: "[стандарт] WCAG 2.2.2, 2.3.3", ref: "site:08-03"}
   - {id: lcp-eager, rule: "Кандидат LCP (H1 или главный визуал hero) не грузится лениво; медиа ниже первого экрана — loading=lazy; 3D и видео — после LCP с постером", label: "[документация] web.dev", ref: "site:07-03"}
-  - {id: vary-blocks, rule: "На одной странице две секции не повторяют один блок в одном варианте (исключения — cta-band и формы-повторы призыва); хвост страницы выводится из возражений, а не «фичи → 3 отзыва → 3 тарифа → лозунг»", label: "[мнение вендора] Hallmark; [проверено] C/01", ref: "site:03-01#3.4"}
+  - {id: vary-blocks, rule: "На одной странице две секции не повторяют один блок в одном варианте (исключения — cta-band и формы-повторы призыва); хвост страницы выводится из возражений, а не «фичи → 3 отзыва → 3 тарифа → лозунг»", label: "[мнение вендора] Hallmark; [проверено]", ref: "site:03-01#3.4"}
   - {id: treatment-elsewhere, rule: "Композиция, типографика, цвет, фон, движение и эффекты блока — creative по id блока; site задаёт анатомию, порядок и ограничения (ворота)", label: "[контракт §2]"}
 
 length_classes:
@@ -54,7 +52,7 @@ mobile_behaviors:
   none: "Без изменений кроме переноса строк (блок уже узкий)"
 
 # >>> text_slot_defaults
-text_slot_defaults:   # ВЫВЕДЕНО derive_text_defaults.py (опыт E/02) из copy-slots.yaml text; руками не править
+text_slot_defaults:   # ВЫВЕДЕНО из copy-slots.yaml text; руками не править
   meta-title: {length: phrase, target_words_ru: 8.6, fact: if-claim, copy: "copy-rule:meta-title", note: "длина оценена по знакам"}
   meta-description: {length: sentence, target_words_ru: 21.4, fact: if-claim, copy: "copy-rule:meta-description", note: "длина оценена по знакам"}
   og-title: {length: phrase, target_words_ru: 6, fact: if-claim, copy: "copy-rule:og-title"}
@@ -99,10 +97,10 @@ text_slot_defaults:   # ВЫВЕДЕНО derive_text_defaults.py (опыт E/02)
   comparison-row: {length: phrase, target_words_ru: 10, fact: always, copy: "copy-rule:comparison-row"}
   faq-q: {length: phrase, target_words_ru: 6, fact: never, copy: "copy-rule:faq-q"}
   faq-a: {length: sentence, target_words_ru: 22, fact: if-claim, copy: "copy-rule:faq-a"}
-  event-meta: {length: phrase, target_words_ru: null, fact: always, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
-  quiz-question: {length: phrase, target_words_ru: null, fact: never, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
-  quiz-option: {length: label, target_words_ru: null, fact: never, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
-  result-summary: {length: sentence, target_words_ru: null, fact: if-claim, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
+  event-meta: {length: phrase, target_words_ru: null, fact: always, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
+  quiz-question: {length: phrase, target_words_ru: null, fact: never, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
+  quiz-option: {length: label, target_words_ru: null, fact: never, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
+  result-summary: {length: sentence, target_words_ru: null, fact: if-claim, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
   image-caption: {length: phrase, target_words_ru: 8, fact: if-claim, copy: "copy-rule:image-caption"}
   form-title: {length: phrase, target_words_ru: 5, fact: if-claim, copy: "copy-rule:form-title"}
   form-lead: {length: phrase, target_words_ru: 9, fact: if-claim, copy: "copy-rule:form-lead"}
@@ -112,18 +110,18 @@ text_slot_defaults:   # ВЫВЕДЕНО derive_text_defaults.py (опыт E/02)
   nav-label: {length: label, target_words_ru: 1, fact: never, copy: "copy-rule:nav-label"}
   footer-tagline: {length: phrase, target_words_ru: 8, fact: if-claim, copy: "copy-rule:footer-tagline"}
   footer-legal: {length: paragraph, target_words_ru: null, fact: always, copy: "copy-rule:footer-legal", note: "у text длины нет (мета, реквизиты): класс — оценка E"}
-  contact-info: {length: phrase, target_words_ru: null, fact: always, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
-  disclaimer: {length: sentence, target_words_ru: null, fact: if-claim, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
-  ad-marking: {length: phrase, target_words_ru: null, fact: always, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
-  cookie-text: {length: sentence, target_words_ru: null, fact: never, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
+  contact-info: {length: phrase, target_words_ru: null, fact: always, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
+  disclaimer: {length: sentence, target_words_ru: null, fact: if-claim, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
+  ad-marking: {length: phrase, target_words_ru: null, fact: always, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
+  cookie-text: {length: sentence, target_words_ru: null, fact: never, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
   article-title: {length: phrase, target_words_ru: 5, fact: if-claim, copy: "copy-rule:article-title"}
   article-lead: {length: paragraph, target_words_ru: 38, fact: if-claim, copy: "copy-rule:article-lead"}
   article-summary: {length: paragraph, target_words_ru: 60, fact: always, copy: "copy-rule:article-summary"}
   article-heading: {length: label, target_words_ru: 3, fact: never, copy: "copy-rule:article-heading"}
   article-paragraph: {length: sentence, target_words_ru: 23, fact: if-claim, copy: "copy-rule:article-paragraph"}
   article-author: {length: phrase, target_words_ru: 10, fact: always, copy: "copy-rule:article-author"}
-  article-date: {length: label, target_words_ru: null, fact: always, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
-  article-sources: {length: paragraph, target_words_ru: null, fact: always, copy: "нет правила text (S1: запрос text)", note: "класс и правило факта — оценка E до правил text"}
+  article-date: {length: label, target_words_ru: null, fact: always, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
+  article-sources: {length: paragraph, target_words_ru: null, fact: always, copy: "нет правила text", note: "класс и правило факта — оценка каталога блоков до правил text"}
   geo-answer: {length: paragraph, target_words_ru: 60, fact: always, copy: "copy-rule:geo-answer"}
   definition: {length: sentence, target_words_ru: 25, fact: if-claim, copy: "copy-rule:definition"}
   email-subject: {length: phrase, target_words_ru: 5, fact: if-claim, copy: "copy-rule:email-subject"}
@@ -147,7 +145,7 @@ blocks:
     purpose: "Опознать сайт и дать главный путь без прокрутки: логотип → главная, меню или только призыв и контакт"
     serves: [header]
     use_when: ["всегда: конвенция «логотип слева → главная, навигация сверху»"]
-    avoid_when: ["меню сайта на посадочной под платный трафик — вариант landing-minimal (C 02 §2.3)", "нижняя панель вкладок как в приложении (поправка PLAN №3)"]
+    avoid_when: ["меню сайта на посадочной под платный трафик — вариант landing-minimal (site 03/02 §2.3)", "нижняя панель вкладок как в приложении"]
     page_types: [landing-lead-services, landing-saas, home-multipage, service-page]
     html: {element: header, landmark: banner, list: ul, note: "меню — <nav aria-label=«Основное меню»>; H1 не в шапке; кнопка меню телефона — <button aria-expanded aria-controls>"}
     slots:
@@ -159,15 +157,15 @@ blocks:
       - {id: messenger, slot: messenger-link, required: false}
       - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: login, slot: link, required: false, note: "«Войти» — action log-in (micro), не главный призыв"}
-      - {id: lang-switch, slot: link, required: false, note: "переключатель языка — G; hreflang — H"}
+      - {id: lang-switch, slot: link, required: false, note: "переключатель языка — site 06; hreflang — site 07"}
     variants:
-      - {id: landing-minimal, name: "Логотип + призыв + контакт", when: "посадочная под платный трафик (paid-search, paid-social, retargeting, email): меню сайта убрано, якоря и телефон остаются", default: true, drops: [nav-link], sources: ["C 02 §2.3 [спорно]"]}
-      - {id: site-nav, name: "Шапка сайта с меню", when: "страница внутри многостраничника; архетип (N1b, N5, N6, N9, N11, N12 …) выбирает G по типу сайта", hallmark: [N1b, N5, N6, N9, N11, N12, N13], note: "архетип — site-map.chrome.header.archetype (перечисление site-map.schema.json v1 #/$defs/header-archetype, G 06-02 §1.2); план страницы только выбирает вариант (page.navigation). N1a «логотип + ряд ссылок + кнопка справа» по привычке — ИИ-отпечаток (гейт 42 Hallmark)"}
-      - {id: transparent-over-hero, name: "Прозрачная поверх hero", when: "hero-media на всю ширину; контраст текста шапки ≥ 4,5:1 к кадру; после начала прокрутки — непрозрачная", sources: ["C 03 §4.1"]}
+      - {id: landing-minimal, name: "Логотип + призыв + контакт", when: "посадочная под платный трафик (paid-search, paid-social, retargeting, email): меню сайта убрано, якоря и телефон остаются", default: true, drops: [nav-link], sources: ["site 03/02 §2.3 [спорно]"]}
+      - {id: site-nav, name: "Шапка сайта с меню", when: "страница внутри многостраничника; архетип (N1b, N5, N6, N9, N11, N12 …) выбирает G по типу сайта", hallmark: [N1b, N5, N6, N9, N11, N12, N13], note: "архетип — site-map.chrome.header.archetype (перечисление site-map.schema.json v1 #/$defs/header-archetype, site 06/02 §1.2); план страницы только выбирает вариант (page.navigation). N1a «логотип + ряд ссылок + кнопка справа» по привычке — ИИ-отпечаток (гейт 42 Hallmark)"}
+      - {id: transparent-over-hero, name: "Прозрачная поверх hero", when: "hero-media на всю ширину; контраст текста шапки ≥ 4,5:1 к кадру; после начала прокрутки — непрозрачная", sources: ["site 03/03 §4.1"]}
     mobile: {behavior: [stack], below_60rem: "меню → кнопка «Меню» с полноэкранным списком; призыв и (ЛУ) телефон остаются видимыми", below_40rem: "высота ≤ 64 px; логотип + кнопка меню + призыв или телефон", never_hide: [logo, cta], sticky: "липкая или частично липкая (появляется при прокрутке вверх); липкие слои вместе ≤ 20 % высоты экрана телефона; scroll-padding-top на высоту шапки (WCAG 2.4.11)"}
     refs: {structure: ["site:03-03#4.1", "site:03-03#4.2", "site:03-02#2.3"], ia: ["site:06-02"], conversion: ["site:05-01"], a11y: ["ux:02-02#7", "ux:02-02#8.2", "site:08-03"], events: ["site:07-04"], ux: ["ux:02-02#1.2", "ux:02-02#12.4"], creative: ["creative:block-treatments"]}
-    errors: ["Полное меню сайта, блог и соцсети в шапке посадочной под рекламу — выходы в момент решения", "Логотип по центру или без ссылки на главную", "Липкая шапка на треть экрана телефона (C/02: максимум 30,6 %)", "Два гамбургера во встроенном браузере соцсети — проверка in-app (ux 09-04 §4.14)"]
-    evidence: ["C/02: липкая шапка на телефоне — медиана 7,7 % высоты экрана [проверено]"]
+    errors: ["Полное меню сайта, блог и соцсети в шапке посадочной под рекламу — выходы в момент решения", "Логотип по центру или без ссылки на главную", "Липкая шапка на треть экрана телефона (site 03/03: максимум 30,6 %)", "Два гамбургера во встроенном браузере соцсети — проверка in-app (ux 09-04 §4.14)"]
+    evidence: ["липкая шапка на телефоне — медиана 7,7 % высоты экрана [проверено]"]
 
   announcement-bar:
     family: header-nav
@@ -200,7 +198,7 @@ blocks:
     flow: chrome
     purpose: "Дать обзор длинной страницы и прыжок к нужной секции"
     serves: [header]
-    use_when: ["страница длиннее ≈ 8 экранов десктопа или ≈ 15 экранов телефона (C 02 §1.4)", "курс, мероприятие, длинная услуга, статья с оглавлением"]
+    use_when: ["страница длиннее ≈ 8 экранов десктопа или ≈ 15 экранов телефона (site 03/02 §1.4)", "курс, мероприятие, длинная услуга, статья с оглавлением"]
     avoid_when: ["короткая посадочная 3–6 секций", "вместе с липкой шапкой и липкой панелью, если слои вместе > 20 % экрана"]
     html: {element: nav, landmark: navigation, list: ul, label: "aria-label «По странице»", note: "ссылки на id секций; aria-current=«true» у активного пункта — по желанию"}
     slots:
@@ -224,10 +222,10 @@ blocks:
     flow: chrome
     purpose: "Показать место страницы в иерархии многостраничника и путь наверх"
     serves: [header]
-    use_when: ["многостраничник, страница третьего уровня и глубже (поправка PLAN №4)"]
+    use_when: ["многостраничник, страница третьего уровня и глубже"]
     avoid_when: ["лендинг, главная, страница второго уровня без иерархии"]
     page_types: [service-page, case-page, article-page, feature-page, use-case-page]
-    html: {element: nav, landmark: navigation, list: ol, label: "aria-label «Хлебные крошки»", note: "последний пункт — текущая страница с aria-current=«page»; разметка BreadcrumbList — H"}
+    html: {element: nav, landmark: navigation, list: ol, label: "aria-label «Хлебные крошки»", note: "последний пункт — текущая страница с aria-current=«page»; разметка BreadcrumbList — site 07"}
     slots:
       - {id: current, slot: nav-label, required: true, note: "текущая страница без ссылки"}
     groups:
@@ -235,7 +233,7 @@ blocks:
     variants:
       - {id: full-path, name: "Полный путь", when: "по умолчанию", default: true}
       - {id: parent-only, name: "Только родитель «← Раздел»", when: "телефон или глубина > 4"}
-    mobile: {behavior: [none], below_40rem: "одна строка без переноса (NN/g, правило 9 — G 06-02 §2.1); длинный путь — вариант parent-only «← Раздел»", never_hide: [current]}
+    mobile: {behavior: [none], below_40rem: "одна строка без переноса (NN/g, правило 9 — site 06/02 §2.1); длинный путь — вариант parent-only «← Раздел»", never_hide: [current]}
     refs: {ia: ["site:06-02"], seo: ["site:07-01"], a11y: ["ux:02-02#4"], ux: ["ux:02-02#4"]}
     errors: ["Крошки на одностраничном лендинге", "Разметка BreadcrumbList не совпадает с видимым путём"]
 
@@ -263,10 +261,10 @@ blocks:
       - {id: proof, slot: fact-ref, required: if-fact, fact_kinds: [metric, rating, client, award]}
     variants:
       - {id: statement-cta, name: "Заголовок + лид + призыв", when: "по умолчанию", default: true, first_screen_policy: offer-cta}
-      - {id: marquee, name: "Одно заявление на весь экран", when: "кампания L2, манифест, бренд-заявление; призыв в шапке, видимый признак продолжения", first_screen_policy: poster, drops: [subheadline, cta, cta-label], hallmark: [H1], sources: ["C 03 §2.2"]}
+      - {id: marquee, name: "Одно заявление на весь экран", when: "кампания L2, манифест, бренд-заявление; призыв в шапке, видимый признак продолжения", first_screen_policy: poster, drops: [subheadline, cta, cta-label], hallmark: [H1], sources: ["site 03/03 §2.2"]}
     mobile: {behavior: [stack], below_40rem: "дисплей на шаг меньше; длинные слова — hyphens: auto при lang=ru или дисплей ещё на шаг меньше; неразрывный пробел после предлогов и союзов — правило text (типографика); ядро ≤ 40 слов (text hero-core) выше черты первого экрана с учётом шапки и баннера cookie", never_hide: [headline, cta]}
     refs: {structure: ["site:03-03#1.2", "site:03-03#2.2", "site:03-03#3.1"], conversion: ["site:05-01"], seo: ["site:07-01"], a11y: ["site:08-03"], events: ["site:07-04"], text: ["text:04-01"], creative: ["creative:block-treatments"]}
-    errors: ["Слоган вместо категории без надзаголовка (C/02: 5 из 30)", "Анимированный по буквам H1 — задерживает смысл и LCP", "hero 100vh с текстом по центру и без признака продолжения (гейт 6 Hallmark)"]
+    errors: ["Слоган вместо категории без надзаголовка (site 03/03: 5 из 30)", "Анимированный по буквам H1 — задерживает смысл и LCP", "hero 100vh с текстом по центру и без признака продолжения (гейт 6 Hallmark)"]
     evidence: ["hero у 30 из 30 живых страниц, позиция 0,00 [проверено]"]
 
   hero-media:
@@ -290,7 +288,7 @@ blocks:
       - {id: cta-note, slot: cta-note, required: false}
       - {id: hero-proof, slot: hero-proof, required: if-fact, fact: always}
       - {id: proof, slot: fact-ref, required: if-fact, fact_kinds: [metric, rating, client, award]}
-      - {id: visual, slot: hero-visual, required: true, media_role: informational, ratio: {desktop: "16:9", mobile: "4:5"}, note: "свой кадр телефона 4:5 или 9:16 (C 03 §5.3)"}
+      - {id: visual, slot: hero-visual, required: true, media_role: informational, ratio: {desktop: "16:9", mobile: "4:5"}, note: "свой кадр телефона 4:5 или 9:16 (site 03/03 §5.3)"}
       - {id: screenshot, slot: screenshot, required: by-variant, variants: [product-frame], authenticity: real-only, note: "настоящий интерфейс; ИИ-скриншот — нет (ai-media 01/01 §2.1)"}
       - {id: video, slot: video, required: by-variant, variants: [video-loop], note: "петля ≤ 1,5 МБ десктоп, ≤ 600 КБ телефон (ai-media); пауза"}
       - {id: model, slot: model-3d, required: by-variant, variants: [scene-3d], note: "рецепт blender; постер = visual"}
@@ -301,7 +299,7 @@ blocks:
       - {id: poster-image, name: "Плакат-образ", when: "кампания L2, портфолио: образ + признак продолжения, призыв в шапке", first_screen_policy: poster, drops: [cta, cta-label], hallmark: [H6]}
       - {id: product-frame, name: "Продукт в рамке", when: "SaaS, приложение: настоящий скриншот или мокап", first_screen_policy: offer-cta, adds: [screenshot], hallmark: [H7, H8]}
       - {id: video-loop, name: "Видео-петля", when: "процесс или настроение важнее кадра; есть вертикальный файл для телефона", adds: [video], first_screen_policy: [offer-cta, offer-cta-header]}
-      - {id: scene-3d, name: "3D-объект или сцена", when: "товар с неочевидной формой, кампания L2; LCP — H1 или постер, призыв работает до загрузки 3D (поправка PLAN №22)", adds: [model], first_screen_policy: offer-cta}
+      - {id: scene-3d, name: "3D-объект или сцена", when: "товар с неочевидной формой, кампания L2; LCP — H1 или постер, призыв работает до загрузки 3D", adds: [model], first_screen_policy: offer-cta}
       - {id: illustration, name: "Иллюстрация-центр", when: "абстрактная услуга с сильным рисованным образом (по паспорту стиля)", hallmark: [H9]}
     mobile: {behavior: [reframe, stack], below_60rem: "одна колонка: текст над визуалом или визуал над текстом — одинаково на всех страницах проекта; обрезка «за край экрана» и наклон мокапа снимаются", below_40rem: "кадр 4:5 или 9:16; видео — постер при save-data; призыв выше черты первого экрана; длинные слова H1 — hyphens: auto при lang=ru или дисплей на шаг меньше; неразрывный пробел после предлогов и союзов — правило text (типографика)", never_hide: [headline, cta, hero-proof]}
     refs: {structure: ["site:03-03#3.1", "site:03-03#5.3"], conversion: ["site:05-01"], budget: ["site:07-03"], seo: ["site:07-01"], a11y: ["site:08-03", "ai-media:10-03"], legal: ["site:08-02"], assets: ["ai-media:01-01#2.2", "ai-media:01-01#8"], blender: ["blender:01-02#7"], creative: ["creative:block-treatments"]}
@@ -317,7 +315,7 @@ blocks:
     use_when: ["лидогенерация с расчётом, замером, записью или простой заявкой", "вебинар, материал, лист ожидания (форма из одного поля)"]
     avoid_when: ["SaaS с пробным периодом — кнопка на регистрацию (допустимо одно поле e-mail)", "дорогая услуга холодному трафику — сначала доверие, форма во второй-третьей секции"]
     page_types: [landing-lead-services, landing-lead-magnet, landing-waitlist, landing-event]
-    html: {element: section, landmark: region, heading: h1, form: true, note: "<form> с <label> у каждого поля, autocomplete, согласие — отдельный <input type=checkbox> с <label> и ссылкой (I); кнопка type=submit"}
+    html: {element: section, landmark: region, heading: h1, form: true, note: "<form> с <label> у каждого поля, autocomplete, согласие — отдельный <input type=checkbox> с <label> и ссылкой (site 08); кнопка type=submit"}
     slots:
       - {id: eyebrow, slot: eyebrow, required: false}
       - {id: headline, slot: headline, required: true, heading: h1}
@@ -325,9 +323,9 @@ blocks:
       - {id: hero-proof, slot: hero-proof, required: if-fact, fact: always}
       - {id: proof, slot: fact-ref, required: if-fact, fact_kinds: [metric, rating, price, offer-terms]}
       - {id: form-title, slot: form-title, required: false}
-      - {id: form, slot: form, required: true, note: "≤ 3 видимых поля; набор полей — F (lead-forms.yaml)"}
+      - {id: form, slot: form, required: true, note: "≤ 3 видимых поля; набор полей — lead-forms.yaml"}
       - {id: cta-label, slot: cta-label, required: true, note: "подпись кнопки отправки называет результат"}
-      - {id: consent, slot: form-consent, required: true, note: "если собираются ПД; отдельное согласие с 01.09.2025 — I"}
+      - {id: consent, slot: form-consent, required: true, note: "если собираются ПД; отдельное согласие с 01.09.2025 — site 08"}
       - {id: cta-note, slot: cta-note, required: true, purpose: "что будет после отправки: кто и когда свяжется, сколько стоит"}
       - {id: phone, slot: phone-link, required: if-available, note: "канал того же действия"}
       - {id: messenger, slot: messenger-link, required: false}
@@ -456,7 +454,7 @@ blocks:
     mobile: {behavior: [none], below_40rem: "обращение на шаг меньше; подпись компактнее", never_hide: [body, signature, cta]}
     refs: {structure: ["site:03-01#4.2", "site:03-03#2.2"], text: ["copy-rule:body"], creative: ["creative:block-treatments"]}
     errors: ["Письмо от вымышленного основателя", "Письмо + три кнопки в первом экране — теряется жанр"]
-    note: "Отдельный id, а не вариант hero-text: другой набор слотов (проза ≥ 60 слов, подпись, person-ref) — правило B §4.4 (ответ на открытый вопрос B)"
+    note: "Отдельный id, а не вариант hero-text: другой набор слотов (проза ≥ 60 слов, подпись, person-ref) — правило site 02/02 §4.4"
 
   hero-carousel:
     family: hero
@@ -479,7 +477,7 @@ blocks:
     mobile: {behavior: [rail], below_40rem: "лента с видимым краем следующего слайда и кнопками; первый слайд — главное предложение", never_hide: [headline, cta]}
     refs: {structure: ["site:03-03#3.1"], a11y: ["site:08-03"], conversion: ["site:05-01"], creative: ["creative:block-treatments"]}
     errors: ["Автопрокрутка без паузы", "Разные H1 на слайдах", "Слайдер как способ «вместить всё» вместо выбора главного"]
-    note: "Id сохранён (решение E на открытый вопрос B): отличается набором слотов (повторяемые слайды); статус — «не рекомендуется для главного сообщения» (C 03 §3.1 [консенсус])"
+    note: "Id сохранён: отличается набором слотов (повторяемые слайды); статус — «не рекомендуется для главного сообщения» (site 03/03 §3.1 [консенсус])"
 
   # ================================================================================================================ proof
   logo-wall:
@@ -496,13 +494,13 @@ blocks:
     slots:
       - {id: caption, slot: logos-caption, required: true, fact: always, purpose: "называет связь компаний с продуктом"}
       - {id: title, slot: section-title, required: false, heading: h2, note: "если заголовка нет — визуально скрытый H2"}
-      - {id: ad-marking, slot: ad-marking, required: false, note: "спонсоры и партнёрские блоки — решение I (38-ФЗ ст. 18.1)"}
+      - {id: ad-marking, slot: ad-marking, required: false, note: "спонсоры и партнёрские блоки — по site 08 (38-ФЗ ст. 18.1)"}
     groups:
       - {id: logo, name: "Логотип", min: 4, max: 24, html: li, slots: [{id: logo, slot: logo, required: true, authenticity: real-only, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt логотипа logo"}, {id: client, slot: client-ref, required: true, fact_kinds: [client, partner]}, {id: link, slot: link, required: false, note: "на кейс клиента"}]}
     variants:
       - {id: row, name: "Один ряд", when: "4–8 логотипов", default: true, hallmark: [T2]}
       - {id: grid, name: "Сетка", when: "9–24 логотипа, отраслевые группы"}
-      - {id: marquee, name: "Бегущая строка", when: "много логотипов, кампания; только с паузой и prefers-reduced-motion (WCAG 2.2.2)", note: "поправка к kimi 05-03 §5.3 «no marquee» — у B §4.4"}
+      - {id: marquee, name: "Бегущая строка", when: "много логотипов, кампания; только с паузой и prefers-reduced-motion (WCAG 2.2.2)", note: "исключение из запрета «no marquee» — site 02/02 §4.4"}
     mobile: {behavior: [stack], below_60rem: "6 → 3 в ряд", below_40rem: "3 → 2 в ряд, высота логотипа 32 → 24 px; бегущая строка — медленнее или сеткой", never_hide: [caption]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-02"], a11y: ["site:08-03"], assets: ["ai-media:01-01#2.3"], ux: ["ux:07-06#5.2"], creative: ["creative:block-treatments"]}
     errors: ["«Нам доверяют» с чужими или сгенерированными логотипами", "alt=«logo» у всех картинок", "Логотипы как бегущая строка без паузы"]
@@ -529,7 +527,7 @@ blocks:
       - {id: stat-with-quote, name: "Число + цитата", when: "одно главное число и отзыв, который его объясняет (вариант доказательства Hallmark hum.md)"}
     mobile: {behavior: [stack], below_60rem: "4 → 2 в ряд", below_40rem: "по одному числу в строке", never_hide: [stat.value, stat.label, source]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-02"], text: ["copy-rule:stat-value", "copy-rule:stat-source"], creative: ["creative:block-treatments"]}
-    errors: ["«10 000+ клиентов» без факта", "Чередование «ряд чисел ↔ фичи» по всей странице — новый шаблон ИИ-страниц 2026 (C/01: переход stats → benefits 5 раз на 6 страницах)", "Анимированный счётчик, который показывает 0 до прокрутки (краулер и читалка видят 0)"]
+    errors: ["«10 000+ клиентов» без факта", "Чередование «ряд чисел ↔ фичи» по всей странице — новый шаблон ИИ-страниц 2026 (site 03/01: переход stats → benefits 5 раз на 6 страницах)", "Анимированный счётчик, который показывает 0 до прокрутки (краулер и читалка видят 0)"]
     evidence: ["proof-stats — 6 из 30 живых страниц, позиция 0,32 [проверено]"]
 
   testimonial-cards:
@@ -548,7 +546,7 @@ blocks:
       - {id: lead, slot: section-lead, required: false}
       - {id: source, slot: stat-source, required: false, purpose: "откуда отзывы и за какой период"}
     groups:
-      - {id: testimonial, name: "Отзыв", min: 2, max: 9, html: li, slots: [{id: quote, slot: testimonial-quote, required: true, fact: always}, {id: attribution, slot: testimonial-attribution, required: true}, {id: avatar, slot: avatar, required: false, authenticity: real-only}, {id: video, slot: video, required: false, note: "видеоотзыв — с субтитрами (I)"}, {id: link, slot: link, required: false, purpose: "на источник или кейс"}, {id: testimonial, slot: testimonial-ref, required: true, fact_kinds: [testimonial]}]}
+      - {id: testimonial, name: "Отзыв", min: 2, max: 9, html: li, slots: [{id: quote, slot: testimonial-quote, required: true, fact: always}, {id: attribution, slot: testimonial-attribution, required: true}, {id: avatar, slot: avatar, required: false, authenticity: real-only}, {id: video, slot: video, required: false, note: "видеоотзыв — с субтитрами (site 08)"}, {id: link, slot: link, required: false, purpose: "на источник или кейс"}, {id: testimonial, slot: testimonial-ref, required: true, fact_kinds: [testimonial]}]}
     variants:
       - {id: grid, name: "Сетка", when: "2–6 текстовых отзывов", default: true}
       - {id: rail, name: "Лента", when: "7+ отзывов; лента с видимым краем и кнопками, без автопрокрутки"}
@@ -614,7 +612,7 @@ blocks:
       - {id: widget-embed, name: "Виджет площадки", when: "заказчик хочет живой виджет; грузить по видимости или по клику (P: сторонние скрипты; I: cookie)"}
     mobile: {behavior: [stack], below_40rem: "значки в столбик; выдержки — лентой", never_hide: [rating, rating-label, source, platform-link]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01", "site:08-02"], budget: ["site:07-03"], seo: ["site:07-01"], creative: ["creative:block-treatments"]}
-    errors: ["«4,9» без площадки, даты и ссылки", "Разметка AggregateRating для отзывов о себе на своём сайте — решение H (правила поисковиков)", "Тяжёлый виджет карт в первом экране"]
+    errors: ["«4,9» без площадки, даты и ссылки", "Разметка AggregateRating для отзывов о себе на своём сайте — по site 07 (правила поисковиков)", "Тяжёлый виджет карт в первом экране"]
 
   case-cards:
     family: proof
@@ -661,7 +659,7 @@ blocks:
       - {id: photo, slot: photo, required: false, authenticity: real-only}
       - {id: case, slot: case-ref, required: true, fact_kinds: [case]}
       - {id: testimonial, slot: testimonial-ref, required: if-fact, fact_kinds: [testimonial]}
-      - {id: disclaimer, slot: disclaimer, required: false, purpose: "типичный результат рядом с лучшим (text B2 §5.4)"}
+      - {id: disclaimer, slot: disclaimer, required: false, purpose: "типичный результат рядом с лучшим (text 02/03 §5.4)"}
       - {id: link, slot: link, required: false, purpose: "на полный кейс"}
       - {id: link-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки link — называет, что откроется: полный кейс"}
       - {id: cta, slot: cta-primary, required: false}
@@ -728,7 +726,7 @@ blocks:
     status: active
     purpose: "Лицензии, сертификаты, допуски, членство в СРО — с номерами и ссылкой на реестр"
     serves: [awards-press]
-    use_when: ["лицензируемые услуги (медицина, образование, строительство, охрана) — обязательно (C 01 §1.2)", "B2B-тендеры"]
+    use_when: ["лицензируемые услуги (медицина, образование, строительство, охрана) — обязательно (site 03/01 §1.2)", "B2B-тендеры"]
     avoid_when: ["сертификаты без номера и срока"]
     requires_facts: true
     fact_kinds: [certificate]
@@ -927,7 +925,7 @@ blocks:
     status: active
     purpose: "Настоящий скриншот или мокап интерфейса с пояснениями к деталям"
     serves: [product-demo]
-    use_when: ["SaaS, приложение: продукт — главный довод (демо-секции у Linear, Basecamp, PostHog — C 01 §3.2)"]
+    use_when: ["SaaS, приложение: продукт — главный довод (демо-секции у Linear, Basecamp, PostHog — site 03/01 §3.2)"]
     avoid_when: ["интерфейса нет или он не готов — ИИ-скриншот запрещён"]
     html: {element: section, landmark: region, heading: h2, figure: true, note: "<figure> + <figcaption>; выноски — нумерованный список в HTML, а не только картинка"}
     slots:
@@ -974,7 +972,7 @@ blocks:
     variants:
       - {id: inline-player, name: "Плеер в секции", when: "по умолчанию", default: true}
       - {id: lightbox, name: "Плеер в окне по нажатию", when: "видео дополнительное; окно — диалог с фокусом"}
-      - {id: embed-facade, name: "Внешний плеер (YouTube, VK Видео, Rutube) по клику", when: "видео уже на площадке; iframe только после нажатия (скорость — P, cookie — I)"}
+      - {id: embed-facade, name: "Внешний плеер (YouTube, VK Видео, Rutube) по клику", when: "видео уже на площадке; iframe только после нажатия (скорость — site 07, cookie — site 08)"}
     mobile: {behavior: [none], below_40rem: "постер 16:9 или вертикальный; без автоплея", never_hide: [video, poster]}
     refs: {a11y: ["site:08-03"], budget: ["site:07-03"], legal: ["site:08-01"], events: ["site:07-04"], assets: ["ai-media:01-01#5"], creative: ["creative:block-treatments"]}
     errors: ["Автоплей со звуком", "Видео без субтитров (WCAG 1.2.2)", "iframe YouTube в HTML сразу — +500 КБ скриптов и cookie до согласия"]
@@ -1084,7 +1082,7 @@ blocks:
     status: active
     purpose: "Параметры товара, услуги или тарифа строками «параметр — значение»"
     serves: [specs]
-    use_when: ["промо товара — обязательно (C 01 §1.2)", "тарифы и услуги с измеримыми параметрами"]
+    use_when: ["промо товара — обязательно (site 03/01 §1.2)", "тарифы и услуги с измеримыми параметрами"]
     avoid_when: ["параметров меньше трёх — key-facts"]
     requires_facts: true
     fact_kinds: [property, metric]
@@ -1106,7 +1104,7 @@ blocks:
     status: active
     purpose: "Проза без карточек: манифест, история, описание, объяснение механизма, SEO-текст"
     serves: [about, story, problem, solution, article-body, seo-text]
-    use_when: ["мысль требует связного текста", "SEO-текст в хвосте страницы (после главного призыва, C 01 §3.1)", "абзац-ответ для ИИ-поиска (geo-answer)"]
+    use_when: ["мысль требует связного текста", "SEO-текст в хвосте страницы (после главного призыва, site 03/01 §3.1)", "абзац-ответ для ИИ-поиска (geo-answer)"]
     avoid_when: ["текст «для объёма» между ценой и формой"]
     html: {element: section, landmark: region, heading: h2, note: "абзацы <p>; определения — <dfn> или <dl>"}
     slots:
@@ -1122,7 +1120,7 @@ blocks:
       - {id: story, name: "История", when: "о компании, основатель, глава сюжета", default: true}
       - {id: manifesto, name: "Манифест", when: "короткие утверждения крупно (подача — creative)"}
       - {id: explainer, name: "Объяснение", when: "механизм, термин, ответ на вопрос (GEO — text и H)"}
-      - {id: seo-text, name: "SEO-текст", when: "хвост страницы под поисковый запрос; польза и риск — H, text"}
+      - {id: seo-text, name: "SEO-текст", when: "хвост страницы под поисковый запрос; польза и риск — site 07, text"}
     mobile: {behavior: [none], never_hide: [body]}
     refs: {seo: ["site:07-01", "site:07-02"], text: ["copy-rule:body", "copy-rule:geo-answer"], creative: ["creative:block-treatments"]}
     errors: ["SEO-текст между оффером и призывом", "Стена текста без подзаголовков"]
@@ -1156,7 +1154,7 @@ blocks:
     status: active
     purpose: "Перечень услуг или продуктов с ценой «от» и ссылкой на подробности"
     serves: [services, cross-sell]
-    use_when: ["многоуслуговый бизнес: вторая секция лендинга или главной (C 01 §3.2)", "смежные предложения в хвосте (cross-sell)"]
+    use_when: ["многоуслуговый бизнес: вторая секция лендинга или главной (site 03/01 §3.2)", "смежные предложения в хвосте (cross-sell)"]
     avoid_when: ["одна услуга — offer-details"]
     html: {element: section, landmark: region, heading: h2, list: ul, item: li, note: "карточка — <li> с H3-ссылкой; цена — текстом"}
     slots:
@@ -1170,7 +1168,7 @@ blocks:
       - {id: cards-with-price, name: "Карточки с ценой «от»", when: "по умолчанию", default: true}
       - {id: cards-plain, name: "Карточки без цены", when: "цены на сайте не публикуются — решение заказчика: название, суть и ссылка, без цены и обложки"}
       - {id: compact-list, name: "Компактный список", when: "10+ услуг"}
-      - {id: cross-sell, name: "Смежные предложения", when: "хвост страницы: приложение, смежные услуги, подарочные карты (C 01 §1.2: 10 из 30, позиция 0,82)"}
+      - {id: cross-sell, name: "Смежные предложения", when: "хвост страницы: приложение, смежные услуги, подарочные карты (site 03/01 §1.2: 10 из 30, позиция 0,82)"}
     mobile: {behavior: [stack, accordion], below_40rem: "одна колонка; длинный перечень — группами в аккордеоне", never_hide: [title, service.price]}
     refs: {structure: ["site:03-01#3.2"], conversion: ["site:05-02"], ia: ["site:06-01"], legal: ["site:08-01"], creative: ["creative:block-treatments"]}
     errors: ["«Цена по запросу» у всех услуг при известных ценах «от»", "Одинаковые стоковые обложки у всех услуг"]
@@ -1182,7 +1180,7 @@ blocks:
     status: active
     purpose: "2–4 плана: цена, период, состав, кнопка — выбор без звонка"
     serves: [pricing]
-    use_when: ["SaaS и подписки с самообслуживанием — цена на странице обязательна (C 01 §3.2)"]
+    use_when: ["SaaS и подписки с самообслуживанием — цена на странице обязательна (site 03/01 §3.2)"]
     avoid_when: ["«Contact sales» на всех тарифах — признак недоверия [мнение вендора]; честное «от» или калькулятор", "тарифов больше 4 — сравнение в comparison-table"]
     requires_facts: true
     fact_kinds: [price, offer-terms]
@@ -1202,7 +1200,7 @@ blocks:
       - {id: with-period-toggle, name: "С переключателем периода", when: "месяц / год со скидкой; обе цены в HTML"}
     mobile: {behavior: [stack], below_60rem: "не больше 2 тарифов рядом", below_40rem: "по одному; популярный тариф выделен подачей, а не переносом в DOM", never_hide: [plan.name, plan.price, plan.price-note, plan.feature, plan.cta]}
     refs: {structure: ["site:03-01#3.2"], conversion: ["site:05-02"], legal: ["site:08-01"], seo: ["site:07-01"], ux: ["ux:04-09#10"], text: ["copy-rule:pricing-price", "copy-rule:pricing-price-note"], creative: ["creative:block-treatments"]}
-    errors: ["Три тарифа «из шаблона» с выдуманными ценами", "Цена только картинкой или только скриптом", "Зачёркнутая цена без реальной прежней (I)"]
+    errors: ["Три тарифа «из шаблона» с выдуманными ценами", "Цена только картинкой или только скриптом", "Зачёркнутая цена без реальной прежней (site 08)"]
     evidence: ["pricing — 14 из 30 живых страниц, позиция 0,31; SaaS: цена на странице у 2 из 8 [проверено]"]
 
   pricing-table:
@@ -1211,7 +1209,7 @@ blocks:
     status: active
     purpose: "Строки «услуга — цена»: прозрачный прайс локального бизнеса и услуг"
     serves: [pricing, services]
-    use_when: ["лидогенерация услуг: цена рано, 2–4-я секция (C/01: медиана позиции 0,31)"]
+    use_when: ["лидогенерация услуг: цена рано, 2–4-я секция (site 03/01: медиана позиции 0,31)"]
     avoid_when: ["цены нет в фактах — не заполнять «от 0 ₽»"]
     requires_facts: true
     fact_kinds: [price]
@@ -1220,7 +1218,7 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: lead, slot: section-lead, required: false}
       - {id: note, slot: pricing-price-note, required: true, purpose: "что входит в цену, что нет; дата прайса"}
-      - {id: disclaimer, slot: disclaimer, required: false, purpose: "«не является публичной офертой» — решение I"}
+      - {id: disclaimer, slot: disclaimer, required: false, purpose: "«не является публичной офертой» — по site 08"}
       - {id: cta, slot: cta-primary, required: false, purpose: "рассчитать точно, вызвать замерщика"}
       - {id: cta-label, slot: cta-label, required: false}
       - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
@@ -1249,7 +1247,7 @@ blocks:
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: price, slot: pricing-price, required: true, fact: always}
-      - {id: price-old, slot: price-old, required: if-fact, note: "только реальная прежняя цена за период (I)"}
+      - {id: price-old, slot: price-old, required: if-fact, note: "только реальная прежняя цена за период (site 08)"}
       - {id: price-note, slot: pricing-price-note, required: true, purpose: "период, рассрочка, что включено"}
       - {id: badge, slot: badge, required: false}
       - {id: cta, slot: cta-primary, required: true}
@@ -1371,7 +1369,7 @@ blocks:
       - {id: cta-label, slot: cta-label, required: true}
       - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: disclaimer, slot: disclaimer, required: false}
-      - {id: ad-marking, slot: ad-marking, required: false, note: "если это реклама третьего лица — I"}
+      - {id: ad-marking, slot: ad-marking, required: false, note: "если это реклама третьего лица — site 08"}
       - {id: promo, slot: price-ref, required: true, fact_kinds: [promo, price, availability]}
     variants:
       - {id: band, name: "Полоса", when: "по умолчанию", default: true}
@@ -1418,31 +1416,31 @@ blocks:
     status: active
     purpose: "Захват заявки в потоке страницы: что получит человек, короткие поля, согласие, что будет дальше"
     serves: [lead-form, final-cta]
-    use_when: ["лидогенерация — обязательна форма или канал связи (C 01 §1.2)", "финальный призыв длинной страницы", "повтор формы hero после доказательств"]
+    use_when: ["лидогенерация — обязательна форма или канал связи (site 03/01 §1.2)", "финальный призыв длинной страницы", "повтор формы hero после доказательств"]
     avoid_when: ["SaaS с регистрацией в продукте — кнопка ведёт на регистрацию (ux 05-01)"]
     html: {element: section, landmark: region, heading: h2, form: true, note: "<form> с <label> у каждого поля, autocomplete (name, tel, email), ошибки связаны aria-describedby; согласие — отдельный чекбокс; кнопка type=submit; успех — фокус на сообщение"}
     slots:
       - {id: title, slot: form-title, required: true, heading: h2}
       - {id: lead, slot: form-lead, required: true}
-      - {id: form, slot: form, required: true, note: "набор полей и шагов — F (lead-forms.yaml); канон — ux 04-05"}
+      - {id: form, slot: form, required: true, note: "набор полей и шагов — lead-forms.yaml; канон — ux 04-05"}
       - {id: cta-label, slot: cta-label, required: true}
-      - {id: consent, slot: form-consent, required: true, note: "отдельное согласие на ПД — I"}
+      - {id: consent, slot: form-consent, required: true, note: "отдельное согласие на ПД — site 08"}
       - {id: next-steps, slot: form-next-steps, required: true}
       - {id: success, slot: form-success, required: true, note: "на месте формы или страница «спасибо»"}
       - {id: phone, slot: phone-link, required: if-available}
       - {id: messenger, slot: messenger-link, required: false}
-      - {id: secondary, slot: cta-secondary, required: false, purpose: "вторая цель для не готовых: пример сметы, материал, «сохранить расчёт» (C 02 §2.1)"}
+      - {id: secondary, slot: cta-secondary, required: false, purpose: "вторая цель для не готовых: пример сметы, материал, «сохранить расчёт» (site 03/02 §2.1)"}
       - {id: secondary-label, slot: cta-secondary-label, required: false}
       - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
       - {id: proof, slot: fact-ref, required: false, fact_kinds: [rating, metric, testimonial, offer-terms], note: "микродоказательство рядом с формой"}
     variants:
       - {id: short, name: "Короткая (≤ 3 поля)", when: "по умолчанию: имя, телефон, удобное время", default: true}
       - {id: with-details, name: "С описанием задачи", when: "B2B, сложная услуга: поле комментария, файл"}
-      - {id: multi-step, name: "Многошаговая", when: "≥ 4 полей — разбить на шаги с прогрессом (F)"}
+      - {id: multi-step, name: "Многошаговая", when: "≥ 4 полей — разбить на шаги с прогрессом (site 05)"}
       - {id: final, name: "Финальная", when: "последняя секция: повтор главного обещания и второй путь", note: "serves final-cta"}
     mobile: {behavior: [stack], below_40rem: "подписи над полями; поля tel/email со своей клавиатурой; кнопка на всю ширину; липкий призыв скрыт, пока форма видна", never_hide: [form, consent, next-steps]}
     refs: {conversion: ["site:05-01", "site:05-lead-forms"], legal: ["site:08-01"], a11y: ["ux:08-03", "site:08-03"], events: ["site:07-04"], ux: ["ux:04-05#2.5", "ux:04-05#6.3", "ux:04-05#7.7", "ux:04-05#7.8", "ux:07-02"], text: ["text:04-04"], creative: ["creative:block-treatments"]}
-    errors: ["Капча-картинка вместо антиспама без трения (F)", "Предзаполненная галочка согласия", "Кнопка «Отправить» вместо результата («Получить смету»)", "Нет подтверждения после отправки"]
+    errors: ["Капча-картинка вместо антиспама без трения (site 05)", "Предзаполненная галочка согласия", "Кнопка «Отправить» вместо результата («Получить смету»)", "Нет подтверждения после отправки"]
     evidence: ["lead-form — 10 из 30 живых страниц, позиция 0,47; промежуточная форма или полоса призыва — 14 из 30 [проверено]"]
 
   quiz:
@@ -1457,7 +1455,7 @@ blocks:
     slots:
       - {id: title, slot: form-title, required: true, heading: h2}
       - {id: lead, slot: form-lead, required: true, purpose: "что получит человек: расчёт, подбор, смету — и сколько шагов"}
-      - {id: form, slot: form, required: true, note: "шаги и поля — F; 3–7 вопросов — ориентир F"}
+      - {id: form, slot: form, required: true, note: "шаги и поля — lead-forms.yaml; 3–7 вопросов — ориентир site 05"}
       - {id: result, slot: result-summary, required: true, purpose: "итог расчёта или подбора — на экране или честно «пришлём»"}
       - {id: cta-label, slot: cta-label, required: true}
       - {id: consent, slot: form-consent, required: true}
@@ -1509,11 +1507,11 @@ blocks:
     purpose: "Телефон и удобное время: перезвоним — для тех, кто не хочет писать"
     serves: [lead-form, final-cta]
     use_when: ["ЛУ в РФ: часть аудитории предпочитает звонок", "в шапке или финальном призыве"]
-    avoid_when: ["окно «Перезвоним за 30 секунд» само по таймеру (выключено решением 15)"]
+    avoid_when: ["окно «Перезвоним за 30 секунд» само по таймеру (выключено по умолчанию)"]
     html: {element: section, landmark: region, heading: h2, form: true, note: "поле type=tel autocomplete=tel; открытие окна — только по нажатию посетителя (<dialog>)"}
     slots:
       - {id: title, slot: form-title, required: true, heading: h2}
-      - {id: form, slot: form, required: true, note: "телефон + удобное время (F)"}
+      - {id: form, slot: form, required: true, note: "телефон + удобное время (site 05)"}
       - {id: cta-label, slot: cta-label, required: true}
       - {id: consent, slot: form-consent, required: true}
       - {id: next-steps, slot: form-next-steps, required: true, purpose: "когда и кто позвонит — по факту срока ответа"}
@@ -1547,7 +1545,7 @@ blocks:
       - {id: link-out, name: "Кнопка на внешнюю запись", when: "виджет тяжёлый или не встраивается"}
     mobile: {behavior: [stack], never_hide: [form, consent]}
     refs: {conversion: ["site:05-01"], legal: ["site:08-01"], budget: ["site:07-03"], a11y: ["site:08-03"], creative: ["creative:block-treatments"]}
-    errors: ["Сторонний виджет грузится в первом экране (TBT)", "Нет согласия на ПД у стороннего виджета (кто оператор — I)"]
+    errors: ["Сторонний виджет грузится в первом экране (TBT)", "Нет согласия на ПД у стороннего виджета (кто оператор — site 08)"]
 
   email-capture:
     family: conversion
@@ -1555,15 +1553,15 @@ blocks:
     status: active
     purpose: "Одна строка почты: лист ожидания, рассылка, материал"
     serves: [lead-form, final-cta]
-    use_when: ["лист ожидания, рассылка, лид-магнит", "SaaS: одно поле e-mail в hero (Intercom — C 03 §3.2)"]
-    avoid_when: ["попап подписки при входе (решение 15)"]
+    use_when: ["лист ожидания, рассылка, лид-магнит", "SaaS: одно поле e-mail в hero (Intercom — site 03/03 §3.2)"]
+    avoid_when: ["попап подписки при входе"]
     html: {element: section, landmark: region, heading: h2, form: true, note: "<label> у поля (можно визуально скрытый), type=email autocomplete=email"}
     slots:
       - {id: title, slot: form-title, required: true, heading: h2}
       - {id: lead, slot: form-lead, required: true}
       - {id: form, slot: form, required: true}
       - {id: cta-label, slot: cta-label, required: true}
-      - {id: consent, slot: form-consent, required: true, note: "рассылка — согласие на получение (I)"}
+      - {id: consent, slot: form-consent, required: true, note: "рассылка — согласие на получение (site 08)"}
       - {id: next-steps, slot: form-next-steps, required: true, purpose: "что и как часто придёт; подтверждение адреса"}
       - {id: counter, slot: stat-value, required: if-fact, note: "счётчик листа ожидания — только живой, с датой"}
     variants:
@@ -1597,7 +1595,7 @@ blocks:
       - {id: inside, name: "Что внутри", min: 3, max: 8, html: li, slots: [{id: text, slot: list-item, required: true}]}
     variants:
       - {id: gated-email, name: "За почту", when: "по умолчанию", default: true}
-      - {id: send-by-messenger, name: "В мессенджер", when: "рынок РФ: материал присылают в мессенджер (каналы — F)"}
+      - {id: send-by-messenger, name: "В мессенджер", when: "рынок РФ: материал присылают в мессенджер (каналы — site 05)"}
       - {id: ungated, name: "Без формы", when: "вторая цель на странице услуги: скачать сразу, action download"}
     mobile: {behavior: [stack], never_hide: [inside, form, consent]}
     refs: {conversion: ["site:05-01", "site:05-03"], legal: ["site:08-01"], creative: ["creative:block-treatments"]}
@@ -1609,7 +1607,7 @@ blocks:
     status: active
     purpose: "Кнопки каналов того же действия: телефон, мессенджеры, почта, чат"
     serves: [final-cta, contacts]
-    use_when: ["ЛУ в РФ: телефон и мессенджер — каналы цели (C 02 §2.1)", "финальный призыв: «позвонить или написать»"]
+    use_when: ["ЛУ в РФ: телефон и мессенджер — каналы цели (site 03/02 §2.1)", "финальный призыв: «позвонить или написать»"]
     avoid_when: ["каналы, которые заказчик не ведёт"]
     html: {element: section, landmark: region, heading: h2, list: ul, note: "ссылки tel:, mailto:, мессенджеров с доступными именами («Написать в Telegram»); иконки декоративные"}
     slots:
@@ -1620,7 +1618,7 @@ blocks:
       - {id: channel, name: "Канал", min: 1, max: 5, html: li, slots: [{id: phone, slot: phone-link, required: false}, {id: messenger, slot: messenger-link, required: false}, {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}, {id: email, slot: email-link, required: false}]}
     variants:
       - {id: buttons-row, name: "Ряд кнопок", when: "по умолчанию", default: true}
-      - {id: floating-cluster, name: "Плавающий кластер", when: "телефон: один кластер в углу, не перекрывает липкий призыв и поля формы (C 03 §4.3)"}
+      - {id: floating-cluster, name: "Плавающий кластер", when: "телефон: один кластер в углу, не перекрывает липкий призыв и поля формы (site 03/03 §4.3)"}
     mobile: {behavior: [stack], never_hide: [channel]}
     refs: {conversion: ["site:05-01"], legal: ["site:08-01"], a11y: ["site:08-03"], events: ["site:07-04"], creative: ["creative:block-treatments"]}
     errors: ["Кнопки мессенджеров поверх кнопки «Отправить»", "Номер телефона картинкой"]
@@ -1646,7 +1644,7 @@ blocks:
     variants:
       - {id: badges, name: "Бейджи", when: "по умолчанию", default: true}
       - {id: badges-with-qr, name: "Бейджи и QR", when: "десктоп: перенос на телефон"}
-      - {id: platform-button, name: "Одна кнопка своей платформы", when: "телефон: показывать магазин своей ОС (C 01 §3.3)"}
+      - {id: platform-button, name: "Одна кнопка своей платформы", when: "телефон: показывать магазин своей ОС (site 03/01 §3.3)"}
     mobile: {behavior: [stack], below_40rem: "одна кнопка платформы; QR скрыт (на телефоне бесполезен)", never_hide: [store]}
     refs: {conversion: ["site:05-01"], events: ["site:07-04"], creative: ["creative:block-treatments"]}
     errors: ["QR на телефоне", "Рейтинг магазина без даты"]
@@ -1658,7 +1656,7 @@ blocks:
     status: active
     purpose: "Промежуточный или финальный призыв после довода: заголовок, строка, 1–2 кнопки"
     serves: [cta-band, final-cta]
-    use_when: ["страница длиннее 3 экранов — повтор призыва каждые 2–3 экрана (C 02 §1.4)", "финал: повтор главного обещания"]
+    use_when: ["страница длиннее 3 экранов — повтор призыва каждые 2–3 экрана (site 03/02 §1.4)", "финал: повтор главного обещания"]
     avoid_when: ["полоса после каждой секции", "главное действие — форма: тогда lead-form"]
     html: {element: section, landmark: region, heading: h2}
     slots:
@@ -1689,7 +1687,7 @@ blocks:
     flow: overlay
     purpose: "Главный призыв, закреплённый при прокрутке — обычно внизу экрана телефона"
     serves: [cta-band]
-    use_when: ["страница длиннее 3 экранов телефона и у неё одно главное действие (C 03 §4.3)"]
+    use_when: ["страница длиннее 3 экранов телефона и у неё одно главное действие (site 03/03 §4.3)"]
     avoid_when: ["липкие слои вместе > 20 % высоты экрана", "одновременно с видимым призывом hero или формы — прятать"]
     html: {element: div, landmark: none, note: "position: fixed; padding-bottom: env(safe-area-inset-bottom); scroll-padding-bottom у html на её высоту (WCAG 2.4.11)"}
     slots:
@@ -1712,8 +1710,8 @@ blocks:
     flow: overlay
     purpose: "Окно с формой — только по действию посетителя; по таймеру, прокрутке или уходу — выключено по умолчанию"
     serves: [utility, lead-form]
-    use_when: ["открытие по нажатию посетителя (кнопка «Получить расчёт»)", "автопоказ — только по условиям F с доказательствами и решением заказчика (решение 15)"]
-    avoid_when: ["при входе на посадочную", "exit-intent и таймер по умолчанию", "платный трафик — проверить правила рекламных систем (F, H)"]
+    use_when: ["открытие по нажатию посетителя (кнопка «Получить расчёт»)", "автопоказ — только по условиям site 05 с доказательствами и решением заказчика"]
+    avoid_when: ["при входе на посадочную", "exit-intent и таймер по умолчанию", "платный трафик — проверить правила рекламных систем (site 05, site 07)"]
     html: {element: dialog, landmark: dialog, form: true, note: "<dialog> модальный: фокус внутрь, Esc закрывает, фокус возвращается на кнопку-источник; кнопка закрытия с доступным именем"}
     slots:
       - {id: title, slot: form-title, required: true, heading: h2}
@@ -1723,12 +1721,12 @@ blocks:
       - {id: consent, slot: form-consent, required: true}
     variants:
       - {id: on-click, name: "По нажатию", when: "единственный вариант по умолчанию", default: true}
-      - {id: timed, name: "По таймеру", when: "выключен (решение 15)"}
-      - {id: exit-intent, name: "При уходе", when: "выключен (решение 15)"}
-      - {id: engaged-slide-in, name: "Карточка после вовлечения", when: "выключен по умолчанию; только policies.capture_popup: engaged брифа с rationale: немодальная, в углу, ≤ 25 % высоты экрана телефона, после ≥ 60 % прокрутки статьи или ключевой секции (не по таймеру), одна за визит, после закрытия не показывать ≥ 30 дней; не на посадочной под платный трафик (F 05-…/01 §11)", avoid: "страница под Директ и другой платный трафик; модальный вид"}
+      - {id: timed, name: "По таймеру", when: "выключен"}
+      - {id: exit-intent, name: "При уходе", when: "выключен"}
+      - {id: engaged-slide-in, name: "Карточка после вовлечения", when: "выключен по умолчанию; только policies.capture_popup: engaged брифа с rationale: немодальная, в углу, ≤ 25 % высоты экрана телефона, после ≥ 60 % прокрутки статьи или ключевой секции (не по таймеру), одна за визит, после закрытия не показывать ≥ 30 дней; не на посадочной под платный трафик (site 05/01 §11)", avoid: "страница под Директ и другой платный трафик; модальный вид"}
     mobile: {behavior: [none], below_40rem: "на весь экран с видимой кнопкой закрытия; без двойного закрытия", never_hide: [form]}
     refs: {conversion: ["site:05-01"], seo: ["site:07-01"], legal: ["site:08-02"], ux: ["ux:01-01#14.4", "ux:06-04#8.1", "ux:04-07"], creative: ["creative:block-treatments"]}
-    errors: ["Окно при входе закрывает всю страницу (C/02: 1 из 27)", "«Нет, я не хочу экономить» — конфирмшейминг (ux 06-04)"]
+    errors: ["Окно при входе закрывает всю страницу (site 03/03: 1 из 27)", "«Нет, я не хочу экономить» — конфирмшейминг (ux 06-04)"]
 
   # ================================================================================================================== faq
   faq:
@@ -1737,9 +1735,9 @@ blocks:
     status: active
     purpose: "Остаточные вопросы словами посетителя с прямым ответом в первой фразе"
     serves: [faq, objections]
-    use_when: ["нижняя треть страницы (C/01: позиция 0,90)", "objections: 1–3 блокирующих вопроса рядом с призывом"]
+    use_when: ["нижняя треть страницы (site 03/01: позиция 0,90)", "objections: 1–3 блокирующих вопроса рядом с призывом"]
     avoid_when: ["главное возражение-блокер спрятано в FAQ внизу", "вопросы «Почему мы?» для рекламы себя"]
-    html: {element: section, landmark: region, heading: h2, details: true, note: "<details><summary>вопрос</summary>ответ</details> или кнопка aria-expanded + область; ответы в HTML, не подгружаются по клику; разметка FAQPage — решение H"}
+    html: {element: section, landmark: region, heading: h2, details: true, note: "<details><summary>вопрос</summary>ответ</details> или кнопка aria-expanded + область; ответы в HTML, не подгружаются по клику; разметка FAQPage — по site 07"}
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: cta, slot: cta-primary, required: false}
@@ -1766,7 +1764,7 @@ blocks:
     status: active
     purpose: "Кто вы: история, миссия, год основания, цифры о себе — доверие к исполнителю"
     serves: [about]
-    use_when: ["главная многостраничника — обязательно (C 01 §1.2)", "ЛУ: коротко со ссылкой или реквизитами"]
+    use_when: ["главная многостраничника — обязательно (site 03/01 §1.2)", "ЛУ: коротко со ссылкой или реквизитами"]
     avoid_when: ["история «с 1998 года на рынке» без фактов"]
     html: {element: section, landmark: region, heading: h2}
     slots:
@@ -1793,7 +1791,7 @@ blocks:
     status: active
     purpose: "Кто будет делать работу: фото, имя, роль, опыт — с согласием каждого"
     serves: [team, event-program]
-    use_when: ["юристы, медицина, курсы (преподаватели), ремонт «в доме» — обязательно или выше в порядке (C 01 §3.2)", "спикеры мероприятия — speakers-grid"]
+    use_when: ["юристы, медицина, курсы (преподаватели), ремонт «в доме» — обязательно или выше в порядке (site 03/01 §3.2)", "спикеры мероприятия — speakers-grid"]
     avoid_when: ["нет согласия людей на фото и имя"]
     requires_facts: true
     fact_kinds: [person]
@@ -1811,7 +1809,7 @@ blocks:
       - {id: compact-list, name: "Компактный список", when: "10+ человек"}
     mobile: {behavior: [stack, rail], below_40rem: "2 в ряд или лента", never_hide: [person.name, person.role]}
     refs: {conversion: ["site:05-02"], legal: ["site:08-01", "site:08-02"], assets: ["ai-media:01-01#2.5", "ai-media:12-04#2"], creative: ["creative:block-treatments"]}
-    errors: ["ИИ-лица в роли команды (решение заказчика 15)", "Стоковые фото «специалистов»", "Имена без согласия на публикацию"]
+    errors: ["ИИ-лица в роли команды", "Стоковые фото «специалистов»", "Имена без согласия на публикацию"]
     evidence: ["team — 6 из 30 живых страниц, позиция 0,42 [проверено]"]
 
   founder-note:
@@ -1890,11 +1888,11 @@ blocks:
     status: active
     purpose: "Адрес, телефоны, часы работы, мессенджеры, реквизиты — где вы и как связаться"
     serves: [contacts]
-    use_when: ["ЛУ, страница услуги, главная локального бизнеса — обязательно (C 01 §1.2)", "страница контактов"]
+    use_when: ["ЛУ, страница услуги, главная локального бизнеса — обязательно (site 03/01 §1.2)", "страница контактов"]
     avoid_when: []
     requires_facts: true
     fact_kinds: [company]
-    html: {element: section, landmark: region, heading: h2, note: "<address> для контактов; часы — <dl> с <time>; телефоны и почта — ссылками; разметка Organization/LocalBusiness — H"}
+    html: {element: section, landmark: region, heading: h2, note: "<address> для контактов; часы — <dl> с <time>; телефоны и почта — ссылками; разметка Organization/LocalBusiness — site 07"}
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: info, slot: contact-info, required: true}
@@ -1902,7 +1900,7 @@ blocks:
       - {id: email, slot: email-link, required: false}
       - {id: messenger, slot: messenger-link, required: false}
       - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
-      - {id: legal, slot: footer-legal, required: false, note: "реквизиты: здесь или в подвале (I)"}
+      - {id: legal, slot: footer-legal, required: false, note: "реквизиты: здесь или в подвале (site 08)"}
       - {id: route, slot: link, required: false, purpose: "проложить маршрут"}
       - {id: route-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки route — называет действие и карты, которые откроются"}
       - {id: company, slot: fact-ref, required: true, fact_kinds: [company]}
@@ -1935,9 +1933,9 @@ blocks:
       - {id: photo-alt, slot: image-alt, required: false, purpose: "alt фото photo"}
     variants:
       - {id: static-image, name: "Статичная карта со ссылкой", when: "по умолчанию: лёгкая, без скриптов", default: true}
-      - {id: embedded-widget, name: "Интерактивная карта", when: "несколько точек; загрузка по видимости или нажатию (P, I)"}
+      - {id: embedded-widget, name: "Интерактивная карта", when: "несколько точек; загрузка по видимости или нажатию (site 07, site 08)"}
       - {id: venue, name: "Площадка мероприятия", when: "мероприятие: фото зала, вместимость, как добраться"}
-      - {id: service-area, name: "Зона обслуживания", when: "выездные услуги: районы и города выезда, условия выезда (опыт E/04: секция без блока на живой странице)", note: "v1: в новых планах — отдельный блок block:service-area; вариант оставлен для совместимости с планами v0.9"}
+      - {id: service-area, name: "Зона обслуживания", when: "выездные услуги: районы и города выезда, условия выезда (site 04/01: секция без блока на живой странице)", note: "v1: в новых планах — отдельный блок block:service-area; вариант оставлен для совместимости с планами v0.9"}
     mobile: {behavior: [stack], below_40rem: "статичная карта + кнопка «Открыть в Картах»", never_hide: [address, route]}
     refs: {budget: ["site:07-03"], legal: ["site:08-01"], a11y: ["site:08-03"], creative: ["creative:block-treatments"]}
     errors: ["Виджет карт в первом экране — сторонние скрипты и cookie до согласия", "Карта без адреса текстом"]
@@ -1957,9 +1955,9 @@ blocks:
       - {id: lead, slot: section-lead, required: false}
       - {id: conditions, slot: body, required: false, purpose: "условия выезда: бесплатно в пределах города, доплата за область, срок приезда"}
       - {id: terms, slot: price-ref, required: if-fact, fact_kinds: [price, offer-terms]}
-      - {id: map, slot: map, required: false, media_role: informational, note: "зона на карте — статичная картинка; виджет — фасадом по нажатию (P 03 §5.2)"}
+      - {id: map, slot: map, required: false, media_role: informational, note: "зона на карте — статичная картинка; виджет — фасадом по нажатию (site 07/03 §5.2)"}
       - {id: map-alt, slot: image-alt, required: false, purpose: "alt картинки карты map"}
-      - {id: check, slot: form, required: by-variant, note: "проверка адреса — набор lead-forms.yaml (F)"}
+      - {id: check, slot: form, required: by-variant, note: "проверка адреса — набор lead-forms.yaml (site 05)"}
       - {id: cta, slot: cta-primary, required: false, note: "призыв страницы или «Проверить адрес»"}
       - {id: cta-label, slot: cta-label, required: false}
       - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
@@ -1971,8 +1969,8 @@ blocks:
       - {id: address-check, name: "Проверка адреса", when: "возможность или цена зависят от адреса: поле адреса → ответ", adds: [check]}
     mobile: {behavior: [stack], below_40rem: "список в одну-две колонки; карта ниже списка", never_hide: [title]}
     refs: {structure: ["site:03-01#3.2"], seo: ["site:07-01"], budget: ["site:07-03"], creative: ["creative:block-treatments"]}
-    errors: ["Зона только картинкой карты без текста районов", "«Работаем по всей России» без условий выезда у локальной услуги", "Страницы «услуга × район» без локальных фактов — дорвей (H 07-01)"]
-    evidence: ["E/04: секция «зона обслуживания» — 1 из 234 секций 22 живых страниц, без блока в v0.9 [проверено]"]
+    errors: ["Зона только картинкой карты без текста районов", "«Работаем по всей России» без условий выезда у локальной услуги", "Страницы «услуга × район» без локальных фактов — дорвей (site 07/01)"]
+    evidence: ["секция «зона обслуживания» — 1 из 234 секций 22 живых страниц, без блока в v0.9 [проверено]"]
 
   # ==================================================================================================== portfolio-gallery
   portfolio-grid:
@@ -1981,7 +1979,7 @@ blocks:
     status: active
     purpose: "Проекты как главный довод: картинка, название, ссылка на проект"
     serves: [portfolio]
-    use_when: ["студия, агентство, дизайн, ремонт, архитектура — обязательно (C 01 §1.2)"]
+    use_when: ["студия, агентство, дизайн, ремонт, архитектура — обязательно (site 03/01 §1.2)"]
     avoid_when: ["работ нет или они чужие"]
     requires_facts: true
     fact_kinds: [case, demo]
@@ -2032,7 +2030,7 @@ blocks:
     status: active
     purpose: "Расписание по времени и дням: доклады, секции, спикеры"
     serves: [event-program]
-    use_when: ["мероприятие и вебинар — обязательно (C 01 §1.2)"]
+    use_when: ["мероприятие и вебинар — обязательно (site 03/01 §1.2)"]
     avoid_when: ["программа не утверждена — «программа будет опубликована до даты» честнее выдуманной"]
     html: {element: section, landmark: region, heading: h2, list: ol, note: "время — <time datetime> с часовым поясом; дни — вкладки (WAI-ARIA tabs) или подзаголовки H3; параллельные потоки — <table>"}
     slots:
@@ -2082,7 +2080,7 @@ blocks:
     status: active
     purpose: "Модули и темы, длительность и нагрузка — чему и как научат"
     serves: [event-program]
-    use_when: ["курс и программа обучения — обязательно (C 01 §1.2)"]
+    use_when: ["курс и программа обучения — обязательно (site 03/01 §1.2)"]
     avoid_when: []
     html: {element: section, landmark: region, heading: h2, list: ol, details: true, note: "модуль — <details> или H3 + список; уроки — <ol>"}
     slots:
@@ -2117,7 +2115,7 @@ blocks:
       - {id: title, slot: section-title, required: true, heading: h2}
       - {id: all, slot: link, required: false}
       - {id: all-label, slot: cta-secondary-label, required: false, purpose: "подпись ссылки all — называет, что откроется: все статьи"}
-      - {id: ad-marking, slot: ad-marking, required: false, note: "партнёрские материалы — I"}
+      - {id: ad-marking, slot: ad-marking, required: false, note: "партнёрские материалы — site 08"}
     groups:
       - {id: article, name: "Статья", min: 2, max: 12, html: li, slots: [{id: cover, slot: cover-image, required: false, media_role: informational}, {id: alt, slot: image-alt, required: false, purpose: "alt обложки cover"}, {id: title, slot: card-title, required: true, heading: h3}, {id: excerpt, slot: card-body, required: false}, {id: date, slot: article-date, required: true}, {id: link, slot: link, required: true}]}
     variants:
@@ -2138,7 +2136,7 @@ blocks:
     use_when: ["статья блога, SEO-страница под вопрос, база знаний"]
     avoid_when: []
     page_types: [article-page, seo-landing-page]
-    html: {element: article, landmark: none, heading: h1, figure: true, note: "<article> в <main>: <h1>, <time datetime>, H2/H3 по смыслу; оглавление — <nav>; иллюстрации — <figure>; разметка Article — H"}
+    html: {element: article, landmark: none, heading: h1, figure: true, note: "<article> в <main>: <h1>, <time datetime>, H2/H3 по смыслу; оглавление — <nav>; иллюстрации — <figure>; разметка Article — site 07"}
     slots:
       - {id: title, slot: article-title, required: true, heading: h1}
       - {id: lead, slot: article-lead, required: true}
@@ -2171,7 +2169,7 @@ blocks:
     avoid_when: ["автор вымышлен или «редакция» без людей при экспертной теме"]
     requires_facts: true
     fact_kinds: [person]
-    html: {element: aside, landmark: complementary, note: "ссылки на профили — sameAs в разметке Person (H)"}
+    html: {element: aside, landmark: complementary, note: "ссылки на профили — sameAs в разметке Person (site 07)"}
     slots:
       - {id: photo, slot: avatar, required: false, authenticity: real-only}
       - {id: name, slot: article-author, required: true}
@@ -2213,7 +2211,7 @@ blocks:
     purpose: "«Читайте также»: статьи, кейсы, услуги по теме — путь дальше по сайту"
     serves: [related]
     use_when: ["хвост страницы многостраничника (после главного призыва)", "404: пути на главные разделы", "локальная навигация раздела: соседние страницы или подстраницы (вариант section-siblings)"]
-    avoid_when: ["посадочная под платный трафик — выходы в момент решения (C 02 §2.2)"]
+    avoid_when: ["посадочная под платный трафик — выходы в момент решения (site 03/02 §2.2)"]
     html: {element: nav, landmark: navigation, list: ul, label: "aria-label «Связанные материалы»"}
     slots:
       - {id: title, slot: section-title, required: true, heading: h2}
@@ -2235,12 +2233,12 @@ blocks:
     flow: chrome
     purpose: "Реквизиты, правовые ссылки, контакты и навигация — обязательный низ каждой страницы"
     serves: [footer]
-    use_when: ["всегда: сведения о продавце и правовые документы (I)"]
+    use_when: ["всегда: сведения о продавце и правовые документы (site 08)"]
     avoid_when: ["четыре колонки «Продукт · Компания · Ресурсы · Правовое» по привычке — ИИ-отпечаток Ft3 (Hallmark); только для хаба с настоящей картой"]
     html: {element: footer, landmark: contentinfo, note: "навигация — <nav aria-label=«Подвал»>; контакты — <address>"}
     slots:
       - {id: legal, slot: footer-legal, required: true, fact: always, note: "наименование, ОГРН или ИНН, адрес — требования I"}
-      - {id: privacy, slot: link, required: true, max: 4, purpose: "политика обработки ПД, документ согласия, оферта, политика cookie (состав — I)"}
+      - {id: privacy, slot: link, required: true, max: 4, purpose: "политика обработки ПД, документ согласия, оферта, политика cookie (состав — site 08)"}
       - {id: privacy-label, slot: nav-label, required: true, max: 4, purpose: "подписи правовых ссылок"}
       - {id: contacts, slot: contact-info, required: false}
       - {id: phone, slot: phone-link, required: if-available}
@@ -2256,10 +2254,10 @@ blocks:
       - {id: nav, name: "Ссылка подвала", min: 0, max: 30, html: li, slots: [{id: label, slot: nav-label, required: true}, {id: link, slot: link, required: true}]}
     variants:
       - {id: minimal, name: "Минимальный", when: "лендинг: реквизиты, правовые ссылки, контакты одной-двумя строками", default: true, hallmark: [Ft2, Ft1]}
-      - {id: site, name: "Подвал сайта", when: "многостраничник: навигация по разделам (G)", hallmark: [Ft3]}
+      - {id: site, name: "Подвал сайта", when: "многостраничник: навигация по разделам (site 06)", hallmark: [Ft3]}
       - {id: statement, name: "Финальная фраза", when: "кампания, бренд", hallmark: [Ft5]}
       - {id: newsletter-first, name: "С подпиской", when: "контентный сайт", hallmark: [Ft7]}
-    mobile: {behavior: [stack], below_40rem: "одна колонка открытым списком по умолчанию; реквизиты, правовые и служебные ссылки, контакты — всегда видимы без раскрытия; аккордеон — только групп разделов у подвала сайта при > 25 ссылках (NN/g «Footers 101» 2019 — G 06-02; v1)", never_hide: [legal, privacy, privacy-label]}
+    mobile: {behavior: [stack], below_40rem: "одна колонка открытым списком по умолчанию; реквизиты, правовые и служебные ссылки, контакты — всегда видимы без раскрытия; аккордеон — только групп разделов у подвала сайта при > 25 ссылках (NN/g «Footers 101» 2019 — site 06/02)", never_hide: [legal, privacy, privacy-label]}
     refs: {legal: ["site:08-01"], ia: ["site:06-02"], seo: ["site:07-01"], creative: ["creative:block-treatments"]}
     errors: ["Нет реквизитов и политики ПД", "Копирайт с прошлым годом", "Подвал Ft3 на одностраничном лендинге"]
 
@@ -2271,8 +2269,8 @@ blocks:
     flow: overlay
     purpose: "Уведомление или согласие на cookie и счётчики: немодальное, равные «Принять» и «Отклонить»"
     serves: [utility]
-    use_when: ["юрисдикция и состав скриптов требуют (решает I; аналитика и пиксели — после согласия)"]
-    avoid_when: ["модальное окно на весь экран", "только обязательные cookie — возможно, баннер не нужен (I)"]
+    use_when: ["юрисдикция и состав скриптов требуют (решает site 08; аналитика и пиксели — после согласия)"]
+    avoid_when: ["модальное окно на весь экран", "только обязательные cookie — возможно, баннер не нужен (site 08)"]
     html: {element: div, landmark: region, label: "aria-label «Cookie»", note: "немодальный; внизу или в потоке над шапкой (GOV.UK); кнопки равного вида; не закрывает призыв hero и фокус (WCAG 2.4.11)"}
     slots:
       - {id: text, slot: cookie-text, required: true}
@@ -2285,7 +2283,7 @@ blocks:
       - {id: in-flow-top, name: "В потоке над шапкой", when: "без position: fixed (GOV.UK Design System)"}
     mobile: {behavior: [none], below_40rem: "компактно: не больше 25–30 % высоты экрана; призыв hero остаётся видимым", never_hide: [reject]}
     refs: {legal: ["site:08-01"], a11y: ["site:08-03"], budget: ["site:07-03"], events: ["site:07-04"], ux: ["ux:04-07#7", "ux:06-04"], creative: ["creative:block-treatments"]}
-    errors: ["«Отклонить» спрятано в настройках", "Метрика стартует до выбора", "Баннер закрывает главный призыв на телефоне (C/02: 3 из 27)"]
+    errors: ["«Отклонить» спрятано в настройках", "Метрика стартует до выбора", "Баннер закрывает главный призыв на телефоне (site 03/03: 3 из 27)"]
     evidence: ["баннер cookie или окно перекрывают первый экран телефона у 15 из 27 страниц [проверено]"]
 
   thank-you:
@@ -2298,7 +2296,7 @@ blocks:
     use_when: ["после формы, записи, покупки, подписки — отдельной страницей или на месте формы"]
     avoid_when: []
     page_types: [thank-you-page]
-    html: {element: section, landmark: region, heading: h1, note: "страница «спасибо» — noindex (H); цель аналитики — по событию отправки, а не по одному просмотру (P)"}
+    html: {element: section, landmark: region, heading: h1, note: "страница «спасибо» — noindex (site 07); цель аналитики — по событию отправки, а не по одному просмотру (site 07)"}
     slots:
       - {id: title, slot: form-success, required: true, heading: h1, purpose: "подтверждение словами действия"}
       - {id: next-steps, slot: form-next-steps, required: true, purpose: "кто, когда, каким каналом свяжется — по факту срока ответа"}
@@ -2322,7 +2320,7 @@ blocks:
     flow: page
     purpose: "Что случилось и куда идти: пути на главные разделы, поиск, главное действие"
     serves: [not-found]
-    use_when: ["любой сайт (страница 404 с кодом ответа 404 — H)"]
+    use_when: ["любой сайт (страница 404 с кодом ответа 404 — site 07)"]
     avoid_when: []
     page_types: [not-found-page]
     html: {element: section, landmark: region, heading: h1}
@@ -2332,7 +2330,7 @@ blocks:
       - {id: cta, slot: cta-primary, required: true}
       - {id: cta-label, slot: cta-label, required: true}
       - {id: messenger-prefill, slot: messenger-prefill, required: false, purpose: "готовое первое сообщение мессенджера: на слот ссылается target.prefill действия с целью-мессенджером"}
-      - {id: search, slot: link, required: false, purpose: "поиск по сайту — G"}
+      - {id: search, slot: link, required: false, purpose: "поиск по сайту — site 06"}
       - {id: illustration, slot: illustration, required: false, media_role: decorative}
     groups:
       - {id: route, name: "Путь", min: 2, max: 6, html: li, slots: [{id: link, slot: link, required: true}, {id: label, slot: nav-label, required: true}]}
@@ -2350,7 +2348,7 @@ blocks:
     flow: page
     purpose: "Документ: политика обработки ПД, согласие, оферта, условия, политика cookie"
     serves: [legal]
-    use_when: ["юридические страницы сайта (состав — I по юрисдикции)"]
+    use_when: ["юридические страницы сайта (состав — site 08 по юрисдикции)"]
     avoid_when: ["документ-«рыба» из интернета без данных оператора"]
     page_types: [legal-page]
     html: {element: article, landmark: none, heading: h1, list: ol, note: "H1 — название документа; пункты — нумерованные H2 и <ol>; дата редакции — <time>"}
@@ -2364,7 +2362,7 @@ blocks:
       - {id: clause, name: "Раздел документа", min: 2, max: 40, html: section, slots: [{id: heading, slot: article-heading, required: true, heading: h2}, {id: text, slot: article-paragraph, required: true}]}
     variants:
       - {id: privacy-policy, name: "Политика обработки ПД", when: "сайт собирает ПД", default: true}
-      - {id: consent-document, name: "Согласие на обработку ПД", when: "отдельный документ с 01.09.2025 (I)"}
+      - {id: consent-document, name: "Согласие на обработку ПД", when: "отдельный документ с 01.09.2025 (site 08)"}
       - {id: offer, name: "Оферта", when: "продажа онлайн"}
       - {id: cookie-policy, name: "Политика cookie", when: "есть баннер cookie"}
     mobile: {behavior: [none], never_hide: [title, date, operator]}
@@ -2379,8 +2377,8 @@ blocks:
     purpose: "Сторонний онлайн-чат или кнопка мессенджера в углу"
     serves: [utility]
     use_when: ["заказчик отвечает в чате в рабочее время", "SaaS: поддержка до покупки"]
-    avoid_when: ["никто не отвечает — ссылка на мессенджер честнее", "виджет открывается сам поверх первого экрана (C 03 §4.5)"]
-    html: {element: div, landmark: none, note: "кнопка запуска с доступным именем; сам виджет — по нажатию или после простоя (фасад), не в первые секунды (P)"}
+    avoid_when: ["никто не отвечает — ссылка на мессенджер честнее", "виджет открывается сам поверх первого экрана (site 03/03 §4.5)"]
+    html: {element: div, landmark: none, note: "кнопка запуска с доступным именем; сам виджет — по нажатию или после простоя (фасад), не в первые секунды (site 07)"}
     slots:
       - {id: launcher, slot: cta-label, required: true, purpose: "подпись кнопки чата (доступное имя)"}
       - {id: messenger, slot: messenger-link, required: false}

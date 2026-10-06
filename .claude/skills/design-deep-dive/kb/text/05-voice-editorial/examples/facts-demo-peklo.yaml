@@ -1,0 +1,236 @@
+# facts-demo-peklo.yaml — ДЕМО-ФАКТЫ для примера голоса «дерзкий потребительский, кампания L2» (05-voice-editorial/examples/voice-peklo-bold.yaml)
+# формат: ../../02-strategy-messaging/facts.schema.yaml (facts_version 1)
+#
+# ВЫМЫШЛЕННЫЙ бренд острых соусов «Пекло» (D2C, запуск линейки осенью 2026, Краснодар) и синтетические данные: числа,
+# имена, документы — для примера голоса, не для публикации. Совпадения с реальными брендами случайны. Проверка —
+# validate_voice.py и `claims_check.py lint-facts`.
+# Зачем: дерзкий голос нужно показать на фактах — дерзость меняет подачу, а не числа (урок «Кварца»).
+# Вымышленный бриф бренда (демо, заказчиком считается он): «дерзкие, смешные, честные про остроту; не для всех — и это
+# нормально»; аудитория — 20–35 лет, любят острое, готовят дома; альтернатива — «острые» соусы из супермаркета.
+
+facts_version: 1
+date: "2026-09-24"
+site: peklo-demo
+lang: ru
+jurisdiction: ru
+status: draft
+owner: {role: "основатель (заказчик, вымышленный)"}
+collected_by: "агент F по анкете proof-intake.md (демо)"
+never_claim_defaults: ru-default-1
+
+entities:
+  - {id: brand-peklo, type: company, names: ["«Пекло»", "Пекло", "Peklo"]}
+  - {id: product-peklo-3, type: product, names: ["«Пекло № 3»", "Пекло № 3", "№ 3", "Peklo No. 3"]}
+  - {id: city-krasnodar, type: place, names: ["Краснодар", "Краснодаре", "Krasnodar"]}
+  - {id: person-kim, type: person, names: ["Артём Ким", "Артём", "Artyom Kim", "Artyom"], fact_id: founder-kim}
+  - {id: scale-scoville, type: other, names: ["шкала Сковилла", "Сковилл", "Сковилла", "Сковиллу", "Scoville"], note: "название шкалы остроты (SHU), не компания"}
+
+facts:
+  - id: heat-shu-no3
+    kind: metric
+    claim_class: [fact-number]
+    verbatim:
+      - "120 000 SHU по замеру лаборатории"
+      - "120 000 единиц по шкале Сковилла"
+      - "Острота — 120 000 SHU"
+    canonical: "Острота соуса «Пекло № 3» — 120 000 единиц по шкале Сковилла (SHU), по протоколу испытаний лаборатории от 5 сентября 2026 года."
+    values:
+      - {value: 120000, unit: SHU, what: "острота соуса № 3"}
+    entities: [product-peklo-3]
+    source: {type: research, who: "испытательная лаборатория (демо)", where: "протокол испытаний № 118-П", date: "2026-09-05", document: "protokol-118-p-demo.pdf", quote: "Острота образца «Пекло № 3» — 120 000 SHU (метод ВЭЖХ); 120 000 единиц по шкале Сковилла по замеру лаборатории", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, benefits, product-demo, specs, faq], slot_types: [subheadline, hero-proof, card-title, card-body, spec-row, faq-a, email-body]}
+    translations:
+      en: {canonical: "Peklo No. 3 measures 120,000 Scoville heat units (SHU), per a lab test report dated 5 September 2026.", note: "адаптация"}
+    lang: ru
+
+  - id: house-scale-no3
+    kind: property
+    claim_class: [fact-property, fact-number]
+    verbatim:
+      - "3 из 5 по нашей шкале остроты"
+      - "острота 3 из 5 — по шкале «Пекла»"
+    canonical: "На этикетке «Пекла № 3» острота обозначена как 3 из 5 по собственной шкале бренда."
+    values:
+      - {value: 3, unit: points, scale: 5, what: "острота по шкале бренда"}
+    entities: [product-peklo-3, brand-peklo]
+    source: {type: customer-document, who: "заказчик", where: "макет этикетки № 3", date: "2026-08-30", document: "label-no3-v4.pdf", quote: "Острота: 3 из 5 по нашей шкале остроты", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, benefits, product-demo, specs, faq], slot_types: [hero-proof, card-title, card-body, spec-row, faq-a, badge]}
+    notes: "Своя шкала бренда — не рейтинг третьей стороны: рядом слова «по нашей шкале»."
+    lang: ru
+
+  - id: ingredients-no3
+    kind: property
+    claim_class: [fact-property]
+    verbatim:
+      - "Хабанеро, копчёная паприка, морковь, чеснок, яблочный уксус и соль"
+      - "6 ингредиентов, без сахара"
+      - "без сахара"
+    canonical: "Состав «Пекла № 3»: перец хабанеро, копчёная паприка, морковь, чеснок, яблочный уксус, соль — 6 ингредиентов, сахара в составе нет."
+    values:
+      - {value: 6, unit: pcs, what: "ингредиенты в составе"}
+    entities: [product-peklo-3]
+    source: {type: customer-document, who: "заказчик", where: "технические условия и этикетка № 3", date: "2026-08-30", document: "tu-peklo-2026.pdf; label-no3-v4.pdf", quote: "Состав: перец хабанеро, копчёная паприка, морковь, чеснок, яблочный уксус, соль (6 ингредиентов, без сахара)", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, benefits, product-demo, specs, faq], slot_types: [subheadline, card-title, card-body, spec-row, faq-a, list-item]}
+    translations:
+      en: {canonical: "Peklo No. 3 has 6 ingredients: habanero, smoked paprika, carrot, garlic, apple cider vinegar and salt; no sugar.", note: "адаптация"}
+    lang: ru
+
+  - id: price-no3
+    kind: price
+    claim_class: [price-discount]
+    verbatim:
+      - "100 мл — 590 ₽"
+      - "590 ₽ за бутылку 100 мл"
+    canonical: "Бутылка «Пекла № 3» объёмом 100 мл стоит 590 ₽ (цена на старте продаж, осень 2026)."
+    values:
+      - {value: 590, unit: RUB, what: "цена бутылки 100 мл"}
+      - {value: 100, unit: ml, what: "объём бутылки"}
+    entities: [product-peklo-3]
+    source: {type: customer-document, who: "заказчик", where: "прайс запуска", date: "2026-09-10", document: "price-launch-2026.pdf", quote: "«Пекло № 3», 100 мл — 590 руб.", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing, final-cta], slot_types: [subheadline, pricing-price, pricing-price-note, cta-note, cta-label, email-subject]}
+    valid: {from: "2026-10-01", until: "2026-12-31", review_by: "2026-12-01"}
+    translations:
+      en: {canonical: "A 100 ml bottle of Peklo No. 3 costs ₽590 (launch price, autumn 2026).", note: "адаптация"}
+    lang: ru
+
+  - id: launch-date
+    kind: date
+    claim_class: [purchase-terms]
+    verbatim:
+      - "Продажи — с 1 октября 2026 года"
+      - "с 1 октября"
+    canonical: "Продажи «Пекла № 3» на сайте начинаются 1 октября 2026 года."
+    values:
+      - {date: "2026-10-01", what: "старт продаж"}
+    entities: [product-peklo-3]
+    source: {type: customer-message, who: "заказчик (основатель)", where: "план запуска", date: "2026-09-10", quote: "Продажи на сайте — с 1 октября 2026 года", derivation: direct}
+    verification: {status: stated, date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [hero, pricing, faq, final-cta, about], slot_types: [subheadline, cta-label, cta-note, pricing-price-note, faq-a, email-subject, email-body, form-success, body]}
+    lang: ru
+
+  - id: delivery-russia
+    kind: offer-terms
+    claim_class: [purchase-terms, fact-number]
+    verbatim:
+      - "Доставка по России — от 3 дней"
+      - "от 3 дней по России"
+    canonical: "«Пекло» доставляет заказы по России службой доставки; срок — от 3 дней в зависимости от города (условия доставки на сайте)."
+    values:
+      - {value: 3, unit: days, what: "минимальный срок доставки", comparator: gte, qualifier: "зависит от города"}
+    entities: [brand-peklo]
+    source: {type: customer-document, who: "заказчик", where: "условия доставки", date: "2026-09-10", document: "delivery-terms-2026.pdf", quote: "Доставка по России — от 3 дней, срок зависит от города", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [pricing, faq, final-cta], slot_types: [cta-note, pricing-price-note, faq-a], requires_nearby: "«срок зависит от города» или ссылка на условия доставки"}
+    lang: ru
+
+  - id: made-in-krasnodar
+    kind: property
+    claim_class: [origin]
+    verbatim:
+      - "Варим в Краснодаре"
+      - "сварено в Краснодаре"
+    canonical: "Соусы «Пекло» производят в Краснодаре (адрес производства — в декларации о соответствии)."
+    entities: [brand-peklo, city-krasnodar]
+    source: {type: registry, who: "реестр деклараций о соответствии (демо)", where: "декларация ЕАЭС N RU Д-RU.DEMO", date: "2026-09-01", document: "deklaraciya-demo.pdf", quote: "Адрес места осуществления деятельности по изготовлению продукции: г. Краснодар; варим в Краснодаре", derivation: direct}
+    verification: {status: verified, by: "редактор (демо)", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {section_roles: [about, footer, hero, benefits], slot_types: [footer-tagline, body, card-body, eyebrow]}
+    translations:
+      en: {canonical: "Peklo sauces are made in Krasnodar, Russia.", note: "адаптация"}
+    lang: ru
+
+  - id: founder-kim
+    kind: person
+    claim_class: [fact-number, fact-property]
+    verbatim:
+      - "Артём Ким, шеф, 12 лет на профессиональной кухне"
+      - "Соусы варит Артём Ким"
+    canonical: "Артём Ким — основатель «Пекла» и шеф, 12 лет работал на профессиональной кухне."
+    values:
+      - {value: 12, unit: years, what: "стаж на профессиональной кухне"}
+    entities: [person-kim, brand-peklo]
+    source: {type: interview, who: "Артём Ким (основатель)", where: "интервью для страницы «О нас», запись (демо)", date: "2026-09-08", quote: "На кухне я с 2014 года, двенадцать лет — 12 лет на профессиональной кухне; соусы варит Артём Ким сам", derivation: direct}
+    verification: {status: stated, date: "2026-09-18", method: "со слов основателя; трудовая книжка — по запросу"}
+    permission: {status: granted, subject: "Артём Ким", form: signed-consent, scope: [site], document: "согласие от 2026-09-08 (демо)", date: "2026-09-08", shows: [full-name, position, photo], pd_consent: true, image_consent: true}
+    attribution: {name: "Артём Ким", display: full-name, role: "основатель и шеф", relation: other}
+    use: {section_roles: [about, team, hero], slot_types: [body, card-title, card-body, email-body, footer-tagline]}
+    lang: ru
+
+  - id: origin-story-staff-sauce
+    kind: company
+    claim_class: [company-details, fact-number]
+    verbatim:
+      - "Первый соус Артём сварил в 2019 году для персонала своего ресторана"
+      - "С 2023 года соусы продаются на фермерских рынках Краснодара"
+    canonical: "Первый соус будущего «Пекла» Артём Ким сварил в 2019 году для персонала ресторана, где был шефом; с 2023 года соусы продаются на фермерских рынках Краснодара."
+    values:
+      - {value: 2019, unit: year, what: "первый соус"}
+      - {value: 2023, unit: year, what: "начало продаж на рынках"}
+    entities: [brand-peklo, person-kim, city-krasnodar]
+    source: {type: interview, who: "Артём Ким (основатель)", where: "интервью для страницы «О нас», запись (демо)", date: "2026-09-08", quote: "Первый соус Артём сварил в 2019 году для персонала своего ресторана, ещё без названия. С 2023 года соусы продаются на фермерских рынках Краснодара, по субботам", derivation: direct}
+    verification: {status: stated, date: "2026-09-18", method: "со слов основателя; договор аренды места на рынке — по запросу"}
+    permission: {status: not-required}
+    use: {section_roles: [about, hero], slot_types: [body, card-body, email-body]}
+    notes: "Факт-история (история основателя): каждое предложение истории — отдельная выдержка из интервью; отдельного вида «история» нет — решение F (03 §3)."
+    lang: ru
+
+missing:
+  - id: legal-details
+    what: "реквизиты продавца для подвала и оферты: название, ОГРН или ОГРНИП, адрес"
+    kind: company
+    claim_class: [company-details]
+    placeholder: "[PLACEHOLDER: реквизиты продавца]"
+    who: "заказчик"
+    needed_for: {section_roles: [footer, contacts], slot_types: [footer-legal]}
+    blocking: true
+    fallback: placeholder
+    question: "Как называется продавец (ИП или ООО), ОГРН или ОГРНИП, адрес?"
+  - id: shelf-life
+    what: "срок хранения после вскрытия"
+    kind: property
+    claim_class: [fact-property]
+    placeholder: "[PLACEHOLDER: срок хранения после вскрытия]"
+    who: "заказчик (технолог)"
+    needed_for: {section_roles: [faq, specs], slot_types: [faq-a, spec-row]}
+    fallback: omit-block
+    question: "Сколько соус хранится после вскрытия и где (холодильник)?"
+
+never_claim:
+  - id: nc-health
+    text: "любые обещания пользы и здоровья: «полезно», «ускоряет метаболизм», «лечит простуду», «сжигает калории»"
+    claim_class: [health]
+    patterns: ["полезн\\w*", "метаболизм", "леч\\w*\\s+простуд", "сжига\\w*\\s+калори", "иммунитет"]
+    lift: never
+    reason: "пищевой продукт: лечебные свойства — запрет (38-ФЗ ст. 5 ч. 5 п. 6; ТР ТС — H)"
+    source: {who: "редактор (демо)", date: "2026-09-18"}
+  - id: nc-hottest
+    text: "«самый острый соус в России», «острее всех» — нет сравнительного исследования"
+    claim_class: [superlative, comparison]
+    patterns: ["сам\\w*\\s+остр\\w*", "остре\\w*\\s+всех"]
+    lift: with-fact
+    reason: "Пленум ВАС № 58 п. 29"
+    source: {who: "редактор (демо)", date: "2026-09-18"}
+  - id: nc-scarcity
+    text: "«осталось N бутылок», таймер обратного отсчёта"
+    claim_class: [availability-scarcity, promo-deadline]
+    patterns: ["осталось\\s+\\d", "остал\\w*\\s+(всего\\s+)?\\d+\\s+бутыл"]
+    lift: never
+    reason: "ложная срочность (ux 06/04 §8.1)"
+    source: {who: "редактор (демо)", date: "2026-09-18"}
+  - id: nc-danger-hype
+    text: "«опасно для жизни», «не для слабаков», «только для настоящих мужчин» — страшилка и стыд вместо факта"
+    claim_class: [health]
+    patterns: ["опасн\\w*\\s+для\\s+жизни", "не\\s+для\\s+слабак", "настоящ\\w*\\s+мужчин"]
+    lift: never
+    reason: "голос бренда: не стыдим читателя; риск здоровья как приманка — запрет (voice: taboos)"
+    source: {who: "редактор (демо)", date: "2026-09-18"}

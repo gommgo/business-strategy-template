@@ -1,7 +1,6 @@
-# hero-loop.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#2; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+# hero-loop.yaml — машиночитаемый рецепт; текст — 14-recipes/01-hero-recipes.md#2; схема — recipe.schema.json
 recipe_version: 1
 checked_at: '2026-09-25'
-author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
 id: hero-loop
 title: 'Тихая петля hero: FLF [A, A] + fixed_lens → срез дубля → мезонин без потерь → кодирование → постер'
 doc: 14-recipes/01-hero-recipes.md#2
@@ -34,14 +33,14 @@ route:
     images: '[A]'
     price_rub: 5.25
     test: I-01
-  - role: 'было «премиум»; фаза 5 — не для петли (routing v2: not)'
+  - role: 'не для петли (routing v2: not)'
     model: google/gemini-omni-1.1-flash
     params:
       resolution: 1080p
     price_rub: 48.0
     test: I-15
-    note: 'first_frame_url = last_frame_url — URL хранилища; фаза 5: к кадру не возвращается, шов 5,08, звук всегда (I-15)'
-  - role: 'было «премиум»; фаза 5 — не для петли (routing v2: not)'
+    note: 'first_frame_url = last_frame_url — URL хранилища; к кадру не возвращается, шов 5,08, звук всегда (I-15)'
+  - role: 'не для петли (routing v2: not)'
     model: kling/v3
     params:
       mode: std
@@ -50,8 +49,8 @@ route:
     images: '[A, A]'
     price_rub: 50.0
     test: I-09
-    note: 'фаза 5: шов 2,12, живость 0,42 (I-09); kling/v3 pro 1080p [A,A] — почти стоп-кадр: движение 0,024, шов 6,98 (VM-02)'
-  - role: финал 1080p (решение заказчика «чем выше качество, тем круче»)
+    note: 'шов 2,12, живость 0,42 (I-09); kling/v3 pro 1080p [A,A] — почти стоп-кадр: движение 0,024, шов 6,98 (VM-02)'
+  - role: финал 1080p
     model: bytedance/seedance-1.5-pro
     params:
       resolution: 1080p
@@ -62,9 +61,8 @@ route:
     images: '[A, A]'
     price_rub: 45.0
     test: MS-05
-    note: 'фаза 5: + RIFE-мост 8 кадров — шов 0,41; генерация ≈ 705 с'
+    note: '+ RIFE-мост 8 кадров — шов 0,41; генерация ≈ 705 с'
 spec:
-  example: 99-raw/phase5/jobs/I-03-loop-AA-fixedlens.json
   must:
   - 'motion.loop: first_last_same'
   - motion.background_motion — движение каждого элемента
@@ -72,56 +70,37 @@ spec:
   ancestors:
   - ../../scripts/ai-media/tests/fixtures/D02/E4.spec.json
 compile: scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --out $DDD_HOME/out/ai-media/<ассет>.jsonl
-phase5:
-  jobs:
-  - 99-raw/phase5/jobs/I-01-control-i2v-A.json
-  - 99-raw/phase5/jobs/I-03-loop-AA-fixedlens.json
-  - 99-raw/phase5/jobs/I-15-omni11-flf-AA.json
-  reuse:
-  - I-01
-  - I-02
-  - I-03
-  - I-09
-  - I-15
-  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
 steps:
 - id: scan
   cmd: python3 ../../scripts/ai-media/provenance_check.py scan <выход как скачан> --corners --trust --out prov/
   status: checked
-  evidence: 99-raw/experiments/L/02-video-metadata-survival
 - id: loop
   cmd: python3 ../../scripts/ai-media/video_loop_check.py loop out.mp4 --control control.mp4
   status: checked
-  evidence: 99-raw/experiments/I/02-loop-seam
 - id: trim
   cmd: python3 ../../scripts/ai-media/video_loop_check.py trim out.mp4 loop_mezz.mp4 --auto
   status: checked
-  evidence: 99-raw/experiments/I/02-loop-seam
 - id: rife-bridge
   cmd: python3 ../../scripts/ai-media/loop_rife_bridge.py loop_mezz.mp4 loop_rife.mp4 8 (если seam_ratio_local > 1,5; под heavy.lock
     при free ≥ 3 ГБ; кроссфейд хвоста на крупной форме даёт «фантом» — не применять)
   status: checked
   evidence: ../../scripts/ai-media/loop_rife_bridge.py
 - id: crf-sweep
-  cmd: python3 99-raw/experiments/J/05-assets/sweep_crf.py <stem> (motion_keep ≥ 0,75)
+  cmd: motion_keep ≥ 0,75
   status: checked
-  evidence: 99-raw/experiments/J/05-assets/results_crf_sweep.json
 - id: encode
   cmd: ffmpeg … -vf "setparams=color_primaries=bt709:color_trc=bt709:colorspace=bt709:range=tv,format=yuv420p10le" -c:v libsvtav1 -preset 6 -crf
     <CRF> -map_metadata 0 -movflags use_metadata_tags+faststart (+ H.264)
   status: checked
-  evidence: 99-raw/experiments/M/03-cinemagraph/encode.py
 - id: poster
   cmd: ffmpeg -i hero.av1.mp4 -frames:v 1 poster.png && scripts/ai-media/avif_pick.sh poster.png poster.avif 80
   status: checked
-  evidence: 99-raw/experiments/M/09-demo-acceptance/audit_poster
 - id: stamp
   cmd: python3 ../../scripts/ai-media/provenance_check.py stamp <производная> <производная> --dst trained --system "<модель> via <канал>"
   status: unchecked
 - id: audit-web
   cmd: python3 ../../scripts/ai-media/asset_audit.py audit hero.av1.mp4 --mode video-loop --stage web --master loop_mezz.mp4 --slot hero
   status: checked
-  evidence: 99-raw/experiments/M/09-demo-acceptance/audit_video
 accept:
   asset_audit:
     mode: video-loop
@@ -155,14 +134,14 @@ provenance:
   visible_label: false
   note: AIGC вендора — флагами ffmpeg одной строкой
 numbers:
-  phase5_i03_seam_local: '1,28, живость 0,83 (рябь, 480p 4 с, 5,25 ₽; n = 1) — 99-raw/phase5/runs/2.4-loops/I-03.loop.json'
-  phase5_large_form_seam_local: '3,29 (4 с) / 3,45 (8 с) без моста; форма «гуляет» до 36,5 px и при fixed_lens'
-  phase5_rife_bridge_seam: '0,69 (4 с) / 0,84 (8 с 720p) / 0,41 (8 с 1080p) без двоения — 99-raw/phase5/runs/README.md'
-  phase5_crossfade_tail: 'шов 1,46–1,76 по метрике, но «фантом» (двоение формы) — голос заказчика; только для мелкой ряби'
-  phase5_pingpong_seam: '0,66–0,74 без двоения; только ненаправленное движение'
-  phase5_encoded_seam: '0,8 → 2,40 (AV1 CRF 28, 1 011 КБ за 8 с 720p) / 1,76 (H.264 CRF 22, 2 314 КБ) — 99-raw/experiments/B/12-demo-assets/README.md'
+  live_i03_seam_local: '1,28, живость 0,83 (рябь, 480p 4 с, 5,25 ₽; n = 1)'
+  live_large_form_seam_local: '3,29 (4 с) / 3,45 (8 с) без моста; форма «гуляет» до 36,5 px и при fixed_lens'
+  live_rife_bridge_seam: '0,69 (4 с) / 0,84 (8 с 720p) / 0,41 (8 с 1080p) без двоения'
+  live_crossfade_tail: 'шов 1,46–1,76 по метрике, но «фантом» (двоение формы) — голос заказчика; только для мелкой ряби'
+  live_pingpong_seam: '0,66–0,74 без двоения; только ненаправленное движение'
+  live_encoded_seam: '0,8 → 2,40 (AV1 CRF 28, 1 011 КБ за 8 с 720p) / 1,76 (H.264 CRF 22, 2 314 КБ)'
 status:
   local: checked
   generation: checked
 sources:
-- 91-videos/digests/OA4xB5EY02g.md
+- '[V:OA4xB5EY02g]'

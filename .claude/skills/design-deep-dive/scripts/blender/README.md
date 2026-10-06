@@ -13,8 +13,11 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 `--help` — шапка файла.
 
 Параллельно работают несколько агентов, а Blender и браузер тяжёлые: рендеры, замеры и пачки проверок идут через очередь
-`slot_run.py` — она занимает слот и ждёт свободной памяти (`--min-mem`); браузерные замеры (`site_probe.py`,
-`web_view.py`) берут замки тишины сами (`--no-lock` — обёртка их уже держит).
+`slot_run.py` — она занимает слот и ждёт свободной памяти (`--min-mem`). Каждая утилита с браузером берёт замок браузера
+`$DDD_HOME/locks/browser.lock` сама на время работы браузера (`kbpaths.lock`), замеры времени (`site_probe.py`,
+`web_view.py`) — ещё общий тяжёлый замок тишины (`--no-lock` — без замков). Замки реентерабельны по дереву процессов:
+утилита, запущенная из утилиты с тем же замком или из `slot_run.py`, который его держит (называет файл замка команде в
+`DDD_LOCKS_HELD`), его не ждёт; внешний `flock` на файл замка не нужен.
 
 ## Blender без окна
 
@@ -22,7 +25,7 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 |---|---|---|---|
 | `blender_run.py` | скрипт или выражение в Blender без окна: чистые настройки (`--factory-startup`), таймаут, фильтр шума рендера | `<скрипт>.py [--blend <сцена>.blend] [--timeout 600] [--user-prefs] [-- <аргументы>]`; `--expr "…"`; `--version` | stdout; журнал — `$DDD_HOME/out/blender/logs/`; код 0 · 1 исключение · 124 таймаут |
 | `blender_supervisor.py` | Blender под надзором: процесс на рабочую папку, шаг — транзакция (успех — контрольная точка сцены, ошибка — откат), перезапуск после падения; лимиты `--mem`, `--cpu` и песочница `--sandbox` (`systemd-run`, `bwrap`); процедура — `kb/blender/04-ai-agents-mcp/06-headless-operations.md` | `start <WORK> [--mem 4G] [--sandbox]`; `exec <WORK> <скрипт>.py [--timeout 120] [-- …]`; `status`, `stop`, `replay` | журнал `<WORK>/sup/journal.jsonl`; код `exec` 0 · 1 исключение, сцена откатена · 2 процесс упал, восстановлен |
-| `slot_run.py` | очередь тяжёлых запусков: слоты Blender, замок браузера, общий замок тяжёлых прогонов, ожидание свободной памяти | `[--kind blender\|browser\|none] [--heavy] [--min-mem MB] [--label ИМЯ] -- <команда> …`; `--status` | код команды (75 — ресурсов не дождались); замки и журнал — `$DDD_HOME/locks/` |
+| `slot_run.py` | очередь тяжёлых запусков: слоты Blender, замок браузера, общий замок тяжёлых прогонов, ожидание свободной памяти; удержанные замки браузера и рендера названы команде в `DDD_LOCKS_HELD` | `[--kind blender\|browser\|none] [--heavy] [--min-mem MB] [--label ИМЯ] -- <команда> …`; `--status` | код команды (75 — ресурсов не дождались); замки и журнал — `$DDD_HOME/locks/` |
 | `bpy_probe.py` | справочник по Python API из самого Blender: параметры операторов и `poll()` в фоне, свойства типов, фактические значения перечислений, сокеты нод, модификаторы, поиск, устаревшее | `op export_scene.gltf`; `type Object`; `node ShaderNodeMix data_type=RGBA`; `enum scene.render.engine`; `search …`; `deprecated`; `[--out <файл>.json]` | JSON в stdout или `--out`; код 3 — ошибка с `did_you_mean` |
 | `render_views.py` | внутри Blender: рендер модели с нескольких ракурсов, контактный лист, статистика геометрии и материалов | `blender_run.py render_views.py -- <вход> <OUT_DIR> [--views 4\|6\|turntable:8] [--engine eevee\|cycles\|workbench] [--clay]` | `<OUT_DIR>/view_*.png`, `<OUT_DIR>/sheet.png`, `<OUT_DIR>/stats.json` |
 
@@ -37,7 +40,7 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 | `agent_scene.py`, `hygiene.py` | работа в сцене человека по тегу (своя коллекция, уборка только своего) и гигиена своего фонового файла; тесты — `test_agent_helpers.py` |
 | `d1lib.py`, `d2lib.py`, `d1exp.py` | моделирование кодом (профили, формы, фаски, гладкость); циклорама и свет от габарита ассета; рендер варианта в плитку, разбор GLB, постобработка `gltf-transform` |
 | `presets.py` | пресеты экспорта glTF для веба и команды постобработки (`gltfpack`, `toktx`) |
-| `rk.py` | обёртка рецептов `kb/blender/12-recipes/`: паспорт → `build(P)` → проверки → рендер → экспорт; результат — `kb/blender/12-recipes/examples/<рецепт>/` |
+| `rk.py` | обёртка рецептов `kb/blender/12-recipes/`: паспорт → `build(P)` → проверки → рендер → экспорт; результат — `kb/blender/12-recipes/examples/<рецепт>/`, пути в `numbers.json` — от папки примера (вне скилла — имя файла) |
 | `scene_audit.py`, `passport_asserts.py`, `preflight_block.py` | проверки внутри Blender: аудит сцены, утверждения паспорта ассета, предэкспортная проверка для веба; первые два текстом годятся и для `execute_blender_code` |
 | `glb_lint_block.py` | проверка готового GLB без Blender: расширения и декодеры, вызовы, треугольники, текстуры и память GPU |
 
@@ -70,7 +73,7 @@ jsDelivr, поэтому им нужна сеть. Выходы — папка, 
 |---|---|---|---|
 | `site_probe.py` | замер страницы с 3D: переданные байты по категориям и сигнатурам, контексты WebGL и WebGPU, вызовы отрисовки, первый 3D-кадр, LCP с элементом, TBT; `--no-3d` — прогон «постер без 3D» для вклада 3D в TBT | `<URL> <OUT_DIR> --quick [--mobile --throttle] [--reduced-motion] [--no-3d]`; `--selftest` | `<OUT_DIR>/probe[…].json`, скриншоты |
 | `gate_check.py` | ворота 3D по отчёту `site_probe.py` (§ ниже) | `<проба>.json mobile\|desktop [--reduced] [--baseline <проба без 3D>.json] [--profile P] [--json] [--strict]`; `--selftest` | таблица или JSON (`rows`, `summary`) |
-| `web_view.py` | GLB в three.js или страница в Chromium на видеокарте: ракурсы, вызовы отрисовки, время кадра, ошибки консоли; живой сайт — ещё сеть по категориям и библиотеки по рантайму | `<модель>.glb <OUT_DIR> [--tone …] [--anim]`; `--page <страница>.html <OUT_DIR> [--scroll 0,0.5,1] [--mobile]`; `--url <URL> <OUT_DIR> [--throttle]`; `--selftest` | скриншоты, `<OUT_DIR>/web_stats.json` или `<OUT_DIR>/page_stats.json` |
+| `web_view.py` | GLB в three.js или страница в Chromium на видеокарте: ракурсы, вызовы отрисовки, время кадра, ошибки консоли; живой сайт — ещё сеть по категориям и библиотеки по рантайму | `<модель>.glb <OUT_DIR> [--tone …] [--anim]`; `--page <страница>.html <OUT_DIR> [--scroll 0,0.5,1] [--mobile]`; `--url <URL> <OUT_DIR> [--throttle]`; `--selftest` | скриншоты, `<OUT_DIR>/web_stats.json` (пути — от папки модели) или `<OUT_DIR>/page_stats.json` |
 | `fx_probe.py` | замер своей демо-страницы с 3D или шейдерным эффектом: режимы desktop, mobile, reduce, uncapped, покой отдельно от прокрутки | `<ROOT_DIR> <страница> <OUT_DIR> [--modes desktop,mobile,reduce,uncapped]` | `<OUT_DIR>/fx_<метка>.json`, скриншоты |
 | `serve_br.py` | локальный сервер «как хостинг»: предсжатые brotli-файлы, типы файлов, без кэша | `<папка> <порт>`; модуль — `from serve_br import start` | — |
 

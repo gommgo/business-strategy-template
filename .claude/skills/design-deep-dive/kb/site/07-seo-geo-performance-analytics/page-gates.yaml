@@ -1,20 +1,13 @@
-# page-gates.yaml — единые ворота страницы (site-research) · v1
+# page-gates.yaml — единые ворота страницы (site) · v1
 # Иерархия (контракт v2 §2): ворота страницы (site) выше ворот эффектов (creative) и ассетов (ai-media, blender);
 # ворота ассета не блокируют страницу за чужие байты. Пороги по профилю — budgets.yaml; автопроверка — page_gates.py v1.2.
-# Строки: PERF, WEIGHT — P; SEO, GEO — H (сверены с head-kit.yaml 1.0 продолжателем H2); A11Y, LEGAL — I; CONTENT, NAV, MOB — K.
+# Строки: PERF, WEIGHT — 07/03; SEO, GEO — по head-kit.yaml 1.0; A11Y, LEGAL — 08-legal-trust-a11y; CONTENT, NAV, MOB — 09-ai-generation-evaluation.
 # Связь с чек-листом: поле site_checklist — пункты 09-ai-generation-evaluation/02-site-checklist.md (SITE-*).
-version: "1.3"
+version: "1.4"
 checked: 2026-09-24
 status: released
-owner: "site-research · агент P (v0, волна 2); K (v1–v1.2, волна 3: K, K2, K3, K4); S1 (v1.3, волна 4)"
-changelog:
-  - "v0 (P, 2026-09-24 ≈16:00): 49 ворот; SEO и GEO — черновик P, A11Y и LEGAL — строки I"
-  - "v0+H2 (2026-09-24 ≈17:20): строки SG-SEO-01…04, SG-GEO-01…02 уточнены H2 по head-kit.yaml 1.0"
-  - "v1 (K, 2026-09-24): статусы строк → v1; поле site_checklist; новые SG-SEO-05…08, SG-NAV-01…02, SG-MOB-01…02, SG-CONTENT-05…07; scope page|site; методы ia, html, plan; исключение x-gate-exception с until; page_gates.py приведён к строкам (SG-GEO-01, SG-SEO-02, SG-SEO-03)"
-  - "v1.1 (K2, 2026-09-24 ≈18:20): SG-WEIGHT-09 (видео первого экрана отдельно) и SG-A11Y-08 (clamp кеглей ≤ 2,5×) по замечаниям creative; page_gates.py --css"
-  - "v1.2 (код — K3, строки — K4; 2026-09-24 22:31): калибровка опыта K/03 — SG-PERF-03 по fin.wv_cls; SG-GEO-01 B только без H1 в сыром HTML; SG-MOB-01 B при layout_zoomed, скрытое переполнение — D; SG-LEGAL-01 для ЕС S при одной загрузке библиотек; SG-LEGAL-04 для ЕС S; SG-A11Y-01 — color-contrast B только у ключевых узлов (H1, лид, призыв, согласие), прочие и без адресов узлов — S; SG-PERF-06 — H1 выпал из LCP (creative E/01); оговорки пакета creative волны 2: CLS при прокрутке от pin (SG-PERF-03), три условия 2.2.2 (SG-A11Y-03), reduce записью всей страницы (SG-A11Y-07); строки приведены к коду page_gates.py v1.2, самопроверка 64/64"
-  - "v1.3 (S1, волна 4, 2026-09-25; аудит X 9.2 №22–24): + SG-PERF-16 (постер видео-hero и LCP; creative F и ai-media J/01) — 63 строки (PERF 16); SG-A11Y-07 — порог и метод reduce по creative 05-motion/01 §4.5, 0,5 % — грубый фильтр до перенастройки page_accept.py; SG-LEGAL-01 — ЕС: события без cookie и идентификатора — S [спорно] до EDPB 2/2023 (В-12); код page_gates.py не менялся (v1.2, самопроверка 64/64)"
-calibration: "пороги PERF и WEIGHT — лаборатория и замер M (без поля CrUX: нет ключа PSI); строки CONTENT, NAV, MOB — самопроверка и смоук-прогон на en-buffer-pricing; прогон на 5 страницах M и 3 демо генераторов (опыт 99-raw/experiments/K/03-gates-v1) ещё не выполнен (K2, 2026-09-24); живая фаза — пересмотр по полю"
+owner: "site · 07-seo-geo-performance-analytics"
+calibration: "пороги PERF и WEIGHT — лаборатория и замер живых страниц (site 02/03), без поля CrUX; строки CONTENT, NAV, MOB — самопроверка и смоук-прогон; живая фаза — пересмотр по полю"
 severity:
   B: "блокер: страница не принимается, пока не исправлено"
   S: "серьёзно: исправить или записать обоснование в page-plan (x-gate-exception: {id, why, who})"
@@ -28,12 +21,12 @@ methods:
   motion: "../../scripts/creative/motion_check.py PAGE --level L<n> --page-type <page_type> --out DIR → results.json, gates.json (петли всей страницы, вспышки, reduce записью; ворота эффектов)"
   probe: "../../scripts/blender/site_probe.py URL OUT (страницы с 3D) → gate_check.py --json (ворота 3D blender; метрики страницы — зеркало)"
   gates: "../../scripts/site/page_gates.py — сводит JSON по профилю budgets.yaml и выдаёт PASS / S / B; метрики страницы, измеренные соседями (motion, probe), — зеркалом D"
-  geo: "../../scripts/site/geo_probe.py (H)"
+  geo: "../../scripts/site/geo_probe.py"
   axe: "axe-core (I; сырой сигнал)"
-  plan: "проверка page-plan и site-brief (site_validate.py, J); page_gates.py --plan читает first_screen_policy, seo.indexable, x-gate-exception"
-  ia: "../../scripts/site/ia_probe.py URL --out DIR → ia.json (G): 404 на шаблонах, меню в HTML, sitemap, hreflang, крошки — строки scope: site"
+  plan: "проверка page-plan и site-brief (site_validate.py); page_gates.py --plan читает first_screen_policy, seo.indexable, x-gate-exception"
+  ia: "../../scripts/site/ia_probe.py URL --out DIR → ia.json: 404 на шаблонах, меню в HTML, sitemap, hreflang, крошки — строки scope: site"
   html: "сохранённый HTML страницы (curl или page_anatomy) — скан заглушек и маркеров ИИ-лендинга (page_gates.py --html)"
-  human: "человек или судья (K)"
+  human: "человек или судья (site 09/03)"
   rum: "RUM web-vitals или CrUX (поле)"
 
 gates:
@@ -46,7 +39,7 @@ gates:
     threshold: {S: "profile.outcome.lcp_ms_lab.mobile.goal", B: "profile.outcome.lcp_ms_lab.mobile.poor"}
     owner: "07/03 §2.1"
     status: v1
-    maps_to: ["page_accept --budget-profile: LCP при --throttle > цели профиля = WARN, > плохо = FAIL", "kimi ACCEPTANCE F2 (LCP ≤ build.perf.lcp_s_mobile)", "blender gate_check: LCP страницы — зеркало D", "ux AC-PRF-01"]
+    maps_to: ["page_accept --budget-profile: LCP при --throttle > цели профиля = WARN, > плохо = FAIL", "blender gate_check: LCP страницы — зеркало D", "ux AC-PRF-01"]
   - id: SG-PERF-02
     name: "LCP десктопа в лаборатории"
     site_checklist: [SITE-PERF-02]
@@ -64,7 +57,7 @@ gates:
     threshold: {S: "profile.outcome.cls_lab.goal", B: "profile.outcome.cls_lab.poor"}
     owner: "07/03 §2.3"
     status: v1
-    note: "v1.2 (K3): сумма сдвигов завышала CLS прокрутки (K/03: ru-azbukaokon телефон — 0,42 против 0,15 по web-vitals). Мерить прокруткой, а не только после загрузки: закрепление pin ScrollTrigger через position: fixed даёт CLS при прокрутке 1,6–2,0, position: sticky и pinType: 'transform' — 0, anticipatePin не помогает; колесо не считается «недавним вводом»; CLS «после загрузки» (page_accept, Lighthouse) этого не видит (creative E/02, 2026-09-24)"
+    note: "сумма сдвигов завышала CLS прокрутки (ru-azbukaokon, телефон — 0,42 против 0,15 по web-vitals). Мерить прокруткой, а не только после загрузки: закрепление pin ScrollTrigger через position: fixed даёт CLS при прокрутке 1,6–2,0, position: sticky и pinType: 'transform' — 0, anticipatePin не помогает; колесо не считается «недавним вводом»; CLS «после загрузки» (page_accept, Lighthouse) этого не видит"
     maps_to: ["page_accept: CLS > цели профиля = WARN, > плохо = FAIL (как S и B здесь)", "blender WEB-02: CLS страницы в gate_check.py — зеркало D", "ux AC-PRF-03"]
   - id: SG-PERF-04
     name: "INP по сценарию (меню, CTA, аккордеон, фокус в поле + нажатие во время загрузки)"
@@ -94,8 +87,8 @@ gates:
     owner: "07/03 §2.1; ai-media 10/01 §4"
     status: v1
     limits: {opacity_near_zero: 0.1}   # H1 из opacity 0 < x < 0,1 — «почти невидим»: кандидат LCP, но время LCP раньше показа
-    note: "v1.2 (K4) по creative E/01 (Chromium 153, 9 вариантов): H1 из opacity: 0, за маской строк (SplitText mask: lines) или скрытый скриптом кандидатом LCP не становится — LCP уходит на лид в 5 раз меньше, поле CrUX (его собирает Chrome) получает время мелкого элемента; WebKit считает H1 по моменту показа; честно — только transform. K/03: Framer (appear, opacity 0.001) — D на обоих устройствах; Lovable, телефон — D (LCP — H2, признаков нет); Durable — H1 в обёртке opacity-0, но итоговый LCP — картинка: метрику не искажает, PASS"
-    maps_to: ["page_accept: LCP нет = FAIL, lazy = FAIL, без fetchpriority = WARN", "blender WEB-01 (не canvas)", "kimi F3 (постер = LCP)"]
+    note: "Chromium 153, 9 вариантов: H1 из opacity: 0, за маской строк (SplitText mask: lines) или скрытый скриптом кандидатом LCP не становится — LCP уходит на лид в 5 раз меньше, поле CrUX (его собирает Chrome) получает время мелкого элемента; WebKit считает H1 по моменту показа; честно — только transform. Замер: Framer (appear, opacity 0.001) — D на обоих устройствах; Lovable, телефон — D (LCP — H2, признаков нет); Durable — H1 в обёртке opacity-0, но итоговый LCP — картинка: метрику не искажает, PASS"
+    maps_to: ["page_accept: LCP нет = FAIL, lazy = FAIL, без fetchpriority = WARN", "blender WEB-01 (не canvas)"]
   - id: SG-PERF-16
     name: "Видео первого экрана и LCP: LCP-элемент hero — не VIDEO без постера; постер ≥ 0,05 бит на отображаемый пиксель и не меньше видео"
     site_checklist: [SITE-PERF-13, SITE-PERF-05]
@@ -105,8 +98,7 @@ gates:
     limits: {poster_bpp_min: 0.05, poster_area_min: 1.0}
     owner: "07/03 §2.1; creative 06-effects-catalog/02 §3.2; ai-media 10-web-integration/01 §4.2"
     status: v1
-    note: "creative F — постер AVIF 2 334 Б 1280×720 (0,020 бит/px) — LCP = VIDEO; ai-media J/01 — 0,024–0,038 бит/px не кандидат, 0,0505 — кандидат [проверено] [проверено]; blender VD3 (T26): постер на строку меньше видео — LCP 4 656 мс (VIDEO), на 1 px шире — 596 мс [проверено]. Постер ≥ 0,05 бит/px и не меньше видео — или LCP — H1 (видео не больше текста по площади). Автопроверка — page_gates.py по отчёту page_accept.py"
-    maps_to: ["kimi F3 (постер = LCP)"]
+    note: "creative: постер AVIF 2 334 Б 1280×720 (0,020 бит/px) — LCP = VIDEO; ai-media: 0,024–0,038 бит/px не кандидат, 0,0505 — кандидат [проверено]; blender: постер на строку меньше видео — LCP 4 656 мс (VIDEO), на 1 px шире — 596 мс [проверено]. Постер ≥ 0,05 бит/px и не меньше видео — или LCP — H1 (видео не больше текста по площади). Автопроверка — page_gates.py по отчёту page_accept.py"
   - id: SG-PERF-07
     name: "Поле p75 (живая страница): LCP, INP, CLS по телефону и десктопу"
     site_checklist: [SITE-PERF-01, SITE-PERF-03, SITE-PERF-04]
@@ -130,7 +122,7 @@ gates:
     phase: build
     method: {tool: "anatomy", field: "network.third_party (категории chat, maps, video, booking) до первого ввода"}
     threshold: {S: "виджет грузится до ввода и до видимости своей секции"}
-    owner: "07/03 §5.2; E blocks.yaml (слоты виджетов)"
+    owner: "07/03 §5.2; 04-blocks/blocks.yaml (слоты виджетов)"
     status: v1
   - id: SG-PERF-10
     name: "Баннер cookie (CMP) не портит скорость: async, прямо в HTML, без сдвига, «Принять» без долгой задачи"
@@ -138,9 +130,9 @@ gates:
     phase: build
     method: {tool: "anatomy + accept", field: "cmp.*, CLS до и после появления, TBT/INP клика по кнопке баннера (свой стенд)"}
     threshold: {S: "баннер сдвигает содержимое (CLS) | скрипт CMP синхронный или через менеджер тегов без причины | клик «Принять» > 200 мс"}
-    owner: "07/03 §5.3; право баннера — I"
+    owner: "07/03 §5.3; право баннера — 08/01"
     status: v1
-    maps_to: ["ux UX-OVL-02, AC-SCF-15 (исключение для обязательного баннера — PLAN поправка 6)"]
+    maps_to: ["ux UX-OVL-02, AC-SCF-15 (исключение для обязательного баннера)"]
   - id: SG-PERF-11
     name: "A/B без скрытия страницы (anti-flicker) и без задержки LCP"
     site_checklist: [SITE-PERF-09]
@@ -192,7 +184,7 @@ gates:
     threshold: {S: "profile.weight.first_screen_kb.<device>"}
     owner: "07/03 §3"
     status: v1
-    maps_to: ["page_accept --budget-profile: выше профиля = WARN (как S здесь)", "motion_check EG-WEIGHT-08 — зеркало D", "kimi F2 first_screen_kb_mobile 1 500", "ai-media 01/01 §7"]
+    maps_to: ["page_accept --budget-profile: выше профиля = WARN (как S здесь)", "motion_check EG-WEIGHT-08 — зеркало D", "ai-media 01/01 §7"]
   - id: SG-WEIGHT-02
     name: "Сессия без кликов (прокрутка до конца)"
     site_checklist: [SITE-PERF-12]
@@ -256,38 +248,38 @@ gates:
     phase: build
     method: {tool: anatomy, field: "first_screen.by_type_kb.media (тип Media CDP в окне первого экрана)"}
     threshold: {D: "видео > 0 КБ — показать отдельно; постер, reduce = 0 байт, вертикальный файл телефону — SITE-PERF-13. Порог видео по уровню — ворота эффектов EG-WEIGHT-04 (S), вес первого экрана вместе с видео — SG-WEIGHT-01 (S)"}
-    owner: "K2 v1.1 по замечанию creative (99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md п.3: > 5 МБ видео до прокрутки у 15 из 49 эффектных страниц)"
+    owner: "07/03 §3; creative (> 5 МБ видео до прокрутки у 15 из 49 эффектных страниц)"
     status: v1
     note: "видео уже входит в SG-WEIGHT-01; строка делает его видимым отдельно (у creative — колонки kb_first_nv, video_kb_first, video_kb_total)"
     maps_to: ["creative EG-WEIGHT-04 (видео первого экрана по уровню, S)"]
 
-  # ------------------------------------------------------------ SEO — строки H (по head-kit.yaml; уточнил продолжатель H2, 2026-09-24)
+  # ------------------------------------------------------------ SEO — по head-kit.yaml
   - id: SG-SEO-01
     name: "Коды и предел Googlebot: индексируемая — 200 без редиректа по UA; несуществующий URL — 404; не 5xx; HTML без сжатия < 2 МБ и H1 в первых 2 МБ; каждый CSS и JS < 2 МБ без сжатия"
     site_checklist: [SITE-SEO-01, SITE-SEO-06]
     phase: build
     method: {tool: "geo | curl без сжатия", field: "page.status, page.html_bytes, page.offsets.h1; флаги page-status-*, html-over-2mb; запрос /h-probe-<случайное> → 404"}
     threshold: {B: "индексируемая ≠ 200 | несуществующий URL ≠ 404 (мягкая 404) | 5xx | HTML ≥ 2 048 КБ или H1 после 2 МБ", S: "файл CSS или JS ≥ 2 048 КБ без сжатия"}
-    owner: "H head-kit.yaml (hk-access-status, hk-access-404, hk-access-html-limit, site_checks.hk-site-soft-404); 07/01 §1.1, §1.5"
+    owner: "head-kit.yaml (hk-access-status, hk-access-404, hk-access-html-limit, site_checks.hk-site-soft-404); 07/01 §1.1, §1.5"
     status: v1
-    maps_to: ["P SG-WEIGHT-07 (HTML по сети — вес, а не предел обхода)", "ia_probe.py G (404 на шаблонах)", "[V:cfIQ_ksB61U 12:36] (5xx снижает обход всего сайта)"]
+    maps_to: ["SG-WEIGHT-07 (HTML по сети — вес, а не предел обхода)", "ia_probe.py (404 на шаблонах)", "[V:cfIQ_ksB61U 12:36] (5xx снижает обход всего сайта)"]
   - id: SG-SEO-02
     name: "head: один title, canonical (абсолютный, на себя, в сыром HTML), lang; нет noindex и противоречивых директив на индексируемой; директивы одинаковы в 10–20 повторах"
     site_checklist: [SITE-SEO-03, SITE-SEO-04, SITE-SEO-05, SITE-SEO-08, SITE-SEO-17]
     phase: build
     method: {tool: "geo | anatomy", field: "head.title, head.canonical_n, head.canonical_self, head.lang, head.noindex, X-Robots-Tag; флаги no-title, no-canonical, multiple-canonical, canonical-elsewhere, noindex, nosnippet, no-lang, no-description; 10–20 запросов подряд"}
     threshold: {B: "noindex (meta или X-Robots-Tag) при page.seo.indexable = true | код или директивы различаются между повторами", S: "нет title | нет canonical | несколько canonical | canonical на другой URL без дубля | nosnippet без решения заказчика", D: "нет description | нет lang или lang не BCP 47"}
-    owner: "H head-kit.yaml (hk-title, hk-canonical, hk-robots-meta, hk-lang, hk-description); crawlers.yaml rt-cdn-directives-stable"
+    owner: "head-kit.yaml (hk-title, hk-canonical, hk-robots-meta, hk-lang, hk-description); crawlers.yaml rt-cdn-directives-stable"
     status: v1
-    note: "page_gates.py (P) считает нет lang серьёзным (S); по head-kit для SEO это D, для доступности — SG-A11Y-02 (html-has-lang, S)"
-    maps_to: ["I SG-A11Y-02 (html-has-lang)", "[V:0yedoWKPgo4 13:29] (ложный noindex из кэша CDN)"]
+    note: "page_gates.py считает нет lang серьёзным (S); по head-kit для SEO это D, для доступности — SG-A11Y-02 (html-has-lang, S)"
+    maps_to: ["SG-A11Y-02 (html-has-lang)", "[V:0yedoWKPgo4 13:29] (ложный noindex из кэша CDN)"]
   - id: SG-SEO-03
     name: "H1 в исходном HTML, ровно один; текст H1 = слот плана page.seo.h1"
     site_checklist: [SITE-BLK-03]
     phase: build
     method: {tool: "geo | anatomy", field: "text.h1_n (сырой HTML); флаги no-h1-in-raw, multiple-h1; anatomy summary.h1_n, nojs.h1_raw_n"}
     threshold: {S: "нет H1 в сыром HTML", D: "H1 больше одного"}
-    owner: "H head-kit.yaml (plan_fields.h1; checks no-h1-in-raw, multiple-h1); C 03-page-structure/03"
+    owner: "head-kit.yaml (plan_fields.h1; checks no-h1-in-raw, multiple-h1); 03/03"
     status: v1
     note: "H1 только после JS — блокер в SG-GEO-01"
   - id: SG-SEO-04
@@ -296,20 +288,20 @@ gates:
     phase: build
     method: {tool: "geo + валидатор", field: "jsonld.types, jsonld.parse_errors, jsonld.issues; флаги no-jsonld, jsonld-parse-error, jsonld-missing-required, jsonld-js-only (--render); Rich Results Test и валидатор Яндекса — человек"}
     threshold: {S: "ошибка разбора | JSON-LD только из JS | тип не из page_types | значение не видно на странице или расходится с fact: | Review или AggregateRating о себе, оценки с других сайтов", D: "нет JSON-LD при непустом page.seo.structured_data | нет рекомендованных свойств | крошки без разметки или разметка без крошек"}
-    owner: "H head-kit.yaml (hk-jsonld-placement, jsonld_policy, page_types, site_checks.hk-site-breadcrumbs)"
+    owner: "head-kit.yaml (hk-jsonld-placement, jsonld_policy, page_types, site_checks.hk-site-breadcrumbs)"
     status: v1
 
-  # ------------------------------------------------------------ GEO — строки H (по head-kit.yaml и crawlers.yaml; уточнил продолжатель H2, 2026-09-24)
+  # ------------------------------------------------------------ GEO — по head-kit.yaml и crawlers.yaml
   - id: SG-GEO-01
     name: "Смысл — в HTML сервера и одинаков для людей и ботов: H1, текст, цены, главный CTA, меню и телефон без исполнения JS; нет текста только для машин"
     site_checklist: [SITE-GEO-01, SITE-GEO-02, SITE-GEO-07, SITE-SEO-12, SITE-PRF-10]
     phase: build
     method: {tool: "geo --render | anatomy", field: "флаги csr-shell, raw-text-under-50-words, h1-js-only, cta-js-only, prices-js-only, nojs-ratio-under-0.5; render.ratio; anatomy summary.nojs_h1, nojs.h1_raw_n и nojs.h1_raw против dom.headings.h1 (буквы без пробелов и регистра), summary.nojs_cta, summary.nojs_prices, summary.nojs_text_ratio; линтер text geo-model-instruction"}
     threshold: {B: "оболочка SPA (csr-shell) или < 50 слов в сыром HTML | H1 только после JS — в сыром HTML нет H1 (nojs.h1_raw_n = 0) | скрытый текст для роботов | инструкции моделям в тексте или коде", S: "главный CTA только после JS | цены только после JS | доля слов без JS < 0,5 | меню или телефон только из скрипта", D: "доля слов без JS < 0,8 | H1 в сыром HTML есть, но текст отличается от видимого"}
-    owner: "H head-kit.yaml (hk-access-ssr, hk-access-links, hk-access-hidden-text, hk-access-no-ai-instructions); 07/02 §3"
+    owner: "head-kit.yaml (hk-access-ssr, hk-access-links, hk-access-hidden-text, hk-access-no-ai-instructions); 07/02 §3"
     status: v1
     limits: {nojs_ratio_s: 0.5, nojs_ratio_d: 0.8}   # доля слов без JS: ниже первой — S, ниже второй — D
-    note: "v1.2 (K3): B за H1 — только когда H1 нет в сыром HTML; если H1 есть, а сравнение текста упало (innerText склеивает слова на скрытых <br> — K/03: ru-matemarketing, телефон, был ложный B), текст сверяется буквами без пробелов и регистра, расхождение — D. Код и строка совпадают: CTA и цены после JS — S, доля < 0,8 — D"
+    note: "B за H1 — только когда H1 нет в сыром HTML; если H1 есть, а сравнение текста упало (innerText склеивает слова на скрытых <br> — ru-matemarketing, телефон, был ложный B), текст сверяется буквами без пробелов и регистра, расхождение — D. Код и строка совпадают: CTA и цены после JS — S, доля < 0,8 — D"
     maps_to: ["blender 01/02 §6.1 (ИИ-краулеры JS не исполняют)", "text geo-rules.yaml geo-model-instruction"]
   - id: SG-GEO-02
     name: "Боты получают страницу: robots.txt 200 text/plain или 404; поисковые боты и боты поверхностей брифа не закрыты; нет антибот-заглушки; сертификат общепризнанный"
@@ -317,19 +309,19 @@ gates:
     phase: build
     method: {tool: "geo (+ --ua-probe)", field: "robots.status, robots.effective, robots.bots.<id>.allowed; флаги robots-5xx-or-unreachable, robots-is-html, robots-star-disallow-all, blocked-*, antibot-challenge, tls-untrusted-chain, ua-*; человек — «Проверка URL» Search Console и «Проверка ответа сервера» Вебмастера"}
     threshold: {B: "robots.txt 5xx, недоступен или HTML | закрыт Googlebot или YandexBot | закрыт AdsBot-Google у посадочной Google Ads | антибот-заглушка для клиента без JS | TLS не проверяется общепризнанными корнями", S: "закрыт поисковый бот поверхности из search.ai_answers (YandexAdditional, OAI-SearchBot, PerplexityBot, Claude-SearchBot, bingbot) при ai_bots_policy ≠ deny-all | managed-блок Cloudflare противоречит ai_bots_policy | ответ по UA бота отличается от браузерного"}
-    owner: "H head-kit.yaml (hk-access-robots-file, hk-access-bots-allowed, hk-access-waf, hk-access-tls); crawlers.yaml (brief_mapping, policies)"
+    owner: "head-kit.yaml (hk-access-robots-file, hk-access-bots-allowed, hk-access-waf, hk-access-tls); crawlers.yaml (brief_mapping, policies)"
     status: v1
 
-  # ------------------------------------------------------------ A11Y — строки I (I-notes «## Для P», 15:40; уточняет I, v1 — K)
+  # ------------------------------------------------------------ A11Y — по 08/03
   - id: SG-A11Y-01
     name: "axe (wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa): нет нарушений link-name, button-name, label, meta-viewport; color-contrast — нет у ключевых узлов (H1, лид первого экрана, призыв, согласие и баннер cookie)"
     site_checklist: [SITE-A11Y-04, SITE-A11Y-05, SITE-A11Y-06, SITE-A11Y-07]
     phase: build
-    method: {tool: axe, field: "violations[].id; для color-contrast — узлы с адресами (формат run_axe_targets.py опыта K/03: in_h1, action, in_form, cookie, first_screen, in_header, in_footer, text); призыв — узел-ссылка или кнопка с текстом кнопки filled или outline из анатомии (dom.ctas); текст о cookie в подвале ниже первого экрана — не баннер"}
-    threshold: {B: "link-name | button-name | label | meta-viewport | color-contrast ключевого узла", S: "color-contrast только у прочих узлов (меню, подвал, карточки, H2 ниже первого экрана) | color-contrast без адресов узлов (счётчики I/02): x-gate-exception это S не снимает — сначала проверить H1, лид, призыв и согласие (axe с адресами узлов, page_accept.py --contrast <селекторы>, кадр)"}
-    owner: "I 08-legal-trust-a11y/03 §8 (gate-a11y-axe-critical: контраст — B для H1, лида, призыва, согласия; S для прочего)"
+    method: {tool: axe, field: "violations[].id; для color-contrast — узлы с адресами (формат run_axe_targets.py: in_h1, action, in_form, cookie, first_screen, in_header, in_footer, text); призыв — узел-ссылка или кнопка с текстом кнопки filled или outline из анатомии (dom.ctas); текст о cookie в подвале ниже первого экрана — не баннер"}
+    threshold: {B: "link-name | button-name | label | meta-viewport | color-contrast ключевого узла", S: "color-contrast только у прочих узлов (меню, подвал, карточки, H2 ниже первого экрана) | color-contrast без адресов узлов (только счётчики нарушений): x-gate-exception это S не снимает — сначала проверить H1, лид, призыв и согласие (axe с адресами узлов, page_accept.py --contrast <селекторы>, кадр)"}
+    owner: "08/03 §8 (gate-a11y-axe-critical: контраст — B для H1, лида, призыва, согласия; S для прочего)"
     status: v1
-    note: "v1.2 (K4): до v1.2 код ставил B за любой color-contrast; в K/03 контраст нарушен у 5 из 8 страниц (SG-A11Y-01 в прогоне 2 проваливали 7), у 2 из них все узлы неключевые (demo-lovable-evebcn — 27, ru-matemarketing — 12) → S. Класс узла — эвристика: ключевой провал подтверждать кадром; axe не видит текст на картинках и видео — F83 (page_accept.py --contrast)"
+    note: "в замере контраст нарушен у 5 из 8 страниц, у 2 из них все узлы неключевые (demo-lovable-evebcn — 27, ru-matemarketing — 12) → S. Класс узла — эвристика: ключевой провал подтверждать кадром; axe не видит текст на картинках и видео — F83 (page_accept.py --contrast)"
     maps_to: ["page_accept F83 (контраст на медиа — ai-media 10/03)"]
   - id: SG-A11Y-02
     name: "axe: target-size, image-alt, frame-title, html-has-lang — 0 или обосновано"
@@ -337,7 +329,7 @@ gates:
     phase: build
     method: {tool: axe}
     threshold: {S: "> 0 без обоснования"}
-    owner: "I 08/03 (gate-a11y-axe-serious)"
+    owner: "08/03 (gate-a11y-axe-serious)"
     status: v1
     maps_to: ["page_accept: img без alt = FAIL"]
   - id: SG-A11Y-03
@@ -346,17 +338,17 @@ gates:
     phase: build
     method: {tool: "motion + accept", field: "motion_check: derived.moving_6s_without_pause и derived.loops_without_pause (петли всей страницы: каждая петля — в экран, через 6 с движется ли, есть ли механизм паузы); page_accept: motion_6s (первый экран на 6-й с после load) и loops (петли всей страницы; с --first-screen-only — пометка «только первый экран»); treatment.loops и loop_control (pause-button | stops-within-5s | not-parallel-content)"}
     threshold: {B: "подтверждённое движение без паузы"}
-    owner: "I 08/03 (gate-a11y-motion-pause); creative — движение"
+    owner: "08/03 (gate-a11y-motion-pause); creative — движение"
     status: v1
-    note: "разовое появление ≤ 5 с и движение, которое ведёт прокрутка человека (скраб, pin, параллакс), под 2.2.2 не попадают — это 2.3.3 AAA и reduce (SG-A11Y-07); петля, стартующая при появлении, — попадает. Петли ниже первого экрана проверяются прокруткой: каждая — в экран и через 6 с. Разбор — creative 05-motion/01 §3.2, I 08/03 §2.1"
-    maps_to: ["page_accept: петля > 5 с без паузы = FAIL", "creative EG-A11Y-01, EG-A11Y-02 (B)", "blender WEB-06", "ux UX-FBK-14/15 (блокер только 2.2.2 и 2.3.1 — PLAN поправка 11)"]
+    note: "разовое появление ≤ 5 с и движение, которое ведёт прокрутка человека (скраб, pin, параллакс), под 2.2.2 не попадают — это 2.3.3 AAA и reduce (SG-A11Y-07); петля, стартующая при появлении, — попадает. Петли ниже первого экрана проверяются прокруткой: каждая — в экран и через 6 с. Разбор — creative 05-motion/01 §3.2, 08/03 §2.1"
+    maps_to: ["page_accept: петля > 5 с без паузы = FAIL", "creative EG-A11Y-01, EG-A11Y-02 (B)", "blender WEB-06", "ux UX-FBK-14/15 (блокер только 2.2.2 и 2.3.1)"]
   - id: SG-A11Y-04
     name: "Не больше 3 вспышек в секунду (WCAG 2.3.1), покадрово для ИИ-видео"
     site_checklist: [SITE-A11Y-02]
     phase: build
     method: {tool: "motion + human", field: "motion_check: derived.flash_fail по записи 25 к/с (> 3 общих или красных за 1 с на ≥ 25 % поля 341 × 256 CSS px — creative EG-A11Y-04); сомнительное (глитч ИИ-видео, заставка, вспышки чаще 12 Гц — их запись не различает) — глазами"}
     threshold: {B: "> 3 вспышек/с"}
-    owner: "I 08/03 (gate-a11y-flash)"
+    owner: "08/03 (gate-a11y-flash)"
     status: v1
   - id: SG-A11Y-05
     name: "Фокус не скрыт баннером cookie и липкими слоями (WCAG 2.4.11); scroll-padding задан"
@@ -364,16 +356,16 @@ gates:
     phase: build
     method: {tool: human, field: "Tab-проход при показанном баннере"}
     threshold: {B: "фокус скрыт целиком"}
-    owner: "I 08/03 (gate-a11y-focus-not-obscured)"
+    owner: "08/03 (gate-a11y-focus-not-obscured)"
     status: v1
-    maps_to: ["ux UX-OVL-02, AC-SCF-15 (исключение для обязательного баннера — PLAN поправка 6)"]
+    maps_to: ["ux UX-OVL-02, AC-SCF-15 (исключение для обязательного баннера)"]
   - id: SG-A11Y-06
     name: "Видео с речью и видеоотзывы — с субтитрами"
     site_checklist: [SITE-A11Y-13]
     phase: build
     method: {tool: human}
     threshold: {B: "нет субтитров"}
-    owner: "I 08/03 (gate-a11y-captions)"
+    owner: "08/03 (gate-a11y-captions)"
     status: v1
   - id: SG-A11Y-07
     name: "prefers-reduced-motion: нет автодвижения и загрузки фоновых видео"
@@ -381,7 +373,7 @@ gates:
     phase: build
     method: {tool: "accept + motion", field: "page_accept reduce: media_kb, motion (первый экран и паузы прокрутки всей страницы, порог — creative EG-A11Y-06); motion_check режим rm: EG-A11Y-05…07"}
     threshold: {S: "media_kb > 0 | движение первого экрана или паузы на записи всей страницы выше порога creative EG-A11Y-06 (0,3 % пикселей в секунду; creative 05-motion/01 §4.5)"}
-    owner: "I 08/03 (gate-a11y-reduce); creative CRV-AL"
+    owner: "08/03 (gate-a11y-reduce); creative CRV-AL"
     status: v1
     note: "reduce проверяется записью всей страницы, а не первым экраном: page_accept.py в режиме reduce — 0 байт видео за прокрутку, движение первого экрана и каждой паузы ≤ порога EG-A11Y-06; motion_check.py — EG-A11Y-05…10 (0 запросов видео, ни одной паузы с непрерывным движением, 0 кадров WebGL в покое, контент и CTA видимы). Начальное состояние появления ставит класс от JS (html.js .reveal), а не голый CSS opacity: 0 — без JS контент видим"
     maps_to: ["page_accept: reduce media > 0 или движение выше порога EG-A11Y-06 = FAIL", "creative EG-A11Y-05…10", "blender WEB-06 (≤ 0,05 % в покое — строже для 3D)"]
@@ -391,7 +383,7 @@ gates:
     phase: build
     method: {tool: html, field: "font-size: clamp(min, …, max) в <style>, атрибутах style и файлах --css; var() не раскрывается"}
     threshold: {S: "max / min > 2,5"}
-    owner: "K2 v1.1 по замечанию creative (99-raw/notes/sync/creative-wave1-for-site-2026-09-24/README.md п.9); I 08/03"
+    owner: "08/03; creative"
     status: v1
     limits: {clamp_ratio_max: 2.5}
     note: "визуальный масштаб шрифтов — creative; здесь только отношение, ломающее 1.4.4"
@@ -403,16 +395,16 @@ gates:
     phase: build
     method: {tool: anatomy, field: "summary.tracking_before_action; network.tracking_requests[] (фаза load, scroll, pre; запрос, отправляющий данные, а не загрузка .js, gtm.js, /sdk, /libs/); cookies_before (cookie трекинга: _ga, _gid, _gcl, _fbp, _uetsid, _uetvid, MUID, _ym_*, AMP_ и др.)"}
     threshold: {B: "jurisdiction eu — до выбора ставятся cookie трекинга или уходят события с cookie или идентификатором устройства [стандарт] (ePrivacy ст. 5(3))", S: "jurisdiction eu — события без cookie и идентификатора (Consent Mode advanced) [спорно] до чтения EDPB Guidelines 2/2023 | jurisdiction eu — до выбора загружены только библиотеки (gtm.js, SDK) без событий и cookie трекинга [спорно]: передача IP поставщику, не хранение на устройстве | jurisdiction ru — позиция I по умолчанию: согласие до запуска счётчиков [спорно]"}
-    owner: "I 08/01 (gate-legal-no-tracking-before-consent; req: LR-RU-10, LR-EU-01)"
+    owner: "08/01 (gate-legal-no-tracking-before-consent; req: LR-RU-10, LR-EU-01)"
     status: v1
-    note: "M/I-01: счётчики и пиксели до любого действия — 90 % строк выборки M (P/00) и 97 % русских (I/01; итоговый CSV). v1.2 (K3): K/03 — en-headspace (до выбора только gtm.js и SDK Amplitude) → S, был ложный B; en-capsule (cookie UET, события GA4 и Ads) → B; demo-lovable-evebcn (события GA4 до выбора, возможно Consent Mode без cookie) → B [спорно]. v1.3 (S1, 2026-09-25; аудит X В-12): события без cookie и идентификатора — S [спорно] до EDPB 2/2023 (если руководство относит их к 5(3) — B [регулятор]); page_gates.py v1.2 пока даёт B на любые события до выбора — предложение K"
+    note: "счётчики и пиксели до любого действия — 90 % строк замера живых страниц и 97 % русских. Примеры: en-headspace (до выбора только gtm.js и SDK Amplitude) → S; en-capsule (cookie UET, события GA4 и Ads) → B; demo-lovable-evebcn (события GA4 до выбора, возможно Consent Mode без cookie) → B [спорно]. События без cookie и идентификатора — S [спорно] до EDPB 2/2023 (если руководство относит их к 5(3) — B [регулятор]); page_gates.py v1.2 пока даёт B на любые события до выбора"
   - id: SG-LEGAL-02
     name: "Баннер cookie: «Отклонить» на первом уровне и равного вида; нет «продолжая пользоваться»"
     site_checklist: [SITE-LEGAL-06]
     phase: build
     method: {tool: anatomy, field: "summary.cmp_reject_first_layer, cmp_reject_equal"}
     threshold: {B: "jurisdiction eu", S: "jurisdiction ru"}
-    owner: "I 08/01 (gate-legal-banner-equal; req: LR-EU-02, LR-EU-03, LR-RU-10)"
+    owner: "08/01 (gate-legal-banner-equal; req: LR-EU-02, LR-EU-03, LR-RU-10)"
     status: v1
   - id: SG-LEGAL-03
     name: "Форма с ПД (РФ): чекбокс согласия без checked, отдельный от рассылки"
@@ -420,7 +412,7 @@ gates:
     phase: build
     method: {tool: anatomy, field: "summary.consent_mode=pd-checkbox, consent_prechecked=0, consent_separate=1"}
     threshold: {B: "нарушено любое условие"}
-    owner: "I 08/01 (gate-legal-pd-consent; req: LR-RU-01, LR-RU-02; 152-ФЗ в ред. 156-ФЗ, с 01.09.2025)"
+    owner: "08/01 (gate-legal-pd-consent; req: LR-RU-01, LR-RU-02; 152-ФЗ в ред. 156-ФЗ, с 01.09.2025)"
     status: v1
   - id: SG-LEGAL-04
     name: "Ссылка на политику ПД (РФ) или уведомление о конфиденциальности (ЕС) в каждой форме и в подвале; страница политики отвечает 200"
@@ -428,16 +420,16 @@ gates:
     phase: build
     method: {tool: anatomy, field: "summary.policy_link_in_form, footer_policy"}
     threshold: {B: "jurisdiction ru — нет ссылки в форме (LR-RU-05: 152-ФЗ ст. 18.1 ч. 2)", S: "jurisdiction eu — нет ссылки на уведомление у формы (LR-EU-06, серьёзность serious)"}
-    owner: "I 08/01 (gate-legal-policy-link; req: LR-RU-05, LR-EU-06)"
+    owner: "08/01 (gate-legal-policy-link; req: LR-RU-05, LR-EU-06)"
     status: v1
-    note: "v1.2 (K3): для ЕС — S по LR-EU-06 (K/03: en-headspace ×2 был ложным B)"
+    note: "для ЕС — S по LR-EU-06"
   - id: SG-LEGAL-05
     name: "Подвал (РФ, B2C): наименование, ОГРН/ОГРНИП, email"
     site_checklist: [SITE-LEGAL-04]
     phase: build
     method: {tool: anatomy, field: "summary.footer_ogrn"}
     threshold: {B: "нет реквизитов"}
-    owner: "I 08/01 (gate-legal-footer-requisites; req: LR-RU-13, LR-RU-14)"
+    owner: "08/01 (gate-legal-footer-requisites; req: LR-RU-13, LR-RU-14)"
     status: v1
   - id: SG-LEGAL-06
     name: "Адрес отправки формы (action/XHR) — сервер в РФ"
@@ -445,7 +437,7 @@ gates:
     phase: build
     method: {tool: "anatomy --net-of"}
     threshold: {S: "сервер вне РФ"}
-    owner: "I 08/01 (gate-legal-form-endpoint-ru; req: LR-RU-07)"
+    owner: "08/01 (gate-legal-form-endpoint-ru; req: LR-RU-07)"
     status: v1
   - id: SG-LEGAL-07
     name: "Зарубежные сторонние сервисы (GA4, Meta, YouTube, Google Fonts, reCAPTCHA) — нет или отмечены уведомлением РКН в брифе"
@@ -453,16 +445,16 @@ gates:
     phase: build
     method: {tool: anatomy, field: "network.third_party[].vendors"}
     threshold: {S: "есть и не отмечены"}
-    owner: "I 08/01 (gate-legal-third-party-foreign; req: LR-RU-08)"
+    owner: "08/01 (gate-legal-third-party-foreign; req: LR-RU-08)"
     status: v1
-    note: "совпадает с перформанс-правилом P: шрифты и скрипты — со своего домена (07/03 §5)"
+    note: "совпадает с правилом производительности: шрифты и скрипты — со своего домена (07/03 §5)"
   - id: SG-LEGAL-08
     name: "Чужая реклама и промо-баннеры: «Реклама» + рекламодатель + erid"
     site_checklist: [SITE-LEGAL-09]
     phase: build
     method: {tool: "anatomy + human"}
     threshold: {B: "нет маркировки"}
-    owner: "I 08/01 (gate-legal-ad-marking; req: LR-RU-17, LR-RU-18)"
+    owner: "08/01 (gate-legal-ad-marking; req: LR-RU-17, LR-RU-18)"
     status: v1
   - id: SG-LEGAL-09
     name: "Медицина: нет «до/после» и благодарностей; есть предупреждение"
@@ -470,17 +462,17 @@ gates:
     phase: build
     method: {tool: human}
     threshold: {B: "нарушено"}
-    owner: "I 08/01 (gate-legal-medical-before-after; req: LR-RU-21)"
+    owner: "08/01 (gate-legal-medical-before-after; req: LR-RU-21)"
     status: v1
 
-  # ------------------------------------------------------------ CONTENT — черновик, уточняют K, F, J
+  # ------------------------------------------------------------ CONTENT — факты, работа формы, события, ошибки консоли
   - id: SG-CONTENT-01
     name: "Каждое число, логотип, отзыв, награда — со ссылкой на fact: в page-plan"
     site_checklist: [SITE-PRF-01, SITE-PRE-18]
     phase: build
-    method: {tool: plan, field: "slots data → fact:<id> (site_validate.py, J)"}
+    method: {tool: plan, field: "slots data → fact:<id> (site_validate.py)"}
     threshold: {B: "доказательство без факта"}
-    owner: "F 05/02; I 08/02; K"
+    owner: "05/02; 08/02; 09/02"
     status: v1
   - id: SG-CONTENT-02
     name: "Форма работает: успешная отправка показывает успех и шлёт событие цели"
@@ -488,7 +480,7 @@ gates:
     phase: build
     method: {tool: "свой стенд + events.yaml", field: "submit → состояние успеха → событие lead_submit_success в тестовый счётчик"}
     threshold: {B: "успех не показан | событие не отправлено или отправлено при ошибке валидации"}
-    owner: "F 05/01; P 07/04 §2"
+    owner: "05/01; 07/04 §2"
     status: v1
   - id: SG-CONTENT-03
     name: "События плана страницы размечены и срабатывают (events.yaml)"
@@ -496,7 +488,7 @@ gates:
     phase: build
     method: {tool: "свой стенд", field: "page-plan events[].event → вызовы ym reachGoal / gtag event в журнале стенда"}
     threshold: {S: "событие плана не срабатывает | имя не из events.yaml"}
-    owner: "P 07/04 §2; E page-plan"
+    owner: "07/04 §2; page-plan"
     status: v1
   - id: SG-CONTENT-04
     name: "0 ошибок консоли и битых ресурсов"
@@ -504,19 +496,19 @@ gates:
     phase: build
     method: {tool: "accept | probe", field: "accept.console (error), probe.console_errors, broken_images"}
     threshold: {S: "> 0"}
-    owner: "K"
+    owner: "09/02"
     status: v1
-    maps_to: ["blender WEB-07 (Б)", "kimi ACCEPTANCE G1"]
+    maps_to: ["blender WEB-07 (Б)"]
 
 
-  # ------------------------------------------------------------ SEO — уровень страницы и сайта (K по head-kit.yaml 1.0)
+  # ------------------------------------------------------------ SEO — уровень страницы и сайта (по head-kit.yaml 1.0)
   - id: SG-SEO-05
     name: "Open Graph: og:image абсолютный и в первом 1 МБ HTML; og:title, og:description"
     site_checklist: [SITE-SEO-08, SITE-SEO-06]
     phase: build
     method: {tool: geo, field: "флаги og-after-1mb, no-og-image, og-image-relative"}
     threshold: {S: "OG после 1 МБ HTML", D: "нет og:image | og:image относительный"}
-    owner: "H head-kit.yaml (hk-og); K v1"
+    owner: "head-kit.yaml (hk-og)"
     status: v1
   - id: SG-SEO-06
     name: "Sitemap: 200 и XML, объявлен в robots.txt, только абсолютные канонические URL с ответом 200"
@@ -525,7 +517,7 @@ gates:
     phase: build
     method: {tool: "ia | geo", field: "ia.sitemap.urls, ia.robots.sitemaps; head-kit site_checks.hk-site-sitemap"}
     threshold: {S: "sitemap нет или не объявлен | в sitemap неканонические, 3xx или 4xx URL"}
-    owner: "H head-kit.yaml (hk-site-sitemap); G 06/02; K v1"
+    owner: "head-kit.yaml (hk-site-sitemap); 06/02"
     status: v1
   - id: SG-SEO-07
     name: "Поиск по сайту, фильтры, календари закрыты: /search?q=<случайное> — Disallow одним правилом на шаблон или noindex, не 5xx"
@@ -534,7 +526,7 @@ gates:
     phase: build
     method: {tool: "curl + geo", field: "ответ и robots для /search?q=<случайное>; crawlers.yaml rt-infinite-spaces"}
     threshold: {S: "страница поиска открыта для индексации | 5xx"}
-    owner: "H head-kit.yaml (hk-site-search-pages); crawlers.yaml rt-infinite-spaces; K v1"
+    owner: "head-kit.yaml (hk-site-search-pages); crawlers.yaml rt-infinite-spaces"
     status: v1
   - id: SG-SEO-08
     name: "hreflang (при языковых версиях): в <head> каждой версии, взаимно, с x-default"
@@ -543,17 +535,17 @@ gates:
     phase: build
     method: {tool: "ia | geo", field: "ia.summary.hreflang_pages, lang_switch; head-kit site_checks.hk-site-hreflang"}
     threshold: {S: "есть переключатель языка, нет hreflang | hreflang невзаимный"}
-    owner: "H head-kit.yaml (hk-site-hreflang); G 06/02 §5; K v1"
+    owner: "head-kit.yaml (hk-site-hreflang); 06/02 §5"
     status: v1
 
-  # ------------------------------------------------------------ NAV — навигация в HTML (K по G 06/02 и head-kit site_checks)
+  # ------------------------------------------------------------ NAV — навигация в HTML (по 06/02 и head-kit site_checks)
   - id: SG-NAV-01
     name: "Меню шапки (включая панели мега-меню) и телефон — ссылками <a href> в HTML сервера на каждом шаблоне"
     site_checklist: [SITE-NAV-16, SITE-OUT-13]
     phase: build
     method: {tool: "ia | anatomy", field: "ia.summary.home_header_items, header_phone (сырой HTML); anatomy header_nav_links"}
     threshold: {S: "пункты меню или телефон только после JS (ia не находит, браузер находит)"}
-    owner: "G 06/02 §3.6; H head-kit.yaml (hk-access-links, hk-site-nav-in-html); K v1"
+    owner: "06/02 §3.6; head-kit.yaml (hk-access-links, hk-site-nav-in-html)"
     status: v1
     note: "меню, которое вставляет скрипт, видно только браузерному замеру; ia_probe читает HTTP без JS"
   - id: SG-NAV-02
@@ -563,40 +555,40 @@ gates:
     phase: build
     method: {tool: ia, field: "ia.summary.crumbs_inner_pct, breadcrumb_ld_pct"}
     threshold: {D: "разметка без видимых крошек или наоборот | крошки на посадочной"}
-    owner: "G 06/02 §2.1; H head-kit.yaml (hk-site-breadcrumbs); K v1"
+    owner: "06/02 §2.1; head-kit.yaml (hk-site-breadcrumbs)"
     status: v1
     limits: {crumbs_vs_markup_pct: 50}   # расхождение долей страниц с видимыми крошками и с разметкой, п.п.
 
-  # ------------------------------------------------------------ MOB — телефон (K по kimi 08/02 и замеру M)
+  # ------------------------------------------------------------ MOB — телефон (по замеру живых страниц)
   - id: SG-MOB-01
     name: "Нет горизонтальной прокрутки на телефоне (390 и 360 px)"
     site_checklist: [SITE-MOB-01]
     phase: build
-    method: {tool: anatomy, field: "mobile summary.layout_zoomed (область телефона расширена), summary.overflow_x_px (ширина прокрутки минус ширина экрана)"}
-    threshold: {B: "layout_zoomed — страница шире экрана, человек прокручивает вбок (или overflow_x_px > 2 при неизвестном layout_zoomed)", D: "overflow_x_px > 2 без расширения области: переполнение скрыто overflow-x (проверить свайпом на iOS)"}
-    owner: "K; kimi 08-director-loop-qa/02 §2 B; ux UX-MOB-01"
+    method: {tool: "accept; anatomy", field: "accept acceptance[].overflow_px телефонных строк (device: mobile) на ширинах приёмки — page_accept --acceptance; без них — mobile summary.layout_zoomed (область телефона расширена), summary.overflow_x_px (ширина прокрутки минус ширина экрана) анатомии телефона лаборатории, с пометкой"}
+    threshold: {B: "вылет > limits.overflow_px на телефонной ширине приёмки; без строк acceptance[] — layout_zoomed анатомии: страница шире экрана, человек прокручивает вбок (или overflow_x_px > 2 при неизвестном layout_zoomed)", D: "анатомия: overflow_x_px > 2 без расширения области — переполнение скрыто overflow-x (проверить свайпом на iOS)"}
+    owner: "09/02; ux UX-MOB-01"
     status: v1
     limits: {overflow_px: 2}   # ширина прокрутки минус ширина экрана
-    note: "v1.2 (K3): K/03 — en-headspace: дорожка карусели 1 307 px под html, body {overflow-x: hidden}, область не расширена → D (был ложный B); ru-azbukaokon: область 457 > 412 px → B верно"
-    maps_to: ["kimi ACCEPTANCE D1", "M: 4 из 51 страницы"]
+    note: "примеры: en-headspace — дорожка карусели 1 307 px под html, body {overflow-x: hidden}, область не расширена → D; ru-azbukaokon — область 457 > 412 px → B"
+    maps_to: ["замер живых страниц: 4 из 51 страницы"]
   - id: SG-MOB-02
     name: "Навигация на телефоне есть: кнопка меню или ≥ 2 видимые ссылки"
     site_checklist: [SITE-MOB-02, SITE-NAV-06]
     phase: build
     method: {tool: anatomy, field: "mobile summary.burger, header_nav_links"}
     threshold: {S: "нет кнопки меню и < 2 ссылок (подтвердить кадром; на одноэкранной арт-странице — не применять)"}
-    owner: "K; kimi 08/02 M-NAV"
+    owner: "09/02"
     status: v1
-    note: "распознавание бургера в M — нижняя граница: у ≈ 40 % страниц меню видно, его нет или кнопка не распознана; B — после подтверждения глазами"
+    note: "распознавание бургера в замере живых страниц — нижняя граница: у ≈ 40 % страниц меню видно, его нет или кнопка не распознана; B — после подтверждения глазами"
 
-  # ------------------------------------------------------------ CONTENT — честность и работоспособность (K)
+  # ------------------------------------------------------------ CONTENT — честность и работоспособность
   - id: SG-CONTENT-05
     name: "Нет заглушек и остатков шаблона: lorem, [PLACEHOLDER], «Feature 1», «John Doe», «fictional», example.com, href=\"#\" у призывов"
     site_checklist: [SITE-OUT-03, SITE-PRF-02]
     phase: build
     method: {tool: html, field: "текст и ссылки сохранённого HTML (page_gates.py --html)"}
     threshold: {B: "любая заглушка в видимом тексте | призыв с href=\"#\" без обработчика формы"}
-    owner: "K; text COPY-C-04; kimi HON-FILLER"
+    owner: "09/02; text COPY-C-04"
     status: v1
   - id: SG-CONTENT-06
     name: "Автоматические маркеры «ИИ-лендинга» (ai-landing-markers.yaml, способ DOM/SCR): нет маркеров серьёзности B"
@@ -604,7 +596,7 @@ gates:
     phase: build
     method: {tool: "html + anatomy", field: "маркеры с auto: true (виджет фальшивой активности, таймер со сбросом, счётчик с 0 в HTML, кнопки-div, 100vh у hero)"}
     threshold: {B: "маркер серьёзности B", S: "маркер серьёзности S без разрешения брифа (allow)"}
-    owner: "K 09-ai-generation-evaluation/ai-landing-markers.yaml"
+    owner: "09-ai-generation-evaluation/ai-landing-markers.yaml"
     status: v1
   - id: SG-CONTENT-07
     name: "Первый экран по политике плана: при offer-cta — ≥ 1 главный призыв в первом экране десктопа и телефона (с баннером cookie, без кликов)"
@@ -612,7 +604,7 @@ gates:
     phase: build
     method: {tool: "anatomy + plan", field: "summary.cta_first_screen по устройствам; plan page.first_screen_policy"}
     threshold: {B: "offer-cta и 0 призывов в первом экране на обоих устройствах", S: "offer-cta и 0 призывов на одном устройстве | poster без призыва в шапке"}
-    owner: "K; C 03-page-structure/03 §2.2"
+    owner: "09/02; 03/03 §2.2"
     status: v1
     note: "M: ≥ 1 призыв в первом экране у 87 % живых страниц; распознавание призыва — эвристика, провал подтверждать кадром"
 
@@ -621,7 +613,7 @@ verdict:
   accepted_with_notes: "нет B; есть S — каждое S исправлено или записано в page-plan x-gate-exception"
   accepted: "нет B и S"
 exceptions:
-  field: "page-plan page.x-gate-exception[{id: SG-*, why, who, until}] (схема J v1)"
+  field: "page-plan page.x-gate-exception[{id: SG-*, why, who, until}] (схема page-plan v1)"
   rule: "исключение снимает S до даты until (или до следующей версии страницы); B исключением не снимается; просроченное исключение — снова S"
 scope:
   page: "по умолчанию — одна страница × устройство"

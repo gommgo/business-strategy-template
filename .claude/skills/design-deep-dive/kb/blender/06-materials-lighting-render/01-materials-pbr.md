@@ -91,7 +91,7 @@ IOR диэлектриков: стекло 1,52, акрил 1,49, поликар
 ```python
 # Blender 5.2.2 / glTF-IO 5.2.40 — [проверено: 99-raw/experiments/D2/99-doc-snippets; значения — D2/03]
 import sys, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 from io_scene_gltf2.blender.com.material_helpers import create_settings_group, get_gltf_node_name
 
@@ -287,7 +287,7 @@ Cycles 3,99 [проверено]. Ловушка 5.2.2: `image.colorspace_settin
 ```python
 # Blender 5.2.2 — [проверено: 99-raw/experiments/D2/99-doc-snippets; приём — D2/03] палитра-текстура для low-poly
 import sys, bpy, os, tempfile
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets")
+sys.path.insert(0, "../../scripts/blender")
 import bpyx
 
 def palette_material(name, hexes, path):

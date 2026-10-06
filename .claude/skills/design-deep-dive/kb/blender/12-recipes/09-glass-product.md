@@ -42,7 +42,7 @@ Chromium · сквозной прогон: [проверено] · страни�
 # Blender 5.2.2 — [проверено] рецепт 09: стеклянный флакон (transmission + volume) + сцена за ним
 import sys, math, json, struct, bpy
 from mathutils import Matrix
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "09-glass-product"
@@ -111,7 +111,7 @@ rk.save(SLUG, glass_material=g, passport=P)
 ```js
 // three r186 — [проверено] стекло видит только то, что нарисовано в canvas
 renderer.toneMapping = THREE.NeutralToneMapping;               // пара к Blender «Khronos PBR Neutral»
-renderer.transmissionResolutionScale = 0.5;                    // −20 % цены прохода пропускания (F2)
+renderer.transmissionResolutionScale = 0.5;                    // −20 % цены прохода пропускания (blender 09/04 §3)
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 scene.background = new THREE.Color('#EFE9E1');                 // фон В СЦЕНЕ — без этой строки стекло «белая плита»
 ```

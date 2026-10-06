@@ -1,4 +1,4 @@
-// ktx2.js · общий код 3D «Звена» (_shared/code3d, дорожка CD, крюк v2) — KTX2Loader отдельным чанком: качается, только если
+// ktx2.js · общий код 3D «Звена» (_shared/code3d, крюк v2) — KTX2Loader отдельным чанком: качается, только если
 // сборка с --ktx2 (define __CD_KTX2__) и GLB содержит KHR_texture_basisu (или glb.ktx2 задан явно — тогда параллельно с GLB).
 // Транскодер basis (basis_transcoder.js + .wasm, three 0.186.0) — со своего домена: build.sh --ktx2 кладёт его в <страница>/js/basis/;
 // путь по умолчанию считается от этого чанка (js/chunks/ → ../basis/), свой путь — glb.ktx2: 'путь/к/basis/'.

@@ -73,7 +73,11 @@
                                              раздела нормы); без ключей — показать, что будет заполнено; --check —
                                              код 1, если есть что заполнить
   --selftest                                 офлайн-тесты
-Все подкоманды проверок: --json OUT, --md OUT, --quiet. Коды выхода: 0 — нет error, 2 — есть error, 1 — ошибка входа.
+Все подкоманды проверок: --json OUT, --md OUT, --quiet.
+Коды выхода: 0 — нет error; 1 — есть error (у approve, select, apply-selection, import-copy — отказ с находкой, у
+before-after --check — есть что заполнить); 2 — ошибка вызова, входа или окружения (файл не читается, неверный ключ,
+нет PyYAML, линтер copy_lint.py не импортируется); 3 — у claims и check: сверка фактов не отработала (claims_check.py
+нет, он не уложился во время или завершился ошибкой) — находки сверки неполны, причина — находка COPY-D-TOOL.
 
 Команды, которые пишут copy deck (check --update, approve, import-copy, apply-selection, select), ставят copy_deck.date
 — дату записи — и шапку о файле: без даты и пути источника, со строкой всех утверждённых страниц. Относительные ссылки
@@ -111,7 +115,8 @@ import tempfile
 try:
     import yaml
 except ImportError:  # pragma: no cover
-    sys.exit('copydeck.py: нужен PyYAML (Python окружения скилла: $DDD_HOME/venv, scripts/install.sh)')
+    print('copydeck.py: нужен PyYAML (Python окружения скилла: $DDD_HOME/venv, scripts/install.sh)', file=sys.stderr)
+    sys.exit(2)
 
 VERSION = '1.2'
 DATE = '2026-09-29'
@@ -129,6 +134,7 @@ VOICE_SCHEMA_PATH = os.path.join(ROOT, '05-voice-editorial', 'voice.schema.yaml'
 META_RULES_PATH = os.path.join(ROOT, '07-seo-geo-copy', 'meta-rules.yaml')
 CLAIMS_RULES_PATH = os.path.join(ROOT, '08-russian-legal-typography', 'claims-rules.yaml')
 CLAIMS_CHECK = os.path.join(HERE, 'claims_check.py')
+EXIT_NO_CLAIMS = 3   # особый исход claims и check: сверка фактов не отработала
 GENRES = ('landing', 'site-page', 'article', 'meta', 'geo', 'email-form')
 LEVELS = ('error', 'warning', 'info')
 STATUS_RANK = {'draft': 0, 'assumed': 0, 'checked': 1, 'approved': 2, 'rejected': -1}
@@ -2218,7 +2224,7 @@ def run_claims(deck, ctx, facts_path, rep, strict=False, all_variants=False, pag
         except subprocess.TimeoutExpired:
             rep.add('claims', 'error', 'COPY-D-TOOL', '—', f'claims_check.py не уложился в {timeout} с', '')
             return None
-        if p.returncode not in (0, 2) or not os.path.exists(jp):
+        if p.returncode not in (0, 1) or not os.path.exists(jp):
             tail = (p.stderr or p.stdout or '').strip().splitlines()[-3:]
             rep.add('claims', 'error', 'COPY-D-TOOL', '—', f'claims_check.py не отработал (код {p.returncode}): {" | ".join(tail)}', 'Проверьте facts.yaml: claims_check.py lint-facts FACTS.')
             return None
@@ -2333,7 +2339,7 @@ def run_claims_text(items, ctx, facts_path, rep, tool='brief', timeout=120):
             p = subprocess.run(cmd, capture_output=True, text=True, timeout=timeout)
         except subprocess.TimeoutExpired:
             return None
-        if p.returncode not in (0, 2) or not os.path.exists(jp):
+        if p.returncode not in (0, 1) or not os.path.exists(jp):
             return None
         res = json.load(open(jp, encoding='utf-8'))
     n = 0
@@ -2712,7 +2718,7 @@ def cmd_validate(a):
     write_outputs(a, rep, 'validate')
     if not a.quiet:
         print(render_text(rep, f'copydeck validate · {a.deck} · {ctx.today} · facts: {fp or "—"}', a.verbose))
-    return 2 if rep.count('error') else 0
+    return 1 if rep.count('error') else 0
 
 
 def cmd_claims(a):
@@ -2725,7 +2731,9 @@ def cmd_claims(a):
     write_outputs(a, rep, 'claims')
     if not a.quiet:
         print(render_text(rep, f'copydeck claims · {a.deck} · {ctx.today} · facts: {fp or "— (все числа и имена — без опоры)"}', a.verbose))
-    return 2 if rep.count('error') else (1 if not rep.tools.get('claims') else 0)
+    if not rep.tools.get('claims'):
+        return EXIT_NO_CLAIMS
+    return 1 if rep.count('error') else 0
 
 
 def cmd_lint(a):
@@ -2738,7 +2746,9 @@ def cmd_lint(a):
     write_outputs(a, rep, 'lint', {'slots': per})
     if not a.quiet:
         print(render_text(rep, f'copydeck lint · {a.deck} · {ctx.today}', a.verbose))
-    return 2 if rep.count('error') else (1 if per is None else 0)
+    if per is None:
+        return 2                                    # линтер не импортируется — ошибка окружения
+    return 1 if rep.count('error') else 0
 
 
 def _lint_rec(r, prof_default, today, h, tool):
@@ -2928,7 +2938,11 @@ def cmd_check(a):
     write_outputs(a, rep, 'check', extra)
     if not a.quiet:
         print(render_text(rep, f'copydeck check · {a.deck} · {ctx.today} · facts: {fp or "—"}', a.verbose))
-    return 2 if rep.count('error') else 0
+    if lint_pp is None:
+        return 2                                    # линтер не импортируется — ошибка окружения
+    if claims_pp is None:
+        return EXIT_NO_CLAIMS
+    return 1 if rep.count('error') else 0
 
 
 # ============================================================================================ вход холста: copy.md и facts.md
@@ -3274,7 +3288,7 @@ def cmd_export(a):
             print('  файлы: ' + ', '.join(os.path.join(out, x) for x in summ['files']))
             print(f"  страница {summ['page']}: строк {summ['rows']}, пробелов этапа {summ['gaps']}; фактов {summ['facts_published']} "
                   f"(скрыто {summ['facts_hidden']}, демо {len(summ['demo_facts'])}), пробелов фактов {summ['missing']}, строк «Нельзя утверждать» {summ['never_rows']}")
-    return 2 if rep.count('error') or not summ else 0
+    return 1 if rep.count('error') or not summ else 0
 
 
 # ============================================================================================ приём правок текста с холста
@@ -3358,7 +3372,7 @@ def cmd_import_copy(a):
     out, rep, summ = import_copy(data, text, a.page, day, a.choose)
     if out is None:
         print(render_text(rep, f'copydeck import-copy · {a.input} → {a.deck}: отказ', True))
-        return 2
+        return 1
     warn = dump_deck(out, a.output, HEAD_IMPORTED, src_path=a.deck, date=day)
     print(a.output)
     if warn:
@@ -3496,7 +3510,7 @@ def cmd_export_assets(a):
     page = next((p for p in live if str(p.get('page_id')) == a.page), None) if a.page else (live[0] if len(live) == 1 else None)
     if page is None:
         print('copydeck export-assets: укажите --page (страниц несколько или нет такой)', file=sys.stderr)
-        return 1
+        return 2
     frag, notes = export_assets(deck, page)
     out = yaml.safe_dump(frag, allow_unicode=True, sort_keys=False, width=140)
     head = f'# фрагмент плана ассетов ai-media (01/01 §8; тексты — asset-spec text) из {os.path.basename(a.deck)}\n'
@@ -3703,7 +3717,7 @@ def cmd_approve(a):
     out, rep = approve_page(data, ctx, a.page, a.by, today_iso(a.at), a.note or '')
     if out is None:
         print(render_text(rep, f'copydeck approve · {a.deck} · страница {a.page}: отказ', True))
-        return 2
+        return 1
     warn = dump_deck(out, a.output, HEAD_CHECKED, src_path=a.deck, date=today_iso(a.at))
     print(a.output)
     if warn:
@@ -3920,15 +3934,15 @@ HEAD_SKELETON = ('copy deck — каркас из плана страницы (c
 def cmd_skeleton(a):
     if os.path.exists(a.output) and not a.force:
         print(f'copydeck skeleton: {a.output} уже есть — тексты не перезаписываются (--force — заменить каркасом)', file=sys.stderr)
-        return 1
+        return 2
     try:
         plan = deep_dates(load_yaml_file(a.plan) or {})
     except (OSError, yaml.YAMLError) as e:
         print(f'copydeck skeleton: план не читается: {a.plan}: {e}', file=sys.stderr)
-        return 1
+        return 2
     if not isinstance(plan, dict) or 'page' not in plan or 'sections' not in plan:
         print(f'copydeck skeleton: {a.plan} — не план страницы (page-plan: page, sections)', file=sys.stderr)
-        return 1
+        return 2
     data, notes = skeleton_from_plan(plan, a.plan, a.output, a.facts_ref, a.voice_ref, today_iso(a.date) if a.date else None)
     dump_deck(data, a.output, HEAD_SKELETON)
     page = deck_root(data)['pages'][0]
@@ -4046,7 +4060,7 @@ def cmd_apply_selection(a):
     out, rep, summ = apply_selection(data, key, votes, a.method, a.by, day, ref)
     if out is None or rep.count('error'):
         print(render_text(rep, f'copydeck apply-selection · {a.deck}: отказ', True))
-        return 2
+        return 1
     warn = dump_deck(out, a.output, HEAD_SELECTED, src_path=a.deck, date=day)
     print(a.output)
     print(f"  выбрано {len(summ['applied'])}: " + ', '.join(f'{p} → {v}' for p, v in summ['applied']))
@@ -4118,7 +4132,7 @@ def cmd_select(a):
     out, rep, summ = select_variant(data, a.page, a.slot, a.variant, a.method, a.by, day)
     if out is None:
         print(render_text(rep, f'copydeck select · {a.deck}: отказ', True))
-        return 2
+        return 1
     warn = dump_deck(out, a.output, HEAD_SELECTED, src_path=a.deck, date=day)
     print(a.output)
     print(f"  {summ['path']} → вариант {summ['variant']}" + ('' if summ['changed'] else ' (текст слота тот же)'))
@@ -4298,9 +4312,9 @@ def main(argv=None):
                 'export-variants': cmd_export_variants, 'apply-selection': cmd_apply_selection, 'select': cmd_select,
                 'approve': cmd_approve, 'before-after': cmd_before_after}[a.cmd](a)
     except SystemExit as e:
-        if isinstance(e.code, str):
+        if isinstance(e.code, str):                 # текст вместо кода — ошибка вызова, входа или окружения
             print(e.code, file=sys.stderr)
-            return 1
+            return 2
         raise
 
 
@@ -4720,7 +4734,7 @@ def selftest():
                 rc_new = main(['skeleton', plan_p, '-o', new_p, '--date', '2026-09-29'])
                 rc_none = main(['skeleton', os.path.join(td, 'нет-плана.yaml'), '-o', os.path.join(td, 'x', 'home.yaml')])
             check('skeleton: папки выхода ещё нет — создаётся, каркас записан; плана нет — код 1 и строка об ошибке входа',
-                  rc_new == 0 and os.path.isfile(new_p) and rc_none == 1 and 'план не читается' in err_.getvalue() and not os.path.exists(os.path.join(td, 'x')),
+                  rc_new == 0 and os.path.isfile(new_p) and rc_none == 2 and 'план не читается' in err_.getvalue() and not os.path.exists(os.path.join(td, 'x')),
                   (rc_new, rc_none, err_.getvalue()[:200]))
             p_nv = _copy.deepcopy(plan)
             p_nv['refs'] = {k: v for k, v in plan['refs'].items() if k not in ('brief', 'meaning')}
@@ -5008,7 +5022,7 @@ def selftest():
             raw_s = f.read()
         dk_s = deck_root(yaml.safe_load(raw_s))
         check('select (команда): файл с шапкой о файле и датой записи; отказ — код 2, файл не пишется',
-              rc_s == 0 and rc_no == 2 and not os.path.exists(no_s) and raw_s.startswith('# copy deck — выбор варианта')
+              rc_s == 0 and rc_no == 1 and not os.path.exists(no_s) and raw_s.startswith('# copy deck — выбор варианта')
               and dk_s['date'] == '2026-09-30' and dk_s['pages'][0]['sections'][0]['slots'][0]['chosen'] == 'b', (rc_s, rc_no, raw_s[:160]))
         # --- утверждение: журнал процесса уходит, selection остаётся
         d = _st_deck(); pg = d['copy_deck']['pages'][0]
@@ -5374,11 +5388,29 @@ def selftest():
                     js_e = json.load(f)
                 st_e = {sl['slot_id']: _status_of(chosen_variant(sl)) for s in sections_of(deck_root(dk_e)['pages'][0]) for sl in slots_of(s)}
                 check('check --update --promote при error COPY-D-MISSING-REF: текст с error и страница не повышаются, чистые тексты — checked',
-                      rc_e == 2 and st_e['a1'] == 'draft' and st_e['h1'] == 'checked' and deck_root(dk_e)['pages'][0]['status'] == 'assumed'
+                      rc_e == 1 and st_e['a1'] == 'draft' and st_e['h1'] == 'checked' and deck_root(dk_e)['pages'][0]['status'] == 'assumed'
                       and 'home/faq/a1' in js_e['promote']['held'], (rc_e, st_e, js_e.get('promote')))
                 check('check --update --promote: текст, у которого статус checked дал бы error (нет chosen), остаётся draft — с заметкой',
                       st_e['cta'] == 'draft' and 'home/hero/cta' in js_e['promote']['held']
                       and any('home/hero/cta' in n and 'на статусе checked' in n for n in js_e['notes']), (st_e['cta'], js_e['notes']))
+                # --- сверка фактов не отработала: claims_check.py с кодом 2 (ошибка вызова) — не итог сверки, даже с выводом
+                fake_cc, jp_nc = os.path.join(td, 'claims_check_fail.py'), os.path.join(td, 'check-no-claims.json')
+                with open(fake_cc, 'w', encoding='utf-8') as f:
+                    f.write("import json, sys\na = sys.argv\njson.dump({'version': '0', 'summary': {'error': 0}, 'findings': []}, "
+                            "open(a[a.index('--json') + 1], 'w'))\nprint('claims_check: вход не разбирается', file=sys.stderr)\nsys.exit(2)\n")
+                saved_cc = globals()['CLAIMS_CHECK']
+                globals()['CLAIMS_CHECK'] = fake_cc
+                try:
+                    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                        rc_nc = main(['check', src_p, '--facts', fpath, '--today', '2026-09-29', '--quiet', '--json', jp_nc])
+                        rc_nc2 = main(['claims', src_p, '--facts', fpath, '--today', '2026-09-29', '--quiet'])
+                finally:
+                    globals()['CLAIMS_CHECK'] = saved_cc
+                with open(jp_nc, encoding='utf-8') as f:
+                    js_nc = json.load(f)
+                check('сверка фактов не отработала (claims_check.py — код 2): check и claims — особый исход 3, причина — COPY-D-TOOL',
+                      rc_nc == EXIT_NO_CLAIMS and rc_nc2 == EXIT_NO_CLAIMS and any(x['rule'] == 'COPY-D-TOOL' and '(код 2)' in x['message']
+                                                                                 for x in js_nc['findings']), (rc_nc, rc_nc2))
                 # --- check --all-variants --update: невыбранные варианты — только в отчёте
                 d = _st_deck(); d['copy_deck']['pages'][0]['promise'] = {'from': 'home/hero/lead'}
                 d['copy_deck']['pages'][0]['sections'][0]['slots'][0]['variants'].append({'id': 'b', 'text': 'Ремонт квартир с договором', 'status': 'draft'})

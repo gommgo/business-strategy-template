@@ -9,16 +9,22 @@ Python окружения скилла: PyYAML, numpy, scipy, Pillow. Сеть �
 
 Папка заданий стенда — $DDD_HOME/out/ai-media/stand или общий ключ --jobs-dir DIR (до подкоманды, как --tasks): в неё
 пишут build и ministand, из неё читает estimate. Входные картинки и маска рецепта уходят в задание как записаны: URL,
-абсолютный путь или путь от папки файла заданий — так их читает polza.py.
+абсолютный путь или путь от папки файла заданий — так их читает polza.py; от той же папки metrics читает source и target
+задач. Вход, файла по которому нет, — строка отчёта «входа нет в скилле»: задание собирается, файл подставляют перед
+прогоном.
 
 Подкоманды:
-  build     [--only E-02,E-08] [--agent ИМЯ]   рецепты tasks.yaml → задания polza.py в папке заданий (E-*.jsonl,
-                                       + .routerai.json); промт — компилятор prompt_compile.py (диалект семейства по
-                                       умолчанию) или буквальная строка; --agent — имя в поле agent заданий (по нему
-                                       polza.py раскладывает выходы и ведёт журнал затрат), без ключа поля нет
+  build     [--only E-02,E-08] [--agent ИМЯ]   рецепты tasks.yaml (ключ recipes) → задания polza.py в папке заданий
+                                       (E-*.jsonl, + .routerai.json); промт — компилятор prompt_compile.py (диалект
+                                       семейства по умолчанию) или буквальная строка; --agent — имя в поле agent заданий
+                                       (по нему polza.py раскладывает выходы и ведёт журнал затрат), без ключа поля нет;
+                                       модель рецепта вне снимка каталога — строка «ОШИБКА» с тестом и моделью, остальные
+                                       группы собираются, код 1
   estimate  [--only …]                 polza.py estimate по заданиям E-* папки заданий → таблица «тест · заданий ·
-                                       ошибок · ₽»
-  run       JOBS.jsonl [--live] [--parallel 2]   прогон через polza.py batch (без --live — сухой прогон)
+                                       ошибок · ₽»; код 1 — есть задания с ошибками, 2 — polza.py вернул ошибку вызова
+                                       или окружения (нет снимка каталога)
+  run       JOBS.jsonl [--live] [--parallel 2]   прогон через polza.py batch (без --live — сухой прогон); код выхода —
+                                       код polza.py batch (особые исходы от 3 — в справке polza.py)
   collect   [--root DIR] [--agent A] [--out results.jsonl]   паспорта polza.py под DIR → таблица результатов (строка на
                                        файл); DIR по умолчанию — выходы polza.py (POLZA_OUT_ROOT, иначе
                                        $DDD_HOME/out/ai-media/_polza); путь паспорта — от DIR; --agent — только его задания
@@ -43,10 +49,11 @@ Python окружения скилла: PyYAML, numpy, scipy, Pillow. Сеть �
                                        меток по слоту для copydeck.py apply-selection --votes (--method human-pairwise)
   ministand --model ID [--params '{"image_resolution":"1K"}'] [--vs PRESET] [--agent ИМЯ] [--out FILE]
                                        регрессионный набор для новой модели → E-MS-<модель>.jsonl в папке заданий или
-                                       --out; --agent — как у build
+                                       --out; --agent — как у build; задачи с полем pipeline (проверяет постобработка или
+                                       видео) в набор не входят; модели нет в снимке каталога — код 2
   selftest                             офлайн-проверки (нормализация кириллицы, Уилсон, Брэдли–Терри, страницы картинок и
                                        текстов, сбор паспортов вне базы, кодирование картинок страницы, папка заданий
-                                       и имя агента)
+                                       и имя агента, модель вне снимка, путь входа от папки заданий в build и metrics)
 """
 from __future__ import annotations
 
@@ -107,6 +114,16 @@ def agent_field(a):
 
 # ================================================================ build: рецепты → задания polza.py
 
+def input_missing(path, base):
+    """Локальный вход рецепта (абсолютный путь или путь от папки файла заданий — так его читает polza.py), файла по
+    которому нет; URL и data:URI не проверяются."""
+    s = str(path)
+    if re.match(r"(https?|data):", s):
+        return False
+    p = Path(s)
+    return not (p if p.is_absolute() else Path(base) / p).is_file()
+
+
 def cmd_build(a):
     cfg = load_yaml(a.tasks)
     import polza_catalog as pcat
@@ -114,17 +131,29 @@ def cmd_build(a):
     snap, dialects, catalog = pcat.Snapshot(), pc.load_dialects(), pc.load_catalog()
     only = set(a.only.split(",")) if a.only else None
     jobs, agent = jobs_dir(a), agent_field(a)
-    report = []
-    for grp in cfg["phase5"]:
+    report, errors, absent = [], [], []
+    snap_name = getattr(getattr(snap, "dir", None), "name", "")
+    for grp in cfg["recipes"]:
         if only and grp["test"] not in only:
             continue
         rows, skipped = [], []
         for jd in grp["jobs"]:
             tid, task = jd["task"], cfg["tasks"][jd["task"]]
             arm = jd.get("arm", "a")
+            ins = list(jd.get("images") or []) + ([jd["mask"]] if jd.get("mask") else []) \
+                + [task[k] for k in ("source", "target") if task.get(k)]
+            for pth in ins:
+                line = f"{grp['test']}/{tid}: входа нет в скилле — {pth}"
+                if input_missing(pth, jobs) and line not in absent:
+                    absent.append(line)
             for preset in jd["use"]:
                 mp = cfg["models"][preset]
                 mid = mp["model"]
+                if mid not in snap.by_id:          # модель выбыла из каталога: задания пресета не собираются
+                    line = f"ОШИБКА: {grp['test']}: модели {mid} (пресет {preset}) нет в снимке каталога {snap_name}".rstrip()
+                    if line not in errors:
+                        errors.append(line)
+                    continue
                 params = dict(mp.get("params") or {})
                 if jd.get("prompt"):
                     prompt = cfg["literals"][jd["prompt"]].replace("{subject}", jd.get("subject", ""))
@@ -159,10 +188,9 @@ def cmd_build(a):
                     est = pcat.estimate(model, x, provider="mie", providers=snap.providers.get(mid))
                     rub = est.get("rub") or 0
                     meta = {"test": grp["test"], "task": tid, "code": task["code"], "arm": arm, "preset": preset,
-                            "dialect": dialect, "compiler": cfg["compiler"], "recompile_before_phase5": dialect != "literal",
+                            "dialect": dialect, "compiler": cfg["compiler"], "compiled_prompt": dialect != "literal",
                             "judge": grp["judge"], "success": grp["success"], "value": jd.get("value", grp["value"]),
-                            "overlaps": grp.get("overlaps", []), "expect": task.get("expect"),
-                            "brief": task.get("brief"), "catalog": cfg["catalog_snapshot"]}
+                            "expect": task.get("expect"), "brief": task.get("brief"), "catalog": cfg["catalog_snapshot"]}
                     purpose = ""
                     if task.get("brief") and task["brief"] != "literal":
                         purpose = json.loads((STAND / task["brief"]).read_text(encoding="utf-8"))["role"]["purpose"]
@@ -195,13 +223,14 @@ def cmd_build(a):
                **agent, "variant": 1, "max_rub": round(ext["price_rub"] * 1.5, 1), "price_rub": ext["price_rub"],
                "price_source": ext["price_source"], "docs": ext["docs"], "notes": ext["note"],
                "meta": {"test": ext["test"], "task": "S08", "code": "IMG-TEXT-CYR", "judge": "metric", "value": ext["value"],
-                        "expect": cfg["tasks"]["S08"]["expect"], "overlaps": ext["overlaps"],
-                        "success": "3 строки дословны по кодовым точкам (как E-02)"}}
+                        "expect": cfg["tasks"]["S08"]["expect"], "success": "3 строки дословны по кодовым точкам (как E-02)"}}
         (jobs / ext["file"]).write_text(json.dumps(job, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
         report.append((ext["test"], ext["file"], 1, []))
     for t, f, n, sk in report:
         print(f"{t}: {f} — заданий {n}" + (f"; пропуски/снятые параметры: {sk}" if sk else ""))
-    return 0
+    for line in absent + errors:
+        print(line)
+    return 1 if errors else 0
 
 
 # ================================================================ estimate / run: обёртки над polza.py
@@ -213,7 +242,7 @@ def e_files(jobs, only=None):
 
 def cmd_estimate(a):
     only = set(a.only.split(",")) if a.only else None
-    total, rows = 0.0, []
+    total, rows, env_err = 0.0, [], False
     for f in e_files(jobs_dir(a), only):
         r = subprocess.run([sys.executable, str(TOOLS / "polza.py"), "estimate", str(f)], capture_output=True, text=True,
                            env={**__import__("os").environ, "POLZA_BASE_URL": "http://127.0.0.1:9"})
@@ -221,13 +250,14 @@ def cmd_estimate(a):
         n, err, rub = (int(m.group(1)), int(m.group(2)), float(m.group(3).replace(" ", "").replace(" ", "").replace(",", "."))) if m else (0, -1, 0.0)
         total += rub
         rows.append((f.name, n, err, rub))
+        env_err |= r.returncode == 2               # polza.py: ошибка вызова или окружения
         if err or not m:
             print(r.stdout[-1500:], r.stderr[-800:], file=sys.stderr)
     print("| Файл | Заданий | Ошибок | ₽ (estimate) |\n|---|---|---|---|")
     for name, n, err, rub in rows:
         print(f"| `{name}` | {n} | {err} | {rub:.2f} |")
     print(f"| **Итого** | {sum(r[1] for r in rows)} | {sum(max(r[2], 0) for r in rows)} | **{total:.2f}** |")
-    return 0 if all(r[2] == 0 for r in rows) else 1
+    return 2 if env_err else 0 if all(r[2] == 0 for r in rows) else 1
 
 
 def cmd_run(a):
@@ -270,9 +300,10 @@ def cmd_collect(a):
 
 # ================================================================ метрики
 
-def _img(path, mode="RGB", maxside=None):
+def _img(path, mode="RGB", maxside=None, base=ROOT):
+    """Картинка: относительный путь — от base (входы source и target задач — от папки файла заданий)."""
     from PIL import Image
-    im = Image.open(ROOT / path if not Path(path).is_absolute() else path)
+    im = Image.open(Path(base) / path if not Path(path).is_absolute() else path)
     im = im.convert(mode)
     if maxside and max(im.size) > maxside:
         s = maxside / max(im.size)
@@ -413,10 +444,10 @@ def load_a04():
     return m
 
 
-A04_Q3 = {"colorfulness": 54.5, "sat_share": 0.0748, "hdr_index": 0.349, "clip_hi": 0.14}   # Q3 фото лидеров (A/04)
+A04_Q3 = {"colorfulness": 54.5, "sat_share": 0.0748, "hdr_index": 0.349, "clip_hi": 0.14}   # Q3 фото лидеров
 
 
-def metrics_for(row, transcripts, a04):
+def metrics_for(row, transcripts, a04, inputs=ROOT):
     import numpy as np
     meta, out = row.get("meta") or {}, {}
     im = _img(row["file"], "RGBA")
@@ -449,11 +480,11 @@ def metrics_for(row, transcripts, a04):
                             "ratio": round(float(g[zone].mean() / max(g[~zone].mean(), 1e-6)), 3),
                             "lum_std_zone": round(float(L[zone].std()), 4)}
     if meta.get("source"):
-        src = _img(meta["source"], "RGB")
+        src = _img(meta["source"], "RGB", base=inputs)
         out_im = _img(row["file"], "RGB").resize(src.size)
         A, B = np.asarray(src).astype(float), np.asarray(out_im).astype(float)
         if meta.get("target"):
-            tgt = np.asarray(_img(meta["target"], "L").resize(src.size)) > 127
+            tgt = np.asarray(_img(meta["target"], "L", base=inputs).resize(src.size)) > 127
         else:
             tgt = np.zeros(A.shape[:2], bool)
             x0, y0, x1, y1 = meta.get("target_rect", [0, 0, 0, 0])
@@ -477,10 +508,11 @@ def cmd_metrics(a):
     rows = jl_read(a.results)
     transcripts = json.loads(Path(a.transcripts).read_text(encoding="utf-8")) if a.transcripts else {}
     a04 = load_a04()
+    inputs = jobs_dir(a)                    # входы задач — от папки файла заданий, как их читает polza.py
     outs = []
     for r in rows:
         try:
-            m = metrics_for(r, transcripts, a04)
+            m = metrics_for(r, transcripts, a04, inputs)
         except Exception as e:          # noqa: BLE001
             m = {"error": str(e)[:200]}
         outs.append({**{k: r.get(k) for k in ("test", "task", "arm", "preset", "model", "variant", "file")}, "m": m})
@@ -991,11 +1023,12 @@ def cmd_ministand(a):
     snap, dialects, catalog = pcat.Snapshot(), pc.load_dialects(), pc.load_catalog()
     if a.model not in snap.by_id:
         print(f"{a.model} нет в снимке каталога — сначала polza_catalog.py snapshot", file=sys.stderr)
-        return 1
+        return 2
     params = json.loads(a.params) if a.params else {}
+    out = Path(a.out) if a.out else jobs_dir(a) / f"E-MS-{slug(a.model)}.jsonl"
     rows, total = [], 0.0
     for tid, t in cfg["tasks"].items():
-        if not t.get("reg") or t.get("owner"):
+        if not t.get("reg") or t.get("pipeline"):     # задачу проверяет постобработка или видео, не генерация
             continue
         prompts = []                                   # (диалект, промт, входные картинки)
         lit = {"S08": "cyr_a_en", "S13": "lat_a_en", "S14": "edit_wall"}.get(tid)
@@ -1026,6 +1059,9 @@ def cmd_ministand(a):
                     print(f"{tid}: пропуск (модель без images)", file=sys.stderr)
                     continue
                 inp["images"] = list(imgs)                      # путь — как в рецепте: его разбирает polza.py
+                for pth in imgs:
+                    if input_missing(pth, out.parent):
+                        print(f"ministand/{tid}: входа нет в скилле — {pth}")
             est = pcat.estimate(m, inp, providers=snap.providers.get(a.model))
             total += est.get("rub") or 0
             rows.append({"model": a.model, "input": inp, "tag": f"MS-{slug(a.model)}-{tid}-{k}", **agent_field(a), "variant": 1,
@@ -1034,7 +1070,6 @@ def cmd_ministand(a):
                                   "brief": t.get("brief"), "source": t.get("source"), "target": t.get("target"),
                                   "target_hex": t.get("target_hex"),
                                   "compare_with": f"результаты стенда по {tid} (тот же бриф, те же метрики и голоса)"}})
-    out = Path(a.out) if a.out else jobs_dir(a) / f"E-MS-{slug(a.model)}.jsonl"
     jl_write(out, rows)
     print(f"мини-стенд: {len(rows)} заданий, ≈ {total:.2f} ₽ → {out}")
     return 0
@@ -1199,13 +1234,13 @@ def cmd_selftest(a):
                   "seeds": [1], "models": {"a-1k": {"model": "m/a"}}, "literals": {"edit_wall": "Перекрась стену в зелёный"},
                   "tasks": {"S08": {"code": "IMG-TEXT-CYR", "title": "надпись", "expect": ["Привет"]},
                             "S14": {"code": "IMG-EDIT", "title": "правка стены", "reg": True, "source": "inputs/scene.png"}},
-                  "phase5": [{"test": "E-01", "file": "E-01-edit.jsonl", "judge": ["metric"], "success": "стена перекрашена",
-                              "value": 1, "hypothesis": "правка по маске",
-                              "jobs": [{"task": "S14", "prompt": "edit_wall", "use": ["a-1k"], "images": ["inputs/scene.png"],
-                                        "mask": "/stand/inputs/mask.png"}]}],
+                  "recipes": [{"test": "E-01", "file": "E-01-edit.jsonl", "judge": ["metric"], "success": "стена перекрашена",
+                               "value": 1, "hypothesis": "правка по маске",
+                               "jobs": [{"task": "S14", "prompt": "edit_wall", "use": ["a-1k"], "images": ["inputs/scene.png"],
+                                         "mask": "/stand/inputs/mask.png"}]}],
                   "external": [{"test": "E-09", "file": "E-09.routerai.json", "model": "v/x", "prompt": "edit_wall",
                                 "channel": "канал", "price_rub": 2.0, "price_source": "прайс", "docs": "документация",
-                                "note": "заметка", "value": 1, "overlaps": []}]}
+                                "note": "заметка", "value": 1}]}
         (tmp / "tasks.yaml").write_text(yaml.safe_dump(recipe, allow_unicode=True), encoding="utf-8")
         base = ["--tasks", str(tmp / "tasks.yaml"), "--jobs-dir", str(tmp / "jobs")]
 
@@ -1224,6 +1259,35 @@ def cmd_selftest(a):
             main(base + ["build", "--agent", "стенд"]), main(base + ["ministand", "--model", "m/a", "--agent", "стенд"])
         check("задания: --agent — имя в поле agent заданий build, ministand и внешнего канала",
               all(j.get("agent") == "стенд" for j in built()))
+        # модель рецепта вне снимка: строка отчёта с тестом и моделью, остальные группы собраны, код 1
+        recipe["models"]["gone-1k"] = {"model": "m/gone"}
+        recipe["recipes"].append({"test": "E-02", "file": "E-02-gone.jsonl", "judge": ["metric"], "success": "—", "value": 1,
+                                  "hypothesis": "модель выбыла", "jobs": [{"task": "S08", "prompt": "edit_wall",
+                                                                           "use": ["gone-1k", "a-1k"]}]})
+        recipe["recipes"].append({"test": "E-03", "file": "E-03-text.jsonl", "judge": ["metric"], "success": "—", "value": 1,
+                                  "hypothesis": "надпись", "jobs": [{"task": "S08", "prompt": "edit_wall", "use": ["a-1k"]}]})
+        (tmp / "tasks.yaml").write_text(yaml.safe_dump(recipe, allow_unicode=True), encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()) as said:
+            rc = main(base + ["build"])
+        said = said.getvalue()
+        check("build: модель вне снимка — строка «ОШИБКА» с тестом и моделью, остальные группы собраны, код 1",
+              rc == 1 and "ОШИБКА: E-02: модели m/gone" in said and len(jl_read(tmp / "jobs" / "E-02-gone.jsonl")) == 1
+              and len(jl_read(tmp / "jobs" / "E-03-text.jsonl")) == 1 and len(jl_read(tmp / "jobs" / "E-01-edit.jsonl")) == 1)
+        check("build: вход без файла от папки заданий — строка «входа нет в скилле», задание собрано",
+              "E-01/S14: входа нет в скилле — inputs/scene.png" in said
+              and "E-01/S14: входа нет в скилле — /stand/inputs/mask.png" in said)
+        (tmp / "jobs" / "inputs").mkdir()
+        Image.new("RGB", (64, 36), (200, 200, 200)).save(tmp / "jobs" / "inputs" / "scene.png")
+        Image.new("RGB", (64, 36), (40, 120, 60)).save(tmp / "res.png")
+        with contextlib.redirect_stdout(io.StringIO()) as said:
+            main(base + ["build", "--only", "E-01"])
+        jl_write(tmp / "results.jsonl", [{"test": "E-01", "task": "S14", "file": str(tmp / "res.png"),
+                                          "meta": {"source": "inputs/scene.png", "target_rect": [0, 0, 32, 18]}}])
+        with contextlib.redirect_stdout(io.StringIO()):
+            main(base + ["metrics", str(tmp / "results.jsonl"), "--out", str(tmp / "metrics.jsonl")])
+        m = jl_read(tmp / "metrics.jsonl")[0]["m"]
+        check("путь входа от папки заданий: build находит inputs/scene.png, metrics читает тот же файл (edit_diff)",
+              "входа нет в скилле — inputs/scene.png" not in said.getvalue() and "edit_diff" in m and "error" not in m)
         os.environ[kbpaths.ENV_HOME] = str(tmp / "home")
         check("задания: без --jobs-dir — $DDD_HOME/out/ai-media/stand, папка создаётся",
               jobs_dir(argparse.Namespace(jobs_dir=None)) == tmp / "home" / "out" / "ai-media" / "stand"

@@ -124,7 +124,7 @@ OUTPUT — one YAML document following <schema> (meaning_version: 1), nothing be
 
 ## 4. Выход и проверки после вызова
 
-1. `99-raw/tools/venv-B1/bin/python ../../scripts/text/validate_meaning.py` — схема и смысловые проверки
+1. `~/.cache/design-deep-dive/venv/bin/python ../../scripts/text/validate_meaning.py` — схема и смысловые проверки
    (один основной сегмент, ссылки внутри блока, допущения в `open_questions`, доказательства опор).
 2. **Сверка смысла до текста** — `chain_inputs.py meaning-claims` собирает ядро, оффер, первый экран иерархии и
    сообщения секций в Markdown → `claims_check.py check … --facts facts.yaml`: `COPY-F-NEVER` и числа без факта ловятся

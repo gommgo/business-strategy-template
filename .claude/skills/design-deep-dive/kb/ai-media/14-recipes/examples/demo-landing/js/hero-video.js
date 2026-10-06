@@ -1,5 +1,5 @@
-// hero-video.js — видео-слой hero поверх картинки-постера (агент J, волна 3, 23.09.2026).
-// Проверено: Chromium 153 (99-raw/experiments/J/06-pages-measure). Правила — 10-web-integration/02-video-delivery.md.
+// hero-video.js — видео-слой hero поверх картинки-постера.
+// Проверено: Chromium 153. Правила — 10-web-integration/02-video-delivery.md.
 // 1) LCP — картинка <picture> (кадр 0 финального видео): видео начинает грузиться только после load + простоя;
 // 2) prefers-reduced-motion: reduce, Save-Data, 2G → видео не запрашивается вовсе (0 байт), остаётся картинка;
 // 3) источники выбираются по data-media (арт-дирекшн: 4:5 на телефоне, 16:9 на десктопе) и по canPlayType;

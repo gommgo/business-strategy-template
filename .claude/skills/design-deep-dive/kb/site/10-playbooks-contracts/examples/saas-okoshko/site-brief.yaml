@@ -1,11 +1,10 @@
-# ПРИМЕР J v1 · лендинг SaaS · вымышленный сервис онлайн-записи «Окошко». Факты — демо text E, вымышлены.
-# Бриф — перевод демо-брифа E/03 (v0) в схему v1.
+# ПРИМЕР v1 · лендинг SaaS · вымышленный сервис онлайн-записи «Окошко». Факты — демо text, вымышлены.
 version: 1
 checked: '2026-09-24'
 project:
   slug: okoshko-demo
   status: draft
-  prepared_by: Claude (агент site E, демо для примера page-plan)
+  prepared_by: Claude (демо для примера page-plan)
 site_type: landing-site
 primary_page_type: landing-saas
 business:
@@ -53,7 +52,7 @@ traffic:
     share: 0.1
     device: mobile
     entry_page: home
-  note: Доли — допущение E (q-traffic-shares).
+  note: Доли — допущение (q-traffic-shares).
 decision_context:
   market: b2b
   price_band: low
@@ -91,7 +90,7 @@ proof:
   - client
   collection:
     owner: основатель (демо)
-    agent: агент E text (демо-набор)
+    agent: агент text (демо-набор)
     status: in-progress
 constraints:
   jurisdiction:
@@ -112,7 +111,7 @@ constraints:
       purpose: analytics
       location: ru
       sets_cookies: true
-  legal_note: 'Пример J v1: ответы правового опросника вымышлены (демо-факты text E).'
+  legal_note: 'Пример v1: ответы правового опросника вымышлены (демо-факты text).'
 policies:
   capture_popup: 'off'
   exit_intent: 'off'
@@ -197,7 +196,7 @@ questions:
 - id: q-legal-details
   block: proof
   q: Реквизиты юрлица для подвала и оферты?
-  why: Без сведений о продавце страницу не публикуем (I)
+  why: Без сведений о продавце страницу не публикуем (site 08)
   options: []
   default: Не публикуем до ответа (missing:legal-details)
   affects:

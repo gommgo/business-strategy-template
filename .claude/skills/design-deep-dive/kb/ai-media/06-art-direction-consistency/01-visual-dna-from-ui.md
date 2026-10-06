@@ -108,7 +108,7 @@ A `01/01`, `01/03`; D `05/03` и `asset-spec.schema.json`), 11 дайджест�
 | `style_blocks[kind]` | `series.block` | дословно; `kind` = photo, illustration, icon3d |
 | `image_palette` / `illustration_palette` | `palette` | ≤ 5 цветов (≤ 4 у фото с референсами: палитру несут картинки); `share` = `share_max`, неакцентные доли масштабируются до Σ ≤ 0,98 |
 | `light`, `camera` | `light`, `camera`, `composition.angle` | только у фото; у 3D — свет из `icon3d.key_light` |
-| `composition.text_zone_default` | `composition.text_zone` + `text.mode: html_overlay` | прямоугольник из стороны и доли; `purpose: caption` у нижней полосы ≤ 30 % |
+| `composition.text_zone_default` | `composition.text_zone` + `text.mode: html_overlay` | прямоугольник из стороны и доли; `purpose: caption` у нижней полосы ≤ 30 %; `side: center` — центральная полоса шириной `share`; объект при этом — не в центре |
 | `references` | `references` + `series.reference_ids` | роли style, palette, material; ≤ 3; только класс `--ref-class` |
 | `exclusions.replace_with` | `exclusions` | у иллюстраций и 3D — только `artifact` и `service` (фото-замены вон) |
 | `composition.asymmetry` | `series.avoid_average` | только фото |
@@ -116,10 +116,13 @@ A `01/01`, `01/03`; D `05/03` и `asset-spec.schema.json`), 11 дайджест�
 ```bash
 # vlm_to_dna.py (F2, 23.09.2026) — [проверено]
 python3 ../../scripts/ai-media/vlm_to_dna.py to-spec 06-art-direction-consistency/examples/dna-warm-consumer.json --kind photo \
-  --task IMG-HERO-PHOTO --subject "a weathered wooden park bench under a birch tree" --slot hero \
+  --task IMG-HERO-PHOTO --subject "a weathered wooden park bench under a birch tree" --section hero --slot hero-visual \
   --ref-class exterior-park-autumn --out spec.json
 99-raw/tools/venv-D2/bin/python ../../scripts/ai-media/prompt_compile.py compile spec.json --model openai/gpt-image-2.5-sunburst
 ```
+
+Правка настоящего кадра: `to-spec … --edit кадр.png --operation relight` — без исключений паспорта и композиции генерации
+с нуля.
 
 ### 2.2. Что меняется в шаблоне паспорта иллюстраций ui 07/02 §3
 
@@ -278,6 +281,8 @@ rust-brown object as the only accent.
    блок стиля ≤ 60 слов, запреты ≤ 6, 5 канареек.
 3. `parse --grid` → черновик паспорта + замеры сетки (палитра k = 6 OKLab, баланс белого, хрома, перцентили светлоты).
 4. Человек правит, `validate`, `status: approved`, `approved_by`.
+5. Новая версия утверждённого паспорта — `lifecycle.version` и запись `lifecycle.history[]`: версия, дата, кто подтвердил,
+   что изменилось.
 
 ### 6.2. Что брать у VLM, что — у кода
 

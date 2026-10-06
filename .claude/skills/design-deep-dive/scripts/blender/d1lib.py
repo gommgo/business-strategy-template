@@ -1,7 +1,6 @@
-"""d1lib — помощники моделирования кодом для Blender 5.2 (агент D1, волна 2 blender-research).
+"""d1lib — помощники моделирования кодом для Blender 5.2.
 
-Надстройка над 03-bpy-api/snippets/bpyx.py (агент B) и идеями 99-raw/experiments/C1/12-protocol-objects/proto_lib.py
-(агент C1). Проверено: Blender 5.2.2 LTS (Python 3.13), тесты — test_d1lib.py рядом.
+Надстройка над bpyx.py (рядом, scripts/blender). Проверено: Blender 5.2.2 LTS (Python 3.13).
 
 Принципы (все — проверенные ловушки 5.2):
 - геометрия строится bmesh/data API, без bpy.ops в цикле; UV-слой создаётся ДО операций; bm.to_mesh + bm.free;
@@ -35,7 +34,7 @@ import bpy
 import bmesh
 from mathutils import Matrix, Vector, noise as mnoise
 
-SNIPPETS = os.path.dirname(os.path.abspath(__file__))  # перенос: bpyx.py — рядом (scripts/blender)
+SNIPPETS = os.path.dirname(os.path.abspath(__file__))  # bpyx.py — рядом (scripts/blender)
 if SNIPPETS not in sys.path:
     sys.path.insert(0, SNIPPETS)
 import bpyx  # noqa: E402
@@ -500,7 +499,7 @@ def resample_polyline(pts, count, closed=False):
 
 def weld_mesh(me, dist: float = 1e-6):
     """Сварить совпадающие вершины: меш из кривой/текста (new_from_object) не сварен по швам заливки и фаски —
-    неманифолдные рёбра (D1/03: 3280 на решётке 7×7). [5.2.2]"""
+    неманифолдные рёбра (3280 на решётке 7×7). [5.2.2]"""
     bm = bmesh.new()
     bm.from_mesh(me)
     n0 = len(bm.verts)
@@ -514,7 +513,7 @@ def weld_mesh(me, dist: float = 1e-6):
 
 def catmull_rom_pts(ctrl, count: int = 64, closed: bool = False):
     """Гладкая кривая Catmull-Rom (centripetal-приближение uniform) через контрольные точки 2D/3D, затем равномерная
-    пересборка по длине — для профилей тел вращения без «ступенек» затенения (D1/04: колокол из ломаной давал
+    пересборка по длине — для профилей тел вращения без «ступенек» затенения (колокол из ломаной даёт
     полосы). [5.2.2]"""
     P = [Vector(p) for p in ctrl]
     n = len(P)
@@ -575,7 +574,7 @@ def extrude_outline(name: str, loops, depth: float, collection=None, *, bevel: f
 def text_mesh(name: str, body: str, collection=None, *, size: float = 0.2, extrude: float = 0.02,
               bevel: float = 0.004, bevel_res: int = 1, resolution_u: int = 3, font_path: str | None = None,
               align_x: str = "CENTER", upright: bool = True, smooth_angle: float = 30.0, offset_bevel: bool = True):
-    """3D-текст → меш. resolution_u 3–4 и bevel_res 0–1 — веб-бюджет (E/09: 9968 → 1520 треуг.).
+    """3D-текст → меш. resolution_u 3–4 и bevel_res 0–1 — веб-бюджет (9968 → 1520 треуг.).
     upright=True — буквы стоят лицом к −Y (к камере «спереди»), низ базовой линии на z=0 (ошибка M2.12 — текст
     плашмя). offset_bevel — фаска не утолщает буквы (offset = −bevel). Шрифт — встроенный или файл проекта
     (не путь ОС — M1.13). [5.2.2]"""
@@ -777,7 +776,7 @@ def hard_surface(ob, *, bevel_width: float, segments: int = 3, angle: float = 30
                  harden: bool = True, weighted: bool = True, wn_weight: int = 50, clamp: bool = True,
                  limit_method: str = "ANGLE", miter_outer: str = "MITER_ARC"):
     """Hard-surface стек: Bevel (по углу, harden_normals) → Weighted Normal (keep_sharp). Экспорт — только с
-    export_apply=True (иначе уходит голый меш, E/03). Возвращает (bevel, wn). [5.2.2]"""
+    export_apply=True (иначе уходит голый меш). Возвращает (bevel, wn). [5.2.2]"""
     b = bpyx.add_modifier(ob, "BEVEL", width=bevel_width, segments=segments, limit_method=limit_method,
                           angle_limit=math.radians(angle), profile=profile, harden_normals=harden,
                           use_clamp_overlap=clamp, miter_outer=miter_outer)
@@ -1197,9 +1196,9 @@ def render_setup(samples: int = 48, view: str = "AgX", look: str | None = "AgX -
 
 
 def export_web(path: str, collection_name: str, preset: str = "static_hero", **over):
-    """Экспорт коллекции ассета пресетом агента E (99-raw/experiments/E/24-presets/presets.py) с collection=…
-    (без выделения: use_selection в фоне без выделения даёт пустой GLB, E/25). [5.2.2]"""
-    E24 = os.path.dirname(os.path.abspath(__file__))  # перенос: presets.py — рядом
+    """Экспорт коллекции ассета пресетом presets.py (рядом) с collection=…
+    (без выделения: use_selection в фоне без выделения даёт пустой GLB). [5.2.2]"""
+    E24 = os.path.dirname(os.path.abspath(__file__))  # presets.py — рядом
     if E24 not in sys.path:
         sys.path.insert(0, E24)
     import presets  # noqa

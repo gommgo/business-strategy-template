@@ -1,9 +1,8 @@
 # voice-grafa-b2b.yaml — пример 1 из 3: сдержанный B2B (бухгалтерия на аутсорсе для ООО и ИП; лидогенерация услуги)
-# text-research · F · 2026-09-24 · формат: ../voice.schema.yaml (voice_version 1)
+# Формат: ../voice.schema.yaml (voice_version 1)
 #
-# Бренд «Графа» — ВЫМЫШЛЕННАЯ компания; ДЕМО-факты — ../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml
-# (написал агент F по формату B2: у базы не было B2B-набора). Образцы строк — ai-self, прошли claims_check.py и
-# copy_lint.py: 99-raw/experiments/F/04-voice-samples/README.md.
+# Бренд «Графа» — ВЫМЫШЛЕННАЯ компания; ДЕМО-факты — файл brand.facts_ref (формат facts.yaml: у базы не было
+# B2B-набора). Образцы строк — ai-self, прошли claims_check.py и copy_lint.py.
 # Что показывает пример: голос для предмета с высокой ценой ошибки (деньги, налоги) и незнакомого бренда — формальнее
 # середины (Gretry 2017: неформальность снижает доверие к незнакомым брендам), без юмора и эмодзи; факт + условие вместо
 # «надёжности»; ключевое слово «заранее» опирается на факт, а не на слова отзыва; английский — адаптация для иностранных
@@ -251,6 +250,6 @@ open_questions:
 
 review:
   method: editor
-  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review (99-raw/experiments/F/04-voice-samples)"
-  by: "агент F (ai-self)"
+  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review"
+  by: "ai-self"
   date: "2026-09-24"

@@ -3,7 +3,7 @@
 # impeccable marketing-buzzword (Apache-2.0), taste §9.D, §9.F (MIT), ux 07/06 §4.1, §5.2.
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   group: MKT
   lang: en
@@ -59,7 +59,7 @@ rules:
     message: "Generic action without an outcome («Get started»): legitimate, but weaker than a result."
     replacement: "name what the person gets: «Start a 14-day trial», «See your first report»"
     examples: {bad: "Get started", good: "Start a 14-day trial"}
-    source: "Hallmark copy.md («Specific verbs»); CTA norms — agent E (wave 2)"
+    source: "Hallmark copy.md («Specific verbs»); CTA norms — text 04/01"
     evidence: "[практика]"
   - id: en-mkt-more-than
     marker_id: COPY-M-MKT-03
@@ -88,11 +88,11 @@ rules:
     requires_no_fact: true
     count_as_marker: false
     pattern: '\bthe\s+best\b|#\s?1\b|\bnumber\s+one\b|\bworld[''’]s\s+(?:first|leading|best|largest)\b|\b(?:industry|market)\s+leader\b|\bunbeatable\b|\bleading\s+provider\b|\bguaranteed\s+results\b|\b100%\s+(?:satisfaction|guaranteed)\b'
-    message: "Superlative or «#1» without substantiation: legal risk (FTC, UCPD; for RU 38-FZ art. 5 — agent H)."
+    message: "Superlative or «#1» without substantiation: legal risk (FTC, UCPD; for RU 38-FZ art. 5)."
     replacement: "criterion and source from facts.yaml, or delete"
     examples: {bad: "The best CRM and the market leader.", good: "Rated 4.8 on G2 (September 2026, 312 reviews)."}
-    source: "PLAN.md risk 6; WP:AISIGNS (newer models avoid «the best»; superlatives are a human trait in encyclopedic text)"
-    evidence: "[стандарт] for law — H; as slop marker [спорно]"
+    source: "WP:AISIGNS (newer models avoid «the best»; superlatives are a human trait in encyclopedic text)"
+    evidence: "[стандарт] for law — text 08/01; as slop marker [спорно]"
   - id: en-mkt-false-urgency
     marker_id: COPY-M-MKT-12
     level: warning
@@ -114,7 +114,7 @@ rules:
     replacement: "exact figure with source and date from facts.yaml, or [PLACEHOLDER]"
     examples: {bad: "Trusted by thousands of teams. 10x faster onboarding.", good: "Used by 214 clinics (fact: clients-2026-09)."}
     source: "Gesso fabricated-precision (FLAG); ux 07/06 §5.2; taste §4.9 («Fake-precise numbers are flagged»)"
-    evidence: "[практика]; fact check — claims_check.py (B2)"
+    evidence: "[практика]; fact check — claims_check.py"
   - id: en-mkt-feeling-promise
     marker_id: COPY-M-MKT-13
     level: warning
@@ -134,7 +134,7 @@ rules:
     replacement: "a claim heading; labels are fine in site navigation"
     note: "conventions «FAQ», «Frequently asked questions», «Contact us» are outside the pattern (CONTRADICTIONS X24)"
     examples: {bad: "Why Choose Us?", good: "Every job signed off with a 40-point checklist"}
-    source: "PLAN.md (inverted outline test for landings); taste §9.F (plain functional labels acceptable for quotes/blog)"
+    source: "text 06/01 §10 (inverted outline test for landings); taste §9.F (plain functional labels acceptable for quotes/blog)"
     evidence: "[практика]"
   - id: en-mkt-self-praise
     marker_id: COPY-M-MKT-01

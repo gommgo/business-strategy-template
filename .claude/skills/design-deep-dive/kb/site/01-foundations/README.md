@@ -10,15 +10,14 @@
 | `02-cro-evidence-and-folklore.md` | Иерархия доказательств CRO и как читать каждый вид; почему «победы» из блогов — шум (≈ 1/3 идей работает, 90 % эффектов < 1,2 %, ранняя остановка); реестр 21 мифа структуры и конверсии с вердиктом и правилом; карточка переноса кейса (YAML) и чтение «+N %»; бенчмарк Unbounce и почему «средняя отрасли» не норма; поправки к ux |
 | `03-site-brief.md` | Бриф сайта: разделы и владельцы полей, минимум по типу сайта, кто что заполняет (`x-fill`), процедура «разбор → черновик → вопросы → допущения → утверждено», банк вопросов заказчику, что делать без доказательств, совместимость с kimi, ответы text B1 (S0) |
 | `site-brief.schema.json` | JSON Schema 2020-12, `$id urn:app-design:site:site-brief:0`: 25 блоков, 14 условий `allOf`, `$ref` на схемы text (meaning, facts), словарь B v0 draft; итоговая схема — v1 `../10-playbooks-contracts/schemas/site-brief.schema.json` (J), этот файл — для брифов версии 0 |
-| `site-brief.example.yaml` | Пример: лендинг лидогенерации услуг в РФ, вымышленная студия ремонта «Отвес» (как у text), статус `proposed` |
-| `site-brief.kimi-map.tsv` | Проекция в `brief.yaml` kimi: `site_path · kimi_path · rule (copy, map, derive, drop, claude_fills) · note`, 189 строк |
+| `../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml` | Пример: лендинг лидогенерации услуг в РФ, вымышленная студия ремонта «Отвес» (как у text), статус `proposed` |
 
 Опыты: `../99-raw/experiments/A/01-schema-validate/` (схема + 16 отрицательных случаев), `A/02-kimi-projection/` (сборка
 пакета kimi без ошибок), `A/03-coverage/` (покрытие полей), `A/04-sample-size/` (выборка A/B на малом трафике).
 
 ## Выжимка
 
-1. Бриф — один YAML по `site-brief.schema.json`; в kimi уходит проекция по `site-brief.kimi-map.tsv`, не сам бриф.
+1. Бриф — один YAML по `site-brief.schema.json`.
 2. Смысл — блок `meaning` по схеме text, доказательства — только `proof.facts_ref` на `facts.yaml` text; нет факта — нет блока.
 3. Тип — `site_type` + `primary_page_type` (словарь B); действие — одно macro-id `action`; вторая цель — иным стилем.
 4. Первый экран продолжает обещание источника; путь до просьбы — по осведомлённости и температуре трафика.

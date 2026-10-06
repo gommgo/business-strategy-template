@@ -195,7 +195,7 @@ Iris Xe (DPR 1,5) = 50 КБ br = 0,5 МБ ассетов = 2 агент-часа
 
 ```bash
 # run: skip — [проверено: 99-raw/notes/trial/RC-checks/rc_vote_tally_test.py → RC_CHECK_OK] итоги голосования (только чтение)
-R=/home/mm/Документы/app-design/blender-research; V=$R/15-showcase/vote
+R=.; V=$R/15-showcase/vote                                           # R — корень базы kb/blender, рабочая папка блока
 python3 $V/build_pairs.py --check                                    # какие пары готовы (ничего не пишет)
 python3 $R/99-raw/notes/trial/RC-checks/rc_vote_tally.py $V/pairs.json $V/votes --json /tmp/tally.json
 curl -s http://127.0.0.1:8790/api/all > /tmp/all.json && python3 $R/99-raw/notes/trial/RC-checks/rc_vote_tally.py $V/pairs.json /tmp/all.json

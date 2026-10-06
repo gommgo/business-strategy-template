@@ -1,5 +1,4 @@
 # Пример motion-spec v1 — «Сталькон», главная корпоративного многостраничника (L1). Учебный.
-# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
 # Проверка: spec_check.py spec … --plan ../site/10-playbooks-contracts/examples/corporate-b2b-stalkon/plans/home.yaml --overlay stalkon-home.treatment.yaml
 # Показывает класс transition: кросс-документный View Transition «обложка карточки → hero кейса» с именами и ролями (Bramus) и долями базы.
 motion_spec_version: "1.0"
@@ -34,7 +33,7 @@ page:
   never:
     - "появление секций ниже первого экрана; счётчики; бегущая строка логотипов"
     - "шторка на весь экран между страницами; повторяющееся интро на каждом переходе"
-    - "переход дольше 400 мс (переход видят на каждом клике — E 02 §8.3)"
+    - "переход дольше 400 мс (переход видят на каждом клике — creative 05/02 §8.3)"
 sections:
   - id: hero
     block: hero-media
@@ -123,4 +122,4 @@ sections:
     reduce: {strategy: no-motion-needed, describe: "как есть"}
     mobile: {strategy: same, describe: "кнопка на всю ширину"}
 open_questions:
-  - "Кросс-документный переход — effect:page-transition (effects.yaml v0.3: нативный @view-transition — L1, библиотеки — L2; решение оркестратора 2026-09-25, X-21; до S1 здесь стоял effect:view-transition — переход внутри документа); Chromium 126+, Safari 18.2+; Firefox — нет (E 02 §8.1): поддержку сверить в живой фазе."
+  - "Кросс-документный переход — effect:page-transition (effects.yaml v0.3: нативный @view-transition — L1, библиотеки — L2; X-21); Chromium 126+, Safari 18.2+; Firefox — нет (creative 05/02 §8.1): поддержку сверить в живой фазе."

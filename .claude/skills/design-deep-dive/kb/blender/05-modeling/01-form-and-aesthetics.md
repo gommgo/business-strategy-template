@@ -65,7 +65,7 @@ opus 2,92 м; скульптура обеих 3,6 м; наивная иконк�
 
 ```python
 # Blender 5.2.2 — [проверено] деталь от габаритов опоры + зазор по BVH
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, bmesh, d1lib as D, bpyx
 from mathutils import Matrix
 from mathutils.bvhtree import BVHTree
@@ -133,7 +133,7 @@ haywire» [V:qMH_J_vcoqE 08:48–09:08, 06:47] — оценка на глаз о
 
 ```python
 # Blender 5.2.2 — [проверено] иерархия частей и минимальный размер детали
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_icon")
@@ -190,7 +190,7 @@ apply (модификатор «Smooth by Angle» без apply — 64, «над�
 
 ```python
 # Blender 5.2.2 — [проверено] фаска + harden + Weighted Normal и проверка «сырых» рёбер
-import sys; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_block")
@@ -301,7 +301,7 @@ NPR. Лента D1/06 и капля — тоже абстракция: опра�
 
 ```python
 # Blender 5.2.2 — [проверено] проверки формы одной строкой отчёта перед рендером
-import sys, json; sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/experiments/D1/_lib")
+import sys, json; sys.path.insert(0, "../../scripts/blender")
 import bpy, d1lib as D, bpyx
 bpy.ops.wm.read_factory_settings(use_empty=True)
 C = D.fresh_collection("ASSET_case")

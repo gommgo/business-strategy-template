@@ -1,9 +1,8 @@
 # Пример treatment v1 — «Окошко», главная (SaaS для салонов, L1). Учебный, вымышленные данные site.
-# creative-research · 09-ai-execution-evaluation · агент I · волна 3 · 2026-09-24.
 # Overlay по id секций v1 плана site; склейка и проверка — spec_check.py plan (см. otves-home.treatment.yaml).
-# Против treatment v0 в плане site: hero без появления (так решила art-direction A: «hero — без появления»), акцент — композицией;
-# пик product-demo: target product-demo.row (было funktsii.row), sticky-stack на CSS (0 КБ JS вместо GSAP 45 КБ — E 02 §3.2: прилипающая стопка
-# = sticky + view()), reduce stations (E 01 §4.2) вместо static-poster; stats — осознанный twist (k3_allow stats в art-direction).
+# Подача: hero без появления (art-direction: «hero — без появления»), акцент — композицией;
+# пик product-demo: target product-demo.row, sticky-stack на CSS (0 КБ JS — creative 05/02 §3.2: прилипающая стопка
+# = sticky + view()), reduce stations (creative 05/01 §4.2); stats — осознанный twist (k3_allow stats в art-direction).
 overlay_version: "1.0"
 checked_at: "2026-09-24"
 example: true

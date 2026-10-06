@@ -1,4 +1,4 @@
-// detail.js · общий код 3D «Звена» (_shared/code3d, дорожка CD) · приём «detail»: винты (локальные матрицы в системе модуля,
+// detail.js · общий код 3D «Звена» (_shared/code3d) · приём «detail»: винты (локальные матрицы в системе модуля,
 // один InstancedMesh на всю руку), риски колец, швы, атлас маркировки canvas-текстурой и наклейки, кабель у основания.
 import {
   Vector3, Quaternion, Matrix4, BoxGeometry, CylinderGeometry, PlaneGeometry, BufferGeometry, Float32BufferAttribute, LatheGeometry,

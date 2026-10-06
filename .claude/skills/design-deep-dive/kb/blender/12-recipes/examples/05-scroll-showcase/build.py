@@ -1,7 +1,7 @@
-# Сгенерировано K/01 из 12-recipes/05-scroll-showcase.md — блоки python в напечатанном виде, по порядку.
+# Сгенерировано run_recipes.py из 12-recipes/05-scroll-showcase.md — блоки python в напечатанном виде, по порядку.
 
 # ---- блок со строки 39
-# Blender 5.2.2 — [проверено] рецепт 05: кейс рецепта 01 + клип «Reveal» (слоты, H/12)
+# Blender 5.2.2 — [проверено] рецепт 05: кейс рецепта 01 + клип «Reveal» (слоты — blender 07/03 §1.2)
 import sys, math, bpy, bmesh
 import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py и animx.py — scripts/blender
 import rk, animx

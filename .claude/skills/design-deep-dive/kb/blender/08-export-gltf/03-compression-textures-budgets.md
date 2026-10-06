@@ -353,8 +353,8 @@ nor_gl), 5.33 МБ картинок; сырой GLB из Blender 6.19 МБ. Ка
 
 ```bash
 # gltf-transform 4.5.0, gltfpack 1.2 (нативный), toktx 4.4.2 — [проверено: 99-raw/experiments/E/17, E/18, E/24-presets/presets.py (POST)]
-BASE=/home/mm/Документы/app-design/blender-research/99-raw/tools
-export PATH="$BASE/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$BASE/bin/gltfpack-1.2:/home/mm/.nvm/versions/node/v24.21.0/bin:$PATH"
+BASE=$DDD_HOME
+export PATH="$BASE/bin/KTX-Software-4.4.2-Linux-x86_64/bin:$BASE/bin/gltfpack-1.2:$PATH"
 cd "$BASE/node"                                     # npx берёт gltf-transform из локального node_modules
 IN=/abs/path/raw.glb
 

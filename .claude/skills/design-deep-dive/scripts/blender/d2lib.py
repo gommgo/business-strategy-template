@@ -1,9 +1,9 @@
-"""d2lib — помощники D2 поверх bpyx (Blender 5.2.2): циклорама, студийные схемы света от размера ассета, паспорт серии.
-Подключение: sys.path.insert(0, ".../99-raw/experiments/D2/_lib"); import d2lib (bpyx подключается сам)."""
+"""d2lib — помощники поверх bpyx (Blender 5.2.2): циклорама, студийные схемы света от размера ассета, паспорт серии.
+Подключение: sys.path.insert(0, "<корень скилла>/scripts/blender"); import d2lib (bpyx подключается сам)."""
 import json, math, os, sys
 import bpy, bmesh
 from mathutils import Vector
-sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))  # перенос: bpyx.py — рядом
+sys.path.insert(0, __import__("os").path.dirname(__import__("os").path.abspath(__file__)))  # bpyx.py — рядом
 import bpyx
 
 
@@ -47,7 +47,7 @@ def light_power(d, E=2.0):
 def studio(objects, scheme="three_point", E_key=2.0, collection=None, prefix="L"):
     """Свет от габаритов ассета: r — радиус описанной сферы, d = 4r. Схемы: three_point (key/fill/rim),
     top_softbox (большой софтбокс сверху + два отражателя-заполнения), rim (контровые с двух сторон + слабый фронт).
-    E_key — освещённость от key на ассете (Вт/м²): 2.0 под PBR Neutral, ≈ 4 под AgX (калибровка D2/04)."""
+    E_key — освещённость от key на ассете (Вт/м²): 2.0 под PBR Neutral, ≈ 4 под AgX."""
     mn, mx = bpyx.world_bbox(objects)
     c = (mn + mx) / 2; r = max((mx - mn).length / 2, 1e-3); d = 4 * r
     rigs = {

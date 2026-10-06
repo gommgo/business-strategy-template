@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
-"""three_probe.py (агент H) — загрузить GLB в three r186 (Chromium, GPU) и выполнить JS-проверку; вывести JSON.
+"""three_probe.py — загрузить GLB в three r186 (Chromium, GPU) и выполнить JS-проверку; вывести JSON.
 
     python3 three_probe.py MODEL.glb CHECK.js [--three 0.186.0] [--out result.json]
 
 CHECK.js — тело async-функции с доступом к THREE, gltf, scene, renderer, camera, render(); возвращает объект (JSON).
 Пример: `const m = new THREE.AnimationMixer(gltf.scene); ...; return {...}`.
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву
+процессов — утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 import json, os, shutil, sys, tempfile
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # перенос: gltf_diff.py — рядом
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))  # gltf_diff.py — рядом
 import gltf_diff as GD
 
 PAGE = r"""<!doctype html><html><head><meta charset="utf-8">
@@ -41,7 +43,7 @@ def run(glb, check_js, ver="0.186.0"):
     httpd, port = GD.serve(tmp)
     logs = []
     try:
-        with sync_playwright() as pw:
+        with GD.kbpaths.lock("browser"), sync_playwright() as pw:
             b = pw.chromium.launch(headless=True, args=GD.GPU_ARGS["gl"])
             p = b.new_page()
             p.on("console", lambda m: logs.append(f"{m.type}: {m.text}") if m.type in ("error", "warning") else None)

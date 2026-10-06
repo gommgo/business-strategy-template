@@ -1,15 +1,15 @@
-# facts-kvarts.yaml — пример 1: исправленный инвентарь «Кварц» (лендинг предзаказа; вымышленный продукт kimi F/03)
-# text-research · B2 · 2026-09-24 · формат: ../facts.schema.yaml (facts_version 1)
+# facts-kvarts.yaml — пример 1: исправленный инвентарь «Кварц» (лендинг предзаказа; вымышленный продукт)
+# Формат: ../facts.schema.yaml (facts_version 1)
 #
-# Откуда: ../../../kimi-research/99-raw/experiments/F/03-package-from-description/landing-kvarts/ (описание заказчика,
-# ответы на вопросы, brief.yaml) и out/kvarts-preorder/brief/facts.md (F1–F9, M1, Never claim).
-# Что исправлено против facts.md kimi (опыт 99-raw/experiments/B2/02-kvarts/):
+# Откуда: описание заказчика, ответы на вопросы и бриф; исходный инвентарь — facts.md из пакета исполнителя макета
+# (F1–F9, M1, Never claim).
+# Что исправлено против исходного facts.md:
 #   1. F9 «сборка в Казани» выведен из «стартап из Казани» — снят; вместо него факт о городе компании (дословная
 #      выдержка) и вопрос в missing: где собирают лампу.
 #   2. «Датчик» в тексте не опирался ни на что — в missing вопрос о механизме подстройки света.
 #   3. «Переключение касанием», «одним касанием» — в описании нет; в missing.
 #   4. «11 900 ₽ — обычная цена» подавалась как зачёркнутая «старая» цена товара, который ещё не продавался: «было»
-#      вводит в заблуждение (38-ФЗ ст. 5 ч. 3 п. 4 — H); формулировка — «цена после предзаказа».
+#      вводит в заблуждение (38-ФЗ ст. 5 ч. 3 п. 4 — text 08/01); формулировка — «цена после предзаказа».
 #   5. «Первая партия — 300 ламп»: заказчик назвал цену для первых 300 ламп, но не размер партии — в missing.
 #   6. Обещание «без усталости глаз» — в never_claim заказчика (lift: never) и в классе health набора по умолчанию.
 #   7. Добавлены canonical (одна формулировка для JSON-LD и ответов нейросетей), values, use по временному словарю,
@@ -24,8 +24,8 @@ jurisdiction: ru
 status: draft
 example: true
 owner: {role: "основатель стартапа (заказчик)"}
-collected_by: "Claude (copy-strategy), вопросы одним сообщением — kimi 07/01 §4.4"
-intake: {form: "kimi landing-kvarts/01 §3 (вопрос 1 «Факты»); повторный запрос — proof-intake.md@2026-09-24", asked: "2026-09-24", answered: "2026-09-24", channel: "сообщение"}
+collected_by: "Claude (copy-strategy), вопросы одним сообщением"
+intake: {form: "вопросы заказчику (вопрос 1 «Факты»); повторный запрос — proof-intake.md@2026-09-24", asked: "2026-09-24", answered: "2026-09-24", channel: "сообщение"}
 never_claim_defaults: ru-default-1
 
 entities:
@@ -51,7 +51,7 @@ facts:
     permission: {status: not-required}
     use: {page_types: [landing-waitlist], section_roles: [hero, pricing], slot_types: [subheadline, pricing-price, pricing-price-note, cta-note]}
     valid: {from: "2026-09-24", until: "2026-12-31", review_by: "2026-11-01"}
-    schema_org: {type: Offer, property: price, note: "priceCurrency RUB; availability PreOrder — решает G"}
+    schema_org: {type: Offer, property: price, note: "priceCurrency RUB; availability PreOrder — решает text 07"}
     related: [price-after-preorder, deposit-included]
     lang: ru
 
@@ -160,7 +160,7 @@ facts:
     verification: {status: stated, date: "2026-09-24", method: "паспорт изделия — запросить (missing: product-passport)"}
     permission: {status: not-required}
     use: {section_roles: [how-it-works, specs], slot_types: [card-body, spec-row]}
-    schema_org: {type: PropertyValue, property: "colorTemperature (additionalProperty)", note: "решает G"}
+    schema_org: {type: PropertyValue, property: "colorTemperature (additionalProperty)", note: "решает text 07"}
     lang: ru
 
   - id: usb-c-18w
@@ -289,7 +289,7 @@ never_claim:
     claim_class: [health]
     patterns: ["глаз", "зрени", "устал\\w*\\s+глаз", "бережёт\\s+зрение"]
     lift: never
-    reason: "запрет заказчика (brand.voice.avoid, bans); для немедицинского товара 38-ФЗ ст. 5 ч. 5 п. 6 (H)"
+    reason: "запрет заказчика (brand.voice.avoid, bans); для немедицинского товара 38-ФЗ ст. 5 ч. 5 п. 6 (text 08/01)"
     source: {who: "заказчик", date: "2026-09-24"}
   - id: nc-reviews
     text: "отзывы и оценки покупателей (лампа ещё не продавалась)"

@@ -1,7 +1,7 @@
 {
  "subject": "sdano",
  "lane": "SD",
- "phase": "1 + 2 (SD, SD2) + ночь (SD3, SD4)",
+ "phase": "1 + 2 + ночь",
  "date": "2026-09-25 … 2026-09-26",
  "time": {
   "agent_clock_min": {
@@ -301,7 +301,7 @@
    "weight_on_obj": 0.91
   }
  },
- "note_noise": "noise_e3_shared (img_metrics) на кадре-чертеже меряет чёрные линии среза, а не шум; noise_flat_e3 — по ровным участкам (scripts/onwhite.py), визуально шум не виден",
+ "note_noise": "noise_e3_shared (img_metrics) на кадре-чертеже меряет чёрные линии среза, а не шум; noise_flat_e3 — по ровным участкам, визуально шум не виден",
  "page_b_draft": {
   "assets_kb": {
    "iso-h1b-1200.avif": 19.2,
@@ -340,7 +340,7 @@
   "S4": 1.3
  },
  "phase2": {
-  "note": "фаза 2: агент SD (сцена v2, композиция B, телефонный кадр, иконки v2, проходы C) и SD2 (иконки v3, «С/у», штамп-клип, фонарик C, спеки)",
+  "note": "сцена v2, композиция B, телефонный кадр, иконки v2, проходы C; затем иконки v3, «С/у», штамп-клип, фонарик C, спеки",
   "time": {
    "agent_clock_min": {
     "SD_phase2": 35,
@@ -423,11 +423,11 @@
   }
  },
  "night": {
-  "note": "SD3 (00:06–01:58, затем завис на вызове ffmpeg без -nostdin; остановлен в 05:40) и SD4 (05:34–06:35)",
+  "note": "две сессии: 00:06–01:58 (затем зависание на вызове ffmpeg без -nostdin, остановка в 05:40) и 05:34–06:35",
   "time": {
    "agent_clock_min": {
     "SD3_active": 112,
-    "SD3_from_to": "00:06–01:58 (дальше завис, ход — NOTES «Ход SD3»)",
+    "SD3_from_to": "00:06–01:58",
     "SD4": 60,
     "SD4_from_to": "05:34–06:35"
    },
@@ -488,7 +488,7 @@
    "run": "run_gates.sh: site_probe ×3 (десктоп; Pixel 7 CPU×4 4G; reduce) + gate_check + motion_check + marketing_audit; всё под slot_run --heavy (тишина по Cycles)",
    "a-code": {
     "level": "L0",
-    "when": "01:45–03:56 (SD3)",
+    "when": "01:45–03:56",
     "lcp_ms": {
      "desk": 56,
      "mob": 596,
@@ -518,7 +518,7 @@
    },
    "b-blender": {
     "level": "L0",
-    "when": "04:23–04:34 (SD3)",
+    "when": "04:23–04:34",
     "lcp_ms": {
      "desk": 52,
      "mob": 856,
@@ -548,7 +548,7 @@
    },
    "c-hybrid": {
     "level": "L1",
-    "when": "05:45–05:56 (SD4, спека C: loops_in_view_max 0 → 1)",
+    "when": "05:45–05:56 (спека C: loops_in_view_max 0 → 1)",
     "lcp_ms": {
      "desk": 60,
      "mob": 864,
@@ -589,8 +589,7 @@
      "motion_check": {
       "fail_S": 1,
       "what": "EG-A11Y-17 mob: 1 движение в видимой зоне при бюджете спеки 0 — однократный показ фонаря на телефоне (шаг прокрутки 1, 17,8 % пикселей за 1 с)"
-     },
-     "copy": "99-raw/experiments/SD/gates/c-hybrid_sd3-0455/"
+     }
     },
     "loadavg_at_probe_start": [
      21.4,
@@ -605,7 +604,7 @@
    }
   },
   "fx_probe_c": {
-   "cmd": "fx_probe.py … --modes desktop,mobile,reduce,uncapped --pointer --bench 120 (SD4-bench, 05:55, в тишине)",
+   "cmd": "fx_probe.py … --modes desktop,mobile,reduce,uncapped --pointer --bench 120 (в тишине)",
    "desktop": {
     "ready_s": 0.15,
     "idle_draw_frames": 0,
@@ -644,11 +643,11 @@
     "lcp_ms": 80
    },
    "uncapped": "ошибка инструмента: Page.screenshot timeout 30 с (без vsync скриншот не дождался кадра) — не замерено",
-   "bench_window": "window.__bench(120) в прогоне fx_probe вернул 0 мс; отдельно (scripts/bench_check.py, SD4 06:28) тот же __bench(120): при плане в кадре 1,45 мс (p50 1,3, p95 1,7), после прокрутки к концу 1,36, снова в кадре 1,37 — причина нуля в сценарии fx_probe, не найдена",
+   "bench_window": "window.__bench(120) в прогоне fx_probe вернул 0 мс; отдельно тот же __bench(120): при плане в кадре 1,45 мс (p50 1,3, p95 1,7), после прокрутки к концу 1,36, снова в кадре 1,37 — причина нуля в сценарии fx_probe, не найдена",
    "transfer_note": "fx_probe считает всё, что пришло за прогон (в т. ч. клип штампа при прокрутке, 53,5 КБ), site_probe — первый экран"
   },
   "fx_bench2_c": {
-   "cmd": "scripts/fx_bench2.py (SD4-bench2, 05:59, в тишине): N = 400 кадров, луч на трещине, полумрак 1",
+   "cmd": "fx_bench2.py (в тишине): N = 400 кадров, луч на трещине, полумрак 1",
    "gpu": "ANGLE (Intel, Mesa Intel Iris Xe Graphics RPL-P), OpenGL ES 3.2 — встроенная графика ноутбука",
    "desk_dpr1": {
     "canvas": [
@@ -677,8 +676,8 @@
    "note": "sync — draw + readPixels 1 px на каждый кадр (задержка с ожиданием GPU); throughput — N draw и один readPixels. Реальный телефон не мерили (EG-LIVE-01 — вручную)"
   },
   "judge": {
-   "shot": "scripts/judge_shots.py (SD4-judge, 40 с на A+B+C): десктоп 1440×900 DPR 1; телефон 390×844 DPR 3 (файл 1170×2532); штамп — браузер без GPU-флагов, клип доиграл (t 1,584 с, ended) у B и C",
-   "video": "c-hybrid__fonarik-10s.webm — 10,0 с, 1440×900, 25 к/с, VP9 593 КБ (SD3 01:57, scripts/fx_video.py): все 4 дефекта найдены"
+   "shot": "снимки судьи (40 с на A+B+C): десктоп 1440×900 DPR 1; телефон 390×844 DPR 3 (файл 1170×2532); штамп — браузер без GPU-флагов, клип доиграл (t 1,584 с, ended) у B и C",
+   "video": "c-hybrid__fonarik-10s.webm — 10,0 с, 1440×900, 25 к/с, VP9 593 КБ: все 4 дефекта найдены"
   }
  }
 }

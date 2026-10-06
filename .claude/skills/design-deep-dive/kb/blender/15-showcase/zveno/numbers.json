@@ -363,10 +363,6 @@
     ]
    }
   },
-  "frames": {
-   "hero": "judge/b-blender__hero.png",
-   "xray": "judge/b-blender__xray.png"
-  },
   "phase2": {
    "tracks": "Z2 (25.09 20:17–21:36) → Z3 (26.09 00:05–05:22)",
    "updated": "2026-09-26 05:22",
@@ -374,7 +370,7 @@
     "Z2": 1.3,
     "Z3": 5.3
    },
-   "engine": "Cycles CPU (20 потоков) + OIDN; секвенции 40 спп --fast (телефон 28), кадры судьи 128 спп 1600×1000; EEVEE отклонён (out/engine)",
+   "engine": "Cycles CPU (20 потоков) + OIDN; секвенции 40 спп --fast (телефон 28), кадры судьи 128 спп 1600×1000; EEVEE отклонён",
    "sets": {
     "story-d": "90 кадров 1280×800 (0 = постер, 1–17 кран, 18–89 сцена)",
     "scan-d": "60 кадров 1280×800",
@@ -699,14 +695,13 @@
     ]
    },
    "motion_check_L2": {
-    "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/b-blender/index.html",
+    "target": "b-blender/index.html",
     "level": "L2",
     "fail_B": 0,
     "fail_S": 0,
     "fail_D": 0,
     "na": 2,
-    "spec_fail": 0,
-    "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/Z/out/motion_b"
+    "spec_fail": 0
    },
    "marketing_audit": {
     "compare": {
@@ -750,7 +745,7 @@
  "c-hybrid": {
   "tracks": "Z2 (ассет, 25.09) + Z3 (крюк v2, касательные, 26.09) + CD2/CD3 (крюк _shared/code3d)",
   "updated": "2026-09-26 05:22",
-  "page": "копия a-code (main.js CD3 01:36, вид p3) + строка glb {url, lowUrl, innerUrl, innerLowUrl}; сборка build.sh --glb (крюк v2)",
+  "page": "копия a-code (main.js, вид p3) + строка glb {url, lowUrl, innerUrl, innerLowUrl}; сборка build.sh --glb (крюк v2)",
   "glb_kb": {
    "zveno-main.glb": 1255.5,
    "zveno-inner.glb": 641.0,
@@ -790,7 +785,7 @@
    "why": "без TANGENT анизотропия крышек в three — «веер» 48 граней; optimize нужен --prune-attributes false"
   },
   "hook_v2": {
-   "innerUrl": "взят: −119 КБ br первого экрана десктопа, −62 телефона, первый кадр 309 против 323 мс (замер CD3)",
+   "innerUrl": "взят: −119 КБ br первого экрана десктопа, −62 телефона, первый кадр 309 против 323 мс",
    "ktx2": "не взят: сеть +301 КБ br (+38 %), первый кадр +25 мс; выигрыш только память GPU текстур 7,5 против 28,8 МБ"
   },
   "checks": {
@@ -862,14 +857,13 @@
    ]
   },
   "motion_check_L2": {
-   "target": "/home/mm/Документы/app-design/blender-research/15-showcase/zveno/c-hybrid/index.html",
+   "target": "c-hybrid/index.html",
    "level": "L2",
    "fail_B": 0,
    "fail_S": 0,
    "fail_D": 0,
    "na": 2,
-   "spec_fail": 0,
-   "out": "/home/mm/Документы/app-design/blender-research/99-raw/experiments/Z/out/motion_c"
+   "spec_fail": 0
   },
   "marketing_audit": {
    "compare": {

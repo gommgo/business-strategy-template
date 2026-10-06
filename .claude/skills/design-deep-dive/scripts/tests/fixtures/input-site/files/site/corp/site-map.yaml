@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · карта G (06-multipage-ia/examples/site-map-corporate-b2b.yaml) → v1: templates[].level, свои бриф и факты.
+# ПРИМЕР v1 · карта корпоративного сайта B2B: templates[].level, свои бриф и факты.
 site_map_version: '1'
 checked: '2026-09-24'
 status: draft

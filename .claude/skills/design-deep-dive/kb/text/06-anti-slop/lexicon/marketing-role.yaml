@@ -1,6 +1,6 @@
-# Правила для роли marketing линтера ux 07/06 и поправки «для сайта» (PLAN.md, «Поправки к правилам соседей»).
+# Правила для роли marketing линтера ux 07/06 и поправки «для сайта» (06-anti-slop/01 §11).
 # ux 07/06 §1 (стр. 55–57): маркетинговый словарь к роли marketing не применяется, правил для неё нет — их пишет эта
-# база (контракт тройки §6 п.9). Здесь: (1) overrides унаследованных правил ux-07-06.yaml там, где сайт иначе, чем
+# база (`kb/common/owners.md` § Правила владения). Здесь: (1) overrides унаследованных правил ux-07-06.yaml там, где сайт иначе, чем
 # интерфейс; (2) правила роли marketing, которых нет в ru-/en-словарях; (3) явные «нормы жанра» (level: off) — чтобы
 # агент видел, что правило ux на сайте намеренно выключено, и не включал его обратно.
 # Поправка действует в жанрах своего поля genres; без поля — в шести жанрах сайта. В жанре interface (кабинет,
@@ -8,7 +8,7 @@
 # оно идёт в канон ux, а оговорку ячейки канона выражает конвертер ux_dict_to_yaml.py.
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   group: MKT
   lang: ru
@@ -19,7 +19,7 @@ defaults:
 overrides:
   - target: "ux-5-2-0[1235]"
     set: {level: warning, requires_no_fact: true, excludes: [user-content]}
-    note: "поправка PLAN к ux 07/06 §5.2 и AC-TXT-02: на сайте число, «10 000+», «4,9 из 5» разрешены при записи facts.yaml (fact_ids); без записи — сигнал, ворота — claims_check.py (B2)"
+    note: "поправка к ux 07/06 §5.2 и AC-TXT-02: на сайте число, «10 000+», «4,9 из 5» разрешены при записи facts.yaml (fact_ids); без записи — сигнал, ворота — claims_check.py"
   - target: "ux-5-2-02"
     set: {level: info, requires_no_fact: true, excludes: [user-content]}
     note: "«Нам доверяют» / «Trusted by» — законная подпись ряда логотипов, если логотипы из facts.yaml с разрешением"
@@ -31,13 +31,13 @@ overrides:
     note: "«Скоро» / «Coming soon» законно на странице листа ожидания (landing-waitlist)"
   - target: "ux-2-4-01"
     set: {level: "off"}
-    note: "дублирует ru-syn-genitive-chain; регулярка по окончаниям -а/-я шумит на подписях картинок (опыт C/02)"
+    note: "дублирует ru-syn-genitive-chain; регулярка по окончаниям -а/-я шумит на подписях картинок"
   - target: "ux-5-3-03"
     set: {appliesTo: [], excludes: [user-content], slot_types: [headline, subheadline, section-title, card-title, step-title, eyebrow, badge, stat-label, pricing-plan-name, article-title, article-heading, case-title, form-title, nav-label]}
-    note: "ux 07/06 §5.3 «WORD — fragment» — про заголовки и подписи; в прозе (guarantee-text) это обязательное тире «Смета — бесплатно» (находка B1, опыт B1/02)"
+    note: "ux 07/06 §5.3 «WORD — fragment» — про заголовки и подписи; в прозе (guarantee-text) это обязательное тире «Смета — бесплатно»"
   - target: "ux-3-2-0[14]"
     set: {excludes: [marketing, help, user-content, nav]}
-    note: "поправка PLAN к ux 07/06 §3.2: «Услуги», «Решения», «Каталог» в навигации многостраничника — конвенция (закон Якоба)"
+    note: "поправка к ux 07/06 §3.2: «Услуги», «Решения», «Каталог» в навигации многостраничника — конвенция (закон Якоба)"
   - target: "ux-3-2-07"
     set: {level: warning, appliesTo: [link, action]}
     note: "«Подробнее» на сайте — не error (CONTRADICTIONS X25): главная кнопка — warning, переписать на следствие; ряд карточек-маршрутов — info, если доступное имя ссылки называет объект карточки: это видно на странице, а не в тексте; уровни — до калибровки на пилотах"
@@ -53,7 +53,7 @@ rules:
     message: "«Легко», «быстро», «мгновенно» без факта: обещание, которое нечем проверить."
     replacement: "число или механизм: «подключение за 10 минут», «3 поля в форме» (из facts.yaml)"
     examples: {bad: "Подключиться легко и быстро.", good: "Подключение за 10 минут."}
-    source: "PLAN.md поправка к ux 07/06 §1 («легко», «быстро» — только с фактом); ux 07/06 §1 («making things easy is not the same as making things seem easy» [V:vxGrL3YSBvw 26:32])"
+    source: "поправка к ux 07/06 §1 («легко», «быстро» — только с фактом); ux 07/06 §1 («making things easy is not the same as making things seem easy» [V:vxGrL3YSBvw 26:32])"
     evidence: "[практика]"
   - id: mkt-role-power-words
     marker_id: COPY-M-LEX-02
@@ -77,7 +77,7 @@ rules:
     message: "Норма жанра: «платформа», «решение» законны как название рыночной категории (позиционирование). Слоп — только синонимы-циклы (ru-syn-product-synonyms)."
     replacement: "не трогать одно упоминание категории; не называть продукт тремя разными словами"
     examples: {bad: "Платформа для кофеен", good: "Платформа для кофеен"}
-    source: "PLAN.md поправка к ux 07/06 §1 (категория продукта — элемент позиционирования, Dunford); ux 07/06 §1 (в интерфейсе — предупреждение)"
+    source: "поправка к ux 07/06 §1 (категория продукта — элемент позиционирования, Dunford); ux 07/06 §1 (в интерфейсе — предупреждение)"
     evidence: "[практика]; решение базы"
     note: "level: off — правило записано, чтобы его не включили обратно по ux"
   - id: mkt-role-headline-verb
@@ -89,7 +89,7 @@ rules:
     message: "Норма жанра: заголовок оффера может начинаться с глагола или называть результат (правило ux 07/02 §4.1 «в заголовке глаголу не место» написано для экранов приложения)."
     replacement: "не трогать"
     examples: {bad: "Считайте зарплату за 10 минут", good: "Считайте зарплату за 10 минут"}
-    source: "PLAN.md поправка к ux 07/02 §4.1 (стр. 344); аудит UX §4 п.9"
+    source: "поправка к ux 07/02 §4.1 (стр. 344)"
     evidence: "[практика]; решение базы"
     note: "level: off — документирует выключенное правило соседа"
   - id: mkt-role-social-proof-caption
@@ -103,7 +103,7 @@ rules:
     message: "Подпись соцдоказательства: законна, если логотипы и названия — из facts.yaml с разрешением на публикацию."
     replacement: "fact_ids на записи логотипов (вид «логотип», разрешение); без разрешения — блок не выводить"
     examples: {bad: "Нам доверяют", good: "Кофейни, которые считают с нами зарплату"}
-    source: "PLAN.md поправка к ux 07/06 §5.2 и AC-TXT-02; аудит UX §4 п.7; контракт тройки §6 п.10"
+    source: "поправка к ux 07/06 §5.2 и AC-TXT-02; kb/common/owners.md § Общие правила тройки"
     evidence: "[практика]"
   - id: mkt-role-eyebrow-generic
     marker_id: COPY-M-STR-10
@@ -114,7 +114,7 @@ rules:
     message: "Надзаголовок-ярлык не несёт информации: повторяет, что секция и так показывает."
     replacement: "убрать; оставить надзаголовок только с информацией (этап «Шаг 2 из 3», дата, категория клиента)"
     examples: {bad: "Преимущества", good: "Для сетей от 10 точек"}
-    source: "PLAN.md поправка к ux 07/06 §5.3 и AC-TXT-13 («слово над заголовком — только если несёт информацию»); taste EYEBROW RESTRAINT; impeccable («eyebrow — ban, not a default»)"
+    source: "поправка к ux 07/06 §5.3 и AC-TXT-13 («слово над заголовком — только если несёт информацию»); taste EYEBROW RESTRAINT; impeccable («eyebrow — ban, not a default»)"
     evidence: "[практика]"
   - id: mkt-role-easy-fast-en
     marker_id: COPY-M-CNT-01
@@ -128,5 +128,5 @@ rules:
     message: "«Easy», «quick», «instantly» without a fact."
     replacement: "a number or mechanism: «set up in 10 minutes», «3 fields»"
     examples: {bad: "Get started easily and quickly.", good: "Set up in 10 minutes."}
-    source: "ux 07/06 §4.1 (Simply, Just, Easily, Quickly — interface warning); PLAN.md correction to ux 07/06 §1"
+    source: "ux 07/06 §4.1 (Simply, Just, Easily, Quickly — interface warning); correction to ux 07/06 §1"
     evidence: "[практика]"

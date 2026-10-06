@@ -51,7 +51,7 @@ import sys
 from html.parser import HTMLParser
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # scripts/lib
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb('site'))
 DIR07 = os.path.join(ROOT, '07-seo-geo-performance-analytics')
@@ -289,39 +289,16 @@ def mobile_device(pw, cond=None):
     return dev
 
 
-def _ancestor_flock(path):
-    """Держит ли замок процесс-предок через flock(1) (`flock … <замок> python3 утилита.py`): повторная блокировка того же
-    файла из дочернего процесса ждала бы родителя до таймаута. Только Linux (/proc); ошибка — False."""
-    name = os.path.basename(path)
-    try:
-        pid = os.getppid()
-        for _ in range(16):
-            if pid <= 1:
-                break
-            with open(f'/proc/{pid}/cmdline', 'rb') as fh:
-                args = [x.decode('utf-8', 'replace') for x in fh.read().split(b'\0') if x]
-            if args and os.path.basename(args[0]) == 'flock' and any(x.endswith(name) for x in args[1:]):
-                return True
-            with open(f'/proc/{pid}/stat', encoding='utf-8', errors='replace') as fh:
-                pid = int(fh.read().rsplit(')', 1)[1].split()[1])
-    except (OSError, ValueError, IndexError):
-        return False
-    return False
-
-
 @contextlib.contextmanager
 def heavy_lock(domains=(), timeout=900.0, budgets=None):
     """Тихая машина для замера времени (conditions.quiet): общий тяжёлый замок (тот же, что slot_run.py --heavy), затем
-    общий замок браузера, затем замки браузера доменов — порядок slot_run. Замок, который уже держит обёртка (slot_run.py
-    передаёт SLOT_RUN_HOLDS, flock — процесс-предок), повторно не берётся. Отдаёт список взятых замков."""
+    общий замок браузера, затем замки браузера доменов — порядок slot_run; все — kbpaths.lock. Замок, который уже держит
+    этот процесс или его предок, повторно не берётся и не ждётся; удержанное slot_run.py (переменная SLOT_RUN_HOLDS) — тоже.
+    Отдаёт список замков в порядке взятия."""
     taken = []
     with contextlib.ExitStack() as st:
         for name, dom in lock_plan(domains, budgets=budgets):
-            path = kbpaths.lock_path(name, dom)
-            if _ancestor_flock(path):
-                continue
-            st.enter_context(kbpaths.lock(name, dom, timeout=timeout))
-            taken.append(path)
+            taken.append(st.enter_context(kbpaths.lock(name, dom, timeout=timeout)))
         yield taken
 
 
@@ -534,9 +511,9 @@ def lcp_element_gate(dev, tag, has_lcp, acc, h1item):
     if lcp.get('lazy'):
         return Gate('SG-PERF-06', dev, 'FAIL', 'lazy', 'LCP-картинка без lazy', 'B', source='page_accept')
     if rwhat:
-        # H1 первого кадра невидим → в Chromium выпадает из LCP (creative E/01; поле CrUX — Chrome)
+        # H1 первого кадра невидим → в Chromium выпадает из LCP (поле CrUX — тоже Chrome)
         return Gate('SG-PERF-06', dev, 'FAIL', rwhat[:90], 'H1 без opacity 0, маски строк, скрытия скриптом', rsev,
-                    'creative E/01 (Chromium 153): честно — только transform; opacity ≥ 0,01 и clip-path — LCP раньше показа')
+                    'Chromium 153: честно — только transform; opacity ≥ 0,01 и clip-path — LCP раньше показа')
     if (lcp.get('tag') or '').upper() == 'IMG' and lcp.get('fp') != 'high':
         return Gate('SG-PERF-06', dev, 'FAIL', 'без fetchpriority=high', 'LCP-картинка с fetchpriority=high', 'S',
                     source='page_accept')
@@ -577,7 +554,7 @@ def letters(t):
 
 def h1_nojs_item(d, s):
     """«H1 только после JS» — B, только если H1 нет в сыром HTML. Если H1 в HTML есть, а сравнение текста упало (innerText
-    склеивает слова на скрытых <br> — опыт K/03: ru-matemarketing, телефон), текст сверяется без пробелов и регистра."""
+    склеивает слова на скрытых <br>, чаще на телефоне), текст сверяется без пробелов и регистра."""
     if s.get('nojs_h1') or (s.get('h1_n') or 0) < 1:
         return ('-', '')
     nj = d.get('nojs') or {}
@@ -592,7 +569,7 @@ def h1_nojs_item(d, s):
     return ('D', 'h1 в HTML есть, текст отличается от видимого')
 
 
-# ---------------------------------------------------------------- H1 и LCP (creative E/01), контраст по узлам
+# ---------------------------------------------------------------- H1 и LCP, контраст по узлам
 VOID_TAGS = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'param', 'source', 'track', 'wbr'}
 OPACITY_RX = re.compile(r'opacity\s*:\s*([\d.]+)', re.I)
 ZERO_OPACITY_RX = re.compile(r'(?:^|[;{\s])opacity\s*:\s*0(?:\.0+)?\s*(?:;|}|$|!)', re.I)
@@ -644,7 +621,7 @@ def hidden_selectors(css):
 
 
 def h1_reveal_evidence(raw, css='', near_zero=None):
-    """Признаки «H1 первого кадра невидим» в сыром HTML и CSS (creative E/01): hidden — opacity 0 (стиль, класс opacity-0,
+    """Признаки «H1 первого кадра невидим» в сыром HTML и CSS: hidden — opacity 0 (стиль, класс opacity-0,
     правило CSS, анимация из 0), visibility: hidden, класс invisible у H1 или 4 ближайших предков, скрипт разбивки с маской
     строк; near_zero — opacity 0 < x < near_zero (SG-PERF-06 limits.opacity_near_zero; Framer appear 0.001) или clip-path —
     H1 остаётся кандидатом, но LCP раньше показа."""
@@ -762,7 +739,7 @@ def axe_node_class(n, ctas):
         return 'h1' if re.match(r'\s*<h1\b', n.get('html') or '', re.I) else 'unknown'
     if n.get('in_h1'):
         return 'h1'
-    # баннер cookie — ключевой; строка «мы используем cookie» в подвале ниже первого экрана — нет (K/03: ru-matemarketing)
+    # баннер cookie — ключевой; строка «мы используем cookie» в подвале ниже первого экрана — нет
     if n.get('in_form') or (n.get('cookie') and (not n.get('in_footer') or n.get('first_screen'))):
         return 'consent'
     if n.get('action'):
@@ -803,7 +780,7 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
             R.append(cmp_outcome('SG-PERF-01' if dev == 'mobile' else 'SG-PERF-02', dev, s.get('lcp_ms'), oc['lcp_ms_lab'],
                                  'lab-unthrottled: диагностика, не приёмка' if dev == 'mobile' else 'anatomy, без троттлинга'))
         # SG-PERF-03: CLS — окно сессии web-vitals (fin.wv_cls), а не сумма всех сдвигов (summary.cls_session): сумма
-        # завышает CLS прокрутки (опыт K/03: ru-azbukaokon телефон — сумма 0,42, web-vitals 0,15)
+        # завышает CLS прокрутки (страница корпуса базы, телефон: сумма 0,42, web-vitals 0,15)
         wv_cls = g(d, 'fin', 'wv_cls')
         if isinstance(wv_cls, (int, float)):
             R.append(cmp_outcome('SG-PERF-03', dev, wv_cls, oc['cls_lab'], 'web-vitals CLS (окно сессии)'))
@@ -895,7 +872,7 @@ def evaluate(prof, anatomy, accept=None, jurisdiction='ru', geo=None, ia=None, a
             sent, cookies = tracking_evidence(d)
             if jurisdiction == 'eu' and not sent and not cookies and g(d, 'network', 'tracking_requests') is not None:
                 # до выбора только загрузка библиотек (gtm.js, SDK) без отправки событий и без cookie трекинга —
-                # S [спорно]: передача IP поставщику, не хранение на устройстве (опыт K/03: en-headspace)
+                # S [спорно]: передача IP поставщику, не хранение на устройстве
                 R.append(Gate('SG-LEGAL-01', dev, 'FAIL', tb, 'после согласия', 'S',
                               'до выбора загружены только библиотеки: событий и cookie трекинга нет [спорно]; грузить после согласия'))
             else:
@@ -1223,7 +1200,8 @@ def eval_ia(ia):
 
 def eval_axe(axe, ctas=None):
     """SG-A11Y-01, 02. color-contrast — B только у ключевых узлов (H1, лид первого экрана, призыв, согласие и
-    баннер cookie; профиль I 08/03 §8), прочие узлы — S; без адресов узлов (счётчики I/02) — S, которое исключение не снимает:
+    баннер cookie; kb/site/08-legal-trust-a11y/03-a11y-marketing-pages.md §8), прочие узлы — S; без адресов узлов (только
+    счётчики) — S, которое исключение не снимает:
     сначала проверить ключевые элементы (axe с адресами узлов, page_accept.py --contrast <селекторы> или кадр)."""
     v = (axe.get('axe') or axe).get('violations') or []
     ids = {x.get('id') for x in v}
@@ -1366,7 +1344,7 @@ def print_table(prof, results, lay=None):
 
 
 def lock_plan(domains=(), holds=None, budgets=None):
-    """Порядок замков тихой машины: тяжёлый, общий браузера, браузера доменов; без тех, что держит обёртка."""
+    """Порядок замков тихой машины: тяжёлый, общий браузера, браузера доменов; без тех, что держит slot_run.py."""
     held = {x.strip() for x in (holds if holds is not None else os.environ.get('SLOT_RUN_HOLDS', '')).split(',') if x.strip()}
     plan = [(conditions(budgets)['lock'], None), ('browser', None)] + [('browser', d) for d in domains]
     return [(n, d) for n, d in plan if not (d is None and n in held)]
@@ -1493,7 +1471,7 @@ def selftest(gates_path=None):
     check('clamp 40px→160px (×4) → S (SG-A11Y-08)', eval_clamp('<style>h1{font-size:clamp(40px, 8vw, 160px)}</style>').severity == 'S')
     check('clamp 2rem→4rem (×2) → PASS', eval_clamp('<p style="font-size: clamp(2rem, 1rem + 3vw, 4rem)">x</p>').status == 'PASS')
     check('clamp не найден → SKIP', eval_clamp('<p>x</p>').status == 'SKIP')
-    # калибровка опыта K/03 — ложные B из прогона на 8 страницах
+    # калибровка на корпусе базы — ложные B из прогона на 8 страницах
     f7 = copy.deepcopy(f2)
     f7['mobile']['summary'].update({'cls_session': 0.42})
     f7['mobile']['fin']['wv_cls'] = 0.15
@@ -1518,7 +1496,7 @@ def selftest(gates_path=None):
     f9['mobile']['network']['tracking_requests'].append({'u': 'https://region1.google-analytics.com/g/collect', 'vendor': 'ga4', 'phase': 'load'})
     check('ЕС: событие GA4 до выбора → B', {r.id: r for r in evaluate(prof, f9, jurisdiction='eu')}['SG-LEGAL-01'].severity == 'B')
     check('РФ: нет ссылки на политику в форме → B', {r.id: r for r in evaluate(prof, f9, jurisdiction='ru')}['SG-LEGAL-04'].severity == 'B')
-    # контраст по классам узлов (профиль I 08/03 §8; опыт K/03) и H1 в LCP (creative E/01)
+    # контраст по классам узлов (08-legal-trust-a11y/03 §8) и H1 в LCP
     def node(**k):
         base = {'in_h1': False, 'action': False, 'in_form': False, 'cookie': False, 'first_screen': False,
                 'in_header': False, 'in_footer': False, 'text': 'x'}
@@ -1533,7 +1511,7 @@ def selftest(gates_path=None):
           eval_axe({'violations': [{'id': 'color-contrast', 'nodes': [node(cookie=True, in_footer=True)]}]})[0].severity == 'S'
           and eval_axe({'violations': [{'id': 'color-contrast', 'nodes': [node(cookie=True, in_footer=True, first_screen=True)]}]})[0].severity == 'B')
     r10 = eval_axe({'axe': {'violations': [{'id': 'color-contrast', 'nodes': 12}]}})[0]
-    check('контраст без адресов узлов (счётчик I/02) → S', r10.severity == 'S')
+    check('контраст без адресов узлов (только счётчик) → S', r10.severity == 'S')
     r10 = apply_exceptions([r10], [{'id': 'SG-A11Y-01', 'why': 'x', 'who': 'y'}])[0]
     check('контраст без адресов: исключение S не снимает', not getattr(r10, 'excepted', False))
     check('контраст прочих + link-name → B', eval_axe({'violations': [{'id': 'color-contrast', 'nodes': [node()]}, {'id': 'link-name'}]})[0].severity == 'B')
@@ -1607,9 +1585,28 @@ def selftest_sources(check, budgets, gates, prof, clean):
     check('условия замера: окно первого экрана 5 с, телефон — дескриптор и CPU, сеть кбит/с → байт/с',
           window_ms(budgets) == 5000 and c['mobile']['descriptor'] == 'Pixel 7' and c['mobile']['cpu_slowdown'] == 4
           and cdp_network(c)['downloadThroughput'] == c['mobile']['down_kbps'] * 125 and c['desktop']['width'] == 1440)
-    check('тишина: тяжёлый замок, затем браузер, затем домены; удержанное обёрткой не берётся',
+    check('тишина: тяжёлый замок, затем браузер, затем домены; удержанное slot_run.py не берётся',
           lock_plan(('ai-media',), holds='', budgets=budgets) == [(c['lock'], None), ('browser', None), ('browser', 'ai-media')]
           and lock_plan((), holds=f"{c['lock']},browser", budgets=budgets) == [])
+    import tempfile
+    env0 = {k: os.environ.get(k) for k in ('DDD_HOME', 'SLOT_RUN_HOLDS')}
+    with tempfile.TemporaryDirectory() as td:   # замки — во временном $DDD_HOME: чужой замер не ждём
+        os.environ['DDD_HOME'] = td
+        os.environ.pop('SLOT_RUN_HOLDS', None)
+        try:
+            with heavy_lock(('site',), timeout=5, budgets=budgets) as outer:
+                held = [kbpaths.lock_held(n, d) for n, d in ((c['lock'], None), ('browser', None), ('browser', 'site'))]
+                t0 = datetime.datetime.now()
+                with heavy_lock(('site',), timeout=5, budgets=budgets):
+                    nested = (datetime.datetime.now() - t0).total_seconds()
+            check('тишина: три замка через kbpaths.lock; вложенный heavy_lock под ними не ждёт; после выхода свободны',
+                  len(outer) == 3 and all(held) and nested < 1 and not kbpaths.lock_held('browser'))
+        finally:
+            for k, v in env0.items():
+                if v is None:
+                    os.environ.pop(k, None)
+                else:
+                    os.environ[k] = v
     js = pause_label_re_js()
     rx = re.compile(js[1:-2], re.I)
     check('подписи паузы: одно выражение JS из PAUSE_LABELS — «Вращение», «Пауза», «Stop animation» да, «Купить» нет',

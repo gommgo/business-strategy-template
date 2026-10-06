@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Звено — модульный манипулятор, который собирают за 30 минут · демо L2</title>
-<meta name="description" content="Робот-манипулятор из восьми модулей: соединяются поворотом кольца, программируются показом. Демо-страница рецепта 03 базы creative-research.">
-<!-- Рабочий пример L2 · рецепт 10-recipes/03-product-launch-l2.md · агент J · волна 3 · 2026-09-25 · Chromium 153 / WebKit 26.6
-     15-showcase «Звено», вариант C «гибрид» (дорожка Z2, 25.09.2026): разметка и тексты — копия a-code; сцена — общий код 3D
-     (_shared/code3d, дорожка CD: IK, студия, свет по сюжету, пол-отражение, туман, пост), модули и начинка сустава — GLB из Blender
-     (дорожка Z: геометрия и крепёж, запечённый AO); постеры — кадр той же сцены. Демо: бренд, характеристики и цены вымышлены; шрифты
+<meta name="description" content="Робот-манипулятор из восьми модулей: соединяются поворотом кольца, программируются показом. Демо-страница рецепта 03 базы creative.">
+<!-- Рабочий пример L2 · рецепт creative 10-recipes/03-product-launch-l2.md · Chromium 153 / WebKit 26.6
+     «Звено», вариант C «гибрид»: разметка и тексты — копия a-code; сцена — общий код 3D
+     (_shared/code3d: IK, студия, свет по сюжету, пол-отражение, туман, пост), модули и начинка сустава — GLB из Blender
+     (геометрия и крепёж, запечённый AO); постеры — кадр той же сцены. Демо: бренд, характеристики и цены вымышлены; шрифты
      OFL; без CDN. Сюжет «история продукта»: модули → сборка → внутри сустава → программирование показом. -->
 <script>
-/* до первой отрисовки: выбор «движения» из localStorage (переключатель F2 motion-toggle), класс js и режим сцены.
+/* до первой отрисовки: выбор «движения» из localStorage (переключатель motion-toggle), класс js и режим сцены.
    gl-pending — ждём 3D: станции-картинки скрыты, сцены высокие; в reduce класса нет → страница-стопка станций. */
 (function () {
   var d = document.documentElement, m = null;
@@ -22,7 +22,7 @@
   if (!reduce) d.classList.add('gl-pending');
 })();
 </script>
-<!-- оба подмножества шрифтов первого экрана (цифры, «», —, двоеточие — в latin; F2: без предзагрузки CLS загрузки 0,15) -->
+<!-- оба подмножества шрифтов первого экрана (цифры, «», —, двоеточие — в latin; без предзагрузки CLS загрузки 0,15) -->
 <link rel="preload" href="_shared/fonts/science-gothic/science-gothic-cyrillic-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="_shared/fonts/science-gothic/science-gothic-latin-wdth-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="_shared/fonts/onest/onest-cyrillic-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -205,7 +205,7 @@
 <footer class="foot" data-section="footer">
   <div class="container">
     <p><b>Звено</b> · модульные манипуляторы · ИНН 0000000000 · <a id="policy" href="#policy">Политика обработки данных</a></p>
-    <p class="foot__demo">Демо-страница базы creative-research (рецепт 03, уровень L2): бренд, характеристики и&nbsp;цены вымышлены; 3D — код и&nbsp;модули из&nbsp;Blender, постеры — кадр той&nbsp;же сцены.</p>
+    <p class="foot__demo">Демо-страница базы creative (рецепт 03, уровень L2): бренд, характеристики и&nbsp;цены вымышлены; 3D — код и&nbsp;модули из&nbsp;Blender, постеры — кадр той&nbsp;же сцены.</p>
   </div>
 </footer>
 </body>

@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """Проверка перекрёстных ссылок, меток и структуры одной базы знаний `kb/<база>/`: то, чего не делает `refcheck.py`, —
-источники `[S…]`, ролики `[V:…]` с таймкодами, README папок против диска, метки опытов, разделы по номерам папок.
+источники `[S…]`, ролики `[V:…]` по форме, README папок против диска, метки опытов, разделы по номерам папок.
 
 База — папка `kb/<база>/` скилла (ux, ui, site, text, creative, ai-media, blender, claude-design); соседние базы —
 папки рядом. Обходит `.md` тематических папок `NN-…` (кроме `99-raw/`), файлы `NN-….md` корня базы и корневые
-`README.md`, `PLAN.md`, `CONTRADICTIONS.md` (транскрипты `91-videos/transcripts/` не разбираются); по умолчанию ещё
+`README.md`, `PLAN.md`, `CONTRADICTIONS.md` (папки `transcripts/` не разбираются); по умолчанию ещё
 `99-raw/tools/README.md` и `99-raw/phase5/*.md`, если есть, — только для проверок (а) и (ж).
 Проверки:
 
@@ -28,16 +28,13 @@
       соседнем файле — WARN с подсказкой, иначе ERROR.
   (в) ссылки `[S<n>]` — определён ли номер в разделе «Источники» того же файла; если нет — в другом файле той же
       папки или базы; какие номера определены, но не используются (для README и дайджестов не считается).
-  (г) ссылки `[V:<id> mm:ss]` (и несколько в одних скобках через `;`) — id ролика из 11 символов, таймкод по форме
-      (минуты и секунды меньше 60) — иначе ERROR. Если у базы или соседей есть папка роликов `91-videos/`: дайджест
-      этой базы; только транскрипт этой базы (не битая, INFO); дайджест или транскрипт соседней базы (INFO); только
-      строка каталога или списки поиска (WARN); ничего (ERROR); таймкод больше длительности ролика по `catalog.tsv` —
-      ERROR. Роликов в скилле нет ни у одной базы — ссылка сверяется только по форме (сводка INFO).
+  (г) ссылки `[V:<id> mm:ss]` (и несколько в одних скобках через `;`) — id ролика из 11 символов (иначе WARN),
+      таймкод по форме (минуты и секунды меньше 60) — иначе ERROR. Роликов в скилле нет: ссылка сверяется только по
+      форме (сводка INFO).
   (д) README папок: все ли файлы и подпапки упомянуты в `README.md`; все ли упомянутые в README файлы этой папки
       (`NN-….md`, `*.yaml`, `*.json`, `*.tsv`, `*.html`) есть на диске; заявленное в таблице README число строк.
   (е) обязательные разделы содержательного файла («Выжимка для агента», «Частые ошибки», «Чек-лист», «Открытые
-      вопросы», «Источники»); у дайджестов `91-videos/digests/` — свой набор («Процесс или методика» — «если
-      показаны», его отсутствие — INFO).
+      вопросы», «Источники»).
   (ж) метки `[проверено: …]`: пути `99-raw/experiments/…` и сокращения `<опыт>/<NN>` (`H/02`, `C/01–05`,
       «ai-media E/03» — опыт соседней базы) ведут на существующую папку или файл опыта; голые `[проверено]` без пути
       опыта на той же строке — сводка INFO по файлу.
@@ -123,18 +120,6 @@ REQUIRED_DEFAULT = [
     ("Открытые вопросы", ("открытые вопросы",)),
     ("Источники", ("источники",)),
 ]
-# формат дайджеста ролика `91-videos/digests/<id>.md`; живая фаза — пункт раздела «Что это значит»
-REQUIRED_DIGEST = [
-    ("Выжимка для агента", ("выжимка",)),
-    ("Числа и эксперименты", ("числа",)),
-    ("Процесс или методика", ("процесс", "методик")),
-    ("Антипаттерны", ("антипаттерн",)),
-    ("Что это значит для ИИ-агента", ("что это значит",)),
-    ("Что устарело или спорно", ("устарело",)),
-    ("Комментарии зрителей", ("комментари",)),
-    ("Куда это относится в базе", ("куда это относится",)),
-]
-OPTIONAL_DIGEST = {"Процесс или методика"}  # «если показаны»
 
 HEADING_RE = re.compile(r"^(#{1,4})\s+(.*?)\s*$")
 NUM_HEADING_RE = re.compile(r"^(?:Шаг\s+)?(\d+(?:\.\d+)*[a-z]?)\.?(?:\s+|$)")
@@ -206,10 +191,6 @@ def read_lines(path):
 
 def rel(root, path):
     return os.path.relpath(path, root).replace(os.sep, "/")
-
-
-def is_digest(relpath):
-    return relpath.startswith("91-videos/digests/") and not os.path.basename(relpath).startswith("_index")
 
 
 def is_raw(relpath):
@@ -438,7 +419,8 @@ def find_nn_file(dirpath, nn, md_only=True):
 
 
 def find_folder(root, filedir, prefix_dots, name_or_nn):
-    """Папка по имени (`08-image-post-processing`, `91-videos/digests`, `07-…`) или номеру (`08`), от файла или корня."""
+    """Папка по имени (`08-image-post-processing`, `02-site-types/examples`, `07-…`) или номеру (`08`), от файла или
+    корня."""
     for base in (os.path.normpath(os.path.join(filedir, prefix_dots)), root):
         if re.match(r"^\d\d$", name_or_nn):
             hits = [h for h in sorted(glob.glob(os.path.join(base, name_or_nn + "-*"))) if os.path.isdir(h)]
@@ -1130,7 +1112,7 @@ def check_source_refs(root, relpath, lines, infence, rep, per_file, per_folder, 
     is_index = relpath.endswith(("README.md", "glossary.md"))
     if not uses and not defs:
         return
-    if uses and start is None and not is_index and not is_digest(relpath):
+    if uses and start is None and not is_index:
         rep.add("в", "WARN", relpath, 0, "в файле есть ссылки %s, но нет раздела «Источники»" % ", ".join("[%s]" % k for k in sorted(uses)[:5]))
 
     def keyf(k):
@@ -1141,9 +1123,9 @@ def check_source_refs(root, relpath, lines, infence, rep, per_file, per_folder, 
             rep.cat("в", "определён в своём файле", len(uses[key]))
             continue
         where = uses[key]
-        if is_index or is_digest(relpath):
-            rep.cat("в", "README или дайджест цитирует чужую метку (не проверяется)", len(where))
-            continue  # README и дайджесты цитируют метки других файлов
+        if is_index:
+            rep.cat("в", "README цитирует чужую метку (не проверяется)", len(where))
+            continue  # README цитирует метки других файлов
         if key in per_folder[folder]:
             rep.cat("в", "определён в другом файле папки (INFO)", len(where))
             rep.add("в", "INFO", relpath, where[0], "[%s] не определён в файле, но определён в другом файле папки (%d использований)" % (key, len(where)))
@@ -1161,67 +1143,13 @@ def check_source_refs(root, relpath, lines, infence, rep, per_file, per_folder, 
 
 
 # ----------------------------------------------------------------------------------------------------- (г)
-def load_catalog(root):
-    cat = {}
-    path = os.path.join(root, "91-videos", "catalog.tsv")
-    if not os.path.exists(path):
-        return cat
-    lines = read_lines(path)
-    head = lines[0].split("\t") if lines else []
-    try:
-        i_id, i_dur = head.index("id"), head.index("duration")
-    except ValueError:
-        return cat
-    for ln in lines[1:]:
-        cols = ln.split("\t")
-        if len(cols) > max(i_id, i_dur):
-            cat[cols[i_id]] = cols[i_dur]
-    return cat
-
-
-def load_v_search(root):
-    """Ролики, найденные поиском вне каталога (`99-raw/experiments/V/01-catalog-build/seen.tsv`): id → длительность
-    (длительности в списке нет — пустая строка)."""
-    found = {}
-    for p in glob.glob(os.path.join(root, "99-raw", "experiments", "V", "*", "seen.tsv")):
-        for ln in read_lines(p)[1:]:
-            cols = ln.split("\t")
-            if len(cols) > 1 and re.match(r"^[A-Za-z0-9_-]{11}$", cols[1]):
-                found[cols[1]] = ""
-    return found
-
-
-def load_neighbor_videos(root):
-    """Дайджесты и транскрипты соседних баз: id → (база, 'дайджест'|'транскрипт'), длительности из их catalog.tsv."""
-    vids, durs = {}, {}
-    for nb in NEIGHBORS:
-        nroot = os.path.normpath(os.path.join(root, "..", nb))
-        for kind, sub in (("транскрипт", "transcripts"), ("дайджест", "digests")):  # дайджест перекрывает транскрипт
-            for p in glob.glob(os.path.join(nroot, "91-videos", sub, "*.md")):
-                vid = os.path.splitext(os.path.basename(p))[0]
-                if vid.startswith("_index"):
-                    continue
-                if vid not in vids or vids[vid][1] != "дайджест":
-                    vids[vid] = (nb, kind)
-        for vid, dur in load_catalog(nroot).items():
-            durs.setdefault(vid, dur)
-    return vids, durs
-
-
-def tc_seconds(tc):
-    s = 0
-    for p in tc.split(":"):
-        s = s * 60 + int(p)
-    return s
-
-
 def tc_valid(tc):
     """Таймкод по форме: минуты и секунды (и минуты часового таймкода) меньше 60."""
     return all(int(p) < 60 for p in tc.split(":")[1:])
 
 
-def check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, catalog, v_search, nb_videos, nb_durs,
-                     have_videos=True):
+def check_video_refs(root, relpath, lines, infence, rep):
+    """Ссылки `[V:<id> mm:ss]` по форме: id ролика из 11 символов, таймкод с минутами и секундами меньше 60."""
     no_tc = 0
     outside = 0
     for i, ln in enumerate(lines):
@@ -1237,41 +1165,14 @@ def check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, c
                     continue
                 vid = idm.group(1)
                 rep.tick("г")
-                rest = body[idm.end():]
-                tcs = TIMECODE_RE.findall(rest)
+                tcs = TIMECODE_RE.findall(body[idm.end():])
                 for tc in tcs:
                     if not tc_valid(tc):
                         rep.cat("г", "таймкод не по форме (битая)")
                         rep.add("г", "ERROR", relpath, i + 1, "[V:%s %s]: таймкод не по форме — минуты и секунды меньше 60" % (vid, tc))
-                if not have_videos:
-                    outside += 1
-                elif vid in digests:
-                    rep.cat("г", "дайджест этой базы")
-                elif vid in transcripts:
-                    rep.cat("г", "нет дайджеста, есть транскрипт (не битая)")
-                    rep.add("г", "INFO", relpath, i + 1, "[V:%s]: дайджеста нет, есть транскрипт `91-videos/transcripts/%s.md` — не битая" % (vid, vid))
-                elif vid in nb_videos:
-                    nb, kind = nb_videos[vid]
-                    rep.cat("г", "%s соседней базы (не битая)" % kind)
-                    rep.add("г", "INFO", relpath, i + 1, "[V:%s]: %s в соседней базе `../%s/91-videos/` — в этой базе ролика нет" % (vid, kind, nb))
-                elif vid in catalog:
-                    rep.cat("г", "только строка каталога")
-                    rep.add("г", "WARN", relpath, i + 1, "[V:%s]: дайджеста и транскрипта нет, только строка каталога" % vid)
-                elif vid in v_search:
-                    rep.cat("г", "только списки поиска")
-                    rep.add("г", "WARN", relpath, i + 1, "[V:%s]: ролик вне каталога (списки поиска), нет ни дайджеста, ни транскрипта" % vid)
-                else:
-                    rep.cat("г", "нет ничего (битая)")
-                    rep.add("г", "ERROR", relpath, i + 1, "[V:%s]: нет ни дайджеста, ни транскрипта, ни строки каталога — ни здесь, ни у соседей" % vid)
+                outside += 1
                 if not tcs:
                     no_tc += 1
-                dur = catalog.get(vid) or v_search.get(vid) or nb_durs.get(vid)
-                if dur and re.match(r"^\d{1,2}(:\d{2}){1,2}$", dur):
-                    dmax = tc_seconds(dur)
-                    for tc in tcs:
-                        if tc_seconds(tc) > dmax + 1:
-                            rep.cat("г", "таймкод больше длительности")
-                            rep.add("г", "ERROR", relpath, i + 1, "[V:%s %s]: таймкод больше длительности ролика %s" % (vid, tc, dur))
     if outside:
         rep.cat("г", "роликов в скилле нет — сверена форма (INFO)", outside)
         rep.add("г", "INFO", relpath, 0, "%d ссылок [V:…]: дайджестов, транскриптов и каталога роликов в скилле нет — сверены id и таймкоды по форме" % outside)
@@ -1297,28 +1198,20 @@ def check_readme_coverage(root, rep, basename_index_all):
         rd = rel(root, d)
         readme = os.path.join(d, "README.md")
         entries = sorted(e for e in os.listdir(d) if not e.startswith(".") and e not in SKIP_DIR_NAMES | {"README.md"})
-        index_files = []
         if not os.path.exists(readme):
-            # индекс вместо README: `91-videos/catalog.md`, `digests/_index-W*.md`
-            index_files = sorted(glob.glob(os.path.join(d, "catalog.md")) + glob.glob(os.path.join(d, "_index*.md")))
             if rd.count("/") == 0 and not entries:
                 rep.add("д", "INFO", rd, 0, "папка пуста, README.md нет")
                 continue
-            if not index_files:
-                rep.add("д", "ERROR" if rd.count("/") == 0 else "INFO", rd, 0, "нет README.md (%d файлов и папок внутри)" % len(entries))
-                continue
-            rep.add("д", "INFO", rd, 0, "README.md нет; индекс папки — %s" % ", ".join("`%s`" % os.path.basename(x) for x in index_files))
-            readme = index_files[0]
-        rlines = []
-        for rf in (index_files or [readme]):
-            rlines += read_lines(rf)
-        text = "\n".join(rlines) + "\n" + "\n".join(os.path.basename(x) for x in index_files)
+            rep.add("д", "ERROR" if rd.count("/") == 0 else "INFO", rd, 0, "нет README.md (%d файлов и папок внутри)" % len(entries))
+            continue
+        rlines = read_lines(readme)
+        text = "\n".join(rlines) + "\n"
         for e in entries:
             full = os.path.join(d, e)
             rep.tick("д")
             if os.path.isdir(full):
                 inner = [x for x in os.listdir(full) if not x.startswith(".") and x not in SKIP_DIR_NAMES]
-                has_index = os.path.exists(os.path.join(full, "README.md")) or glob.glob(os.path.join(full, "_index*.md"))
+                has_index = os.path.exists(os.path.join(full, "README.md"))
                 if has_index:
                     queue.append(full)
                 if e + "/" not in text and e not in text:
@@ -1331,18 +1224,13 @@ def check_readme_coverage(root, rep, basename_index_all):
                     if missing and e != "transcripts":
                         rep.add("д", "INFO", rd, 0, "папка `%s/` упомянута, но %d из %d файлов не перечислены поимённо: %s" % (e, len(missing), len(inner), ", ".join(sorted(missing)[:8]) + (" …" if len(missing) > 8 else "")))
             else:
-                stem = os.path.splitext(e)[0]
-                if e not in text and not (index_files and len(stem) >= 6 and stem in text):
-                    if index_files:
-                        rep.cat("д", "файл не упомянут в индексе папки без README (INFO)")
-                        rep.add("д", "INFO", rd, 0, "файл `%s` не упомянут в индексе папки (%s)" % (e, ", ".join(os.path.basename(x) for x in index_files)))
-                    else:
-                        rep.cat("д", "файл не упомянут в README (битая)")
-                        rep.add("д", "ERROR", rd, 0, "файл `%s` не упомянут в README.md" % e)
+                if e not in text:
+                    rep.cat("д", "файл не упомянут в README (битая)")
+                    rep.add("д", "ERROR", rd, 0, "файл `%s` не упомянут в README.md" % e)
                 else:
                     rep.cat("д", "файл упомянут")
-        # обратное направление: упомянутые в README файлы этой папки есть на диске (индексы без README не проверяются)
-        for i, ln in enumerate(rlines if not index_files else []):
+        # обратное направление: упомянутые в README файлы этой папки есть на диске
+        for i, ln in enumerate(rlines):
             for m in README_FILE_TOKEN_RE.finditer(ln):
                 tok = m.group(1)
                 if tok.startswith(("99-raw/", "../")) or ("/" in tok and tok.split("/", 1)[0] in os.listdir(root)):
@@ -1387,11 +1275,7 @@ def check_required_sections(root, relpath, lines, heads, rep):
         return
     if relpath.startswith(("90-sources/", "00-glossary/")):
         return
-    if relpath.startswith("91-videos/"):
-        if not is_digest(relpath):
-            return
-        profile, label = REQUIRED_DIGEST, "дайджест"
-    elif "/examples/" in relpath or "/pages/" in relpath or "/prompts/" in relpath or relpath in FORMAT_EXEMPT:
+    if "/examples/" in relpath or "/pages/" in relpath or "/prompts/" in relpath or relpath in FORMAT_EXEMPT:
         return  # примеры, промты, анкета, шаблон, план живого теста — разделы формата не нужны
     else:
         profile, label = REQUIRED_DEFAULT, "содержательный файл"
@@ -1405,13 +1289,9 @@ def check_required_sections(root, relpath, lines, heads, rep):
         elif not any(t.startswith(keys[0]) or keys[0] in t for t in hit):
             renamed.append((name, hit[0]))
     rep.tick("е", len(profile))
-    optional = [x for x in missing if label == "дайджест" and x in OPTIONAL_DIGEST]
-    missing = [x for x in missing if x not in optional]
     if missing:
         level = "WARN"  # отсутствие раздела — замечание, не битая ссылка
         rep.add("е", level, relpath, 0, "%s: нет разделов %s" % (label, ", ".join("«%s»" % x for x in missing)))
-    if optional:
-        rep.add("е", "INFO", relpath, 0, "%s: нет необязательного раздела %s («если показан»)" % (label, ", ".join("«%s»" % x for x in optional)))
     for name, actual in renamed:
         rep.add("е", "INFO", relpath, 0, "%s: раздел «%s» назван иначе: «%s»" % (label, name, actual))
 
@@ -1511,14 +1391,6 @@ def run_checks(root, only=(), with_raw=True):
     tools_dir = os.path.join(root, "99-raw", "tools")
     tools_names = set(os.listdir(tools_dir)) if os.path.isdir(tools_dir) else set()
     tools_names |= {p.name for p in kbpaths.scripts().rglob("*") if p.is_file() and "__pycache__" not in p.parts}
-    digests = {os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(root, "91-videos", "digests", "*.md"))
-               if not os.path.basename(p).startswith("_index")}  # id YouTube может начинаться с «_» (`_jwKQ6ZCeAI`)
-    transcripts = {os.path.splitext(os.path.basename(p))[0] for p in glob.glob(os.path.join(root, "91-videos", "transcripts", "*.md"))}
-    catalog = load_catalog(root)
-    v_search = load_v_search(root)
-    nb_videos, nb_durs = load_neighbor_videos(root)
-    # роликов в скилле может не быть ни у одной базы — тогда [V:…] сверяются только по форме
-    have_videos = bool(digests or transcripts or catalog or v_search or nb_videos or nb_durs)
     exp_dir = os.path.join(root, "99-raw", "experiments")
     exp_agents = {d for d in os.listdir(exp_dir) if os.path.isdir(os.path.join(exp_dir, d))} if os.path.isdir(exp_dir) else set()
     basename_index = defaultdict(list)
@@ -1550,8 +1422,7 @@ def run_checks(root, only=(), with_raw=True):
         if want("в") and not raw:
             check_source_refs(root, relpath, lines, infence, rep, per_file, per_folder, where_defined)
         if want("г") and not raw:
-            check_video_refs(root, relpath, lines, infence, rep, digests, transcripts, catalog, v_search, nb_videos, nb_durs,
-                             have_videos)
+            check_video_refs(root, relpath, lines, infence, rep)
         if want("е") and not raw:
             check_required_sections(root, relpath, lines, heads, rep)
         if want("ж"):
@@ -1630,7 +1501,7 @@ def selftest():
       "Кратко: ux 07/06 §5.\n"
       "Утилиты: `states_export.py`, запуск `python3 nosuch_tool.py`.\n"
       "Источник [S1] и [S9].\n"
-      "Ролики: [V:_EEEEEEEEEE 00:10], [V:AAAAAAAAAAA 01:00], [V:BBBBBBBBBBB 02:00], [V:CCCCCCCCCCC], [V:DDDDDDDDDDD 03:00], [V:AAAAAAAAAAA 99:00], [V:AAAAAAAAAAA 07:75].\n"
+      "Ролики: [V:_EEEEEEEEEE 00:10], [V:AAAAAAAAAAA 01:00], [V:CCCCCCCCCCC], [V:AAAAAAAAAAA 07:75], [V:abc].\n"
       "Опыты: [проверено: 99-raw/experiments/Z/01-ok], [проверено: Z/02], [проверено: Z/01–03], [проверено ai-media Q/01],"
       " [проверено: Z3/01].\nГолая метка [проверено].\n"
       "Аудит соседа: см. аудит MEDIA §4.10.\n"
@@ -1644,29 +1515,21 @@ def selftest():
       "Цель раньше: `../02-bbb/01-z.md` §2.\nПравило без пути, стрелка в конце →\n  §1 `[практика]`.\n\n" + std)
     w("site/01-aaa/02-y.md", "# Y\n\n## Выжимка для агента\n\n- нет\n\n" + std)
     w("site/01-aaa/03-unlisted.md", "# U\n\n## Выжимка для агента\n\n- нет\n\n" + std)
-    w("site/02-bbb/README.md", "# 02\n\n`01-z.md`\n")
+    w("site/02-bbb/README.md", "# 02\n\n`01-z.md`, `02-v.md`\n")
+    w("site/02-bbb/02-v.md", "# V\n\n" + std)
     w("site/02-bbb/01-z.md", "# Z\n\n## Выжимка для агента\n\n- нет\n\n## 2. Раздел\n\n- текст\n\n" + std)
     w("site/11-ccc/README.md", "# 11\n\n`01-w.md`\n")
     w("site/11-ccc/01-w.md", "# W\n\n## Выжимка для агента\n\n- нет\n\nСсылка `../02-bbb/08-gone.md`.\n\n" + std)
-    w("site/91-videos/catalog.tsv", "id\tduration\nAAAAAAAAAAA\t10:00\nBBBBBBBBBBB\t05:00\n")
-    w("site/91-videos/README.md", "# 91\n\n`catalog.tsv`, `digests/`\n")
-    w("site/91-videos/digests/AAAAAAAAAAA.md", "# A\n\n## Выжимка для агента\n\n## Числа и эксперименты\n\n"
-      "## Антипаттерны («как не надо»)\n\n## Что это значит для ИИ-агента\n\n## Что устарело или спорно\n\n"
-      "## Комментарии зрителей\n\n## Куда это относится в базе\n")
-    w("site/91-videos/digests/_EEEEEEEEEE.md", "# E\n\n## Выжимка для агента\n\n## Что это значит для ИИ-агента\n")
-    w("site/91-videos/digests/_index-W1.md", "# индекс\n`AAAAAAAAAAA`, `_EEEEEEEEEE`\n")
-    w("site/91-videos/transcripts/BBBBBBBBBBB.md", "# B\n")
     w("site/99-raw/experiments/Z/01-ok/README.md", "# ok\n")
     w("site/99-raw/experiments/Z/03-ok/README.md", "# ok\n")
     w("site/99-raw/experiments/A/02-x/README.md", "# x\n")  # у site тоже есть опыт A: «text A/01» ищется у text
     w("ux/07-ux-writing/06-banned.md", "# ux\n\n## 5. Раздел\n")
-    w("ux/91-videos/digests/DDDDDDDDDDD.md", "# D\n")
     w("ai-media/99-raw/experiments/Q/01-ok/README.md", "# ok\n")
     w("ai-media/99-raw/experiments/Z/07-ok/README.md", "# ok\n")
     w("text/99-raw/experiments/A/01-ok/README.md", "# ok\n")
     rep, files = run_checks(root, with_raw=False)
     msgs = [(c, l, m) for (c, l, _p, _n, m) in rep.items]
-    # база без папок роликов у себя и у соседей: ссылки [V:…] сверяются по форме
+    # вторая база: ссылки [V:…] с часовым таймкодом
     kb2 = os.path.join(tmp, "kb2")
     os.makedirs(os.path.join(kb2, "text", "01-aaa"))
     with open(os.path.join(kb2, "text", "01-aaa", "01-a.md"), "w", encoding="utf-8") as fh:
@@ -1701,15 +1564,12 @@ def selftest():
         ("б: ux 07/06 §5 есть у соседа — без находки", lacks("б", "§5 → `../ux")),
         ("в: [S9] не определён — ERROR", has("в", "ERROR", "[S9]")),
         ("в: [S1] определён — без находки", lacks("в", "[S1] не определён")),
-        ("г: дайджест есть — без находки", lacks("г", "[V:AAAAAAAAAAA]")),
-        ("г: id с «_» в начале — дайджест, не индекс", not any("_EEEEEEEEEE" in m for c, l, m in msgs if c == "г")),
-        ("г: только транскрипт — INFO, не битая", has("г", "INFO", "[V:BBBBBBBBBBB]: дайджеста нет, есть транскрипт")),
-        ("г: ничего нет — ERROR", has("г", "ERROR", "[V:CCCCCCCCCCC]")),
-        ("г: дайджест соседа — INFO", has("г", "INFO", "[V:DDDDDDDDDDD]: дайджест в соседней базе")),
-        ("г: таймкод больше длительности — ERROR", has("г", "ERROR", "[V:AAAAAAAAAAA 99:00]")),
+        ("г: id по форме, с «_» в начале и без таймкода — без находки",
+         lacks("г", "[V:AAAAAAAAAAA 01:00") and lacks("г", "_EEEEEEEEEE") and lacks("г", "[V:CCCCCCCCCCC")),
+        ("г: не похоже на id — WARN", has("г", "WARN", "[V:abc]: не похоже на id")),
         ("г: таймкод не по форме — ERROR", has("г", "ERROR", "[V:AAAAAAAAAAA 07:75]: таймкод не по форме")),
-        ("г: роликов нет нигде — сверка формы, сводка INFO", has("г", "INFO", "сверены id и таймкоды", msgs2)
-         and not has("г", "ERROR", "нет ни дайджеста", msgs2)),
+        ("г: сверка по форме — сводка INFO, ссылки без таймкода — INFO", has("г", "INFO", "4 ссылок [V:…]")
+         and has("г", "INFO", "1 ссылок [V:…] без таймкода") and has("г", "INFO", "сверены id и таймкоды", msgs2)),
         ("г: роликов нет — таймкод не по форме — ERROR", has("г", "ERROR", "1:12:61", msgs2)),
         ("д: файл не в README — ERROR", has("д", "ERROR", "03-unlisted.md")),
         ("д: README называет несуществующий — ERROR", has("д", "ERROR", "05-gone.md")),
@@ -1726,8 +1586,7 @@ def selftest():
         ("б: «§1.2 этого файла» — свой файл, без находки", lacks("б", "§1.2 → `02-bbb")),
         ("б: «→» в конце строки + «§1» в начале следующей — свой файл", lacks("б", "§1 → `02-bbb")),
         ("г: пустое [V:] — без находки", lacks("г", "[V:]")),
-        ("е: дайджест в формате — без WARN", not any(c == "е" and l == "WARN" and _p.endswith("AAAAAAAAAAA.md") for (c, l, _p, _n, m) in rep.items)),
-        ("е: дайджест без «Числа» и «Антипаттерны» — WARN", has("е", "WARN", "«Числа и эксперименты»")),
+        ("е: содержательный файл без «Выжимки» — WARN", has("е", "WARN", "«Выжимка для агента»")),
         ("ж: путь опыта соседа `../../ai-media/…` есть — без находки", lacks("ж", "Q/01-ok")),
         ("ж: путь опыта соседа нет — ERROR в соседней базе", has("ж", "ERROR", "../ai-media/99-raw/experiments/Q/")),
         ("ж: цепочка «ai-media Q/01, Z/07» — сосед наследуется, без находки", lacks("ж", "Z/07")),

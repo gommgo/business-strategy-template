@@ -1,5 +1,5 @@
-# ПРИМЕР J v1 · лидогенерация услуг РФ · вымышленная студия «Отвес» (Нижний Новгород). Факты — демо text, вымышлены.
-# Бриф — перевод брифа A v0 (01-foundations/site-brief.example.yaml) в схему v1: 10-playbooks-contracts/schemas/site-brief.schema.json.
+# ПРИМЕР v1 · лидогенерация услуг РФ · вымышленная студия «Отвес» (Нижний Новгород). Факты — демо text, вымышлены.
+# Схема брифа — v1: 10-playbooks-contracts/schemas/site-brief.schema.json.
 version: 1
 checked: '2026-09-24'
 intake:
@@ -10,7 +10,7 @@ intake:
 project:
   slug: otves-remont-nn
   status: proposed
-  prepared_by: Claude (агент site A, пример формата)
+  prepared_by: Claude (пример формата)
 site_type: landing-site
 primary_page_type: landing-lead-services
 business:
@@ -420,7 +420,7 @@ meaning:
       why: нет независимого рейтинга
   message_hierarchy_ref:
   - ../../../../text/02-strategy-messaging/examples/hierarchy-otves-product-aware.yaml
-  voice_ref: 'черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — text F (волна 2)'
+  voice_ref: 'черновик: спокойно и по делу, на «вы», без восклицаний; профиль голоса — text 05-voice-editorial'
   proof_ref: ../../../../text/02-strategy-messaging/examples/facts-service-renovation.yaml
   languages:
   - lang: ru
@@ -450,8 +450,8 @@ constraints:
   - ru
   legal_category:
   - general
-  legal_note: 'Бытовой подряд (ГК, ЗоЗПП): сведения о продавце, цена «от», скидка с датой, гарантия — формулировки text H, требования
-    site I. Пример J v1: ответы правового опросника вымышлены (как и факты text).'
+  legal_note: 'Бытовой подряд (ГК, ЗоЗПП): сведения о продавце, цена «от», скидка с датой, гарантия — формулировки text 08, требования
+    site 08. Пример v1: ответы правового опросника вымышлены (как и факты text).'
   hosting: 'не задан — допущение: хостинг в РФ (формы с ПД; q-hosting)'
   integrations:
   - CRM — не задана (q-crm)
@@ -484,7 +484,7 @@ analytics:
   system: yandex-metrica
   call_tracking: false
   ab_testing: later
-  note: Цели по conversion.action и secondary_actions (события — P, events.yaml).
+  note: Цели по conversion.action и secondary_actions (события — events.yaml).
 search:
   engines:
   - yandex
@@ -608,7 +608,7 @@ questions:
 - id: q-legal-details
   block: proof
   q: Полное название юрлица, ОГРН или ИНН, адрес — как в ЕГРЮЛ?
-  why: Без сведений о продавце страницу услуги не публикуем (I)
+  why: Без сведений о продавце страницу услуги не публикуем (site 08)
   options: []
   default: Страница не публикуется до ответа (missing:legal-details, blocking)
   affects:
@@ -658,7 +658,7 @@ questions:
 - id: q-hosting
   block: constraints
   q: Где будет сайт и куда уходят заявки (CRM, почта)?
-  why: Персональные данные из форм — хранение и передача по 152-ФЗ (I)
+  why: Персональные данные из форм — хранение и передача по 152-ФЗ (site 08)
   options:
   - хостинг в РФ + почта
   - CRM (какая?)
@@ -693,7 +693,7 @@ questions:
   - ответы — да, обучение — да
   - ответы — да, обучение — нет
   - нет
-  default: Ответы — да; обучение — по умолчанию H (волна 2)
+  default: Ответы — да; обучение — по умолчанию из crawlers.yaml
   affects:
   - /search/ai_bots_policy
   priority: 3

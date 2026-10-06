@@ -1,5 +1,5 @@
 #!/bin/sh
-# Сборка чанка hero.js: esbuild 0.28, React 19.3, R3F 9.8.0, drei 10.7.8, three 0.186.0 (песочница ~/.cache/blender-research/npm-F2)
+# Сборка чанка hero.js: esbuild 0.28, React 19.3, R3F 9.8.0, drei 10.7.8, three 0.186.0 (песочница npm — $DDD_HOME/node)
 set -e
 NPM="${DDD_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/design-deep-dive}/node"  # перенос: npm-зависимости скилла (scripts/package.json)
 HERE=$(cd "$(dirname "$0")" && pwd)

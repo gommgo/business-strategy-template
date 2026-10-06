@@ -1,23 +1,18 @@
-# copy-rubric.yaml — рубрика оценки маркетинговых текстов (text-research, волна 3, агент I, фаза 1)
+# copy-rubric.yaml — рубрика оценки маркетинговых текстов
 # Что это: 12 критериев COPY-R-… с якорями 0–5, вопросами для ИИ-судьи и правилом, кто оценивает (судья или человек).
 # Где правила: ../09-ai-generation-evaluation/03-evaluation.md §3 (как применять), §4 (судья), §6 (люди).
 # Порядок: рубрика идёт ПОСЛЕ ворот — claims_check.py (факты и право) и copy_lint.py (стиль); см. copy-checklist.yaml.
 # Рубрика — сигнал, а не ворота: статус слота меняют только ворота COPY-C-01…08 и человек (COPY-C-3x).
-# Проверка загрузки: python3 99-raw/experiments/I/01-rubric-corpus/check_rubric.py (схема полей, ссылки на маркеры C,
-# чек-лист и временный словарь; примеры good прогоняются через claims_check.py и copy_lint.py).
+# Проверка формулы judge_scoring: python3 ../../scripts/text/chain_inputs.py --selftest.
 # Числа судей, на которых стоят решения, — [исследование] с датой; сама рубрика на генерации не проверена — [не проверено]
-# (живой тест LT-04 в live-test-plan.md). Опыты: I/01 (10 русских лендингов корпуса D) и I/03 (слепой набор D2: 6 RU +
-# 4 EN, повтор 5 текстов I/01) — 99-raw/experiments/I/.
+# (живой тест LT-04 в live-test-plan.md). Опыты: 10 русских лендингов корпуса и слепой набор (6 RU +
+# 4 EN, повтор 5 текстов) — 03-evaluation.md §3.4.
 
 rubric: copy-rubric
 version: "1.2"
 date: "2026-09-24"
-owner: text-research/I
+owner: text/09-ai-generation-evaluation
 status: draft-phase-1      # draft-phase-1 → calibrated (после LT-04) → stable
-changelog:
-  - {version: "1", date: "2026-09-24", what: "12 критериев; 4 вопроса с cap_if_no у критериев судьи; формула judge_scoring (опыт I/01)"}
-  - {version: "1.1", date: "2026-09-24", what: "правила чтения read у 8 вопросов (01-q2, 01-q3, 02-q4, 04-q1, 06-q2, 08-q2, 08-q4, 09-q2): в повторе I/03 тот же оценщик совпал с собой в 0,90 ответов и 0,74 баллов критериев, расхождения — в этих вопросах; текст вопросов не менялся, калибровка — заново (DR-5)"}
-  - {version: "1.2", date: "2026-09-29", what: "правило чтения read у 07-q2: конвенции навигации «Частые вопросы», «Вопросы и ответы», «Контакты» — не ярлыки (X24); текст вопроса не менялся"}
 language: ru               # описания по-русски; вопросы судье — RU и EN
 
 scale:
@@ -40,11 +35,11 @@ judge_scoring:
     входит); score = min(max(1, round_half_up(5 × share)), наименьший cap_if_no среди вопросов с ответом «no»).
     cap_if_no привязывает ответ к якорю: например, у COPY-R-06 «ситуации клиента нет» (q2 = no) даёт не выше 3 —
     «выгода названа, ситуации нет». Ноль ставит только вопрос с cap_if_no: 0 (выдумка, COPY-R-03 q4) или человек
-    (противоречие фактам и смыслу): «все ответы нет» — это якорь 1, а не 0 (опыт I/01).
+    (противоречие фактам и смыслу): «все ответы нет» — это якорь 1, а не 0.
   rounding: half-up
   min_answered: 2          # меньше двух ответов «да/нет» — балл не ставится (score: null), слот уходит человеку
   answers: ["yes", "no", "unsure", "n/a"]   # в YAML ответа судьи — строками в кавычках: "yes", "no" (иначе YAML 1.1 читает их как true/false)
-  why_four_questions: "при трёх вопросах шкала прыгает 0 → 2 → 3 → 5; у каждого критерия судьи — четыре вопроса, а потолки cap_if_no связывают ответы с якорями (опыт I/01)"
+  why_four_questions: "при трёх вопросах шкала прыгает 0 → 2 → 3 → 5; у каждого критерия судьи — четыре вопроса, а потолки cap_if_no связывают ответы с якорями"
   evidence_required: "каждый ответ «no» сопровождается дословной цитатой фрагмента (where); без цитаты — unsure"
   read_rules: "поле read у вопроса — как его понимать; передаётся судье вместе с вопросом и входит в версию промта"
   examples:
@@ -74,11 +69,11 @@ calibration:
   retest_i03: {question_agreement: 0.90, criterion_score_equal: 0.74, mean_abs_diff: 0.37, questions: 125, note: "один оценщик-модель, 5 текстов дважды с разницей ≈ 50 минут, правила чтения уточнены между прогонами — нижняя оценка стабильности; судью проверять тем же способом (3 прогона, COPY-C-23)"}
 
 inputs:                    # что нужно судье и человеку; без входа критерий не оценивается (score: null)
-  facts: "facts.yaml (B2) — 02-strategy-messaging/facts.schema.yaml"
-  meaning: "meaning.yaml (B1) — позиционирование, альтернативы, отличие"
-  hierarchy: "message-hierarchy (B1) — core_message, first_screen, sections[].message, not_said"
-  voice: "профиль по 05-voice-editorial/voice.schema.yaml (F, волна 2), образцы — examples/voice-*.yaml; COPY-R-10 оценивает человек по профилю, судья по профилю — только после калибровки (F/02 не проверял новые строки без автора)"
-  slots: "04-copy-by-block/copy-slots.yaml (E, 69 типов слотов): длины, роли секций, fact_required; длина — сигнал, не ворота"
+  facts: "facts.yaml — 02-strategy-messaging/facts.schema.yaml"
+  meaning: "meaning.yaml (02-strategy-messaging/meaning.schema.yaml) — позиционирование, альтернативы, отличие"
+  hierarchy: "message-hierarchy (02-strategy-messaging/message-hierarchy.schema.yaml) — core_message, first_screen, sections[].message, not_said"
+  voice: "профиль по 05-voice-editorial/voice.schema.yaml, образцы — examples/voice-*.yaml; COPY-R-10 оценивает человек по профилю, судья по профилю — только после калибровки (новые строки без автора не проверялись)"
+  slots: "04-copy-by-block/copy-slots.yaml (69 типов слотов): длины, роли секций, fact_required; длина — сигнал, не ворота"
 
 criteria:
 
@@ -164,7 +159,7 @@ criteria:
         why: "a named person with a checkable track record instead of an adjective"
     markers: [COPY-M-LEX-02, COPY-M-CNT-01, COPY-M-MKT-01, COPY-M-MKT-05, COPY-M-SYN-02]
     checks: [COPY-C-12, COPY-C-20]
-    evidence: "[практика] Dry [V:TUMjnmfsPeM 01:00]; проверка «только мы» (B1 02/01 §4.3); конкретика через проверяемость — [исследование] 01/02 §2.1"
+    evidence: "[практика] Dry [V:TUMjnmfsPeM 01:00]; проверка «только мы» (text 02/01 §4.3); конкретика через проверяемость — [исследование] 01/02 §2.1"
     sources: ["01-foundations/02-what-copy-changes-evidence.md §2.2", "01-foundations/formulas.yaml three-questions-dry", "02-strategy-messaging/01-positioning-value-proposition.md §4.3"]
     limits: "«опровержимо» ≠ право выдумать: конкретика только из facts.yaml, иначе [PLACEHOLDER] (COPY-C-01)"
 
@@ -207,8 +202,8 @@ criteria:
         why: "the claim stays inside the fact and keeps its condition"
     markers: [COPY-M-CNT-02, COPY-M-CNT-05, COPY-M-CNT-06, COPY-M-CNT-03]
     checks: [COPY-C-01, COPY-C-13, COPY-C-21, COPY-C-35]
-    evidence: "[проверено: B2/02 «Кварц» — 3 из 3 эталонных провалов пойманы сверкой]; «свойства без чисел» сверка ловит только --strict — отсюда вопрос судье (B2 отчёт §4)"
-    sources: ["02-strategy-messaging/03-proof-and-facts.md §7", "../../scripts/text/README.md раздел claims_check.py", "../kimi-research/99-raw/experiments/F/03-package-from-description/"]
+    evidence: "[проверено: «Кварц» — 3 из 3 эталонных провалов пойманы сверкой]; «свойства без чисел» сверка ловит только --strict — отсюда вопрос судье"
+    sources: ["02-strategy-messaging/03-proof-and-facts.md §7", "../../scripts/text/README.md раздел claims_check.py"]
     limits: "ворота — claims_check.py (COPY-C-01); судья лишь ищет «свойства без записи», его находка — повод для человека, не приговор"
 
   - id: COPY-R-04
@@ -222,7 +217,7 @@ criteria:
     judge:
       trust: pre-filter
       questions:
-        - {id: q1, cap_if_no: 1, ru: "Есть ли хотя бы одно утверждение, с которым конкурент или покупатель мог бы не согласиться?", en: "Is there at least one claim a competitor or buyer could disagree with?", read: "позиция — утверждение против распространённой практики или отсекающее часть клиентов («Да, придётся пахать»); обещание рынка («монтаж за 1 день») позицией не считается; манифест «не X, а Y» без факта или механизма — «unsure» (I/03)"}
+        - {id: q1, cap_if_no: 1, ru: "Есть ли хотя бы одно утверждение, с которым конкурент или покупатель мог бы не согласиться?", en: "Is there at least one claim a competitor or buyer could disagree with?", read: "позиция — утверждение против распространённой практики или отсекающее часть клиентов («Да, придётся пахать»); обещание рынка («монтаж за 1 день») позицией не считается; манифест «не X, а Y» без факта или механизма — «unsure»"}
         - {id: q2, cap_if_no: 2, ru: "Совпадает ли главное отличие в тексте с meaning.positioning (уникальные свойства и ценность)?", en: "Does the main differentiator in the text match meaning.positioning?"}
         - {id: q3, cap_if_no: 3, ru: "Названа ли альтернатива, от которой уводит текст (статус-кво, «сделать самому», другой подход)?", en: "Is the alternative the text argues against named (status quo, DIY, another approach)?"}
         - {id: q4, cap_if_no: 4, ru: "Отличие подкреплено фактом или механизмом («как именно»), а не только заявлено?", en: "Is the differentiator backed by a fact or a mechanism (how exactly), not only stated?"}
@@ -250,9 +245,9 @@ criteria:
         why: "the alternative is named and the difference is backed by a fact"
     markers: [COPY-M-TON-08, COPY-M-TON-01, COPY-M-MKT-01]
     checks: [COPY-C-20]
-    evidence: "[практика] Dunford (B1 02/01; [V:hdjlCLb9Hl8]); медианный текст линтер не ловит — C 02 §12"
+    evidence: "[практика] Dunford (text 02/01; [V:hdjlCLb9Hl8]); медианный текст линтер не ловит — text 06/02 §12"
     sources: ["02-strategy-messaging/01-positioning-value-proposition.md §2, §4.3", "06-anti-slop/02-linter-spec-and-profiles.md §12"]
-    limits: "судья сравнивает с meaning.yaml, но не знает рынка; «спорность» оценивает человек из аудитории; в I/03 пышный манифест ИИ («not for speed») формально прошёл q1 и q3 и получил 5 — отсюда read у q1"
+    limits: "судья сравнивает с meaning.yaml, но не знает рынка; «спорность» оценивает человек из аудитории; в слепом наборе пышный манифест ИИ («not for speed») формально прошёл q1 и q3 и получил 5 — отсюда read у q1"
 
   - id: COPY-R-05
     key: awareness-fit
@@ -283,7 +278,7 @@ criteria:
         fact_ids: [company-since-2014]
         bad: "Почему ремонт затягивается и как этого избежать"
         good: "Ремонт квартир под ключ в Нижнем Новгороде с 2014 года"
-        why: "для брендового трафика (product-aware) нужен заголовок о компании и доказательство, а не разбор проблемы (B1/02: одна иерархия — один уровень)"
+        why: "для брендового трафика (product-aware) нужен заголовок о компании и доказательство, а не разбор проблемы (одна иерархия — один уровень)"
       - lang: en
         genre: landing
         slot_type: headline
@@ -293,9 +288,9 @@ criteria:
         why: "a visitor who searched for the brand needs confirmation and proof, not a problem essay"
     markers: []
     checks: [COPY-C-20]
-    evidence: "[практика] Шварц по конспектам + [проверено: B1/02 две иерархии одной услуги]"
-    sources: ["02-strategy-messaging/02-awareness-hierarchy-objections.md §1.2, §1.4", "99-raw/experiments/B1/02-two-hierarchies/"]
-    limits: "без page.awareness и иерархии критерий не оценивается (score: null) — поле в copy deck (предложение J)"
+    evidence: "[практика] Шварц по конспектам + [проверено: две иерархии одной услуги]"
+    sources: ["02-strategy-messaging/02-awareness-hierarchy-objections.md §1.2, §1.4"]
+    limits: "без page.awareness и иерархии критерий не оценивается (score: null) — поле в copy deck"
 
   - id: COPY-R-06
     key: value-scenario
@@ -337,7 +332,7 @@ criteria:
     markers: [COPY-M-MKT-05, COPY-M-CNT-01]
     checks: [COPY-C-20]
     evidence: "[практика] Ильяхов «факт → сценарий» [V:_jwKQ6ZCeAI 22:30] и Dry «факт → история» [V:TUMjnmfsPeM 46:41]"
-    sources: ["01-foundations/02-what-copy-changes-evidence.md §2.2", "91-videos/digests/_jwKQ6ZCeAI.md"]
+    sources: ["01-foundations/02-what-copy-changes-evidence.md §2.2", "[V:_jwKQ6ZCeAI]"]
     limits: "сценарий — надстройка над фактом; придуманная ситуация = выдумка (COPY-R-03)"
 
   - id: COPY-R-07
@@ -379,9 +374,9 @@ criteria:
         why: "the titles alone tell the story"
     markers: [COPY-M-STR-09, COPY-M-MKT-11, COPY-M-STR-10]
     checks: [COPY-C-20]
-    evidence: "[практика] инвертированный outline-тест (PLAN «Жанры»; C 01 §5 STR-09); сканирование — 01-foundations/01"
-    sources: ["06-anti-slop/01-text-slop-markers-by-genre.md §5", "PLAN.md «Жанры — ось базы»"]
-    limits: "линтер ловит ярлыки (MKT-11), но не сюжет — C 02 §12"
+    evidence: "[практика] инвертированный outline-тест (text 06/01 §5 STR-09); сканирование — 01-foundations/01"
+    sources: ["06-anti-slop/01-text-slop-markers-by-genre.md §5"]
+    limits: "линтер ловит ярлыки (MKT-11), но не сюжет — text 06/02 §12"
 
   - id: COPY-R-08
     key: objections-risk
@@ -412,7 +407,7 @@ criteria:
         fact_ids: [guarantee-3-years]
         bad: "Гарантируем качество на долгие годы!"
         good: "Гарантия 3 года на работы — пункт 7.2 договора."
-        why: "условие и документ вместо обещания (38-ФЗ, H: гарантия результата — флаг права)"
+        why: "условие и документ вместо обещания (38-ФЗ, claims-rules.yaml: гарантия результата — флаг права)"
       - lang: en
         genre: landing
         slot_type: guarantee-text
@@ -422,9 +417,9 @@ criteria:
         why: "a checkable term instead of a promise"
     markers: [COPY-M-MKT-06, COPY-M-CNT-06]
     checks: [COPY-C-01, COPY-C-02, COPY-C-20]
-    evidence: "[практика] B1 02/02 §3–4 (блокеры до призыва, Moesta); гарантии — [исследование] по аннотациям (B1)"
+    evidence: "[практика] text 02/02 §3–4 (блокеры до призыва, Moesta); гарантии — [исследование] по аннотациям"
     sources: ["02-strategy-messaging/02-awareness-hierarchy-objections.md §3, §4", "08-russian-legal-typography/claims-rules.yaml"]
-    limits: "право гарантий — H (claims-rules.yaml), не рубрика"
+    limits: "право гарантий — claims-rules.yaml, не рубрика"
 
   - id: COPY-R-09
     key: action
@@ -466,8 +461,8 @@ criteria:
     markers: [COPY-M-MKT-07, COPY-M-PUN-07]
     checks: [COPY-C-05, COPY-C-20]
     evidence: "[консенсус] ux 07/02 §1.1–1.4 и 07/06 §3.2, §4.1; Wiebe [V:F_urkVueszI 07:07–24:38] — [кейс]"
-    sources: ["../ux/07-ux-writing/02-microcopy-by-component.md §1.1–1.4", "../ux/07-ux-writing/06-banned-words-and-patterns.md §3.2, §4.1", "91-videos/digests/F_urkVueszI.md"]
-    limits: "форма глагола (инфинитив по-русски, «Show me…» в EN) — E и ux; рубрика проверяет смысл"
+    sources: ["../ux/07-ux-writing/02-microcopy-by-component.md §1.1–1.4", "../ux/07-ux-writing/06-banned-words-and-patterns.md §3.2, §4.1", "[V:F_urkVueszI]"]
+    limits: "форма глагола (инфинитив по-русски, «Show me…» в EN) — 04-copy-by-block и ux; рубрика проверяет смысл"
 
   - id: COPY-R-10
     key: voice
@@ -480,7 +475,7 @@ criteria:
     judge:
       trust: none
       questions: []
-      why_not: "судьи слабо согласуются с людьми по тону и регистру (POLLUX: «Original tone» 0,03–0,46, «Compliance with functional style» 0,13–0,28); схема профиля F готова, но узнаваемость голоса по профилю не проверена на новых строках (F/02: признаки-слова 15/15 на строках автора, 7/15 на новых)"
+      why_not: "судьи слабо согласуются с людьми по тону и регистру (POLLUX: «Original tone» 0,03–0,46, «Compliance with functional style» 0,13–0,28); схема профиля голоса готова, но узнаваемость голоса по профилю не проверена на новых строках (признаки-слова 15/15 на строках автора, 7/15 на новых)"
     anchors:
       0: "голос противоречит профилю (шутки у юристов, панибратство там, где «вы» и сдержанность)"
       1: "безликий голос шаблона, бренд не узнать"
@@ -495,12 +490,12 @@ criteria:
         fact_ids: []
         bad: "Мы — ваш надёжный партнёр в мире ремонта!"
         good: "Спокойно и по делу: срок и смета — в договоре, ход работ — у прораба."
-        why: "черновой голос «спокойно и по делу, на «вы»» из copy deck B1; «надёжный партнёр» — голос шаблона (COPY-M-MKT-01)"
+        why: "черновой голос «спокойно и по делу, на «вы»» из copy deck примера; «надёжный партнёр» — голос шаблона (COPY-M-MKT-01)"
     markers: [COPY-M-MKT-01, COPY-M-PUN-05, COPY-M-PUN-10]
     checks: [COPY-C-30]
     evidence: "[практика] Ross [V:cqnZtGXGwsw 11:11–17:22] (принципы с исполнением); ux 07/01 §6 (оси тона NN/g)"
-    sources: ["05-voice-editorial/01-brand-voice.md", "05-voice-editorial/voice.schema.yaml", "91-videos/digests/cqnZtGXGwsw.md"]
-    limits: "оценка — по профилю голоса проекта (is / is_not, словарь, обращение); вопросы судье по полям профиля — фаза 2, доверие — после калибровки (LT-04, W1-7)"
+    sources: ["05-voice-editorial/01-brand-voice.md", "05-voice-editorial/voice.schema.yaml", "[V:cqnZtGXGwsw]"]
+    limits: "оценка — по профилю голоса проекта (is / is_not, словарь, обращение); вопросы судье по полям профиля не заведены, доверие — после калибровки (LT-04, W1-7)"
 
   - id: COPY-R-11
     key: natural-language
@@ -513,7 +508,7 @@ criteria:
     judge:
       trust: none
       questions: []
-      why_not: "POLLUX (эксперты, RU): Спирмен судей с экспертами по «Naturalness / non-synthetic speech» 0,028–0,168, «Literacy» 0,04–0,32, «Language norms» −0,004…0,22; маркеры (калька, канцелярит, деепричастия) ловит copy_lint.py (C) — это его зона, не судьи"
+      why_not: "POLLUX (эксперты, RU): Спирмен судей с экспертами по «Naturalness / non-synthetic speech» 0,028–0,168, «Literacy» 0,04–0,32, «Language norms» −0,004…0,22; маркеры (калька, канцелярит, деепричастия) ловит copy_lint.py — это его зона, не судьи"
     anchors:
       0: "грамматические ошибки или машинный перевод"
       1: "калька с английского и канцелярит в каждом абзаце"
@@ -531,9 +526,9 @@ criteria:
         why: "висячее деепричастие и хвост «обеспечивая…» (COPY-M-SYN-09, SYN-08) против прямого предложения"
     markers: [COPY-M-LEX-10, COPY-M-LEX-04, COPY-M-SYN-08, COPY-M-SYN-09, COPY-M-TON-10]
     checks: [COPY-C-05, COPY-C-06, COPY-C-31]
-    evidence: "[исследование] POLLUX 2025 (Спирмен по критериям) + [проверено: C/03 — висячие деепричастия ≤ 0,8 и у морфологии]"
+    evidence: "[исследование] POLLUX 2025 (Спирмен по критериям) + [проверено: висячие деепричастия ≤ 0,8 и у морфологии]"
     sources: ["arXiv 2505.24616 табл. 1", "06-anti-slop/02-linter-spec-and-profiles.md §10, §12"]
-    limits: "для EN — носитель; перевод EN → RU вместо параллельного письма — типовой сбой (фаза 2)"
+    limits: "для EN — носитель; перевод EN → RU вместо параллельного письма — типовой сбой"
 
   - id: COPY-R-12
     key: interest
@@ -561,11 +556,11 @@ criteria:
         fact_ids: []
         bad: "Мы делаем ремонт под ключ и заботимся о каждом клиенте."
         good: "Плиточник ждёт электрика, электрик — материалы, а вопросы копятся до вашего приезда."
-        why: "узнаваемая сцена из жизни клиента вместо общих слов (текст ai-self B1/02)"
+        why: "узнаваемая сцена из жизни клиента вместо общих слов (текст ai-self)"
     markers: [COPY-M-TON-01, COPY-M-TON-08]
     checks: [COPY-C-31, COPY-C-32]
     evidence: "[исследование] JUDGE-BENCH 2024–2025, POLLUX 2025; [практика] Сарычева [V:XuQQwB7R-Os 14:38]"
-    sources: ["arXiv 2406.18403 §4", "arXiv 2505.24616 §5", "91-videos/digests/XuQQwB7R-Os.md"]
+    sources: ["arXiv 2406.18403 §4", "arXiv 2505.24616 §5", "[V:XuQQwB7R-Os]"]
     limits: "«интересно» ≠ «вычурно»: сверхкоррекция и пышность — минус (COPY-M-TON-10)"
 
 aggregation:
@@ -576,7 +571,7 @@ aggregation:
 decision_rules:
   - id: DR-1
     when: "любой из COPY-R-01, 02, 03, 09 на ключевом слоте ≤ 2 (судья или человек)"
-    then: "переписать слот по находкам (протокол правки C, COPY-C-17) до показа человеку"
+    then: "переписать слот по находкам (протокол правки, COPY-C-17) до показа человеку"
   - id: DR-2
     when: "COPY-R-03 ≤ 3 или судья пометил свойство без записи facts.yaml"
     then: "claims_check.py --strict по слоту и вопрос заказчику; выдумку — в [PLACEHOLDER]"
@@ -593,7 +588,7 @@ decision_rules:
     when: "рубрика и A/B или тест людей расходятся"
     then: "верить людям и эксперименту; судья — фильтр до эксперимента, не его замена (Spotify 2026; arXiv 2608.07517)"
 
-record_example:           # как результат оценки хранится в copy deck: variants[].checks.rubric (схема J copy-deck.schema.json, поле свободной формы)
+record_example:           # как результат оценки хранится в copy deck: variants[].checks.rubric (схема copy-deck.schema.json, поле свободной формы)
   slot: {page_id: otves-problem-aware, section_id: hero, slot_id: h1, variant: a}
   rubric_version: "1"
   judge: {model: "<судья другого вендора, чем генератор>", runs: 3, both_orders: true, prompt_version: "judge-checklist-v1"}

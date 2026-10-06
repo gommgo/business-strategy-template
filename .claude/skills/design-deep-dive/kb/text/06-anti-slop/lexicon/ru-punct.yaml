@@ -1,12 +1,12 @@
 # Пунктуация и набор (группа PUN) — только приметы генерации и жанровые ошибки. Канон русского набора — ux 07/03 §6 и
-# ui 02/06 §3; маркетинговая типографика, решение по тире и автоматический типограф — агент H (волна 2,
-# 08-russian-legal-typography/typography-rules.yaml подключается через profiles.yaml → external_rules).
+# ui 02/06 §3; маркетинговая типографика, решение по тире и автоматический типограф — text 08/02
+# (08-russian-legal-typography/typography-rules.yaml подключается через profiles.yaml → external_rules).
 # Тире НЕ запрещается и НЕ подменяется дефисом: плотность пунктуационных тире в прозе — анализатор an-dash-density.
 # Правила заголовков и подписей выбирают место по типу слота сайта и по роли строки (appliesTo) — так они работают и
 # в жанре interface, где у строки роль ux 07/06 §7.2, а типа слота нет (ux 07/03 §6.9–§6.10).
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   group: PUN
   lang: ru
@@ -20,11 +20,11 @@ rules:
     level: warning
     count_as_marker: false
     pattern: '(?<=[А-Яа-яЁё»")])\s-\s(?=[А-Яа-яЁё«"(\d])|(?<=\d)\s-\s(?=[А-Яа-яЁё«"(])'
-    note: "«10 - 15» — диапазон, а не тире: его ловит typo-range-hyphen (H), правка — «10–15» без пробелов"
+    note: "«10 - 15» — диапазон, а не тире: его ловит typo-range-hyphen (typography-rules.yaml), правка — «10–15» без пробелов"
     message: "Дефис вместо тире. Для русского это ошибка набора; так пишут и «очеловеченные» тексты (humanizer-ru требует «-» вместо «—»)."
-    replacement: "поставить тире «—» с пробелами (или перестроить фразу, если тире лишнее); решение по набору — H"
+    replacement: "поставить тире «—» с пробелами (или перестроить фразу, если тире лишнее); решение по набору — text 08/02"
     examples: {bad: "Анамнез - это разговор с пациентом.", good: "Анамнез — это разговор с пациентом."}
-    source: "гайд заказчика §C («подмена дефисом выглядит как типографская ошибка»); PLAN.md, поправка к kimi 05/03 §5.3 и taste §9.G; ux 07/03 §6"
+    source: "гайд заказчика §C («подмена дефисом выглядит как типографская ошибка»); поправка к taste §9.G; ux 07/03 §6"
     evidence: "[стандарт] русской типографики; humanizer-ru SKILL.md и taste §9.G — против, для русского неверно"
   - id: ru-pun-colon-reveal
     marker_id: COPY-M-PUN-03
@@ -56,7 +56,7 @@ rules:
     slot_types: [headline, subheadline, section-title, card-title, step-title, eyebrow, cta-label, cta-secondary-label, email-cta-label, meta-title, meta-description, og-title, og-description, email-subject, pricing-plan-name, form-title, article-title, article-heading, badge, faq-q]
     pattern: '[\U0001F300-\U0001FAFF☀-➿⭐⭕‼⁉]'
     message: "Эмодзи в заголовке, кнопке или мета: декор вместо смысла."
-    replacement: "убрать; эмодзи в тексте — только если голос бренда их допускает (профиль голоса, F)"
+    replacement: "убрать; эмодзи в тексте — только если голос бренда их допускает (профиль голоса)"
     examples: {bad: "🚀 Запуск за 10 минут", good: "Запуск за 10 минут"}
     source: "гайд Б3; ux 07/06 §5.3 (эмодзи в подписях — запрет); humanizer-ru п.21; WP:AISIGNS «Emoji as formatting»"
     evidence: "[консенсус] для заголовков; в прозе — [спорно], по голосу"
@@ -68,9 +68,9 @@ rules:
     exclude_slot_types: [headline, subheadline, section-title, card-title, step-title, eyebrow, cta-label, cta-secondary-label, email-cta-label, meta-title, meta-description, og-title, og-description, email-subject, pricing-plan-name, form-title, article-title, article-heading, badge, faq-q, testimonial-quote]
     pattern: '[\U0001F300-\U0001FAFF☀-➿⭐⭕]'
     message: "Эмодзи в прозе (два и больше в блоке): уместны, только если их допускает голос бренда."
-    replacement: "свериться с профилем голоса (F); по умолчанию — убрать"
+    replacement: "свериться с профилем голоса; по умолчанию — убрать"
     examples: {bad: "Доставим завтра 🚚 и соберём мебель 🔧", good: "Доставим завтра и соберём мебель."}
-    source: "PLAN.md «Жанры» (эмодзи — по голосу, не в заголовках и CTA); humanizer-ru п.21"
+    source: "решение базы (эмодзи — по голосу, не в заголовках и CTA); humanizer-ru п.21"
     evidence: "[спорно]"
   - id: ru-pun-straight-quotes
     marker_id: COPY-M-PUN-06
@@ -81,7 +81,7 @@ rules:
     levels: {interface: error}          # ux 07/06 §9 п. 18: прямые кавычки в интерфейсе запрещены
     pattern: '"[^"\n]{1,200}"'
     message: "Прямые кавычки «лапки» в русском тексте."
-    replacement: "«ёлочки», внутри — „лапки“; автотипограф — H"
+    replacement: "«ёлочки», внутри — „лапки“; автотипограф — text 08/02 §8"
     examples: {bad: "Проект \"Альфа\" запущен.", good: "Проект «Альфа» запущен."}
     source: "гайд Б3, §E п.25; ux 07/03 §6.2; humanizer-ru SKILL.md «Стиль»"
     evidence: "[стандарт]"
@@ -120,8 +120,8 @@ rules:
     message: "Стрелка — часть текста кнопки или ссылки. Иконку решает подача (creative), не copy deck."
     replacement: "убрать стрелку из текста"
     examples: {bad: "Начать →", good: "Начать"}
-    source: "PLAN.md поправка к ux 07/06 §5.3 и ui 11/04 m34 («стрелка не входит в текст кнопки»); kimi 05/03 (стрелки 7/15 работ K3)"
-    evidence: "[практика] + [проверено kimi E/03]"
+    source: "поправка к ux 07/06 §5.3 и ui 11/04 m34 («стрелка не входит в текст кнопки»); разбор LLM-вёрстки (стрелки 7/15 работ)"
+    evidence: "[практика] + [проверено]"
   - id: ru-pun-middot
     marker_id: COPY-M-PUN-08
     level: info
@@ -130,8 +130,8 @@ rules:
     message: "Мета-строка через средние точки «A · B · C» — хром генераторов."
     replacement: "обычная подпись с ролью или разделение пространством (вёрстка)"
     examples: {bad: "Дизайн · 12 мин · 2026", good: "Дизайн, 12 минут чтения"}
-    source: "ux 07/06 §5.3; ui 11/04 m32; taste §9.F («middle-dot is rationed»); kimi 05/03 («·» у 8/15 работ K3)"
-    evidence: "[практика] + [проверено kimi E/03]"
+    source: "ux 07/06 §5.3; ui 11/04 m32; taste §9.F («middle-dot is rationed»); разбор LLM-вёрстки («·» у 8/15 работ)"
+    evidence: "[практика] + [проверено]"
   - id: ru-pun-caps-text
     marker_id: COPY-M-PUN-09
     level: info
@@ -145,7 +145,7 @@ rules:
     message: "Капс набран буквами. В copy deck пишите обычным регистром: капс — это стиль (text-transform), его решает подача."
     replacement: "«НАШИ УСЛУГИ» → «Наши услуги» (и проверить, нужен ли надзаголовок вообще)"
     examples: {bad: "НАШИ ПРЕИМУЩЕСТВА", good: "Почему мы"}
-    source: "ux 07/06 §5.3 (ALL-CAPS eyebrow); ui 11/04 m8, m30; PLAN.md поправка (eyebrow как визуал — creative)"
+    source: "ux 07/06 §5.3 (ALL-CAPS eyebrow); ui 11/04 m8, m30; поправка базы (eyebrow как визуал — creative)"
     evidence: "[практика]"
   - id: ru-pun-title-case
     marker_id: COPY-M-PUN-09
@@ -213,7 +213,7 @@ rules:
     lang: any
     count_as_marker: false
     pattern: '(?<!\.)\.\.\.(?!\.)'
-    message: "Три точки вместо многоточия «…» (набор — H)."
+    message: "Три точки вместо многоточия «…» (набор — text 08/02)."
     replacement: "«…» — автотипограф"
     examples: {bad: "И это ещё не всё...", good: "И это ещё не всё…"}
     source: "Hallmark copy.md «Proper typography» (Ellipsis: …, never ...); ux 07/03 §6"

@@ -1,10 +1,10 @@
-# facts-demo-webinar-okoshko.yaml — ДЕМО-ФАКТЫ агента J3 для примера страницы вебинара (10-templates-recipes/examples/ru-okoshko-webinar.yaml)
-# text-research · волна 3 · J3 · 2026-09-24 · формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
+# facts-demo-webinar-okoshko.yaml — ДЕМО-ФАКТЫ для примера страницы вебинара (10-templates-recipes/examples/ru-okoshko-webinar.yaml)
+# Формат: 02-strategy-messaging/facts.schema.yaml (facts_version 1)
 #
-# ДЕМО. Вебинар, спикер, даты и документы выдуманы агентом J3; «Окошко» — демо-сервис агента E. Не публиковать и не выдавать
+# ДЕМО. Вебинар, спикер, даты и документы выдуманы; «Окошко» — демо-сервис. Не публиковать и не выдавать
 # за реальную компанию или человека. Факты продукта (reminders, self-booking-link, import-free, trial-14-days, review-ruslan) —
-# копии из 99-raw/experiments/E/facts-demo-saas-okoshko.yaml с теми же id; у трёх use дополнен event-program (тема программы).
-# Что показывает: дата и время с часовым поясом, длительность, «бесплатно» с условием, запись и срок доступа (E 03 §3.5),
+# копии из facts-demo-saas-okoshko.yaml с теми же id; у трёх use дополнен event-program (тема программы).
+# Что показывает: дата и время с часовым поясом, длительность, «бесплатно» с условием, запись и срок доступа (text 04/03 §3.5),
 # спикер с согласием на ФИО, пробел организатора (ворота публикации) и пробел числа мест с fallback omit-block.
 
 facts_version: 1
@@ -16,7 +16,7 @@ status: draft
 example: true
 owner:
   role: основатель (демо-заказчик)
-collected_by: агент J3 (демо-набор для примера вебинара, 2026-09-24)
+collected_by: демо-набор для примера вебинара (2026-09-24)
 never_claim_defaults: ru-default-1
 entities:
 - id: product-okoshko
@@ -92,7 +92,7 @@ facts:
     - body
   valid:
     until: '2026-10-15'
-  notes: ДЕМО-факт J3 (пример вебинара).
+  notes: ДЕМО-факт (пример вебинара).
   lang: ru
 - id: webinar-duration
   kind: property
@@ -138,7 +138,7 @@ facts:
     - list-item
     - faq-a
     - body
-  notes: ДЕМО-факт J3 (пример вебинара).
+  notes: ДЕМО-факт (пример вебинара).
   lang: ru
 - id: webinar-free
   kind: offer-terms
@@ -184,7 +184,7 @@ facts:
     - form-success
     - faq-a
     requires_nearby: 'условие: «регистрац»'
-  notes: ДЕМО-факт J3 (пример вебинара).
+  notes: ДЕМО-факт (пример вебинара).
   lang: ru
 - id: webinar-recording
   kind: offer-terms
@@ -225,7 +225,7 @@ facts:
     - form-lead
     - faq-a
     - list-item
-  notes: ДЕМО-факт J3 (пример вебинара).
+  notes: ДЕМО-факт (пример вебинара).
   lang: ru
 - id: speaker-marina
   kind: person
@@ -285,7 +285,7 @@ facts:
     display: full-name
     role: руководитель поддержки «Окошка»
     relation: employee
-  notes: ДЕМО-факт J3 (пример вебинара).
+  notes: ДЕМО-факт (пример вебинара).
   lang: ru
 - id: trial-14-days
   kind: offer-terms
@@ -344,7 +344,7 @@ facts:
     en:
       canonical: Any Okoshko plan is free for 14 days with no card required; after the trial, booking pauses until you pick a plan and your data
         is kept for 90 days.
-  notes: 'ДЕМО-факт E. Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  notes: 'ДЕМО-факт. Копия факта facts-demo-saas-okoshko.yaml с тем же id; use дополнен event-program, если факт — тема программы вебинара.'
   lang: ru
 - id: reminders
   kind: property
@@ -399,8 +399,8 @@ facts:
     en:
       canonical: Okoshko reminds clients of their booking in Telegram 24 hours and 2 hours before the visit; Telegram reminders are included in
         every plan.
-  notes: 'ДЕМО-факт E. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (H COPY-L-FREE-01).
-    Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  notes: 'ДЕМО-факт. SMS — отдельный факт sms-price: «бесплатные напоминания» без оговорки про SMS нарушают условие рядом (COPY-L-FREE-01).
+    Копия факта facts-demo-saas-okoshko.yaml с тем же id; use дополнен event-program, если факт — тема программы вебинара.'
   lang: ru
 - id: self-booking-link
   kind: property
@@ -446,7 +446,7 @@ facts:
     en:
       canonical: 'Clients book themselves: through an Okoshko link they choose a service, a stylist and a free slot; the link goes into Telegram,
         VK, maps and the website.'
-  notes: 'ДЕМО-факт E. Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  notes: 'ДЕМО-факт. Копия факта facts-demo-saas-okoshko.yaml с тем же id; use дополнен event-program, если факт — тема программы вебинара.'
   lang: ru
 - id: import-free
   kind: offer-terms
@@ -504,7 +504,7 @@ facts:
   translations:
     en:
       canonical: Okoshko support migrates your client list from Excel or Google Sheets for free within 1 business day of receiving the file.
-  notes: 'ДЕМО-факт E. Снимает возражение switching-cost (B1 02 §4.1). Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен
+  notes: 'ДЕМО-факт. Снимает возражение switching-cost (text 02/02 §4.1). Копия факта facts-demo-saas-okoshko.yaml с тем же id; use дополнен
     event-program, если факт — тема программы вебинара.'
   lang: ru
 - id: review-ruslan
@@ -552,7 +552,7 @@ facts:
         confirmed”
       canonical: 'Ruslan (barbershop owner, Kazan): “I used to spend my evenings calling everyone booked for the next day. Now reminders go out
         on their own, and I only call those who haven''t confirmed” (translated from Russian).'
-      note: перевод цитаты — с пометкой «translated from Russian» рядом (B2 §5.1)
+      note: перевод цитаты — с пометкой «translated from Russian» рядом (text 02/03 §5.1)
   attribution:
     name: Руслан
     display: first-name-initial
@@ -569,7 +569,7 @@ facts:
     - testimonial-attribution
   valid:
     review_by: '2027-06-05'
-  notes: 'ДЕМО-факт E. Копия факта E (facts-demo-saas-okoshko.yaml) с тем же id; J3: use дополнен event-program, если факт — тема программы вебинара.'
+  notes: 'ДЕМО-факт. Копия факта facts-demo-saas-okoshko.yaml с тем же id; use дополнен event-program, если факт — тема программы вебинара.'
   lang: ru
 missing:
 - id: organizer-legal
@@ -614,9 +614,9 @@ never_claim:
   - doubl\w*\s+(your\s+)?(\w+\s+)?revenue
   - increas\w*\s+(your\s+)?(\w+\s+)?revenue
   lift: never
-  reason: 38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis (B2, H)
+  reason: 38-ФЗ ст. 5 ч. 3 п. 2; forecast без basis
   source:
-    who: агент E (демо)
+    who: демо-набор
     date: '2026-09-24'
 - id: nc-zero-noshow
   text: «без неявок», «забудьте о неявках» — абсолютное обещание результата, который зависит от клиентов салона
@@ -627,9 +627,9 @@ never_claim:
   - без\s+неяв\w*
   - забудьте\s+о\s+неяв\w*
   lift: never
-  reason: гарантия результата (H COPY-L-GUAR-01); кейс даёт 6 %, не ноль
+  reason: гарантия результата (COPY-L-GUAR-01); кейс даёт 6 %, не ноль
   source:
-    who: агент E (демо)
+    who: демо-набор
     date: '2026-09-24'
 - id: nc-webinar-scarcity
   text: «места ограничены», «успейте зарегистрироваться» без живого счётчика мест
@@ -641,7 +641,7 @@ never_claim:
   - успе\w*\s+зарегистр
   - осталось\s+\d+\s+мест
   lift: with-fact
-  reason: 38-ФЗ ст. 5 ч. 3 п. 1 (недостоверность об условиях); E 03 §3.5
+  reason: 38-ФЗ ст. 5 ч. 3 п. 1 (недостоверность об условиях); text 04/03 §3.5
   source:
-    who: агент J3 (демо)
+    who: демо-набор
     date: '2026-09-24'

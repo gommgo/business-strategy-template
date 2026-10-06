@@ -141,7 +141,7 @@ addon.py: BlenderMCPServer
 
 ### 1.4. Конфигурация у пользователя (22.09.2026)
 
-`~/.claude.json`: `mcpServers.blender = {"type": "stdio", "command": "/home/mm/.local/bin/uvx", "args":
+`~/.claude.json`: `mcpServers.blender = {"type": "stdio", "command": "uvx", "args":
 ["mcp-for-blender"], "env": {"DISABLE_TELEMETRY": "true"}}` — версия не закреплена (uvx возьмёт свежую при обновлении
 кэша). Галочка «Allow Telemetry» в настройках аддона снята; после обновления аддона до протокола 9 осталась снятой
 (проверил оркестратор). Файл `~/.local/share/BlenderMCP/customer_uuid.txt` существует: сервер создаёт идентификатор

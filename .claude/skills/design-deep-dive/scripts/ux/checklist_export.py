@@ -106,13 +106,12 @@ def main(argv=None):
         levels = re.findall(LEVELS, src)
         fms = sorted(set(re.findall(r"\bF\d{1,2}\.\d{1,2}\b", src)))
         related = sorted(set(re.findall(r"\bUX-[A-Z0-9]{3}-\d{2}\b", src)))
-        wave4 = (code in ("ADM", "CLI", "AIF", "PRC")) or (code == "CNS" and int(num) >= 7)
         items.append({
             "id": uid, "block": "APP" if code in ("ADM", "CLI", "AIF", "PRC") else code,
             "block_title": blocks.get("APP" if code in ("ADM", "CLI", "AIF", "PRC") else code, title or ""),
             "sub_block": sub if code in ("ADM", "CLI", "AIF", "PRC") else "",
             "text": text.strip(), "severity": sev, "severity_label": SEV[sev],
-            "severity_note": "назначено агентом S1 (волна 4), не измерено" if wave4 else "назначено агентом I, не измерено",
+            "severity_note": "оценка, не замер",
             "check_method": ways, "check_method_class": [WAY.get(w, "?") for w in ways],
             "check_method_main": WAY.get(ways[0], "?") if ways else "",
             "source_file": files, "source_section": section, "source_raw": src.strip(),
@@ -125,7 +124,7 @@ def main(argv=None):
            f"source_sha256_16: {q(hashlib.sha256(src.encode('utf-8')).hexdigest()[:16])}",
            f"source_md: {q(MD)}", f"source_md_meta: {q(meta_line.strip())}", f"items_count: {len(items)}",
            "severity_scale: {B: блокер, S: серьёзно, D: желательно}",
-           "severity_note_default: " + q("серьёзность назначена агентом I (волна 3) по свёртке шкалы Нильсена 0–4; для блоков CNS-07…29 и APP — агентом S1 (волна 4); не измерена (см. 02-master-checklist.md, «Открытые вопросы» п.2)"),
+           "severity_note_default: " + q("серьёзность — оценка по свёртке шкалы Нильсена 0–4, не замер (см. 02-master-checklist.md, «Открытые вопросы» п.2)"),
            "check_method_codes: {DOM: dom, LNT: script, AXE: script, SCR: scenario, IMG: visual, JDG: visual, HUM: human}",
            "check_method_note: " + q("коды файла: DOM — разбор DOM/кода страницы; LNT — линтер по исходникам; AXE — axe-core/Lighthouse; SCR — сценарий в headless-браузере; IMG — анализ скриншота; JDG — мультимодальный судья по рубрике; HUM — только человек. JDG и HUM не ставят автоматических ворот"),
            "blocks:"]

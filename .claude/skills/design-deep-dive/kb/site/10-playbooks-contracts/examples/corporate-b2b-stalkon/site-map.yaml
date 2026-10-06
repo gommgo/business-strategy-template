@@ -1,4 +1,4 @@
-# ПРИМЕР J v1 · карта G (06-multipage-ia/examples/site-map-corporate-b2b.yaml) → v1: templates[].level, свои бриф и факты.
+# ПРИМЕР v1 · карта корпоративного сайта B2B: templates[].level, свои бриф и факты.
 site_map_version: '1'
 checked: '2026-09-24'
 status: draft
@@ -362,7 +362,7 @@ pages:
   url: /soglasie-na-obrabotku-dannyh/
   parent: null
   priority: must
-  note: согласие отдельным документом с 01.09.2025 (152-ФЗ в ред. 156-ФЗ) — I
+  note: согласие отдельным документом с 01.09.2025 (152-ФЗ в ред. 156-ФЗ) — site 08
 - id: not-found
   page_type: not-found-page
   template: not-found
@@ -537,7 +537,7 @@ collections:
   - id: edition-date
     type: date
     required: true
-    note: дата редакции документа — I
+    note: дата редакции документа — site 08
 chrome:
   header:
     block: header
@@ -699,10 +699,10 @@ build_order:
   why: вторичная задача найма
 - step: 13
   template: legal
-  why: юридический набор (I) до публикации любой формы
+  why: юридический набор (site 08) до публикации любой формы
 - step: 14
   template: not-found
-  why: 404 с путями на хабы, код 404 (H)
+  why: 404 с путями на хабы, код 404 (site 07)
 - step: 15
   template: utility
   why: «спасибо» проверяется вместе с формой на шаге 3

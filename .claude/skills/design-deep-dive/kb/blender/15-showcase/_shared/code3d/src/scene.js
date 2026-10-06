@@ -1,6 +1,6 @@
-// scene.js · общий код 3D «Звена» (_shared/code3d, дорожка CD) · сцена «код v3» + гибридный крюк (модули из GLB)
-// three 0.186.0 (npm-trial) · сборка — _shared/code3d/build.sh (esbuild, define __CD_*__) → <страница>/js/three-scene.js + chunks/.
-// Исходник фазы 1 — 99-raw/experiments/CD/src/scene-v3p1.js (один файл); здесь он разложен по модулям без изменения поведения
+// scene.js · общий код 3D «Звена» (_shared/code3d) · сцена «код v3» + гибридный крюк (модули из GLB)
+// three 0.186.0 · сборка — _shared/code3d/build.sh (esbuild, define __CD_*__) → <страница>/js/three-scene.js + chunks/.
+// Сцена разложена по модулям без изменения поведения однофайлового исходника фазы 1
 // (look 'p1' = кадры фазы 1), правки фазы 2 — таблица LOOKS.p2.
 // API для main.js (как v2/v3): createScene(canvas, {context, dprMax, quality, flags?, look?, glb?, …}) → {ready, resize, set, pointer,
 // intro, renderNow, stop, dispose, stats, tap, ikBounds, flags, mask}. Имена модулей и шарниров — rig.js (base, j1, j2, l1, j3, l2, wrist, grip).
@@ -9,7 +9,7 @@
 //   ao — N8AO (пост);  fx — свет по сюжету + bloom/LUT/зерно (пост);  detail — винты, кабель, маркировка, риски, швы;  texture — точёные крышки.
 // Гибрид: opts.glb = 'url.glb' | { url, lowUrl?, only?: ['j2'], map?: {j3: 'j2'}, materials: 'glb'|'code', ao?: bool,
 //   innerUrl?, innerLowUrl?, ktx2?: true | 'путь/basis/', ktx2Workers? } — модули с этими именами берутся из GLB (glb-modules.js, отдельный
-//   чанк), всё живое (кинематика, IK, студия, свет по сюжету, пол, туман, пост) — код. Крюк v2 (26.09): KTX2 в GLB (сборка --ktx2) и
+//   чанк), всё живое (кинематика, IK, студия, свет по сюжету, пол, туман, пост) — код. Крюк v2: KTX2 в GLB (сборка --ktx2) и
 //   начинка J3 отдельным GLB (innerUrl) — догружается в простое после первого кадра и подставляется вместо начинки-заглушки кода.
 // Правила ворот не меняются: 0 кадров в покое, один контекст, DPR ≤ 1,5 (телефон 1,25), текст — только в HTML.
 import {
@@ -47,8 +47,8 @@ export const LOOKS = {
     bloom: { threshold: 3.4, intensity: 0.9, radius: 0.45, levels: 4 },
     ik: { tilt: 0.4, reach: 0.94, minR: 1.35, plane: 0.0, aim: true, minD: 1.2, yMax: 1.95, comfort: 'lift' } },
 };
-// фаза 3 (CD3): p3 = p2 + приём 8 «лучи в дымке» (контровой диск за рукой, рука режет лучи) + приём 10 «след инструмента»
-// луч: диск 1,9 м (эллипс 0,65) в 2,5 м за целью камеры — нижний край не уходит под пол (иначе граница свечения по горизонту, CD3 sweep s5→t2);
+// фаза 3: p3 = p2 + приём 8 «лучи в дымке» (контровой диск за рукой, рука режет лучи) + приём 10 «след инструмента»
+// луч: диск 1,9 м (эллипс 0,65) в 2,5 м за целью камеры — нижний край не уходит под пол (иначе граница свечения по горизонту);
 // свёртка 48 отсчётов, спад 0,9, плотность 0,5 — лучи короткие: дальний фон не поднимается (при 0,8 каждый пиксель «дотягивался» до
 // диска и фон кадра к странице уходил в ΔE 3,4; при 0,5 — 3,0, края кадра и зона текста как у p2), колонка текста остаётся тёмной
 LOOKS.p3 = { ...LOOKS.p2, beam: true, trail: true, beamK: 1.0, beamColor: '#8d98ad', beamDist: 2.5, beamR: 1.9, beamRx: 1.2, beamY: 0.35, beamAsp: 0.65,
@@ -618,7 +618,7 @@ export function createScene(canvas, opts = {}) {
       try { await Promise.race([document.fonts.ready, new Promise((r) => setTimeout(r, 400))]); atlas.image = makeAtlas(opts.font).image; atlas.needsUpdate = true; } catch (e) { /* без шрифта — запасной */ }
     }
     // программы сцены — в тех вариантах, в которых они будут рисоваться: в буфер (пост, зеркало — линейный выход) и на экран;
-    // иначе первый настоящий кадр перекомпилирует всё синхронно (замер: длинная задача 2,2 с на десктопе, CD shots-v3)
+    // иначе первый настоящий кадр перекомпилирует всё синхронно (замер: длинная задача 2,2 с на десктопе)
     const compileFor = async (rt) => {
       renderer.setRenderTarget(rt);
       const pr = par ? renderer.compileAsync(scene, camera) : (renderer.compile(scene, camera), null);
@@ -648,7 +648,7 @@ export function createScene(canvas, opts = {}) {
 
   return {
     renderer, ready, flags: F, version, look: opts.look || 'p2',
-    __dbg: { scene, camera, bg, floor },                            // стенды: доступ к сцене (опыты AO, WebGPU) — не для страницы
+    __dbg: { scene, camera, bg, floor },                            // стенды: доступ к сцене (замеры AO, WebGPU) — не для страницы
     isReady: () => isReady,
     resize,
     set(phase, t, instant) {

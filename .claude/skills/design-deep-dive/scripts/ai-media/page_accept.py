@@ -28,8 +28,10 @@
 выше цели — WARN, выше «плохо» — FAIL; CLS так же. Без профиля вес не сравнивается, а LCP и CLS — только по порогам, общим
 для всех уровней. Условия лаборатории (телефон — дескриптор Pixel 7, CPU ×4, сеть; десктоп — окно и DPR) — budgets.yaml
 conditions; UA — как у браузера (HeadlessChrome), автоматизация не маскируется.
-Замер времени — на тихой машине: утилита берёт общий тяжёлый замок, потом замок браузера (page_gates.heavy_lock); замки,
-которые уже держит обёртка (slot_run.py, flock), повторно не берутся.
+Браузер работает под общим замком браузера kbpaths.lock('browser'), который утилита берёт сама: замок реентерабелен по
+дереву процессов, внешняя обёртка не нужна. Замер времени — на тихой машине: перед замком браузера утилита берёт общий
+тяжёлый замок (page_gates.heavy_lock); --no-lock снимает только тяжёлый замок. Замки, которые уже держит обёртка
+slot_run.py (SLOT_RUN_HOLDS), повторно не берутся.
 
 Запуск (код-репо — соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/ai-media/page_accept.py):
   page_accept.py PAGE.html|URL --out DIR [--budget-profile landing-saas@L1] [--mobile] [--throttle] [--no-rm] [--root DIR]
@@ -45,7 +47,7 @@ import argparse, contextlib, http.server, io, json, math, os, re, socketserver, 
 import numpy as np
 from PIL import Image
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib'))  # scripts/lib: kbpaths
 import kbpaths  # noqa: E402
 kbpaths.use('site')
 import page_gates as PG  # noqa: E402  профиль бюджета, условия замера, тишина машины
@@ -628,6 +630,13 @@ def verdict(no, rm, th, acc_rows=None):
     return {'pass': not fail, 'fail': fail, 'warn': warn, 'ok': ok}
 
 
+def browser_lock():
+    """Общий замок браузера без замков тишины (--no-lock): kbpaths.lock('browser') — реентерабельно по дереву процессов;
+    замок, который держит обёртка slot_run.py (SLOT_RUN_HOLDS), повторно не берётся."""
+    held = {x.strip() for x in os.environ.get('SLOT_RUN_HOLDS', '').split(',') if x.strip()}
+    return contextlib.nullcontext() if 'browser' in held else kbpaths.lock('browser')
+
+
 def exit_code(v, strict=False):
     """Код выхода по вердикту замера: замер выполнен — 0, находки остаются в отчёте (вердикт страницы решает page_gates.py);
     с --strict — 1 при провалах."""
@@ -651,7 +660,7 @@ def run(a):
     from playwright.sync_api import sync_playwright
     local = os.path.exists(a.target)
     tag = ('mobile' if a.mobile else f'{a.width}x{a.height}') + ('_thr' if a.throttle else '') + ('_dark' if a.dark else '') + ('_click' if a.click else '')
-    lock = contextlib.nullcontext() if a.no_lock else PG.heavy_lock(domains=('ai-media',))
+    lock = browser_lock() if a.no_lock else PG.heavy_lock(domains=('ai-media',))
     with lock, contextlib.ExitStack() as st:
         if local:
             root = local_root(a.target, a.root)
@@ -707,6 +716,27 @@ def selftest():
         nonlocal ok
         ok = ok and bool(cond)
         print(('OK   ' if cond else 'FAIL ') + msg)
+    home, holds = os.environ.get(kbpaths.ENV_HOME), os.environ.pop('SLOT_RUN_HOLDS', None)
+    with tempfile.TemporaryDirectory() as td:          # свой $DDD_HOME: общий замок браузера машины не трогается
+        os.environ[kbpaths.ENV_HOME] = td
+        try:
+            t0 = time.monotonic()
+            with kbpaths.lock('browser', timeout=5):
+                with browser_lock():
+                    nested = subprocess.run([sys.executable, '-c', 'import sys; sys.path.insert(0, sys.argv[1]); import kbpaths\n'
+                                             'with kbpaths.lock("browser", timeout=5): print("ok")',
+                                             os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib')],
+                                            capture_output=True, text=True, timeout=60)
+            check('--no-lock: замок браузера берётся (kbpaths.lock), вложенный вызов и дочерняя утилита под ним не ждут',
+                  nested.returncode == 0 and 'ok' in nested.stdout and time.monotonic() - t0 < 10)
+            os.environ['SLOT_RUN_HOLDS'] = 'render,browser'
+            check('--no-lock: замок браузера, который держит slot_run.py, повторно не берётся',
+                  isinstance(browser_lock(), contextlib.nullcontext))
+        finally:
+            os.environ.pop('SLOT_RUN_HOLDS', None)
+            if holds is not None:
+                os.environ['SLOT_RUN_HOLDS'] = holds
+            os.environ.pop(kbpaths.ENV_HOME, None) if home is None else os.environ.__setitem__(kbpaths.ENV_HOME, home)
     src = open(os.path.abspath(__file__), encoding='utf-8').read().split('\ndef selftest')[0]
     check('в коде нет --disable-blink-features и подмены UA на строку без Headless',
           '--disable-blink-' not in src and 'user_agent=' not in src and 'AppleWebKit' not in src)
@@ -837,7 +867,7 @@ def parser():
     ap.add_argument('--first-screen-only', action='store_true', help='2.2.2 и reduce — только первый экран (отчёт помечает)')
     ap.add_argument('--loops', type=int, default=3, help='сколько найденных петель проверить через 6 с после показа')
     ap.add_argument('--acceptance', action='store_true', help='картинки и вылет на ширинах приёмки (kb/common/acceptance-widths.yaml)')
-    ap.add_argument('--no-lock', action='store_true', help='не брать замки тишины (обёртка их уже держит)')
+    ap.add_argument('--no-lock', action='store_true', help='не брать тяжёлый замок тишины (замок браузера берётся всегда)')
     ap.add_argument('--strict', action='store_true', help='выход по находкам: код 1 при провалах (без ключа замер возвращает 0)')
     return ap
 

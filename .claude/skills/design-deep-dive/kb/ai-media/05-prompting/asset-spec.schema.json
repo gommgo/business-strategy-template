@@ -1,14 +1,9 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ai-media-research.local/05-prompting/asset-spec.schema.json",
+  "$id": "urn:app-design:ai-media:asset-spec:0.2",
   "title": "Asset spec (спецификация визуального ассета сайта)",
-  "description": "Единый контракт ассета без привязки к модели: из него компилятор (../../scripts/ai-media/prompt_compile.py) собирает промт в диалекте модели по dialects.yaml. Описательные поля — по-английски (язык промта), служебные — любые. Подробности и правила отображения: 05-prompting/03-asset-spec-and-dialects.md (v0.1), 05-prompting/04–06 (v0.2: видео, правки, референсы, серии, продукт, опции компиляции). Волна 1, агент D; v0.2 — D2, волна 2.",
+  "description": "Единый контракт ассета без привязки к модели: из него компилятор (../../scripts/ai-media/prompt_compile.py) собирает промт в диалекте модели по dialects.yaml. Описательные поля — по-английски (язык промта), служебные — любые. Подробности и правила отображения: 05-prompting/03-asset-spec-and-dialects.md (v0.1), 05-prompting/04–06 (v0.2: видео, правки, референсы, серии, продукт, опции компиляции).",
   "x-version": "0.2",
-  "x-changelog": [
-    "0.1 (2026-09-23, D, волна 1): базовая схема",
-    "0.2 (2026-09-23, D2, волна 2): только добавления, v0.1 валидна без изменений — spec_version 0.2; references[].id/kind и роли identity/material/layout/effect/pose/video_motion; блоки product, series, edit, compile; motion.background_motion/still/forbid/tempo/shots/reference_mode/frame_annotations/source_video; text.strict_spelling; output.variants",
-    "0.2 + D2b (2026-09-23 вечер): необязательные edit.changes[].op (смешанная правка) и motion.camera.target; spec_version не меняется"
-  ],
   "x-checked-at": "2026-09-23",
   "x-sources": [
     "05-prompting/01-vendor-prompt-guides.md",
@@ -20,7 +15,7 @@
   "additionalProperties": false,
   "required": ["spec_version", "id", "checked_at", "task", "role", "subject", "composition", "palette", "text", "output"],
   "properties": {
-    "spec_version": {"enum": ["0.1", "0.2"], "description": "0.2 — D2, волна 2 (обратно совместима с 0.1)."},
+    "spec_version": {"enum": ["0.1", "0.2"], "description": "0.2 обратно совместима с 0.1."},
     "id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$", "description": "Устойчивый id ассета (слаг)."},
     "checked_at": {"type": "string", "format": "date", "description": "Дата последней сверки спецификации с каталогом и диалектами."},
     "brief_language": {"type": "string", "default": "ru", "description": "Язык исходного брифа заказчика (BCP-47). Описательные поля спецификации всё равно пишутся по-английски."},
@@ -121,7 +116,7 @@
       "type": "array",
       "minItems": 1,
       "maxItems": 6,
-      "description": "Роли и доли площади как «Frequency» в ui-research 12/04 §2.2. Сумма share ≤ 1 (проверяет компилятор). Больше 5 цветов модели выполняют хуже (BFL).",
+      "description": "Роли и доли площади как «Frequency» в ui 12/04 §2.2. Сумма share ≤ 1 (проверяет компилятор). Больше 5 цветов модели выполняют хуже (BFL).",
       "items": {
         "type": "object",
         "additionalProperties": false,
@@ -158,7 +153,7 @@
         "required": ["src", "role"],
         "properties": {
           "src": {"type": "string", "description": "Путь (относительно файла спецификации) или URL."},
-          "role": {"enum": ["style", "subject", "character", "product", "composition", "palette", "background", "first_frame", "last_frame", "edit_source", "mask", "identity", "material", "layout", "effect", "pose", "video_motion"], "description": "identity … video_motion — D2, волна 2 (05-prompting/05 §3)."},
+          "role": {"enum": ["style", "subject", "character", "product", "composition", "palette", "background", "first_frame", "last_frame", "edit_source", "mask", "identity", "material", "layout", "effect", "pose", "video_motion"], "description": "identity … video_motion — с версии 0.2 (05-prompting/05 §3)."},
           "note": {"type": "string", "description": "Что именно взять: «line weight and palette only»."},
           "id": {"type": "string", "pattern": "^[a-z0-9_-]+$", "description": "D2: id для ссылок из edit.source, product.reference_ids, series.reference_ids."},
           "kind": {"enum": ["image", "video"], "default": "image", "description": "D2: видео-референс (Seedance 2.x, Omni)."}
@@ -261,7 +256,7 @@
             "move": {"enum": ["static", "dolly-in", "dolly-out", "pan-left", "pan-right", "tilt-up", "tilt-down", "truck-left", "truck-right", "pedestal-up", "pedestal-down", "orbit", "tracking", "crane-up", "crane-down", "zoom-in", "zoom-out"]},
             "amplitude": {"enum": ["small", "medium", "large"]},
             "speed": {"enum": ["slow", "medium", "fast"]},
-            "target": {"type": "string", "description": "D2b: на чём держится неподвижная камера — Kling «The camera remains fixed on {target}» (по умолчанию «the subject»)."}
+            "target": {"type": "string", "description": "На чём держится неподвижная камера — Kling «The camera remains fixed on {target}» (по умолчанию «the subject»)."}
           }
         },
         "subject_motion": {"type": "string", "description": "Одно действие субъекта, общими словами (the subject …)."},
@@ -339,7 +334,7 @@
         "changes": {"type": "array", "maxItems": 12, "items": {"type": "object", "additionalProperties": false, "required": ["target", "to"],
                     "properties": {"target": {"type": "string"}, "to": {"type": "string"}, "where": {"type": "string"},
                                    "value": {"type": "string", "description": "Целевое значение: «#1F5E3B», «2700 K», «45 cm»."},
-                                   "op": {"enum": ["replace", "recolor", "add", "remove"], "description": "D2b: операция этого изменения в смешанной правке (по умолчанию — edit.operation); add — «to» + «where», remove — «to» = что видно на месте."}}}},
+                                   "op": {"enum": ["replace", "recolor", "add", "remove"], "description": "Операция этого изменения в смешанной правке (по умолчанию — edit.operation); add — «to» + «where», remove — «to» = что видно на месте."}}}},
         "keep": {"type": "array", "items": {"type": "string"}, "maxItems": 10},
         "visible_after": {"type": "string", "description": "Что видно в кадре после правки (формула Jamey)."},
         "mask": {"type": "object", "additionalProperties": false, "required": ["src", "polarity"],
@@ -414,7 +409,7 @@
         "surface": {"type": "string", "description": "Что видно в зоне: «evenly lit warm-grey plaster wall», «clear pale sky»."},
         "tone": {"type": "string", "description": "Тон и контраст зоны: «even, low contrast, light»."},
         "purpose": {"enum": ["headline", "body", "cta", "logo", "caption"]},
-        "text_color_on_top": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "Цвет HTML-текста поверх — для проверки контраста (агент K)."}
+        "text_color_on_top": {"type": "string", "pattern": "^#[0-9A-Fa-f]{6}$", "description": "Цвет HTML-текста поверх — для проверки контраста."}
       }
     }
   }

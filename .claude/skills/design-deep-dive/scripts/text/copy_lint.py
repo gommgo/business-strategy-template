@@ -41,7 +41,7 @@ action, object, group, context, status; жанр — interface); «-» — stdin
 «-ая,» (ux-6-4-10) не трогает: «улица Лесная, дом 3» — адрес, а не деепричастный оборот. Файл фактов — ключ --facts,
 у copy deck — его facts_ref.
 
-Коды выхода: 0 — нет находок уровня error; 2 — есть error (ворота не пройдены); 1 — ошибка вызова, входа или словаря.
+Коды выхода: 0 — нет находок уровня error; 1 — есть error (ворота не пройдены); 2 — ошибка вызова, входа или словаря.
 Интерпретатор — $DDD_HOME/venv/bin/python (PyYAML, морфология pymorphy3); без pymorphy3 работают регулярные
 приближения с уровнем не выше warning, а проверка форм групп строк интерфейса пропускается с заметкой.
 
@@ -84,7 +84,7 @@ try:
     import yaml  # PyYAML
 except ImportError:  # pragma: no cover
     sys.stderr.write("copy_lint: нужен PyYAML — запускайте интерпретатором $DDD_HOME/venv/bin/python.\n")
-    sys.exit(1)
+    sys.exit(2)
 
 LEVELS = ("error", "warning", "info", "off")
 LEVEL_RANK = {"off": 0, "info": 1, "warning": 2, "error": 3}
@@ -97,7 +97,7 @@ INTERNAL_SLOTS = ("hr",)            # псевдослот парсера: ра�
 
 
 class UsageError(ValueError):
-    """Ошибка вызова: неизвестная роль, тип слота или часть компонента; роль строки не из ролей части — код 1."""
+    """Ошибка вызова: неизвестная роль, тип слота или часть компонента; роль строки не из ролей части — код 2."""
 
 # --- токенизация -------------------------------------------------------------------------------------------------
 LETTER = "A-Za-zА-Яа-яЁё"
@@ -1379,7 +1379,7 @@ def stats_rhythm(lengths: list[int]) -> dict:
 
 
 # без морфологии повтор ищется только среди глаголов, которые модели чаще всего дублируют (humanizer-ru п.33);
-# полный поиск по основам давал шум на человеческих текстах (опыт C/02)
+# полный поиск по основам шумит на человеческих текстах
 REPEAT_VERBS_RU = re.compile(r"(?<![а-яё])(позволя|помога|предлага|обеспечива|поддержива|да[её]т|дают|дела[ею]т|"
                              r"показыва|использу|осуществля|созда[ёе]т|создают|демонстриру|способству|формиру|реализу|"
                              r"улучша|повыша|сокраща|оптимизиру|автоматизиру|гарантиру|отвеча)", re.I)
@@ -1424,8 +1424,8 @@ REFLEXIVE_CANC = {"осуществляться", "производиться", 
 
 
 def morph_findings(doc: Document, rules: list[Rule], genre: str, profile: dict, morph) -> list[Finding]:
-    """Деепричастные хвосты, цепочки родительных и пассив по pymorphy3 (опыт C/03: полнота 1,0 против 0,57–0,75 у
-    регулярок на размеченном наборе). Заменяет одноимённые регулярные правила, когда морфология доступна."""
+    """Деепричастные хвосты, цепочки родительных и пассив по pymorphy3: на размеченном наборе полнота 1,0 против
+    0,57–0,75 у регулярок. Заменяет одноимённые регулярные правила, когда морфология доступна."""
     rb = {r.id: r for r in rules}
     out: list[Finding] = []
 
@@ -1557,7 +1557,7 @@ NOT_VERB_RU = {
     # имена с «глагольными» окончаниями (в начале части предложения; имена в середине пропускаются по заглавной)
     "павел", "михаил", "даниил", "гавриил", "самуил", "людмила", "мила", "алла", "стелла", "камилла", "марат", "ренат",
     "булат", "талгат", "рифат", "максим", "вадим", "ефим", "серафим", "герасим", "ахмет", "натали",
-    # прежний список (формы на -ы, -и, -кт и др. — для совместимости)
+    # нарицательные формы на -ы, -и, -кт и др.
     "эффект", "проект", "аспект", "продукт", "факт", "контракт", "дни", "сроки", "итоги", "услуги", "товары", "работы",
     "расходы", "материалы"}
 
@@ -2256,7 +2256,7 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
     out: list[Finding] = []
     prose_types = set(profile.get("prose_slot_types") or ["body", "article-paragraph", "geo-answer", "email-body"])
     prose_roles = set(profile.get("prose_roles") or [])
-    # подписи в 1–3 слова не проза, даже если слот размечен как body (опыт C/02: вкладки и статусы веб-приложения);
+    # подписи в 1–3 слова не проза, даже если слот размечен как body (вкладки и статусы веб-приложения);
     # у строки без типа слота (жанр interface) проза — по роли (body, help, email)
     prose_units = [(i, u) for i, u in enumerate(doc.units) if (ltype(u) in prose_types if ltype(u) else
                                                               u.role in prose_roles)
@@ -2302,7 +2302,7 @@ def run_analyzers(doc: Document, rules: list[Rule], genre: str, lang: str, profi
         if cfg.get("enabled", True) and rh.get("sentences", 0) >= int(cfg.get("min_sentences", 8)):
             md = rh.get("mean_abs_diff")
             # ровные короткие фразы (серия вопросов, живая колонка) — другой стиль; машинная монотонность — это ровные
-            # средние и длинные предложения (опыт C/04: колонка bureau.ru 2012 со средним 7 слов давала ложное)
+            # средние и длинные предложения (живая колонка со средним 7 слов в предложении — не монотонность)
             if md is not None and md < float(cfg.get("mean_diff_min", 4)) \
                     and rh.get("mean_len", 0) >= float(cfg.get("min_mean_len", 9)):
                 out.append(mk_analyzer_finding(rb.get("an-rhythm-monotone"), "an-rhythm-monotone", an_level(cfg),
@@ -3070,19 +3070,19 @@ def selftest() -> int:
           found(lt("Оставьте заявку.\n\nТы получишь смету завтра.", "landing"), "an-address-mix"))
     check("голос на «ты»: строка на «вы» — находка", found(lt("Оставьте заявку.", "landing",
                                                               voice={"address_form": "ty"}), "an-address-mix"))
-    # 10. калибровки линтера (text X §7: К1–К16, К28)
-    check("К1: «10 - 15 дней» — диапазон (typo-range-hyphen), не дефис вместо тире",
+    # 10. калибровки линтера: ложные и пропущенные находки на образцах текстов
+    check("«10 - 15 дней» — диапазон (typo-range-hyphen), не дефис вместо тире",
           not found(lt("Сдача через 10 - 15 дней.", "landing", slot_type="body"), "ru-pun-hyphen-as-dash") and
           found(lt("Сдача через 10 - 15 дней.", "landing", slot_type="body"), "typo-range-hyphen") and
           found(lt("Анамнез - это разговор с пациентом.", "landing", slot_type="body"), "ru-pun-hyphen-as-dash"))
-    check("К3: сообщение ru-mkt-superlatives ссылается на COPY-L-SUP-01", "COPY-L-SUP-01" in rb["ru-mkt-superlatives"].message
+    check("сообщение ru-mkt-superlatives ссылается на COPY-L-SUP-01", "COPY-L-SUP-01" in rb["ru-mkt-superlatives"].message
           and "38-ФЗ" not in rb["ru-mkt-superlatives"].message)
     sup = lt("Лучшая мастерская в городе — по мнению наших гостей.", "landing", slot_type="headline")
     check("право — только в claims_check.py: правил COPY-L-… в словарях линтера нет, превосходная степень — одна "
           "находка стиля", not [i for i in ids if i.startswith("COPY-L-")] and not found(sup, "COPY-L-*") and
           [f["id"] for f in sup["findings"] if f["fragment"] == "Лучшая"] == ["ru-mkt-superlatives"],
           str([(f["id"], f["fragment"]) for f in sup["findings"]]))
-    check("К4: «По статистике, 78 %» — размытая атрибуция, в geo — error",
+    check("«По статистике, 78 %» — размытая атрибуция, в geo — error",
           found(lt("По статистике, 78 % клиентов возвращаются.", "geo", slot_type="geo-answer"),
                 "ru-lex-vague-attribution", "error"))
     dense = ("В современном мире уникальный комплексный подход обеспечивает эффективное решение ключевых задач. "
@@ -3091,7 +3091,7 @@ def selftest() -> int:
              "уровень. Уникальный опыт и мощные инструменты позволяют достигать впечатляющих результатов. "
              "Комплексное решение для вашего бизнеса — это наш приоритет и наша миссия.")
     full, page = lt(dense, "landing"), lt(dense, "landing", page_audit=True)
-    check("К5: аудит страницы без copy deck — анализаторы не выше warning, вердикт — сигнал",
+    check("аудит страницы без copy deck — анализаторы не выше warning, вердикт — сигнал",
           found(full, "an-marker-density") and not found(page, "an-*", "error") and
           page["summary"]["mode"] == "page-audit" and page["summary"]["verdict"] != "rewrite",
           f"{full['summary']} / {page['summary']}")
@@ -3104,7 +3104,7 @@ def selftest() -> int:
               (resolve_profile(profiles, g, None)[0].get("level_overrides") or {}).get("ux-6-4-*") == "warning"
               for g in SITE_GENRES) and "ux-6-4-10" not in
           (resolve_profile(profiles, "interface", None)[0].get("level_overrides") or {}))
-    check("К6: «Подробнее» на лендинге — не error", not found(rp, "ux-3-2-07", "error"))
+    check("«Подробнее» на лендинге — не error", not found(rp, "ux-3-2-07", "error"))
     import tempfile
     with tempfile.TemporaryDirectory() as td:
         fpath = Path(td) / "facts.yaml"
@@ -3129,18 +3129,18 @@ def selftest() -> int:
           [f["example"].get("good") for f in hp] == ["в\u00a0Нижнем", "и\u00a0области"] and
           all("неразрывный пробел после" in f["replacement"] for f in hp), str([(f["fragment"], f["example"]) for f in hp]))
     tag = deck({"slots": [{"slot_type": "footer-tagline", "text": "Быстро. Просто. Надёжно."}]}, "landing")
-    check("К7: рубленый драматизм в слогане (footer-tagline) — сигнал", found(tag, "ru-syn-chopped", "info") and
+    check("рубленый драматизм в слогане (footer-tagline) — сигнал", found(tag, "ru-syn-chopped", "info") and
           not found(tag, "ru-syn-chopped", "warning"))
     rep_text = ("Прораб каждый вечер присылал фото с объекта, чтобы хозяин видел работу. Мастер тоже присылал фото "
                 "плитки, когда заканчивал стену в ванной.")
     vr = lt(rep_text, "landing", slot_type="body", voice={"customer_words": ["каждый вечер присылал фото"]})
-    check("К7: повтор слова клиента (customer_words) — не находка", not found(vr, "an-verb-repeat"))
-    check("К8: длинное совпадение с кавычками внутри — находка; фраза целиком в кавычках — нет",
+    check("повтор слова клиента (customer_words) — не находка", not found(vr, "an-verb-repeat"))
+    check("длинное совпадение с кавычками внутри — находка; фраза целиком в кавычках — нет",
           found(lt("Сервис не только «экономит» время, но и снижает затраты.", "landing", slot_type="body"),
                 "ru-syn-not-only-but-also") and
           not found(lt("Клиент написал: «Сервис не только экономит время, но и снижает затраты».", "landing",
                        slot_type="body"), "ru-syn-not-only-but-also"))
-    check("К8: кликбейт в заголовке статьи и теме письма",
+    check("кликбейт в заголовке статьи и теме письма",
           found(deck({"slots": [{"slot_type": "article-heading", "text": "Вы не поверите, сколько стоит ремонт"}]},
                      "article"), "meta-clickbait", "warning") and
           found(deck({"slots": [{"slot_type": "email-subject", "text": "Вы не поверите, что внутри"}]}, "email-form"),
@@ -3149,38 +3149,38 @@ def selftest() -> int:
                                    "meta": {"title": "Ремонт квартир от 9 800 ₽/м² — гарантия 3 года",
                                             "fact_ids": ["price-from-per-m2", "guarantee-3-years"]},
                                    "sections": []}]}}
-    check("К9: meta.fact_ids снимают число без факта в мета", not found(deck(dm), "an-number-without-fact"))
+    check("meta.fact_ids снимают число без факта в мета", not found(deck(dm), "an-number-without-fact"))
     dv = {"slots": [{"slot_type": "headline", "chosen": "a", "variants": [
         {"id": "a", "text": "Ремонт квартир с 2014 года"},
         {"id": "b", "text": "В современном мире ремонт — это стресс"},
         {"id": "c", "status": "rejected", "text": "Откройте для себя ремонт нового поколения"}]}]}
-    check("К10: по умолчанию — выбранный вариант; --all-variants — живые, без rejected",
+    check("по умолчанию — выбранный вариант; --all-variants — живые, без rejected",
           not found(deck(dv, "landing"), "ru-lex-intro-cliche") and
           found(deck(dv, "landing", all_variants=True), "ru-lex-intro-cliche") and
           not found(deck(dv, "landing", all_variants=True), "ru-mkt-banned-openers"))
-    check("К11: «X, который Y» с fact_ids — без находки",
+    check("«X, который Y» с fact_ids — без находки",
           not found(deck({"slots": [{"slot_type": "headline", "text": "Лампа, которая сама подбирает свет",
                                      "fact_ids": ["auto-light"]}]}, "landing"), "ru-mkt-headline-which") and
           found(deck({"slots": [{"slot_type": "headline", "text": "Сервис, который понимает ваш бизнес"}]}, "landing"),
                 "ru-mkt-headline-which"))
     stuffing = ("Ремонт квартир в Нижнем Новгороде — наша работа. Мы делаем ремонт квартир любой сложности, "
                 "ремонт квартир под ключ и косметический ремонт квартир.")
-    check("К12: набивка ключа на лендинге — сигнал, в статье — warning",
+    check("набивка ключа на лендинге — сигнал, в статье — warning",
           found(lt(stuffing, "landing", slot_type="body"), "geo-keyword-stuffing", "info") and
           found(lt(stuffing, "article", slot_type="article-paragraph"), "geo-keyword-stuffing", "warning"))
     labels = deck({"slots": [{"slot_type": "section-title", "text": x} for x in
                              ("Наши преимущества", "Частые вопросы", "Вопросы и ответы", "Контакты")]}, "landing")
     got_l = [f["fragment"] for f in found(labels, "ru-mkt-label-headings", "warning")]
-    check("К13: ярлык секции — warning; «Частые вопросы», «Вопросы и ответы», «Контакты» — конвенции",
+    check("ярлык секции — warning; «Частые вопросы», «Вопросы и ответы», «Контакты» — конвенции",
           got_l == ["Наши преимущества"], str(got_l))
     vf = kbpaths.kb("text", "05-voice-editorial", "examples", "voice-otves-warm.yaml")
     voice = load_voice(str(vf))
     rv = lt("Команда профессионалов делает ремонт в кратчайшие сроки.", "landing", slot_type="body", voice=voice)
-    check("К14: словарь бренда «не говорим» (--voice) — находки, в плотности маркеров",
+    check("словарь бренда «не говорим» (--voice) — находки, в плотности маркеров",
           len(found(rv, "voice-avoid-*")) >= 2 and all(f["counts_as_marker"] for f in found(rv, "voice-avoid-*")))
-    check("К14: EN-приметы истории", found(lt("They got the kitchen of their dreams and couldn't be happier.", "landing",
+    check("EN-приметы истории", found(lt("They got the kitchen of their dreams and couldn't be happier.", "landing",
                                              slot_type="body"), "en-mkt-story-cliches"))
-    check("К14: аббревиатура после двоеточия и «since 2014» — без находок ux",
+    check("аббревиатура после двоеточия и «since 2014» — без находок ux",
           not found(lt("Оплата: СБП", "interface", "label"), "ux-6-4-11") and
           not found(lt("Open since 2014", "interface", "label"), "ux-4-2-07"))
     dc = {"copy_deck": {"pages": [{"page_id": "home", "page_type": "landing-saas", "sections": [
@@ -3189,11 +3189,11 @@ def selftest() -> int:
                                                         "Мастер видит запись и адрес клиента в телефоне.",
                                                         "Отчёт по выручке собирается каждый вечер сам."])]}]}]}}
     fc = found(deck(dc), "an-cards-uniform", "info")
-    check("К15: карточки секции одной длины — сигнал an-cards-uniform с приметой реестра (tells.yaml#checks)",
+    check("карточки секции одной длины — сигнал an-cards-uniform с приметой реестра (tells.yaml#checks)",
           fc and fc[0].get("tell") == "uniform-card-copy", str(fc[:1]))
-    check("К15: утверждение со счётом словами — число без факта",
+    check("утверждение со счётом словами — число без факта",
           found(lt("Мы работаем в два раза быстрее конкурентов.", "landing"), "an-number-without-fact"))
-    check("К16: строчная после двоеточия и грамматическое тире в прозе — без находок ux",
+    check("строчная после двоеточия и грамматическое тире в прозе — без находок ux",
           not found(lt("Ремонт в Сормове: ремонт под ключ", "landing", slot_type="headline"), "ux-6-4-11") and
           not found(deck({"slots": [{"slot_type": "guarantee-text", "text": "Смета — бесплатно."}]}, "landing"),
                     "ux-5-3-03"))
@@ -3201,11 +3201,11 @@ def selftest() -> int:
                                    "lint_allow": [{"rule": "meta-title-too-short", "reason": "известный бренд"}],
                                    "sections": []}]}}
     rma = deck(ma)
-    check("К28: короткий title известного бренда — lint_allow страницы", not found(rma, "meta-title-too-short") and
+    check("короткий title известного бренда — lint_allow страницы", not found(rma, "meta-title-too-short") and
           rma["summary"]["suppressed"] == 1)
     tpl = ((load_yaml(ROOT / "07-seo-geo-copy" / "meta-rules.yaml") or {}).get("templates") or {}) \
         .get("landing-lead-services", {}).get("example_ru") or {}
-    check("К28: description шаблона landing-lead-services не начинается с тех же 42 знаков, что title",
+    check("description шаблона landing-lead-services не начинается с тех же 42 знаков, что title",
           tpl.get("title") and tpl.get("description") and tpl["title"][:42] != tpl["description"][:42])
     # 11. надзаголовки, стрелка, разряды
     per = rb["an-eyebrow-rate"].per_sections
@@ -3225,6 +3225,20 @@ def selftest() -> int:
           all(set(rb[i].genre_variants) <= set(SITE_GENRES) and rb[i].genre_variants for i in
               ("ux-5-2-01", "ux-5-2-02", "ux-3-2-01", "ux-3-2-04")) and not rb["ux-5-2-01"].for_genre("interface")
           is not rb["ux-5-2-01"])
+    # коды выхода: 0 — нет error, 1 — есть error, 2 — ошибка вызова
+    import contextlib
+    import io
+    import tempfile
+    with tempfile.TemporaryDirectory(prefix="ddd-copy-lint-") as td:
+        bad, good = Path(td) / "bad.txt", Path(td) / "good.txt"
+        bad.write_text('Проект "Альфа" создан\n', encoding="utf-8")
+        good.write_text("Проект создан\n", encoding="utf-8")
+        with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+            codes = (main([str(good), "--genre", "interface", "--role", "toast"]),
+                     main([str(bad), "--genre", "interface", "--role", "toast"]),
+                     main([str(bad), "--genre", "interface", "--role", "no-such-role"]), main([]))
+    check("коды выхода: нет error — 0, есть error — 1, неизвестная роль и вызов без входа — 2", codes == (0, 1, 2, 2),
+          str(codes))
     for line in fails:
         print(line)
     print(f"проверок: {n_checks}, провалов: {len(fails)}")
@@ -3234,18 +3248,18 @@ def selftest() -> int:
 
 # --- CLI -------------------------------------------------------------------------------------------------------------
 class _ArgParser(argparse.ArgumentParser):
-    """Ошибка ключей — код 1 (у argparse по умолчанию 2, а 2 у линтера значит «есть error в тексте»)."""
+    """Ошибка ключей — строка использования и сообщение с именем утилиты, код 2 (ошибка вызова)."""
 
     def error(self, message):
         self.print_usage(sys.stderr)
         sys.stderr.write(f"copy_lint: {message}\n")
-        raise SystemExit(1)
+        raise SystemExit(2)
 
 
 def main(argv=None) -> int:
     ap = _ArgParser(description="Линтер текстов RU/EN по жанру и роли строки: маркетинговые тексты сайта (жанры сайта) и "
-                                "тексты интерфейса (жанр interface, реестр texts.md). Коды: 0 — нет error, 2 — есть error, "
-                                "1 — ошибка вызова (неизвестная роль, тип слота, часть компонента, жанр).")
+                                "тексты интерфейса (жанр interface, реестр texts.md). Коды: 0 — нет error, 1 — есть error, "
+                                "2 — ошибка вызова (неизвестная роль, тип слота, часть компонента, жанр).")
     ap.add_argument("paths", nargs="*", help="файлы .txt .md .html .yaml, реестр texts.md; «-» — stdin")
     ap.add_argument("--genre", choices=GENRES, help="жанр: " + ", ".join(GENRES) + "; у copy deck — page_type.genre словаря "
                                                     "site, у реестра texts.md — interface")
@@ -3284,8 +3298,8 @@ def main(argv=None) -> int:
     if a.selftest:
         return selftest()
     if not a.paths:
-        ap.print_usage()
-        return 1
+        ap.print_usage(sys.stderr)
+        return 2
     try:
         vocab = load_vocab(Path(a.vocab) if a.vocab else None)
         profiles = load_profiles(Path(a.profiles) if a.profiles else None)
@@ -3306,7 +3320,7 @@ def main(argv=None) -> int:
             results.append(res)
     except (OSError, ValueError, yaml.YAMLError, re.error) as exc:
         sys.stderr.write(f"copy_lint: {exc}\n")
-        return 1
+        return 2
     payload = {"tool": "copy_lint", "version": VERSION, "date": DATE, "results": results}
     if a.json:
         print(json.dumps(payload, ensure_ascii=False, indent=1))
@@ -3314,8 +3328,14 @@ def main(argv=None) -> int:
         print(render_md(results))
     else:
         print(render_text(results))
-    return 2 if any(r["summary"]["error"] for r in results) else 0
+    return 1 if any(r["summary"]["error"] for r in results) else 0
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit as e:              # текст вместо кода (нет морфологии при --morph on) — ошибка окружения
+        if isinstance(e.code, str):
+            print(e.code, file=sys.stderr)
+            sys.exit(2)
+        raise

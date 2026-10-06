@@ -122,7 +122,7 @@ python3 ../../scripts/blender/bpy_probe.py node ShaderNodeMix data_type=RGBA   #
 import sys, importlib
 import bpy                             # в MCP bpy уже есть в пространстве имён; импорт безвреден
 sys.dont_write_bytecode = True
-p = "/home/mm/Документы/app-design/blender-research/03-bpy-api/snippets"
+p = "../../scripts/blender"           # от корня базы kb/blender; в MCP — полный путь к этой папке
 if p not in sys.path:
     sys.path.insert(0, p)
 import bpyx

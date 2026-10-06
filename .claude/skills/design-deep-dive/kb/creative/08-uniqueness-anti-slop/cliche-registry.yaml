@@ -1,13 +1,11 @@
 # Реестр приёмов-клише подачи сайта: визуальные и моушн-приметы «сделано по умолчанию».
-# creative-research · 08-uniqueness-anti-slop · волна 2 · агент H · 2026-09-24.
 # Политика и пять проверок — 01-cliche-policy.md; уникальность и вариативность — 02-uniqueness-and-variation.md.
-# v0.1 (status: draft — до калибровки порогов K в волне 3): даты first_seen / saturated_since — опыт H/02 (99-raw/experiments/H/02-dating);
-# проверка — ../../scripts/creative/registry_check.py; правила детекторов → записи — 99-raw/experiments/H/01-detectors/detector_map.yaml.
+# Проверка — ../../../scripts/creative/registry_check.py.
 version: "0.1"
 checked_at: "2026-09-24"
-review_by: "2027-03-24"          # пересмотр раз в 6 месяцев (PLAN «Главные риски» п.1; ui 11/04 §5)
+review_by: "2027-03-24"          # пересмотр раз в 6 месяцев (ui 11/04 §5)
 status: draft
-owner: "creative-research H (08-uniqueness-anti-slop)"
+owner: "creative · 08-uniqueness-anti-slop"
 scope: >-
   Визуальные приметы и приметы движения маркетинговой страницы (цвет, материал и поверхность, фон, 3D, типографика,
   шаблонный хром, композиция как визуал, движение, взаимодействие, подача продукта, образ). Структура и конверсия — site
@@ -20,9 +18,9 @@ principle: >-
   Диагноз ставится по кластеру: одиночная примета — повод проверить решение, три и больше без решения — провал сцены.
 compat:
   ail: "формат совместим с ../../site/09-ai-generation-evaluation/ai-landing-markers.yaml 1.0: severity B/S/D; justify_if ≡ allow; detect.method — коды ниже (общие с AIL: DOM, SCR, IMG, JDG, HUM, LNT)"
-  art_direction: "../01-creative-direction/art-direction.schema.json $defs/decision: technique = cliche:<id>; aliases — прежние слова и id примеров A"
+  art_direction: "../01-creative-direction/art-direction.schema.json $defs/decision: technique = cliche:<id>; aliases — прежние слова и id примеров (01-creative-direction/examples)"
   mockup_checks: "scripts/claude-design/mockup_checks.py: ключи --allow проверок (../../common/tells.yaml#checks, поле allow) → поле k3_allow; бриф site ambition.allow.markers"
-  prefix: "пункты чек-листа — CRV-CL-*, CRV-UV-* (01, 02); маркеры реестра в проверках K — cliche:<id>"
+  prefix: "пункты чек-листа — CRV-CL-*, CRV-UV-* (01, 02); маркеры реестра в проверках — cliche:<id>"
 severity_scale:
   B: "блокер: нарушает WCAG A/AA или прячет смысл и действие (движение без паузы > 5 с рядом с текстом, текст нечитаем на эффекте)"
   S: "серьёзно: примета генератора или колея жанра без решения; снять или оправдать решением art-direction (justify_if)"
@@ -37,17 +35,17 @@ risk_scale:
   low: "частый, но сам по себе не читается как ИИ; вредит только в кластере"
 detect_codes:
   IMG: "кадр первого экрана или контактный лист (1440×900, 390×844; scroll_record.py, effects_probe.py sheet)"
-  DOM: "computed styles и DOM (effects_probe.py C, measure_ui.py, mockup_checks.py)"
-  MET: "число по пикселям скриншота (доля оттенка OKLCH, colorfulness) — 99-raw/experiments/H/01"
+  DOM: "computed styles и DOM (effects_probe.py, measure_ui.py, mockup_checks.py)"
+  MET: "число по пикселям скриншота (доля оттенка OKLCH, colorfulness)"
   DET: "внешний детектор: impeccable detect 4.1.0 (id правила), @gessobuild/anti-slop 0.4.3 --marketing (id правила)"
   REC: "запись прокрутки: кадры и доля движущихся пикселей (scroll_record.py) — движение не видно на скриншоте"
   SCR: "сценарий в браузере: наведение, курсор, reduce, пауза"
-  LNT: "проверка документа art-direction до сборки (ad_check.py A): решение по cliche:<id> есть или нет"
-  JDG: "судья по рубрике K (волна 3) по кадрам"
+  LNT: "проверка документа art-direction до сборки (ad_check.py): решение по cliche:<id> есть или нет"
+  JDG: "судья по рубрике (../09-ai-execution-evaluation/04-effectiveness-rubric.md) по кадрам"
   HUM: "человек или заказчик"
 fields:
   id: "kebab-case, латиница; стабилен, не переиспользуется; ссылка — cliche:<id>"
-  aliases: "прежние слова и id (примеры A, бриф), которые означают эту запись"
+  aliases: "прежние слова и id (примеры 01-creative-direction/examples, бриф), которые означают эту запись"
   name_ru: "короткое имя"
   family: "color | surface | background | 3d | type | chrome | layout | motion | interaction | product | imagery | meta"
   sign: "как выглядит на странице"
@@ -74,9 +72,9 @@ clusters:
   - {id: ai-saas-2024, name_ru: "ИИ-SaaS 2023–2024", members: [purple-neon-band, purple-gradient-hero, gradient-text, neon-glow, pill-announcement-chip, accent-word-headline, overused-display-font, aurora-blobs, mesh-gradient-bg, glassmorphism-panels, dashboard-in-browser-frame, bento-uniform-tiles, logo-orbit-hero, emoji-sparkle-ai, pulsing-cta], source: "ui 11/04 §5; Hallmark anti-patterns Critical; ui 11/01 §18"}
   - {id: editorial-luxe-2025, name_ru: "«редакционный люкс» 2025–2026 (почерк генераторов макетов)", members: [dark-acid-accent, warm-paper, cream-serif-terracotta, broadsheet-hairlines, caps-eyebrow, mono-captions, meta-dots-labels, accent-word-headline, overused-display-font, webgl-centerpiece, dark-pause-section], source: "frontend-design v2–v3 кластеры 1, 2, 3, 5"}
   - {id: web3-3d-2022, name_ru: "Web3 и ИИ-3D 2021–2025", members: [purple-neon-band, aurora-blobs, iridescent-holo, chrome-liquid-metal, glass-object-pastel, particle-swarm, floating-orbs, synthwave-grid, floating-bob-loop], source: "blender 01/01 §22; ai-media 01/03 IMG-M05, M06; ai-media 11/03 §3.2 п.1"}
-  - {id: studio-awwwards-kit, name_ru: "набор «наградной студии» 2019–2026", members: [section-fade-up, split-text-reveal, custom-cursor-follower, magnetic-button, marquee-strip, liquid-hover-distortion, preloader, smooth-scroll-default, circular-rotating-text, giant-display-type, variable-axis-gimmick, parallax-everything, cursor-watching-eyes], source: "C 03/01 (частоты); blender 01/01 §22"}
+  - {id: studio-awwwards-kit, name_ru: "набор «наградной студии» 2019–2026", members: [section-fade-up, split-text-reveal, custom-cursor-follower, magnetic-button, marquee-strip, liquid-hover-distortion, preloader, smooth-scroll-default, circular-rotating-text, giant-display-type, variable-axis-gimmick, parallax-everything, cursor-watching-eyes], source: "creative 03/01 (частоты); blender 01/01 §22"}
 id_aliases:
-  # прежние id из примеров A (01-creative-direction/examples/*.json) → запись реестра; ссылка cliche:<прежний id> остаётся действительной
+  # прежние id из примеров (01-creative-direction/examples/*.json) → запись реестра; ссылка cliche:<прежний id> остаётся действительной
   latte-art-closeup: category-rut-imagery
   stock-interior-under-overlay: hero-media-veil
   preloader-percent: preloader
@@ -89,23 +87,23 @@ watchlist:
   # Растущие приёмы: пока не приметы, но уже продаются готовыми или быстро растут. При пересмотре 2027-03 — кандидаты в saturated.
   checked_at: "2026-09-24"
   items:
-    - {id_candidate: dither-halftone-shader, name_ru: "дизеринг и печатный растр (halftone) шейдером", evidence: "Paper Shaders 0.0.81: dithering, image-dithering, halftone-cmyk, halftone-dots; npm ×233 в 2026 [данные: H/02]", note: "сегодня — поворот для mesh; готовый компонент → риск стать следующим умолчанием (ui 11/04 §5: «всё, что рекомендуют как способ отличиться»)"}
-    - {id_candidate: fluted-glass, name_ru: "рифлёное стекло поверх фото", evidence: "Paper Shaders fluted-glass (0.0.81) [данные: H/02]", note: "поворот для glassmorphism-panels, уже в ките"}
-    - {id_candidate: god-rays-light, name_ru: "лучи света (god rays) и пульсирующая рамка", evidence: "Paper Shaders god-rays, pulsing-border [данные: H/02]", note: "кандидат в кластер ai-saas (свечение)"}
-    - {id_candidate: css-scroll-driven-scenes, name_ru: "сцены на CSS scroll-driven", evidence: "Codrops: 1 урок 2024 → 8 уроков 2026; в продакшене 2 из 49 эффектных сайтов (C) [данные]", note: "fresh; главный приём сцены допустим"}
-    - {id_candidate: view-transition-morph, name_ru: "морфинг элементов между страницами (View Transitions)", evidence: "Codrops 2023-10-03; 1 из 49 (C) [данные]", note: "fresh; кросс-документные — не Baseline (G)"}
+    - {id_candidate: dither-halftone-shader, name_ru: "дизеринг и печатный растр (halftone) шейдером", evidence: "Paper Shaders 0.0.81: dithering, image-dithering, halftone-cmyk, halftone-dots; npm ×233 в 2026 [данные]", note: "сегодня — поворот для mesh; готовый компонент → риск стать следующим умолчанием (ui 11/04 §5: «всё, что рекомендуют как способ отличиться»)"}
+    - {id_candidate: fluted-glass, name_ru: "рифлёное стекло поверх фото", evidence: "Paper Shaders fluted-glass (0.0.81) [данные]", note: "поворот для glassmorphism-panels, уже в ките"}
+    - {id_candidate: god-rays-light, name_ru: "лучи света (god rays) и пульсирующая рамка", evidence: "Paper Shaders god-rays, pulsing-border [данные]", note: "кандидат в кластер ai-saas (свечение)"}
+    - {id_candidate: css-scroll-driven-scenes, name_ru: "сцены на CSS scroll-driven", evidence: "Codrops: 1 урок 2024 → 8 уроков 2026; в продакшене 2 из 49 эффектных сайтов [данные]", note: "fresh; главный приём сцены допустим"}
+    - {id_candidate: view-transition-morph, name_ru: "морфинг элементов между страницами (View Transitions)", evidence: "Codrops 2023-10-03; 1 из 49 [данные]", note: "fresh; кросс-документные — не Baseline"}
     - {id_candidate: scroll-film-scrub, name_ru: "скраб-фильм прокрутки из генерированного видео", evidence: "higgsfield-websites: animated website по умолчанию; scroll-world [мнение вендора]", note: "умолчание скилла → риск стать приметой ИИ-сайтов 2027"}
     - {id_candidate: chaos-opt-in-mode, name_ru: "«хаос-режим» по выбору посетителя (Vibes Mode)", evidence: "Afterglo «Vibes Mode» [V:J6aNMFZogyk 20:01–20:41] [кейс]", note: "не клише, а законный выход для L2-игры: включается кнопкой, есть остановка и reduce; следить за повторяемостью"}
 cluster_rule: >-
   На одной сцене (экран, секция hero) три и больше записей одного кластера без решения art-direction — провал критерия
   «единственность» (01-cliche-policy.md §1.5); на странице — порог по уровню (§3.3): L0 ≤ 1 насыщенного приёма, L1 ≤ 2,
   L2 ≤ 3 с поворотом у каждого.
-crosswalk_external:   # rel — по зеркалу site ai-landing-markers.yaml (S1 site, 2026-09-25): AIL-08, -17 narrower; AIL-49 equal; AIL-47 related (там — перехват нажатия, B) · правка X
+crosswalk_external:   # rel — по зеркалу site ai-landing-markers.yaml: AIL-08, -17 narrower; AIL-49 equal; AIL-47 related (там — перехват нажатия, B)
   - {ext: "центрированный hero 100vh, ложный пол", owner: site, id: AIL-06, here: "визуальных записей нет; композиция hero — ../04-visual-language/02"}
   - {ext: "три одинаковые карточки", owner: site, id: AIL-07, here: "—"}
   - {ext: "шаблонный бенто (≥ 5 однотипных плиток)", owner: site, id: AIL-08, rel: narrower, here: "bento-uniform-tiles — только визуал плиток (радиус, одинаковый padding)"}
   - {ext: "нарисованный хром браузера и телефона", owner: site, id: AIL-17, rel: narrower, here: "dashboard-in-browser-frame — подача продукта и повороты"}
-  - {ext: "ряд чисел, числа без фактов", owner: site, id: [AIL-02, AIL-18], here: "— (решение A k3:stats — twist)"}
+  - {ext: "ряд чисел, числа без фактов", owner: site, id: [AIL-02, AIL-18], here: "— (решение k3:stats — twist)"}
   - {ext: "лента «Нам доверяют» без разрешения", owner: site, id: AIL-19, here: "marquee-strip — только движение ленты"}
   - {ext: "счётчик с нуля в HTML", owner: site, id: AIL-20, here: "—"}
   - {ext: "ИИ-шапка и ИИ-подвал", owner: site, id: [AIL-11, AIL-21], here: "—"}
@@ -126,9 +124,9 @@ entries:
     sign: "акцент, фон, свечение или WebGL-туманность в полосе оттенка OKLCH 270–320° (индиго, фиолет, пурпур, маджента), бренд этого цвета не задаёт"
     signals:
       eye: "первый экран «про ИИ»: фиолетово-синий свет, туманность, неоновые края"
-      metric: "доля пикселей скриншота 1440×900 с C > 0,06 и H 270–320° > 3 % при бренде вне полосы (MET, H/01); акцент CSS в полосе (DOM)"
+      metric: "доля пикселей скриншота 1440×900 с C > 0,06 и H 270–320° > 3 % при бренде вне полосы (MET); акцент CSS в полосе (DOM)"
       detector: "ui 11/04 m1 (скрипт §3, по hue OKLCH); impeccable ai-color-palette; higgsfield «ИИ-фиолет»; проверки макета — нет"
-    detect: {method: [MET, DOM, IMG, DET], auto: "частично: ui 11/04 m1 (по двум hex — D/02 п.4: переписать на OKLCH); доля пикселей — H/01"}
+    detect: {method: [MET, DOM, IMG, DET], auto: "частично: ui 11/04 m1 (по двум hex — переписать на OKLCH); доля пикселей — MET"}
     threshold: "полоса 270–320° > 3 % площади первого экрана или акцент в полосе, бренд вне полосы"
     first_seen: "2020 — дефолт `bg-indigo-500` Tailwind UI (ui 11/04 §1.2) [консенсус]"
     saturated_since: "2023 — «канонический слоп» 2023–2024 (ui 11/04 §5; извинение Wathan 08.2025) [консенсус]"
@@ -142,7 +140,7 @@ entries:
     cluster: [ai-saas-2024, web3-3d-2022]
     k3_allow: null
     neighbors: ["ui 11/04 m1, m2", "ai-media 01/03 IMG-M05", "ai-media 06/01 R3 (forbidden_hues 270–320°)", "Hallmark: purple-gradient hero (Critical)", "higgsfield: запрещённая палитра «ИИ-фиолет»"]
-    evidence: ["[консенсус]", "[данные: C — пурпур 270–320° у 8 % эффектных сайтов 2025–2026, 03-live-sites-measured/01 §7]", "[проверено: H/01 — детекторы цвета ложны на жанре: Gesso purple-violet-wash 8/16 сайтов C, impeccable ai-color-palette 5/16; решает происхождение цвета]"]
+    evidence: ["[консенсус]", "[данные: пурпур 270–320° у 8 % эффектных сайтов 2025–2026, 03-live-sites-measured/01 §7]", "[проверено: детекторы цвета ложны на жанре: Gesso purple-violet-wash 8/16 эффектных сайтов, impeccable ai-color-palette 5/16; решает происхождение цвета]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -222,7 +220,7 @@ entries:
     replace_with: "вес кнопки — размер, заливка, позиция (ui 11/03 §2.3); глубина на тёмном — светлотой поверхности"
     cluster: [ai-saas-2024]
     k3_allow: null
-    neighbors: ["ui 11/03 §2.3", "ui 13/01 Г5, ui_audit D4 (поправка PLAN: на сайте — по концепции)", "Hallmark: Shadow-glow on dark", "impeccable dark-glow"]
+    neighbors: ["ui 11/03 §2.3", "ui 13/01 Г5, ui_audit D4 (на сайте — по концепции)", "Hallmark: Shadow-glow on dark", "impeccable dark-glow"]
     evidence: ["[консенсус]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -236,7 +234,7 @@ entries:
       eye: "«тех-студия 2025»: чёрное поле, лаймовый акцент, капс"
       metric: "фон L < 0,2 на > 60 % первого экрана и один акцент C > 0,2 (H 100–140° или 25–40°) (MET, DOM)"
       detector: "frontend-design v2–v3 кластер 2; higgsfield: «почти-чёрный + неон»; impeccable — нет"
-    detect: {method: [MET, DOM, IMG], auto: "частично: палитра effects_probe.py (C)"}
+    detect: {method: [MET, DOM, IMG], auto: "частично: палитра effects_probe.py"}
     threshold: "оба признака + ≥ 1 примета хрома (caps-eyebrow, mono-captions)"
     first_seen: "2023 (студии и dev-tools) [практика]"
     saturated_since: "2025 — назван кластером ИИ-дефолта во frontend-design v2 (2026-06-15) [мнение вендора]"
@@ -250,7 +248,7 @@ entries:
     cluster: [editorial-luxe-2025]
     k3_allow: null
     neighbors: ["frontend-design v2 кластер 2 (ui 11/04 §4.1)", "ui 11/04 m33 (#0B0B0B / #111)", "higgsfield-websites палитры-запреты"]
-    evidence: ["[мнение вендора]", "[данные: C — тёмный первый экран у 51 % эффектных сайтов: тёмное само по себе не клише]"]
+    evidence: ["[мнение вендора]", "[данные: тёмный первый экран у 51 % эффектных сайтов: тёмное само по себе не клише]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -358,7 +356,7 @@ entries:
     cluster: [editorial-luxe-2025]
     k3_allow: eyebrow
     neighbors: ["ui 11/04 m8, m30", "проверка макета LOOK-EYEBROW (eyebrow); доля капс-узлов — примета caps-share, LOOK-CAPS (caps)", "impeccable kicker-above-heading, hero-eyebrow-chip", "Hallmark: Eyebrow on every section; gate 54", "taste v2 ≤ 1 на 3 секции; higgsfield ≤ ceil(N/3)", "text: COPY-C-18 (текст надзаголовка)", "site AIL-05 (категория в H1 или надзаголовке)"]
-    evidence: ["[консенсус]", "[данные]", "[проверено: H/01 — impeccable kicker-above-heading и hero-eyebrow-chip: сайты C 0/16]"]
+    evidence: ["[консенсус]", "[данные]", "[проверено: impeccable kicker-above-heading и hero-eyebrow-chip: эффектные сайты 0/16]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -489,11 +487,11 @@ entries:
     levels: {L0: "проверенная текстовая гарнитура с кириллицей — норма (ui 11/04 §4.4)", L1: "display — выбран под предмет", L2: "то же + кастом/вариативные оси"}
     justify_if: "гарнитура фирменная или выбрана по предмету с причиной; для кириллицы — из ../04-visual-language/cyrillic-display-fonts.yaml"
     twists: ["та же гарнитура, но на вариативных осях или с редкой начертанием по концепции"]
-    replace_with: "гарнитура с кириллицей по предмету (D: cyrillic-display-fonts.yaml, 37 гарнитур)"
+    replace_with: "гарнитура с кириллицей по предмету (../04-visual-language/cyrillic-display-fonts.yaml, 37 гарнитур)"
     cluster: [editorial-luxe-2025, ai-saas-2024]
     k3_allow: serif
-    neighbors: ["ui 11/04 m6", "impeccable overused-font", "Hallmark gate 1", "taste v2", "D 04/01 (Montserrat: type.today — годится для заголовков; Hallmark — banned default) [спорно]"]
-    evidence: ["[консенсус]", "[спорно: Montserrat — позиции расходятся, решение по предмету; на 51 эффектной странице C (8 из РФ) Montserrat не встретился ни разу — поиск по effects.json, H 2026-09-24; частота на обычных сайтах рунета не измерена]"]
+    neighbors: ["ui 11/04 m6", "impeccable overused-font", "Hallmark gate 1", "taste v2", "creative 04/01 (Montserrat: type.today — годится для заголовков; Hallmark — banned default) [спорно]"]
+    evidence: ["[консенсус]", "[спорно: Montserrat — позиции расходятся, решение по предмету; на 51 эффектной странице замера (8 из РФ) Montserrat не встретился ни разу — поиск по данным 03-live-sites-measured, 2026-09-24; частота на обычных сайтах рунета не измерена]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -509,8 +507,8 @@ entries:
       detector: "Hallmark: Aurora-blob background (Critical), gate 29; ai-media 11/03 §3.2 п.1; impeccable radial-halo (частично)"
     detect: {method: [DOM, MET, IMG, DET], auto: "частично"}
     threshold: "≥ 2 размытых пятна за текстом hero без предмета"
-    first_seen: "2019–2021 — blobmaker.app 2019-01-02, haikei.app 2021-03-12, meshgradient.com 2020-11-01 (первые снимки Wayback) [данные: H/02]"
-    saturated_since: "2022 [мнение вендора: Hallmark — «2022–2023 generated-design default… on every Dribbble shot since 2022»]; Aceternity Aurora Background — 2024-03-18, React Bits Aurora — 2025-02-11 [данные: H/02]"
+    first_seen: "2019–2021 — blobmaker.app 2019-01-02, haikei.app 2021-03-12, meshgradient.com 2020-11-01 (первые снимки Wayback) [данные]"
+    saturated_since: "2022 [мнение вендора: Hallmark — «2022–2023 generated-design default… on every Dribbble shot since 2022»]; Aceternity Aurora Background — 2024-03-18, React Bits Aurora — 2025-02-11 [данные]"
     status: saturated
     severity: S
     risk: high
@@ -532,23 +530,23 @@ entries:
     sign: "многоцветный плавный градиент на весь экран (CSS mesh на radial-gradient, @property или WebGL-шейдер), часто течёт"
     signals:
       eye: "мягкий переливающийся фон без предмета"
-      metric: "фон hero — ≥ 3 radial-gradient или canvas WebGL на весь экран с colorfulness выше Q3 выборки C (DOM, MET)"
+      metric: "фон hero — ≥ 3 radial-gradient или canvas WebGL на весь экран с colorfulness выше Q3 выборки эффектных сайтов (DOM, MET)"
       detector: "Hallmark gate 29 (mesh-on-everything); impeccable — нет"
-    detect: {method: [DOM, MET, IMG], auto: "частично: canvas и WebGL — effects_probe.py C"}
+    detect: {method: [DOM, MET, IMG], auto: "частично: canvas и WebGL — effects_probe.py"}
     threshold: "mesh на весь первый экран без бренда и без предмета"
-    first_seen: "2020 — анимированный градиент stripe.com; разбор Kevin Hufnagl — 2020-10-22, whatamesh — 2021-09-12, meshgradient.com — 2020-11-01 [данные: H/02]"
-    saturated_since: "2025–2026 — @paper-design/shaders (`mesh-gradient`, `static-mesh-gradient`, `grain-gradient` в 0.0.81): 0,59 млн загрузок за 2025 → 16,4 млн за янв–авг 2026 (×233) [данные: H/02 npm, прокси]"
+    first_seen: "2020 — анимированный градиент stripe.com; разбор Kevin Hufnagl — 2020-10-22, whatamesh — 2021-09-12, meshgradient.com — 2020-11-01 [данные]"
+    saturated_since: "2025–2026 — @paper-design/shaders (`mesh-gradient`, `static-mesh-gradient`, `grain-gradient` в 0.0.81): 0,59 млн загрузок за 2025 → 16,4 млн за янв–авг 2026 (×233) [данные: npm, прокси]"
     status: saturated
     severity: D
     risk: mid
-    levels: {L0: "статичный двухстоповый градиент бренда", L1: "один шейдерный фон на странице (A: «самый дешёвый вау»), бренд-палитра, пауза и reduce", L2: "как среда сцены с поворотом"}
+    levels: {L0: "статичный двухстоповый градиент бренда", L1: "один шейдерный фон на странице («самый дешёвый вау»), бренд-палитра, пауза и reduce", L2: "как среда сцены с поворотом"}
     justify_if: "палитра — из бренда (Stripe-лента — фирменный знак); градиент — свет или материал продукта; бандинг закрыт зерном; FPS и вес в бюджете; reduce — статичный кадр"
     twists: ["градиент в форме знака бренда (лента, волна, логотип), а не на весь экран", "градиент отвечает на прокрутку как свет времени суток (сюжет)", "печатный растр из материала бренда (дизеринг и halftone уже есть готовыми шейдерами Paper — см. watchlist)"]
     replace_with: "сплошной фон; фото или кадр продукта; градиент в одной зоне (кнопка, край) — ui 01/06 §2.1"
     cluster: [ai-saas-2024]
     k3_allow: null
-    neighbors: ["ui 11/04 m3 (на сайте — приём при концепции: поправка PLAN)", "ui 01/06 §1.7 (хрома фона > 30 % экрана ≤ 0,03 — норма приложений)", "Hallmark gate 29", "ai-media 01/03 §7.2 (Stripe: абстракция кодом — «где нечего показывать»)"]
-    evidence: ["[кейс]", "[данные: H/02 npm]"]
+    neighbors: ["ui 11/04 m3 (на сайте — приём при концепции)", "ui 01/06 §1.7 (хрома фона > 30 % экрана ≤ 0,03 — норма приложений)", "Hallmark gate 29", "ai-media 01/03 §7.2 (Stripe: абстракция кодом — «где нечего показывать»)"]
+    evidence: ["[кейс]", "[данные: npm]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -564,7 +562,7 @@ entries:
     detect: {method: [IMG, DOM, JDG], auto: "нет"}
     threshold: "перелив на объекте без связи с продуктом"
     first_seen: "2018 (голо-тренд в графике и упаковке) [практика]"
-    saturated_since: "2021 — Web3 и NFT («хромированный/радужный блоб Web3 2021–2023, ИИ 2024» — blender 01/01 §22) [мнение]; фон Iridescence React Bits — первый снимок 2025-02-11 [данные: H/02]"
+    saturated_since: "2021 — Web3 и NFT («хромированный/радужный блоб Web3 2021–2023, ИИ 2024» — blender 01/01 §22) [мнение]; фон Iridescence React Bits — первый снимок 2025-02-11 [данные]"
     status: saturated
     severity: S
     risk: mid
@@ -591,7 +589,7 @@ entries:
     detect: {method: [IMG, JDG], auto: "нет"}
     threshold: "хромированная абстракция в hero"
     first_seen: "2019–2020 (Y2K-ревайвл в графике) [практика]"
-    saturated_since: "2021 (Web3 2021–2023, ИИ 2024 — blender 01/01 §22) [мнение]; готовые шейдеры: React Bits Liquid Chrome — первый снимок 2025-02-11, Paper Shaders `liquid-metal` (0.0.81) [данные: H/02]"
+    saturated_since: "2021 (Web3 2021–2023, ИИ 2024 — blender 01/01 §22) [мнение]; готовые шейдеры: React Bits Liquid Chrome — первый снимок 2025-02-11, Paper Shaders `liquid-metal` (0.0.81) [данные]"
     status: saturated
     severity: S
     risk: high
@@ -602,7 +600,7 @@ entries:
     cluster: [web3-3d-2022]
     k3_allow: null
     neighbors: ["ai-media 01/03 IMG-M06", "blender 01/01 §22 «хромированный/радужный блоб»"]
-    evidence: ["[мнение]", "[данные: H/02]"]
+    evidence: ["[мнение]", "[данные]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -650,12 +648,12 @@ entries:
     severity: S
     risk: mid
     levels: {L0: "1–2 служебных слоя (шапка поверх hero, меню)", L1: "то же + одна панель поверх медиа", L2: "стекло как материал сцены поверх живого медиа"}
-    justify_if: "под стеклом живое медиа (фото, видео, 3D), стекло отделяет текст от него; непрозрачность ≥ 72 % при blur ≥ 12 px (ui 11/01 §6); prefers-reduced-transparency; цена backdrop-filter в бюджете FPS (F)"
+    justify_if: "под стеклом живое медиа (фото, видео, 3D), стекло отделяет текст от него; непрозрачность ≥ 72 % при blur ≥ 12 px (ui 11/01 §6); prefers-reduced-transparency; цена backdrop-filter в бюджете FPS (../06-effects-catalog/effects.yaml#glass-panel)"
     twists: ["стекло одной панели поверх продукта в движении (ценник на витрине)", "стекло с реальной толщиной (преломление края) вместо плоского размытия — только L2 и в бюджете"]
     replace_with: "сплошные поверхности; глубина светлотой"
     cluster: [ai-saas-2024]
     k3_allow: glass
-    neighbors: ["ui 11/04 m15; ui 11/01 §6; ui_audit D3 (лимит стекла — бюджет производительности, не стиль: поправка PLAN)", "Hallmark: Glassmorphism without purpose", "проверка макета LOOK-GLASS"]
+    neighbors: ["ui 11/04 m15; ui 11/01 §6; ui_audit D3 (лимит стекла — бюджет производительности, не стиль)", "Hallmark: Glassmorphism without purpose", "проверка макета LOOK-GLASS"]
     evidence: ["[консенсус]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -669,10 +667,10 @@ entries:
       eye: "«технологичность» точками"
       metric: "WebGL Points или canvas с > 1 000 частиц в hero (код, DOM)"
       detector: "blender 01/01 §22; ai-media 11/03 §3.2 п.1; внешние детекторы — нет"
-    detect: {method: [IMG, DOM], auto: "частично: WebGL — effects_probe.py C"}
+    detect: {method: [IMG, DOM], auto: "частично: WebGL — effects_probe.py"}
     threshold: "частицы-декор без смысла в первом экране"
-    first_seen: "2015 — particles.js (npm 2015-05-09) [данные: H/02]"
-    saturated_since: "2020 — tsparticles (npm 2020-02-05), пик 2023 13,4 млн загрузок; снова ×4,4 в 2026 [данные: H/02 npm, прокси]"
+    first_seen: "2015 — particles.js (npm 2015-05-09) [данные]"
+    saturated_since: "2020 — tsparticles (npm 2020-02-05), пик 2023 13,4 млн загрузок; снова ×4,4 в 2026 [данные: npm, прокси]"
     status: saturated
     severity: S
     risk: mid
@@ -683,7 +681,7 @@ entries:
     cluster: [web3-3d-2022]
     k3_allow: null
     neighbors: ["blender 01/01 §22 «шар/галактика/логотип из частиц»", "ai-media 11/03 §3.2", "ai-media 01/03 §5.4 («нейросеть из точек»)"]
-    evidence: ["[мнение]", "[данные: H/02 npm]"]
+    evidence: ["[мнение]", "[данные: npm]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -725,7 +723,7 @@ entries:
       detector: "impeccable — нет; Hallmark рекомендует (E7); ai-media 01/03 §7.1 — «фактура и зерно» против пластика"
     detect: {method: [DOM, IMG], auto: "частично: effects_probe.py (признак зерна)"}
     threshold: "анимированное зерно на всей странице или зерно поверх текста мельче 16 px"
-    first_seen: "2021 — grainy gradients (CSS-Tricks, генераторы шума) [практика; H/02]"
+    first_seen: "2021 — grainy gradients (CSS-Tricks, генераторы шума) [практика]"
     saturated_since: "2025 — frontend-design v1 рекомендует «noise textures… grain overlays» (2025-11) [мнение вендора]"
     status: saturated
     severity: D
@@ -736,7 +734,7 @@ entries:
     replace_with: "без зерна; дизеринг градиента"
     cluster: []
     k3_allow: null
-    neighbors: ["ai-media 01/03 §7.1, 06/04 п.9 (зерно 1–3 %)", "D 03 (зерно: ai-media и Hallmark — да, impeccable — нет) [спорно]"]
+    neighbors: ["ai-media 01/03 §7.1, 06/04 п.9 (зерно 1–3 %)", "creative 04/03 (зерно: ai-media и Hallmark — да, impeccable — нет) [спорно]"]
     evidence: ["[практика]", "[спорно]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -775,9 +773,9 @@ entries:
     sign: "canvas-сцена в центре hero (куб, 3D-стена фото, дым, вращающийся объект), которую нельзя трогать и которая не объясняет продукт"
     signals:
       eye: "красиво и пусто: объект крутится сам"
-      metric: "WebGL-контекст в первом экране, draw calls > 0 в покое, нет обработчиков ввода на canvas (DOM, effects_probe.py C)"
+      metric: "WebGL-контекст в первом экране, draw calls > 0 в покое, нет обработчиков ввода на canvas (DOM, effects_probe.py)"
       detector: "Hallmark: Three.js for a still object; blender BR-02"
-    detect: {method: [DOM, IMG, JDG], auto: "частично: webgl, webgl_idle_dc — C"}
+    detect: {method: [DOM, IMG, JDG], auto: "частично: webgl, webgl_idle_dc — effects_probe.py"}
     threshold: "3D в первом экране без взаимодействия и без показа продукта"
     first_seen: "2016–2018 (наградные WebGL-студии) [практика]"
     saturated_since: "2025 [данные]"
@@ -803,23 +801,23 @@ entries:
     sign: "каждый блок при входе в зону видимости выезжает снизу с проявлением (opacity 0 → 1, translateY 20–60 px), одинаковые длительность и кривая; каскад у всех списков"
     signals:
       eye: "страница «никогда не успокаивается» (Hallmark); блок въезжает целиком, «etched in glass and glued together» — части не живут отдельно [V:OqvQhZ0bTYY 22:26]; на скриншоте не видно — только в записи"
-      metric: "> 10 элементов с одинаковой парой transition/animation (ui 11/04 m28); текст ниже первого экрана с opacity < 0,05 до прокрутки у ≥ 35 % секций (effects_probe.py reveal, C)"
-      detector: "ui 11/04 m28 (скрипт его не считает — аудит UI 4.2 п.8); Hallmark: Animate-on-scroll on everything, Universal scroll-triggered fade-up; impeccable content-hidden-at-rest; Gesso reveal-specificity-trap"
-    detect: {method: [REC, DOM, DET], auto: "частично: reveal — effects_probe.py C; запись — scroll_record.py"}
-    threshold: "одна и та же пара «сдвиг + проявление» у ≥ 5 блоков без системы (система появления — E, 05-motion/02)"
-    first_seen: "2016 — библиотека AOS (демо — первый снимок 2016-04-18, npm 2016-06-09) [данные: H/02]"
-    saturated_since: "2019 — дефолт шаблонов; ИИ-примета: frontend-design v3 «generic default, reads as AI-generated»; AOS — 8,1 млн загрузок за янв–авг 2026 (×1,27) [данные: H/02, консенсус]"
+      metric: "> 10 элементов с одинаковой парой transition/animation (ui 11/04 m28); текст ниже первого экрана с opacity < 0,05 до прокрутки у ≥ 35 % секций (effects_probe.py reveal)"
+      detector: "ui 11/04 m28 (скрипт его не считает); Hallmark: Animate-on-scroll on everything, Universal scroll-triggered fade-up; impeccable content-hidden-at-rest; Gesso reveal-specificity-trap"
+    detect: {method: [REC, DOM, DET], auto: "частично: reveal — effects_probe.py; запись — scroll_record.py"}
+    threshold: "одна и та же пара «сдвиг + проявление» у ≥ 5 блоков без системы (система появления — 05-motion/02)"
+    first_seen: "2016 — библиотека AOS (демо — первый снимок 2016-04-18, npm 2016-06-09) [данные]"
+    saturated_since: "2019 — дефолт шаблонов; ИИ-примета: frontend-design v3 «generic default, reads as AI-generated»; AOS — 8,1 млн загрузок за янв–авг 2026 (×1,27) [данные, консенсус]"
     status: dated
     severity: S
     risk: high
-    levels: {L0: "одно оркестрованное появление первого экрана; дальше контент стоит", L1: "система появления из 2–3 видов по ролям секций (E)", L2: "хореография сцен (E), разные типы входа по сюжету"}
-    justify_if: "есть система появления (разные входы по роли секции, E `05-motion/02`), части блока движутся со вторичным действием, а не одной плитой; качество ≠ число анимаций [V:OqvQhZ0bTYY 02:04]; LCP-элемент не прячется в opacity 0, reduce — конечное состояние"
+    levels: {L0: "одно оркестрованное появление первого экрана; дальше контент стоит", L1: "система появления из 2–3 видов по ролям секций", L2: "хореография сцен, разные типы входа по сюжету"}
+    justify_if: "есть система появления (разные входы по роли секции, `05-motion/02`), части блока движутся со вторичным действием, а не одной плитой; качество ≠ число анимаций [V:OqvQhZ0bTYY 02:04]; LCP-элемент не прячется в opacity 0, reduce — конечное состояние"
     twists: ["вход по смыслу секции: цифры собираются, фото проявляется маской, текст стоит", "появление только у медиа, текст — сразу", "одно появление на сцену вместо каскада"]
     replace_with: "контент на месте; одно оркестрованное появление первого экрана (ui 11/04 m28; Hallmark)"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["ui 11/04 m28 (на сайте — порог «одинаковое появление > N без системы», поправка PLAN)", "ui 08/02 §5.4, 08/03 (поправка PLAN: не нарушает 2.2.2 при < 5 с)", "blender 09/03 §3.1 («на каждом блоке — клише»)", "E: ../05-motion/02-choreography-scroll-transitions.md §2 (система появления: 2–3 примитива по ролям; порог одинаковой подписи — там же)"]
-    evidence: ["[консенсус]", "[данные: C — появление текста у 35 %, система ≥ 5 элементов у 20 % эффектных сайтов]"]
+    neighbors: ["ui 11/04 m28 (на сайте — порог «одинаковое появление > N без системы»)", "ui 08/02 §5.4, 08/03 (на сайте не нарушает 2.2.2 при < 5 с)", "blender 09/03 §3.1 («на каждом блоке — клише»)", "../05-motion/02-choreography-scroll-transitions.md §2 (система появления: 2–3 примитива по ролям; порог одинаковой подписи — там же)"]
+    evidence: ["[консенсус]", "[данные: появление текста у 35 %, система ≥ 5 элементов у 20 % эффектных сайтов]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -830,12 +828,12 @@ entries:
     sign: "заголовки разбиты на буквы/слова/строки и выезжают каскадом из-под маски при загрузке и прокрутке"
     signals:
       eye: "каждый заголовок «печатается» или выезжает по буквам"
-      metric: "узлы-обёртки букв/слов в h1–h2 (split_text, C) у > 50 % заголовков (DOM)"
-      detector: "effects_probe.py split_text (C; возможно завышение); внешние детекторы — нет"
-    detect: {method: [DOM, REC], auto: "частично: C"}
+      metric: "узлы-обёртки букв/слов в h1–h2 (split_text, effects_probe.py) у > 50 % заголовков (DOM)"
+      detector: "effects_probe.py split_text (возможно завышение); внешние детекторы — нет"
+    detect: {method: [DOM, REC], auto: "частично: effects_probe.py"}
     threshold: "split у > 50 % заголовков страницы"
-    first_seen: "2018 — Splitting.js (npm 2018-01-05); GSAP SplitText (Club) [данные: H/02]"
-    saturated_since: "2025 — React Bits Split Text 2025-01-21; split-type ×2,7 в 2026; SplitText бесплатен с GSAP 3.13 (2025); у ≈ половины эффектных сайтов C (кандидат в насыщенные) [данные: H/02, C]"
+    first_seen: "2018 — Splitting.js (npm 2018-01-05); GSAP SplitText (Club) [данные]"
+    saturated_since: "2025 — React Bits Split Text 2025-01-21; split-type ×2,7 в 2026; SplitText бесплатен с GSAP 3.13 (2025); у ≈ половины эффектных сайтов (кандидат в насыщенные) [данные: 03-live-sites-measured]"
     status: saturated
     severity: D
     risk: mid
@@ -845,8 +843,8 @@ entries:
     replace_with: "заголовок стоит; движение — у медиа"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["C 03/01 (split у половины — предв.)", "F effects.yaml split-text-reveal (реализация)", "text: слоты заголовков (длина)"]
-    evidence: ["[данные: C, H/02]", "[практика]"]
+    neighbors: ["creative 03/01 (split у половины — предв.)", "../06-effects-catalog/effects.yaml#split-text-reveal (реализация)", "text: слоты заголовков (длина)"]
+    evidence: ["[данные: 03-live-sites-measured]", "[практика]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -884,23 +882,23 @@ entries:
     sign: "системный курсор скрыт (cursor: none) или за ним тянется круг/точка/блоб; при наведении растёт, меняет смешивание"
     signals:
       eye: "курсор «живёт своей жизнью»"
-      metric: "элемент pointer-events: none ≤ 220 px, догоняющий мышь за 0,7 с (effects_probe.py cursor, C); `cursor: none` на body"
-      detector: "effects_probe.py cursor (C); Hallmark: Cursor follower dots («Cut»)"
-    detect: {method: [SCR, DOM], auto: "да: C"}
+      metric: "элемент pointer-events: none ≤ 220 px, догоняющий мышь за 0,7 с (effects_probe.py cursor); `cursor: none` на body"
+      detector: "effects_probe.py cursor; Hallmark: Cursor follower dots («Cut»)"
+    detect: {method: [SCR, DOM], auto: "да: effects_probe.py"}
     threshold: "свой курсор без концепции; курсор на тач-устройствах"
-    first_seen: "2019-01-31 — урок Codrops «Custom Cursor Effects» [данные: H/02]"
-    saturated_since: "2020–2021 (студийные сайты; kursor 2019-05-16, mouse-follower 2022-04-07); React Bits Splash Cursor 2025-01-05, Blob Cursor 2025-01-21; 20 % эффектных сайтов C; библиотеки падают в 2026 (mouse-follower ×0,77, kursor ×0,17) [данные: C, H/02]"
+    first_seen: "2019-01-31 — урок Codrops «Custom Cursor Effects» [данные]"
+    saturated_since: "2020–2021 (студийные сайты; kursor 2019-05-16, mouse-follower 2022-04-07); React Bits Splash Cursor 2025-01-05, Blob Cursor 2025-01-21; 20 % эффектных сайтов; библиотеки падают в 2026 (mouse-follower ×0,77, kursor ×0,17) [данные: 03-live-sites-measured]"
     status: saturated
     severity: S
     risk: mid
-    levels: {L0: "нет", L1: "курсорный акцент на десктопе в одной сцене (A: L1)", L2: "свой курсор по концепции, системный курсор виден или заменён без потери точности"}
+    levels: {L0: "нет", L1: "курсорный акцент на десктопе в одной сцене", L2: "свой курсор по концепции, системный курсор виден или заменён без потери точности"}
     justify_if: "курсор — инструмент концепции (лупа у ювелира, фонарик в тёмной сцене, кисть у художника); только pointer: fine; системный курсор не пропадает над ссылками и полями; reduce — без инерции"
     twists: ["курсор меняет содержимое (подсветка, лупа, фонарь), а не просто догоняет", "эффект у одной сцены, в остальных — системный курсор"]
     replace_with: "системный курсор; hover-отклик у самих элементов"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["Hallmark: Cursor follower dots", "C 03/01 (свой курсор — 20 %)", "frontend-design v1 (2025-11) рекомендовал custom cursors — к v3 снято", "E ../05-motion/03-micro-motion-and-performance.md §1.3 (свой курсор и курсорный акцент)"]
-    evidence: ["[данные: C, H/02]", "[мнение вендора]"]
+    neighbors: ["Hallmark: Cursor follower dots", "creative 03/01 (свой курсор — 20 %)", "frontend-design v1 (2025-11) рекомендовал custom cursors — к v3 снято", "../05-motion/03-micro-motion-and-performance.md §1.3 (свой курсор и курсорный акцент)"]
+    evidence: ["[данные: 03-live-sites-measured]", "[мнение вендора]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -915,8 +913,8 @@ entries:
       detector: "внешние детекторы — нет"
     detect: {method: [SCR], auto: "нет (кандидат в effects_probe.py)"}
     threshold: "магнит на ≥ 3 элементах"
-    first_seen: "2020-08-05 — урок Codrops «Magnetic Buttons» [данные: H/02]"
-    saturated_since: "2021 (студийные сайты) [практика]; React Bits Magnet — первый снимок 2025-01-21 [данные: H/02]"
+    first_seen: "2020-08-05 — урок Codrops «Magnetic Buttons» [данные]"
+    saturated_since: "2021 (студийные сайты) [практика]; React Bits Magnet — первый снимок 2025-01-21 [данные]"
     status: saturated
     severity: D
     risk: mid
@@ -926,8 +924,8 @@ entries:
     replace_with: "обычный hover-отклик"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["E ../05-motion/03-micro-motion-and-performance.md §1.4 (магнитная кнопка: условия и числа)", "F effects.yaml (реализация)"]
-    evidence: ["[данные: H/02]", "[практика]"]
+    neighbors: ["../05-motion/03-micro-motion-and-performance.md §1.4 (магнитная кнопка: условия и числа)", "../06-effects-catalog/effects.yaml#magnetic-cta (реализация)"]
+    evidence: ["[данные]", "[практика]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -938,23 +936,23 @@ entries:
     sign: "бесконечная горизонтальная лента слов (часто капсом, крупно) или логотипов клиентов"
     signals:
       eye: "лента едет под hero или между секциями"
-      metric: "сдвиг широкой дорожки между замерами (effects_probe.py marquee, C; speed_px_s) — скорость выше нормы лидеров E (`../05-motion/01-motion-principles-and-access.md`, выжимка); бесконечная анимация без кнопки паузы"
+      metric: "сдвиг широкой дорожки между замерами (effects_probe.py marquee; speed_px_s) — скорость выше нормы лидеров (`../05-motion/01-motion-principles-and-access.md`, выжимка); бесконечная анимация без кнопки паузы"
       detector: "impeccable marquee; проверка макета LOOK-MARQUEE (marquee, minor); Hallmark Marquee Hero (макроструктура) и Ft8 (без паузы — против gate 18)"
-    detect: {method: [DOM, REC, DET], auto: "да: C, impeccable, проверка макета"}
+    detect: {method: [DOM, REC, DET], auto: "да: effects_probe.py, impeccable, проверка макета"}
     threshold: "лента без паузы дольше 5 с рядом с текстом — B (WCAG 2.2.2); лента-декор слов без смысла — D"
-    first_seen: "2020-03-31 — урок Codrops «CSS-only marquee» [данные: H/02]"
-    saturated_since: "2021–2022 (студии, fashion); компонент Marquee в копипаст-ките Magic UI (H/02); у 6 из 49 эффектных сайтов C [данные]"
+    first_seen: "2020-03-31 — урок Codrops «CSS-only marquee» [данные]"
+    saturated_since: "2021–2022 (студии, fashion); компонент Marquee в копипаст-ките Magic UI; у 6 из 49 эффектных сайтов [данные]"
     status: saturated
     severity: S
     risk: mid
-    levels: {L0: "нет", L1: "одна лента с паузой (A: L1)", L2: "лента как часть ритма, пауза, reduce — стоп"}
+    levels: {L0: "нет", L1: "одна лента с паузой", L2: "лента как часть ритма, пауза, reduce — стоп"}
     justify_if: "лента несёт содержание (реальные логотипы клиентов с разрешением — AIL-19; расписание, цены, новости); есть пауза (кнопка или наведение и фокус), остановка при reduce; текст ленты — aria-hidden дубль или в HTML"
     twists: ["лента, управляемая прокруткой (скорость = скорость прокрутки), а не вечная", "одна строка данных продукта (курс, табло) вместо капс-лозунга"]
     replace_with: "статичная сетка логотипов; одна строка текста"
     cluster: [studio-awwwards-kit]
     k3_allow: marquee
     neighbors: ["проверка макета LOOK-MARQUEE (creative — владелец визуальной приметы: AIL crosswalk)", "impeccable marquee", "site AIL-19 (логотипы — с разрешением)", "ai-media 10/04 page_accept (движение на 6-й секунде без паузы — FAIL)", "[V:ufHQG7fDLQc 15:19] (basement: крупные слова под углом — «not that readable»)"]
-    evidence: ["[данные: C, H/02]", "[стандарт: WCAG 2.2.2]", "[мнение: V:ufHQG7fDLQc 15:19]"]
+    evidence: ["[данные: 03-live-sites-measured]", "[стандарт: WCAG 2.2.2]", "[мнение: V:ufHQG7fDLQc 15:19]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -969,7 +967,7 @@ entries:
       detector: "blender 01/01 §22; внешние детекторы — нет"
     detect: {method: [SCR, IMG], auto: "нет"}
     threshold: "эффект на всех карточках сетки"
-    first_seen: "2019 — пик уроков Codrops по искажениям (7 в 2019) [данные: H/02]"
+    first_seen: "2019 — пик уроков Codrops по искажениям (7 в 2019) [данные]"
     saturated_since: "2020 (портфолио студий — blender 01/01 §22) [мнение]"
     status: dated
     severity: D
@@ -981,7 +979,7 @@ entries:
     cluster: [studio-awwwards-kit]
     k3_allow: null
     neighbors: ["blender 01/01 §22"]
-    evidence: ["[мнение]", "[данные: H/02]"]
+    evidence: ["[мнение]", "[данные]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -996,18 +994,18 @@ entries:
       detector: "blender 01/01 §22; ai-media 10/02 (экран-заставку не делать); page_accept.py"
     detect: {method: [SCR, DOM], auto: "частично: page_accept.py"}
     threshold: "заставка на L0–L1; на L2 — без решения art-direction"
-    first_seen: "2012 — уроки Codrops «loading animations» [данные: H/02]"
+    first_seen: "2012 — уроки Codrops «loading animations» [данные]"
     saturated_since: "2015–2019 (студийные витрины) [практика]"
     status: dated
     severity: S
     risk: mid
-    levels: {L0: "нет", L1: "нет", L2: "только кампания по явному решению; контент доступен, LCP вне заставки (PLAN, поправки)"}
+    levels: {L0: "нет", L1: "нет", L2: "только кампания по явному решению; контент доступен, LCP вне заставки"}
     justify_if: "L2-кампания, заставка — часть сюжета (ворота в мир), длится ≤ 2 с, пропускается, LCP и текст — в HTML"
     twists: ["заставка = первый кадр сцены (без процентов), переходит в hero без разрыва"]
     replace_with: "контент сразу, тяжёлое — после LCP (blender 01/01 §1.4)"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["blender 01/01 §22; blender 01/02 п.26, 01/04 §7", "ai-media 10/02:167–168", "PLAN поправки (прелоадер — только L2-кампания)", "[V:J6aNMFZogyk 11:24] (Gridspace: прелоадер «Explore ↓» с заблокированной прокруткой — антипример)"]
+    neighbors: ["blender 01/01 §22; blender 01/02 п.26, 01/04 §7", "ai-media 10/02:167–168", "../06-effects-catalog/effects.yaml#preloader (прелоадер — только L2-кампания)", "[V:J6aNMFZogyk 11:24] (Gridspace: прелоадер «Explore ↓» с заблокированной прокруткой — антипример)"]
     evidence: ["[консенсус]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1019,23 +1017,23 @@ entries:
     sign: "инерционная прокрутка (Lenis, Locomotive) на всей странице, хвост 0,8–1,4 с, без сцен, которым она нужна"
     signals:
       eye: "прокрутка «вязкая», на телефоне не отключена"
-      metric: "smooth_scroll и scroll_settle_ms > 600 (effects_probe.py C); Lenis активен на телефоне"
-      detector: "effects_probe.py smooth_scroll (C)"
-    detect: {method: [SCR, DOM], auto: "да: C"}
+      metric: "smooth_scroll и scroll_settle_ms > 600 (effects_probe.py); Lenis активен на телефоне"
+      detector: "effects_probe.py smooth_scroll"
+    detect: {method: [SCR, DOM], auto: "да: effects_probe.py"}
     threshold: "плавная прокрутка при отсутствии pin- и скраб-сцен"
-    first_seen: "2019-07 — урок Codrops о плавной прокрутке; locomotive-scroll 2019-07-19 [данные: H/02]"
-    saturated_since: "2023 — Lenis (@studio-freight/lenis 2022-05-09, lenis 2023-04-03): 22,6 млн загрузок за янв–авг 2026 против 3,8 млн за 2025 (×11) [данные: H/02, прокси]; активна у 35 % эффектных сайтов C"
+    first_seen: "2019-07 — урок Codrops о плавной прокрутке; locomotive-scroll 2019-07-19 [данные]"
+    saturated_since: "2023 — Lenis (@studio-freight/lenis 2022-05-09, lenis 2023-04-03): 22,6 млн загрузок за янв–авг 2026 против 3,8 млн за 2025 (×11) [данные: прокси]; активна у 35 % эффектных сайтов"
     status: saturated
     severity: D
     risk: high
-    levels: {L0: "нет (A: без плавной прокрутки)", L1: "нет", L2: "только под скраб-сцены, на телефоне выкл., reduce — выкл."}
+    levels: {L0: "нет (ambition-levels.yaml: без плавной прокрутки)", L1: "нет", L2: "только под скраб-сцены, на телефоне выкл., reduce — выкл."}
     justify_if: "есть pin/скраб-сцены, которым нужна синхронизация; скорость прокрутки не меняется (без перехвата); телефон и reduce — нативная прокрутка"
     twists: ["плавность только внутри сцены-закрепления"]
-    replace_with: "нативная прокрутка; `scroll-behavior: smooth` для якорей с reduce (ui 08/02 поправка аудита)"
+    replace_with: "нативная прокрутка; `scroll-behavior: smooth` для якорей с reduce (ui 08/02)"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["C 03/01, 03/02 (Lenis не отключается на телефоне; хвост 0,8–1,4 с)", "E 05-motion/02 (плавная прокрутка, перехват)", "ui 11/03 §5.4 («never hijack my scrollbar», 5 800 лайков)"]
-    evidence: ["[данные: C, H/02]"]
+    neighbors: ["creative 03/01, 03/02 (Lenis не отключается на телефоне; хвост 0,8–1,4 с)", "05-motion/02 (плавная прокрутка, перехват)", "ui 11/03 §5.4 («never hijack my scrollbar», 5 800 лайков)"]
+    evidence: ["[данные: 03-live-sites-measured]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -1073,23 +1071,23 @@ entries:
     sign: "заголовок или имя 150–370 px на весь экран, гигантский вордмарк в подвале, контурные (stroke) буквы"
     signals:
       eye: "размер вместо идеи"
-      metric: "display_max_px > 160 (C, k3); вордмарк > 50 % ширины в footer; -webkit-text-stroke у display (DOM)"
-      detector: "effects_probe.py display_max_px (C)"
-    detect: {method: [DOM, IMG], auto: "частично: C"}
-    threshold: "display > 160 px без роли poster (D) или вордмарк в подвале без бренда"
+      metric: "display_max_px > 160 (effects_probe.py, проверка макета); вордмарк > 50 % ширины в footer; -webkit-text-stroke у display (DOM)"
+      detector: "effects_probe.py display_max_px"
+    detect: {method: [DOM, IMG], auto: "частично: effects_probe.py"}
+    threshold: "display > 160 px без роли poster (creative 04/01) или вордмарк в подвале без бренда"
     first_seen: "2018 (студийные сайты) [практика]"
     saturated_since: "2025 [данные]"
     status: saturated
     severity: D
     risk: mid
-    levels: {L0: "по формуле длины заголовка (D 04/01)", L1: "роль display-poster при ≤ 12 знаках (D)", L2: "как главный приём сцены"}
-    justify_if: "длина заголовка и роль poster (D: `font_max = строк × W / (N × k)`); крупный текст — сам образ (имя бренда-знака); clamp с max ≤ 2,5 × min (1.4.4 — D)"
+    levels: {L0: "по формуле длины заголовка (creative 04/01)", L1: "роль display-poster при ≤ 12 знаках (creative 04/01)", L2: "как главный приём сцены"}
+    justify_if: "длина заголовка и роль poster (creative 04/01: `font_max = строк × W / (N × k)`); крупный текст — сам образ (имя бренда-знака); clamp с max ≤ 2,5 × min (1.4.4 — creative 04/01)"
     twists: ["текст как предмет сцены (заполняет, режется кадром, двигается по сюжету)"]
-    replace_with: "размер по формуле D; иерархия весом"
+    replace_with: "размер по формуле creative 04/01; иерархия весом"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["D 04/01 (роли display, clamp и 1.4.4)", "C 03/01 (display max первого экрана — медиана 69 px)"]
-    evidence: ["[данные: C]"]
+    neighbors: ["creative 04/01 (роли display, clamp и 1.4.4)", "creative 03/01 (display max первого экрана — медиана 69 px)"]
+    evidence: ["[данные: 03-live-sites-measured]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -1110,13 +1108,13 @@ entries:
     status: saturated
     severity: S
     risk: high
-    levels: {L0: "реальный скриншот в figure, рамка 1 px", L1: "реальный интерфейс в мокапе blender или фрагмент UI кодом (D 04/03)", L2: "продукт в движении (запись, секвенция)"}
-    justify_if: "интерфейс настоящий (скриншот заказчика — fact:), рамка — простая линия или реальное устройство (фото, рендер); A: решение «Окошко» — avoid"
+    levels: {L0: "реальный скриншот в figure, рамка 1 px", L1: "реальный интерфейс в мокапе blender или фрагмент UI кодом (creative 04/03)", L2: "продукт в движении (запись, секвенция)"}
+    justify_if: "интерфейс настоящий (скриншот заказчика — fact:), рамка — простая линия или реальное устройство (фото, рендер); 01-creative-direction/examples: решение «Окошко» — avoid"
     twists: ["фрагмент живого UI кодом, крупно, без рамки (часть экрана, одно действие)", "реальное устройство в руке или на столе (фото предмета)"]
     replace_with: "реальный кадр интерфейса от заказчика или содержимое без рамки (AIL-17)"
     cluster: [ai-saas-2024]
     k3_allow: chrome
-    neighbors: ["site AIL-17", "Hallmark gate 47 (Re-drawn chrome)", "D 04/03 (подача продукта; рамка — Hallmark E3 против gate 47 [спорно])", "ui 07/02:702 (поправка PLAN: скриншот — ключевой визуал SaaS)"]
+    neighbors: ["site AIL-17", "Hallmark gate 47 (Re-drawn chrome)", "creative 04/03 (подача продукта; рамка — Hallmark E3 против gate 47 [спорно])", "ui 07/02:702 (на сайте: скриншот — ключевой визуал SaaS)"]
     evidence: ["[практика]", "[данные]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1137,13 +1135,13 @@ entries:
     status: saturated
     severity: D
     risk: mid
-    levels: {L0: "фото предмета со спокойной зоной под текст (без вуали; F83 — ai-media 10/03)", L1: "видео-петля hero с постером, паузой и reduce (F: видео-фон hero)", L2: "видео-сюжет"}
+    levels: {L0: "фото предмета со спокойной зоной под текст (без вуали; F83 — ai-media 10/03)", L1: "видео-петля hero с постером, паузой и reduce (../06-effects-catalog/02-hero-video-background.md)", L2: "видео-сюжет"}
     justify_if: "кадр показывает предмет (место, продукт, результат); контраст решён композицией (зона 35–45 %) или скримом по числам, а не сплошной вуалью; видео — пауза и постер"
     twists: ["текст в спокойной трети кадра без вуали (ai-media 06/03)", "кадр-документ (реальное место, люди с разрешением) вместо стока"]
-    replace_with: "композиция «текст ↔ медиа» D 04/02; настоящий кадр предмета"
+    replace_with: "композиция «текст ↔ медиа» creative 04/02; настоящий кадр предмета"
     cluster: []
     k3_allow: photo-hero
-    neighbors: ["проверка макета LOOK-HERO-OVERLAY (creative — владелец визуальной приметы: AIL crosswalk)", "ai-media 06/03 (зона текста, F83)", "site AIL-49 (картинка без смысла над заголовком)", "A: решение «Отвес» — avoid (stock-interior-under-overlay)"]
+    neighbors: ["проверка макета LOOK-HERO-OVERLAY (creative — владелец визуальной приметы: AIL crosswalk)", "ai-media 06/03 (зона текста, F83)", "site AIL-49 (картинка без смысла над заголовком)", "01-creative-direction/examples: решение «Отвес» — avoid (stock-interior-under-overlay)"]
     evidence: ["[практика]", "[данные]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1170,7 +1168,7 @@ entries:
     replace_with: "постер; реальная съёмка предмета"
     cluster: []
     k3_allow: null
-    neighbors: ["ai-media 01/03 VID-M13, VID-M18", "A: решение «Лесная обжарка» L2 — avoid"]
+    neighbors: ["ai-media 01/03 VID-M13, VID-M18", "01-creative-direction/examples: решение «Лесная обжарка» L2 — avoid"]
     evidence: ["[мнение]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1184,7 +1182,7 @@ entries:
       eye: "образ подошёл бы любой компании категории"
       metric: "—"
       detector: "ai-media IMG-M07, IMG-M22 (VLM-вопросы); blender 01/01 §22 (глобус с дугами)"
-    detect: {method: [IMG, JDG, LNT], auto: "нет; LNT — есть ли `concept.rut` в art-direction A"}
+    detect: {method: [IMG, JDG, LNT], auto: "нет; LNT — есть ли `concept.rut` в art-direction"}
     threshold: "образ совпадает с колеёй категории, записанной в art-direction (`concept.rut`)"
     first_seen: "всегда (стоковая фотография) [практика]"
     saturated_since: "по категориям; ИИ-генерация удешевила колею (ai-media 01/03 §7.2) [мнение]"
@@ -1197,7 +1195,7 @@ entries:
     replace_with: "результат продукта, реальный предмет, реальный пользователь (ai-media 01/03 §5.4)"
     cluster: []
     k3_allow: null
-    neighbors: ["ai-media 01/03 IMG-M07, M08, M22, §5.4", "blender 01/01 §22 (глобус с дугами, изометрическая комната)", "A 01 (`concept.rut` — колея категории)", "site AIL-49"]
+    neighbors: ["ai-media 01/03 IMG-M07, M08, M22, §5.4", "blender 01/01 §22 (глобус с дугами, изометрическая комната)", "01-creative-direction (`concept.rut` — колея категории)", "site AIL-49"]
     evidence: ["[консенсус]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1224,7 +1222,7 @@ entries:
     replace_with: "2D-иконки одного набора или 3D в стиле серии (blender 01/01 §22)"
     cluster: []
     k3_allow: null
-    neighbors: ["blender 01/01 §13.1, §22; blender рецепт 02 (глянец 0,35 + coat — сам даёт клише: аудит BLENDER §4 п.6)", "ai-media 01/03 §7.2"]
+    neighbors: ["blender 01/01 §13.1, §22; blender рецепт 02 (глянец 0,35 + coat — сам даёт клише)", "ai-media 01/03 §7.2"]
     evidence: ["[мнение]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1241,7 +1239,7 @@ entries:
     detect: {method: [DOM, IMG, JDG], auto: "частично"}
     threshold: "≥ 5 однотипных плиток с одним радиусом (AIL-08 + m14)"
     first_seen: "2022 — Apple на презентациях продуктов (ui 11/01 §8) [консенсус]"
-    saturated_since: "2023 — SaaS-лендинги; копипаст-компоненты Bento Grid (H/02); ui 11/04 §5 «bento из одинаковых плиток» — дефолт 2025–26 [консенсус]"
+    saturated_since: "2023 — SaaS-лендинги; копипаст-компоненты Bento Grid; ui 11/04 §5 «bento из одинаковых плиток» — дефолт 2025–26 [консенсус]"
     status: saturated
     severity: D
     risk: high
@@ -1251,7 +1249,7 @@ entries:
     replace_with: "список, чередование «текст ↔ кадр» (AIL-08)"
     cluster: [ai-saas-2024]
     k3_allow: cards
-    neighbors: ["site AIL-08 (владелец структуры)", "ui 11/01 §8; ui 11/04 m14, §5", "B: выдача Dribbble «saas landing page» — bento среди типовых приёмов (концепты)"]
+    neighbors: ["site AIL-08 (владелец структуры)", "ui 11/01 §8; ui 11/04 m14, §5", "02-references-moodboards: выдача Dribbble «saas landing page» — bento среди типовых приёмов (концепты)"]
     evidence: ["[консенсус]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1268,7 +1266,7 @@ entries:
     detect: {method: [IMG, DOM], auto: "нет"}
     threshold: "орбита в первом экране без реальных интеграций"
     first_seen: "2023 [практика]"
-    saturated_since: "2024 — компонент Orbiting Circles копипаст-кита Magic UI (H/02); выдача Dribbble «saas landing page» (B) [данные]"
+    saturated_since: "2024 — компонент Orbiting Circles копипаст-кита Magic UI; выдача Dribbble «saas landing page» [данные]"
     status: saturated
     severity: D
     risk: high
@@ -1278,8 +1276,8 @@ entries:
     replace_with: "сетка логотипов интеграций с подписями; схема кодом"
     cluster: [ai-saas-2024]
     k3_allow: center-hero
-    neighbors: ["site AIL-06 (центр hero), AIL-19 (логотипы — с разрешением)", "B 02 (Dribbble: центрированный hero с орбитой логотипов)"]
-    evidence: ["[данные: B, H/02]", "[практика]"]
+    neighbors: ["site AIL-06 (центр hero), AIL-19 (логотипы — с разрешением)", "02-references-moodboards (Dribbble: центрированный hero с орбитой логотипов)"]
+    evidence: ["[данные: 02-references-moodboards]", "[практика]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -1300,12 +1298,12 @@ entries:
     severity: D
     risk: low
     levels: {L0: "как ритм длинной страницы — допустимо", L1: "то же", L2: "то же"}
-    justify_if: "смена темы сюжета (переход «проблема → решение»), ритм фонов секций D 04/02"
+    justify_if: "смена темы сюжета (переход «проблема → решение»), ритм фонов секций creative 04/02"
     twists: ["пауза цветом бренда или фото, а не угольной полосой"]
-    replace_with: "ритм фонов по сюжету (D 04/02)"
+    replace_with: "ритм фонов по сюжету (creative 04/02)"
     cluster: [editorial-luxe-2025]
     k3_allow: null
-    neighbors: ["D 04/02 (ритм и фоны секций)"]
+    neighbors: ["creative 04/02 (ритм и фоны секций)"]
     evidence: ["[данные]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1349,18 +1347,18 @@ entries:
     detect: {method: [LNT, JDG, IMG], auto: "нет"}
     threshold: "эффект из кита без изменения ≥ 2 параметров (цвет, форма, скорость, композиция)"
     first_seen: "2022 (Spline-сцены, шаблоны Framer) [практика]"
-    saturated_since: "2024–2026 — копипаст-киты (Aceternity UI, Magic UI, React Bits) и генераторы, ставящие их по умолчанию (H/02) [данные]"
+    saturated_since: "2024–2026 — копипаст-киты (Aceternity UI, Magic UI, React Bits) и генераторы, ставящие их по умолчанию [данные]"
     status: saturated
     severity: S
     risk: high
     levels: {L0: "—", L1: "свои параметры у каждого эффекта", L2: "свой эффект или глубокая переделка"}
     justify_if: "параметры эффекта выведены из бренда и концепции (критерий «исполнение»: своя форма, а не пресет); демо-цвета и демо-скорости заменены"
     twists: ["форма эффекта — из предмета (лента = упаковка бренда)", "эффект управляется данными продукта"]
-    replace_with: "эффект с параметрами из art-direction; своя реализация F"
+    replace_with: "эффект с параметрами из art-direction; своя реализация (06-effects-catalog)"
     cluster: []
     k3_allow: null
-    neighbors: ["blender 01/01 откр. вопр. («шаблонность Spline-сцен и no-code-эффектов (Unicorn) — мнение»)", "PLAN §2 критерий 3 «исполнение: своя форма, а не пресет»"]
-    evidence: ["[данные: H/02]", "[практика]"]
+    neighbors: ["blender 01/01 откр. вопр. («шаблонность Spline-сцен и no-code-эффектов (Unicorn) — мнение»)", "01-cliche-policy.md §1.3 (исполнение: своя форма, а не пресет)"]
+    evidence: ["[данные]", "[практика]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -1383,10 +1381,10 @@ entries:
     levels: {L0: "нет", L1: "одно слово по смыслу", L2: "как голос бренда по концепции"}
     justify_if: "ось показывает смысл слова (GROW растёт, OOZE течёт — Mandy Michael [V:luAqYCd_TC8 11:12, 13:20]); текст остаётся текстом в HTML; reduce — статичное начертание"
     twists: ["ось отвечает данным продукта (температура, скорость), а не курсору"]
-    replace_with: "статичное начертание, выбранное под роль (D 04/01)"
+    replace_with: "статичное начертание, выбранное под роль (creative 04/01)"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["D 04/01 (оси FLAR, SHRP, wdth, MORF)", "E 05-motion (движение текста)", "[V:luAqYCd_TC8 16:18] — ось по тёмной теме автор называет «dumb example»"]
+    neighbors: ["creative 04/01 (оси FLAR, SHRP, wdth, MORF)", "05-motion (движение текста)", "[V:luAqYCd_TC8 16:18] — ось по тёмной теме автор называет «dumb example»"]
     evidence: ["[мнение]", "[V:luAqYCd_TC8 16:18]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1398,7 +1396,7 @@ entries:
     sign: "анимированные иконки, галочки, лоадеры, персонажи из общедоступной библиотеки в чужом стиле"
     signals:
       eye: "иконки «из другого сайта»: другой штрих, другая пластика"
-      metric: "lottie/dotLottie JSON 50–500 КБ у декоративных иконок (asset_inventory.py ai-media; effects_probe.py C)"
+      metric: "lottie/dotLottie JSON 50–500 КБ у декоративных иконок (asset_inventory.py ai-media; effects_probe.py)"
       detector: "Hallmark: Lottie shortcut; внешние детекторы — нет"
     detect: {method: [DOM, IMG], auto: "частично: Lottie — asset_inventory.py"}
     threshold: "≥ 1 стоковая Lottie в стиле, отличном от набора иконок страницы"
@@ -1426,21 +1424,21 @@ entries:
     signals:
       eye: "всё «плывёт» при прокрутке"
       metric: "≥ 3 секций с transform по прокрутке у фоновых слоёв (DOM, REC)"
-      detector: "запись прокрутки (C); внешние детекторы — нет"
-    detect: {method: [REC, DOM], auto: "частично: C"}
+      detector: "запись прокрутки; внешние детекторы — нет"
+    detect: {method: [REC, DOM], auto: "частично: effects_probe.py"}
     threshold: "параллакс в ≥ 3 секциях без сюжета"
     first_seen: "2011 — параллакс уже в статье о трендах 2011 года [V:ilNOMaR6x_U 04:23] [мнение]; волна параллакс-сайтов 2011–2013 [практика]"
     saturated_since: "2014–2016 — шаблон «outdoor» с горой и словом «Adventure.» повторяли студии без outdoor-клиентов [V:Ulgy6xIrdPg 06:41–07:11] [мнение]"
     status: dated
     severity: D
     risk: mid
-    levels: {L0: "нет (A: без параллакса)", L1: "одна сцена, амплитуда ограничена, reduce — выкл.", L2: "параллакс как глубина сцены по сюжету (E)"}
-    justify_if: "глубина сцены — часть концепции (слои пространства продукта), амплитуда ограничена, без масштабирования крупных объектов на весь экран, reduce — статично (E 05-motion)"
+    levels: {L0: "нет (ambition-levels.yaml: без параллакса)", L1: "одна сцена, амплитуда ограничена, reduce — выкл.", L2: "параллакс как глубина сцены по сюжету"}
+    justify_if: "глубина сцены — часть концепции (слои пространства продукта), амплитуда ограничена, без масштабирования крупных объектов на весь экран, reduce — статично (05-motion)"
     twists: ["одна сцена глубины вместо параллакса на каждом экране"]
     replace_with: "статичные секции; одна сцена глубины"
     cluster: [studio-awwwards-kit]
     k3_allow: null
-    neighbors: ["ui 08/02 (поправка PLAN: параллакс — с reduce и ограничением амплитуды)", "E 05-motion/02", "[V:Ulgy6xIrdPg 06:41]"]
+    neighbors: ["ui 08/02 (на сайте: параллакс — с reduce и ограничением амплитуды)", "05-motion/02", "[V:Ulgy6xIrdPg 06:41]"]
     evidence: ["[мнение]", "[V:Ulgy6xIrdPg 06:41–07:11]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1467,7 +1465,7 @@ entries:
     replace_with: "вес кнопки — размер, заливка, место (ui 11/03 §2.3); микроотклик на наведение"
     cluster: [ai-saas-2024]
     k3_allow: null
-    neighbors: ["blender 07/04 L232, 07/01 L351 «пульсация CTA» (аудит BLENDER §4 п.15: не увязана с 2.2.2)", "E ../05-motion/03-micro-motion-and-performance.md §1.2 (CTA: импульс по событию, масштаб — там же)", "[V:J6aNMFZogyk 06:17]"]
+    neighbors: ["blender 07/04 L232, 07/01 L351 «пульсация CTA» (не увязана с 2.2.2)", "../05-motion/03-micro-motion-and-performance.md §1.2 (CTA: импульс по событию, масштаб — там же)", "[V:J6aNMFZogyk 06:17]"]
     evidence: ["[стандарт: WCAG 2.2.2, 2.3.1]", "[практика]", "[мнение]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
@@ -1506,23 +1504,23 @@ entries:
     sign: "3D-объект, карточка или иконка hero бесконечно всплывает и опускается (translateY или вращение) с периодом в несколько секунд"
     signals:
       eye: "всё в hero «дышит» на месте"
-      metric: "бесконечная анимация translateY/rotate крупного объекта; период короче порога E (`../05-motion/01-motion-principles-and-access.md` §6.3) (DOM, REC)"
-      detector: "запись прокрутки (C, K); внешние детекторы — нет"
-    detect: {method: [DOM, REC], auto: "частично: anim_infinite_idle — C"}
-    threshold: "крупный объект качается с периодом короче порога E или без паузы дольше 5 с рядом с текстом"
+      metric: "бесконечная анимация translateY/rotate крупного объекта; период короче порога (`../05-motion/01-motion-principles-and-access.md` §6.3) (DOM, REC)"
+      detector: "запись прокрутки; внешние детекторы — нет"
+    detect: {method: [DOM, REC], auto: "частично: anim_infinite_idle — effects_probe.py"}
+    threshold: "крупный объект качается с периодом короче порога 05-motion/01 §6.3 или без паузы дольше 5 с рядом с текстом"
     first_seen: "2019–2020 (3D-иллюстрации и парящие карточки SaaS) [практика]"
     saturated_since: "2022 (ИИ-3D hero; рецепт blender 07 «парящий остров», blender 07/04 §5 период 3–4 с) [мнение]"
     status: saturated
     severity: S
     risk: high
-    levels: {L0: "нет", L1: "медленное «дыхание» по норме E, пауза, reduce — статично", L2: "то же, как часть сцены"}
-    justify_if: "движение объяснено сценой (невесомость продукта, вода, воздух) и идёт с периодом и амплитудой по E (полоса укачивания обойдена); пауза; reduce — статичный кадр"
+    levels: {L0: "нет", L1: "медленное «дыхание» по норме 05-motion/01 §6.3, пауза, reduce — статично", L2: "то же, как часть сцены"}
+    justify_if: "движение объяснено сценой (невесомость продукта, вода, воздух) и идёт с периодом и амплитудой по 05-motion/01 §6.3 (полоса укачивания обойдена); пауза; reduce — статичный кадр"
     twists: ["объект реагирует на прокрутку (поднимается по сюжету) вместо вечной петли"]
     replace_with: "статичный кадр; движение по событию"
     cluster: [web3-3d-2022]
     k3_allow: null
-    neighbors: ["E ../05-motion/01-motion-principles-and-access.md §6.3 (одно число для «парения», вестибулярные факторы §6)", "blender 07/04 §5 (3–4 с) против 09/05 п.18 (≥ 10 с) — противоречие закрывает E (PLAN, таблица поправок)", "blender 01/01 §22 (парящий остров — рецепт 07)"]
-    evidence: ["[исследование: через E — вестибулярная полоса]", "[мнение]"]
+    neighbors: ["../05-motion/01-motion-principles-and-access.md §6.3 (одно число для «парения», вестибулярные факторы §6)", "blender 07/04 §5 (3–4 с) против 09/05 п.18 (≥ 10 с) — противоречие закрывает 05-motion/01 §6.3", "blender 01/01 §22 (парящий остров — рецепт 07)"]
+    evidence: ["[исследование: вестибулярная полоса — 05-motion/01 §6]", "[мнение]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"
 
@@ -1534,7 +1532,7 @@ entries:
     signals:
       eye: "интерфейс «из 1998 года»"
       metric: "—"
-      detector: "npm ie-page-transitions 0.0.2 (W1) — признак готовой библиотеки"
+      detector: "npm ie-page-transitions 0.0.2 — признак готовой библиотеки"
     detect: {method: [IMG, JDG], auto: "нет"}
     threshold: "ретро без ретро-концепции"
     first_seen: "2019 (волна Y2K-ностальгии) [практика]"
@@ -1545,10 +1543,10 @@ entries:
     levels: {L0: "нет", L1: "нет", L2: "осознанная отсылка (музей интернета, ретро-продукт, пародия)"}
     justify_if: "концепция — эпоха или пародия; остальная страница читается современно; reduce — мгновенная смена"
     twists: []
-    replace_with: "View Transitions в своём характере (E)"
+    replace_with: "View Transitions в своём характере"
     cluster: []
     k3_allow: null
-    neighbors: ["W1: ie-page-transitions 0.0.2 (99-raw/notes/wave2/W1-notes.md)"]
+    neighbors: ["ie-page-transitions 0.0.2 (npm)"]
     evidence: ["[практика]"]
     checked_at: "2026-09-24"
     review_by: "2027-03-24"

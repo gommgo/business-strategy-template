@@ -1,4 +1,4 @@
-# Рецепт 03 · Флагманский запуск продукта · L2 — машиночитаемая часть 10-recipes/03-product-launch-l2.md · J · 2026-09-25
+# Рецепт 03 · Флагманский запуск продукта · L2 — машиночитаемая часть 10-recipes/03-product-launch-l2.md
 recipe_version: "0.1"
 id: recipe:product-launch-l2
 title_ru: "Флагманский запуск продукта, L2 — история продукта: разобрать, собрать, заглянуть внутрь"
@@ -16,7 +16,6 @@ inputs:
   art_direction_example: "01-creative-direction/examples/art-direction-kvarts.json"
   copy_deck_example: "../text/10-templates-recipes/examples/ru-kvarts-preorder.yaml"
   motion_spec_example: "10-recipes/examples/l2-zveno/motion-spec.yaml"
-  kimi: "../kimi-research/03-prompting/04-template-library.md#t7 (строки моментов — spec_check.py moments)"
   video: ["V:yAWFjiaK1Ek 04:38", "V:ufHQG7fDLQc 09:13"]
 concept:
   thesis: "Движется только сам продукт и только по вашей прокрутке: рука разбирается на модули, собирается поворотом колец и открывает сустав; текст стоит."
@@ -62,13 +61,13 @@ motion:
   loops_in_view_max: 0
   motion_spec_example: "10-recipes/examples/l2-zveno/motion-spec.yaml"
 stack:
-  library: ["three@0.186.1 (esbuild, 123 КБ br; сцена v2 — световой проход J2)", "motion.js F2", css]
+  library: ["three@0.186.1 (esbuild, 123 КБ br; сцена v2 — после светового прохода)", "motion.js", css]
   js_first_kb_br: 2.7
   notes: "three грузится после load + простоя и только при WebGL2 и не-reduce; один fixed-холст; рендер по требованию"
-  platforms: {static: "как пример J/02", tilda: "сцену выносить на static-страницу (G 01 §10)"}
+  platforms: {static: "как пример 10-recipes/examples/l2-zveno", tilda: "сцену выносить на static-страницу (creative 07/01 §10)"}
 assets:
   - {slot: scene-3d, ladder: 3d, source: code, blender_recipe: "../blender/12-recipes/01-hero-product.md; 05-scroll-showcase.md; 08-sequence-video-alpha.md (телефон)", budget_kb: 125, note: "в проекте — CAD заказчика и запечённый свет"}
-  - {slot: hero-visual, ladder: image, source: render, budget_kb: 15, note: "постер — рендер той же сцены 1600×1000 и 600×1300; v2 (J2) — 17,5 / 14,5 КБ: десктоп выше бюджета примера на 2,5 КБ после светового прохода (предел hero-изображения уровня — ambition-levels.yaml)"}
+  - {slot: hero-visual, ladder: image, source: render, budget_kb: 15, note: "постер — рендер той же сцены 1600×1000 и 600×1300; v2 — 17,5 / 14,5 КБ: десктоп выше бюджета примера на 2,5 КБ после светового прохода (предел hero-изображения уровня — ambition-levels.yaml)"}
   - {slot: stations, ladder: image, source: render, budget_kb: 16, note: "5 станций 1200×750 для reduce, без JS и без WebGL; v2 — 7,4–16,2 КБ"}
   - {slot: og-image, ladder: image, source: template, task_codes: [IMG-TEXT-CYR], budget_kb: 300}
 copy:
@@ -83,20 +82,19 @@ budget:
   first_screen_mb: {mobile: 2.5, desktop: 4.0, example: 0.34}
   session_mb: {mobile: 8, desktop: 15, example: 0.37}
   fonts_kb: {mobile: 300, desktop: 300, example: 186.8}
-  source: "ambition-levels.yaml L2; пример — 99-raw/experiments/J/04-light-pass/gates-l2/gates.md (motion_check 0.1.3, v2)"
+  source: "ambition-levels.yaml L2; пример — прогон motion_check 0.1.3 (сцена v2)"
 gates:
   tools: ["motion_check.py --level L2 --spec", "marketing_audit.py --level L2", "site_probe.py + gate_check (blender 09/05 §7.2)"]
   must_pass: [EG-PERF-08, EG-PERF-02, EG-WEIGHT-02, EG-WEIGHT-03, EG-A11Y-03, EG-A11Y-09, EG-A11Y-12, EG-FB-04, EG-FB-05]
-  watch: ["EG-A11Y-27: текст первого экрана над 3D на телефоне — --contrast \"h1\" \".hero__lead\" (у v1 H1 1,0:1)", "EG-PERF-05: загрузка сцены задачами (PMREM, compileAsync), не одной длинной", "хвост кадров ≤ 0,45 с после ввода (motion_check 0.1.2+ снимает на +0,5 с)"]
-  manual: ["попарно с якорями L2 (рубрика K)", "реальный телефон: плавность и нагрев (EG-LIVE-01)"]
+  watch: ["EG-A11Y-27: текст первого экрана над 3D на телефоне — --contrast \"h1\" \".hero__lead\" (без затемнения под текстом H1 1,0:1)", "EG-PERF-05: загрузка сцены задачами (PMREM, compileAsync), не одной длинной", "хвост кадров ≤ 0,45 с после ввода (motion_check 0.1.2+ снимает на +0,5 с)"]
+  manual: ["попарно с якорями L2 (рубрика 09-ai-execution-evaluation/effectiveness.rubric.json)", "реальный телефон: плавность и нагрев (EG-LIVE-01)"]
 decisions:
   - {id: d-centerpiece, technique: "cliche:webgl-centerpiece", decision: twist, why: "3D — сам продукт и его механика; постер и станции без WebGL"}
-  - {id: d-smooth, technique: "cliche:smooth-scroll-default", decision: avoid, why: "сцены на родной прокрутке, хвост только у картинки ≤ 0,45 с (J2)"}
+  - {id: d-smooth, technique: "cliche:smooth-scroll-default", decision: avoid, why: "сцены на родной прокрутке, хвост только у картинки ≤ 0,45 с"}
   - {id: d-bob, technique: "cliche:floating-bob-loop", decision: avoid, why: "в покое 0 кадров; пробуждение одно и конечное"}
   - {id: d-preloader, technique: "cliche:preloader", decision: avoid, why: "постер своего рендера вместо заставки"}
-  - {id: d-glow, technique: "cliche:neon-glow", decision: twist, why: "свечение — функция продукта: кольцо-замок горит, когда модуль зафиксирован и под питанием, гаснет при разборке; ровное, без пульсации и цветных теней (J2, J/04); d-frame и d-chrome — в тексте рецепта §10 (схема: ≤ 5 решений)"}
+  - {id: d-glow, technique: "cliche:neon-glow", decision: twist, why: "свечение — функция продукта: кольцо-замок горит, когда модуль зафиксирован и под питанием, гаснет при разборке; ровное, без пульсации и цветных теней; d-frame и d-chrome — в тексте рецепта §10 (схема: ≤ 5 решений)"}
 errors: ["WebGL-центр без задачи", "рендер в покое", "LCP на canvas или заставке", "текст в canvas", "сглаживание по кадрам", "второй контекст ради проверки", "широкий игровой display"]
 example:
   path: "10-recipes/examples/l2-zveno/"
-  gates: "99-raw/experiments/J/04-light-pass/gates-l2/gates.md"
-  result: "прогон 1–2 (J, motion_check 0.1): B 0, S 4 ложные (детектор петель) → исправлено в 0.1.2; прогон 3 (J2, сцена v2 после светового прохода, 0.1.3, 5 режимов): B 0, S 0, D 0; x-gate-exception не нужен. Световой проход — 99-raw/experiments/J/04-light-pass/ (листы pairs-desk.jpg, pairs-mob.jpg, sheet-before.jpg, sheet-after.jpg; цена кадра out/bench.json)"
+  result: "прогон 1–2 (motion_check 0.1): B 0, S 4 ложные (детектор петель) → исправлено в 0.1.2; прогон 3 (сцена v2 после светового прохода, 0.1.3, 5 режимов): B 0, S 0, D 0; x-gate-exception не нужен."

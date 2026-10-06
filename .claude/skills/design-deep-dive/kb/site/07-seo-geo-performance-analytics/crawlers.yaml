@@ -1,16 +1,16 @@
 # crawlers.yaml — поисковые и ИИ-боты: назначение, управление через robots.txt и meta, проверка подлинности.
-# Владелец: site-research, агент H (волна 2; разделы google_unsupported_rules, emerging, observed и правила rt-* по W2 —
-# продолжатель H2). Только первоисточники платформ; у каждой записи — дата проверки.
-# Читают: geo_probe.py (оценка robots.txt по ботам), head-kit.yaml, J (плейбуки), K (чек-лист), kimi (ACCEPTANCE).
+# Владелец: site (07-seo-geo-performance-analytics). Только первоисточники платформ; у каждой записи — дата проверки.
+# Читают: geo_probe.py (оценка robots.txt по ботам), head-kit.yaml, плейбуки (10-playbooks-contracts) и чек-лист
+# (09-ai-generation-evaluation).
 # Бриф: поле search.ai_bots_policy (../01-foundations/site-brief.schema.json) → раздел policies ниже.
 
 version: 1.0
 checked: 2026-09-24
-status: released            # draft → released (H2, 2026-09-24) → v1 базы (J, волна 3); перепроверка — раз в квартал
-owner: site H (волна 2)
+status: released            # перепроверка — раз в квартал
+owner: site
 network_note: >-
   Страницы документации зарубежных платформ сняты через выход в ЕС (VPN, Литва), Яндекса — с российского адреса,
-  24.09.2026. Сырые таблицы — 99-raw/experiments/H/00-sources/. Списки ботов меняются без анонсов: перепроверять
+  24.09.2026. Списки ботов меняются без анонсов: перепроверять
   раз в квартал и перед запуском сайта (doc_url + дата checked).
 
 vocab:
@@ -33,7 +33,7 @@ vocab:
 
 bots:
 
-  # ---------- Яндекс (приоритет 1, решение заказчика 15) ----------
+  # ---------- Яндекс (приоритет 1) ----------
   - id: yandex-yandexbot
     owner: Яндекс
     user_agent_token: YandexBot
@@ -848,8 +848,8 @@ policies:
       данных о том, что разрешение обучения повышает упоминания бренда, нет.
 
 robots_txt_rules:
-  # Техника сборки файла (RFC 9309; Google robots.txt spec 2026-08-31; Яндекс Вебмастер; дайджесты W2 0yedoWKPgo4 и
-  # cfIQ_ksB61U). → 01-seo-google-yandex.md §2.1; 02-geo-ai-search.md §2
+  # Техника сборки файла (RFC 9309; Google robots.txt spec 2026-08-31; Яндекс Вебмастер; видео [V:0yedoWKPgo4] и
+  # [V:cfIQ_ksB61U]). → 01-seo-google-yandex.md §2.1; 02-geo-ai-search.md §2
   - id: rt-one-file-per-host
     rule: robots.txt — в корне каждого хоста и протокола (https://example.ru/robots.txt), UTF-8, text/plain, код 200; для поддоменов — свой файл
   - id: rt-5xx
@@ -938,7 +938,7 @@ google_unsupported_rules:
   history: >-
     Коммит 4af32e5 добавил content-signal, content-usage, domain, request-rate, revisit-after, visit-time («identified as
     frequently used… via HTTP Archive»); clean-param, crawl-delay, host, noarchive, nofollow, noindex были в списке раньше.
-    [V:DchuJS7JWvk 03:20]; копия файла — 99-raw/experiments/H/00-sources/google_robotstxt_reporting_robots.cc
+    [V:DchuJS7JWvk 03:20]
   fields:
     - {field: clean-param, others: "Яндекс — склейка GET-параметров (rt-yandex-clean-param)", decision: "писать для Яндекса; Google — canonical без параметров"}
     - {field: content-signal, others: "Cloudflare Content Signals; поддержка ИИ-ботами не подтверждена", decision: "сами не пишем (emerging)"}
@@ -965,7 +965,7 @@ emerging:
       Perplexity, Яндекса, Bing не упомянут (сырые копии 00-sources, 2026-09-24); по словам автора — читают агенты-программисты
       в документации ПО
     lighthouse: "аудит «llms.txt» (Agentic browsing, обн. 2026-05-05): ошибка сервера — флаг; 404 — N/A («providing the file is optional at the moment»)"
-    adoption: "Web Almanac 2025 — валиден у 2,13 % сайтов (десктоп), 39,6 % файлов создал плагин All in One SEO; H/01 — ≈ 25 из 97 хостов; H/02 — 20 из 69 страниц (RU 3 из 33)"
+    adoption: "Web Almanac 2025 — валиден у 2,13 % сайтов (десктоп), 39,6 % файлов создал плагин All in One SEO; замер корпуса text — ≈ 25 из 97 хостов; замер посадочных — 20 из 69 страниц (RU 3 из 33)"
     evidence_of_benefit: "нет; цифры логов из вторичных пересказов не подтверждены первоисточником — [вендор-GEO]"
     decision: "маркетинговый сайт — по умолчанию нет; по просьбе заказчика — собирать из карты сайта и facts; документация и API — да"
     check: "geo_probe.py: llms.valid, llms.is_html, llms.redirected_away; 200 text/plain или 404 — не 5xx и не HTML-заглушка"
@@ -981,12 +981,12 @@ emerging:
     what: "Markdown-версия страницы по тому же адресу + .md (page.html.md или page.md); <link rel=\"alternate\" type=\"text/markdown\">; rel=\"describedby\" → llms.txt; или заголовок Link"
     spec: "llmstxt.org v2"
     readers: "платформами не документировано; Google — «Rewriting content just for AI systems» и «special markup» можно игнорировать"
-    adoption: "H/01 — 0 из 112 страниц"
+    adoption: "замер корпуса text — 0 из 112 страниц"
     decision: "только документация разработчиков; маркетинговым страницам — нет: две версии расходятся [V:Vkn3R6DUJ34 14:19–15:07], «developer bias» [V:Vkn3R6DUJ34 21:08–22:28]"
     checked: 2026-09-24
   - id: webmcp
     what: "инструменты сайта для браузерного агента: декларативные в HTML и императивные в JS"
-    spec: "предложение веб-стандарта; в Chrome — эксперимент с origin trial (web.dev, обн. 2026-04-01); ранний показ — блог Chrome for Developers 2026-02-10 (по дайджесту W)"
+    spec: "предложение веб-стандарта; в Chrome — эксперимент с origin trial (web.dev, обн. 2026-04-01); ранний показ — блог Chrome for Developers 2026-02-10"
     readers: "браузерные агенты Chrome; Lighthouse проверяет через CDP-домен WebMCP (Agentic browsing, 2026-05-05)"
     decision: "по умолчанию нет; кандидаты — запись, калькулятор, подбор тарифа после выхода из эксперимента"
     doc_url: https://web.dev/articles/ai-agent-site-ux
@@ -995,7 +995,7 @@ emerging:
     what: "строка robots.txt Content-signal: search=yes|no, ai-input=yes|no, ai-train=yes|no; тест use=immediate|reference|full"
     spec: "Cloudflare (managed robots.txt, обн. 2026-08-03); заявлена как оговорка прав по ст. 4 Директивы ЕС 2019/790"
     readers: "Google не исполняет (kUnsupportedTags, 2026-02-19); поддержка ИИ-ботами не подтверждена; Search Console может показать «Syntax not understood»"
-    adoption: "H/01 — 3 хоста (intercom, zapier, megaplan), H/02 — 2 страницы; все ai-train=yes"
+    adoption: "замер корпуса text — 3 хоста (intercom, zapier, megaplan), замер посадочных — 2 страницы; все ai-train=yes"
     decision: "сами не пишем; сайт за Cloudflare — сверить managed-блок с search.ai_bots_policy"
     doc_url: https://developers.cloudflare.com/bots/additional-configurations/managed-robots-txt/
     checked: 2026-09-24
@@ -1003,7 +1003,7 @@ emerging:
     what: "HTTP-заголовок Content-Usage: train-ai=n и строка robots.txt Content-Usage: [путь] train-ai=n внутри группы"
     spec: "IETF AIPREF: draft-ietf-aipref-vocab-08 (2026-09-13), draft-ietf-aipref-attach-05 (G. Illyes, M. Thomson; 2026-08-19; «Updates: 9309 (if approved)») — черновики"
     readers: "поддержка краулерами не подтверждена; Google строку пока не исполняет (kUnsupportedTags)"
-    decision: "опционально, [не проверено]; для ЕС-профиля — вопрос I"
+    decision: "опционально, [не проверено]; для ЕС-профиля — вопрос site 08"
     doc_url: https://datatracker.ietf.org/doc/draft-ietf-aipref-attach/
     checked: 2026-09-24
   - id: ucp
@@ -1013,16 +1013,16 @@ emerging:
     checked: 2026-09-24
 
 observed:
-  # Сверка с geo_probe.py и Web Almanac — фон, не норма. Отчёты опытов — 99-raw/experiments/H/01…, H/02….
+  # Сверка с geo_probe.py и Web Almanac — фон, не норма.
   web_almanac_2025:
     unit: "% сайтов (десктоп), где бот назван в robots.txt (не обязательно запрещён); обход июля 2025, главные страницы CrUX"
     values: {gptbot: 4.5, petalbot: 4.0, claudebot: 3.6, ccbot: 3.5, google-extended: 3.4, amazonbot: 3.3, facebookbot: 2.9, perplexitybot: 2.8, chatgpt-user: 2.8, meta-externalagent: 2.8}
   h01_corpus_d: >-
-    97 хостов с разобранным robots.txt (корпус text D, 2026-09-24): поисковые и ИИ-ответные боты (Googlebot, YandexBot,
+    97 хостов с разобранным robots.txt (корпус text, 2026-09-24): поисковые и ИИ-ответные боты (Googlebot, YandexBot,
     YandexAdditional, OAI-SearchBot, PerplexityBot, Claude-SearchBot, bingbot, Applebot, AdsBot) не запрещены ни разу;
     обучение закрыто у 2 хостов (GPTBot — figma, loom; ClaudeBot, Google-Extended, CCBot — figma); Content-Signal — 3 хоста;
     managed-блок Cloudflare — 0
-  h02_sample_m: "51 хост посадочных M (69 страниц итоговой выборки, пересчёт X2): поисковые и ИИ-ответные боты и AdsBot не запрещены ни разу, обучение закрыто у 1 хоста (GPTBot — loom); Content-Signal — 2 страницы"
+  h02_sample_m: "51 хост посадочных из замера живых страниц (69 страниц итоговой выборки): поисковые и ИИ-ответные боты и AdsBot не запрещены ни разу, обучение закрыто у 1 хоста (GPTBot — loom); Content-Signal — 2 страницы"
   conclusion: >-
     На посадочных robots.txt ИИ не мешает; мешают антибот-заглушки, сертификат НУЦ без общепризнанного, CSR-оболочки и
     HTML > 2 МБ (02-geo-ai-search.md §3.2; head-kit.yaml access_gates)

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""fx_probe.py (агент F2, перенесено в 99-raw/tools агентом U волна 4) — замер своей демо-страницы с 3D/шейдерным
-эффектом.
+"""fx_probe.py — замер своей демо-страницы с 3D/шейдерным эффектом.
 
-Отличия от 99-raw/tools/web_view.py --page (который тоже прогоняется для каждого демо):
+Отличия от web_view.py --page (его тоже прогоняют для каждого демо):
   * режимы одним запуском: desktop (1440×900, DPR 1), mobile (Pixel 7: 412×915 CSS, DPR 2.625, touch, UA Android)
     с CPU×4, reduce (prefers-reduced-motion: reduce) и uncapped (без vsync: --disable-gpu-vsync
     --disable-frame-rate-limit → rAF не упирается в 60 и FPS показывает цену кадра);
@@ -17,8 +16,13 @@
                       [--scroll-steps 16] [--pointer] [--bench 120] [--webgpu] [--query "?v=a"] [--label name]
   ROOT_DIR раздаётся локальным сервером (страница может ссылаться на ../assets внутри ROOT_DIR).
 Результат: OUT_DIR/fx_<label>.json и скриншоты OUT_DIR/<label>_<mode>_*.png; сводка в stdout.
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву
+процессов — утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 import functools, http.server, json, os, socketserver, sys, threading, time
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
+import kbpaths  # noqa: E402
 
 GPU = ["--use-gl=angle", "--use-angle=gl", "--ignore-gpu-blocklist", "--enable-gpu"]
 UNCAPPED = ["--disable-gpu-vsync", "--disable-frame-rate-limit"]
@@ -225,7 +229,7 @@ def main():
     from playwright.sync_api import sync_playwright
     res = {"page": page, "url_query": opt(a, "--query", ""), "date": time.strftime("%Y-%m-%d %H:%M"), "modes": {}}
     try:
-        with sync_playwright() as pw:
+        with kbpaths.lock("browser"), sync_playwright() as pw:
             for mode in modes:
                 try:
                     res["modes"][mode] = run_mode(pw, mode, url, out, label, a)

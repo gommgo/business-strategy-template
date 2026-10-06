@@ -1,7 +1,6 @@
-# abstract-background.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/01-hero-recipes.md#6; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+# abstract-background.yaml — машиночитаемый рецепт; текст — 14-recipes/01-hero-recipes.md#6; схема — recipe.schema.json
 recipe_version: 1
 checked_at: '2026-09-25'
-author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
 id: abstract-background
 title: 'Абстрактный фон: CSS → SVG → шейдер → картинка → видео'
 doc: 14-recipes/01-hero-recipes.md#6
@@ -41,7 +40,7 @@ route:
     images: '[A]'
     price_rub: 10.5
     test: MS-03
-    note: 'фаза 5: спокойное движение крупной формы (0,61); петля — [A, A] + RIFE-мост (hero-loop)'
+    note: 'спокойное движение крупной формы (0,61); петля — [A, A] + RIFE-мост (hero-loop)'
   - role: 'видео без кадра (routing v2 — запас)'
     model: bytedance/seedance-2-mini
     params:
@@ -49,24 +48,15 @@ route:
       duration: '5'
       generate_audio: 'false'
     price_rub: 12.825
-    note: 'routing v0 округляет до 12,8; фаза 5: Seedance 2 Mini [A,A] — images как референсы, петлю не строит (I-08: шов 7,21); петля — Seedance 1.5 Pro (hero-loop)'
+    note: 'routing v0 округляет до 12,8; Seedance 2 Mini [A,A] — images как референсы, петлю не строит (I-08: шов 7,21); петля — Seedance 1.5 Pro (hero-loop)'
 compile: scripts/ai-media/prompt_compile.py jobs <spec> --models <модель> --out $DDD_HOME/out/ai-media/<ассет>.jsonl
-phase5:
-  jobs:
-  - 99-raw/phase5/jobs/E-13-bg-hex.jsonl
-  reuse:
-  - E-13
-  - E-01
-  estimate: python3 ../../scripts/ai-media/polza.py estimate 99-raw/phase5/jobs/<файл>.jsonl
 steps:
 - id: audit
   cmd: python3 ../../scripts/ai-media/asset_audit.py audit bg.png --dna <паспорт> --out audit/
   status: checked
-  evidence: 99-raw/experiments/K
 - id: grain
   cmd: 'CSS: .grain::after { background: url(noise.svg); opacity: .07; mix-blend-mode: soft-light }'
   status: checked
-  evidence: 99-raw/experiments/J/03-banding-browser
 accept:
   thresholds:
   - palette.min_matched
@@ -79,8 +69,8 @@ provenance:
   dst: trained
   visible_label: false
 numbers:
-  phase5_sc01_backgrounds: 'тёмный фон с переливом: Sunburst 2K 7 ₽ / Flare 1K 4 ₽ / NB2 1K 4,8 ₽; AVIF при s2 ≥ 80 — 91 / 40 / 20 КБ — 99-raw/experiments/B/12-demo-assets/README.md'
-  phase5_e13: 'E-13 (hex фона у FLUX.2 / Flare / NB2) не запускался — отменено заказчиком 25.09'
+  live_sc01_backgrounds: 'тёмный фон с переливом: Sunburst 2K 7 ₽ / Flare 1K 4 ₽ / NB2 1K 4,8 ₽; AVIF при s2 ≥ 80 — 91 / 40 / 20 КБ'
+  live_e13: 'E-13 (hex фона у FLUX.2 / Flare / NB2) не запускался'
 status:
   local: checked
   generation: unchecked

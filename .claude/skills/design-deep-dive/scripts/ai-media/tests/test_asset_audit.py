@@ -3,7 +3,7 @@
 серий на синтетике (Pillow, numpy, ffmpeg — входы строятся во временной папке), пакет судьи на заглушках ответов (пары,
 рубрика, калибровочный набор, страница голосования), доверие по порогам группы judge; набор и эталон иконок, кодирование
 без усечения глубины и резкость источника, подбор качества под бюджет веса, строки окружения вместо трассировки,
-командная строка palette.py.
+командная строка palette.py, замок heavy без внешней обёртки.
 Запуск: python3 scripts/ai-media/tests/test_asset_audit.py [--ocr] [--keep] [-v]
   --ocr  — ещё и OCR кириллицы (под блокировкой heavy; ≈ 10 с);  --keep — не удалять временную папку.
 Программы окружения, которых нет на машине (exiftool, avifenc, ssimulacra2), — пропуск с пометкой, не провал."""
@@ -264,7 +264,7 @@ def write_clip(frames, path, fps=24, args=LOSSLESS, audio=False):
     """Кадры (n, h, w) uint8 → видеофайл через ffmpeg; по умолчанию — мезонин без потерь."""
     import subprocess
     h, w = frames.shape[1:3]
-    cmd = ["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "gray", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-"]
+    cmd = [kbpaths.ffmpeg(), "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "gray", "-s", f"{w}x{h}", "-r", str(fps), "-i", "-"]
     if audio:
         cmd += ["-f", "lavfi", "-i", "sine=frequency=440", "-shortest", "-c:a", "aac"]
     subprocess.run(cmd + ["-threads", "2", *args, str(path)], input=frames.tobytes(), check=True)
@@ -391,7 +391,7 @@ def t_video(tmp):
     # повторы кадров: каждый пятый кадр дважды; переменная частота — пропуски по таймкодам
     dup = np.concatenate([np.repeat(s[i:i + 1], 2 if i % 5 == 4 else 1, 0) for i in range(len(s))])
     write_clip(dup, d / "dups.mp4")
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(clean), "-vf", "select='not(eq(mod(n\\,5)\\,4))'", "-fps_mode", "vfr",
+    subprocess.run([kbpaths.ffmpeg(), "-v", "error", "-y", "-i", str(clean), "-vf", "select='not(eq(mod(n\\,5)\\,4))'", "-fps_mode", "vfr",
                     "-threads", "2", *LOSSLESS, str(d / "vfr.mkv")], check=True)
     D = {Path(x["file"]).name: x for x in audit([d / "dups.mp4", d / "vfr.mkv"], tmp / "o_dups")["assets"]}
     tm = D["vfr.mkv"]["checks"]["loop"].get("timing") or {}
@@ -457,7 +457,7 @@ def t_encoding(tmp):
     yy, xx = np.mgrid[0:H, 0:W].astype(np.float64)
     g = np.stack([0.20 + 0.10 * xx / W, 0.22 + 0.08 * yy / H, 0.30 + 0.06 * (xx + yy) / (W + H)], -1)
     raw = np.clip(g * 65535, 0, 65535).astype("<u2").tobytes()
-    subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb48le", "-s", f"{W}x{H}", "-i", "-",
+    subprocess.run([kbpaths.ffmpeg(), "-v", "error", "-y", "-f", "rawvideo", "-pix_fmt", "rgb48le", "-s", f"{W}x{H}", "-i", "-",
                     "-frames:v", "1", "-pix_fmt", "rgb48be", str(d / "master16.png")], input=raw, check=True)
     for depth in (8, 10):
         subprocess.run([str(avifenc), "-q", "70", "-s", "8", "-y", "444", "-d", str(depth), str(d / "master16.png"),
@@ -1086,6 +1086,27 @@ def t_ocr(tmp):
           and not ({"QA-TEXT-MISMATCH", "QA-TEXT-CHECK"} & codes(s3)), (s3["checks"].get("text"), s3["checks"].get("ocr")))
 
 
+def t_lock(tmp):
+    """Замок heavy — через kbpaths.lock: вызов из процесса, который его держит, не ждёт; дочерняя команда наследует
+    замок и входит под него без ожидания (свой $DDD_HOME во временной папке — общий замок машины не трогается)."""
+    import os
+    import time
+    home = os.environ.get(kbpaths.ENV_HOME)
+    os.environ[kbpaths.ENV_HOME] = str(tmp / "lock-home")
+    try:
+        probe = [sys.executable, "-c", "import sys; sys.path.insert(0, sys.argv[1]); import kbpaths\n"
+                 "with kbpaths.lock('heavy', 'ai-media', timeout=5): print('вошёл')", str(TOOLS.parent / "lib")]
+        t0 = time.monotonic()
+        with kbpaths.lock("heavy", "ai-media", timeout=5):
+            r = aa.run_locked(probe, "heavy", wait=5, capture_output=True, text=True, timeout=60)
+        check("замок heavy: вызов под уже взятым замком не ждёт, дочерний процесс входит под него без ожидания",
+              r.returncode == 0 and "вошёл" in r.stdout and time.monotonic() - t0 < 10, (r.returncode, r.stderr[-200:]))
+        r2 = aa.run_locked([sys.executable, "-c", "print(1)"], "heavy", wait=5, capture_output=True, text=True, timeout=60)
+        check("замок heavy: без держателя команда идёт под замком и завершается", r2.returncode == 0, r2.stderr[-200:])
+    finally:
+        os.environ.pop(kbpaths.ENV_HOME, None) if home is None else os.environ.__setitem__(kbpaths.ENV_HOME, home)
+
+
 def run(keep=False, ocr=False, verbose=False):
     R.clear()
     tmp = Path(tempfile.mkdtemp(prefix="asset_audit_test_"))
@@ -1094,7 +1115,7 @@ def run(keep=False, ocr=False, verbose=False):
                   lambda: t_svg_series(tmp), lambda: t_encoding(tmp), lambda: t_judge_package(tmp), lambda: t_judge_rubric(tmp),
                   lambda: t_judge_trust(tmp), lambda: t_judge_calibration(tmp), lambda: t_stand_page(tmp),
                   lambda: t_provenance(tmp), lambda: t_icon_set(tmp), lambda: t_env(tmp),
-                  lambda: t_palette_cli(tmp)) + ((lambda: t_ocr(tmp),) if ocr else ()):
+                  lambda: t_palette_cli(tmp), lambda: t_lock(tmp)) + ((lambda: t_ocr(tmp),) if ocr else ()):
             try:
                 t()
             except Exception as e:  # noqa: BLE001

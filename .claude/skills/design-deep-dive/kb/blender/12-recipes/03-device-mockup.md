@@ -32,11 +32,11 @@ el 8°, 85 мм (почти фронтально — экран читается
 ## 3. Код: скриншот под экран → build(P) → проверки → постер → GLB
 
 ```python
-# Blender 5.2.2 — [проверено] рецепт 03: телефон D1/02 + скриншот из файла → постер + GLB
+# Blender 5.2.2 — [проверено] рецепт 03: телефон (blender 05/04 §2) + скриншот из файла → постер + GLB
 import sys, math, bpy, bmesh
 import numpy as np
 from mathutils import Matrix
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 D, bpyx = rk.D, rk.bpyx
 SLUG = "03-device-mockup"

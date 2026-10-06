@@ -114,7 +114,7 @@ B1 `02` §2.4):
 Вида факта «история» нет (решение F по вопросу B2): история — цепочка фактов `company`, `person`, `case`, `date` с
 дословными выдержками интервью в `source.quote`. Для сборки сюжета база предлагает B2 необязательное поле `story_role`
 (`origin`, `turning-point`, `proof`, `present`); образец данных — факт `origin-story-staff-sauce` в
-`99-raw/experiments/F/04-voice-samples/facts-demo-peklo.yaml`.
+`examples/facts-demo-peklo.yaml`.
 
 ## 2. История клиента
 

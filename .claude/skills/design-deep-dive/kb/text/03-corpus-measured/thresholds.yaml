@@ -1,31 +1,31 @@
-# thresholds.yaml — пороги линтера по жанрам и слотам из корпуса D (text-research, волна 1, агент D и продолжатель D2,
-# 2026-09-24). Как выведены: 03-corpus-measured/03-thresholds-by-genre.md §1; числа и группы: 02-measurements.md;
+# thresholds.yaml — пороги линтера по жанрам и слотам из корпуса. Как выведены:
+# 03-corpus-measured/03-thresholds-by-genre.md §1; числа и группы: 02-measurements.md;
 # корпус: corpus.tsv; замер: measurements.tsv.
 # Кто читает что:
-#   copy_lint.py (C) — genres.<жанр>.analyzers (объединённая выборка ru + en): сливает поверх профиля
+#   copy_lint.py — genres.<жанр>.analyzers (объединённая выборка ru + en): сливает поверх профиля
 #     06-anti-slop/profiles.yaml (ключи и поля — как в defaults.analyzers); поверх —
-#     genres.<жанр>.analyzers_by_lang.<ru|en> по языку входа (с 0.9.3, правка оркестратора 2026-09-24 10:50).
+#     genres.<жанр>.analyzers_by_lang.<ru|en> по языку входа.
 #   genres.<жанр>.analyzers_by_lang.<ru|en> — те же анализаторы по языку. Главное различие — тире: в EN пунктуационное
 #     тире — примета ИИ, в RU норма пунктуации.
-#   genres.<жанр>.slots.<slot_type>.<ru|en>.{words|chars}.{p10,p50,p90}, n (страниц), provisional — длины слотов для E
-#     (copy-slots.yaml) и G (мета); линтер не читает.
+#   genres.<жанр>.slots.<slot_type>.<ru|en>.{words|chars}.{p10,p50,p90}, n (страниц), provisional — длины слотов для
+#     copy-slots.yaml и мета-правил (text 07); линтер не читает.
 #   rows — построчно: genre, slot_type («*» — весь текст страницы), lang, metric, warn_low, warn_high, error_low,
 #     error_high, n (страниц в опорной группе), n_ai, basis (основание error), warn_ci (90 % бутстрэп-интервал warning),
-#     ai_p50, source (corpus-D:lead — лидеры; corpus-D:human — лидеры + средний рынок; третье поле — жанр выборки:
+#     ai_p50, source (corpus:lead — лидеры; corpus:human — лидеры + средний рынок; третье поле — жанр выборки:
 #     marketing = лендинги + страницы сайта), date, provisional.
 # Правила: warning — p90 лидеров («больше — хуже») или p10 лидеров («меньше — хуже»); error — нижний дециль ИИ при
 # зазоре (basis gap-ai-p10), иначе крайний выброс людей max(p98 людей, 1,5 × warning) (basis human-p98).
 # provisional: true — опорная группа < 8 страниц (взяты лидеры + средний рынок) или жанр-прокси (geo — по статьям,
 # email-form — по лендингам и слотам форм); у provisional плотности маркеров allow_error: false — такой порог не ворота.
 # Замер: copy_lint 0.9.2 / 0.9.3 (эквивалентны по метрикам) (системный python3, без морфологии: с pymorphy3 плотность маркеров RU выше ≈ на 0,3 на 100
-# слов; словари C без внешних правил G/H — поле tools.rules), copy_metrics 0.3.2, copy_extract 0.3.0.
+# слов; словари линтера без внешних правил text 07 и text 08 — поле tools.rules), copy_metrics 0.3.2, copy_extract 0.3.0.
 date: '2026-09-24'
 version: 2
 provisional: false
-source: 03-corpus-measured/corpus.tsv, measurements.tsv; 99-raw/experiments/D/03-measure/
+source: 03-corpus-measured/corpus.tsv, measurements.tsv
 tools: {copy_lint: 0.9.2 / 0.9.3 (эквивалентны по метрикам), copy_lint_check: 0.9.3, copy_metrics: 0.3.2, copy_extract: 0.3.0,
-  python: 3.13.5, morphology: false, rules: '336 правил из словарей C (139 маркерных); внешние G/H не подключались: с ними
-    455, из них маркерное одно — meta-clickbait (G), на корпусе 0 срабатываний из 621 поля'}
+  python: 3.13.5, morphology: false, rules: '336 правил из словарей линтера (139 маркерных); внешние правила text 07 и text 08 не подключались: с ними
+    455, из них маркерное одно — meta-clickbait (text 07), на корпусе 0 срабатываний из 621 поля'}
 rules: {upper: 'warning = p90 лидеров жанра; error = p10 ИИ, если он выше warning и ИИ-страниц ≥ 8 (зазор), иначе max(p98
     людей, 1,5×warning)', lower: 'warning = p10 лидеров; error = p90 ИИ при зазоре, иначе min(p2 людей, 0,5×warning)', sparse: 'редкие
     приёмы (тире в прозе, «не X, а Y», вопросы, тройки, восклицания): warning не ниже 200 / медиана слов страницы жанра
@@ -1187,7 +1187,7 @@ rows:
   basis: human-p98
   ai_p50: 1.181
   warn_ci: [1.441, 2.785]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1201,7 +1201,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [1.125, 3.279]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1216,7 +1216,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.133]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1231,7 +1231,7 @@ rows:
   basis: human-p98
   ai_p50: 0.377
   warn_ci: [1.227, 5.312]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1246,7 +1246,7 @@ rows:
   basis: human-p98
   ai_p50: 1.132
   warn_ci: [0.821, 2.454]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1261,7 +1261,7 @@ rows:
   basis: human-p98
   ai_p50: 0.649
   warn_ci: [0.222, 1.311]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1274,7 +1274,7 @@ rows:
   n_ai: 0
   basis: human-p2
   warn_ci: [3.23, 4.58]
-  source: corpus-D:human:landing
+  source: corpus:human:landing
   date: '2026-09-24'
   provisional: true
 - genre: landing
@@ -1288,7 +1288,7 @@ rows:
   basis: human-p2
   ai_p50: 0.364
   warn_ci: [0.263, 0.462]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1302,122 +1302,122 @@ rows:
   basis: human-p2
   ai_p50: 7.523
   warn_ci: [0.398, 4.366]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - {genre: landing, slot_type: headline, lang: ru, metric: words, warn_low: 2.7, warn_high: 10.0, error_low: 1.4, error_high: 15.0,
-  p50: 4.5, ai_p50: 7.0, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 4.5, ai_p50: 7.0, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: headline, lang: ru, metric: chars, warn_low: 19.5, warn_high: 72.4, error_low: 9.8, error_high: 108.6,
-  p50: 33.5, ai_p50: 48.5, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.5, ai_p50: 48.5, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: subheadline, lang: ru, metric: words, warn_low: 6.0, warn_high: 29.0, error_low: 3.0, error_high: 55.1,
-  p50: 11.0, ai_p50: 19.5, n: 15, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 11.0, ai_p50: 19.5, n: 15, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: subheadline, lang: ru, metric: chars, warn_low: 30.0, warn_high: 221.0, error_low: 15.0, error_high: 415.5,
-  p50: 86.0, ai_p50: 140.0, n: 15, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 86.0, ai_p50: 140.0, n: 15, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: eyebrow, lang: ru, metric: words, warn_low: 1.0, warn_high: 5.0, error_low: 0.5, error_high: 8.0,
-  p50: 3.0, ai_p50: 3.5, n: 14, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 3.0, ai_p50: 3.5, n: 14, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: eyebrow, lang: ru, metric: chars, warn_low: 5.5, warn_high: 26.3, error_low: 2.8, error_high: 53.9,
-  p50: 18.0, ai_p50: 21.0, n: 14, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 18.0, ai_p50: 21.0, n: 14, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: hero-proof, lang: ru, metric: words, warn_low: 2.0, warn_high: 10.2, error_low: 1.0, error_high: 15.3,
-  p50: 6.0, ai_p50: 4.0, n: 8, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 4.0, n: 8, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: hero-proof, lang: ru, metric: chars, warn_low: 10.9, warn_high: 65.6, error_low: 5.5, error_high: 98.5,
-  p50: 29.0, ai_p50: 30.0, n: 8, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 29.0, ai_p50: 30.0, n: 8, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: cta-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 3.8, error_low: 0.5, error_high: 7.2,
-  p50: 2.0, ai_p50: 2.0, n: 20, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 2.0, n: 20, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: cta-label, lang: ru, metric: chars, warn_low: 9.0, warn_high: 25.0, error_low: 4.5, error_high: 60.0,
-  p50: 15.0, ai_p50: 16.0, n: 20, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 15.0, ai_p50: 16.0, n: 20, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: cta-secondary-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 5.0, error_low: 0.5,
-  error_high: 14.6, p50: 2.0, ai_p50: 2.0, n: 21, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 14.6, p50: 2.0, ai_p50: 2.0, n: 21, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: cta-secondary-label, lang: ru, metric: chars, warn_low: 6.6, warn_high: 33.0, error_low: 3.3,
-  error_high: 94.9, p50: 15.0, ai_p50: 16.5, n: 21, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 94.9, p50: 15.0, ai_p50: 16.5, n: 21, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: cta-note, lang: ru, metric: words, warn_low: 2.6, warn_high: 11.0, error_low: 1.3, error_high: 16.5,
-  p50: 7.0, ai_p50: 6.0, n: 8, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 7.0, ai_p50: 6.0, n: 8, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: cta-note, lang: ru, metric: chars, warn_low: 17.6, warn_high: 71.5, error_low: 8.8, error_high: 107.2,
-  p50: 48.0, ai_p50: 40.0, n: 8, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 48.0, ai_p50: 40.0, n: 8, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: section-title, lang: ru, metric: words, warn_low: 2.0, warn_high: 8.0, error_low: 1.0, error_high: 12.5,
-  p50: 4.0, ai_p50: 3.0, n: 23, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 4.0, ai_p50: 3.0, n: 23, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: section-title, lang: ru, metric: chars, warn_low: 14.0, warn_high: 57.0, error_low: 6.0, error_high: 85.5,
-  p50: 28.0, ai_p50: 21.0, n: 23, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 28.0, ai_p50: 21.0, n: 23, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: section-lead, lang: ru, metric: words, warn_low: 6.0, warn_high: 25.3, error_low: 3.0, error_high: 66.0,
-  p50: 11.0, ai_p50: 12.7, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 11.0, ai_p50: 12.7, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: section-lead, lang: ru, metric: chars, warn_low: 33.4, warn_high: 208.8, error_low: 16.7,
-  error_high: 547.4, p50: 70.8, ai_p50: 80.7, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 547.4, p50: 70.8, ai_p50: 80.7, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: body, lang: ru, metric: words, warn_low: 1.0, warn_high: 16.5, error_low: 0.5, error_high: 52.6,
-  p50: 4.2, ai_p50: 32.0, n: 22, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 4.2, ai_p50: 32.0, n: 22, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: body, lang: ru, metric: chars, warn_low: 8.6, warn_high: 130.0, error_low: 4.3, error_high: 400.8,
-  p50: 33.0, ai_p50: 221.0, n: 22, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.0, ai_p50: 221.0, n: 22, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: list-item, lang: ru, metric: words, warn_low: 1.0, warn_high: 15.0, error_low: 0.5, error_high: 33.2,
-  p50: 5.0, ai_p50: 5.0, n: 26, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 5.0, ai_p50: 5.0, n: 26, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: list-item, lang: ru, metric: chars, warn_low: 6.1, warn_high: 129.9, error_low: 3.0, error_high: 244.2,
-  p50: 38.0, ai_p50: 38.6, n: 26, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 38.0, ai_p50: 38.6, n: 26, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: card-title, lang: ru, metric: words, warn_low: 1.0, warn_high: 6.0, error_low: 0.5, error_high: 10.2,
-  p50: 3.0, ai_p50: 2.0, n: 18, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 3.0, ai_p50: 2.0, n: 18, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: card-title, lang: ru, metric: chars, warn_low: 8.0, warn_high: 37.0, error_low: 4.0, error_high: 76.8,
-  p50: 18.0, ai_p50: 17.0, n: 18, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 18.0, ai_p50: 17.0, n: 18, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: card-body, lang: ru, metric: words, warn_low: 2.6, warn_high: 19.0, error_low: 1.0, error_high: 38.0,
-  p50: 8.0, ai_p50: 11.0, n: 17, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 8.0, ai_p50: 11.0, n: 17, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: card-body, lang: ru, metric: chars, warn_low: 17.0, warn_high: 135.5, error_low: 8.0, error_high: 297.0,
-  p50: 55.3, ai_p50: 78.1, n: 17, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 55.3, ai_p50: 78.1, n: 17, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: stat-value, lang: ru, metric: words, warn_low: 1.0, warn_high: 3.0, error_low: 0.5, error_high: 4.5,
-  p50: 2.0, ai_p50: 1.0, n: 14, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 1.0, n: 14, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: stat-value, lang: ru, metric: chars, warn_low: 3.0, warn_high: 19.5, error_low: 1.5, error_high: 29.3,
-  p50: 8.0, ai_p50: 4.0, n: 14, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 8.0, ai_p50: 4.0, n: 14, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: stat-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 8.6, error_low: 0.5, error_high: 12.9,
-  p50: 4.0, ai_p50: 2.0, n: 11, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 4.0, ai_p50: 2.0, n: 11, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: stat-label, lang: ru, metric: chars, warn_low: 11.0, warn_high: 62.6, error_low: 5.0, error_high: 93.9,
-  p50: 26.0, ai_p50: 18.0, n: 11, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 26.0, ai_p50: 18.0, n: 11, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: testimonial-quote, lang: ru, metric: words, warn_low: 12.7, warn_high: 85.3, error_low: 6.3,
-  error_high: 143.1, p50: 28.0, ai_p50: 21.0, n: 16, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 143.1, p50: 28.0, ai_p50: 21.0, n: 16, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: testimonial-quote, lang: ru, metric: chars, warn_low: 88.6, warn_high: 583.0, error_low: 44.3,
-  error_high: 1026.7, p50: 189.7, ai_p50: 139.0, n: 16, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24',
+  error_high: 1026.7, p50: 189.7, ai_p50: 139.0, n: 16, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24',
   provisional: true}
 - {genre: landing, slot_type: testimonial-attribution, lang: ru, metric: words, warn_low: 1.0, warn_high: 5.6, error_low: 0.5,
-  error_high: 9, p50: 2.0, ai_p50: 2.5, n: 12, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 9, p50: 2.0, ai_p50: 2.5, n: 12, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: testimonial-attribution, lang: ru, metric: chars, warn_low: 6.0, warn_high: 37.3, error_low: 3.0,
-  error_high: 72, p50: 15.4, ai_p50: 15.0, n: 12, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 72, p50: 15.4, ai_p50: 15.0, n: 12, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: case-title, lang: ru, metric: words, warn_low: 2.0, warn_high: 7.0, error_low: 1.0, error_high: 10.5,
-  p50: 4.0, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 4.0, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: case-title, lang: ru, metric: chars, warn_low: 13.0, warn_high: 45.9, error_low: 5.0, error_high: 68.9,
-  p50: 29.3, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 29.3, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-name, lang: ru, metric: words, warn_low: 1.0, warn_high: 11.1, error_low: 0.5,
-  error_high: 34, p50: 4.4, ai_p50: 1.0, n: 19, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 34, p50: 4.4, ai_p50: 1.0, n: 19, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-name, lang: ru, metric: chars, warn_low: 11.9, warn_high: 70.6, error_low: 5.4,
-  error_high: 217, p50: 31.7, ai_p50: 7.5, n: 19, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 217, p50: 31.7, ai_p50: 7.5, n: 19, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-summary, lang: ru, metric: words, warn_low: 2.0, warn_high: 29.7, error_low: 1.0,
-  error_high: 54.2, p50: 9.0, ai_p50: 7.0, n: 14, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 54.2, p50: 9.0, ai_p50: 7.0, n: 14, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-summary, lang: ru, metric: chars, warn_low: 11.0, warn_high: 229.9, error_low: 4.0,
-  error_high: 350.7, p50: 60.6, ai_p50: 62.0, n: 14, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 350.7, p50: 60.6, ai_p50: 62.0, n: 14, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price, lang: ru, metric: words, warn_low: 1.0, warn_high: 6.3, error_low: 0.5, error_high: 9.5,
-  p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 5, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 5, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price, lang: ru, metric: chars, warn_low: 3.9, warn_high: 35.3, error_low: 2.0, error_high: 53.0,
-  p50: 10.3, ai_p50: 11.0, n: 10, n_ai: 5, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 10.3, ai_p50: 11.0, n: 10, n_ai: 5, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price-note, lang: ru, metric: words, warn_low: 1.0, warn_high: 10.2, error_low: 0.5,
-  error_high: 15.2, p50: 2.0, ai_p50: 4.0, n: 8, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 15.2, p50: 2.0, ai_p50: 4.0, n: 8, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price-note, lang: ru, metric: chars, warn_low: 5.0, warn_high: 60.0, error_low: 2.5,
-  error_high: 100.3, p50: 16.9, ai_p50: 23.0, n: 8, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 100.3, p50: 16.9, ai_p50: 23.0, n: 8, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-feature, lang: ru, metric: words, warn_low: 1.0, warn_high: 10.0, error_low: 0.5,
-  error_high: 24.3, p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 24.3, p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-feature, lang: ru, metric: chars, warn_low: 14.0, warn_high: 66.8, error_low: 5.0,
-  error_high: 172.6, p50: 24.0, ai_p50: 21.5, n: 10, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 172.6, p50: 24.0, ai_p50: 21.5, n: 10, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: badge, lang: ru, metric: words, warn_low: 1.0, warn_high: 1, error_low: 0.5, error_high: 1.5,
-  p50: 1.0, ai_p50: 1, n: 5, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 1.0, ai_p50: 1, n: 5, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: badge, lang: ru, metric: chars, warn_low: 3.0, warn_high: 10, error_low: 1.5, error_high: 15.0,
-  p50: 6.0, ai_p50: 10, n: 5, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 10, n: 5, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-q, lang: ru, metric: words, warn_low: 3.0, warn_high: 9.0, error_low: 1.5, error_high: 13.5,
-  p50: 6.0, ai_p50: 4.0, n: 25, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 4.0, n: 25, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-q, lang: ru, metric: chars, warn_low: 21.1, warn_high: 64.7, error_low: 10.6, error_high: 97.1,
-  p50: 41.6, ai_p50: 28.5, n: 25, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 41.6, ai_p50: 28.5, n: 25, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-a, lang: ru, metric: words, warn_low: 3.0, warn_high: 43.1, error_low: 1.5, error_high: 91.4,
-  p50: 21.7, ai_p50: 11.0, n: 15, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 21.7, ai_p50: 11.0, n: 15, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-a, lang: ru, metric: chars, warn_low: 24.0, warn_high: 322.9, error_low: 10.0, error_high: 711.0,
-  p50: 156.5, ai_p50: 74.0, n: 15, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 156.5, ai_p50: 74.0, n: 15, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: form-lead, lang: ru, metric: words, warn_low: 7.0, warn_high: 14.5, error_low: 3.5, error_high: 21.8,
-  p50: 9.3, n: 8, n_ai: 0, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 9.3, n: 8, n_ai: 0, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: form-lead, lang: ru, metric: chars, warn_low: 40.4, warn_high: 105.0, error_low: 20.2, error_high: 157.5,
-  p50: 62.0, n: 8, n_ai: 0, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 62.0, n: 8, n_ai: 0, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: form-consent, lang: ru, metric: words, warn_low: 5.0, warn_high: 20.2, error_low: 2.5, error_high: 30.2,
-  p50: 7.5, ai_p50: 7.5, n: 18, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 7.5, ai_p50: 7.5, n: 18, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: form-consent, lang: ru, metric: chars, warn_low: 42.8, warn_high: 166.6, error_low: 21.4,
-  error_high: 249.9, p50: 62.5, ai_p50: 68.5, n: 18, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 249.9, p50: 62.5, ai_p50: 68.5, n: 18, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - genre: landing
   slot_type: '*'
   lang: en
@@ -1430,7 +1430,7 @@ rows:
   basis: human-p98
   ai_p50: 0.308
   warn_ci: [1.419, 3.297]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1445,7 +1445,7 @@ rows:
   basis: human-p98
   ai_p50: 1.872
   warn_ci: [0.898, 1.562]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1460,7 +1460,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.085]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1475,7 +1475,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.355, 2.338]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1490,7 +1490,7 @@ rows:
   basis: human-p98
   ai_p50: 0.46
   warn_ci: [1.121, 2.791]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1505,7 +1505,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.24, 1.648]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1520,7 +1520,7 @@ rows:
   basis: human-p2
   ai_p50: 7.68
   warn_ci: [2.86, 4.753]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1535,7 +1535,7 @@ rows:
   basis: human-p2
   ai_p50: 0.486
   warn_ci: [0.273, 0.4]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - genre: landing
@@ -1550,107 +1550,107 @@ rows:
   basis: human-p2
   ai_p50: 5.727
   warn_ci: [2.395, 3.741]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: false
 - {genre: landing, slot_type: headline, lang: en, metric: words, warn_low: 2.0, warn_high: 14.5, error_low: 1.0, error_high: 22.3,
-  p50: 7.0, ai_p50: 5.0, n: 26, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 7.0, ai_p50: 5.0, n: 26, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: headline, lang: en, metric: chars, warn_low: 14.1, warn_high: 90.4, error_low: 7.0, error_high: 156.1,
-  p50: 45.0, ai_p50: 28.0, n: 26, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 45.0, ai_p50: 28.0, n: 26, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: subheadline, lang: en, metric: words, warn_low: 8.2, warn_high: 31.6, error_low: 4.1, error_high: 73.6,
-  p50: 16.0, ai_p50: 25.0, n: 19, n_ai: 27, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 16.0, ai_p50: 25.0, n: 19, n_ai: 27, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: subheadline, lang: en, metric: chars, warn_low: 49.2, warn_high: 219.4, error_low: 24.6, error_high: 510.0,
-  p50: 111.0, ai_p50: 152.0, n: 19, n_ai: 27, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 111.0, ai_p50: 152.0, n: 19, n_ai: 27, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: eyebrow, lang: en, metric: words, warn_low: 1.0, warn_high: 6.0, error_low: 0.5, error_high: 9.0,
-  p50: 2.9, ai_p50: 3.0, n: 15, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.9, ai_p50: 3.0, n: 15, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: eyebrow, lang: en, metric: chars, warn_low: 4.0, warn_high: 33.1, error_low: 2.0, error_high: 49.7,
-  p50: 13.1, ai_p50: 17.0, n: 15, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 13.1, ai_p50: 17.0, n: 15, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: hero-proof, lang: en, metric: words, warn_low: 4.0, warn_high: 9.0, error_low: 2.0, error_high: 13.5,
-  p50: 6.0, ai_p50: 2.7, n: 11, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 2.7, n: 11, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: hero-proof, lang: en, metric: chars, warn_low: 22.4, warn_high: 57.4, error_low: 11.2, error_high: 86.1,
-  p50: 32.0, ai_p50: 11.0, n: 11, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 32.0, ai_p50: 11.0, n: 11, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: cta-label, lang: en, metric: words, warn_low: 2.0, warn_high: 4.0, error_low: 1.0, error_high: 6.5,
-  p50: 2.0, ai_p50: 3.0, n: 25, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 3.0, n: 25, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: cta-label, lang: en, metric: chars, warn_low: 7.7, warn_high: 21.3, error_low: 3.8, error_high: 41.7,
-  p50: 11.7, ai_p50: 15.0, n: 25, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 11.7, ai_p50: 15.0, n: 25, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: cta-secondary-label, lang: en, metric: words, warn_low: 2.0, warn_high: 4.0, error_low: 1.0,
-  error_high: 6.0, p50: 2.0, ai_p50: 2.0, n: 24, n_ai: 24, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 6.0, p50: 2.0, ai_p50: 2.0, n: 24, n_ai: 24, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: cta-secondary-label, lang: en, metric: chars, warn_low: 8.0, warn_high: 22.0, error_low: 4.0,
-  error_high: 39.6, p50: 14.0, ai_p50: 15.0, n: 24, n_ai: 24, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 39.6, p50: 14.0, ai_p50: 15.0, n: 24, n_ai: 24, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: section-title, lang: en, metric: words, warn_low: 2.0, warn_high: 11.0, error_low: 1.0, error_high: 16.5,
-  p50: 6.0, ai_p50: 5.0, n: 25, n_ai: 33, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 6.0, ai_p50: 5.0, n: 25, n_ai: 33, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: section-title, lang: en, metric: chars, warn_low: 16.0, warn_high: 60.7, error_low: 8.0, error_high: 91.1,
-  p50: 35.0, ai_p50: 26.0, n: 25, n_ai: 33, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 35.0, ai_p50: 26.0, n: 25, n_ai: 33, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: section-lead, lang: en, metric: words, warn_low: 8.0, warn_high: 40.4, error_low: 4.0, error_high: 96.1,
-  p50: 19.1, ai_p50: 23.0, n: 23, n_ai: 31, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 19.1, ai_p50: 23.0, n: 23, n_ai: 31, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: section-lead, lang: en, metric: chars, warn_low: 43.0, warn_high: 261.7, error_low: 21.5,
-  error_high: 581.8, p50: 116.0, ai_p50: 132.9, n: 23, n_ai: 31, source: 'corpus-D:lead:marketing', date: '2026-09-24',
+  error_high: 581.8, p50: 116.0, ai_p50: 132.9, n: 23, n_ai: 31, source: 'corpus:lead:marketing', date: '2026-09-24',
   provisional: false}
 - {genre: landing, slot_type: body, lang: en, metric: words, warn_low: 1.0, warn_high: 25.0, error_low: 0.5, error_high: 56.7,
-  p50: 6.0, ai_p50: 3.0, n: 23, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 6.0, ai_p50: 3.0, n: 23, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: body, lang: en, metric: chars, warn_low: 9.0, warn_high: 132.0, error_low: 4.5, error_high: 372.8,
-  p50: 33.0, ai_p50: 18.0, n: 23, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.0, ai_p50: 18.0, n: 23, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: list-item, lang: en, metric: words, warn_low: 1.0, warn_high: 21.0, error_low: 0.5, error_high: 55.2,
-  p50: 5.7, ai_p50: 6.0, n: 16, n_ai: 18, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 5.7, ai_p50: 6.0, n: 16, n_ai: 18, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: list-item, lang: en, metric: chars, warn_low: 9.0, warn_high: 146.9, error_low: 4.0, error_high: 356.8,
-  p50: 33.0, ai_p50: 36.0, n: 16, n_ai: 18, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.0, ai_p50: 36.0, n: 16, n_ai: 18, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: card-title, lang: en, metric: words, warn_low: 2.0, warn_high: 8.0, error_low: 1.0, error_high: 12.0,
-  p50: 3.0, ai_p50: 2.0, n: 21, n_ai: 29, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 3.0, ai_p50: 2.0, n: 21, n_ai: 29, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: card-title, lang: en, metric: chars, warn_low: 10.0, warn_high: 49.0, error_low: 5.0, error_high: 73.5,
-  p50: 22.0, ai_p50: 17.4, n: 21, n_ai: 29, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 22.0, ai_p50: 17.4, n: 21, n_ai: 29, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: card-body, lang: en, metric: words, warn_low: 2.0, warn_high: 35.0, error_low: 1.0, error_high: 60.0,
-  p50: 12.0, ai_p50: 11.0, n: 19, n_ai: 26, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 12.0, ai_p50: 11.0, n: 19, n_ai: 26, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: card-body, lang: en, metric: chars, warn_low: 12.0, warn_high: 223.8, error_low: 6.0, error_high: 376.5,
-  p50: 71.4, ai_p50: 78.0, n: 19, n_ai: 26, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 71.4, ai_p50: 78.0, n: 19, n_ai: 26, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: stat-value, lang: en, metric: words, warn_low: 1.0, warn_high: 3.0, error_low: 0.5, error_high: 4.5,
-  p50: 2.0, ai_p50: 2.0, n: 13, n_ai: 21, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 2.0, n: 13, n_ai: 21, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: stat-value, lang: en, metric: chars, warn_low: 3.0, warn_high: 19.1, error_low: 1.5, error_high: 28.7,
-  p50: 5.5, ai_p50: 6.0, n: 13, n_ai: 21, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 5.5, ai_p50: 6.0, n: 13, n_ai: 21, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: landing, slot_type: stat-label, lang: en, metric: words, warn_low: 1.6, warn_high: 7.7, error_low: 0.8, error_high: 11.5,
-  p50: 3.0, ai_p50: 2.4, n: 11, n_ai: 19, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 3.0, ai_p50: 2.4, n: 11, n_ai: 19, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: stat-label, lang: en, metric: chars, warn_low: 9.8, warn_high: 32.9, error_low: 4.9, error_high: 57.2,
-  p50: 21.0, ai_p50: 18.0, n: 11, n_ai: 19, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 21.0, ai_p50: 18.0, n: 11, n_ai: 19, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: logos-caption, lang: en, metric: words, warn_low: 1.7, warn_high: 12.0, error_low: 0.9, error_high: 18.0,
-  p50: 4.8, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 4.8, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: logos-caption, lang: en, metric: chars, warn_low: 8.0, warn_high: 79.0, error_low: 4.0, error_high: 118.5,
-  p50: 31.0, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 31.0, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: testimonial-quote, lang: en, metric: words, warn_low: 13.4, warn_high: 28.7, error_low: 6.7,
-  error_high: 88.2, p50: 24.3, ai_p50: 25.3, n: 10, n_ai: 14, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 88.2, p50: 24.3, ai_p50: 25.3, n: 10, n_ai: 14, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: testimonial-quote, lang: en, metric: chars, warn_low: 71.7, warn_high: 187.5, error_low: 35.8,
-  error_high: 505.5, p50: 144.0, ai_p50: 145.3, n: 10, n_ai: 14, source: 'corpus-D:lead:marketing', date: '2026-09-24',
+  error_high: 505.5, p50: 144.0, ai_p50: 145.3, n: 10, n_ai: 14, source: 'corpus:lead:marketing', date: '2026-09-24',
   provisional: true}
 - {genre: landing, slot_type: testimonial-attribution, lang: en, metric: words, warn_low: 1.0, warn_high: 3.7, error_low: 0.5,
-  error_high: 7.8, p50: 2.0, ai_p50: 3.0, n: 12, n_ai: 10, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 7.8, p50: 2.0, ai_p50: 3.0, n: 12, n_ai: 10, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: testimonial-attribution, lang: en, metric: chars, warn_low: 6.0, warn_high: 30.4, error_low: 3.0,
-  error_high: 54.9, p50: 12.7, ai_p50: 26.0, n: 12, n_ai: 10, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 54.9, p50: 12.7, ai_p50: 26.0, n: 12, n_ai: 10, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-name, lang: en, metric: words, warn_low: 2.0, warn_high: 6.0, error_low: 1.0,
-  error_high: 9.0, p50: 3.0, ai_p50: 2.0, n: 9, n_ai: 12, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 9.0, p50: 3.0, ai_p50: 2.0, n: 9, n_ai: 12, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-name, lang: en, metric: chars, warn_low: 10.1, warn_high: 35.5, error_low: 4.1,
-  error_high: 53.3, p50: 19.0, ai_p50: 14.0, n: 9, n_ai: 12, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 53.3, p50: 19.0, ai_p50: 14.0, n: 9, n_ai: 12, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-summary, lang: en, metric: words, warn_low: 2.1, warn_high: 74.4, error_low: 1.1,
-  error_high: 111.6, p50: 22.7, ai_p50: 13.4, n: 6, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 111.6, p50: 22.7, ai_p50: 13.4, n: 6, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-plan-summary, lang: en, metric: chars, warn_low: 14.3, warn_high: 414.0, error_low: 7.2,
-  error_high: 621.0, p50: 129.0, ai_p50: 81.0, n: 6, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 621.0, p50: 129.0, ai_p50: 81.0, n: 6, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price, lang: en, metric: words, warn_low: 1.0, warn_high: 4.1, error_low: 0.5, error_high: 7.3,
-  p50: 2.0, ai_p50: 2.0, n: 9, n_ai: 17, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 2.0, ai_p50: 2.0, n: 9, n_ai: 17, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price, lang: en, metric: chars, warn_low: 4.2, warn_high: 15.6, error_low: 2.1, error_high: 35.5,
-  p50: 6.0, ai_p50: 7.0, n: 9, n_ai: 17, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 7.0, n: 9, n_ai: 17, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price-note, lang: en, metric: words, warn_low: 2.0, warn_high: 6.8, error_low: 1.0,
-  error_high: 10.2, p50: 3.0, ai_p50: 3.0, n: 9, n_ai: 14, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 10.2, p50: 3.0, ai_p50: 3.0, n: 9, n_ai: 14, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-price-note, lang: en, metric: chars, warn_low: 11.7, warn_high: 33.4, error_low: 4.3,
-  error_high: 50.1, p50: 16.0, ai_p50: 18.1, n: 9, n_ai: 14, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 50.1, p50: 16.0, ai_p50: 18.1, n: 9, n_ai: 14, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-feature, lang: en, metric: words, warn_low: 2.8, warn_high: 20.0, error_low: 1.4,
-  error_high: 30.0, p50: 8.2, ai_p50: 4.0, n: 5, n_ai: 7, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 30.0, p50: 8.2, ai_p50: 4.0, n: 5, n_ai: 7, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: pricing-feature, lang: en, metric: chars, warn_low: 13.5, warn_high: 85.0, error_low: 6.8,
-  error_high: 127.5, p50: 56.0, ai_p50: 31.4, n: 5, n_ai: 7, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 127.5, p50: 56.0, ai_p50: 31.4, n: 5, n_ai: 7, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-q, lang: en, metric: words, warn_low: 3.0, warn_high: 11.0, error_low: 1.5, error_high: 16.5,
-  p50: 8.0, ai_p50: 6.1, n: 12, n_ai: 6, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 8.0, ai_p50: 6.1, n: 12, n_ai: 6, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-q, lang: en, metric: chars, warn_low: 20.0, warn_high: 61.4, error_low: 8.8, error_high: 92.1,
-  p50: 43.1, ai_p50: 37.2, n: 12, n_ai: 6, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 43.1, ai_p50: 37.2, n: 12, n_ai: 6, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-a, lang: en, metric: words, warn_low: 3.0, warn_high: 45.6, error_low: 1.5, error_high: 122,
-  p50: 21.9, ai_p50: 16.9, n: 10, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 21.9, ai_p50: 16.9, n: 10, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: faq-a, lang: en, metric: chars, warn_low: 17.6, warn_high: 295.6, error_low: 8.8, error_high: 711,
-  p50: 140.4, ai_p50: 98.4, n: 10, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 140.4, ai_p50: 98.4, n: 10, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - genre: site-page
   slot_type: '*'
   lang: ru
@@ -1663,7 +1663,7 @@ rows:
   basis: human-p98
   ai_p50: 1.218
   warn_ci: [1.847, 4.324]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1677,7 +1677,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.938, 3.279]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1692,7 +1692,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.133]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1707,7 +1707,7 @@ rows:
   basis: human-p98
   ai_p50: 0.188
   warn_ci: [0.997, 5.312]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1722,7 +1722,7 @@ rows:
   basis: human-p98
   ai_p50: 1.02
   warn_ci: [0.961, 2.454]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1737,7 +1737,7 @@ rows:
   basis: human-p98
   ai_p50: 0.638
   warn_ci: [0.176, 1.311]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1750,7 +1750,7 @@ rows:
   n_ai: 0
   basis: human-p2
   warn_ci: [3.494, 4.544]
-  source: corpus-D:human:marketing
+  source: corpus:human:marketing
   date: '2026-09-24'
   provisional: true
 - genre: site-page
@@ -1764,7 +1764,7 @@ rows:
   basis: human-p2
   ai_p50: 0.364
   warn_ci: [0.246, 0.344]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1778,122 +1778,122 @@ rows:
   basis: human-p2
   ai_p50: 6.849
   warn_ci: [0.827, 4.918]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - {genre: site-page, slot_type: headline, lang: ru, metric: words, warn_low: 2.7, warn_high: 10.0, error_low: 1.4, error_high: 15.0,
-  p50: 4.5, ai_p50: 7.0, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 4.5, ai_p50: 7.0, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: headline, lang: ru, metric: chars, warn_low: 19.5, warn_high: 72.4, error_low: 9.8, error_high: 108.6,
-  p50: 33.5, ai_p50: 48.5, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.5, ai_p50: 48.5, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: subheadline, lang: ru, metric: words, warn_low: 6.0, warn_high: 29.0, error_low: 3.0, error_high: 55.1,
-  p50: 11.0, ai_p50: 19.5, n: 15, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 11.0, ai_p50: 19.5, n: 15, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: subheadline, lang: ru, metric: chars, warn_low: 30.0, warn_high: 221.0, error_low: 15.0,
-  error_high: 415.5, p50: 86.0, ai_p50: 140.0, n: 15, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 415.5, p50: 86.0, ai_p50: 140.0, n: 15, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: eyebrow, lang: ru, metric: words, warn_low: 1.0, warn_high: 5.0, error_low: 0.5, error_high: 8.0,
-  p50: 3.0, ai_p50: 3.5, n: 14, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 3.0, ai_p50: 3.5, n: 14, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: eyebrow, lang: ru, metric: chars, warn_low: 5.5, warn_high: 26.3, error_low: 2.8, error_high: 53.9,
-  p50: 18.0, ai_p50: 21.0, n: 14, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 18.0, ai_p50: 21.0, n: 14, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: hero-proof, lang: ru, metric: words, warn_low: 2.0, warn_high: 10.2, error_low: 1.0, error_high: 15.3,
-  p50: 6.0, ai_p50: 4.0, n: 8, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 4.0, n: 8, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: hero-proof, lang: ru, metric: chars, warn_low: 10.9, warn_high: 65.6, error_low: 5.5, error_high: 98.5,
-  p50: 29.0, ai_p50: 30.0, n: 8, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 29.0, ai_p50: 30.0, n: 8, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: cta-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 3.8, error_low: 0.5, error_high: 7.2,
-  p50: 2.0, ai_p50: 2.0, n: 20, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 2.0, n: 20, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: cta-label, lang: ru, metric: chars, warn_low: 9.0, warn_high: 25.0, error_low: 4.5, error_high: 60.0,
-  p50: 15.0, ai_p50: 16.0, n: 20, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 15.0, ai_p50: 16.0, n: 20, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: cta-secondary-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 5.0, error_low: 0.5,
-  error_high: 14.6, p50: 2.0, ai_p50: 2.0, n: 21, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 14.6, p50: 2.0, ai_p50: 2.0, n: 21, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: cta-secondary-label, lang: ru, metric: chars, warn_low: 6.6, warn_high: 33.0, error_low: 3.3,
-  error_high: 94.9, p50: 15.0, ai_p50: 16.5, n: 21, n_ai: 4, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 94.9, p50: 15.0, ai_p50: 16.5, n: 21, n_ai: 4, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: cta-note, lang: ru, metric: words, warn_low: 2.6, warn_high: 11.0, error_low: 1.3, error_high: 16.5,
-  p50: 7.0, ai_p50: 6.0, n: 8, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 7.0, ai_p50: 6.0, n: 8, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: cta-note, lang: ru, metric: chars, warn_low: 17.6, warn_high: 71.5, error_low: 8.8, error_high: 107.2,
-  p50: 48.0, ai_p50: 40.0, n: 8, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 48.0, ai_p50: 40.0, n: 8, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: section-title, lang: ru, metric: words, warn_low: 2.0, warn_high: 8.0, error_low: 1.0, error_high: 12.5,
-  p50: 4.0, ai_p50: 3.0, n: 23, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 4.0, ai_p50: 3.0, n: 23, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: section-title, lang: ru, metric: chars, warn_low: 14.0, warn_high: 57.0, error_low: 6.0,
-  error_high: 85.5, p50: 28.0, ai_p50: 21.0, n: 23, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 85.5, p50: 28.0, ai_p50: 21.0, n: 23, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: section-lead, lang: ru, metric: words, warn_low: 6.0, warn_high: 25.3, error_low: 3.0, error_high: 66.0,
-  p50: 11.0, ai_p50: 12.7, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 11.0, ai_p50: 12.7, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: section-lead, lang: ru, metric: chars, warn_low: 33.4, warn_high: 208.8, error_low: 16.7,
-  error_high: 547.4, p50: 70.8, ai_p50: 80.7, n: 22, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 547.4, p50: 70.8, ai_p50: 80.7, n: 22, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: body, lang: ru, metric: words, warn_low: 1.0, warn_high: 16.5, error_low: 0.5, error_high: 52.6,
-  p50: 4.2, ai_p50: 32.0, n: 22, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 4.2, ai_p50: 32.0, n: 22, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: body, lang: ru, metric: chars, warn_low: 8.6, warn_high: 130.0, error_low: 4.3, error_high: 400.8,
-  p50: 33.0, ai_p50: 221.0, n: 22, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.0, ai_p50: 221.0, n: 22, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: list-item, lang: ru, metric: words, warn_low: 1.0, warn_high: 15.0, error_low: 0.5, error_high: 33.2,
-  p50: 5.0, ai_p50: 5.0, n: 26, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 5.0, ai_p50: 5.0, n: 26, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: list-item, lang: ru, metric: chars, warn_low: 6.1, warn_high: 129.9, error_low: 3.0, error_high: 244.2,
-  p50: 38.0, ai_p50: 38.6, n: 26, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 38.0, ai_p50: 38.6, n: 26, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: card-title, lang: ru, metric: words, warn_low: 1.0, warn_high: 6.0, error_low: 0.5, error_high: 10.2,
-  p50: 3.0, ai_p50: 2.0, n: 18, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 3.0, ai_p50: 2.0, n: 18, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: card-title, lang: ru, metric: chars, warn_low: 8.0, warn_high: 37.0, error_low: 4.0, error_high: 76.8,
-  p50: 18.0, ai_p50: 17.0, n: 18, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 18.0, ai_p50: 17.0, n: 18, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: card-body, lang: ru, metric: words, warn_low: 2.6, warn_high: 19.0, error_low: 1.0, error_high: 38.0,
-  p50: 8.0, ai_p50: 11.0, n: 17, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 8.0, ai_p50: 11.0, n: 17, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: card-body, lang: ru, metric: chars, warn_low: 17.0, warn_high: 135.5, error_low: 8.0, error_high: 297.0,
-  p50: 55.3, ai_p50: 78.1, n: 17, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 55.3, ai_p50: 78.1, n: 17, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: stat-value, lang: ru, metric: words, warn_low: 1.0, warn_high: 3.0, error_low: 0.5, error_high: 4.5,
-  p50: 2.0, ai_p50: 1.0, n: 14, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 1.0, n: 14, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: stat-value, lang: ru, metric: chars, warn_low: 3.0, warn_high: 19.5, error_low: 1.5, error_high: 29.3,
-  p50: 8.0, ai_p50: 4.0, n: 14, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 8.0, ai_p50: 4.0, n: 14, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: stat-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 8.6, error_low: 0.5, error_high: 12.9,
-  p50: 4.0, ai_p50: 2.0, n: 11, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 4.0, ai_p50: 2.0, n: 11, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: stat-label, lang: ru, metric: chars, warn_low: 11.0, warn_high: 62.6, error_low: 5.0, error_high: 93.9,
-  p50: 26.0, ai_p50: 18.0, n: 11, n_ai: 6, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 26.0, ai_p50: 18.0, n: 11, n_ai: 6, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: testimonial-quote, lang: ru, metric: words, warn_low: 12.7, warn_high: 85.3, error_low: 6.3,
-  error_high: 143.1, p50: 28.0, ai_p50: 21.0, n: 16, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 143.1, p50: 28.0, ai_p50: 21.0, n: 16, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: testimonial-quote, lang: ru, metric: chars, warn_low: 88.6, warn_high: 583.0, error_low: 44.3,
-  error_high: 1026.7, p50: 189.7, ai_p50: 139.0, n: 16, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24',
+  error_high: 1026.7, p50: 189.7, ai_p50: 139.0, n: 16, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24',
   provisional: true}
 - {genre: site-page, slot_type: testimonial-attribution, lang: ru, metric: words, warn_low: 1.0, warn_high: 5.6, error_low: 0.5,
-  error_high: 9, p50: 2.0, ai_p50: 2.5, n: 12, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 9, p50: 2.0, ai_p50: 2.5, n: 12, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: testimonial-attribution, lang: ru, metric: chars, warn_low: 6.0, warn_high: 37.3, error_low: 3.0,
-  error_high: 72, p50: 15.4, ai_p50: 15.0, n: 12, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 72, p50: 15.4, ai_p50: 15.0, n: 12, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: case-title, lang: ru, metric: words, warn_low: 2.0, warn_high: 7.0, error_low: 1.0, error_high: 10.5,
-  p50: 4.0, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 4.0, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: case-title, lang: ru, metric: chars, warn_low: 13.0, warn_high: 45.9, error_low: 5.0, error_high: 68.9,
-  p50: 29.3, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 29.3, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-name, lang: ru, metric: words, warn_low: 1.0, warn_high: 11.1, error_low: 0.5,
-  error_high: 34, p50: 4.4, ai_p50: 1.0, n: 19, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 34, p50: 4.4, ai_p50: 1.0, n: 19, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-name, lang: ru, metric: chars, warn_low: 11.9, warn_high: 70.6, error_low: 5.4,
-  error_high: 217, p50: 31.7, ai_p50: 7.5, n: 19, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 217, p50: 31.7, ai_p50: 7.5, n: 19, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-summary, lang: ru, metric: words, warn_low: 2.0, warn_high: 29.7, error_low: 1.0,
-  error_high: 54.2, p50: 9.0, ai_p50: 7.0, n: 14, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 54.2, p50: 9.0, ai_p50: 7.0, n: 14, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-summary, lang: ru, metric: chars, warn_low: 11.0, warn_high: 229.9, error_low: 4.0,
-  error_high: 350.7, p50: 60.6, ai_p50: 62.0, n: 14, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 350.7, p50: 60.6, ai_p50: 62.0, n: 14, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price, lang: ru, metric: words, warn_low: 1.0, warn_high: 6.3, error_low: 0.5, error_high: 9.5,
-  p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 5, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 5, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price, lang: ru, metric: chars, warn_low: 3.9, warn_high: 35.3, error_low: 2.0,
-  error_high: 53.0, p50: 10.3, ai_p50: 11.0, n: 10, n_ai: 5, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 53.0, p50: 10.3, ai_p50: 11.0, n: 10, n_ai: 5, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price-note, lang: ru, metric: words, warn_low: 1.0, warn_high: 10.2, error_low: 0.5,
-  error_high: 15.2, p50: 2.0, ai_p50: 4.0, n: 8, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 15.2, p50: 2.0, ai_p50: 4.0, n: 8, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price-note, lang: ru, metric: chars, warn_low: 5.0, warn_high: 60.0, error_low: 2.5,
-  error_high: 100.3, p50: 16.9, ai_p50: 23.0, n: 8, n_ai: 1, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 100.3, p50: 16.9, ai_p50: 23.0, n: 8, n_ai: 1, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-feature, lang: ru, metric: words, warn_low: 1.0, warn_high: 10.0, error_low: 0.5,
-  error_high: 24.3, p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 24.3, p50: 3.0, ai_p50: 3.0, n: 10, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-feature, lang: ru, metric: chars, warn_low: 14.0, warn_high: 66.8, error_low: 5.0,
-  error_high: 172.6, p50: 24.0, ai_p50: 21.5, n: 10, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 172.6, p50: 24.0, ai_p50: 21.5, n: 10, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: badge, lang: ru, metric: words, warn_low: 1.0, warn_high: 1, error_low: 0.5, error_high: 1.5,
-  p50: 1.0, ai_p50: 1, n: 5, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 1.0, ai_p50: 1, n: 5, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: badge, lang: ru, metric: chars, warn_low: 3.0, warn_high: 10, error_low: 1.5, error_high: 15.0,
-  p50: 6.0, ai_p50: 10, n: 5, n_ai: 1, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 10, n: 5, n_ai: 1, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-q, lang: ru, metric: words, warn_low: 3.0, warn_high: 9.0, error_low: 1.5, error_high: 13.5,
-  p50: 6.0, ai_p50: 4.0, n: 25, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 4.0, n: 25, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-q, lang: ru, metric: chars, warn_low: 21.1, warn_high: 64.7, error_low: 10.6, error_high: 97.1,
-  p50: 41.6, ai_p50: 28.5, n: 25, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 41.6, ai_p50: 28.5, n: 25, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-a, lang: ru, metric: words, warn_low: 3.0, warn_high: 43.1, error_low: 1.5, error_high: 91.4,
-  p50: 21.7, ai_p50: 11.0, n: 15, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 21.7, ai_p50: 11.0, n: 15, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-a, lang: ru, metric: chars, warn_low: 24.0, warn_high: 322.9, error_low: 10.0, error_high: 711.0,
-  p50: 156.5, ai_p50: 74.0, n: 15, n_ai: 4, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 156.5, ai_p50: 74.0, n: 15, n_ai: 4, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: form-lead, lang: ru, metric: words, warn_low: 7.0, warn_high: 14.5, error_low: 3.5, error_high: 21.8,
-  p50: 9.3, n: 8, n_ai: 0, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 9.3, n: 8, n_ai: 0, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: form-lead, lang: ru, metric: chars, warn_low: 40.4, warn_high: 105.0, error_low: 20.2, error_high: 157.5,
-  p50: 62.0, n: 8, n_ai: 0, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 62.0, n: 8, n_ai: 0, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: form-consent, lang: ru, metric: words, warn_low: 5.0, warn_high: 20.2, error_low: 2.5, error_high: 30.2,
-  p50: 7.5, ai_p50: 7.5, n: 18, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 7.5, ai_p50: 7.5, n: 18, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: form-consent, lang: ru, metric: chars, warn_low: 42.8, warn_high: 166.6, error_low: 21.4,
-  error_high: 249.9, p50: 62.5, ai_p50: 68.5, n: 18, n_ai: 2, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 249.9, p50: 62.5, ai_p50: 68.5, n: 18, n_ai: 2, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - genre: site-page
   slot_type: '*'
   lang: en
@@ -1906,7 +1906,7 @@ rows:
   basis: human-p98
   ai_p50: 0.308
   warn_ci: [1.385, 3.149]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1921,7 +1921,7 @@ rows:
   basis: human-p98
   ai_p50: 1.872
   warn_ci: [0.868, 1.562]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1936,7 +1936,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.083]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1951,7 +1951,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.358, 2.176]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1966,7 +1966,7 @@ rows:
   basis: human-p98
   ai_p50: 0.46
   warn_ci: [1.112, 2.736]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1981,7 +1981,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.234, 1.552]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -1996,7 +1996,7 @@ rows:
   basis: human-p2
   ai_p50: 7.68
   warn_ci: [2.86, 5.08]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -2011,7 +2011,7 @@ rows:
   basis: human-p2
   ai_p50: 0.486
   warn_ci: [0.273, 0.422]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - genre: site-page
@@ -2026,108 +2026,108 @@ rows:
   basis: human-p2
   ai_p50: 5.727
   warn_ci: [2.395, 4.17]
-  source: corpus-D:lead:marketing
+  source: corpus:lead:marketing
   date: '2026-09-24'
   provisional: false
 - {genre: site-page, slot_type: headline, lang: en, metric: words, warn_low: 2.0, warn_high: 14.5, error_low: 1.0, error_high: 22.3,
-  p50: 7.0, ai_p50: 5.0, n: 26, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 7.0, ai_p50: 5.0, n: 26, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: headline, lang: en, metric: chars, warn_low: 14.1, warn_high: 90.4, error_low: 7.0, error_high: 156.1,
-  p50: 45.0, ai_p50: 28.0, n: 26, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 45.0, ai_p50: 28.0, n: 26, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: subheadline, lang: en, metric: words, warn_low: 8.2, warn_high: 31.6, error_low: 4.1, error_high: 73.6,
-  p50: 16.0, ai_p50: 25.0, n: 19, n_ai: 27, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 16.0, ai_p50: 25.0, n: 19, n_ai: 27, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: subheadline, lang: en, metric: chars, warn_low: 49.2, warn_high: 219.4, error_low: 24.6,
-  error_high: 510.0, p50: 111.0, ai_p50: 152.0, n: 19, n_ai: 27, source: 'corpus-D:lead:marketing', date: '2026-09-24',
+  error_high: 510.0, p50: 111.0, ai_p50: 152.0, n: 19, n_ai: 27, source: 'corpus:lead:marketing', date: '2026-09-24',
   provisional: false}
 - {genre: site-page, slot_type: eyebrow, lang: en, metric: words, warn_low: 1.0, warn_high: 6.0, error_low: 0.5, error_high: 9.0,
-  p50: 2.9, ai_p50: 3.0, n: 15, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.9, ai_p50: 3.0, n: 15, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: eyebrow, lang: en, metric: chars, warn_low: 4.0, warn_high: 33.1, error_low: 2.0, error_high: 49.7,
-  p50: 13.1, ai_p50: 17.0, n: 15, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 13.1, ai_p50: 17.0, n: 15, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: hero-proof, lang: en, metric: words, warn_low: 4.0, warn_high: 9.0, error_low: 2.0, error_high: 13.5,
-  p50: 6.0, ai_p50: 2.7, n: 11, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 6.0, ai_p50: 2.7, n: 11, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: hero-proof, lang: en, metric: chars, warn_low: 22.4, warn_high: 57.4, error_low: 11.2, error_high: 86.1,
-  p50: 32.0, ai_p50: 11.0, n: 11, n_ai: 5, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 32.0, ai_p50: 11.0, n: 11, n_ai: 5, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: cta-label, lang: en, metric: words, warn_low: 2.0, warn_high: 4.0, error_low: 1.0, error_high: 6.5,
-  p50: 2.0, ai_p50: 3.0, n: 25, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 3.0, n: 25, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: cta-label, lang: en, metric: chars, warn_low: 7.7, warn_high: 21.3, error_low: 3.8, error_high: 41.7,
-  p50: 11.7, ai_p50: 15.0, n: 25, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 11.7, ai_p50: 15.0, n: 25, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: cta-secondary-label, lang: en, metric: words, warn_low: 2.0, warn_high: 4.0, error_low: 1.0,
-  error_high: 6.0, p50: 2.0, ai_p50: 2.0, n: 24, n_ai: 24, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 6.0, p50: 2.0, ai_p50: 2.0, n: 24, n_ai: 24, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: cta-secondary-label, lang: en, metric: chars, warn_low: 8.0, warn_high: 22.0, error_low: 4.0,
-  error_high: 39.6, p50: 14.0, ai_p50: 15.0, n: 24, n_ai: 24, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 39.6, p50: 14.0, ai_p50: 15.0, n: 24, n_ai: 24, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: section-title, lang: en, metric: words, warn_low: 2.0, warn_high: 11.0, error_low: 1.0,
-  error_high: 16.5, p50: 6.0, ai_p50: 5.0, n: 25, n_ai: 33, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 16.5, p50: 6.0, ai_p50: 5.0, n: 25, n_ai: 33, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: section-title, lang: en, metric: chars, warn_low: 16.0, warn_high: 60.7, error_low: 8.0,
-  error_high: 91.1, p50: 35.0, ai_p50: 26.0, n: 25, n_ai: 33, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  error_high: 91.1, p50: 35.0, ai_p50: 26.0, n: 25, n_ai: 33, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: section-lead, lang: en, metric: words, warn_low: 8.0, warn_high: 40.4, error_low: 4.0, error_high: 96.1,
-  p50: 19.1, ai_p50: 23.0, n: 23, n_ai: 31, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 19.1, ai_p50: 23.0, n: 23, n_ai: 31, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: section-lead, lang: en, metric: chars, warn_low: 43.0, warn_high: 261.7, error_low: 21.5,
-  error_high: 581.8, p50: 116.0, ai_p50: 132.9, n: 23, n_ai: 31, source: 'corpus-D:lead:marketing', date: '2026-09-24',
+  error_high: 581.8, p50: 116.0, ai_p50: 132.9, n: 23, n_ai: 31, source: 'corpus:lead:marketing', date: '2026-09-24',
   provisional: false}
 - {genre: site-page, slot_type: body, lang: en, metric: words, warn_low: 1.0, warn_high: 25.0, error_low: 0.5, error_high: 56.7,
-  p50: 6.0, ai_p50: 3.0, n: 23, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 6.0, ai_p50: 3.0, n: 23, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: body, lang: en, metric: chars, warn_low: 9.0, warn_high: 132.0, error_low: 4.5, error_high: 372.8,
-  p50: 33.0, ai_p50: 18.0, n: 23, n_ai: 30, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.0, ai_p50: 18.0, n: 23, n_ai: 30, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: list-item, lang: en, metric: words, warn_low: 1.0, warn_high: 21.0, error_low: 0.5, error_high: 55.2,
-  p50: 5.7, ai_p50: 6.0, n: 16, n_ai: 18, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 5.7, ai_p50: 6.0, n: 16, n_ai: 18, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: list-item, lang: en, metric: chars, warn_low: 9.0, warn_high: 146.9, error_low: 4.0, error_high: 356.8,
-  p50: 33.0, ai_p50: 36.0, n: 16, n_ai: 18, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 33.0, ai_p50: 36.0, n: 16, n_ai: 18, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: card-title, lang: en, metric: words, warn_low: 2.0, warn_high: 8.0, error_low: 1.0, error_high: 12.0,
-  p50: 3.0, ai_p50: 2.0, n: 21, n_ai: 29, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 3.0, ai_p50: 2.0, n: 21, n_ai: 29, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: card-title, lang: en, metric: chars, warn_low: 10.0, warn_high: 49.0, error_low: 5.0, error_high: 73.5,
-  p50: 22.0, ai_p50: 17.4, n: 21, n_ai: 29, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 22.0, ai_p50: 17.4, n: 21, n_ai: 29, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: card-body, lang: en, metric: words, warn_low: 2.0, warn_high: 35.0, error_low: 1.0, error_high: 60.0,
-  p50: 12.0, ai_p50: 11.0, n: 19, n_ai: 26, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 12.0, ai_p50: 11.0, n: 19, n_ai: 26, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: card-body, lang: en, metric: chars, warn_low: 12.0, warn_high: 223.8, error_low: 6.0, error_high: 376.5,
-  p50: 71.4, ai_p50: 78.0, n: 19, n_ai: 26, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 71.4, ai_p50: 78.0, n: 19, n_ai: 26, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: stat-value, lang: en, metric: words, warn_low: 1.0, warn_high: 3.0, error_low: 0.5, error_high: 4.5,
-  p50: 2.0, ai_p50: 2.0, n: 13, n_ai: 21, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 2.0, ai_p50: 2.0, n: 13, n_ai: 21, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: stat-value, lang: en, metric: chars, warn_low: 3.0, warn_high: 19.1, error_low: 1.5, error_high: 28.7,
-  p50: 5.5, ai_p50: 6.0, n: 13, n_ai: 21, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false}
+  p50: 5.5, ai_p50: 6.0, n: 13, n_ai: 21, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false}
 - {genre: site-page, slot_type: stat-label, lang: en, metric: words, warn_low: 1.6, warn_high: 7.7, error_low: 0.8, error_high: 11.5,
-  p50: 3.0, ai_p50: 2.4, n: 11, n_ai: 19, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 3.0, ai_p50: 2.4, n: 11, n_ai: 19, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: stat-label, lang: en, metric: chars, warn_low: 9.8, warn_high: 32.9, error_low: 4.9, error_high: 57.2,
-  p50: 21.0, ai_p50: 18.0, n: 11, n_ai: 19, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 21.0, ai_p50: 18.0, n: 11, n_ai: 19, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: logos-caption, lang: en, metric: words, warn_low: 1.7, warn_high: 12.0, error_low: 0.9,
-  error_high: 18.0, p50: 4.8, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 18.0, p50: 4.8, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: logos-caption, lang: en, metric: chars, warn_low: 8.0, warn_high: 79.0, error_low: 4.0,
-  error_high: 118.5, p50: 31.0, n: 6, n_ai: 0, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 118.5, p50: 31.0, n: 6, n_ai: 0, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: testimonial-quote, lang: en, metric: words, warn_low: 13.4, warn_high: 28.7, error_low: 6.7,
-  error_high: 88.2, p50: 24.3, ai_p50: 25.3, n: 10, n_ai: 14, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 88.2, p50: 24.3, ai_p50: 25.3, n: 10, n_ai: 14, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: testimonial-quote, lang: en, metric: chars, warn_low: 71.7, warn_high: 187.5, error_low: 35.8,
-  error_high: 505.5, p50: 144.0, ai_p50: 145.3, n: 10, n_ai: 14, source: 'corpus-D:lead:marketing', date: '2026-09-24',
+  error_high: 505.5, p50: 144.0, ai_p50: 145.3, n: 10, n_ai: 14, source: 'corpus:lead:marketing', date: '2026-09-24',
   provisional: true}
 - {genre: site-page, slot_type: testimonial-attribution, lang: en, metric: words, warn_low: 1.0, warn_high: 3.7, error_low: 0.5,
-  error_high: 7.8, p50: 2.0, ai_p50: 3.0, n: 12, n_ai: 10, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 7.8, p50: 2.0, ai_p50: 3.0, n: 12, n_ai: 10, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: testimonial-attribution, lang: en, metric: chars, warn_low: 6.0, warn_high: 30.4, error_low: 3.0,
-  error_high: 54.9, p50: 12.7, ai_p50: 26.0, n: 12, n_ai: 10, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 54.9, p50: 12.7, ai_p50: 26.0, n: 12, n_ai: 10, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-name, lang: en, metric: words, warn_low: 2.0, warn_high: 6.0, error_low: 1.0,
-  error_high: 9.0, p50: 3.0, ai_p50: 2.0, n: 9, n_ai: 12, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 9.0, p50: 3.0, ai_p50: 2.0, n: 9, n_ai: 12, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-name, lang: en, metric: chars, warn_low: 10.1, warn_high: 35.5, error_low: 4.1,
-  error_high: 53.3, p50: 19.0, ai_p50: 14.0, n: 9, n_ai: 12, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 53.3, p50: 19.0, ai_p50: 14.0, n: 9, n_ai: 12, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-summary, lang: en, metric: words, warn_low: 2.1, warn_high: 74.4, error_low: 1.1,
-  error_high: 111.6, p50: 22.7, ai_p50: 13.4, n: 6, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 111.6, p50: 22.7, ai_p50: 13.4, n: 6, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-plan-summary, lang: en, metric: chars, warn_low: 14.3, warn_high: 414.0, error_low: 7.2,
-  error_high: 621.0, p50: 129.0, ai_p50: 81.0, n: 6, n_ai: 8, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 621.0, p50: 129.0, ai_p50: 81.0, n: 6, n_ai: 8, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price, lang: en, metric: words, warn_low: 1.0, warn_high: 4.1, error_low: 0.5, error_high: 7.3,
-  p50: 2.0, ai_p50: 2.0, n: 9, n_ai: 17, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  p50: 2.0, ai_p50: 2.0, n: 9, n_ai: 17, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price, lang: en, metric: chars, warn_low: 4.2, warn_high: 15.6, error_low: 2.1,
-  error_high: 35.5, p50: 6.0, ai_p50: 7.0, n: 9, n_ai: 17, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: true}
+  error_high: 35.5, p50: 6.0, ai_p50: 7.0, n: 9, n_ai: 17, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price-note, lang: en, metric: words, warn_low: 2.0, warn_high: 6.8, error_low: 1.0,
-  error_high: 10.2, p50: 3.0, ai_p50: 3.0, n: 9, n_ai: 14, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 10.2, p50: 3.0, ai_p50: 3.0, n: 9, n_ai: 14, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-price-note, lang: en, metric: chars, warn_low: 11.7, warn_high: 33.4, error_low: 4.3,
-  error_high: 50.1, p50: 16.0, ai_p50: 18.1, n: 9, n_ai: 14, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 50.1, p50: 16.0, ai_p50: 18.1, n: 9, n_ai: 14, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-feature, lang: en, metric: words, warn_low: 2.8, warn_high: 20.0, error_low: 1.4,
-  error_high: 30.0, p50: 8.2, ai_p50: 4.0, n: 5, n_ai: 7, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 30.0, p50: 8.2, ai_p50: 4.0, n: 5, n_ai: 7, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: pricing-feature, lang: en, metric: chars, warn_low: 13.5, warn_high: 85.0, error_low: 6.8,
-  error_high: 127.5, p50: 56.0, ai_p50: 31.4, n: 5, n_ai: 7, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  error_high: 127.5, p50: 56.0, ai_p50: 31.4, n: 5, n_ai: 7, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-q, lang: en, metric: words, warn_low: 3.0, warn_high: 11.0, error_low: 1.5, error_high: 16.5,
-  p50: 8.0, ai_p50: 6.1, n: 12, n_ai: 6, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 8.0, ai_p50: 6.1, n: 12, n_ai: 6, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-q, lang: en, metric: chars, warn_low: 20.0, warn_high: 61.4, error_low: 8.8, error_high: 92.1,
-  p50: 43.1, ai_p50: 37.2, n: 12, n_ai: 6, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 43.1, ai_p50: 37.2, n: 12, n_ai: 6, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-a, lang: en, metric: words, warn_low: 3.0, warn_high: 45.6, error_low: 1.5, error_high: 122,
-  p50: 21.9, ai_p50: 16.9, n: 10, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 21.9, ai_p50: 16.9, n: 10, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - {genre: site-page, slot_type: faq-a, lang: en, metric: chars, warn_low: 17.6, warn_high: 295.6, error_low: 8.8, error_high: 711,
-  p50: 140.4, ai_p50: 98.4, n: 10, n_ai: 3, source: 'corpus-D:human:marketing', date: '2026-09-24', provisional: true}
+  p50: 140.4, ai_p50: 98.4, n: 10, n_ai: 3, source: 'corpus:human:marketing', date: '2026-09-24', provisional: true}
 - genre: article
   slot_type: '*'
   lang: ru
@@ -2139,7 +2139,7 @@ rows:
   basis: human-p98
   ai_p50: 2.933
   warn_ci: [1.251, 2.024]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2153,7 +2153,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.778, 1.337]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2167,7 +2167,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.09, 0.158]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2181,7 +2181,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.215, 0.543]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2195,7 +2195,7 @@ rows:
   basis: human-p98
   ai_p50: 0.883
   warn_ci: [1.203, 2.028]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2209,7 +2209,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.016, 0.233]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2223,7 +2223,7 @@ rows:
   basis: human-p2
   ai_p50: 5.55
   warn_ci: [5.33, 6.456]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2237,7 +2237,7 @@ rows:
   basis: human-p2
   ai_p50: 0.39
   warn_ci: [0.28, 0.514]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2251,33 +2251,33 @@ rows:
   basis: human-p2
   ai_p50: 0.0
   warn_ci: [0.759, 2.298]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - {genre: article, slot_type: cta-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 2.0, error_low: 0.5, error_high: 3.0,
-  p50: 2.0, n: 5, n_ai: 0, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 2.0, n: 5, n_ai: 0, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: cta-label, lang: ru, metric: chars, warn_low: 1.0, warn_high: 16.0, error_low: 0.5, error_high: 24.0,
-  p50: 13.0, n: 5, n_ai: 0, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 13.0, n: 5, n_ai: 0, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: list-item, lang: ru, metric: words, warn_low: 3.0, warn_high: 30.0, error_low: 1.0, error_high: 55.4,
-  p50: 9.0, ai_p50: 4.0, n: 11, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 9.0, ai_p50: 4.0, n: 11, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: list-item, lang: ru, metric: chars, warn_low: 19.0, warn_high: 204.1, error_low: 7.0, error_high: 407.1,
-  p50: 66.0, ai_p50: 35.6, n: 11, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 66.0, ai_p50: 35.6, n: 11, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-title, lang: ru, metric: words, warn_low: 3.4, warn_high: 8.6, error_low: 1.7, error_high: 12.9,
-  p50: 5.0, ai_p50: 7.5, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 5.0, ai_p50: 7.5, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-title, lang: ru, metric: chars, warn_low: 27.6, warn_high: 59.2, error_low: 13.8,
-  error_high: 88.8, p50: 37.0, ai_p50: 59.0, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 88.8, p50: 37.0, ai_p50: 59.0, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-lead, lang: ru, metric: words, warn_low: 14.0, warn_high: 46.4, error_low: 7.0, error_high: 69.6,
-  p50: 38.0, ai_p50: 45.0, n: 11, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 38.0, ai_p50: 45.0, n: 11, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-lead, lang: ru, metric: chars, warn_low: 116.2, warn_high: 376.4, error_low: 52, error_high: 564.6,
-  p50: 273.0, ai_p50: 334.0, n: 11, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 273.0, ai_p50: 334.0, n: 11, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-heading, lang: ru, metric: words, warn_low: 1.0, warn_high: 9.0, error_low: 0.5, error_high: 13.5,
-  p50: 3.0, ai_p50: 2.0, n: 11, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 3.0, ai_p50: 2.0, n: 11, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-heading, lang: ru, metric: chars, warn_low: 8.5, warn_high: 59.0, error_low: 4.3,
-  error_high: 88.5, p50: 24.2, ai_p50: 23.1, n: 11, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 88.5, p50: 24.2, ai_p50: 23.1, n: 11, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-paragraph, lang: ru, metric: words, warn_low: 6.0, warn_high: 45.0, error_low: 3.0,
-  error_high: 69.4, p50: 23.0, ai_p50: 27.3, n: 12, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 69.4, p50: 23.0, ai_p50: 27.3, n: 12, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-paragraph, lang: ru, metric: chars, warn_low: 41.3, warn_high: 330.8, error_low: 20.7,
-  error_high: 496.2, p50: 170.7, ai_p50: 244.5, n: 12, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 496.2, p50: 170.7, ai_p50: 244.5, n: 12, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - genre: article
   slot_type: '*'
   lang: en
@@ -2289,7 +2289,7 @@ rows:
   basis: human-p98
   ai_p50: 1.378
   warn_ci: [0.34, 0.812]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2303,7 +2303,7 @@ rows:
   basis: human-p98
   ai_p50: 0.44
   warn_ci: [0.354, 0.843]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2317,7 +2317,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.052]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2331,7 +2331,7 @@ rows:
   basis: human-p98
   ai_p50: 0.126
   warn_ci: [0.888, 1.329]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2345,7 +2345,7 @@ rows:
   basis: human-p98
   ai_p50: 0.6
   warn_ci: [0.68, 1.271]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2359,7 +2359,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.04]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2373,7 +2373,7 @@ rows:
   basis: human-p2
   ai_p50: 6.2
   warn_ci: [5.88, 7.122]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2387,7 +2387,7 @@ rows:
   basis: human-p2
   ai_p50: 0.343
   warn_ci: [0.402, 0.48]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: article
@@ -2401,61 +2401,61 @@ rows:
   basis: human-p2
   ai_p50: 0.697
   warn_ci: [0.841, 2.303]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - {genre: article, slot_type: list-item, lang: en, metric: words, warn_low: 4.0, warn_high: 39.0, error_low: 2.0, error_high: 62.6,
-  p50: 14.0, ai_p50: 4.0, n: 9, n_ai: 1, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 14.0, ai_p50: 4.0, n: 9, n_ai: 1, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: list-item, lang: en, metric: chars, warn_low: 25.5, warn_high: 251.7, error_low: 12.8, error_high: 383.6,
-  p50: 80.0, ai_p50: 27.5, n: 9, n_ai: 1, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 80.0, ai_p50: 27.5, n: 9, n_ai: 1, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-title, lang: en, metric: words, warn_low: 6.4, warn_high: 13.2, error_low: 3.2, error_high: 19.8,
-  p50: 10.0, ai_p50: 12.5, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 10.0, ai_p50: 12.5, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-title, lang: en, metric: chars, warn_low: 35.4, warn_high: 71.6, error_low: 17.7,
-  error_high: 107.4, p50: 55.0, ai_p50: 66.5, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 107.4, p50: 55.0, ai_p50: 66.5, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-lead, lang: en, metric: words, warn_low: 5.0, warn_high: 72.0, error_low: 2.5, error_high: 108.0,
-  p50: 29.0, ai_p50: 62.5, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  p50: 29.0, ai_p50: 62.5, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-lead, lang: en, metric: chars, warn_low: 27.4, warn_high: 421.8, error_low: 13.7,
-  error_high: 632.7, p50: 155.0, ai_p50: 376.5, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 632.7, p50: 155.0, ai_p50: 376.5, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-heading, lang: en, metric: words, warn_low: 3.0, warn_high: 10.0, error_low: 1.5,
-  error_high: 15.0, p50: 6.0, ai_p50: 5.0, n: 8, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 15.0, p50: 6.0, ai_p50: 5.0, n: 8, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-heading, lang: en, metric: chars, warn_low: 21.0, warn_high: 57.4, error_low: 10.5,
-  error_high: 86.1, p50: 36.0, ai_p50: 26.5, n: 8, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 86.1, p50: 36.0, ai_p50: 26.5, n: 8, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-paragraph, lang: en, metric: words, warn_low: 5.0, warn_high: 62.9, error_low: 2.5,
-  error_high: 94.3, p50: 23.0, ai_p50: 34.6, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 94.3, p50: 23.0, ai_p50: 34.6, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: article, slot_type: article-paragraph, lang: en, metric: chars, warn_low: 30.0, warn_high: 396.4, error_low: 15.0,
-  error_high: 594.5, p50: 139.0, ai_p50: 194.4, n: 9, n_ai: 2, source: 'corpus-D:human:article', date: '2026-09-24', provisional: true}
+  error_high: 594.5, p50: 139.0, ai_p50: 194.4, n: 9, n_ai: 2, source: 'corpus:human:article', date: '2026-09-24', provisional: true}
 - {genre: meta, slot_type: meta-title, lang: ru, metric: words, warn_low: 4.0, warn_high: 15.5, error_low: 2.0, error_high: 23.3,
-  p50: 9.5, ai_p50: 10.0, n: 30, n_ai: 12, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 9.5, ai_p50: 10.0, n: 30, n_ai: 12, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: meta-title, lang: ru, metric: chars, warn_low: 31.5, warn_high: 118.0, error_low: 15.8, error_high: 177.0,
-  p50: 69.0, ai_p50: 73.0, n: 30, n_ai: 12, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 69.0, ai_p50: 73.0, n: 30, n_ai: 12, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: meta-description, lang: ru, metric: words, warn_low: 17.0, warn_high: 37.6, error_low: 6.7, error_high: 56.4,
-  p50: 24.0, ai_p50: 21.0, n: 29, n_ai: 12, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 24.0, ai_p50: 21.0, n: 29, n_ai: 12, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: meta-description, lang: ru, metric: chars, warn_low: 129.8, warn_high: 275.8, error_low: 48.2,
-  error_high: 413.7, p50: 182.0, ai_p50: 160.5, n: 29, n_ai: 12, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  error_high: 413.7, p50: 182.0, ai_p50: 160.5, n: 29, n_ai: 12, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-title, lang: ru, metric: words, warn_low: 2.2, warn_high: 15.8, error_low: 1.1, error_high: 23.7,
-  p50: 6.0, n: 27, n_ai: 0, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 6.0, n: 27, n_ai: 0, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-title, lang: ru, metric: chars, warn_low: 17.0, warn_high: 116.4, error_low: 8.5, error_high: 174.6,
-  p50: 60.0, n: 27, n_ai: 0, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 60.0, n: 27, n_ai: 0, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-description, lang: ru, metric: words, warn_low: 5.4, warn_high: 37.6, error_low: 2.7, error_high: 56.4,
-  p50: 21.0, n: 29, n_ai: 0, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 21.0, n: 29, n_ai: 0, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-description, lang: ru, metric: chars, warn_low: 34.2, warn_high: 283.4, error_low: 17.1, error_high: 425.1,
-  p50: 164.0, n: 29, n_ai: 0, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 164.0, n: 29, n_ai: 0, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: meta-title, lang: en, metric: words, warn_low: 4.4, warn_high: 10.0, error_low: 1.5, error_high: 17.7,
-  p50: 7.0, ai_p50: 8.0, n: 32, n_ai: 36, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 7.0, ai_p50: 8.0, n: 32, n_ai: 36, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: meta-title, lang: en, metric: chars, warn_low: 27.7, warn_high: 72.6, error_low: 11.2, error_high: 112.5,
-  p50: 50.0, ai_p50: 52.0, n: 32, n_ai: 36, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 50.0, ai_p50: 52.0, n: 32, n_ai: 36, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: meta-description, lang: en, metric: words, warn_low: 15.2, warn_high: 27.3, error_low: 7.6, error_high: 41.0,
-  p50: 22.0, ai_p50: 18.0, n: 32, n_ai: 31, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 22.0, ai_p50: 18.0, n: 32, n_ai: 31, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: meta-description, lang: en, metric: chars, warn_low: 93.0, warn_high: 167.4, error_low: 46.5,
-  error_high: 251.1, p50: 137.5, ai_p50: 98.0, n: 32, n_ai: 31, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  error_high: 251.1, p50: 137.5, ai_p50: 98.0, n: 32, n_ai: 31, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-title, lang: en, metric: words, warn_low: 4.4, warn_high: 10.0, error_low: 1.0, error_high: 16.1,
-  p50: 7.0, ai_p50: 6.0, n: 32, n_ai: 17, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 7.0, ai_p50: 6.0, n: 32, n_ai: 17, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-title, lang: en, metric: chars, warn_low: 26.4, warn_high: 65.0, error_low: 5.1, error_high: 112.0,
-  p50: 47.0, ai_p50: 34.0, n: 32, n_ai: 17, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 47.0, ai_p50: 34.0, n: 32, n_ai: 17, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-description, lang: en, metric: words, warn_low: 14.6, warn_high: 27.4, error_low: 7.3, error_high: 41.1,
-  p50: 21.0, ai_p50: 17.0, n: 31, n_ai: 17, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 21.0, ai_p50: 17.0, n: 31, n_ai: 17, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - {genre: meta, slot_type: og-description, lang: en, metric: chars, warn_low: 90.2, warn_high: 168.2, error_low: 45.1, error_high: 252.3,
-  p50: 133.0, ai_p50: 93.0, n: 31, n_ai: 17, source: 'corpus-D:lead:meta', date: '2026-09-24', provisional: false}
+  p50: 133.0, ai_p50: 93.0, n: 31, n_ai: 17, source: 'corpus:lead:meta', date: '2026-09-24', provisional: false}
 - genre: geo
   slot_type: '*'
   lang: ru
@@ -2467,7 +2467,7 @@ rows:
   basis: human-p98
   ai_p50: 2.933
   warn_ci: [1.288, 2.024]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2481,7 +2481,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.807, 1.337]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2495,7 +2495,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.09, 0.158]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2509,7 +2509,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.215, 0.543]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2523,7 +2523,7 @@ rows:
   basis: human-p98
   ai_p50: 0.883
   warn_ci: [1.24, 2.028]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2537,7 +2537,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.016, 0.233]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2551,7 +2551,7 @@ rows:
   basis: human-p2
   ai_p50: 5.55
   warn_ci: [5.33, 6.456]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2565,7 +2565,7 @@ rows:
   basis: human-p2
   ai_p50: 0.39
   warn_ci: [0.28, 0.513]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2579,13 +2579,13 @@ rows:
   basis: human-p2
   ai_p50: 0.0
   warn_ci: [0.759, 2.298]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - {genre: geo, slot_type: faq-a, lang: ru, metric: words, warn_low: 3.0, warn_high: 43.1, error_low: 1.5, error_high: 91.4,
-  p50: 21.7, ai_p50: 11.0, n: 15, n_ai: 4, source: 'corpus-D:human:geo', date: '2026-09-24', provisional: true}
+  p50: 21.7, ai_p50: 11.0, n: 15, n_ai: 4, source: 'corpus:human:geo', date: '2026-09-24', provisional: true}
 - {genre: geo, slot_type: faq-a, lang: ru, metric: chars, warn_low: 24.0, warn_high: 322.9, error_low: 10.0, error_high: 711.0,
-  p50: 156.5, ai_p50: 74.0, n: 15, n_ai: 4, source: 'corpus-D:human:geo', date: '2026-09-24', provisional: true}
+  p50: 156.5, ai_p50: 74.0, n: 15, n_ai: 4, source: 'corpus:human:geo', date: '2026-09-24', provisional: true}
 - genre: geo
   slot_type: '*'
   lang: en
@@ -2597,7 +2597,7 @@ rows:
   basis: human-p98
   ai_p50: 1.378
   warn_ci: [0.34, 0.812]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2611,7 +2611,7 @@ rows:
   basis: human-p98
   ai_p50: 0.44
   warn_ci: [0.354, 0.843]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2625,7 +2625,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.052]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2639,7 +2639,7 @@ rows:
   basis: human-p98
   ai_p50: 0.126
   warn_ci: [0.888, 1.329]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2653,7 +2653,7 @@ rows:
   basis: human-p98
   ai_p50: 0.6
   warn_ci: [0.68, 1.271]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2667,7 +2667,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.04]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2681,7 +2681,7 @@ rows:
   basis: human-p2
   ai_p50: 6.2
   warn_ci: [5.88, 7.148]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2695,7 +2695,7 @@ rows:
   basis: human-p2
   ai_p50: 0.343
   warn_ci: [0.402, 0.494]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - genre: geo
@@ -2709,13 +2709,13 @@ rows:
   basis: human-p2
   ai_p50: 0.697
   warn_ci: [0.841, 2.303]
-  source: corpus-D:human:article
+  source: corpus:human:article
   date: '2026-09-24'
   provisional: true
 - {genre: geo, slot_type: faq-a, lang: en, metric: words, warn_low: 3.0, warn_high: 45.6, error_low: 1.5, error_high: 122,
-  p50: 21.9, ai_p50: 16.9, n: 10, n_ai: 3, source: 'corpus-D:human:geo', date: '2026-09-24', provisional: true}
+  p50: 21.9, ai_p50: 16.9, n: 10, n_ai: 3, source: 'corpus:human:geo', date: '2026-09-24', provisional: true}
 - {genre: geo, slot_type: faq-a, lang: en, metric: chars, warn_low: 17.6, warn_high: 295.6, error_low: 8.8, error_high: 711,
-  p50: 140.4, ai_p50: 98.4, n: 10, n_ai: 3, source: 'corpus-D:human:geo', date: '2026-09-24', provisional: true}
+  p50: 140.4, ai_p50: 98.4, n: 10, n_ai: 3, source: 'corpus:human:geo', date: '2026-09-24', provisional: true}
 - genre: email-form
   slot_type: '*'
   lang: ru
@@ -2728,7 +2728,7 @@ rows:
   basis: human-p98
   ai_p50: 1.181
   warn_ci: [1.642, 2.785]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2742,7 +2742,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [1.125, 3.279]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2757,7 +2757,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.133]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2772,7 +2772,7 @@ rows:
   basis: human-p98
   ai_p50: 0.377
   warn_ci: [1.227, 5.312]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2787,7 +2787,7 @@ rows:
   basis: human-p98
   ai_p50: 1.132
   warn_ci: [0.821, 2.454]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2802,7 +2802,7 @@ rows:
   basis: human-p98
   ai_p50: 0.649
   warn_ci: [0.222, 1.311]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2815,7 +2815,7 @@ rows:
   n_ai: 0
   basis: human-p2
   warn_ci: [3.318, 4.596]
-  source: corpus-D:human:landing
+  source: corpus:human:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2829,7 +2829,7 @@ rows:
   basis: human-p2
   ai_p50: 0.364
   warn_ci: [0.263, 0.462]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2843,25 +2843,25 @@ rows:
   basis: human-p2
   ai_p50: 7.523
   warn_ci: [0.398, 4.38]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - {genre: email-form, slot_type: cta-label, lang: ru, metric: words, warn_low: 1.0, warn_high: 3.0, error_low: 0.5, error_high: 6.8,
-  p50: 2.0, ai_p50: 2.0, n: 22, n_ai: 10, source: 'corpus-D:lead:email-form', date: '2026-09-24', provisional: true}
+  p50: 2.0, ai_p50: 2.0, n: 22, n_ai: 10, source: 'corpus:lead:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: cta-label, lang: ru, metric: chars, warn_low: 6.8, warn_high: 24.8, error_low: 3.4, error_high: 57.4,
-  p50: 14.0, ai_p50: 16.0, n: 22, n_ai: 10, source: 'corpus-D:lead:email-form', date: '2026-09-24', provisional: true}
+  p50: 14.0, ai_p50: 16.0, n: 22, n_ai: 10, source: 'corpus:lead:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: cta-note, lang: ru, metric: words, warn_low: 2.6, warn_high: 11.0, error_low: 1.3, error_high: 16.5,
-  p50: 7.0, ai_p50: 6.0, n: 8, n_ai: 5, source: 'corpus-D:human:email-form', date: '2026-09-24', provisional: true}
+  p50: 7.0, ai_p50: 6.0, n: 8, n_ai: 5, source: 'corpus:human:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: cta-note, lang: ru, metric: chars, warn_low: 17.6, warn_high: 71.5, error_low: 8.8, error_high: 107.2,
-  p50: 48.0, ai_p50: 40.0, n: 8, n_ai: 5, source: 'corpus-D:human:email-form', date: '2026-09-24', provisional: true}
+  p50: 48.0, ai_p50: 40.0, n: 8, n_ai: 5, source: 'corpus:human:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: form-lead, lang: ru, metric: words, warn_low: 7.0, warn_high: 14.5, error_low: 3.5, error_high: 21.8,
-  p50: 9.3, n: 8, n_ai: 0, source: 'corpus-D:lead:email-form', date: '2026-09-24', provisional: true}
+  p50: 9.3, n: 8, n_ai: 0, source: 'corpus:lead:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: form-lead, lang: ru, metric: chars, warn_low: 40.4, warn_high: 105.0, error_low: 20.2,
-  error_high: 157.5, p50: 62.0, n: 8, n_ai: 0, source: 'corpus-D:lead:email-form', date: '2026-09-24', provisional: true}
+  error_high: 157.5, p50: 62.0, n: 8, n_ai: 0, source: 'corpus:lead:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: form-consent, lang: ru, metric: words, warn_low: 5.0, warn_high: 20.2, error_low: 2.5,
-  error_high: 30.2, p50: 7.5, ai_p50: 7.5, n: 18, n_ai: 2, source: 'corpus-D:human:email-form', date: '2026-09-24', provisional: true}
+  error_high: 30.2, p50: 7.5, ai_p50: 7.5, n: 18, n_ai: 2, source: 'corpus:human:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: form-consent, lang: ru, metric: chars, warn_low: 42.8, warn_high: 166.6, error_low: 21.4,
-  error_high: 249.9, p50: 62.5, ai_p50: 68.5, n: 18, n_ai: 2, source: 'corpus-D:human:email-form', date: '2026-09-24', provisional: true}
+  error_high: 249.9, p50: 62.5, ai_p50: 68.5, n: 18, n_ai: 2, source: 'corpus:human:email-form', date: '2026-09-24', provisional: true}
 - genre: email-form
   slot_type: '*'
   lang: en
@@ -2874,7 +2874,7 @@ rows:
   basis: human-p98
   ai_p50: 0.308
   warn_ci: [1.435, 3.297]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2889,7 +2889,7 @@ rows:
   basis: human-p98
   ai_p50: 1.872
   warn_ci: [0.898, 1.562]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2904,7 +2904,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.0, 0.085]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2919,7 +2919,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.354, 2.338]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2934,7 +2934,7 @@ rows:
   basis: human-p98
   ai_p50: 0.46
   warn_ci: [1.143, 2.791]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2949,7 +2949,7 @@ rows:
   basis: human-p98
   ai_p50: 0.0
   warn_ci: [0.24, 1.648]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2964,7 +2964,7 @@ rows:
   basis: human-p2
   ai_p50: 7.68
   warn_ci: [2.86, 4.762]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2979,7 +2979,7 @@ rows:
   basis: human-p2
   ai_p50: 0.486
   warn_ci: [0.273, 0.4]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - genre: email-form
@@ -2994,22 +2994,22 @@ rows:
   basis: human-p2
   ai_p50: 5.727
   warn_ci: [2.395, 3.968]
-  source: corpus-D:lead:landing
+  source: corpus:lead:landing
   date: '2026-09-24'
   provisional: true
 - {genre: email-form, slot_type: cta-label, lang: en, metric: words, warn_low: 2.0, warn_high: 4.0, error_low: 1.0, error_high: 6.4,
-  p50: 2.0, ai_p50: 3.0, n: 26, n_ai: 30, source: 'corpus-D:lead:email-form', date: '2026-09-24', provisional: true}
+  p50: 2.0, ai_p50: 3.0, n: 26, n_ai: 30, source: 'corpus:lead:email-form', date: '2026-09-24', provisional: true}
 - {genre: email-form, slot_type: cta-label, lang: en, metric: chars, warn_low: 7.8, warn_high: 21.0, error_low: 3.9, error_high: 41.1,
-  p50: 11.7, ai_p50: 15.0, n: 26, n_ai: 30, source: 'corpus-D:lead:email-form', date: '2026-09-24', provisional: true}
+  p50: 11.7, ai_p50: 15.0, n: 26, n_ai: 30, source: 'corpus:lead:email-form', date: '2026-09-24', provisional: true}
 - {genre: landing, slot_type: hero-core, lang: ru, metric: hero.core_words, warn_low: 6.0, warn_high: 34.2, error_high: 60.0,
-  p50: 19.5, ai_p50: 36.0, n: 14, n_ai: 9, source: 'corpus-D:lead:landing', date: '2026-09-24', provisional: false, note: заголовок
+  p50: 19.5, ai_p50: 36.0, n: 14, n_ai: 9, source: 'corpus:lead:landing', date: '2026-09-24', provisional: false, note: заголовок
     + подзаголовок + кнопки + строка у кнопки + микродоказательство первого экрана}
 - {genre: site-page, slot_type: hero-core, lang: ru, metric: hero.core_words, warn_low: 4.4, warn_high: 34.4, error_high: 58.8,
-  p50: 16.0, ai_p50: 34.5, n: 23, n_ai: 10, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false, note: заголовок
+  p50: 16.0, ai_p50: 34.5, n: 23, n_ai: 10, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false, note: заголовок
     + подзаголовок + кнопки + строка у кнопки + микродоказательство первого экрана}
 - {genre: landing, slot_type: hero-core, lang: en, metric: hero.core_words, warn_low: 5.7, warn_high: 37.5, error_high: 56.2,
-  p50: 26.0, ai_p50: 28.5, n: 24, n_ai: 34, source: 'corpus-D:lead:landing', date: '2026-09-24', provisional: false, note: заголовок
+  p50: 26.0, ai_p50: 28.5, n: 24, n_ai: 34, source: 'corpus:lead:landing', date: '2026-09-24', provisional: false, note: заголовок
     + подзаголовок + кнопки + строка у кнопки + микродоказательство первого экрана}
 - {genre: site-page, slot_type: hero-core, lang: en, metric: hero.core_words, warn_low: 4.2, warn_high: 41.5, error_high: 78.6,
-  p50: 26.0, ai_p50: 28.5, n: 26, n_ai: 34, source: 'corpus-D:lead:marketing', date: '2026-09-24', provisional: false, note: заголовок
+  p50: 26.0, ai_p50: 28.5, n: 26, n_ai: 34, source: 'corpus:lead:marketing', date: '2026-09-24', provisional: false, note: заголовок
     + подзаголовок + кнопки + строка у кнопки + микродоказательство первого экрана}

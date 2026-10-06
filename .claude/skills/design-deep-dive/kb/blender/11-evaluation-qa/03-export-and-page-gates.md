@@ -4,7 +4,7 @@
 2 турнтейбла) · Blender 5.2.2, glTF-IO 5.2.40, three r186 (jsDelivr), Chromium headless (ANGLE GL, Intel Iris Xe).
 
 Конвейер: `../../scripts/blender/qa_pipeline.py scene | glb | page` — тонкая обёртка над готовыми утилитами E, F1, A, H; вердикт
-`fail/review/pass`, код выхода 2/1/0 (3 — сбой запуска). Проверки сцены — `01-scene-geometry-checks.md`; рендер и критика — `02`.
+`fail/review/pass` — в JSON; код выхода 0 — замер выполнен, 2 — сбой; с `--strict` — 1 / 3 / 0. Проверки сцены — `01-scene-geometry-checks.md`; рендер и критика — `02`.
 
 ## Выжимка для агента
 
@@ -52,9 +52,8 @@
 
 ```bash
 # Python 3 + Blender 5.2.2 + three r186 — [проверено] GLB кружки: цепочка E + diff
-cd /home/mm/Документы/app-design/blender-research
 C=99-raw/experiments/C1/12-protocol-objects/out
-python3 ../../scripts/blender/qa_pipeline.py glb $C/mug.glb --blend $C/mug.blend --diff || [ $? -le 2 ]
+python3 ../../scripts/blender/qa_pipeline.py glb $C/mug.glb --blend $C/mug.blend --diff
 ```
 
 Вывод: `{"verdict": "review", "codes": ["hint"], …}` — геометрия не сжата (Meshopt добавит постобработка, E `08/03`); diff:
@@ -111,7 +110,6 @@ IoU 0,997, ΔE2000 3,07 (p95 7,1) — совпадает [проверено].
 
 ```bash
 # three r186 (Chromium) — [проверено] турнтейбл: сэмплирование (a) против 3 ключей без сэмплов (f)
-cd /home/mm/Документы/app-design/blender-research
 H=99-raw/experiments/H/10-turntable
 for v in a_linear_2keys_sampled f_linear_3keys_curves_180; do
   python3 ../../scripts/blender/three_probe.py $H/out/$v.glb $H/check_rot.js --out "$OUT_DIR/$v.json" > /dev/null
@@ -163,9 +161,9 @@ done
 # run: system
 # Python 3 — [проверено] ворота F1 по готовому отчёту site_probe.py + статика import map
 import sys
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/99-raw/tools")
+sys.path.insert(0, "../../scripts/blender")
 from qa_pipeline import gate_check, importmap_check
-EX = "/home/mm/Документы/app-design/blender-research/09-web-runtime/examples/"
+EX = "09-web-runtime/examples/"
 for name, val, lim, ok in gate_check(EX + "hero-lazy/probe/desktop_0/probe_quick.json", "desktop"):
     print("OK  " if ok else "FAIL", name, val, lim)
 for page in ("hero-lazy", "camera-path-scroll", "shader-background"):
@@ -180,8 +178,7 @@ assert [i["code"] for i in importmap_check(EX + "camera-path-scroll/index.html")
 
 ```bash
 # Python 3 + Chromium — [проверено] живой прогон страницы с prefers-reduced-motion
-cd /home/mm/Документы/app-design/blender-research
-python3 ../../scripts/blender/qa_pipeline.py page 09-web-runtime/examples/hero-lazy --reduced || [ $? -le 2 ]
+python3 ../../scripts/blender/qa_pipeline.py page 09-web-runtime/examples/hero-lazy --reduced
 ```
 
 Вывод: `pass` — LCP 36 мс (постер), 0 вызовов и 0 % движения в покое, 0 ошибок консоли (≈ 12 с) [проверено].
@@ -190,7 +187,7 @@ python3 ../../scripts/blender/qa_pipeline.py page 09-web-runtime/examples/hero-l
 
 | страница | режим | вердикт | главное |
 |---|---|---|---|
-| hero-lazy (F1) | десктоп | fail | 8/9 ворот; TBT 172 мс > 150 (у F1 175) — воспроизведено; LCP 44 мс (IMG), 1 274 КБ, 10 вызовов |
+| hero-lazy | десктоп | fail | 8/9 ворот; TBT 172 мс > 150 (у F1 175) — воспроизведено; LCP 44 мс (IMG), 1 274 КБ, 10 вызовов |
 | hero-lazy | reduce | pass | 0 вызовов, 0 % движения, LCP 36 мс |
 | camera-path-scroll (F2) | десктоп | review | 9/9 ворот (LCP 72 мс, TBT 93, 532 КБ, 0 вызовов в покое); import map без переназначения ядра |
 

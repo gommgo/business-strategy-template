@@ -39,6 +39,9 @@ D 40 px; ui/CONTRADICTIONS.md §[C3]). Числа — `scripts/ui/data/threshold
 Ограничения (важно для выводов): computed styles — это не токены дизайн-системы, а их применение на конкретном
 экране; SPA догружают разметку, поэтому часть значений зависит от момента снятия; кросс-доменные iframe не
 измеряются; проценты и `em` уже разрешены в px; элементы под `display:none` и нулевые боксы не считаются.
+
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву процессов —
+утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 
 import argparse
@@ -1264,7 +1267,7 @@ def main():
                      "surface": a.surface, "preset": a.preset})
 
     ok, bad = 0, []
-    with sync_playwright() as pw:
+    with kbpaths.lock("browser"), sync_playwright() as pw:
         for j in jobs:
             schemes = ["light", "dark"] if j.get("scheme") == "both" else [j.get("scheme", "light")]
             for sc in schemes:

@@ -2,7 +2,8 @@
 """Проверка 3D в браузере: GLB в three.js или готовая страница — через headless Chromium на реальной видеокарте.
 
 САМОПРОВЕРКА
-    python3 web_view.py --selftest     # режим страницы на локальной папке: GSAP по рантайму
+    python3 web_view.py --selftest     # пути web_stats.json от папки модели (без браузера); режим страницы на локальной
+                                       # папке: GSAP по рантайму
 
 РЕЖИМ МОДЕЛИ
     python3 web_view.py model.glb OUT_DIR [--three 0.186.0] [--views 4|turntable:8] [--size 1200x800]
@@ -10,11 +11,12 @@
         [--anim] [--frames 120] [--gpu gl|vulkan|swiftshader] [--no-lock]
     Грузит модель через GLTFLoader (+ DRACOLoader, KTX2Loader, MeshoptDecoder с jsDelivr той же версии three),
     кадрирует по Box3, снимает ракурсы (та же конвенция, что render_views.py: азимут 0 — вид спереди; Blender −Y
-    становится +Z в glTF), собирает stats.json: время загрузки, ревизия three, строка GPU, draw calls и
+    становится +Z в glTF), собирает web_stats.json: время загрузки, ревизия three, строка GPU, draw calls и
     треугольники из renderer.info, число мешей/материалов/текстур, максимальный размер текстуры, extensionsUsed,
     анимации (имя, длительность, число треков), габариты; среднее и p95 время кадра (render + gl.finish) за --frames.
     --anim: проигрывает все клипы и снимает кадры на 0/25/50/75 % самого длинного.
-    Скриншоты: OUT_DIR/web_view_<n>.png, контактный лист OUT_DIR/web_sheet.png.
+    Скриншоты: OUT_DIR/web_view_<n>.png, контактный лист OUT_DIR/web_sheet.png. Пути в web_stats.json (model,
+    views[].file, anim_frames[].file, sheet) — от папки модели (у рецептов базы — папка примера), а не путь машины.
 
 РЕЖИМ СТРАНИЦЫ
     python3 web_view.py --page path/to/index.html OUT_DIR [--size 1440x900] [--mobile] [--scroll 0,0.33,0.66,1]
@@ -37,11 +39,12 @@
     через CDP — ориентир для мобильного первого экрана. Сайт открывается как есть: куки-баннеры и заглушки видны на
     скриншотах.
 
-Замер кадров — на тихой машине: утилита берёт общий тяжёлый замок и замок браузера (page_gates.heavy_lock; --no-lock —
-обёртка их уже держит). Код репозитория запускает утилиту соседним чекаутом
-../strategy/.claude/skills/design-deep-dive/scripts/blender/web_view.py.
+Замер кадров — на тихой машине: утилита сама берёт общий тяжёлый замок и замок браузера на время работы браузера
+(page_gates.heavy_lock через kbpaths.lock, реентерабельно по дереву процессов: утилита, запущенная из утилиты с теми же
+замками, их не ждёт); --no-lock — без замков: ни тишины машины, ни очереди браузера. Код репозитория запускает утилиту
+соседним чекаутом ../strategy/.claude/skills/design-deep-dive/scripts/blender/web_view.py.
 
-GPU: по умолчанию --use-angle=gl (Intel Iris Xe через Mesa). swiftshader — программный, для сравнения.
+GPU: по умолчанию --use-angle=gl (видеокарта машины через ANGLE и OpenGL). swiftshader — программный, для сравнения.
 Время кадра в режиме модели — CPU-время render() + gl.finish(); ANGLE в headless может не ждать GPU, поэтому
 это ориентир для сравнения вариантов между собой, а не бенчмарк устройства. FPS в режиме страницы — по
 requestAnimationFrame (упирается в 60 при vsync).
@@ -49,7 +52,7 @@ requestAnimationFrame (упирается в 60 при vsync).
 import contextlib, functools, http.server, json, os, shutil, socketserver, sys, tempfile, threading, time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, os.path.join(HERE, "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(HERE, "..", "lib"))
 import kbpaths  # noqa: E402
 kbpaths.use("site")
 import page_gates as PG  # noqa: E402  условия замера и тишина машины (budgets.yaml site)
@@ -227,6 +230,20 @@ def opt(a, name, default=None):
     return a[a.index(name) + 1] if name in a else default
 
 
+def portable_stats(stats, base):
+    """Пути отчёта режима модели — от папки модели base (у рецептов базы — папка примера), а не путь машины: model,
+    views[].file, anim_frames[].file, sheet. Строка без абсолютного пути (сообщение «не собран: …») — как есть."""
+    def rel(p):
+        return os.path.relpath(p, base).replace(os.sep, "/") if isinstance(p, str) and os.path.isabs(p) else p
+    out = dict(stats, model=rel(stats.get("model")))
+    for key in ("views", "anim_frames"):
+        if key in stats:
+            out[key] = [dict(v, file=rel(v.get("file"))) for v in stats[key]]
+    if "sheet" in stats:
+        out["sheet"] = rel(stats["sheet"])
+    return out
+
+
 def sheet(paths, out):
     try:
         from PIL import Image
@@ -311,6 +328,7 @@ def model_mode(a):
         httpd.shutdown(); shutil.rmtree(tmp, ignore_errors=True)
     if shots:
         stats["sheet"] = sheet(shots, os.path.join(out, "web_sheet.png"))
+    stats = portable_stats(stats, os.path.dirname(model))
     json.dump(stats, open(os.path.join(out, "web_stats.json"), "w"), ensure_ascii=False, indent=1)
     summary = {k: stats.get(k) for k in ("file_kb", "error", "frame_time", "sheet")}
     summary["info"] = stats.get("info"); summary["console_errors"] = [l for l in stats.get("console", []) if l.startswith(("error", "pageerror"))][:10]
@@ -439,8 +457,8 @@ SELFTEST_HTML = """<!doctype html><html lang="ru"><head><meta charset="utf-8"><t
 
 
 def selftest():
-    """Режим страницы на локальной папке: GSAP и ScrollTrigger — по рантайму (gsapVersions, _gsap, .pin-spacer без
-    window.gsap); отчёт page_stats.json."""
+    """Пути web_stats.json режима модели — от папки модели (без браузера, временная папка); режим страницы на локальной
+    папке: GSAP и ScrollTrigger — по рантайму (gsapVersions, _gsap, .pin-spacer без window.gsap); отчёт page_stats.json."""
     import subprocess
     ok = True
 
@@ -448,6 +466,23 @@ def selftest():
         nonlocal ok
         ok = ok and bool(cond)
         print(("OK   " if cond else "FAIL ") + msg)
+    with tempfile.TemporaryDirectory() as td:
+        ex = os.path.join(td, "01-sample")
+        model, out = os.path.join(ex, "part.glb"), os.path.join(ex, "web", "part")
+        stats = {"model": model, "file_kb": 1.0, "views": [{"az": 35, "el": 20, "file": os.path.join(out, "web_view_0_az35_el20.png")}],
+                 "anim_frames": [{"t": 0, "file": os.path.join(out, "web_anim_000.png")}], "sheet": os.path.join(out, "web_sheet.png"),
+                 "console": ["error: x"]}
+        os.makedirs(out)
+        fp = os.path.join(out, "web_stats.json")
+        json.dump(portable_stats(stats, os.path.dirname(model)), open(fp, "w"), ensure_ascii=False, indent=1)
+        back = json.load(open(fp, encoding="utf-8"))
+        text = open(fp, encoding="utf-8").read()
+    check("web_stats.json: model, views[].file, anim_frames[].file, sheet — от папки модели, абсолютных путей нет",
+          (back["model"], back["views"][0]["file"], back["anim_frames"][0]["file"], back["sheet"]) ==
+          ("part.glb", "web/part/web_view_0_az35_el20.png", "web/part/web_anim_000.png", "web/part/web_sheet.png")
+          and td not in text and back["console"] == ["error: x"])
+    check("сообщение «не собран: …» на месте листа — как есть",
+          portable_stats({"model": "/m/a.glb", "sheet": "не собран: x"}, "/m")["sheet"] == "не собран: x")
     with tempfile.TemporaryDirectory() as td:
         page = os.path.join(td, "index.html")
         with open(page, "w", encoding="utf-8") as f:

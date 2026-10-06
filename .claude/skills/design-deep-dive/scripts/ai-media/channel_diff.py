@@ -8,7 +8,7 @@ $DDD_HOME/cache/ai-media/genapi; по умолчанию два последни
 картинки/видео > 0,1 %, изменения supported_parameters; у Gen-API — новые/удалённые сети и изменения cost.
 """
 import argparse, json, pathlib
-import os, sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib')); import kbpaths  # перенос
+import os, sys; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'lib')); import kbpaths  # scripts/lib: kbpaths
 CACHE = kbpaths.cache('ai-media')
 
 def last_two(sub, fname):

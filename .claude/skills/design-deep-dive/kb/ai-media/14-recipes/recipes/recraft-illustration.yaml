@@ -1,7 +1,6 @@
-# recraft-illustration.yaml — машиночитаемый рецепт (агент M, волна 3, 24.09.2026); текст — 14-recipes/03-vector-text-og-recipes.md#2; схема — recipe.schema.json; поправки фазы 5 — агент Q, сессия 5, 25.09.2026
+# recraft-illustration.yaml — машиночитаемый рецепт; текст — 14-recipes/03-vector-text-og-recipes.md#2; схема — recipe.schema.json
 recipe_version: 1
 checked_at: '2026-09-25'
-author: агент M, волна 3; поправки фазы 5 — агент Q, сессия 5
 id: recraft-illustration
 title: 'Иллюстрация пустого состояния: Recraft V4.1 Vector + чистка SVG'
 doc: 14-recipes/03-vector-text-og-recipes.md#2
@@ -19,37 +18,25 @@ route:
     channel: routerai
     price_rub: 8.83
     test: G-10
-    note: 'фаза 5: паспорт CM-01 25.09 — 8,83 ₽ (было 8,74); G-10 заменён CM-01; фон — лучше Vector (Pro дал белый фон)'
+    note: 'паспорт CM-01 25.09 — 8,83 ₽ (было 8,74); G-10 заменён CM-01; фон — лучше Vector (Pro дал белый фон)'
   - role: наборы иконок и спот «с первого раза»
     model: recraft/recraft-v4.1-pro-vector
     channel: routerai
     price_rub: 33.11
     test: CM-01
-    note: 'фаза 5: ровно 8 иконок из 8, 35 путей, 0 градиентов; спот — 14 путей против 20 у Vector'
+    note: 'ровно 8 иконок из 8, 35 путей, 0 градиентов; спот — 14 путей против 20 у Vector'
   - role: запас
     model: recraft-v4 (model=vector, pro=false, translate_input=false)
     channel: genapi
     price_rub: 20.0
     test: G-15
-phase5:
-  jobs:
-  - 99-raw/phase5/jobs/G-10-recraft-illustration.routerai.json
-  - 99-raw/phase5/jobs/B2-01-probe-options-controls.routerai.json
-  reuse:
-  - G-10
-  - G-11
-  - G-12
-  - B2-01
-  estimate: python3 ../../scripts/ai-media/mp_client.py estimate 99-raw/phase5/jobs/G-10-recraft-illustration.routerai.json
 steps:
 - id: clean
-  cmd: удалить фон-прямоугольник и preserveAspectRatio="none" (G/02 process.py) → svgo --config ../../scripts/ai-media/data/svgo.keep-signature.config.mjs
+  cmd: удалить фон-прямоугольник и preserveAspectRatio="none" → svgo --config ../../scripts/ai-media/data/svgo.keep-signature.config.mjs
   status: checked
-  evidence: 99-raw/experiments/G/02-recraft-svg-hygiene
 - id: signature
   cmd: python3 ../../scripts/ai-media/provenance_check.py scan out.svg
   status: checked
-  evidence: 99-raw/experiments/L/01-provenance-check
 accept:
   thresholds:
   - svg.illustration_kb_max
@@ -64,13 +51,13 @@ delivery:
 provenance:
   dst: trained
   visible_label: false
-  note: '<recraft-signature> не удалять; фаза 5: через RouterAI подписи нет, в <metadata> — манифест C2PA 17,7 КБ (при нарезке — в _source/)'
+  note: '<recraft-signature> не удалять; через RouterAI подписи нет, в <metadata> — манифест C2PA 17,7 КБ (при нарезке — в _source/)'
 numbers:
-  phase5_cm01_icons: 'Pro Vector 33,11 ₽ — 8 из 8, 35 путей / 345 узлов, 24,4 КБ после svgo (из них 17,7 КБ манифест); Vector 8,83 — 12 с повторами, 63 пути — 99-raw/phase5/runs/5-vector/analysis/icons/metrics.md'
-  phase5_cm01_spot_bg: 'спот Pro 14 путей против 20; фон Vector 8 путей, Pro — белый фон вместо заданного — 99-raw/phase5/runs/5-vector/analysis/illustrations/metrics.md'
-  phase5_palette_words: 'палитра словами — ΔE00 заливок медиана 3,3–8,4 → перекраска svg_sheet.py recolor за 0 ₽ — 99-raw/phase5/runs/5-vector/palette-exact/'
-  phase5_cm02_reference: 'input_references у V4.1 Vector = image-to-image: фото → вектор, 131 путь, 103 КБ после svgo'
-  phase5_svg_no_manifest: 'без C2PA-манифеста (17,7 КБ в <metadata>, после чистки путей Invalid): иконки Pro 6,7 / Vector 10,1 КБ, спот 4,5 / 6,9, фон 5,1 / 2,3, фото → вектор 52,7; мастер SVG — побайтно, на страницу — без <metadata>, провенанс — паспорт — 99-raw/experiments/L/05-phase5-provenance/2026-09-25-all/README.md'
+  live_cm01_icons: 'Pro Vector 33,11 ₽ — 8 из 8, 35 путей / 345 узлов, 24,4 КБ после svgo (из них 17,7 КБ манифест); Vector 8,83 — 12 с повторами, 63 пути'
+  live_cm01_spot_bg: 'спот Pro 14 путей против 20; фон Vector 8 путей, Pro — белый фон вместо заданного'
+  live_palette_words: 'палитра словами — ΔE00 заливок медиана 3,3–8,4 → перекраска svg_sheet.py recolor за 0 ₽'
+  live_cm02_reference: 'input_references у V4.1 Vector = image-to-image: фото → вектор, 131 путь, 103 КБ после svgo'
+  live_svg_no_manifest: 'без C2PA-манифеста (17,7 КБ в <metadata>, после чистки путей Invalid): иконки Pro 6,7 / Vector 10,1 КБ, спот 4,5 / 6,9, фон 5,1 / 2,3, фото → вектор 52,7; мастер SVG — побайтно, на страницу — без <metadata>, провенанс — паспорт'
 status:
   local: checked
   generation: checked

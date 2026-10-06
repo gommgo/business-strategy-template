@@ -1,4 +1,4 @@
-# Blender 5.2.2 / glTF-Blender-IO 5.2.40 — пресеты bpy.ops.export_scene.gltf для веба (three r186). [проверено: 99-raw/experiments/E/24-presets]
+# Blender 5.2.2 / glTF-Blender-IO 5.2.40 — пресеты bpy.ops.export_scene.gltf для веба (three r186). [проверено]
 # Импорт: exec(open(".../presets.py").read()) или sys.path + import presets; export(path, PRESET, **overrides)
 
 BASE_WEB = dict(
@@ -42,12 +42,13 @@ PRESETS = {
     "instances": dict(BASE_WEB, export_gpu_instances=True, export_gn_mesh=True),
     # 6. «Лёгкий» для телефона: картинки как есть (JPEG/PNG!) — KTX2 и ресайз делает gltfpack; WebP-вход gltfpack -tc НЕ перекодирует
     "mobile_light": dict(BASE_WEB, export_image_format="AUTO"),
-    # 7. Адресуемые узлы (агент U, волна 4, П-57): метки hotspot_*/cam_*, extras, клики по частям — база та же, что static_hero;
-    #    держит постобработка (POST ниже), которая НЕ переименовывает и не удаляет пустышки/имена (I/03, E/28)
+    # 7. Адресуемые узлы: метки hotspot_*/cam_*, extras, клики по частям — база та же, что static_hero;
+    #    держит постобработка (POST ниже), которая НЕ переименовывает и не удаляет пустышки/имена
     "addressable_nodes": dict(BASE_WEB),
 }
 
-# Постобработка (из 99-raw/tools/node; нативный gltfpack для текстур: 99-raw/tools/bin/gltfpack-1.2/gltfpack; toktx в PATH для ktx2)
+# Постобработка (npm-пакеты — $DDD_HOME/node; нативный gltfpack для текстур — $DDD_HOME/bin/gltfpack-1.2/gltfpack; toktx для ktx2 —
+# $DDD_HOME/bin/KTX-Software-4.4.2-Linux-x86_64/bin)
 POST = {
     "static_hero": "npx gltf-transform optimize IN OUT --compress meshopt --texture-compress webp --texture-size 2048 --simplify false",
     "anim_trs": "npx gltf-transform optimize IN OUT --compress meshopt --texture-compress webp --flatten false --join false --simplify false",
@@ -55,7 +56,7 @@ POST = {
     "anim_skin": "npx gltf-transform optimize IN OUT --compress meshopt --texture-compress webp --flatten false --join false --simplify false",
     "instances": "npx gltf-transform optimize IN OUT --compress meshopt --texture-compress webp --flatten false --join false --simplify false",
     "mobile_light": "gltfpack -i IN -o OUT -cc -tc -ts 0.5",
-    # -kn (keep node names) -ke (keep extras): без них gltfpack -cc переименовывает/удаляет пустышки (I/03 §…, П-57)
+    # -kn (keep node names) -ke (keep extras): без них gltfpack -cc переименовывает/удаляет пустышки
     "addressable_nodes": "gltfpack -i IN -o OUT -cc -kn -ke",
 }
 

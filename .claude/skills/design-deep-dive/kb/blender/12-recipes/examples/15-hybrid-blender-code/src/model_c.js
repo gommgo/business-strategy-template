@@ -1,4 +1,4 @@
-// model_c.js — гибрид C: GLB из Blender (export_web.py рецепта 17 → gltfpack). Десктоп — WebP атлас 2048 (KB3: ETC1S сдвигал
+// model_c.js — гибрид C: GLB из Blender (export_web.py рецепта 17 → gltfpack). Десктоп — WebP атлас 2048 (ETC1S сдвигал
 // почти-серые PBT в сиреневый, а с транскодером Basis KTX2 ещё и тяжелее на 229 КБ br), телефон — WebP 512.
 // • 67 колпачков — 13 общих мешей на узлах glTF (инстансы) → InstancedMesh по мешу, UV ячейки атласа — атрибут экземпляра
 //   iUV из extras узла kb_uv4 (в «чужом» просмотрщике колпачки просто без надписей); Ё — свой меш и своя текстура;
@@ -20,7 +20,7 @@ const smooth = (t) => { t = Math.min(1, Math.max(0, t)); return t * t * (3 - 2 *
 function patchUV(mat) {
   if (mat.userData.kbPatched) return mat;
   mat.userData.kbPatched = true;
-  // KB3: верх нажатой клавиши чуть светлее (как подсветка обвода у B) — атрибут экземпляра iPress 0…1 (глубина нажатия)
+  // верх нажатой клавиши чуть светлее (как подсветка обвода у B) — атрибут экземпляра iPress 0…1 (глубина нажатия)
   mat.onBeforeCompile = (sh) => {
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', '#include <common>\nattribute vec4 iUV;\nattribute float iPress;\nvarying float vPress;')

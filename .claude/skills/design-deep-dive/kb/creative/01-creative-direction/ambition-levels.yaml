@@ -16,13 +16,12 @@
 #                     budgets.yaml; ворота эффектов берут его числа по threshold_ref «profile.*» зеркалом D.
 # Величина, у которой владелец — другая база, стоит ссылкой: 3D героя и первого экрана — ворота blender (three_d_ref),
 # картинка первого экрана — бюджет ассета ai-media (hero_image_ref).
-# Единицы: вес — байты «на проводе» (как считают ai-media 01/02, blender 01/04, site M: CDP / responseBodySize).
+# Единицы: вес — байты «на проводе» (как считают ai-media 01/02, blender 01/04, site 02/03: CDP / responseBodySize).
 # Окно первого экрана, «сессию» и условия замера на телефоне и десктопе ведёт site:
 # ../site/07-seo-geo-performance-analytics/budgets.yaml — conditions (first_screen, lab_mobile, lab_desktop) и layers.
 #
 # Сокращения источников: `ai-media:01-02#4.3` = ../ai-media/01-web-assets-landscape/02-live-sites-measured.md §4.3;
-# `blender:01-02#3.1` = ../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md §3.1; `A/03` = наш опыт
-# 99-raw/experiments/A/03-budget-quartiles (квартили по ai-media, blender, site M).
+# `blender:01-02#3.1` = ../blender/01-web-3d-landscape/02-when-3d-budgets-loading.md §3.1.
 
 version: "1.0"
 status: draft
@@ -36,11 +35,11 @@ consumers:
   ai-media: "visual-dna character.boldness и one_bold_move (maps_to.visual_dna)"
 
 # ------------------------------------------------------------------------------------------------------------------
-# Обязательно на всех уровнях. id с префиксом CRV- (контракт v2 §3 п.16). «L2+» — дополнительно на L2.
+# Обязательно на всех уровнях. id с префиксом CRV- (kb/common/owners.md § Общие правила тройки). «L2+» — дополнительно на L2.
 mandatory_all_levels:
   - id: CRV-AL-01
     rule: "Вариант при prefers-reduced-motion: конечные состояния без анимации появления и прокрутки, 0 байт видео при загрузке, 0 вызовов отрисовки WebGL в покое; смысл и CTA на месте (reduce, not remove — движение заменяется, а не пропадает без следа)."
-    source: "WCAG 2.2 SC 2.3.3 (AAA) + техника C39; ui-research 08-motion/03 §2; page_accept.py (0 байт видео, движение < 0,5 %); blender 09/05 §5"
+    source: "WCAG 2.2 SC 2.3.3 (AAA) + техника C39; ui 08/03 §2; page_accept.py (0 байт видео, движение < 0,5 %); blender 09/05 §5"
     label: "[стандарт] для 2.3.3; [проверено] у соседей"
   - id: CRV-AL-02
     rule: "Движение, запущенное автоматически, дольше 5 с и показанное вместе с другим контентом (бегущая строка, живой фон, видео-петля, Lottie-петля) — видимая пауза или остановка за ≤ 5 с."
@@ -52,11 +51,11 @@ mandatory_all_levels:
     label: "[стандарт]"
   - id: CRV-AL-04
     rule: "Смысловой текст, заголовки, цены и CTA — в HTML (не в canvas, не в картинке, не в видео); LCP-элемент — текст, картинка или постер, не canvas."
-    source: "blender 01/02 §6.1 (ИИ-краулеры JS не исполняют), blender 01/04 A/04 (canvas не становится LCP); ai-media 10/01 §4.3"
+    source: "blender 01/02 §6.1 (ИИ-краулеры JS не исполняют), blender 01/04 (canvas не становится LCP); ai-media 10/01 §4.3"
     label: "[проверено] у соседей"
   - id: CRV-AL-05
     rule: "Фолбэк без WebGL и без JS: страница читается, CTA и форма работают; эффект — прогрессивное улучшение (@supports, проверка возможностей, matchMedia)."
-    source: "blender 01/01 §1.4; blender 09/05 §5; PLAN.md риск 6"
+    source: "blender 01/01 §1.4; blender 09/05 §5"
     label: "[практика]"
   - id: CRV-AL-06
     rule: "Своя облегчённая версия для телефона: тяжёлые сцены — постер, видео 9:16 или 4:5 легче десктопного, 3D — половина ассетов, DPR ≤ 1,5."
@@ -64,7 +63,7 @@ mandatory_all_levels:
     label: "[практика]"
   - id: CRV-AL-07
     rule: "Клавиатура и фокус не ломаются: плавная прокрутка и перехват колеса не мешают Tab, якорям, поиску по странице; видимый фокус ≥ 3:1."
-    source: "WCAG 2.2 SC 2.1.1, 2.4.7, 2.4.11 (фокус не скрыт), 1.4.11 (контраст индикатора фокуса 3:1); ux-research 08-accessibility"
+    source: "WCAG 2.2 SC 2.1.1, 2.4.7, 2.4.11 (фокус не скрыт), 1.4.11 (контраст индикатора фокуса 3:1); ux 08"
     label: "[стандарт]"
   - id: CRV-AL-08
     rule: "Контраст текста на медиа (фото, видео, шейдер, 3D, градиент) — по F83 в самой светлой точке зоны текста и по кадрам видео; иначе подложка или скрим."
@@ -72,7 +71,7 @@ mandatory_all_levels:
     label: "[стандарт] F83; [проверено] у ai-media"
   - id: CRV-AL-09
     rule: "«Вау» догружается после LCP: 3D, шейдер, секвенции, тяжёлое видео — после load и простоя; LCP-элемент не анимируется из opacity: 0 (только transform, clip-path или появление из 0,01)."
-    source: "blender 01/02 §4.1 (порядок загрузки hero, проверено A/07); ai-media 10/01 §4.3, стр. 249–254"
+    source: "blender 01/02 §4.1 (порядок загрузки hero, проверено); ai-media 10/01 §4.3, стр. 249–254"
     label: "[проверено] у соседей"
   - id: CRV-AL-10
     rule: "Вне экрана цикл отрисовки и петли стоят (IntersectionObserver, visibilitychange); в покое без движения — 0 кадров WebGL."
@@ -80,13 +79,13 @@ mandatory_all_levels:
     label: "[проверено] у blender"
   - id: CRV-AL-11
     rule: "Конвенции взаимодействия сохраняются на любом уровне: логотип слева со ссылкой на главную, навигация сверху, предсказуемые формы и кнопки; выразительность — в концепции, визуале, композиции, движении и тексте."
-    source: "контракт тройки v2 §6 п.11; ux-research 03-layout-placement/04 §12, 10-design-systems-consistency/02 §5.3; Tuch 2012 через ui 13/02 §3.3"
+    source: "kb/common/owners.md § Общие правила тройки; ux 03/04 §12, ux 10/02 §5.3; Tuch 2012 через ui 13/02 §3.3"
     label: "[консенсус]"
   - id: CRV-AL-12
     applies_to: [L2]
     rule: "L2+: заметный переключатель «меньше движения» на странице (для тех, у кого не выставлена системная настройка), состояние запоминается; содержимое доступно без интро (кнопка «пропустить» или его отсутствие)."
-    source: "WCAG 2.2 SC 2.3.3 Understanding (механизм отключения движения от взаимодействия); PLAN.md стартовая таблица уровней"
-    label: "[гипотеза] — E и K подтверждают в волнах 2–3"
+    source: "WCAG 2.2 SC 2.3.3 Understanding (механизм отключения движения от взаимодействия)"
+    label: "[гипотеза]"
 
 # ------------------------------------------------------------------------------------------------------------------
 levels:
@@ -120,7 +119,7 @@ levels:
       label: "[гипотеза]"
     budgets:
       effects:
-        js_presentation_kb_br: {mobile: 20, desktop: 20, source: "без библиотек движения: CSS + до 1 малого скрипта IntersectionObserver; ср. blender A/03: gsap+ScrollTrigger 40 КБ br — уже выше", label: "[гипотеза]"}
+        js_presentation_kb_br: {mobile: 20, desktop: 20, source: "без библиотек движения: CSS + до 1 малого скрипта IntersectionObserver; ср. blender 01/03: gsap+ScrollTrigger 40 КБ br — уже выше", label: "[гипотеза]"}
         js_3d_kb_br: {mobile: 0, desktop: 0, source: "L0 без WebGL", label: "[решение уровня]"}
         webgl_contexts: {mobile: 0, desktop: 0, source: "L0 без WebGL", label: "[решение уровня]"}
         wasm_presentation_kb_br: {mobile: null, desktop: null, source: "wasm-рантаймы подачи (dotLottie, Rive) — отдельная строка, в JS первого экрана не входят; веса и версии — 07-stack-implementation/stack.yaml; число порога даст пилот с Lottie или Rive", label: "[открыто]"}
@@ -136,11 +135,11 @@ levels:
         otherwise: L1              # порог не достигнут — умолчание типа: L1 с L0-блоками конверсии
         no_data: L1                # данных о трафике нет — L1 и вопрос в questions[] брифа
       conditions:
-        - "лидогенерация услуг — правило lead_services: L0 при горячем мобильном трафике и низкой или средней цене (карты, рекомендации, ретаргетинг, поиск с намерением); иначе L1 с L0-блоками конверсии (решение 20 site)"
+        - "лидогенерация услуг — правило lead_services: L0 при горячем мобильном трафике и низкой или средней цене (карты, рекомендации, ретаргетинг, поиск с намерением); иначе L1 с L0-блоками конверсии"
         - "аудитория 45+ — предпочитает низкую визуальную сложность (Reinecke и др., CHI 2013, 548 человек, через ui 13/02 §3.1)"
         - "B2G, регулируемые отрасли (finance, medical, dietary-supplements) и страницы, где доверие важнее впечатления (taste 1.A: trust-first → MOTION 2–3)"
         - "внутренние страницы многостраничника и шаблоны серии (единство системы важнее «вау»)"
-        - "сервисы и рабочие экраны — не L0, а нормы ui-research и ux-research: уровней у них нет"
+        - "сервисы и рабочие экраны — не L0, а нормы ui и ux: уровней у них нет"
     avoid_for:
       - "кампания или запуск, где впечатление и есть сообщение (landing-campaign, campaign-site)"
       - "портфолио студии и креативных профессий (работа показывает мастерство — impeccable: режим Experience)"
@@ -177,7 +176,7 @@ levels:
       - {id: video-loop-hero, what: "немая видео-петля первого экрана с постером, паузой и reduce"}
       - {id: 3d-object, what: "один 3D-объект товара: предрендер, петля, model-viewer или hero-GLB после LCP (blender 01/02 §7)", limit: "≤ 1 контекст, 3D ≤ 0,8/1,5 МБ"}
       - {id: cursor-accent, what: "курсорный акцент на десктопе (магнит CTA, подсветка) без замены системного курсора"}
-      - {id: view-transitions, what: "View Transitions, где поддерживается: между страницами многостраничника — нативный кросс-документный (effect:page-transition, 0 КБ JS, @supports, анимация только при prefers-reduced-motion: no-preference, ≤ 400 мс) и состояния блока (effect:view-transition); без поддержки — обычный переход (X-21, решение оркестратора 2026-09-25)"}
+      - {id: view-transitions, what: "View Transitions, где поддерживается: между страницами многостраничника — нативный кросс-документный (effect:page-transition, 0 КБ JS, @supports, анимация только при prefers-reduced-motion: no-preference, ≤ 400 мс) и состояния блока (effect:view-transition); без поддержки — обычный переход (X-21)"}
     forbidden:
       - {id: smooth-scroll, why: "на L1 не нужен: сцены работают с родной прокруткой; цена — ожидания и доступность"}
       - {id: scroll-jacking, why: "изменение скорости и направления прокрутки — только L2 и только закрепление со скрабом"}
@@ -195,9 +194,9 @@ levels:
       label: "[гипотеза]"
     budgets:
       effects:
-        js_presentation_kb_br: {mobile: 100, desktop: 100, source: "blender A/03 (2026-09-22): gsap + ScrollTrigger 40 КБ br, lenis 4,9, motion 22, OGL 12, @paper-design/shaders 6; + свой код ≈ 30–50 КБ", label: "[данные] + [гипотеза]"}
+        js_presentation_kb_br: {mobile: 100, desktop: 100, source: "blender 01/03 (2026-09-22): gsap + ScrollTrigger 40 КБ br, lenis 4,9, motion 22, OGL 12, @paper-design/shaders 6; + свой код ≈ 30–50 КБ", label: "[данные] + [гипотеза]"}
         js_3d_kb_br: {mobile: 200, desktop: 300, source: "blender:01-02#3.1 JS для 3D ≤ 200/300 КБ br; только при 3d-object", label: "[спорно] у blender"}
-        webgl_contexts: {mobile: 1, desktop: 1, source: "PLAN.md стартовая таблица; blender 09/04 §2 шейдерный фон — 1 вызов, 1,45 мс на кадр", label: "[гипотеза] + [проверено] у blender"}
+        webgl_contexts: {mobile: 1, desktop: 1, source: "blender 09/04 §2 шейдерный фон — 1 вызов, 1,45 мс на кадр", label: "[гипотеза] + [проверено] у blender"}
         wasm_presentation_kb_br: {mobile: null, desktop: null, source: "wasm-рантаймы подачи (dotLottie, Rive) — отдельная строка, в JS первого экрана не входят; веса и версии — 07-stack-implementation/stack.yaml; число порога даст пилот с Lottie или Rive", label: "[открыто]"}
         three_d_ref: "blender/09-web-runtime/05-performance-a11y-fallbacks.md §1.1"   # 3D героя и первого экрана — ворота blender (§1.1, §7.2), одни на всех уровнях
         video_first_screen_kb: {mobile: 600, desktop: 1500, source: "видео первого экрана без действия — петля hero: ai-media:01-02#4.3 (петля 6–10 с, 1080p ≈ 150–200 КБ/с; 720p на телефоне)", label: "[данные]"}
@@ -262,13 +261,13 @@ levels:
       label: "[гипотеза]; длина сцены — [мнение] blender 07/04 §5"
     budgets:
       effects:
-        js_presentation_kb_br: {mobile: 150, desktop: 200, source: "blender A/03: gsap + ScrollTrigger 40, lenis 4,9, motion 22 КБ br; переходы и курсор — свой код", label: "[данные] + [гипотеза]"}
-        js_3d_kb_br: {mobile: 250, desktop: 350, source: "blender A/03: three core 109, three + загрузчики 158, R3F + drei 286, R3F + drei + post 345 КБ br; blender:01-02#3.1 (≤ 200/300) — для кампании мягче", label: "[данные] [спорно]"}
+        js_presentation_kb_br: {mobile: 150, desktop: 200, source: "blender 01/03: gsap + ScrollTrigger 40, lenis 4,9, motion 22 КБ br; переходы и курсор — свой код", label: "[данные] + [гипотеза]"}
+        js_3d_kb_br: {mobile: 250, desktop: 350, source: "blender 01/03: three core 109, three + загрузчики 158, R3F + drei 286, R3F + drei + post 345 КБ br; blender:01-02#3.1 (≤ 200/300) — для кампании мягче", label: "[данные] [спорно]"}
         webgl_contexts: {mobile: 1, desktop: 2, source: "предложение: один полноэкранный canvas на сцены; второй — только десктоп", label: "[гипотеза]"}
         wasm_presentation_kb_br: {mobile: null, desktop: null, source: "wasm-рантаймы подачи (dotLottie, Rive) — отдельная строка, в JS первого экрана не входят; веса и версии — 07-stack-implementation/stack.yaml; число порога даст пилот с Lottie или Rive", label: "[открыто]"}
         three_d_ref: "blender/09-web-runtime/05-performance-a11y-fallbacks.md §1.1"   # 3D героя и первого экрана — ворота blender (§1.1, §7.2), одни на всех уровнях
         three_d_session_mb: {mobile: 3, desktop: 8, source: "blender:01-02#7 (история на прокрутке 5–15 МБ прогрессивно; мир 5–20 МБ); blender 08/03 §6.5 (3D всей страницы ≤ 8–10 МБ десктоп, [мнение])", label: "[спорно]"}
-        video_first_screen_kb: {mobile: 1000, desktop: 2500, source: "видео первого экрана без действия: петля hero или сюжет на постере; эффектные страницы C — у 15 из 49 больше 5 МБ видео до прокрутки", label: "[гипотеза]"}
+        video_first_screen_kb: {mobile: 1000, desktop: 2500, source: "видео первого экрана без действия: петля hero или сюжет на постере; эффектные страницы creative 03/01 — у 15 из 49 больше 5 МБ видео до прокрутки", label: "[гипотеза]"}
         video_autoplay_session_mb: {mobile: 4, desktop: 10, source: "ai-media:01-02#4.3 (5/2 МБ для обычной страницы) × 2 для видео-сюжета; тяжелее — только после явного действия", label: "[гипотеза]"}
         draw_calls_max: {mobile: 30, desktop: 60, measure: "кадр в покое", source: "blender 11/05 §11 (WEB-05)", label: "[спорно] у blender"}
         draw_calls_scroll_max: {mobile: 50, desktop: 100, measure: "кадр при прокрутке, сцена-«мир»", source: "blender:01-02#3.1 (≤ 100 для «мира»); blender 11/05 §11", label: "[спорно] у blender"}
@@ -331,7 +330,7 @@ defaults_by_page_type:
   rules:
     - "уровень страницы не выше уровня сайта в брифе (site-brief ambition.level) — ограничение site"
     - "подъём внутренней страницы на уровень — только с причиной в брифе (ambition.by_page[].why)"
-    - "L0 — сдержанная подача в той же визуальной системе сайта, а не «без дизайна» (формулировка site, решение 20)"
+    - "L0 — сдержанная подача в той же визуальной системе сайта, а не «без дизайна» (формулировка site)"
 
 # Потолок движения поверх уровня (site-brief ambition.motion_cap): визуальный уровень L1, движение — subtle.
 motion_caps: [none, subtle, expressive, cinematic]

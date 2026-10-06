@@ -404,7 +404,7 @@ def selftest():
                 dump(site, op2)
             r = subprocess.run([sys.executable, os.path.join(HERE, "copydeck.py"), "claims", op2, "--facts", fp, "--today", "2026-09-24",
                                 "--json", jp, "--quiet"], capture_output=True, text=True)
-            found = json.load(open(jp, encoding="utf-8"))["findings"] if r.returncode in (0, 2) and os.path.exists(jp) else None
+            found = json.load(open(jp, encoding="utf-8"))["findings"] if r.returncode in (0, 1) and os.path.exists(jp) else None
             use_n.append(None if found is None else sum(1 for f in found if f["rule"] == "COPY-F-USE"))
             if os.path.exists(jp):
                 os.remove(jp)
@@ -428,7 +428,7 @@ def selftest():
     for r in res:
         print(("OK   " if r[1] else "FAIL ") + r[0] + ("" if r[1] or len(r) < 3 else f": {r[2]}"))
     print(f"selftest: {ok} из {len(res)}")
-    return 0 if ok == len(res) else 2
+    return 0 if ok == len(res) else 1
 
 
 def main():
@@ -447,12 +447,18 @@ def main():
         sys.exit(selftest())
     fn = {"meaning-claims": cmd_meaning_claims, "judge-input": cmd_judge_input, "judge-score": cmd_judge_score}.get(a.cmd)
     if not fn:
-        ap.print_help()
-        sys.exit(1)
+        ap.print_help(sys.stderr)
+        sys.exit(2)
     rc = fn(a)
     if isinstance(rc, int):
         sys.exit(rc)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except SystemExit as e:              # текст вместо кода — ошибка входа (страницы нет в copy deck)
+        if isinstance(e.code, str):
+            print(e.code, file=sys.stderr)
+            sys.exit(2)
+        raise

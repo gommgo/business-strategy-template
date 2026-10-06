@@ -17,7 +17,7 @@ skip или js; язык; файл:строка; первая строка бл�
 """
 import json, os, re, subprocess, sys, tempfile
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("blender"))
 TOOLS = str(kbpaths.scripts("blender"))

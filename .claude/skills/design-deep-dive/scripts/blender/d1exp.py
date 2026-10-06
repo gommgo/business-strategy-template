@@ -1,12 +1,12 @@
-# Blender 5.2.2 — помощники экспериментов D1: рендер варианта в плитку, контактный лист, разбор GLB, постобработка.
+# Blender 5.2.2 — помощники вариантов модели: рендер варианта в плитку, контактный лист, разбор GLB, постобработка.
 import json, math, os, struct, subprocess, sys, time
 
 import bpy
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))  # перенос: scripts/lib
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "lib"))
 import kbpaths  # noqa: E402
 ROOT = str(kbpaths.kb("blender"))
-NODE_DIR = str(kbpaths.node_home())  # перенос: npm-зависимости — $DDD_HOME/node
+NODE_DIR = str(kbpaths.node_home())  # npm-зависимости — $DDD_HOME/node
 NODE_BIN = os.path.dirname(kbpaths.node())
 
 

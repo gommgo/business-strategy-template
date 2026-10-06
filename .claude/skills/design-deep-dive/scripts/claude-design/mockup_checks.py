@@ -60,8 +60,9 @@
   порога владельца (шаблонный хром — ui 11/04 §1.3), без числа у владельца — от двух примет («несколько примет»
   шапки реестра), кандидат `proposed` в вердикт не входит; на странице — кластер реестра клише creative по
   `cluster_rule`; на экране приложения — ещё число маркеров домена app-visual (ui 11/04 §1.3). Приметы вида без ключа
-  `--allow` (контраст тёплой палитры, шкала кеглей, высота шапки) — нормы с уровнем своей проверки. Код 2 — critical
-  или сложившийся кластер.
+  `--allow` (контраст тёплой палитры, шкала кеглей, высота шапки) — нормы с уровнем своей проверки. Код 1 — critical
+  или сложившийся кластер; 2 — ошибка вызова или окружения (файл не читается, неизвестный ключ); 3 — мало свободной
+  памяти, браузер не запускался.
   Приметы вида: тёплая тонированная бумага, выделенное слово заголовка, антиква в заголовках, капс-надзаголовки (частота
   — число владельца COPY-C-18: не чаще одного на N секций с заголовком H1, H2), доля капса, пилюля над H1, градиентный
   текст, hero на высоту окна по центру без продолжения (порог высоты — AIL-06 site; hero — блок верхнего уровня с
@@ -2181,7 +2182,7 @@ def verdict(F, surface):
 def summarize(F, allowed, surface='page'):
     """Сводка без дублей: примета — один раз, сколько бы проверок её ни нашли; счёт — по доменам реестра в единице
     домена (страница или экран одного прогона), домены не складываются; кластеры реестра и реестра клише — членами,
-    порогом владельца и признаком «сложился» (clusters_of); clusters_formed — сложившиеся кластеры (код 2)."""
+    порогом владельца и признаком «сложился» (clusters_of); clusters_formed — сложившиеся кластеры (код 1)."""
     reg = registry()
     counts = {s_: 0 for s_ in SEV_ORDER}
     for f in F:
@@ -2226,8 +2227,8 @@ def summarize(F, allowed, surface='page'):
 
 
 def exit_code(summary):
-    """Код прогона: 2 — есть critical или сложился кластер примет, иначе 0."""
-    return 2 if summary['counts']['critical'] or summary['clusters_formed'] else 0
+    """Код прогона: 1 — есть critical или сложился кластер примет, иначе 0."""
+    return 1 if summary['counts']['critical'] or summary['clusters_formed'] else 0
 
 
 def to_md(res):
@@ -2476,7 +2477,7 @@ def cmd_resize(a):
     res = {'target': a.target, 'wait_ms': a.wait_ms, 'steps': steps, 'desktop_restore_diff': diff, 'problems': problems,
            'verdict': 'fail' if problems else 'pass'}
     print(json.dumps(res, ensure_ascii=False, indent=1))
-    return 2 if problems else 0
+    return 1 if problems else 0
 
 
 # ---------------------------------------------------------------- самопроверка
@@ -2721,20 +2722,20 @@ def cmd_selftest(_a):
     F = analyze('http://x/', [_view(bento=[dict(bento, n=4)], orbit=[dict(orbit, icons=4)])], None, None, None, None, set(), [], opts)
     check('4 плитки и 4 иконки — ниже порогов владельца', not {'LOOK-BENTO', 'LOOK-ORBIT'} & set(ids(F)))
 
-    # вердикт кластера: пороги владельцев, одиночная примета — вопрос, кластер — major и код 2
+    # вердикт кластера: пороги владельцев, одиночная примета — вопрос, кластер — major и код 1
     check('пороги кластеров у владельцев: ui 11/04 §1.3 — маркеров 4, хрома 3; реестр клише — 3',
           (ui_diagnosis(), cliche_cluster_min()) == ({'markers': 4, 'chrome': 3}, 3), (ui_diagnosis(), cliche_cluster_min()))
     F = analyze('http://x/', [_view(rows=[dict(row, cv=0.1)], bento=[bento])], None, None, None, None, set(), [], opts)
     kit = sorted((f['id'], f['severity'], f.get('cluster')) for f in F if f['id'] in ('LOOK-THREE-CARDS', 'LOOK-BENTO'))
-    check('три карточки и бенто — кластер saas-card-kit: обе major, код 2',
+    check('три карточки и бенто — кластер saas-card-kit: обе major, код 1',
           (kit, exit_code(summarize(F, set(), 'page'))) == ([('LOOK-BENTO', 'major', 'saas-card-kit'),
-                                                             ('LOOK-THREE-CARDS', 'major', 'saas-card-kit')], 2), kit)
+                                                             ('LOOK-THREE-CARDS', 'major', 'saas-card-kit')], 1), kit)
     chrome_leaves = [_leaf('Записаться →', in_btn=True), _leaf('01 Замер'), _leaf('02 Смета'), _leaf('03 Ремонт')]
     F = analyze('http://x/', [_view(headings=heads, leaves=chrome_leaves)], None, None, None, None, set(), [], opts)
     ch = sorted((f['id'], f['severity']) for f in F if f.get('cluster') == 'template-chrome')
-    check('надзаголовки, стрелка и нумерация — кластер шаблонного хрома (3 из порога 3): major, код 2',
+    check('надзаголовки, стрелка и нумерация — кластер шаблонного хрома (3 из порога 3): major, код 1',
           (ch, exit_code(summarize(F, set(), 'page'))) == ([('LOOK-ARROWS', 'major'), ('LOOK-EYEBROW', 'major'),
-                                                           ('LOOK-NUMBERED', 'major')], 2), ch)
+                                                           ('LOOK-NUMBERED', 'major')], 1), ch)
     F = analyze('http://x/', [_view(headings=heads, leaves=chrome_leaves)], None, None, None, None, {'eyebrow'}, [], opts)
     check('снятая ключом примета в кластер не входит: хром 2 из 3 — minor, код 0',
           (sorted((f['id'], f['severity']) for f in F if f['id'] in ('LOOK-ARROWS', 'LOOK-NUMBERED')),
@@ -3014,4 +3015,10 @@ def main():
 
 
 if __name__ == '__main__':
-    sys.exit(main())
+    try:
+        sys.exit(main())
+    except SystemExit as e:              # текст вместо кода — ошибка вызова или окружения
+        if isinstance(e.code, str):
+            print(e.code, file=sys.stderr)
+            sys.exit(2)
+        raise

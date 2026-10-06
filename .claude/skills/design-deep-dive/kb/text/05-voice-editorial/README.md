@@ -15,9 +15,10 @@
 | `voice.schema.yaml` | профиль голоса — JSON Schema 2020-12 в YAML (`$id urn:app-design:text:voice:1`): оси, принципы с исполнением, пары, обращение, словарь для линтера, юмор, карта тона, образцы строк по `slot_type`, таблица стиля, проекции для kimi и промта (F) |
 | `examples/voice-grafa-b2b.yaml` | сдержанный B2B — бухгалтерия на аутсорсе «Графа» (ДЕМО-факты), 10 типов слотов RU и EN (F) |
 | `examples/voice-otves-warm.yaml` | тёплый локальный сервис — ремонт «Отвес» (факты B2), 10 типов слотов RU и EN (F) |
+| `examples/facts-demo-grafa.yaml`, `examples/facts-demo-peklo.yaml` | ДЕМО-факты образцов голоса «Графа» и «Пекло» (формат `../02-strategy-messaging/facts.schema.yaml`): на них ссылаются `brand.facts_ref` и `claims_boundaries_ref` профилей |
 | `examples/voice-peklo-bold.yaml` | дерзкий потребительский, кампания L2 — острый соус «Пекло» (ДЕМО-факты), 10 типов слотов RU и EN (F) |
 
-Проверка: схема и примеры — `99-raw/tools/venv-F/bin/python ../../scripts/text/validate_voice.py`; образцы
+Проверка: схема и примеры — `~/.cache/design-deep-dive/venv/bin/python ../../scripts/text/validate_voice.py`; образцы
 через сверку и линтер — `python3 99-raw/experiments/F/04-voice-samples/check_samples.py`; пары 02–03 и таблица стиля —
 `python3 99-raw/experiments/F/05-style-sheet-pairs/run.py`. Профиль → правила линтера — конвертеры
 `99-raw/experiments/F/03-schema-lint/voice_to_lint.py` и `05-style-sheet-pairs/style_to_lint.py` (`--rules`). Опыты —

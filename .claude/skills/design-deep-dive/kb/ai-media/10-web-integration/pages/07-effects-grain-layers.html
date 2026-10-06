@@ -1,7 +1,7 @@
 <!doctype html>
 <!-- 07 · Эффекты поверх ИИ-ассетов: зерно поверх (SVG feTurbulence, 280 Б) против «пластика»; тёмный градиент CTA-полосы CSS-ом
-     (Chromium дизерит CSS-градиент, а AVIF/WebP/AV1 — нет: J/03); 2.5D — объект с альфой + слой тени (RGB, multiply) на цвете
-     секции + лёгкий параллакс за курсором (только hover и no-preference). Агент J, волна 3, 23.09.2026 · проверено: J/03, J/07, J/06. -->
+     (Chromium дизерит CSS-градиент, а AVIF/WebP/AV1 — нет: ai-media 10/03); 2.5D — объект с альфой + слой тени (RGB, multiply) на цвете
+     секции + лёгкий параллакс за курсором (только hover и no-preference). -->
 <html lang="ru">
 <head>
 <meta charset="utf-8">
@@ -34,7 +34,7 @@
 <body>
 <section class="section">
   <h2>Зерно поверх, а не в файле</h2>
-  <p>Шум, «впечённый» в картинку до сжатия, AVIF/WebP/JPEG съедают (H/05) и платите весом ×10. SVG-шум в CSS — 280 байт,
+  <p>Шум, «впечённый» в картинку до сжатия, AVIF/WebP/JPEG съедают и платите весом ×10. SVG-шум в CSS — 280 байт,
      рисуется после декодирования и снимает «пластиковую» гладкость ИИ-кадра. Справа — тот же AVIF с зерном 9 % (soft-light).</p>
   <div class="split">
     <figure><img src="assets/hero/dawn-16x9-960.avif" width="960" height="540" alt="Озеро на рассвете, без зерна" fetchpriority="high"><figcaption>без зерна</figcaption></figure>
@@ -44,12 +44,12 @@
 <section class="band" aria-labelledby="cta">
   <h2 id="cta">Тёмный градиент — только кодом</h2>
   <p>Эта полоса — CSS (0 байт): Chromium дизерит CSS-градиент (ступень 0,04 кода), а тот же градиент в AVIF 8 бит даёт 0,55,
-     в AVIF 10 бит — 0,35–0,39, в видео AV1 10 бит — 0,35 (J/03): 10 бит в браузере бандинг не лечит.</p>
+     в AVIF 10 бит — 0,35–0,39, в видео AV1 10 бит — 0,35: 10 бит в браузере бандинг не лечит.</p>
 </section>
 <section class="section">
   <h2>2.5D: объект, тень, цвет секции</h2>
   <p>Объект с альфой (AVIF 15 КБ) и слой тени (RGB-отношение «кадр / чистая подложка», AVIF 7 КБ, multiply) кладутся на любой
-     цвет секции — тень и рефлексы остаются. В Chromium композит совпадает с расчётом (ΔE00 p99 ≤ 2,2, J/07).</p>
+     цвет секции — тень и рефлексы остаются. В Chromium композит совпадает с расчётом (ΔE00 p99 ≤ 2,2).</p>
   <div class="stage2d" data-parallax>
     <picture><source type="image/avif" srcset="assets/layers/shadow-rgb.avif"><img class="shadow" src="assets/layers/shadow-rgb.webp" width="1536" height="864" alt=""></picture>
     <picture><source type="image/avif" srcset="assets/layers/object.avif"><img class="obj" src="assets/layers/object.webp" width="1536" height="864" alt="Красная глянцевая банка и жёлтый шар на однотонном фоне"></picture>

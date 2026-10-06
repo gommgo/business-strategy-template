@@ -1,10 +1,10 @@
 # Артефакты генерации (группа ART): одна находка = вердикт «текст скопирован из чат-бота или не дописан».
 # Проверяются первыми, во всех ролях и жанрах, в цитатах тоже (mask_quotes: false). Префикс маркеров — COPY-M-ART-.
 # Источники реестра: WP:Signs of AI writing (oldid 1376434705, 2026-09-24) §Markup, §utm_source=; humanizer-ru
-# scripts/lint.py ARTIFACTS (MIT, коммит ff990df, порт из Vladimir-Human/humanizer-ru, MIT); kimi 05/03 §3.9 (сбои K3).
+# scripts/lint.py ARTIFACTS (MIT, коммит ff990df, порт из Vladimir-Human/humanizer-ru, MIT); разбор LLM-вёрстки (сбои генерации).
 date: 2026-09-24
 version: 1
-owner: C (волна 1)
+owner: text · 06-anti-slop
 defaults:
   group: ART
   lang: any
@@ -64,9 +64,9 @@ rules:
     level: warning
     pattern: '\[PLACEHOLDER(?::[^\]\n]{0,80})?\]'
     message: "Место для факта, которого нет в facts.yaml. В черновике допустимо; к публикации — заполнить или убрать утверждение (--final делает это ошибкой)."
-    replacement: "получить факт у заказчика (proof-intake, B2) или переписать фразу без факта"
+    replacement: "получить факт у заказчика (proof-intake.md) или переписать фразу без факта"
     examples: {bad: "Работаем с [PLACEHOLDER: число клиентов] компаниями.", good: "Работаем с 214 компаниями (fact: clients-2026)."}
-    source: "PLAN.md риск 3; kimi templates/facts.md (Missing); контракт тройки §3 п.10"
+    source: "facts.md входа холста («Нет»); kb/common/owners.md § Форматы обмена"
     evidence: "[стандарт базы]"
   - id: art-pua-chars
     marker_id: COPY-M-ART-05
@@ -92,7 +92,7 @@ rules:
     message: "Литерал экранирования или сбой валюты в видимом тексте (\\u00b0, &nbsp;, «$€4 900»)."
     replacement: "заменить на символ (°, неразрывный пробел, «—») или исправить валюту"
     examples: {bad: "Температура 60\\u00b0C, цена $€4,900", good: "Температура 60 °C, цена 4 900 €"}
-    source: "kimi 05-reviews-practice/03-default-look-k3.md §3.9 (контент-баги 3/15 работ K3) [проверено kimi E/03]"
+    source: "разбор LLM-вёрстки (контент-баги 3/15 работ) [проверено]"
     evidence: "[проверено] соседом"
   - id: art-fiction-disclaimer-ru
     marker_id: COPY-M-ART-07
@@ -103,7 +103,7 @@ rules:
     message: "Пометка вымысла или демо-контента в тексте страницы."
     replacement: "подставить реальные данные из брифа и facts.yaml; нет данных — [PLACEHOLDER]"
     examples: {bad: "«Янтарь» — вымышленный бренд, демо-контент для показа.", good: "«Янтарь» — пекарня на Лиговском, 24."}
-    source: "kimi 05/03 §3.7 (честная пометка вымысла ≥ 3/15 работ витрины K3)"
+    source: "разбор LLM-вёрстки (честная пометка вымысла ≥ 3/15 работ витрины)"
   - id: art-fiction-disclaimer-en
     marker_id: COPY-M-ART-07
     level: error
@@ -113,7 +113,7 @@ rules:
     message: "Пометка вымысла, демо-контента или адрес-пример в тексте страницы."
     replacement: "подставить реальные данные; нет данных — [PLACEHOLDER]"
     examples: {bad: "Qingjian Paper Works is a fictional brand. Write to hello@fluid-studio.example", good: "Qingjian Paper Works makes paper in Anhui since 1998."}
-    source: "kimi 05/03 §3.7; ux 07/06 §5.1 (example.com в видимом тексте)"
+    source: "разбор LLM-вёрстки; ux 07/06 §5.1 (example.com в видимом тексте)"
   - id: art-knowledge-cutoff-ru
     marker_id: COPY-M-ART-09
     level: error
@@ -143,5 +143,5 @@ rules:
     message: "Разметка Markdown внутри текста короткого слота: вёрстка выделений — задача дизайна, не copy deck."
     replacement: "убрать ** и #; выделение — через иерархию блока"
     examples: {bad: "**Быстрый** старт за 10 минут", good: "Старт за 10 минут"}
-    source: "WP:AISIGNS «Use of Markdown», «Overuse of boldface»; PLAN.md поправка (выделенное слово в заголовке — ui 11/04 m7)"
+    source: "WP:AISIGNS «Use of Markdown», «Overuse of boldface»; поправка базы (выделенное слово в заголовке — ui 11/04 m7)"
     evidence: "[практика]"

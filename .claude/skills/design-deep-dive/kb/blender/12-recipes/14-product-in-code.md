@@ -1,9 +1,9 @@
 # 14 · Продукт кодом (дорога A): «код v3» — приёмы, их цена, что помогло, где потолок кода
 
 Испытание 15-showcase · рецепт по итогам фаз 1–2 · агент RC, 26.09.2026; числа — окончательный вид p3 (CD3, `99-raw/experiments/CD/HANDOFF-3.md §4`) · three 0.186.0 (WebGLRenderer), postprocessing 6.39.5,
-n8ao 2.0.1, esbuild 0.28.2 из офлайн-песочницы `~/.cache/blender-research/npm-trial` · Chromium 153 headless, ANGLE GL, Iris Xe ·
-доказательства — дорожка CD («Звено» A «код v3», `99-raw/experiments/CD/`, страница `15-showcase/zveno/a-code/`) и KB (клавиатура «Ё» A,
-`99-raw/experiments/KB/08-pages/src/model_a.js`) · подробности кода и ловушек — папка `../14-code-3d/` (ведёт CD), здесь — рецепт.
+n8ao 2.0.1, esbuild 0.28.2 из офлайн-песочницы `$DDD_HOME/node` · Chromium 153 headless, ANGLE GL, Iris Xe ·
+доказательства — дорожка CD («Звено» A «код v3», `examples/14-product-in-code/src/`, страница `15-showcase/zveno/a-code/`) и KB (клавиатура «Ё» A,
+`examples/14-product-in-code/src/model_a.js`) · подробности кода и ловушек — папка `../14-code-3d/` (ведёт CD), здесь — рецепт.
 
 ## Выжимка рецепта
 
@@ -172,11 +172,11 @@ N8AO, если он всё же нужен: без учёта прозрачно
 Вес приёма: define сборки + условие в коде; рантайм-флаг бандлер не видит.
 
 ```bash
-# run: skip — [проверено: 15-showcase/_shared/code3d/build.sh; 99-raw/experiments/CD/out/kb.json] офлайн-сборка и вес по приёмам
-R=/home/mm/Документы/app-design/blender-research
+# run: skip — [проверено: 15-showcase/_shared/code3d/build.sh; 12-recipes/examples/14-product-in-code/src/build.sh kb] офлайн-сборка и вес по приёмам
+R=.                                                    # корень базы kb/blender — рабочая папка блока
 $R/15-showcase/_shared/code3d/build.sh $R/15-showcase/zveno/a-code/js                 # A: без крюка GLB (define __CD_GLB__=false)
 $R/15-showcase/_shared/code3d/build.sh /tmp/x/js --no-post                               # вес поста = разность brotli-сумм
-$R/99-raw/experiments/CD/build.sh kb                                                     # все варианты → CD/out/kb.json (≈ 10 с)
+$R/12-recipes/examples/14-product-in-code/src/build.sh kb                                # все варианты → $DDD_HOME/out/blender/recipes/14-product-in-code/kb.json (≈ 10 с)
 ```
 
 ## 6. Бюджеты и ворота (тишина; фаза 2 и итог CD3 — вид p3)
@@ -199,7 +199,7 @@ LCP страницы «Звена» — H1, а не постер: постер �
 
 Один паспорт в метрах (`15-showcase/keyboard/passport.json`) у кода и у Blender: маска и точки замера верха колпачков B подошли к кадру A
 без правок [проверено: KB `rules.md`]. Колпачки Cherry — кольцами (1 вызов на 68 клавиш), надписи — canvas-атлас шрифтом страницы,
-пластина с вырезами, свитчи — инстансы простых форм, N8AO на десктопе (`99-raw/experiments/KB/08-pages/src/model_a.js`).
+пластина с вырезами, свитчи — инстансы простых форм, N8AO на десктопе (`examples/14-product-in-code/src/model_a.js`).
 
 | что | A (код) | B (Blender, Cycles) | доказательство |
 |---|---|---|---|

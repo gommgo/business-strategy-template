@@ -1,4 +1,4 @@
-# Рецепт 02 · Лендинг SaaS · L1 — машиночитаемая часть 10-recipes/02-saas-l1.md · J · 2026-09-25
+# Рецепт 02 · Лендинг SaaS · L1 — машиночитаемая часть 10-recipes/02-saas-l1.md
 recipe_version: "0.1"
 id: recipe:saas-l1
 title_ru: "Лендинг SaaS, L1 — продукт в движении: интерфейс сам делает работу по прокрутке"
@@ -7,7 +7,7 @@ checked_at: "2026-09-25"
 site_type: saas-marketing-site
 page_type: landing-saas
 level: L1
-level_why: "умолчание лендинга (решение заказчика п. 13); одна сцена показывает работу продукта"
+level_why: "умолчание лендинга; одна сцена показывает работу продукта"
 budget_profile: landing-saas@L1
 when: ["продукт можно показать действием за 5–6 шагов", "трафик поиск и соцсети, регистрация пробного периода"]
 not_when: ["горячий мобильный трафик на тарифы — L0", "продукт без наглядного действия — L0 + скриншоты"]
@@ -63,8 +63,8 @@ motion:
 stack:
   library: [css]
   js_first_kb_br: 0
-  notes: "sticky + view-timeline; счётчик — стопка цифр с animation-range (не @property + counter(): WebKit 26.6 не обновляет, J/05); GSAP — только если сцена шире секции или синхронна с WebGL"
-  platforms: {tilda: "сцену — T123 (CSS) или Zero On Scroll; проверка на опубликованной", static: "как пример J/03"}
+  notes: "sticky + view-timeline; счётчик — стопка цифр с animation-range (не @property + counter(): WebKit 26.6 не обновляет); GSAP — только если сцена шире секции или синхронна с WebGL"
+  platforms: {tilda: "сцену — T123 (CSS) или Zero On Scroll; проверка на опубликованной", static: "как пример 10-recipes/examples/l1-sverka"}
 assets:
   - {slot: screenshot, ladder: text, source: code, note: "HTML-фрагмент интерфейса, без рамки устройства"}
   - {slot: og-image, ladder: image, source: template, task_codes: [IMG-TEXT-CYR], budget_kb: 300}
@@ -78,12 +78,12 @@ budget:
   first_screen_mb: {mobile: 2.0, desktop: 3.5, example: 0.236}
   session_mb: {mobile: 5, desktop: 10, example: 0.236}
   fonts_kb: {mobile: 250, desktop: 250, example: 229.9}
-  source: "ambition-levels.yaml L1; пример — 99-raw/experiments/J/03-l1-sverka/motion-0.1.3/gates.md (J2, 0.1.3)"
+  source: "ambition-levels.yaml L1; пример — прогон motion_check 0.1.3"
 gates:
   tools: ["motion_check.py --level L1 --spec", "marketing_audit.py --level L1"]
   must_pass: [EG-PERF-02, EG-PERF-07, EG-A11Y-06, EG-A11Y-10, EG-A11Y-17, EG-FB-02, EG-WEIGHT-01, EG-WEIGHT-07]
   watch: ["шрифты у предела 250 КБ", "станции sticky-сцены — долей at и кадром"]
-  manual: ["WebKit: var() в animation-range — кадры (WebKit 26.6 Playwright — сверено J2, J/05; Safari на устройстве — живая фаза)"]
+  manual: ["WebKit: var() в animation-range — кадры (WebKit 26.6 Playwright — сверено; Safari на устройстве — живая фаза)"]
 decisions:
   - {id: d-frame, technique: "cliche:dashboard-in-browser-frame", decision: avoid, why: "интерфейс — живой HTML без рамки устройства"}
   - {id: d-serif, technique: "cliche:cream-serif-terracotta", decision: twist, why: "антиква — язык книги учёта, бумага холодная серая, акцент зелёный"}
@@ -92,5 +92,4 @@ decisions:
 errors: ["скриншот в рамке браузера", "появление тарифов и FAQ", "ScrollTrigger pin ради одной сцены (42 КБ, CLS 1,6–2,0)", "начальное состояние вне @supports", "счётчик пользователей в hero"]
 example:
   path: "10-recipes/examples/l1-sverka/"
-  gates: "99-raw/experiments/J/03-l1-sverka/motion-0.1.3/gates.md"
-  result: "motion_check L1: FAIL 0 (B 0, S 0, D 0) — J на 0.1 (N/A 2; моменты 3/3 PASS) и перепрогон J2 на 0.1.3, ворота v0.2, после счётчика стопкой цифр (N/A 5; сверка spec — 9 FAIL станций ложные: цель внутри sticky-слоя, кадрами 1 · 3 · 5 совпало)"
+  result: "motion_check L1: FAIL 0 (B 0, S 0, D 0) — на 0.1 (N/A 2; моменты 3/3 PASS) и перепрогон на 0.1.3, ворота v0.2, после счётчика стопкой цифр (N/A 5; сверка spec — 9 FAIL станций ложные: цель внутри sticky-слоя, кадрами 1 · 3 · 5 совпало)"

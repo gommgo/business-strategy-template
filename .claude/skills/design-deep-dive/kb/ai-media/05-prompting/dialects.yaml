@@ -8,8 +8,7 @@
 #   этого числа пикселей: компилятор сверяет файлы входа до вызова, картинка меньше — ошибка.
 version: "0.4"
 checked_at: "2026-09-25"
-catalog_snapshot: "99-raw/cache/polza/2026-09-25_1411/api-v1-models.json"   # компилятор берёт последний снимок (как polza.py); закрепить — POLZA_CATALOG=<папка>
-catalog_extract: "99-raw/experiments/D/01-catalog-prompt-limits/prompt_limits.json"
+catalog_snapshot: "$DDD_HOME/cache/ai-media/polza/2026-09-25_1411/api-v1-models.json"   # компилятор берёт последний снимок (как polza.py); закрепить — POLZA_CATALOG=<папка>
 
 defaults:
   description_language: en          # описание — по-английски (01 §12.7)
@@ -23,7 +22,7 @@ defaults:
                trending on artstation, best quality, high quality, ultra hd, octane render, unreal engine, beautiful,
                amazing, perfect, professional photo]   # Ideogram magic prompt v1, BFL «Filler hurts», MiniMax «abstract words like cinematic»
   quality_words: [cinematic, 4k, 8k, masterpiece, ultra-detailed, high quality, best quality, hdr, award-winning]   # «слова качества» не работают; для плеча A/B — compile.quality_words
-  quality_words_policy: "не добавлять по умолчанию: против — MiniMax («abstract words like cinematic»), Runway, BFL, скиллы sd25-pe и wan3-pe («Do not automatically add quality packs»); за — Seedance 2.0 (гайд и скилл sd2-pe: «4K HD, rich details» + анти-искажения обязательно), в примерах Kling и Vertex; ByteDance противоречит сам себе → [спорно], плечо A/B — compile.quality_words (W3-13); у семейства — quality_vendor"
+  quality_words_policy: "не добавлять по умолчанию: против — MiniMax («abstract words like cinematic»), Runway, BFL, скиллы sd25-pe и wan3-pe («Do not automatically add quality packs»); за — Seedance 2.0 (гайд и скилл sd2-pe: «4K HD, rich details» + анти-искажения обязательно), в примерах Kling и Vertex; ByteDance противоречит сам себе → [спорно], плечо A/B — compile.quality_words; у семейства — quality_vendor"
   grading_words: [warm]      # Ideogram: «The word "warm"… is BANNED as a grading adjective» — задавать источник света
   comparatives: [darker, lighter, brighter, dimmer, warmer, cooler, bigger, smaller, larger, more, less, softer, harder,
                  sharper, stronger, weaker, higher, lower, redder, greener, bluer]   # правка: целевые значения вместо сравнительных [V:8kM5aDD5gLI 25:38]
@@ -321,7 +320,7 @@ families:
     camera: {one_move: true, prefer: "slow, gentle, continuous small movements", rule: "sd2-pe: «only 1 type of camera movement in the shot of a time slice»"}
     audio: {param: generate_audio, set: "false", vendor_default: "true"}
     subtitles_hint: "горизонтальный формат снижает вероятность субтитров"
-    quality_vendor: {position: required, phrase: "4K HD, rich details; faces stay stable and undistorted, no clipping through objects.", note: "sd2-pe: «Mandatory fallback… anti-distortion and high image quality constraints»; гайд [26]: «HD, rich details, cinematic texture, natural colors, soft lighting»; база по умолчанию не добавляет (W3) — [спорно]"}
+    quality_vendor: {position: required, phrase: "4K HD, rich details; faces stay stable and undistorted, no clipping through objects.", note: "sd2-pe: «Mandatory fallback… anti-distortion and high image quality constraints»; гайд [26]: «HD, rich details, cinematic texture, natural colors, soft lighting»; база по умолчанию не добавляет — [спорно]"}
     references_rule: "sd2-pe: после каждого @Image N — местоимение или имя: «@Image 1 (Lee) stands up…»"
     enhancer: {vendor: "скилл sd2-pe (интерактивный, вне API)", polza: null}
     aspect_ratio_param: aspect_ratio
@@ -494,7 +493,7 @@ families:
 
   bria-fibo:
     class: D                       # обучена только на JSON-подписях ~1 000 слов (arXiv 2511.06876)
-    source: "02 §2; Gen-API bria-fibo (99-raw/cache/gen-api.ru_model_bria-fibo_api_1dd5eda0.md)"
+    source: "02 §2; Gen-API bria-fibo (gen-api.ru/model/bria-fibo/api)"
     in_polza: false
     models:
       bria-fibo: {max_prompt_chars: null, max_refs: 1, note: "Gen-API: prompt | structured_prompt, seed, step_num 50, guidance_scale 5, negative_prompt, mask_url, aspect_ratio"}
@@ -504,7 +503,7 @@ families:
     negative: {field: negative_prompt, field_style: nouns_comma, object: positive}
     language: {description: en}
     status: untested               # схема — из значения по умолчанию Gen-API; порядок и полнота ключей не сверены с первоисточником Bria
-    phase5: "D2-12 (Gen-API, 25.09.2026): structured_prompt объектом — 3 из 3 отклонено провайдером («параметры сформированы некорректно», 0 ₽); проза ≤ 1 000 символов работает (10 ₽), > 1 000 — 422; FIBO сам разворачивает прозу в свою JSON-схему (4 006 и 4 761 символ против 723 и 683) → через Gen-API писать прозу; JSON строкой (D2-12v2) не прогонялся"
+    note: "D2-12 (Gen-API, 25.09.2026): structured_prompt объектом — 3 из 3 отклонено провайдером («параметры сформированы некорректно», 0 ₽); проза ≤ 1 000 символов работает (10 ₽), > 1 000 — 422; FIBO сам разворачивает прозу в свою JSON-схему (4 006 и 4 761 символ против 723 и 683) → через Gen-API писать прозу; JSON строкой (D2-12v2) не прогонялся"
 
 # ---- видео-диалекты: дополняют семейства выше, компилятор сливает их по имени семейства ----
 # motion_forbid: sentence — запреты движения предложениями (так пишут вендоры: Seedance «keep it subtitle-free»,
@@ -521,7 +520,7 @@ video:
                  note: "в polza нет параметра multi_shots (у вендора по умолчанию true, у провайдера — вероятно false: sound «Обязательно true при multi_shots=true») — мульти-шот текстом [не проверено]; для одного плана — «one continuous shot»"}}
   minimax-h3:   {motion_forbid: positive, timestamps_template: "At 00:{t0:06.3f}, {beat}", multishot: {template: "[Shot {n}] At 00:{t0:06.3f}, the camera cuts to {words}", joiner: " "},
                  i2va_line: "For the target video, at 0.00 seconds into the target video, <Picture 1> (from [Shot 1]) is fully referenced."}
-  grok-video:   {motion_forbid: positive, timestamps_template: null, multishot: null, note: "D2-08 (фаза 5, n = 2): запреты предложениями (--opt forbid_style=sentence: «No zoom. No spin. Do not reposition the subject.») против без запретов — дрейф объекта 8,1 % против 19,1 % ширины; positive против sentence не сравнивались"}
+  grok-video:   {motion_forbid: positive, timestamps_template: null, multishot: null, note: "D2-08 (живой прогон, n = 2): запреты предложениями (--opt forbid_style=sentence: «No zoom. No spin. Do not reposition the subject.») против без запретов — дрейф объекта 8,1 % против 19,1 % ширины; positive против sentence не сравнивались"}
   runway:       {motion_forbid: positive, timestamps_template: "[00:{t0:02.0f}] {beat}", multishot: null}
 
 # ---- каналы вне Media API polza: задания .routerai.json и .genapi.json для mp_client.py ----
@@ -529,17 +528,17 @@ channels:
   routerai:
     method: POST
     path: "/api/v1/images"          # синхронно, base64 в data[].b64_json, usage.cost (₽)
-    docs: "99-raw/cache/routerai.ru_docs_guides_overview_multimodal_image-generation_753f42c7.md"
-    catalog: "99-raw/experiments/P/04-ru-aggregators/routerai_models.json (23.09.2026 09:34, supported_parameters)"
-    price_source: "99-raw/experiments/P/05-price-compare/price_table_2026-09-23.md (RouterAI ×1,30 к ЦБ)"
+    docs: "routerai.ru/docs/guides/overview/multimodal/image-generation"
+    catalog: "routerai.ru/api/v1/models (23.09.2026 09:34, supported_parameters)"
+    price_source: "ai-media 02/03: таблица цен 23.09.2026 (RouterAI ×1,30 к ЦБ)"
     input_reference: {type: image_url, image_url: {url: "{src}"}}   # src → data URI при отправке (mp_client.py)
     # output_format модели — формат, который она отдаёт, когда его не называет маршрут задачи (routing.yaml); без поля —
     # png. У векторных моделей — svg: другого формата канал у них не принимает (supported_output_formats каталога).
     models:
       black-forest-labs/flux.2-pro:  {family: flux2, params: [aspect_ratio, output_format, n, input_references, seed], price_rub: 3.28, price_unit: "картинка ≤ 1 Мп", upsampling: "не управляется: disable_pup нет в supported_parameters"}
       black-forest-labs/flux.2-flex: {family: flux2, params: [aspect_ratio, output_format, n, input_references, seed], price_rub: 6.56, price_unit: "картинка ≤ 1 Мп", upsampling: "не управляется"}
-      openai/gpt-image-2.5-sunburst: {family: gpt-image, params: [aspect_ratio, quality, background, n, input_references, output_compression], price_rub: 1.44, price_unit: "1024² medium, по токенам (P/05)"}
-      openai/gpt-image-2.5-flare:    {family: gpt-image, params: [aspect_ratio, quality, background, n, input_references, output_compression], price_rub: 1.44, price_unit: "1024² medium, по токенам (P/05)"}
+      openai/gpt-image-2.5-sunburst: {family: gpt-image, params: [aspect_ratio, quality, background, n, input_references, output_compression], price_rub: 1.44, price_unit: "1024² medium, по токенам (ai-media 02/03)"}
+      openai/gpt-image-2.5-flare:    {family: gpt-image, params: [aspect_ratio, quality, background, n, input_references, output_compression], price_rub: 1.44, price_unit: "1024² medium, по токенам (ai-media 02/03)"}
       bytedance-seed/seedream-4.5:   {family: seedream, params: [resolution, aspect_ratio, n, input_references, seed], price_rub: 4.37, price_unit: "картинка"}
       recraft/recraft-v4.1:          {family: recraft-v4, params: [aspect_ratio, n, input_references], price_rub: 3.82, price_unit: "картинка"}
       recraft/recraft-v4.1-vector:   {family: recraft-v4, params: [aspect_ratio, output_format, n, input_references], output_format: svg, price_rub: 8.74, price_unit: "картинка"}
@@ -547,8 +546,8 @@ channels:
   genapi:
     method: POST
     path: "/api/v1/networks/{network}"   # ответ {request_id, status: starting}; результат GET /api/v1/request/get/{request_id}
-    docs: "99-raw/cache/gen-api.ru_model_flux-2_api_51030861_r.md; gen-api.ru_docs_v1_generations_getting-the-result_e49ed601.md"
-    price_source: "99-raw/experiments/P/04-ru-aggregators/genapi_prices_2026-09-23.txt"
+    docs: "gen-api.ru/model/flux-2/api; gen-api.ru/docs/v1/generations/getting-the-result"
+    price_source: "прайс Gen-API 23.09.2026"
     models:
       flux-2:      {family: flux2, variant: "FLUX.2 [dev] (fal)", params: [prompt, image_urls, guidance_scale, num_inference_steps, width, height, num_images, acceleration, enable_prompt_expansion, enable_safety_checker, seed, output_format, model, translate_input],
                     fixed: {enable_prompt_expansion: false, translate_input: false, num_images: 1, model: standard, output_format: png}, price_rub: 3.0, price_unit: "Мп (standard, по тексту)", upsampling: "enable_prompt_expansion (по умолчанию false)"}
@@ -566,12 +565,12 @@ channels:
 # вопросам брифа (DSG); согласие на повторах 100 % (n = 4).
 # Итог: ни одно плечо умолчание не заменило; JSON — спецификация системы (asset-spec → компилятор), не формат промта модели.
 ab_results:
-  - {test: D2-01, family: nano-banana, model: google/gemini-3.1-flash-lite-image, channel: polza, date: "2026-09-25", arms: "json против sections", pairs: 10, delta_pp: 2.8, ci95: [-2.7, 9.1], sign_p: 0.625, scores: "json 98,1 (sd 4,0) / sections 95,3 (sd 6,6) — потолок", dialect_winner: none, decision: "оставить умолчание (sections)", run: "99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
-  - {test: D2-02, family: flux2, model: "flux-2 (Gen-API, FLUX.2 [dev] без переписчика)", channel: genapi, date: "2026-09-25", arms: "json против prose, seed 101/202", pairs: 10, delta_pp: null, ci95: null, dialect_winner: none, decision: "умолчание не меняется; судья D2-03b не прогонялся (решение заказчика 25.09 п. 16) — вывод предварительный, глазом, 1 образец на бриф: JSON развёл «coral» как цвет (абстрактное пятно 2 из 2), проза дала живой коралл (2 из 2) — лечится прозой «a coral-colored abstract shape»; в B5 JSON ослабил «bold condensed» в 1 из 2", run: "99-raw/phase5/runs/3-prompt-form/analysis-D2-02/d2_report.md"}
-  - {test: D2-04, family: z-image, model: tongyi-mai/z-image, channel: polza, date: "2026-09-25", arms: "text_zone_style google / copyspace против base", pairs: "4 + 4", delta_pp: [5.3, 2.2], ci95: [[0.0, 10.6], [-8.3, 10.0]], dialect_winner: none, decision: "оставить умолчание (base); «copy space» дал самую шумную зону (z1: плотность краёв 0,0037 против 0,0005)", run: "99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
-  - {test: D2-05, family: z-image, model: tongyi-mai/z-image, channel: polza, date: "2026-09-25", arms: "negation sentence / none-mention против family", pairs: "3 + 3", delta_pp: [3.7, 0.0], ci95: [[0.0, 11.1], [-11.1, 11.1]], dialect_winner: none, decision: "оставить умолчание; «No people.» у энкодерной Z-Image людей не вызывает — 0 из 3 во всех плечах (H5 не подтверждена)", run: "99-raw/phase5/runs/3-prompt-form/analysis/d2_report.md"}
-  - {test: D2-06, family: nano-banana, model: google/gemini-3.1-flash-image-preview, channel: polza, date: "2026-09-25", arms: "10 правок одним вызовом против цепочки 5 + 5", pairs: 1, delta_pp: null, ci95: null, result: "одним вызовом 10 из 10 (4,8 ₽); цепочка 10 из 10 (9,6 ₽), шаг 1 — 5 из 10, global ΔE00 4,69, LEAK 0,28", dialect_winner: none, decision: "правки — одним вызовом (1 образец): для NB2 --opt max_changes=10; defaults.edit.max_changes = 5 не менялось", run: "99-raw/phase5/runs/3-prompt-form/D2-06-check/D2-06_sheet.jpg"}
-  - {test: D2-07, family: seedance-1-5, model: bytedance/seedance-1.5-pro, channel: polza, date: "2026-09-25", arms: "i2v motion_only / full (пересказ сцены) / одно событие, 480p 4 с", pairs: "2 × 3", delta_pp: null, ci95: null, result: "движение 1,61 / 1,69 / 2,45 («одно событие» +52 %); SSIM кадра 0 к A — 0,814 у всех", dialect_winner: none, decision: "i2v=motion_only остаётся — по краткости (463 против 796 символов), пересказ не уменьшает движение и не перерисовывает кадр", run: "99-raw/phase5/runs/3-prompt-form/video/D2-07/metrics.md"}
-  - {test: D2-08, family: grok-video, model: grok-imagine-video-1-5, channel: polza, date: "2026-09-25", arms: "запреты движения предложениями (forbid_style=sentence) против без запретов, 480p 4 с", pairs: "2 × 2", delta_pp: null, ci95: null, result: "дрейф объекта 8,1 % против 19,1 % ширины (−58 %); площадь ±1,2 % против 0,095–1,05 (без запретов в 1 из 2 продукт почти ушёл из кадра)", dialect_winner: sentence, decision: "запреты движения писать всегда; форма sentence проверена, positive (умолчание семейства) — не сравнивалась", run: "99-raw/phase5/runs/3-prompt-form/README.md"}
-  - {test: D2-11, family: seedance-1-5, model: bytedance/seedance-1.5-pro, channel: polza, date: "2026-09-25", arms: "JSON из тех же предложений против prose, 3 брифа × 2", pairs: "3 × 2", delta_pp: null, ci95: null, result: "движение JSON / проза: пейзаж 2,03 / 1,61, крупная форма 2,22 / 3,15, продукт 1,28 / 1,50; склеек 0 из 12; разброс повторов (1,84 против 4,46) больше разницы плеч; продукт на ключе наезжает (×1,8–2,1) в 3 из 4 при любой форме", dialect_winner: none, decision: "форма видео-промта не важна; умолчание prose", run: "99-raw/phase5/runs/3-prompt-form/video/D2-11/metrics.md"}
-  - {test: D2-12, family: bria-fibo, model: bria-fibo, channel: genapi, date: "2026-09-25", arms: "structured_prompt (JSON-объект) против prose", pairs: 0, delta_pp: null, ci95: null, result: "JSON-плечо 3 из 3 отклонено провайдером (0 ₽); проза ≤ 1 000 символов — 2 картинки по 10 ₽, B1 (1 339 символов) — 422; FIBO вернул свою JSON-схему в 5,5–7 раз длиннее прозы", dialect_winner: prose, decision: "через Gen-API — проза ≤ 1 000 символов; JSON строкой (D2-12v2) не прогонялся (решение заказчика п. 16)", run: "99-raw/phase5/runs/3-prompt-form/README.md"}
+  - {test: D2-01, family: nano-banana, model: google/gemini-3.1-flash-lite-image, channel: polza, date: "2026-09-25", arms: "json против sections", pairs: 10, delta_pp: 2.8, ci95: [-2.7, 9.1], sign_p: 0.625, scores: "json 98,1 (sd 4,0) / sections 95,3 (sd 6,6) — потолок", dialect_winner: none, decision: "оставить умолчание (sections)"}
+  - {test: D2-02, family: flux2, model: "flux-2 (Gen-API, FLUX.2 [dev] без переписчика)", channel: genapi, date: "2026-09-25", arms: "json против prose, seed 101/202", pairs: 10, delta_pp: null, ci95: null, dialect_winner: none, decision: "умолчание не меняется; судья D2-03b не прогонялся — вывод предварительный, глазом, 1 образец на бриф: JSON развёл «coral» как цвет (абстрактное пятно 2 из 2), проза дала живой коралл (2 из 2) — лечится прозой «a coral-colored abstract shape»; в B5 JSON ослабил «bold condensed» в 1 из 2"}
+  - {test: D2-04, family: z-image, model: tongyi-mai/z-image, channel: polza, date: "2026-09-25", arms: "text_zone_style google / copyspace против base", pairs: "4 + 4", delta_pp: [5.3, 2.2], ci95: [[0.0, 10.6], [-8.3, 10.0]], dialect_winner: none, decision: "оставить умолчание (base); «copy space» дал самую шумную зону (z1: плотность краёв 0,0037 против 0,0005)"}
+  - {test: D2-05, family: z-image, model: tongyi-mai/z-image, channel: polza, date: "2026-09-25", arms: "negation sentence / none-mention против family", pairs: "3 + 3", delta_pp: [3.7, 0.0], ci95: [[0.0, 11.1], [-11.1, 11.1]], dialect_winner: none, decision: "оставить умолчание; «No people.» у энкодерной Z-Image людей не вызывает — 0 из 3 во всех плечах (H5 не подтверждена)"}
+  - {test: D2-06, family: nano-banana, model: google/gemini-3.1-flash-image-preview, channel: polza, date: "2026-09-25", arms: "10 правок одним вызовом против цепочки 5 + 5", pairs: 1, delta_pp: null, ci95: null, result: "одним вызовом 10 из 10 (4,8 ₽); цепочка 10 из 10 (9,6 ₽), шаг 1 — 5 из 10, global ΔE00 4,69, LEAK 0,28", dialect_winner: none, decision: "правки — одним вызовом (1 образец): для NB2 --opt max_changes=10; defaults.edit.max_changes = 5 не менялось"}
+  - {test: D2-07, family: seedance-1-5, model: bytedance/seedance-1.5-pro, channel: polza, date: "2026-09-25", arms: "i2v motion_only / full (пересказ сцены) / одно событие, 480p 4 с", pairs: "2 × 3", delta_pp: null, ci95: null, result: "движение 1,61 / 1,69 / 2,45 («одно событие» +52 %); SSIM кадра 0 к A — 0,814 у всех", dialect_winner: none, decision: "i2v=motion_only остаётся — по краткости (463 против 796 символов), пересказ не уменьшает движение и не перерисовывает кадр"}
+  - {test: D2-08, family: grok-video, model: grok-imagine-video-1-5, channel: polza, date: "2026-09-25", arms: "запреты движения предложениями (forbid_style=sentence) против без запретов, 480p 4 с", pairs: "2 × 2", delta_pp: null, ci95: null, result: "дрейф объекта 8,1 % против 19,1 % ширины (−58 %); площадь ±1,2 % против 0,095–1,05 (без запретов в 1 из 2 продукт почти ушёл из кадра)", dialect_winner: sentence, decision: "запреты движения писать всегда; форма sentence проверена, positive (умолчание семейства) — не сравнивалась"}
+  - {test: D2-11, family: seedance-1-5, model: bytedance/seedance-1.5-pro, channel: polza, date: "2026-09-25", arms: "JSON из тех же предложений против prose, 3 брифа × 2", pairs: "3 × 2", delta_pp: null, ci95: null, result: "движение JSON / проза: пейзаж 2,03 / 1,61, крупная форма 2,22 / 3,15, продукт 1,28 / 1,50; склеек 0 из 12; разброс повторов (1,84 против 4,46) больше разницы плеч; продукт на ключе наезжает (×1,8–2,1) в 3 из 4 при любой форме", dialect_winner: none, decision: "форма видео-промта не важна; умолчание prose"}
+  - {test: D2-12, family: bria-fibo, model: bria-fibo, channel: genapi, date: "2026-09-25", arms: "structured_prompt (JSON-объект) против prose", pairs: 0, delta_pp: null, ci95: null, result: "JSON-плечо 3 из 3 отклонено провайдером (0 ₽); проза ≤ 1 000 символов — 2 картинки по 10 ₽, B1 (1 339 символов) — 422; FIBO вернул свою JSON-схему в 5,5–7 раз длиннее прозы", dialect_winner: prose, decision: "через Gen-API — проза ≤ 1 000 символов; JSON строкой (D2-12v2) не прогонялся"}

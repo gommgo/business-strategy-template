@@ -38,7 +38,7 @@
 ```python
 # Blender 5.2.2 — [проверено] рецепт 12: AR-GLB (лимиты Scene Viewer) + USDZ (Quick Look)
 import sys, os, json, shutil, struct, bpy
-sys.path.insert(0, "/home/mm/Документы/app-design/blender-research/12-recipes/examples/_kit")
+import os; sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "..", "..", "scripts", "blender"))  # перенос: rk.py — scripts/blender
 import rk
 SLUG = "12-model-viewer-ar"
 SRC = f"{rk.ROOT}/12-recipes/examples/01-hero-product"
@@ -104,7 +104,7 @@ rk.save(SLUG, ar_lint=lint, web_glb_lint=lint_web, usdz=usd)
 F1 брал `ajax.googleapis.com` — оба адреса отдают 4.3.1):
 
 ```html
-<!-- model-viewer 4.3.1 — [проверено: 99-raw/experiments/K/09-mv-page — загрузка и рендер в Chromium; AR на устройствах не проверен] -->
+<!-- model-viewer 4.3.1 — [проверено: загрузка и рендер в Chromium; AR на устройствах не проверен] -->
 <script type="module" src="https://cdn.jsdelivr.net/npm/@google/model-viewer@4.3.1/dist/model-viewer.min.js"></script>
 <style> model-viewer { display: block; width: 100%; height: auto; aspect-ratio: 1; } </style>  <!-- :host задаёт 300×150 -->
 <model-viewer src="case_ar.glb" ios-src="case.usdz" poster="poster.webp"

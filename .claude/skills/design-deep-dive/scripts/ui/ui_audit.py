@@ -71,6 +71,9 @@ J раскладка, K движение, L приметы вида, M сокр�
   * контраст текста на градиенте и на полупрозрачной подложке считается по цвету ближайшего непрозрачного предка —
     значение недостоверно, вердикт WARN (I1b); текст над картинкой, видео или canvas — WARN «проверить F83» (I1m):
     контраст по буквам считает `scripts/ai-media/page_accept.py --contrast`.
+
+Замок браузера утилита берёт сама на время работы браузера: kbpaths.lock("browser"), реентерабельный по дереву процессов —
+утилита, запущенная из утилиты с тем же замком, его не ждёт.
 """
 from __future__ import annotations
 
@@ -1876,7 +1879,7 @@ def audit(target, opts):
     url = to_url(target)
     reports, runs, normal_rows, reduced_rows = [], [], None, None
 
-    with sync_playwright() as pw:
+    with kbpaths.lock("browser"), sync_playwright() as pw:
         browser = pw.chromium.launch(args=["--force-color-profile=srgb", "--disable-lcd-text"])
         if overflow:
             # на ширине overflow_only — только горизонтальный вылет (WCAG 1.4.10)

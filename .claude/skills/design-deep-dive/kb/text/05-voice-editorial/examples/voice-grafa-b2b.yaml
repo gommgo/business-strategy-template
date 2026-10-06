@@ -1,9 +1,8 @@
 # voice-grafa-b2b.yaml — пример 1 из 3: сдержанный B2B (бухгалтерия на аутсорсе для ООО и ИП; лидогенерация услуги)
-# text-research · F · 2026-09-24 · формат: ../voice.schema.yaml (voice_version 1)
+# Формат: ../voice.schema.yaml (voice_version 1)
 #
-# Бренд «Графа» — ВЫМЫШЛЕННАЯ компания; ДЕМО-факты — ../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml
-# (написал агент F по формату B2: у базы не было B2B-набора). Образцы строк — ai-self, прошли claims_check.py и
-# copy_lint.py: 99-raw/experiments/F/04-voice-samples/README.md.
+# Бренд «Графа» — ВЫМЫШЛЕННАЯ компания; ДЕМО-факты — файл brand.facts_ref (формат facts.yaml: у базы не было
+# B2B-набора). Образцы строк — ai-self, прошли claims_check.py и copy_lint.py.
 # Что показывает пример: голос для предмета с высокой ценой ошибки (деньги, налоги) и незнакомого бренда — формальнее
 # середины (Gretry 2017: неформальность снижает доверие к незнакомым брендам), без юмора и эмодзи; факт + условие вместо
 # «надёжности»; ключевое слово «заранее» опирается на факт, а не на слова отзыва; английский — адаптация для иностранных
@@ -18,7 +17,7 @@ brand:
   name: "Графа"
   site: grafa-buh-demo
   category: "бухгалтерия на аутсорсе для ООО и ИП"
-  facts_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml"
+  facts_ref: "facts-demo-grafa.yaml"
 
 scope:
   genres: [landing, site-page, email-form, article, meta]
@@ -39,7 +38,7 @@ derived_from:
   differs_from_competitors: "Называем срок, сумму и пункт договора; объясняем налоговые слова один раз и по-человечески; не пугаем штрафами."
   brief_adjectives: ["надёжные", "профессиональные", "современные"]
   basis:
-    - {kind: brief, ref: "демо-бриф агента F: бухгалтерия для ООО и ИП на УСН, удалённо"}
+    - {kind: brief, ref: "демо-бриф: бухгалтерия для ООО и ИП на УСН, удалённо"}
     - {kind: voc, ref: "fact:review-dmitry-k — «Раньше про требования налоговой я узнавал от банка — когда счёт уже блокировали»"}
     - {kind: inferred, ref: "цена ошибки и незнакомость бренда → формальнее середины (ux 07/01 §7.2; Gretry 2017)"}
     - {kind: assumption, ref: "прилагательные брифа «надёжные, профессиональные, современные»", question_id: q-adjectives}
@@ -74,7 +73,7 @@ principles:
       - "Первое предложение блока — действие или результат со сроком или суммой"
       - "Предложения 8–20 слов; одно предложение — одна мысль; без парцелляции («Быстро. Чётко. В срок.»)"
       - "Вопрос в заголовке — только в FAQ, и ответ начинается с сути («Переход занимает 10 рабочих дней»)"
-    is_not: "Не телеграф: рубленые фразы без связок — та же сухость, только модная (сверхкоррекция, C)."
+    is_not: "Не телеграф: рубленые фразы без связок — та же сухость, только модная (сверхкоррекция, text 06/01 §13)."
     do: ["Переход занимает 10 рабочих дней: принимаем базу 1С и документы, сверяем остатки."]
     dont: ["Переход? Легко. Быстро. Без стресса."]
     checked_by: [copy_lint, judge]
@@ -142,9 +141,9 @@ vocabulary:
     - {term: "не будет проверок", use_instead: "что делаем, если придёт требование", reason: "never_claim:nc-no-audits", level: error}
     - {term: "спешите", use_instead: "срок из факта, если он есть", reason: "ложная срочность", level: warning}
   use_with_care:
-    - {term: "аутсорсинг, аутсорс", condition: "в title, мета и заголовке SEO-страницы (слово запроса — G); в тексте — «ведём бухгалтерию»"}
+    - {term: "аутсорсинг, аутсорс", condition: "в title, мета и заголовке SEO-страницы (слово запроса — text 07/01); в тексте — «ведём бухгалтерию»"}
     - {term: "сопровождение", condition: "только в названии тарифа; в тексте — глаголы"}
-    - {term: "бесплатно", condition: "рядом — что именно бесплатно («расчёт стоимости») (H: COPY-L-FREE-01)"}
+    - {term: "бесплатно", condition: "рядом — что именно бесплатно («расчёт стоимости») (COPY-L-FREE-01)"}
   spellings:
     - {preferred: "1С", variants: ["1C", "1-С", "1с"], lang: ru, note: "кириллическая «С»"}
     - {preferred: "УСН", variants: ["упрощёнка", "упрощенка"], lang: ru, note: "разговорное — только в цитате клиента"}
@@ -178,7 +177,7 @@ taboos:
   - {id: no-audits, what: "обещание, что проверок и штрафов не будет", why: "не зависит от исполнителя", refs: ["never_claim:nc-no-audits"]}
   - {id: jokes-about-tax-office, what: "шутки о налоговой и о деньгах клиента", why: "humor.level: none"}
 
-claims_boundaries_ref: "../../99-raw/experiments/F/04-voice-samples/facts-demo-grafa.yaml#never_claim"
+claims_boundaries_ref: "facts-demo-grafa.yaml#never_claim"
 
 samples:
   # --- русский (10 типов слотов) — ai-self, ДЕМО-факты «Графы»
@@ -251,6 +250,6 @@ open_questions:
 
 review:
   method: editor
-  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review (99-raw/experiments/F/04-voice-samples)"
-  by: "агент F (ai-self)"
+  result: "черновик; образцы: claims_check — 0 error, copy_lint — clean/review"
+  by: "ai-self"
   date: "2026-09-24"
