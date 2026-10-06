@@ -35,8 +35,7 @@
                                       `design/<surface>/motion/lab/<id>/` (путь с «/» на конце): её называет
                                       prototype.lab_path арт-дирекции или references[].source.url спецификации движения
                                       страницы; статус — prototype.status (у папки из спецификации — «—»), sha256 —
-                                      отпечаток папки: строки «путь файла, sha256 файла» по алфавиту; папки нет —
-                                      источника нет
+                                      отпечаток папки (dir_sha); папки нет — источника нет
   units                               сайт — страницы планов site/<surface>/plans/ (порядок build_order карты или
                                       pages.list брифа); кабинет — экраны screens/<surface>/screens/
     composition                       сайт — статус плана; кабинет — статус экрана
@@ -177,7 +176,8 @@ def sha(path):
 
 
 def dir_sha(path):
-    """Отпечаток папки: sha256 строк «<путь файла от папки>\\t<sha256 файла>» по алфавиту путей."""
+    """Отпечаток папки: sha256 строк «<путь файла от папки>\\t<sha256 файла>» через перевод строки, UTF-8. Порядок —
+    sorted(Path): по сегментам пути, сегменты — посимвольно по кодовым точкам Unicode, без учёта локали."""
     root = Path(path)
     lines = [f"{p.relative_to(root).as_posix()}\t{sha(p)}" for p in sorted(x for x in root.rglob("*") if x.is_file())]
     return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
