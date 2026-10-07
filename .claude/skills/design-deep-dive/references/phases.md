@@ -350,7 +350,9 @@ S2–S3 цепочки текстов; `site-map` — `step:site-map`; `page-pla
   - `…/voc.yaml` — слова клиента с источником, по желанию;
   - в брифе — `proof.facts_ref`, `meaning_ref`. Поля фактов никуда не копируются: план ссылается `refs.facts` и слотами
     данных `fact:<id>`, copy deck — `facts_ref` и `fact_ids`.
-- **Проверка.** `claims_check.py lint-facts` (разрешение `pending` — предупреждение, до публикации — `--final`);
+- **Проверка.** `claims_check.py lint-facts` (разрешение `pending` — предупреждение, до публикации — `--final`;
+  значение контакта для кода `machine` не из `canonical` — ошибка, контакт без него — предупреждение с готовым
+  значением, text 02/03 §4.2);
   `validate_any.py` смысла — счётчики оснований `basis_kinds`: доля допущений выше порога text 09/02 §1.1 (S3) —
   доклад заказчику, какие утверждения стоят на допущениях и что их подтвердит, а не остановка этапа;
   `chain_inputs.py meaning-claims --meaning M --brief B -o OUT` → `copydeck.py claims` — смысл против фактов до текстов,

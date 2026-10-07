@@ -106,10 +106,25 @@ if base:
         'перевод факта: язык не код': lambda d: d['facts'][0].setdefault('translations', {}).__setitem__('english', {'canonical': 'x'}),
         'never_claim: язык вне формата': lambda d: d.setdefault('never_claim', [{'id': 'nc-x', 'text': 'x', 'claim_class': ['superlative'], 'patterns': ['x']}])[0].__setitem__('lang', 'english'),
         'never_claim: перевод с лишним полем': lambda d: d.setdefault('never_claim', [{'id': 'nc-x', 'text': 'x', 'claim_class': ['superlative'], 'patterns': ['x']}])[0].__setitem__('translations', {'en': {'text': 'x', 'lift': 'never'}}),
+        'machine: телефон не E.164': lambda d: d['facts'][0].__setitem__('machine', {'type': 'telephone', 'value': '+7 900 000-00-01'}),
+        'machine: вид вне словаря': lambda d: d['facts'][0].__setitem__('machine', {'type': 'phone', 'value': '+79000000001'}),
+        'machine: адрес без улицы': lambda d: d['facts'][0].__setitem__('machine', {'type': 'postal-address', 'country': 'RU', 'locality': 'Казань'}),
+        'machine: мессенджер без сети': lambda d: d['facts'][0].__setitem__('machine', {'type': 'messenger', 'value': 'https://t.me/primer'}),
+        'machine: день недели вне словаря': lambda d: d['facts'][0].__setitem__('machine', {'type': 'opening-hours', 'hours': [{'days': ['пн'], 'opens': '09:00', 'closes': '21:00'}]}),
     }
     for name, fn in negs.items():
         errs = mutate(fn)
         check(f'отрицательный: {name} → ошибка', bool(errs), 'валидатор пропустил')
+    machines = [{'type': 'telephone', 'value': '+79000000001'}, {'type': 'email', 'value': 'hello@primer.example'},
+                {'type': 'url', 'value': 'https://primer.example/'},
+                {'type': 'messenger', 'network': 'telegram', 'value': 'https://t.me/primer'},
+                {'type': 'postal-address', 'country': 'RU', 'locality': 'Казань', 'street': 'улица Примерная, 1'},
+                {'type': 'opening-hours', 'hours': [{'days': ['mo', 'tu'], 'opens': '09:00', 'closes': '24:00'}]},
+                {'type': 'legal-id', 'scheme': 'ogrn', 'value': '1000000000001'}, {'type': 'geo', 'lat': 55.75, 'lon': 37.62}]
+    bad_m = [(m['type'], [e.message[:80] for e in mutate(lambda d, m=m: d['facts'][0].__setitem__('machine', m))])
+             for m in machines]
+    check('machine: по значению каждого вида (телефон, почта, ссылка, мессенджер, адрес, часы, реквизит, координаты) — '
+          'валиден', not any(e for _, e in bad_m), [x for x in bad_m if x[1]])
 
 # ---- voc (если уже есть)
 vp = os.path.join(SM, 'voc.schema.yaml')

@@ -234,7 +234,7 @@ copy deck → `fact_ids`.
 |---|---|---|
 | шапка | `facts_version`, `date`, `site`, `lang`, `jurisdiction` (ru), `status`, `owner`, `collected_by`, `intake`, `never_claim_defaults` | чей инвентарь, на какую дату, какое право |
 | `entities[]` | `id`, `type`, `names[]`, `fact_id` | известные имена; клиент и человек — только через факт с разрешением |
-| `facts[]` | `id`, `aliases`, `kind`, `claim_class[]`, `verbatim[]`, `canonical`, `values[]`, `source`, `verification`, `permission`, `use`, `valid`, `basis`, `legal`, `attribution`, `original_ref`, `edits[]`, `asset`, `responsible`, `translations`, `schema_org`, `related` | белый список |
+| `facts[]` | `id`, `aliases`, `kind`, `claim_class[]`, `verbatim[]`, `canonical`, `values[]`, `source`, `verification`, `permission`, `use`, `valid`, `basis`, `legal`, `attribution`, `original_ref`, `edits[]`, `asset`, `responsible`, `translations`, `schema_org`, `machine`, `related` | белый список |
 | `missing[]` | `id`, `what`, `placeholder`, `who`, `needed_for`, `asked`, `due`, `blocking`, `fallback`, `question` | пробелы и вопросы |
 | `never_claim[]` | `id`, `text`, `claim_class`, `patterns`, `lift`, `voice`, `scope`, `reason` | запреты проекта |
 
@@ -252,6 +252,16 @@ URL или документ; сравнение, превосходная сте
   и site H (разметка; у Google ограничения на самохвальные отзывы об организации).
 - `values[]` — `value`, `range` или `date`; `unit`; `what` (объект счёта); `comparator` (`gte` для «от» и «+»); `approx`;
   для рейтинга `scale`, `count`, `as_of`.
+- `machine` — значение контакта или реквизита для кода: ссылки `tel:`, `mailto:` и мессенджера, подвал, JSON-LD. Вид
+  `type` и значение: `telephone` — E.164 (`+79000000001`), `email`, `url` — абсолютный адрес, `messenger` — сеть и
+  ссылка, по которой пишут, `postal-address` — части адреса (`country` ISO, `region`, `locality`, `street`,
+  `postal_code`), `opening-hours` — дни и время (`opens`, `closes`), `legal-id` — схема (ИНН, ОГРН, ОГРНИП, КПП, НДС ЕС)
+  и номер, `geo` — `lat`, `lon`. Один факт — одно значение. `machine` — проекция `canonical`, а не второй источник:
+  `claims_check.py lint-facts` сверяет его с формулировкой (номер, почта, адрес ссылки или ник, части адреса словами
+  формулировки, времена, реквизит с меткой, координаты; дни недели — словами, их сверяет человек). Расхождение — error
+  `COPY-F-MACHINE`: код опубликовал бы значение не из утверждённой формулировки; у факта вида `company` с контактом в
+  `canonical` без `machine` — warning с готовым значением из формулировки. Форма — `facts.schema.yaml`
+  (`$defs/machine`).
 
 ### 4.3. Источник и основание
 
@@ -409,6 +419,7 @@ COPY-F-QUOTE-EDIT`, отзыва нет — `error COPY-F-QUOTE`.
 | `COPY-F-PERMISSION`, `COPY-F-INFERRED`, `COPY-F-EXPIRED`, `COPY-F-LEGAL`, `COPY-F-REF` | error | нет разрешения или согласия на ПДн; вывод вместо факта; срок истёк; нет юриста; ссылка на несуществующий факт |
 | `COPY-F-UNVERIFIED` | error / warning | не проверен; «со слов» там, где нужен документ |
 | `COPY-F-USE`, `COPY-F-NEARBY`, `COPY-F-STALE`, `COPY-F-NAME`, `COPY-F-PLACEHOLDER-UNLISTED` | warning | вне места (в `not_in` — error); нет оговорки рядом; пора пересмотреть; неизвестное имя (в подписях и логотипах — error); заглушки нет в `missing` |
+| `COPY-F-MACHINE` (`lint-facts`) | error / warning | `machine` не по форме или не из `canonical` / контакт или реквизит вида `company` без `machine` — с готовым значением (§4.2) |
 | `COPY-F-PLACEHOLDER`, `COPY-F-FLAGS` / `COPY-F-UNSUPPORTED` | info / warning | счётчик заглушек, классов нет в `claim_flags` / только `--strict`: фраза без опоры |
 
 В вопросах находки понижаются до `info`, кроме `never_claim`: «Хотите читать без усталости глаз?» — то же обещание.

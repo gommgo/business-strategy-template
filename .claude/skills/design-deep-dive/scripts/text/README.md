@@ -28,7 +28,9 @@
 
 - **Сверка смысла** (`chain_inputs.py meaning-claims` → `copydeck.py claims`) — сигнал до текстов. Возражения, страхи
   и альтернативы — слова аудитории: в проекцию смысла не идут, сверяются потом ответы на них в copy deck.
-- **Факты** (`claims_check.py lint-facts`): разрешение `pending` и демо-данные — `warning`, с `--final` — `error`.
+- **Факты** (`claims_check.py lint-facts`): разрешение `pending` и демо-данные — `warning`, с `--final` — `error`;
+  `COPY-F-MACHINE` — значение для кода `machine` не по форме или не из `canonical` — `error`, контакт или реквизит вида
+  `company` без `machine` — `warning` с готовым значением из формулировки.
 - **Статус `checked`** ставит `copydeck.py check --update OUT --promote` у текстов без `error` сверки, линтера и
   `validate` (записи `lint` и `claims` с `text_hash`); страница — `checked`, когда проверены все её выбранные тексты.
   Текст с `error` остаётся в своём статусе — причина в заметках вывода. **`approved`** — только человек (`approve`).

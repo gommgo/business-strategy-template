@@ -33,6 +33,7 @@ facts:
   verbatim:
   - ООО «Сталькон» (вымышленная демо-компания), ОГРН 0000000000000 — ДЕМО
   canonical: ООО «Сталькон», ОГРН 0000000000000 — вымышленная демо-компания.
+  machine: {type: legal-id, scheme: ogrn, value: '0000000000000'}
   entities:
   - company-stalkon
   source:

@@ -55,7 +55,8 @@
           exit 0 — нет error; 1 — есть error; 2 — ошибка вызова, входа или окружения
   lint-facts FACTS [--today …] [--final] — проверка самого инвентаря (вывод без основания, истёкшие, без разрешений,
           id мест use по словарю site, демо-данные); разрешение pending и демо-данные — warning, с --final (ворота
-          публикации) — error; exit 0/1/2
+          публикации) — error; машинное значение machine (COPY-F-MACHINE): не по форме или не из canonical — error,
+          контакт или реквизит (kind: company) без machine — warning с готовым значением; exit 0/1/2
   --selftest — офлайн-тесты извлечения, сопоставления, правил, калибровок и ложных срабатываний; exit 0/1
 
 Обслуживание базы (в маршруте этапов проекта не участвует):
@@ -2808,12 +2809,179 @@ def cmd_inventory(a):
     return 0
 
 
+# ================================================================ машинное значение факта (machine)
+# Форма — facts.schema.yaml $defs/machine; сверка с canonical и подсказка — lint-facts (03-proof-and-facts.md §4.2).
+MACHINE_TYPES = ('telephone', 'email', 'url', 'messenger', 'postal-address', 'opening-hours', 'legal-id', 'geo')
+_M_EMAIL = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+')
+_M_URL = re.compile(r'(?<![@\w.])(?:https?://)?(?:www\.)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s,;«»"()]*)?', re.I)
+_M_HANDLE = re.compile(r'(?<![\w@])@([A-Za-z0-9_]{3,32})\b')
+_M_LEGAL = re.compile(r'\b(ОГРНИП|ОГРН|ИНН|КПП)\s*:?\s*(\d{9,15})\b', re.I)
+_M_PHONE = re.compile(r'(?<![\w+])(\+?\d[\d\s()‐‑–-]{8,}\d)(?!\w)')
+_M_TIME = re.compile(r'(?<![\d:.])([01]?\d|2[0-4])[:.]([0-5]\d)(?!\d|[.,]\d)')
+_M_NUM = re.compile(r'-?\d+(?:[.,]\d+)?')
+_M_ADDRESS = re.compile(r'адрес|address', re.I)
+_M_HOURS = re.compile(r'час\w* работы|режим работы|ежедневно|без выходных|opening hours', re.I)
+_M_PHONE_CC = {'ru': '7'}                     # код страны десятизначного номера без «+» по праву фактов
+_M_LEGAL_SCHEME = {'ИНН': 'inn', 'ОГРН': 'ogrn', 'ОГРНИП': 'ogrnip', 'КПП': 'kpp'}
+
+
+def e164(raw, jurisdiction='ru'):
+    """Телефон формулировки → E.164 или None: «+» и 7–15 цифр; 8 или 7 и ещё 10 цифр — +7; десять цифр — с кодом
+    страны права фактов (ru — 7)."""
+    d = re.sub(r'\D', '', raw or '')
+    if (raw or '').strip().startswith('+'):
+        return '+' + d if 7 <= len(d) <= 15 and d[0] != '0' else None
+    if len(d) == 11 and d[0] in '78':
+        return '+7' + d[1:]
+    cc = _M_PHONE_CC.get(jurisdiction)
+    return f'+{cc}{d}' if cc and len(d) == 10 and d[0] != '0' else None
+
+
+def _url_key(u):
+    """Адрес без схемы, www и хвостового слеша; хост — строчными."""
+    u = re.sub(r'^(?:https?://)?(?:www\.)?', '', (u or '').strip(), flags=re.I)
+    host, _, path = u.partition('/')
+    path = path.rstrip('/')
+    return host.lower() + (f'/{path}' if path else '')
+
+
+def _m_norm(s):
+    return re.sub(r'\s+', ' ', str(s or '').replace(' ', ' ').lower().replace('ё', 'е')).strip()
+
+
+def machine_contacts(text, jurisdiction='ru'):
+    """Контакты формулировки — кандидаты значений machine: {email, url (ключ без схемы), handle, legal [(схема,
+    значение)], phone (E.164), time (ЧЧ:ММ), num}. Виды ищутся по порядку, найденное одним видом следующие не видят:
+    домен почты — не ссылка, номер в ссылке и реквизит — не телефон."""
+    t, out = text or '', {k: [] for k in ('email', 'url', 'handle', 'legal', 'phone', 'time')}
+    for key, rx, conv in (('email', _M_EMAIL, lambda m: m.group(0)),
+                          ('url', _M_URL, lambda m: _url_key(m.group(0).rstrip('.!?:;'))),
+                          ('handle', _M_HANDLE, lambda m: m.group(1)),
+                          ('legal', _M_LEGAL, lambda m: (_M_LEGAL_SCHEME[m.group(1).upper()], m.group(2))),
+                          ('phone', _M_PHONE, lambda m: e164(m.group(1), jurisdiction)),
+                          ('time', _M_TIME, lambda m: f'{int(m.group(1)):02d}:{m.group(2)}')):
+        out[key] = [v for v in (conv(m) for m in rx.finditer(t)) if v]
+        t = rx.sub(lambda m: ' ' * len(m.group(0)), t)
+    out['num'] = [float(x.replace(',', '.')) for x in _M_NUM.findall(text or '')]
+    return out
+
+
+def machine_check(m, text, jurisdiction='ru'):
+    """Сверка machine с формулировкой canonical: None — значение есть в формулировке, иначе — чего нет. Сверяются
+    значения: номер, почта, адрес ссылки (ник у мессенджера), части адреса словами, времена часов работы (дни — словами
+    формулировки, их сверяет человек), реквизит со своей меткой, координаты."""
+    if not isinstance(m, dict) or m.get('type') not in MACHINE_TYPES:
+        return f"не по форме (type — {', '.join(MACHINE_TYPES)})"
+    c, t = machine_contacts(text, jurisdiction), m['type']
+    if t == 'telephone':
+        return None if m.get('value') in c['phone'] else f"номера {m.get('value')} в canonical нет"
+    if t == 'email':
+        return None if str(m.get('value') or '').lower() in {e.lower() for e in c['email']} else \
+            f"почты {m.get('value')} в canonical нет"
+    if t in ('url', 'messenger'):
+        key = _url_key(m.get('value'))
+        handle = key.rsplit('/', 1)[-1].lower() if '/' in key else None
+        if key in c['url'] or t == 'messenger' and handle and (handle in {h.lower() for h in c['handle']}
+                                                              or '+' + handle in c['phone']):
+            return None
+        return f"адреса {m.get('value')} в canonical нет"
+    if t == 'postal-address':
+        miss = [k for k in ('street', 'locality', 'region', 'postal_code')
+                if m.get(k) and _m_norm(m[k]) not in _m_norm(text)]
+        return f"частей адреса {', '.join(miss)} нет в canonical (слова — как в формулировке)" if miss else None
+    if t == 'opening-hours':
+        want = {x for h in m.get('hours') or [] if isinstance(h, dict) for x in (h.get('opens'), h.get('closes')) if x}
+        have = set(c['time'])
+        return None if want and want == have else \
+            f"времена часов работы {', '.join(sorted(want)) or '—'} не равны canonical ({', '.join(sorted(have)) or '—'})"
+    if t == 'legal-id':
+        pairs = {(s, v) for s, v in c['legal']}
+        if (m.get('scheme'), m.get('value')) in pairs or m.get('scheme') in ('vat', 'other') and \
+                str(m.get('value') or '') in (text or ''):
+            return None
+        return f"реквизита {m.get('scheme')} {m.get('value')} с этой меткой в canonical нет"
+    near = [any(abs(x - float(m.get(k))) < 1e-6 for x in c['num']) for k in ('lat', 'lon')
+            if isinstance(m.get(k), (int, float))]
+    return None if len(near) == 2 and all(near) else 'координат lat и lon в canonical нет'
+
+
+def _address_hint(text, jurisdiction):
+    """Адрес по формулировке «…адрес…: город, улица, дом» → части; чего не вывести — «…»."""
+    tail = re.search(r'(?:адрес|address)[^:]*:\s*(.+)', text or '', re.I)
+    tail = tail.group(1).strip().rstrip('.') if tail else ''
+    loc, _, street = tail.partition(', ')
+    if not street or re.search(r'\d', loc):
+        loc, street = '…', tail or '…'
+    return {'type': 'postal-address', 'country': {'ru': 'RU'}.get(jurisdiction, '…'), 'locality': loc, 'street': street}
+
+
+def machine_hint(text, jurisdiction='ru'):
+    """Готовые значения machine по формулировке canonical (подсказка lint-facts): [значение]; части, которых из
+    формулировки не вывести (дни часов работы, части адреса не по образцу «город, улица»), — «…»."""
+    c, low, out = machine_contacts(text, jurisdiction), (text or '').lower(), []
+    out += [{'type': 'legal-id', 'scheme': s, 'value': v} for s, v in c['legal']]
+    out += [{'type': 'email', 'value': e} for e in c['email']]
+    for key in c['url']:
+        net = next((n for n, host in (('telegram', 't.me/'), ('whatsapp', 'wa.me/')) if key.startswith(host)), None)
+        if net and not re.search(r'канал|channel', low):
+            out.append({'type': 'messenger', 'network': net, 'value': f'https://{key}'})
+        else:
+            out.append({'type': 'url', 'value': f'https://{key}'})
+    if re.search(r'telegram|телеграм', low) and not any(x['type'] == 'messenger' for x in out):
+        out += [{'type': 'messenger', 'network': 'telegram', 'value': f'https://t.me/{h}'} for h in c['handle']]
+    out += [{'type': 'telephone', 'value': p} for p in c['phone']]
+    times = list(dict.fromkeys(c['time']))
+    if len(times) >= 2 or _M_HOURS.search(text or ''):
+        out.append({'type': 'opening-hours', 'hours': [{'days': ['…'], 'opens': times[0] if times else '…',
+                                                        'closes': times[1] if len(times) > 1 else '…'}]})
+    if _M_ADDRESS.search(text or ''):
+        out.append(_address_hint(text, jurisdiction))
+    return out
+
+
+def flow(v):
+    """Значение строкой потока YAML для подсказки: {type: telephone, value: "+79000000001"}."""
+    if isinstance(v, dict):
+        return '{' + ', '.join(f'{k}: {flow(x)}' for k, x in v.items()) + '}'
+    if isinstance(v, list):
+        return '[' + ', '.join(flow(x) for x in v) + ']'
+    if isinstance(v, str) and re.fullmatch(r'[a-z][a-z0-9-]*', v):
+        return v
+    return json.dumps(v, ensure_ascii=False)
+
+
+def machine_issues(f, jurisdiction='ru'):
+    """Машинное значение факта для кода (lint-facts): machine не по форме или не из canonical — error (код опубликовал
+    бы значение не из утверждённой формулировки); у факта вида company с контактом в canonical без machine — warning с
+    готовым значением. [(level, msg, fix)]."""
+    m, text, fid = f.get('machine'), f.get('canonical') or '', f['id']
+    hint = machine_hint(text, jurisdiction)
+    if m is not None:
+        why = machine_check(m, text, jurisdiction)
+        if not why:
+            return []
+        return [('error', f"fact:{fid}: machine — {why}",
+                 'machine — проекция canonical: то же значение в форме для кода' +
+                 (f" ({'; '.join(map(flow, hint))})" if hint else '') + '; правка формулировки — новое значение.')]
+    if f.get('kind') != 'company' or not hint:
+        return []
+    kinds = ', '.join(dict.fromkeys(h['type'] for h in hint))
+    if len(hint) > 1:
+        return [('warning', f"fact:{fid}: в canonical несколько контактов ({kinds}), machine нет",
+                 'Факт на контакт, у каждого machine: ' + '; '.join(map(flow, hint)) + '.')]
+    gap = '…' in flow(hint[0])
+    return [('warning', f"fact:{fid}: контакт без machine — готовое значение: {flow(hint[0])}",
+             'Добавьте machine — код возьмёт значение без разбора строки' +
+             ('; «…» — части, которых из формулировки не вывести.' if gap else '.'))]
+
+
 def cmd_lint_facts(a):
     schema = load_schema(a.schema)
     facts = load_facts(a.input, schema, True)
     today = today_of(a)
     F = []
     vocab = load_vocab()
+    jur = facts.data.get('jurisdiction') or 'ru'
     if facts.data.get('example'):
         add(F, 'error' if a.final else 'warning', 'COPY-F-EXAMPLE', unit('facts', a.input), 'example', None,
             'файл фактов — демо-данные (example: true): на макете допустимы, публикация — нет',
@@ -2830,6 +2998,8 @@ def cmd_lint_facts(a):
             add(F, lvl, rule, u, f['id'], ','.join(f.get('claim_class') or []), msg, fix, [f['id']])
         if f.get('kind') in ('testimonial', 'person', 'client', 'partner', 'case', 'expert-quote') and (f.get('permission') or {}).get('status') == 'not-required':
             add(F, 'error', 'COPY-F-PERMISSION', u, f['id'], f.get('kind'), f"fact:{f['id']}: вид {f.get('kind')} требует разрешения третьего лица, а стоит not-required", 'Укажите разрешение субъекта (permission.subject, form, document).')
+        for lvl, msg, fix in machine_issues(f, jur):
+            add(F, lvl, 'COPY-F-MACHINE', u, f['id'], None, msg, fix, [f['id']])
         if vocab:
             use = f.get('use') or {}
             for key, vk in (('page_types', 'page_types'), ('section_roles', 'section_roles'), ('slot_types', 'slot_types')):
@@ -3588,6 +3758,7 @@ def cmd_selftest(_a=None):
                 lf[final] = {(x['rule'], x['level']) for x in json.load(fi)['findings'] if x['unit'] == 'fact:review-pending'}
     check('lint-facts: разрешение pending — warning до --final, с --final — error',
           lf[False] == {('COPY-F-PERMISSION', 'warning')} and lf[True] == {('COPY-F-PERMISSION', 'error')}, lf)
+    _selftest_machine(check)
     _selftest_calibration(check, facts, schema)
     # --- внешние правила
     with tempfile.NamedTemporaryFile('w', suffix='.yaml', delete=False, encoding='utf-8') as t:
@@ -3604,6 +3775,72 @@ def cmd_selftest(_a=None):
     _selftest_legal(check)   # правовой модуль
     print('selftest:', 'OK' if ok else 'FAIL')
     return 0 if ok else 1
+
+
+def _selftest_machine(check):
+    """machine факта (lint-facts): совпадение с canonical, расхождение и форма — error, подсказка готового значения у
+    контакта без machine — на вымышленных фактах."""
+    def fact(fid, canonical, machine=None, kind='company'):
+        return dict({'id': fid, 'kind': kind, 'canonical': canonical}, **({'machine': machine} if machine else {}))
+
+    week = ['mo', 'tu', 'we', 'th', 'fr', 'sa', 'su']
+    same = [fact('tel', 'Телефон студии «Пример»: +7 900 000-00-01.', {'type': 'telephone', 'value': '+79000000001'}),
+            fact('tel8', 'Телефон: 8 (900) 000-00-02.', {'type': 'telephone', 'value': '+79000000002'}),
+            fact('mail', 'Почта студии: hello@primer.example.', {'type': 'email', 'value': 'hello@primer.example'}),
+            fact('site', 'Сайт студии: primer.example/kontakty.', {'type': 'url', 'value': 'https://primer.example/kontakty'}),
+            fact('tg', 'Написать студии в Telegram: @primer_studio.',
+                 {'type': 'messenger', 'network': 'telegram', 'value': 'https://t.me/primer_studio'}),
+            fact('addr', 'Адрес студии: Казань, улица Примерная, 1, офис 2.',
+                 {'type': 'postal-address', 'country': 'RU', 'locality': 'Казань', 'street': 'улица Примерная, 1, офис 2'}),
+            fact('hours', 'Часы работы: ежедневно с 9:00 до 21:00.',
+                 {'type': 'opening-hours', 'hours': [{'days': week, 'opens': '09:00', 'closes': '21:00'}]}),
+            fact('ogrn', 'ООО «Пример», ОГРН 1000000000001.', {'type': 'legal-id', 'scheme': 'ogrn', 'value': '1000000000001'}),
+            fact('geo', 'Координаты студии: 55.7512, 37.6184.', {'type': 'geo', 'lat': 55.7512, 'lon': 37.6184})]
+    got = {f['id']: machine_issues(f) for f in same}
+    check('machine совпадает с canonical — находок нет: телефон с «+» и с 8 в скобках, почта, ссылка без схемы, '
+          'Telegram по нику, части адреса, часы 9:00, ОГРН с меткой, координаты', not any(got.values()), got)
+    differ = [fact('tel', 'Телефон: +7 900 000-00-01.', {'type': 'telephone', 'value': '+79000000009'}),
+              fact('addr', 'Адрес: Казань, улица Примерная, 1.',
+                   {'type': 'postal-address', 'country': 'RU', 'locality': 'Казань', 'street': 'ул. Примерная, 1'}),
+              fact('hours', 'Часы работы: с 9:00 до 21:00.',
+                   {'type': 'opening-hours', 'hours': [{'days': ['mo'], 'opens': '10:00', 'closes': '21:00'}]}),
+              fact('ogrn', 'ОГРН 1000000000001.', {'type': 'legal-id', 'scheme': 'inn', 'value': '1000000000001'}),
+              fact('form', 'Телефон: +7 900 000-00-01.', {'type': 'phone', 'value': '+79000000001'}),
+              fact('metric', '12 лет работы.', {'type': 'telephone', 'value': '+79000000001'}, kind='metric')]
+    got = {f['id']: [x[0] for x in machine_issues(f)] for f in differ}
+    tel = machine_issues(differ[0])
+    check('machine не из canonical (номер, сокращённая улица, время, метка реквизита) и не по форме — error у любого '
+          'вида факта; совет называет значение из формулировки',
+          all(v == ['error'] for v in got.values()) and '"+79000000001"' in tel[0][2], got)
+    hint = {f['id']: machine_issues(f) for f in (
+        fact('tel', 'Телефон студии: 8 900 000-00-01.'), fact('tg', 'Пишите в Telegram: @primer_studio.'),
+        fact('chan', 'Telegram-канал студии: t.me/primer_news.'),
+        fact('addr', 'Адрес студии: Казань, улица Примерная, 1.'),
+        fact('two', 'Телефон +7 900 000-00-01, почта hello@primer.example.'),
+        fact('since', 'Студия работает с 2014 года.'), fact('metric', 'Телефон +7 900 000-00-01.', kind='metric'))}
+    check('контакт вида company без machine — warning с готовым значением в сообщении (E.164, Telegram по нику, канал — '
+          'ссылка, части адреса); два контакта — факт на контакт; без контакта и не company — находок нет',
+          [x[0] for v in list(hint.values())[:5] for x in v] == ['warning'] * 5
+          and '{type: telephone, value: "+79000000001"}' in hint['tel'][0][1]
+          and 'network: telegram, value: "https://t.me/primer_studio"' in hint['tg'][0][1]
+          and '{type: url, value: "https://t.me/primer_news"}' in hint['chan'][0][1]
+          and 'country: "RU", locality: "Казань", street: "улица Примерная, 1"' in hint['addr'][0][1]
+          and 'email, telephone' in hint['two'][0][1] and not hint['since'] and not hint['metric'], hint)
+    with tempfile.TemporaryDirectory() as td:
+        fp, jp = os.path.join(td, 'facts.yaml'), os.path.join(td, 'lint.json')
+        base = {'id': 'x', 'claim_class': ['company-details'], 'verbatim': ['x'], 'lang': 'ru',
+                'source': {'type': 'customer-message', 'who': 'заказчик', 'date': '2026-09-01'},
+                'verification': {'status': 'stated'}, 'permission': {'status': 'not-required'}}
+        doc = {'facts_version': 1, 'date': '2026-09-01', 'site': 'primer', 'lang': 'ru', 'never_claim_defaults': 'none',
+               'facts': [dict(base, **same[0]), dict(base, **differ[0]), dict(base, **fact('nom', 'Телефон: +7 900 000-00-03.'))]}
+        with open(fp, 'w', encoding='utf-8') as fo:
+            yaml.safe_dump(doc, fo, allow_unicode=True, sort_keys=False)
+        rc = cmd_lint_facts(argparse.Namespace(input=fp, schema=SCHEMA_PATH, today='2026-09-24', final=False, json=jp,
+                                               quiet=True))
+        with open(jp, encoding='utf-8') as fi:
+            mf = {(x['unit'], x['level']) for x in json.load(fi)['findings'] if x['rule'] == 'COPY-F-MACHINE'}
+    check('lint-facts: COPY-F-MACHINE — расхождение error (код 1), контакт без machine warning, совпадение без находки',
+          mf == {('fact:tel', 'error'), ('fact:nom', 'warning')} and rc == 1, (mf, rc))
 
 
 # ================================================================ CLI

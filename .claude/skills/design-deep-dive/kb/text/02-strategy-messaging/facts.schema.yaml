@@ -387,6 +387,85 @@ $defs:
       requires_nearby: {type: string, description: "Что стоит рядом на этом языке (use.requires_nearby): «Yandex Maps, as of 1 September 2026»."}
       note: {type: string, description: "Адаптация, а не дословный перевод; у цитат — пометка перевода."}
 
+  machine:
+    description: >-
+      Машинное значение контакта или реквизита для кода (ссылки tel:, mailto: и мессенджера, подвал, JSON-LD): то же
+      значение, что в canonical, в форме, которую код берёт без разбора строк. Один факт — одно значение.
+      `claims_check.py lint-facts` сверяет его с canonical: расхождение — error COPY-F-MACHINE; у факта вида company с
+      контактом в canonical без machine — warning с готовым значением (03-proof-and-facts.md §4.2).
+    oneOf:
+      - type: object
+        additionalProperties: false
+        required: [type, value]
+        properties:
+          type: {const: telephone}
+          value: {type: string, pattern: "^\\+[1-9][0-9]{6,14}$", description: "E.164: «+», код страны и номер без пробелов."}
+      - type: object
+        additionalProperties: false
+        required: [type, value]
+        properties:
+          type: {const: email}
+          value: {type: string, pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"}
+      - type: object
+        additionalProperties: false
+        required: [type, value]
+        properties:
+          type: {const: url}
+          value: {type: string, pattern: "^https?://[^\\s]+$", description: "Абсолютный адрес: сайт, страница, профиль (sameAs разметки)."}
+      - type: object
+        additionalProperties: false
+        required: [type, network, value]
+        properties:
+          type: {const: messenger}
+          network: {enum: [telegram, whatsapp, max, viber, vk, other]}
+          value: {type: string, pattern: "^https?://[^\\s]+$", description: "Ссылка, по которой пишут: https://t.me/<имя>, https://wa.me/<номер>."}
+      - type: object
+        additionalProperties: false
+        required: [type, country, locality, street]
+        description: "Части адреса — слова canonical; разметка — PostalAddress."
+        properties:
+          type: {const: postal-address}
+          country: {type: string, pattern: "^[A-Z]{2}$", description: "ISO 3166-1 alpha-2: RU, KZ, DE."}
+          region: {type: string}
+          locality: {type: string, minLength: 1, description: "Город или населённый пункт."}
+          street: {type: string, minLength: 1, description: "Улица, дом, строение, офис."}
+          postal_code: {type: string}
+      - type: object
+        additionalProperties: false
+        required: [type, hours]
+        description: "Часы работы; разметка — OpeningHoursSpecification."
+        properties:
+          type: {const: opening-hours}
+          hours:
+            type: array
+            minItems: 1
+            items:
+              type: object
+              additionalProperties: false
+              required: [days, opens, closes]
+              properties:
+                days:
+                  type: array
+                  minItems: 1
+                  uniqueItems: true
+                  items: {enum: [mo, tu, we, th, fr, sa, su]}
+                opens: {type: string, pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]$"}
+                closes: {type: string, pattern: "^(([01][0-9]|2[0-3]):[0-5][0-9]|24:00)$"}
+      - type: object
+        additionalProperties: false
+        required: [type, scheme, value]
+        properties:
+          type: {const: legal-id}
+          scheme: {enum: [inn, ogrn, ogrnip, kpp, vat, other], description: "ИНН, ОГРН, ОГРНИП, КПП, номер плательщика НДС ЕС."}
+          value: {type: string, pattern: "^[0-9A-Z]{4,20}$"}
+      - type: object
+        additionalProperties: false
+        required: [type, lat, lon]
+        properties:
+          type: {const: geo}
+          lat: {type: number, minimum: -90, maximum: 90}
+          lon: {type: number, minimum: -180, maximum: 180}
+
   entity:
     type: object
     additionalProperties: false
@@ -466,6 +545,7 @@ $defs:
           type: {type: string}
           property: {type: string}
           note: {type: string}
+      machine: {$ref: "#/$defs/machine"}
       related:
         type: array
         items: {$ref: "#/$defs/id"}
@@ -863,8 +943,8 @@ x-canvas-map:
     - {from: [/entities], note: "имена для сверки текстов; на холст идут готовые формулировки фактов"}
     - {from: [/facts/*/aliases, /facts/*/kind, /facts/*/canonical, /facts/*/values, /facts/*/entities, /facts/*/basis,
               /facts/*/attribution, /facts/*/original_ref, /facts/*/edits, /facts/*/asset, /facts/*/responsible,
-              /facts/*/schema_org, /facts/*/related, /facts/*/tags, /facts/*/notes],
-       note: "поля сверки, разметки и происхождения: исполнитель ставит на макет только дословные формулировки; canonical и schema_org — пакет кода; файлы-доказательства — план ассетов"}
+              /facts/*/schema_org, /facts/*/machine, /facts/*/related, /facts/*/tags, /facts/*/notes],
+       note: "поля сверки, разметки и происхождения: исполнитель ставит на макет только дословные формулировки; canonical, schema_org и machine — пакет кода; файлы-доказательства — план ассетов"}
     - {from: [/missing/*/aliases, /missing/*/kind, /missing/*/claim_class, /missing/*/needed_for, /missing/*/asked,
               /missing/*/due, /missing/*/blocking, /missing/*/fallback, /missing/*/question],
        note: "как и когда закрыть пробел — работа слоя страницы; блокирующие пробелы — строка пробелов INPUT.md"}
