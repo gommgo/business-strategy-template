@@ -174,9 +174,12 @@ prototypes: variants[] — лабораторная страница `lab_path` 
 манифеста ассетов своей страницы по варианту и формату — строка `asset · <слот>` на файл; демо-картинки и общие ассеты
 продукта — нет), спецификация движения, записи фактов из слотов данных плана и fact_ids текстов; экран — файл экрана,
 блоки его состава и каркас, строки texts.md, которые они называют (ключ, текст, статус). У обеих — токены ДС
-(system.tokens.css, иначе system.tokens.json, иначе tokens.json артефакта ДС) и system.yaml без starter; у страницы —
-ещё бренд и арт-дирекция поверхности, у экрана — бриф на вид. ARTIFACTS.md, REVIEW.md, вход, файлы базы, review/ и копии
-холста в источники единицы не входят.
+(system.tokens.css, иначе system.tokens.json, иначе tokens.json артефакта ДС) и system.yaml; у страницы — ещё бренд и
+арт-дирекция поверхности, у экрана — бриф на вид. Поля, правка которых не меняет ни макет, ни содержание, в отпечаток не
+входят (OUTSIDE_FP): запись решения у system.yaml, бренда и арт-дирекции (статус, утверждение, starter) и machine
+факта — проекция canonical для кода, её равенство формулировке держит claims_check.py lint-facts; у copy deck — то же
+правило через text_hash. ARTIFACTS.md, REVIEW.md, вход, файлы базы, review/ и копии холста в источники единицы не
+входят.
 Из Python: `assemble(slug, surf, repo, stage, maps, today=None, units=None, strict=False, anchor=None)` → сборка в
 памяти (`files`, `rep`, `units`, `outside`); `check_surface(…, units=None)` → (находки, сборка);
 `unit_sources(slug, surface, unit, repo=None)` → строки
@@ -3389,18 +3392,28 @@ def _row(ctx, sid, path, fp=None):
     return {"id": sid, "path": ctx.rel(path), "fingerprint": fp or sha_path(path)}
 
 
-# Поля записи решения (статус, утверждение, история, заготовка) в отпечаток единицы не входят: утверждение ДС, бренда
-# или арт-дирекции после приёмки макета одобрение не снимает, снимает смена значений.
-DECISION_FIELDS = {"system": {"starter", "status", "approval"}, "brand": {"status", "approval"},
-                   "art-direction": {"status", "approved_by", "approved_at", "checked_at", "lifecycle"}}
+# Поля вне отпечатка единицы — их правка не меняет ни макет, ни содержание источника: запись решения (статус,
+# утверждение, история, заготовка) и machine факта — проекция canonical для кода, её равенство формулировке держит
+# claims_check.py lint-facts (COPY-F-MACHINE). Утверждение ДС, бренда или арт-дирекции и machine после приёмки макета
+# одобрение не снимают, снимает смена значений; у copy deck то же правило — text_hash (deck_text_hash).
+OUTSIDE_FP = {"system": {"starter", "status", "approval"}, "brand": {"status", "approval"},
+              "art-direction": {"status", "approved_by", "approved_at", "checked_at", "lifecycle"},
+              "fact": {"machine"}}
+
+
+def content_fp(sid, data):
+    """Отпечаток записи источника sid по содержанию: sha256 JSON без полей вне отпечатка (OUTSIDE_FP); не словарь —
+    None."""
+    if not isinstance(data, dict):
+        return None
+    return sha_text(json.dumps({k: v for k, v in data.items() if k not in OUTSIDE_FP[sid]}, ensure_ascii=False,
+                               sort_keys=True, default=str))
 
 
 def _doc_row(ctx, sid, path):
-    """Строка источника по содержанию документа без полей записи решения; файл не разбирается — sha256 файла."""
+    """Строка источника по содержанию документа (content_fp); файл не разбирается — sha256 файла."""
     data, _err = load_doc(path)
-    fp = sha_text(json.dumps({k: v for k, v in data.items() if k not in DECISION_FIELDS[sid]}, ensure_ascii=False,
-                             sort_keys=True, default=str)) if isinstance(data, dict) else None
-    return _row(ctx, sid, path, fp)
+    return _row(ctx, sid, path, content_fp(sid, data))
 
 
 def _product_rows(ctx):
@@ -3449,8 +3462,7 @@ def _page_rows(ctx, unit):
         recs = {str(f.get("id")): f for f in get(data, "facts", default=[]) or [] if isinstance(f, dict)}
         for fid in sorted(ids):
             rec = recs.get(fid)
-            rows.append(_row(ctx, f"fact · {fid}", fpath, sha_text(json.dumps(rec, ensure_ascii=False, sort_keys=True,
-                                                                               default=str)) if rec else "—"))
+            rows.append(_row(ctx, f"fact · {fid}", fpath, content_fp("fact", rec) if rec else "—"))
     bp = ctx.site("brief")
     brief = load_doc(bp)[0] if bp.is_file() else None
     bref = rel_ref(bp, get(brief, "brand", "ref")) if isinstance(brief, dict) else None
@@ -3486,8 +3498,8 @@ def _screen_rows(ctx, unit):
 def unit_sources(slug, surface, unit, repo=None):
     """Источники единицы — страницы сайта или экрана кабинета — для отпечатка одобрения: строки {id, path,
     fingerprint} по id и пути (путь — от корня данных; отпечаток — sha256 файла, text_hash текстов страницы, sha256
-    записи факта или строки texts.md, у system.yaml, бренда и арт-дирекции — содержание без полей статуса и
-    утверждения, «—» — названного источника нет на месте); единицы нет — None. ARTIFACTS.md, REVIEW.md, вход, файлы
+    строки texts.md, у записи факта, system.yaml, бренда и арт-дирекции — содержание без полей вне отпечатка
+    OUTSIDE_FP, «—» — названного источника нет на месте); единицы нет — None. ARTIFACTS.md, REVIEW.md, вход, файлы
     базы, review/ и копии холста в источники не входят."""
     root = docpaths.root(repo)
     surf = docpaths.surface(slug, surface, root)
@@ -4295,6 +4307,24 @@ def selftest():
               and fp0.startswith("sha256:") and same == fp0
               and unit_fingerprint(fx.slug, "promo", "spasibo", fx.root) not in (fp0, None)
               and unit_sources(fx.slug, "promo", "nope", fx.root) is None)
+    with FP.built("package-landing") as fx:
+        # записи фактов страницы: machine (проекция canonical для кода) отпечаток не меняет, правка canonical — меняет
+        Y = yaml_mod()
+        fid = next(r["id"][len("fact · "):] for r in unit_sources(fx.slug, "promo", "home", fx.root)
+                   if r["id"].startswith("fact · ") and r["fingerprint"] != "—")
+        fp0 = unit_fingerprint(fx.slug, "promo", "home", fx.root)
+        fpath = docpaths.facts(fx.slug, repo=fx.root)
+        doc = Y.safe_load(fpath.read_text(encoding="utf-8"))
+        rec = next(f for f in doc["facts"] if f.get("id") == fid)
+        rec["machine"] = {"type": "url", "value": "https://example.org/otves"}
+        fpath.write_text(Y.safe_dump(doc, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        with_machine = unit_fingerprint(fx.slug, "promo", "home", fx.root)
+        rec["canonical"] = f"{rec.get('canonical') or ''} — правка"
+        fpath.write_text(Y.safe_dump(doc, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        check("записи фактов страницы: добавленный machine — тот же отпечаток (одобрение живо), правка canonical — "
+              "другой",
+              fp0.startswith("sha256:") and with_machine == fp0
+              and unit_fingerprint(fx.slug, "promo", "home", fx.root) not in (fp0, None))
     with FP.built("package-landing") as fx:
         # ассеты входа макета: ключ «страница и слот», принятое по варианту и формату, демо, общие ассеты продукта
         Y = yaml_mod()
