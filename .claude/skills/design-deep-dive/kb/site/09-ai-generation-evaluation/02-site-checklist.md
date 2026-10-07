@@ -155,7 +155,7 @@ COPY-C-*), визуал и движение — creative (`../../creative/01-cre
 | SITE-PRE-23 | `budget_profile` = `<page_type>@<уровень>` разрешается `page_gates.py --resolve`; виджеты — `load: on-visible` или `on-interaction` | S | LNT | `../07-seo-geo-performance-analytics/03-performance-budgets-gates.md` §3, §5 |
 | SITE-PRE-24 | `overlays` плана согласованы с политиками брифа: баннер cookie — по юрисдикции, окно захвата — только при политике | S | LNT | `../04-blocks/03-slots-and-page-plan.md`; DEF-24 |
 | SITE-PRE-25 | Сёстры закрыли свои входы: copy-deck по слотам прошёл сверку с фактами (COPY-C-01…04), treatment — по уровню, план ассетов — по медиа-слотам, у 3D-слота есть постер | B | LNT, HUM | `../../text/09-ai-generation-evaluation/03-evaluation.md` §2; CRV-AL-09 |
-| SITE-PRE-26 | Проекция в пакет исполнителя проходит `build_package.py questions`, `build`, `check`; в TASK — структура из плана, A3 — из `first_screen_policy`, в ACCEPTANCE — блоки I–L (§6.2 файла 01) | B | LNT | `01-generators-and-ai-landing-markers.md` §6; `../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md` |
+| SITE-PRE-26 | Пакет для кода — манифест готовности `ready.yaml` свеж: `ready.py check` без находок (единицы, строки `open`, пункты `after_build` с блоками I–L — по текущим файлам); снимок для кода берут с этого коммита | B | LNT | `../10-playbooks-contracts/01-procedure-brief-to-pages.md` §9; `../../common/acceptance-criteria.yaml` |
 
 ## 3. Блоки проверки собранной страницы
 

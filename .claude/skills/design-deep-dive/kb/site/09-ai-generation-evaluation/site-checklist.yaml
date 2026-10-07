@@ -1,8 +1,8 @@
 # Машиночитаемая версия 09-ai-generation-evaluation/02-site-checklist.md (сводный чек-лист сайта).
 # Сгенерировано scripts/site/checklist_export.py — правки вносить в Markdown и перегенерировать.
 version: "1.0"
-generated_at: "2026-10-06 02:49"
-checked: "2026-10-06"
+generated_at: "2026-10-07 04:01"
+checked: "2026-10-07"
 source_md: "09-ai-generation-evaluation/02-site-checklist.md"
 source_md_meta: "Свод правил базы в форме «да / нет» для проверки плана, собранной страницы и сайта: **248 пунктов в 15 блоках** плюс каталог"
 items_count: 248
@@ -399,16 +399,16 @@ items:
   - id: SITE-PRE-26
     block: PRE
     block_title: "бриф и план до сборки (входной контракт)"
-    text: "Проекция в пакет исполнителя проходит `build_package.py questions`, `build`, `check`; в TASK — структура из плана, A3 — из `first_screen_policy`, в ACCEPTANCE — блоки I–L (§6.2 файла 01)"
+    text: "Пакет для кода — манифест готовности `ready.yaml` свеж: `ready.py check` без находок (единицы, строки `open`, пункты `after_build` с блоками I–L — по текущим файлам); снимок для кода берут с этого коммита"
     severity: B
     severity_label: "блокер"
     check_method: [LNT]
     check_method_class: [script]
     check_method_main: script
     auto_gate: true
-    source_file: ["09-ai-generation-evaluation/01-generators-and-ai-landing-markers.md", "../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md?"]
-    source_section: "§6"
-    source_raw: "`01-generators-and-ai-landing-markers.md` §6; `../../kimi-research/07-brief-handoff/templates/ACCEPTANCE.md`"
+    source_file: ["10-playbooks-contracts/01-procedure-brief-to-pages.md", "../common/acceptance-criteria.yaml"]
+    source_section: "§9"
+    source_raw: "`../10-playbooks-contracts/01-procedure-brief-to-pages.md` §9; `../../common/acceptance-criteria.yaml`"
     evidence_level: []
   - id: SITE-STR-01
     block: STR
