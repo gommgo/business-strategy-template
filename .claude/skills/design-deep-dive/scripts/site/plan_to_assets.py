@@ -34,10 +34,11 @@ three_d. Каркас проходит свою проверку: строки, 
                 forbidden; poster_for на строку, которой нет; warning — форма демо-картинки макета x-demo {file |
                 files, what} (есть ли файл, не сверяется: путь вне git), local_edit у строки без настоящего кадра
                 (источник не real и не edit-real), instance без записи в instances; в проекте — форма манифеста ассетов поверхности
-                (design/<surface>/assets/manifest.yaml) по схеме asset-manifest.schema.json (warning); у принятой строки
-                (status: accepted) манифестов поверхности и продукта (design/_assets/manifest.yaml) sha256 есть и равен
-                файлу — error: по нему код-репо сверяет снимок (docs/projects/_template/design/README.md § Пакет для
-                кода)
+                (design/<surface>/assets/manifest.yaml) по схеме asset-manifest.schema.json (warning); у строки файла
+                шрифта (woff2, woff, ttf, otf) манифестов поверхности и продукта — поле font {family, weight, style}
+                (warning); у принятой строки (status: accepted) манифестов поверхности и продукта
+                (design/_assets/manifest.yaml) sha256 есть и равен файлу — error: по нему код-репо сверяет снимок
+                (docs/projects/_template/design/README.md § Пакет для кода)
   R-MAT-002     поля утверждённого плана: approval, дорога 3D у 3D-слота, нет заглушек TODO, у generate и
                 edit-real слота или варианта — коды задач routing.yaml
   R-COV-004     3D-слот без постера; с планом страницы — строка на каждый медиа- и 3D-слот (нет строки: error у
@@ -117,6 +118,7 @@ MANIFEST_SCHEMA = kbpaths.kb("ai-media", "05-prompting", "asset-manifest.schema.
 PLAN_FILE = "01-asset-slots-by-page-type.md"
 KIND = "asset-plan"
 MANIFEST_KIND = "asset-manifest"
+FONT_FORMATS = ("woff2", "woff", "ttf", "otf")             # файл шрифта: строка манифеста несёт font
 FIXTURE = "asset-plan"
 CHROME_ROLES = {"header", "footer", "utility", "legal"}          # не первый экран (как site_validate.py)
 SVG_SLOTS = {"diagram", "qr-code", "logo", "brand-logo", "favicon", "icon"}
@@ -709,6 +711,14 @@ def check_manifest(K, path, c, pages=None):
         who = f"{row.get('slot')}: " if isinstance(row, dict) and row.get("slot") else ""
         c.add("R-STRUCT-005", "warning", "/" + "/".join(str(x) for x in ap_) if ap_ else "",
               f"форма манифеста ассетов: {who}{e.message[:300]}")
+    # файл шрифта код подключает по полям font строки (Fonts API с локальным провайдером): без них файла для кода нет
+    for i, row in enumerate(rows if isinstance(rows, list) else []):
+        if isinstance(row, dict) and isinstance(row.get("file"), str) and "font" not in row and \
+                (pages is None or str(row.get("page") or "") in pages) and \
+                str(row.get("format") or Path(row["file"]).suffix.lstrip(".")).lower() in FONT_FORMATS:
+            c.add("R-STRUCT-005", "warning", (f"/assets/{i}" if branch else f"/{i}") + "/font",
+                  f"{row.get('slot')}: строка файла шрифта {row['file']} без font {{family, weight, style}}: код "
+                  "подключает шрифт по этим полям")
     # принятая строка — файл снимка код-репо: лок берёт её sha256 как отпечаток файла, поэтому отпечаток, не равный файлу,
     # — дефект строки, как ссылка в пустоту (docs/projects/_template/design/README.md § Пакет для кода)
     for i, row in enumerate(rows if isinstance(rows, list) else []):
@@ -1402,8 +1412,26 @@ def _selftest():
               r.returncode == 1 and got == [("R-STRUCT-005", "error", None, True)])
         check("фикстура: check --page — манифест продукта не сверяется",
               man_check("- " + row, "--page", "home") == (0, []))
+        (prod.parent / "fonts").mkdir()
+        (prod.parent / "fonts" / "demo-400.woff2").write_bytes(b"wOF2\n")
+        frow = ("- slot: font-demo\n  file: fonts/demo-400.woff2\n  status: accepted\n  license: OFL (демо)\n  sha256: "
+                + hashlib.sha256(b"wOF2\n").hexdigest() + "\n")
+        fonts = {}
+        for name, extra in (("без font", ""), ("с font", "  font: {family: Demo Sans, weight: 400, style: normal}\n"),
+                            ("font не по форме", "  font: {family: Demo Sans, weight: bold}\n")):
+            prod.write_text("assets:\n" + frow + extra, encoding="utf-8")
+            r = subprocess.run(tool + ["check", fx.slug, "--repo", str(fx.root), "--json"], capture_output=True,
+                               text=True)
+            fonts[name] = [(f.rule, f.severity, f.ref.endswith("/font") or "font" in f.message)
+                           for f in F.parse_lines(r.stdout)]
+        check("фикстура: строка файла шрифта манифеста продукта без font {family, weight, style} и font не по форме "
+              "(насыщенность словом, нет начертания) — R-STRUCT-005 warning; с font — 0 находок",
+              fonts["без font"] == [("R-STRUCT-005", "warning", True)] and fonts["с font"] == []
+              and fonts["font не по форме"] and set(fonts["font не по форме"]) == {("R-STRUCT-005", "warning", True)})
         prod.unlink()
         (prod.parent / "logo.svg").unlink()
+        (prod.parent / "fonts" / "demo-400.woff2").unlink()
+        (prod.parent / "fonts").rmdir()
         broken = ("manifest_version: 1\nassets:\n- " + row.replace("status: accepted", "status: done")
                   + "- slot: header-logo\n  role: informational\n")
         check("фикстура: статус строки вне перечня и строка без file → R-STRUCT-005 warning вида asset-manifest, код 0",

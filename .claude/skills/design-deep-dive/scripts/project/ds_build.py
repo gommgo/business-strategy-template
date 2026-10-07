@@ -28,7 +28,14 @@
 Тема значений `$value` — `light`, пока корень токенов не объявил другую: `$extensions["org.design-deep-dive.modes"].base` —
 `light` или `dark`. От неё — `color-scheme` в `:root` (у продукта с одной тёмной темой — `dark`) и первая тема
 артефакта; режим токена с именем парной темы даёт вторую тему — её блок включается и по настройке системы
-(`prefers-color-scheme`), и атрибутом `[data-theme]`.
+(`prefers-color-scheme`), и атрибутом `[data-theme]`. Темы, которых ждут брифы — бриф сайта каждой поверхности слоя
+страницы и бриф на вид кабинета, блок `themes` (две темы — `dark.needed` или `default: system`, иначе одна —
+`default`), — есть у токенов темой значений или режимом; иначе R-COV-010: сайт в тёмной теме на токенах без
+`modes.base: dark` получил бы `color-scheme: light`, и системные элементы страницы были бы светлыми.
+
+Шрифты: семейство, которому нужен файл, — первое имя стека токена fontFamily или fontFamily типографического токена,
+если оно не родовое (`GENERIC_FONTS`) и не системное (`SYSTEM_FONTS`) — `web_families()`; файлы — строки манифеста
+ассетов продукта с полем `font` (их сверяет ready.py: семейство без принятого файла — строка open «шрифт: …»).
 
 Типографика в CSS считается от того, что покажет браузер. Интерлиньяж: число DTCG — отношение, округлённое до шести
 знаков; когда оно недотягивает до целого px (14 px × 1.428571 = 19,999994), браузер усекает высоту строки до шага
@@ -76,6 +83,7 @@ projects/<slug>/design/_design-system/project/`: ссылка `src`, `href`, `po
                 без циклов; значения режимов; тема значений `base`; одна шкала space.*)                    error;
                 warning — вторая шкала, лимит семейств, px типографики из CSS расходится с px значения DTCG,
                 ключ `$extensions` вне известных сборке, режим токена с именем темы значений
+  R-COV-010     тема брифа сайта или кабинета есть у токенов (тема значений `modes.base` или режим)           warning
   R-FRESH-001   system.tokens.css, передняя часть DESIGN.md, tokens.json и README артефакта равны сборке байт в байт
                 (README сверяется по началу файла: хвост, который дописывает страница артефакта, — не расхождение)
                 error; нет прозы — warning
@@ -129,6 +137,9 @@ FAMILY_OF_GROUP = {"color": "color", "space": "spacing", "radius": "radius", "sh
 OWN_FAMILIES_MAX = 12                                        # своих семейств у артефакта (cd 05/01 §3.2)
 GENERIC_FONTS = ("serif", "sans-serif", "monospace", "cursive", "fantasy", "system-ui", "emoji", "math", "fangsong",
                  "ui-serif", "ui-sans-serif", "ui-monospace", "ui-rounded")
+SYSTEM_FONTS = ("-apple-system", "blinkmacsystemfont", "segoe ui", "helvetica neue", "helvetica", "arial", "georgia",
+                "times new roman", "times", "courier new", "courier", "verdana", "tahoma", "trebuchet ms", "menlo",
+                "monaco", "consolas")                  # гарнитуры, которые стоят в системах: файла шрифта не требуют
 FONT_WEIGHTS = {"thin": 100, "hairline": 100, "extra-light": 200, "ultra-light": 200, "light": 300, "normal": 400,
                 "regular": 400, "book": 400, "medium": 500, "semi-bold": 600, "demi-bold": 600, "bold": 700,
                 "extra-bold": 800, "ultra-bold": 800, "black": 900, "heavy": 900, "extra-black": 950,
@@ -425,6 +436,32 @@ class Tokens:
 def _root_modes(data):
     ext = data.get("$extensions") if isinstance(data, dict) else None
     return ext.get(EXT_MODES) if isinstance(ext, dict) else None
+
+
+def token_themes(toks):
+    """Темы токенов: тема значений `$value` (`modes.base`) и парная, если у токенов есть режим с её именем."""
+    first = base_theme(toks.data)
+    return {first} | ({THEME_PAIR[first]} if THEME_PAIR[first] in toks.mode_names() else set())
+
+
+def web_families(data):
+    """Семейства токенов, которым нужен файл шрифта: первое имя стека каждого токена fontFamily и fontFamily
+    типографических токенов, если оно не родовое и не системное (GENERIC_FONTS, SYSTEM_FONTS), — по порядку документа,
+    без повторов. Токен, значение которого не разрешается, пропускается: его называет R-STRUCT-006."""
+    toks, out = Tokens(data), []
+    for t in toks.list:
+        if t.type not in ("fontFamily", "typography"):
+            continue
+        try:
+            v = toks.value(t)
+        except ValueError:
+            continue
+        stack = v.get("fontFamily") if t.type == "typography" and isinstance(v, dict) else v
+        first = stack[0] if isinstance(stack, list) and stack else stack
+        name = str(first or "").split(",")[0].strip().strip("'\"")
+        if name and name.lower() not in GENERIC_FONTS + SYSTEM_FONTS and name not in out:
+            out.append(name)
+    return out
 
 
 def base_theme(data):
@@ -1247,8 +1284,36 @@ def derive(prj, data):
     return out, toks
 
 
+def brief_themes(prj):
+    """Темы, которых ждут брифы продукта: [(поверхность или None, путь, {темы})] — бриф сайта каждой поверхности слоя
+    страницы и бриф на вид кабинета, блок `themes`: две темы — `dark.needed` или `default: system`, иначе одна —
+    `default` (светлая по умолчанию). Бриф, который не читается, называет его валидатор."""
+    import yaml
+    try:
+        rows = docpaths.surfaces(prj.slug, repo=prj.repo)
+    except docpaths.DocPathError:
+        rows = []
+    paths = [(s.slug, docpaths.site(prj.slug, s.slug, "brief", repo=prj.repo)) for s in rows if s.page]
+    paths.append((None, docpaths.design(prj.slug, "app-brief", repo=prj.repo)))
+    out = []
+    for surf, p in paths:
+        try:
+            doc = yaml.safe_load(p.read_text(encoding="utf-8")) if p.is_file() else None
+        except (OSError, yaml.YAMLError):
+            continue
+        if not isinstance(doc, dict):
+            continue
+        th = doc.get("themes") if isinstance(doc.get("themes"), dict) else {}
+        dark = th.get("dark") if isinstance(th.get("dark"), dict) else {}
+        default = th.get("default") or "light"
+        need = set(THEMES) if dark.get("needed") is True or default == "system" else {default}
+        if need <= set(THEMES):
+            out.append((surf, p, need))
+    return out
+
+
 def check(prj):
-    """Находки R-STRUCT-006 и R-FRESH-001 по ДС продукта."""
+    """Находки R-STRUCT-006, R-COV-010 и R-FRESH-001 по ДС продукта."""
     rep = F.Report()
     derived = [prj.css_path, prj.design_md_path, prj.art_tokens, prj.art_readme]
     if not prj.tokens_path.is_file():
@@ -1287,6 +1352,20 @@ def check(prj):
         rep.add("R-STRUCT-006", i.severity, surface=None, kind=KIND, ref="tokens#" + i.pointer, path=rel_tokens,
                 message=i.message, fix="одно значение в `$value` и в расширении кегля токена, затем "
                                        f"ds_build build {prj.slug}")
+    have, first = token_themes(toks), base_theme(toks.data)
+    declared = isinstance(_root_modes(data), dict) and "base" in _root_modes(data)
+    for surf, path, need in brief_themes(prj):
+        if need <= have:
+            continue
+        rep.add("R-COV-010", "warning", surface=surf, kind=KIND, ref="tokens#" + pointer(("$extensions", EXT_MODES)),
+                path=rel_tokens,
+                message=f"бриф {prj.rel(path)} ждёт тем {', '.join(sorted(need))}, у токенов — "
+                        f"{', '.join(sorted(have))}: тема значений `$value` — {first}"
+                        + ("" if declared else " (`modes.base` не объявлена)")
+                        + f", color-scheme производного CSS — {' '.join([first] + sorted(have - {first}))}",
+                fix="тёмные значения `$value` — `modes.base: dark` в корне токенов, вторая тема — режим токенов с её "
+                    f"именем, затем ds_build build {prj.slug}; правка токенов снимает одобрение макета — решает "
+                    "владелец продукта, как и правка темы брифа")
     built, _ = derive(prj, data)
     fix = f"ds_build build {prj.slug} — производные руками не правят"
     for path in (prj.css_path, prj.design_md_path, prj.art_tokens, prj.art_readme):
@@ -1507,6 +1586,44 @@ def reference_tokens():
     return json.loads(m.group(1)) if m else None
 
 
+def _selftest_themes(check_):
+    """R-COV-010: темы брифов сайта и кабинета против тем токенов — на вымышленном проекте во временной папке."""
+    import tempfile
+    import yaml
+    with tempfile.TemporaryDirectory(prefix="ddd-ds-themes-") as td:
+        pj = Path(td) / "docs" / "projects" / "demo"
+        (pj / "site" / "promo").mkdir(parents=True)
+        (pj / "design").mkdir()
+        (pj / "surface.md").write_text("| slug | name | type | web-kind | status |\n|---|---|---|---|---|\n"
+                                       "| promo | Лендинг | `web` | `landing` | draft |\n", encoding="utf-8")
+        prj = Project.of("demo", Path(td))
+        color = {"color": {"$type": "color", "bg": {"$value": {"colorSpace": "srgb", "components": [0.1, 0.1, 0.1],
+                                                               "hex": "#1A1A1A"}}}}
+
+        def cov(tokens, themes, app=None):
+            prj.tokens_path.write_text(json.dumps(tokens, ensure_ascii=False), encoding="utf-8")
+            (pj / "site" / "promo" / "site-brief.yaml").write_text(yaml.safe_dump({"themes": themes}), encoding="utf-8")
+            ab = pj / "design" / "app-brief.yaml"
+            if app:
+                ab.write_text(yaml.safe_dump({"themes": app}), encoding="utf-8")
+            elif ab.exists():
+                ab.unlink()
+            return [(f.surface, f.severity, f.message) for f in check(prj) if f.rule == "R-COV-010"]
+
+        dark_one = {"default": "dark", "dark": {"needed": False, "why": "вымышлено"}}
+        got = cov(color, dark_one)
+        check_("сайт в одной тёмной теме на токенах без modes.base: dark → R-COV-010 warning поверхности, в "
+               "сообщении — тема значений и color-scheme", len(got) == 1 and got[0][:2] == ("promo", "warning")
+               and "не объявлена" in got[0][2] and "color-scheme производного CSS — light" in got[0][2])
+        based = dict(color, **{"$extensions": {EXT_MODES: {"base": "dark"}}})
+        check_("modes.base: dark — тема брифа есть у токенов, находки нет", cov(based, dark_one) == [])
+        two = {"default": "system", "dark": {"needed": True, "why": "вымышлено"}, "switcher": True}
+        got = cov(based, two, app={"default": "light"})
+        check_("две темы брифа сайта на токенах одной тёмной темы и светлый бриф на вид кабинета → по находке, у "
+               "кабинета без поверхности", sorted((g[0] or "", g[1]) for g in got) == [("", "warning"),
+                                                                                    ("promo", "warning")])
+
+
 def _selftest():
     import copy
     import subprocess
@@ -1558,6 +1675,16 @@ def _selftest():
            re.search(r':root\[data-theme="dark"\] \{[^}]*--color-on-bg: #FFFFFF;', css) is not None)
     check_("CSS: сокращённое движение и узкая ширина (type.body 14 → 16 ниже первой границы 640px)",
            "--motion-fast: 0ms;" in css and "@media (width < 640px)" in css and "--type-body-size: 16px;" in css)
+    fam = copy.deepcopy(doc)
+    fam["font"].update({"ui": {"$type": "fontFamily", "$value": ["system-ui", "-apple-system", "sans-serif"]},
+                        "serif": {"$type": "fontFamily", "$value": "Georgia"}})
+    fam["type"]["title"] = {"$value": dict(doc["type"]["body"]["$value"], fontFamily=["Demo Display", "serif"])}
+    fam["type"]["broken"] = {"$value": dict(doc["type"]["body"]["$value"], fontFamily="{font.nope}")}
+    check_("web_families: первое имя стека fontFamily и типографики — не родовое и не системное, без повторов; "
+           "алиас в пустоту пропускается", web_families(fam) == ["Golos Text", "Demo Display"])
+    check_("темы токенов: тема значений и парная по режиму (light + dark); без режимов темы — одна",
+           token_themes(toks) == {"light", "dark"} and token_themes(Tokens({"font": doc["font"]})) == {"light"})
+    _selftest_themes(check_)
     fm = front_matter(toks, "Проба", "описание")
     check_("передняя часть: colors, typography, x-modes, x-narrow",
            'color-bg: "#FFFFFF"' in fm and "type-body:" in fm and "x-modes:" in fm and "x-narrow:" in fm)

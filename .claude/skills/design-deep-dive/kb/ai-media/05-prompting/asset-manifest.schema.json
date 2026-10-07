@@ -40,7 +40,15 @@
         "sha256": {"type": "string", "pattern": "^(sha256:)?[0-9a-f]{64}$", "description": "Отпечаток файла."},
         "ai": {"type": "boolean", "description": "Пометка ИИ: true — файл сгенерирован или правлен моделью."},
         "ai_mark": {"type": ["boolean", "string"], "description": "Пометка ИИ — второе имя поля ai или текст пометки."},
-        "ai_label": {"type": ["boolean", "string"], "description": "Подпись раскрытия ИИ у файла."}
+        "ai_label": {"type": ["boolean", "string"], "description": "Подпись раскрытия ИИ у файла."},
+        "font": {"type": "object", "additionalProperties": false, "required": ["family", "weight", "style"],
+                 "description": "Строка файла шрифта (design/_assets/fonts/, woff2): по семейству, насыщенности и начертанию код подключает файл (Fonts API с локальным провайдером); family — первое имя стека fontFamily токенов ДС, лицензия файла — поле license.",
+                 "properties": {
+                   "family": {"type": "string", "minLength": 1},
+                   "weight": {"anyOf": [{"type": "integer", "minimum": 1, "maximum": 1000},
+                                        {"type": "string", "pattern": "^[1-9][0-9]{0,3} [1-9][0-9]{0,3}$"}],
+                              "description": "Насыщенность: число (400) или диапазон вариативного шрифта «100 900»."},
+                   "style": {"enum": ["normal", "italic", "oblique"]}}}
       }
     }
   }

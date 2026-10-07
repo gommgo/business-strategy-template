@@ -34,7 +34,9 @@ fonts:
     - role: <роль>                    # heading · body · accent
       family: <семейство>
       cyrillic: false                 # true — кириллица есть и проверена отрисовкой
-      license: <лицензия>             # веб-лицензия; файлы — design/_assets/fonts/ вместе с лицензией
+      license: <лицензия>             # веб-лицензия; файлы — design/_assets/fonts/ вместе с лицензией, у каждого —
+                                      # строка манифеста design/_assets/manifest.yaml с font: {family, weight, style}
+                                      # (family — как в стеке токенов ДС): по ней код подключает шрифт
       replaces: {family: <фирменный шрифт>, why: <причина>}   # только при замене: у фирменного шрифта нет
                                                               # веб-лицензии или кириллицы
 

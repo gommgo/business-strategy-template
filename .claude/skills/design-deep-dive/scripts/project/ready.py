@@ -53,9 +53,12 @@
                                       юрисдикция своей страницы), способ проверки — поле check (gates, tool, code,
                                       manual); вход холста манифест не читает
     open                              заглушки [PLACEHOLDER] выбранных текстов (вариант chosen, у слота без chosen —
-                                      единственный), демо-факты (example: true), которые страница называет, и
+                                      единственный), демо-факты (example: true), которые страница называет,
                                       демо-кадры — «демо-кадр: <слот>» на слот плана ассетов страницы с расширением
-                                      x-demo (кадр макета не для публикации); затем строки «решение заказчика: …» — ДС
+                                      x-demo (кадр макета не для публикации), и у каждой единицы — «шрифт: <семейство>
+                                      …»: семейство токенов ДС, которому нужен файл (ds_build.web_families), без
+                                      принятой строки манифеста ассетов продукта с этим font.family и файлом; затем
+                                      строки «решение заказчика: …» — ДС
                                       не утверждена, у кабинета ещё покрытие ДС типов своего экрана не полное
                                       (ds_coverage) и FSD-карта не stable, и открытые источники группы «контекст»
                                       («<путь> <статус>», context_open): готовность они не держат, решает заказчик
@@ -252,6 +255,7 @@ class Build:
         self.surf_open = []
         self.context = []
         self._facts = None
+        self._fonts = None
         self._src = {}
 
     # пути
@@ -268,6 +272,25 @@ class Build:
     @property
     def ds_status(self):
         return docpaths.status(self.dprod("system")) if self.dprod("system").is_file() else None
+
+    @property
+    def fonts_open(self):
+        """Строки open «шрифт: <семейство> …» — у каждой единицы: семейство токенов ДС, которому нужен файл
+        (`ds_build.web_families`), без принятой строки манифеста ассетов продукта с этим `font.family` и файлом на
+        диске. Код подключает шрифты по строкам манифеста; без файла страница — не та, что одобрена на макете."""
+        if self._fonts is None:
+            data = load(self.dprod("tokens"))
+            man = self.dprod("assets") / "manifest.yaml"
+            rows = load(man)
+            rows = rows.get("assets") if isinstance(rows, dict) else rows
+            have = {str(r["font"].get("family")).lower() for r in rows if isinstance(r, dict)
+                    and r.get("status") == "accepted" and isinstance(r.get("font"), dict)
+                    and isinstance(r.get("file"), str) and (man.parent / r["file"]).is_file()} \
+                if isinstance(rows, list) else set()
+            fams = mod("ds_build").web_families(data) if isinstance(data, dict) else []
+            self._fonts = [f"шрифт: {f} — нет принятого файла со строкой манифеста design/_assets/ (font.family)"
+                           for f in fams if f.lower() not in have]
+        return self._fonts
 
     def review(self):
         """Строки «Приёмка» REVIEW.md: {единица: {artboards, verdict, fingerprint, by, date, open}}."""
@@ -496,7 +519,7 @@ class Build:
             if bad:
                 why.append("факты: " + ", ".join(bad[:4]) + (f" и ещё {len(bad) - 4}" if len(bad) > 4 else ""))
             opened += [f"демо-факт: {x}" for x in sorted(set(demo))]
-            opened += [f"демо-кадр: {x}" for x in self.demo_slots(pid)]
+            opened += [f"демо-кадр: {x}" for x in self.demo_slots(pid)] + self.fonts_open
             decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
             decide += [line for line, scope in self.context if scope in (None, ("page", pid))]
             exc = [str(e.get("id")) for e in get(plan, "page", "x-gate-exception", default=[]) or []
@@ -508,8 +531,8 @@ class Build:
 
     @staticmethod
     def unit(uid, ready, comp, texts, verdict, budget, exc, after, opened):
-        """Единица формы; publishable — готова, а в open только «решение заказчика: …» (заглушек, демо-фактов и
-        демо-кадров нет): такую единицу код публикует."""
+        """Единица формы; publishable — готова, а в open только «решение заказчика: …» (заглушек, демо-фактов,
+        демо-кадров и шрифтов без файла нет): такую единицу код публикует."""
         return {"id": uid, "ready": ready, "publishable": ready and all(o.startswith(DECIDE) for o in opened),
                 "composition": comp, "texts": texts, "mockup": verdict, "budget_profile": budget,
                 "gate_exceptions": exc, "after_build": after, "open": opened}
@@ -524,8 +547,8 @@ class Build:
 
     @staticmethod
     def open_list(opened, decide):
-        """Строки open единицы: заглушки, демо-кадры и демо-факты по алфавиту, затем по алфавиту решения заказчика
-        (ДС, покрытие, FSD-карта, открытые источники контекста)."""
+        """Строки open единицы: заглушки, демо-кадры, демо-факты и шрифты без файла по алфавиту, затем по алфавиту
+        решения заказчика (ДС, покрытие, FSD-карта, открытые источники контекста)."""
         return sorted(set(opened)) + sorted({DECIDE + d for d in decide})
 
     # кабинет
@@ -570,6 +593,7 @@ class Build:
             verdict, mwhy = self.mockup(slug, rev, ids)
             if mwhy:
                 why.append(mwhy)
+            opened += self.fonts_open
             decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
             if cov_err:
                 decide.append(f"покрытие ДС не посчитано ({cov_err})")
@@ -1463,6 +1487,25 @@ def _selftest():
         sysp.write_text(sysp.read_text(encoding="utf-8").replace("status: approved", "status: proposed", 1)
                         + "starter: [plan-dashboard]\n", encoding="utf-8")
         d = build(slug, surf, root, today)
+        font = "шрифт: Golos Text — нет принятого файла со строкой манифеста design/_assets/ (font.family)"
+        pd0 = next(u for u in d["units"] if u["id"] == "plan-dashboard")
+        fdir = docpaths.design(slug, "assets", repo=root) / "fonts"
+        fdir.mkdir(parents=True, exist_ok=True)
+        (fdir / "golos-text-400.woff2").write_bytes(b"wOF2 demo")
+        row = {"slot": "font-golos-text", "file": "fonts/golos-text-400.woff2", "status": "accepted",
+               "font": {"family": "Golos Text", "weight": 400, "style": "normal"}, "license": "OFL (демо)",
+               "sha256": sha(fdir / "golos-text-400.woff2")}
+        (fdir.parent / "manifest.yaml").write_text(yaml_mod().safe_dump({"assets": [dict(row, status="draft")]},
+                                                                        allow_unicode=True), encoding="utf-8")
+        draft = build(slug, surf, root, today)
+        (fdir.parent / "manifest.yaml").write_text(yaml_mod().safe_dump({"assets": [row]}, allow_unicode=True),
+                                                   encoding="utf-8")
+        d = build(slug, surf, root, today)
+        check("шрифт токенов ДС без принятого файла — строка open «шрифт: …» у каждой единицы (черновая строка "
+              "манифеста её не снимает), публикацию держит; принятая строка манифеста продукта с font.family и файлом "
+              "её снимает",
+              pd0["ready"] and not pd0["publishable"] and all(font in u["open"] for u in draft["units"])
+              and not any(font in u["open"] for u in d["units"]))
         units = {u["id"]: u for u in d["units"]}
         pd = units["plan-dashboard"]
         cov_lines = {u: [o for o in x["open"] if o.startswith(f"{DECIDE}покрытие ДС")] for u, x in units.items()}
