@@ -5,7 +5,7 @@
 планы 15 шаблонов), `J/04` (`site_validate.py`: 23 проверки карты на трёх картах G — 0 ошибок).
 
 Плейбук многостраничника — умолчания шагов 3–5 процедуры (`01-procedure-brief-to-pages.md`) для карты и шаблонов. Владельцы:
-карта, шаблоны, навигация, перелинковка, языки — G (`../06-multipage-ia/01-sitemaps-templates-content-model.md`, `02-navigation-linking-i18n.md`, `site-map.schema.json`, примеры); порядок секций —
+карта, шаблоны, навигация, перелинковка, языки — G (`../06-multipage-ia/01-sitemaps-templates-content-model.md`, `02-navigation-linking-i18n.md`, `schemas/site-map.schema.json`, примеры); порядок секций —
 C (`../03-page-structure/01-narratives-and-section-order.md` §3); блоки — E (`blocks.yaml` v1); формы — F (`lead-forms.yaml` v1); разметка — H (`head-kit.yaml`);
 бюджет — P (`budgets.yaml`); право — I (`legal-requirements.yaml`). Карта v1 — `schemas/site-map.schema.json` (+ `templates[].level`).
 
@@ -290,7 +290,7 @@ Article для проектов; подписи работ — текстом, �
 ## Источники
 
 - [S1] G — `../06-multipage-ia/01-sitemaps-templates-content-model.md` §2–§4, `02-navigation-linking-i18n.md` §1–§6,
-  `site-map.schema.json`, три примера, опыт G/01 (`ia_probe.py`, 20 сайтов, 13 русских; 2026-09-24).
+  `schemas/site-map.schema.json`, три примера, опыт G/01 (`ia_probe.py`, 20 сайтов, 13 русских; 2026-09-24).
 - [S2] C — `../03-page-structure/01-narratives-and-section-order.md` §3.2–3.3 (главная, услуга, тарифы, кейс, функция), `02-length-goal-message-match.md` §1.3, `03-first-screen-and-mobile.md` §1.3.
 - [S3] B — `../02-site-types/01-site-and-page-taxonomy.md` §2 (обязательные и рекомендуемые страницы по 9 типам), §6.
 - [S4] H — `head-kit.yaml` v1.0 (`page_types`, `site_checks`), `crawlers.yaml`, `01-seo-google-yandex.md`.

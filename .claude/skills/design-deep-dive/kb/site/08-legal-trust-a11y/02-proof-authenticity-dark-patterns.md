@@ -318,7 +318,7 @@ ux, ai-media, text, A) · опыт `99-raw/experiments/I/01-legal-signals-M` · 
   §1 (ГК 152.1, FTC 16 CFR 465, NY § 396-b) — прочитаны целиком; аудит MEDIA §4.7 (пять позиций о людях в hero).
 - [S10] text — `../../text/02-strategy-messaging/facts.schema.yaml` (поля `permission`, `attribution`, `valid`),
   `../../text/08-russian-legal-typography/01-advertising-law-claims.md` §7 (отзывы), `claims-rules.yaml`.
-- [S11] E — `../04-blocks/blocks.yaml` (блоки доказательств, `authenticity`), `page-plan.schema.json`.
+- [S11] E — `../04-blocks/blocks.yaml` (блоки доказательств, `authenticity`), `../10-playbooks-contracts/schemas/page-plan.schema.json`.
 - [S12] Опыт I/01 — `99-raw/experiments/I/01-legal-signals-M/results.md` `[проверено]`.
 - [S13] C — `../03-page-structure/03-first-screen-and-mobile.md` §4.5 (окна и чаты при входе, C/02).
 - [S14] Nouwens et al., CHI 2020 (arXiv 2001.02479) и EDPB Cookie Banner Taskforce 2023 — по `01-law-ru-eu.md` [S24], [S16].

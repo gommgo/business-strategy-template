@@ -2,7 +2,7 @@
 # Владелец: site (07-seo-geo-performance-analytics). Только первоисточники платформ; у каждой записи — дата проверки.
 # Читают: geo_probe.py (оценка robots.txt по ботам), head-kit.yaml, плейбуки (10-playbooks-contracts) и чек-лист
 # (09-ai-generation-evaluation).
-# Бриф: поле search.ai_bots_policy (../01-foundations/site-brief.schema.json) → раздел policies ниже.
+# Бриф: поле search.ai_bots_policy (../10-playbooks-contracts/schemas/site-brief.schema.json) → раздел policies ниже.
 
 version: 1.0
 checked: 2026-09-24
@@ -802,7 +802,7 @@ not_included:
   - {what: "Яндекс: прочие роботы (Images, Video, Metrika, ScreenshotBot, MobileBot…)", why: "не влияют на ИИ-ответы; полный список — doc_url yandex-yandexbot"}
 
 policies:
-  # Значения поля брифа search.ai_bots_policy (../01-foundations/site-brief.schema.json). Правила сборки robots.txt — ниже.
+  # Значения поля брифа search.ai_bots_policy (../10-playbooks-contracts/schemas/site-brief.schema.json). Правила сборки robots.txt — ниже.
   allow-all:
     name: Пускать всех — поиск, ИИ-ответы и обучение
     robots_txt: |

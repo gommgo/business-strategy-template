@@ -416,7 +416,7 @@ LR-EU-09 (прежняя цена), LR-EU-10 (e-commerce services).
 - [S4] H — `../07-seo-geo-performance-analytics/01-seo-google-yandex.md`, `head-kit.yaml` v1.0, `crawlers.yaml` (2026-09-24).
 - [S5] P — `budgets.yaml`, `page-gates.yaml`, `events.yaml`, `03-performance-budgets-gates.md`, `04-analytics-experiments.md`.
 - [S6] I — `../08-legal-trust-a11y/01-law-ru-eu.md`, `02-proof-authenticity-dark-patterns.md`, `03-a11y-marketing-pages.md`, `legal-requirements.yaml` (37 требований; не юридическое заключение).
-- [S7] A — `../01-foundations/site-brief.schema.json` (условия `allOf` по типам), схема v1 — `schemas/site-brief.schema.json`.
+- [S7] A — `schemas/site-brief.schema.json` (условия `allOf` по типам).
 - [S8] creative — `../../creative/01-creative-direction/ambition-levels.yaml` v0.1 (уровни, `section_caps`, умолчания по типам).
 - [S9] M — `../02-site-types/03-live-pages-measured.md` (черновик), `pages.csv` предварительный — `[данные]` с оговоркой.
 - [S10] Дайджесты — `../91-videos/digests/w87hTii1Dao.md` (Гарднер 2015), `Vkn3R6DUJ34.md` (SOTR 111, 2026), `hEzpiDuYFoE.md` (Кохави).

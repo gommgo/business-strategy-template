@@ -364,9 +364,8 @@ k-means в OKLab (перевод `../../scripts/lib/color.py`: `rgb2oklab`, `okl
   `^ref:[a-z0-9]+(-[a-z0-9]+)*$`); наш `id` ему соответствует. Выгрузка в бриф — `lib export --format brief --board <имя>`
   → `references: [{ref, role, take, dont_take, source: creative-library, note}]` [S10].
 - `role` в брифе одна, в записи — список пригодных ролей (`roles[]`); при выгрузке берётся первая — выбирать осознанно
-  (`03` §3). Роли `color`, `material`, `imagery`, `effect` предложены A (`../01-creative-direction/drafts-for-site/
-  site-brief-creative-fields.yaml`, раздел `references[]`) — до их принятия site в `site-brief` v0 они уходят как `other`
-  с ролью в `note`.
+  (`03` §3). Роли `color`, `material`, `imagery`, `effect` — в словаре ролей брифа (`role` в `$defs/reference` схемы
+  `../../site/10-playbooks-contracts/schemas/site-brief.schema.json`).
 - Автор: Dribbble п. 7.7 запрещает «Collecting or harvesting … User information, including account names» [S1]; Behance
   PST 2.1 — «collect other people's information without their consent» [S3]. Храним минимум для атрибуции (имя и ссылка на
   профиль) `[спорно]`; при отказе — `author: null`, атрибуция по ссылке на работу.
@@ -521,7 +520,7 @@ Dprofile — «поиск» с 16:24, риск по п. 11.3 и «личным �
   `01-sources-probe/`; самопроверка `refs_client.py selftest`.
 - [S9] kimi-research `07-brief-handoff/03-references-brand-assets.md` §1–3, `templates/refs-README.md` — роли референсов,
   подготовка файлов, подписи Take / Do not take (2026-09-24).
-- [S10] site-research `01-foundations/site-brief.schema.json` v0 — `$defs/reference` (`ref:`, `role`, `take`, `dont_take`).
+- [S10] site-research `../../site/10-playbooks-contracts/schemas/site-brief.schema.json` — `$defs/reference` (`ref:`, `role`, `take`, `dont_take`).
 - [S11] Контракт тройки v2 `../site/99-raw/notes/triad-contract-2026-09-24.md` §3 п.7 (библиотека референсов), §4 (браузеры).
 - [S12] Разведка оркестратора `99-raw/notes/refs-recon-orchestrator-2026-09-24.md` (Dprofile JSON, AWS WAF Dribbble,
   Fastly Behance, запись cookie раз в ≈ 30 с).

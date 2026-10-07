@@ -2,7 +2,7 @@
 
 Волна 2 · агент G · 2026-09-24 · прочитано целиком 26 внешних источников (NN/g 13, Google Search Central 10, Яндекс
 Вебмастер 2, W3C WCAG 2.2) + 2 дайджеста роликов W и 30 файлов базы, соседей и сестёр · опыты `99-raw/experiments/G/00-selftest`
-(`ia_probe.py`, 26/26), `G/01-ia-probe` (20 многостраничников, 13 русских) · артефакты: `site-map.schema.json`,
+(`ia_probe.py`, 26/26), опыт G/01 (20 многостраничников, 13 русских) · артефакты: `../10-playbooks-contracts/schemas/site-map.schema.json`,
 пример карты — `../10-playbooks-contracts/examples/corporate-b2b-stalkon/site-map.yaml`. Навигация, перелинковка,
 URL и языки — `02-navigation-linking-i18n.md`.
 
@@ -371,7 +371,7 @@ TASK.md; приёмка «каждая ссылка навигации ведё�
 - [ ] Юридический набор по I в подвале каждой страницы, включая посадочные без меню?
 - [ ] HTML-карта сайта при > 25 страниц и ≥ 2 уровнях, при ≤ 25 — подвал-карта?
 - [ ] `build_order` начинается с главной и общих компонентов; каждый шаблон в порядке сборки?
-- [ ] Схема `site-map.schema.json` и перекрёстные ссылки проходят без ошибок?
+- [ ] Схема `../10-playbooks-contracts/schemas/site-map.schema.json` и перекрёстные ссылки проходят без ошибок?
 
 ## Открытые вопросы и противоречия
 
@@ -411,5 +411,5 @@ TASK.md; приёмка «каждая ссылка навигации ведё�
 - [S21] Дайджесты W: `../91-videos/digests/Vkn3R6DUJ34.md` (Search Off the Record 111, 2026-06-15), `kype1JQbrks.md` (эпизод 106, 2026-03-30). [документация]
 - [S22] Hallmark v1.1.0 (MIT), `references/structure.md`, `component-cookbook.md` — клон `../../kimi-research/99-raw/cache/repos/Nutlope__hallmark/`. [мнение вендора]
 - [S23] Сосед kimi: `06-cn-ecosystem/01-official-cn.md` §5.2 («сначала главная»), `07-brief-handoff/01-from-app-description-to-brief.md` §2.2, `templates/build_package.py` (NAV_RULE, A1_STRUCTURE). [документация] [практика]
-- [S24] База: B `../02-site-types/01-site-and-page-taxonomy.md` §2–§7, `vocabulary.yaml` r2; C `../03-page-structure/01-narratives-and-section-order.md` §3–§4, `02` §2.3–§4; A `../01-foundations/site-brief.schema.json`, `03-site-brief.md` §2.10, §7; E `../04-blocks/blocks.yaml` v0.9, `page-plan.schema.json`. Свои агенты.
+- [S24] База: B `../02-site-types/01-site-and-page-taxonomy.md` §2–§7, `vocabulary.yaml` r2; C `../03-page-structure/01-narratives-and-section-order.md` §3–§4, `02` §2.3–§4; A `../10-playbooks-contracts/schemas/site-brief.schema.json`, `03-site-brief.md` §2.10, §7; E `../04-blocks/blocks.yaml` v0.9, `page-plan.schema.json`. Свои агенты.
 - [S25] Опыты G/00 и G/01: `../99-raw/experiments/G/`, утилита `../../../scripts/site/ia_probe.py`. [проверено]

@@ -137,7 +137,7 @@ SaaS или продукт, кампания L2 и корпоративный с
 
 **Машинные файлы.** Единые id — `site/02-site-types/vocabulary.yaml`: типы страниц, роли секций, блоки, слоты; чужие
 словари — строками `crosswalk.tsv` той же папки. Схемы брифа, карты, плана и блоков —
-`site/10-playbooks-contracts/schemas/`: одноимённые схемы в папках 01, 04, 06 для новых файлов не берут. Блоки —
+`site/10-playbooks-contracts/schemas/`. Блоки —
 `blocks.yaml`, формы — `lead-forms.yaml`; бюджеты (`budgets.yaml`), ворота (`page-gates.yaml`), события и разметка — YAML
 папки `site/07-seo-geo-performance-analytics/`. **Утилиты.** `site_validate.py` — бриф, карта, планы по схемам;
 `vocab_lint.py` — id вне словаря; `plan_to_assets.py` — каркас плана ассетов; `page_gates.py` — профиль (`--resolve`) и

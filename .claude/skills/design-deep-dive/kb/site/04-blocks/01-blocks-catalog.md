@@ -4,7 +4,7 @@
 text, Hallmark, ai-media, blender, kimi, ux · опыты `99-raw/experiments/E/01-validate`, `02-text-slot-defaults`,
 `03-saas-demo-brief`, `04-blocks-vs-live-pages`
 
-Машиночитаемый каталог — `blocks.yaml` (v1.0 — 84 блока, v0.9 E — 83; схема `blocks.schema.json`): анатомия, варианты, телефон, разметка и
+Машиночитаемый каталог — `blocks.yaml` (v1.0 — 84 блока; схема `../10-playbooks-contracts/schemas/blocks.schema.json`): анатомия, варианты, телефон, разметка и
 ссылки у каждого блока. Здесь — как выбрать блок и вариант, что в нём обязательно и чего не делать. Специальные блоки
 (формы, FAQ, о компании, контакты, портфолио, мероприятия, курсы, материалы, служебные) — `02-blocks-catalog-specialized.md`;
 слоты и план страницы — `03-slots-and-page-plan.md`. Порядок секций и роли — C (`../03-page-structure/`); подача блоков —

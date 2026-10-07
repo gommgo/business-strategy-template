@@ -301,7 +301,7 @@ Transitions, Barba, Swup)».
   hot` и `device: mobile` (карты, рекомендации, ретаргетинг, поиск с намерением) — и `price_band` — `low` или `mid`;
   `ambition.source: default`, в `note` — это правило. Данных о трафике нет — **L1 и вопрос** в журнал брифа. Заказчик может
   вернуть L1 или выше явно (`ambition.source: customer`).
-- Путь поля: в `site-brief.schema.json` v0 `price_band` лежит в **`decision_context.price_band`**; в тексте решения 20,
+- Путь поля: в `site-brief.schema.json` `price_band` лежит в **`decision_context.price_band`**; в тексте решения 20,
   `budgets.yaml` P и `ambition-levels.yaml` v0 было написано `offer.price_band` — у `offer` такого поля нет. Наш YAML
   исправлен в v0.1 (2026-09-24 16:22), site — предложение `[проверено: чтение схемы 2026-09-24]`.
 - `device: mixed` в долю телефона не входит; если порог достигается только с ней — вопрос заказчику `[не проверено]`.
@@ -456,7 +456,7 @@ Transitions, Barba, Swup)».
 - [S3] web.dev: «Web Vitals» (обновлено 2024-10-31) и «Defining the Core Web Vitals metrics thresholds» (2025-05-07, по `budgets.yaml` P): LCP 2,5 / 4 с, INP 200 / 500 мс, CLS 0,1 / 0,25 на p75. `[документация]`
 - [S4] HTTP Archive. Web Almanac 2025, глава Page Weight (2026-01-15; Barret, Indigo), рис. 14.54, 14.56, 14.57 — медианы веса и доля CWV по весу; кэш `99-raw/cache/almanac.httparchive.org_en_2025_page-weight_252b0d0b.md`. `[данные]`
 - [S5] site-research, агент P. `07-seo-geo-performance-analytics/budgets.yaml` v0 и `page-gates.yaml` v0 (2026-09-24 15:46): цели и «плохо», слои веса, исключения, серьёзность, условия лаборатории.
-- [S6] site-research. `PLAN.md` решение 20 (≈ 15:25–15:35), ответ на C1 (`99-raw/notes/sync/C1-site-reply-2026-09-24/README.md`, 15:21), `01-foundations/site-brief.schema.json` v0, `site-brief.example.yaml`, `03-site-brief.md` §3, `02-site-types/vocabulary.yaml` r2.
+- [S6] site-research. `PLAN.md` решение 20 (≈ 15:25–15:35), ответ на C1, `../../site/10-playbooks-contracts/schemas/site-brief.schema.json`, `03-site-brief.md` §3, `../../site/02-site-types/vocabulary.yaml`.
 - [S7] ai-media-research. `01-web-assets-landscape/01-asset-slots-by-page-type.md` §7, `02-live-sites-measured.md` §4, `03-ai-fit-trust-and-slop.md` §7.1; `../../scripts/ai-media/page_accept.py`.
 - [S8] blender-research. `01-web-3d-landscape/02-when-3d-budgets-loading.md` §1.3, §3.1, §7; `09-web-runtime/04-shaders-effects-catalog-impl.md` §2.1; `09-web-runtime/05-performance-a11y-fallbacks.md` §5.2, §7.2; `11-evaluation-qa/05-master-checklist.md` §9; `99-raw/experiments/A/03-bundle-sizes`.
 - [S9] kimi-research. `07-brief-handoff/01-from-app-description-to-brief.md` §6.2; `07-brief-handoff/02-task-package.md` §8.1 (gsap 3.15.0, lenis 1.3.26); `07-brief-handoff/templates/brief.yaml`; `03-prompting/04-template-library.md` T7.

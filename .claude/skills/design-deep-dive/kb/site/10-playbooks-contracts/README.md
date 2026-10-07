@@ -13,7 +13,7 @@
 | `schemas/site-brief.schema.json` | бриф v1 (`urn:app-design:site:site-brief:1`) |
 | `schemas/page-plan.schema.json` | план страницы v1 (`…:page-plan:1`), подача — `$ref` на `treatment:1` creative (v1 с 2026-09-25) |
 | `schemas/site-map.schema.json` | карта сайта v1 (`…:site-map:1`) |
-| `schemas/blocks.schema.json` | каталог блоков v1 (`…:blocks:1`; формат совместим с v0.9) |
+| `schemas/blocks.schema.json` | каталог блоков v1 (`…:blocks:1`) |
 | `examples/lead-services-otves/` | лидогенерация услуг РФ «Отвес»: бриф, 6 планов, проекция `brief.kimi.home.yaml`, `acceptance-site.home.md`, `asset-plan.home.yaml`, заглушки сестёр |
 | `examples/saas-okoshko/` | лендинг SaaS «Окошко»: бриф (draft), `facts.yaml` (копия демо text + пробел `demo`), 5 планов, проекция, план ассетов |
 | `examples/corporate-b2b-stalkon/` | корпоративный многостраничник «Сталькон»: бриф, демо-факты J, карта v1, 15 планов шаблонов, проекция главной, план ассетов |
@@ -39,7 +39,7 @@
 - **site-map v1**: `templates[].level` + `level_why` (уровень шаблона ≤ сайта); описание крошек → G `../06-multipage-ia/02-navigation-linking-i18n.md` §2.1.
 - **blocks.yaml v1** и **lead-forms.yaml v1** — на месте (журналы в начале файлов): блок `service-area`, `qr-code`, `cta-next-label`,
   вариант `capture-popup.engaged-slide-in`, телефонные правила крошек и подвала, архетип шапки; журнал согласия, события `event:<id>`.
-- Схемы v0/v0.9 владельцев остаются для файлов своих версий; `site_validate.py` выбирает схему по полю версии.
+- Схемы сайта — только v1 (`schemas/`): файл другой версии `site_validate.py` не принимает (SB-S01, SM-S01, PL-S01).
 - **2026-09-25 (S1, волна 4)**: `page-plan` v1 — подсхема `treatment` v1 creative (`treatment:1`; примеры — цели эффектов по id v1,
   hero «Окошка» без появления); `site-brief` v1 — `constraints.cms` `enum` (8 платформ, аудит X С-20); генератор
   `../99-raw/experiments/J/01-schemas-v1/make_schemas.py` обновлён теми же строками (пересборка даёт те же `site-brief` и `site-map`).

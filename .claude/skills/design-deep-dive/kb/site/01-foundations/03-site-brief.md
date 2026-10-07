@@ -2,13 +2,13 @@
 
 Волна 1 · агент A · 2026-09-24 · прочитано целиком 16 источников (контракт, kimi, ux, text, creative, словарь B) · опыты
 `99-raw/experiments/A/01-schema-validate/` (схема и 16 отрицательных случаев), `A/02-kimi-projection/` (сборка пакета kimi),
-`A/03-coverage/` (покрытие полей). Файлы формата: `site-brief.schema.json` (JSON Schema 2020-12, v0),
+покрытие полей — опыт A/03. Файлы формата: `../10-playbooks-contracts/schemas/site-brief.schema.json` (JSON Schema 2020-12, v1),
 пример — `../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml` (лидогенерация услуг в РФ, вымышленная
 студия «Отвес»).
 
 ## Выжимка для агента
 
-1. **Бриф сайта — один YAML-файл по `site-brief.schema.json`**. → §1, §7 `[проверено]`
+1. **Бриф сайта — один YAML-файл по схеме v1 `../10-playbooks-contracts/schemas/site-brief.schema.json`**. → §1, §7 `[проверено]`
 2. **Поля смысла — блок `meaning` по схеме text** (`$ref: urn:app-design:text:meaning:1`), доказательства — только
    ссылка `proof.facts_ref` на `facts.yaml` text; свои определения аудитории, возражений и фактов не заводить. → §2.6, §2.7
    `[проверено]`
@@ -91,7 +91,7 @@ site-brief.yaml (site)                         brief.yaml kimi (проекция
 
 ## 2. Разделы брифа
 
-Полная схема — `site-brief.schema.json` (25 блоков верхнего уровня, 14 условий `allOf`); пример —
+Полная схема — `../10-playbooks-contracts/schemas/site-brief.schema.json` (26 блоков верхнего уровня, 14 условий `allOf`); пример —
 `../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`.
 Пометки: **владелец** — кто определяет поле; **заполнение** — кто вписывает значение (`x-fill` в схеме).
 
@@ -347,8 +347,8 @@ other, general). `cms`, `stack`, `hosting` (важно для локализац
 
 ## 8. Для сестёр (S0)
 
-Путь схемы — `01-foundations/site-brief.schema.json` (`$id urn:app-design:site:site-brief:0`), пример —
-`../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`. Поля, ждущие определений сестёр (в v0 есть тип
+Путь схемы — `../10-playbooks-contracts/schemas/site-brief.schema.json` (`$id urn:app-design:site:site-brief:1`), пример —
+`../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`. Поля, ждущие определений сестёр (в схеме есть тип
 и пометка владельца):
 - **text**: весь блок `meaning` (через `$ref` на их схему — определения их); `proof.facts_ref` и виды фактов (ссылка на
   `facts.schema.yaml`); `constraints.legal_category` (их перечень); `meaning.voice_ref` и `brand.voice` — профиль голоса
@@ -384,7 +384,7 @@ other, general). `cms`, `stack`, `hosting` (важно для локализац
 
 ## Чек-лист
 
-- Бриф — YAML по `site-brief.schema.json`, `validate.py` — 0 ошибок схемы и смысла?
+- Бриф — YAML по `../10-playbooks-contracts/schemas/site-brief.schema.json`, `../../../scripts/site/site_validate.py` — 0 ошибок схемы и смысла?
 - `site_type` и `primary_page_type` из словаря B; у `landing-site` тип посадочной страницы класса landing?
 - `conversion.action` — одно macro-id; вторая цель — в `secondary_actions`?
 - У каждого источника трафика есть температура, устройство и обещание источника (если это реклама или письмо)?

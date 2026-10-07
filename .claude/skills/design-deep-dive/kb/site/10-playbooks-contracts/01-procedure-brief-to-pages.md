@@ -135,7 +135,7 @@
    курс и школа — цена и люди; лид-магнит — обмен «материал за контакт»; портфолио — кейсы или работы. `[проверено]`
 3. **Вопросы.** Журнал `questions[]` — один на весь бриф (`block` — раздел; `default` — что будет без ответа; `affects` — JSON
    Pointer полей; `priority` 1 — без ответа страницу честно не построить). За раз — не больше 7 вопросов, из подачи — не
-   больше 2 (`../../creative/01-creative-direction/drafts-for-site/site-brief-creative-fields.yaml`, банк вопросов); на вкус — не спрашивать, предлагать
+   больше 2 (банк вопросов подачи — creative 01/01 §2.3); на вкус — не спрашивать, предлагать
    направления на выбор. `[практика]`
 4. **Правовой опросник** — `constraints.legal_intake` (I 01 §6 шаг 1): реестр РКН, где хранятся заявки, сторонние сервисы и их
    страны, рассылки, лицензия, продажа на сайте, необязательные cookie, медицина. Ответы задают `page.legal` планов и набор
@@ -509,20 +509,20 @@ title, description, canonical на себя, `lang`; H1, цены, призыв 
 
 ## Источники
 
-- [S1] site-research A — `01-foundations/03-site-brief.md`, `site-brief.schema.json` v0, опыты A/01 (валидатор, 16 отрицательных
+- [S1] site-research A — `../01-foundations/03-site-brief.md`, `schemas/site-brief.schema.json`, опыты A/01 (валидатор, 16 отрицательных
   случаев), A/02 (проекция в kimi, `build_package.py`), 2026-09-24 — поля брифа, проверки SB-*; надёжно `[проверено]`.
 - [S2] site-research B — `02-site-types/01-site-and-page-taxonomy.md` §2, §6; `vocabulary.yaml` — типы и дерево выбора.
 - [S3] site-research C — `03-page-structure/01` §3–§4, `02` §1.3, `03` §1.3, §2 — порядок, длина, первый экран, A3.
 - [S4] site-research E — `04-blocks/03-slots-and-page-plan.md` §1–§7, `blocks.yaml`, опыт E/01 — план страницы и проверки.
 - [S5] site-research F — `05-conversion-funnels/01–03`, `lead-forms.yaml` — призывы, формы, доказательства, воронки.
-- [S6] site-research G — `06-multipage-ia/01–02`, `site-map.schema.json`, примеры, `ia_probe.py` — карта и навигация.
+- [S6] site-research G — 06/01–02, `schemas/site-map.schema.json`, примеры, `ia_probe.py` — карта и навигация.
 - [S7] site-research H — `07-…/01`, `head-kit.yaml`, `crawlers.yaml` — SEO и GEO по типам страниц.
 - [S8] site-research P — `07-…/03–04`, `budgets.yaml`, `page-gates.yaml`, `events.yaml`, `page_gates.py`, `ab_plan.py`.
 - [S9] site-research I — `08-legal-trust-a11y/01–03`, `legal-requirements.yaml` — право и допуск доказательств; не юридическое заключение.
 - [S10] site-research K — каталог дефектов DEF-01…50, SITE-PRE-01…26, блоки приёмки I–L (`99-raw/notes/wave3/K-notes.md` «Для J»,
   черновик 2026-09-24) — id стабильны, формулировки уточняются.
-- [S11] creative-research A — `01-creative-direction/ambition-levels.yaml` v0.1, `drafts-for-site/site-brief-creative-fields.yaml`,
-  `treatment.v0.schema.json`, `c1_check.py` (точка C1, 2026-09-24).
+- [S11] creative-research A — `../../creative/01-creative-direction/ambition-levels.yaml` v0.1, `treatment.v0.schema.json` (точка
+  C1, 2026-09-24).
 - [S12] text-research — `02-strategy-messaging/facts.schema.yaml`, `proof-intake.md`; `10-templates-recipes/copy-deck.schema.json`.
 - [S13] kimi-research — `07-brief-handoff/templates/` (`brief.yaml`, `build_package.py`), `08-director-loop-qa/01-loop-protocol.md`.
 - [S14] ux-research — `13-app-types/04-master-procedure-brief-to-screens.md` §1 (образец процедуры и правила пропуска).

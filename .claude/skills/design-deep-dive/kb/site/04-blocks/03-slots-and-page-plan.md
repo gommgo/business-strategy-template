@@ -4,7 +4,7 @@
 план ассетов ai-media `01/01` §8, blender `01/02` §7 и `12-recipes/`, пакет kimi `07-brief-handoff/` · опыты
 `99-raw/experiments/E/01-validate`, `02-text-slot-defaults`, `03-saas-demo-brief`
 
-Схемы — `page-plan.schema.json` (v0.9) и `blocks.schema.json`; примеры — `../10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml`
+Схемы v1 — `../10-playbooks-contracts/schemas/page-plan.schema.json` и `../10-playbooks-contracts/schemas/blocks.schema.json`; примеры — `../10-playbooks-contracts/examples/lead-services-otves/plans/home.yaml`
 (лидогенерация услуг РФ), `../10-playbooks-contracts/examples/saas-okoshko/plans/home.yaml` (SaaS).
 Проверка — `../../../scripts/site/site_validate.py` (схема + связи) и `../../../scripts/site/vocab_lint.py`. План — точка S1
 тройки: по нему text пишет copy-deck, creative — подачу секций, ai-media — план ассетов, blender — 3D, kimi получает секции.
@@ -133,7 +133,7 @@
   слота есть в `fact.use.slot_types` — иначе info (у демо-фактов text `use` уже реальных мест: цена в `subheadline`,
   `list-item`, `result-summary`; фото человека — медиа-слоты не описаны).
 - **Минимум по типу страницы** (виды фактов, без которых страница не публикуется) — `proof.required_kinds` брифа A
-  (`../01-foundations/site-brief.schema.json`, allOf): у SaaS — `demo` (скриншоты); валидатор A даёт SB-P01, если в фактах нет
+  (`../10-playbooks-contracts/schemas/site-brief.schema.json`, allOf): у SaaS — `demo` (скриншоты); валидатор A даёт SB-P01, если в фактах нет
   ни вида, ни блокирующего пробела (опыт E/03 на демо «Окошко»).
 
 ### 1.7. action-слоты и события
@@ -353,7 +353,7 @@
 - [S2] Словарь B `../02-site-types/vocabulary.yaml` v0 r2; `02-vocabulary-and-crosswalk.md` §4.5–4.7. Свой агент.
 - [S3] C `../03-page-structure/01-narratives-and-section-order.md` §1.1, §3–4; `02-length-goal-message-match.md` §1.3, §2–4;
   `03-first-screen-and-mobile.md` §1.3, §2, §5. Свой агент.
-- [S4] A `../01-foundations/site-brief.schema.json` (v0), `../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`,
+- [S4] A `../10-playbooks-contracts/schemas/site-brief.schema.json`, `../10-playbooks-contracts/examples/lead-services-otves/site-brief.yaml`,
   `03-site-brief.md`; валидатор
   `../../../scripts/site/site_validate.py`. Свой агент.
 - [S5] text `../../text/10-templates-recipes/copy-deck.schema.json` (v1), `04-copy-by-block/copy-slots.yaml`,

@@ -2,7 +2,7 @@
 # позиционирование, ценностное предложение, силы выбора, возражения и снятие риска
 #
 # Что это. JSON Schema (draft 2020-12), записанная в YAML. Экземпляр — блок `meaning:` в site-brief (владелец схемы брифа —
-# site: `../site/01-foundations/site-brief.schema.json` включает этот блок через `$ref` на `$id` ниже)
+# site: `../site/10-playbooks-contracts/schemas/site-brief.schema.json` включает этот блок через `$ref` на `$id` ниже)
 # или отдельный файл `meaning.yaml` проекта, пока site-brief нет. Как заполнять — `01-positioning-value-proposition.md`
 # §5 (процедура «бриф → позиционирование») и `02-awareness-hierarchy-objections.md`.
 #

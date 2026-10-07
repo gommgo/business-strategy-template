@@ -109,7 +109,7 @@ GEO здесь — техника: доступ ИИ-ботов, HTML без JS,
 
 ### 2.2. Политика заказчика: `search.ai_bots_policy`
 
-Значения поля брифа (`../01-foundations/site-brief.schema.json`) и готовые robots.txt — `crawlers.yaml` `policies`:
+Значения поля брифа (`../10-playbooks-contracts/schemas/site-brief.schema.json`) и готовые robots.txt — `crawlers.yaml` `policies`:
 `allow-all`, `allow-search-deny-training`, `deny-all`, `ask` (умолчание брифа). Решение за заказчиком; база даёт умолчание
 на случай молчания.
 

@@ -432,10 +432,10 @@ LCP-кандидат и то, без чего первый экран не чи�
 - [S4] ai-media-research. `01-web-assets-landscape/03-ai-fit-trust-and-slop.md` §5.2–5.3: 25 маркеров картинок и 18 маркеров видео.
 - [S5] blender-research. `04-ai-agents-mcp/04-agent-operating-protocol.md` §2–3: бриф ассета и паспорт серии; `99-raw/experiments/A/03-bundle-sizes/README.md` (model-viewer 4.3.1 + three 0.183 = 240 КБ br).
 - [S6] kimi-research. `07-brief-handoff/templates/brief.yaml` и шаблон `DESIGN.md` (Google DESIGN.md alpha, lint @google/design.md 0.4.0); `07-brief-handoff/01-from-app-description-to-brief.md` §6.2 (уровни движения); `03-prompting/04-template-library.md` T0, T7; `k3_checks.py` 1.0 (`--allow`).
-- [S7] site-research. `04-blocks/page-plan.schema.json` v0.9 (контейнер `treatment{}`), `01-foundations/site-brief.schema.json` v0; ответ site на C1 (`99-raw/notes/sync/C1-site-reply-2026-09-24/README.md`, 15:21).
+- [S7] site-research. `../../site/10-playbooks-contracts/schemas/page-plan.schema.json` (контейнер `treatment{}`), `../../site/10-playbooks-contracts/schemas/site-brief.schema.json`; ответ site на C1.
 - [S8] site-research, агент P. `07-seo-geo-performance-analytics/budgets.yaml` v0 и `page-gates.yaml` v0 (2026-09-24 15:46): профили, `effects_ref`, серьёзность S и B, `x-gate-exception`.
 - [S9] ui-research. `11-styles-trends/04-anti-slop-ui.md` §4.1–4.3, §5 (22.09.2026): кластеры дефолтов, «запрет смещает вероятность», датировка 12–18 месяцев. `[мнение]` + практика.
-- [S10] creative-research, C1. `drafts-for-site/treatment.v0.schema.json` (29 временных id эффектов, списки по уровням) и `site-brief-creative-fields.yaml` (2026-09-24 15:18).
+- [S10] creative-research, C1. `drafts-for-site/treatment.v0.schema.json` (29 временных id эффектов, списки по уровням) (2026-09-24 15:18).
 - [S11] Опыты A/01 (`99-raw/experiments/A/01-art-direction-examples/`) и A/02 (`99-raw/experiments/A/02-c1-check/`), перезапуск 2026-09-24 15:52. `[проверено]`
 - [S12] `01-concept-and-directions.md` §7–8 (выбор, выражение бренда) и `ambition-levels.yaml` v0 — свои файлы базы.
 - [S13] Andy Clarke. «Art Direction for the Web». Smashing Media AG, 2019, ISBN 978-3-945749-76-0 — официальный отрывок (smashed.by/artdirectionexcerpt, снят 2026-09-24): арт-дирекшн связывает точки контакта маркетинга, продукта и сайта. `[мнение]` практика.

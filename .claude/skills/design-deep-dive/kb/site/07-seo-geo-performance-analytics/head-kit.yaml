@@ -1,8 +1,8 @@
 # head-kit.yaml — обязательный head, доступ для ботов и структурированные данные по типам страниц.
 # Владелец: site (07-seo-geo-performance-analytics).
 # Правила — в 01-seo-google-yandex.md (SEO) и 02-geo-ai-search.md (GEO).
-# Поля плана страницы: ../04-blocks/page-plan.schema.json → page.seo.{indexable, canonical, h1, structured_data, ssr_required, notes}.
-# Поля брифа: ../01-foundations/site-brief.schema.json → search.{engines, ai_answers, ai_bots_policy, regions, existing_site, profiles}.
+# Поля плана страницы: ../10-playbooks-contracts/schemas/page-plan.schema.json → page.seo.{indexable, canonical, h1, structured_data, ssr_required, notes}.
+# Поля брифа: ../10-playbooks-contracts/schemas/site-brief.schema.json → search.{engines, ai_answers, ai_bots_policy, regions, existing_site, profiles}.
 # Слова title, description, FAQ, «ответ первым» — text: ../../text/07-seo-geo-copy/meta-rules.yaml, geo-checklist.yaml.
 # Картинки OG и фавиконы — ai-media; скорость и вес — budgets.yaml, page-gates.yaml; боты и robots.txt — crawlers.yaml.
 # Серьёзность: B — блокер (страница не попадает в поиск или ответы ИИ), S — серьёзно (теряется показ или сниппет),
@@ -14,7 +14,7 @@ status: released
 owner: site
 
 plan_fields:
-  # Как заполнять page.seo в page-plan (04-blocks/page-plan.schema.json). Умолчания по типам — раздел page_types.
+  # Как заполнять page.seo в page-plan (10-playbooks-contracts/schemas/page-plan.schema.json). Умолчания по типам — раздел page_types.
   indexable:
     type: boolean
     rule: false → <meta name="robots" content="noindex"> в сыром HTML; страница остаётся доступной для обхода (не Disallow), иначе noindex не прочтут

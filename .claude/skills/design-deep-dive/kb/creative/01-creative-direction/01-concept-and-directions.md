@@ -514,8 +514,8 @@ style, accent hue) `[практика]` `[проверено: A/01 n1]`:
 ## Источники
 
 - [S1] Контракт тройки site · creative · text v2.1, 2026-09-24 — `../site/99-raw/notes/triad-contract-2026-09-24.md` §2, §3 п.5, §6 п.11. Внутренний договор баз; владельцы тем и формат art-direction.
-- [S2] site-research, агент A. `01-foundations/site-brief.schema.json` v0 и `03-site-brief.md`, 2026-09-24. Поля брифа, x-fill, банк вопросов; прочитано целиком.
-- [S3] site-research, агент E. `04-blocks/page-plan.schema.json` v0.9 и три примера, 2026-09-24. Секции, макроструктуры, политика первого экрана.
+- [S2] site-research, агент A. `../../site/10-playbooks-contracts/schemas/site-brief.schema.json` и `03-site-brief.md`, 2026-09-24. Поля брифа, x-fill, банк вопросов; прочитано целиком.
+- [S3] site-research, агент E. `../../site/10-playbooks-contracts/schemas/page-plan.schema.json` и три примера, 2026-09-24. Секции, макроструктуры, политика первого экрана.
 - [S4] site-research, агент B. `02-site-types/vocabulary.yaml` r2, 2026-09-24. Словарь макроструктур (30) и ролей секций.
 - [S5] kimi-research, агент F. `07-brief-handoff/01-from-app-description-to-brief.md` §2.4, §4, 2026-09-24. Оси направлений, правила вопросов, пример «Кварц». Практика с опытом F/03.
 - [S6] kimi-research, агент C. `03-prompting/04-template-library.md` T2a, T3a, T7, 2026-09-24. Правило «≥ 2 осей, ≤ 1 тёплого или антиквы».

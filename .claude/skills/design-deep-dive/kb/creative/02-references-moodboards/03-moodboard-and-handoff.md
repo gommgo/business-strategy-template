@@ -336,10 +336,10 @@ source: creative-library, note}]`; роли `color`, `material`, `imagery`, `eff
   запрет палитр, «what does the build copy from this?»).
 - [S7] ai-media-research `06-art-direction-consistency/01-visual-dna-from-ui.md` §5.2 (референсы с классом), §6.2 (hex — от кода).
 - [S8] blender-research `04-ai-agents-mcp/04-agent-operating-protocol.md` §2 (стр. 100–104: текст важнее картинки).
-- [S9] site-research `01-foundations/site-brief.schema.json` v0 (`$defs/reference`), `02-site-types/vocabulary.yaml`
+- [S9] site-research `../../site/10-playbooks-contracts/schemas/site-brief.schema.json` (`$defs/reference`), `../../site/02-site-types/vocabulary.yaml`
   (`section_role`, 42 значения, draft ред. 2).
 - [S10] creative-research A: `01-creative-direction/art-direction.schema.json` (`directions[]`, `moodboard[]`, `$defs/reference`),
-  `drafts-for-site/site-brief-creative-fields.yaml` (`references[]`: `applies_to`, `captured`, роли +4).
+  бриф сайта `../../site/10-playbooks-contracts/schemas/site-brief.schema.json` (`$defs/reference`: `applies_to`, `captured`, роли +4).
 - [S11] Контракт тройки v2 §3 п.5, п.7 (art-direction, библиотека референсов).
 - [S12] Dribbble Terms of Service, «Updated March 17, 2025», п. 11 (производные работы), 7.7 — см. `02` [S1].
 - [S13] Опыт B/06 `99-raw/experiments/B/06-live-dribbble/` (170 кандидатов, мудборд, оценка выдачи глазами).

@@ -1,5 +1,5 @@
 # lead-forms.yaml — наборы полей и шагов лид-форм сайта (site)
-# Ссылка из page-plan: action-слот `form.ref: lead-forms.yaml#<form-set-id>` (04-blocks/page-plan.schema.json, $defs.action-slot.form).
+# Ссылка из page-plan: action-слот `form.ref: lead-forms.yaml#<form-set-id>` (10-playbooks-contracts/schemas/page-plan.schema.json, $defs.action-slot.form).
 # Канон формы (раскладка, подписи, валидация, ошибки, кнопка) — ../ux/04-components-patterns/05-forms-and-validation.md;
 # право (согласия, политика, трансграничная передача) — ../08-legal-trust-a11y/; тексты у формы и письма — text
 # ../text/04-copy-by-block/04-form-emails-notifications.md; события — ../07-seo-geo-performance-analytics/events.yaml: здесь — id словаря событий.

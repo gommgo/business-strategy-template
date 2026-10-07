@@ -744,6 +744,5 @@
     }
   },
   "x-version": 1,
-  "x-checked": "2026-09-24",
-  "x-supersedes": "04-blocks/blocks.schema.json (v0.9)"
+  "x-checked": "2026-09-24"
 }

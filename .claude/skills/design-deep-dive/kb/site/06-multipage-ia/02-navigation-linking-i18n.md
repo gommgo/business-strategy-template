@@ -3,7 +3,7 @@
 Волна 2 · агент G, файл дописал продолжатель G2 · 2026-09-24 · прочитано целиком 27 внешних источников (NN/g 13, Google
 Search Central 10, Яндекс Вебмастер 2, W3C 2 — WCAG 2.2 и APG) + 2 дайджеста роликов W · опыты
 `99-raw/experiments/G/00-selftest` (`ia_probe.py`, 26/26), `G/01-ia-probe` (20 многостраничников, 13 русских, v1.1) ·
-артефакт: `site-map.schema.json` — поля `chrome`, `linking`, `url_policy`, `languages`. Карты, шаблоны, модель контента,
+артефакт: `../10-playbooks-contracts/schemas/site-map.schema.json` — поля `chrome`, `linking`, `url_policy`, `languages`. Карты, шаблоны, модель контента,
 служебные страницы и порядок сборки — `01-sitemaps-templates-content-model.md`; навигация как поведение — канон ux
 (`../../ux/02-ia-navigation/`); `hreflang`, canonical и sitemap.xml — H.
 
@@ -271,8 +271,8 @@ Hallmark 42 «AI nav» (аудит KIMI §4 п.1; поправка PLAN №24) �
   статья (решение заказчика п. 20, `defaults_by_page_type`), поэтому собираются без эффектов уровня L1 (морфинг «полоса →
   пилюля» N10, параллакс). Прозрачная шапка поверх hero — только на страницах с hero, контраст ≥ 4,5 : 1, в липком
   состоянии непрозрачная (C 03 §4.1). Уровень страницы не выше уровня сайта; у страниц одного шаблона уровень один (один
-  `page-plan`). В `site-map.schema.json` v0 поля уровня нет: его задают бриф (`ambition.by_page`) и `page-plan`
-  (`page.ambition_level`); предложение J — `templates[].level` как копия для пакета. [практика] (решение 20 PLAN)
+  `page-plan`). В карте уровень шаблона — `templates[].level` с причиной подъёма `level_why`: копия `ambition.by_page`
+  брифа или умолчания creative, не выше уровня сайта; у плана — `page.ambition_level`. [практика] (решение 20 PLAN)
 - **Переходы между страницами** (`@view-transition`) и scroll-driven анимации — только прогрессивное улучшение внутри
   `prefers-reduced-motion: no-preference`; поддержку браузеров не дублируем (скоропортится, владелец — creative):
   `../../creative/05-motion/02-choreography-scroll-transitions.md` §3.1, §8.1 (на 2026-09-24); прелоадер,
@@ -732,5 +732,5 @@ HTTP-разбор главных панелей не нашёл — подтве
 - [S29] ux-research: `../../ux/02-ia-navigation/01-information-architecture.md` §3–§11, `02-navigation-patterns.md` §1.2, §3, §4, §7, §8, §10–§12; `../../ux/07-ux-writing/05-localization-and-i18n.md` §2, §6.2, §9.1, §10.2, §11 — через них NN/g Hamburger 2016, Pernice и Budiu 2016, Whitenton 2016, Loranger 2017, Laubheimer 2021, «Search: Visible and Simple» 2001, W3C «Text size in translation». [консенсус]
 - [S30] Hallmark v1.1.0 (MIT): `references/component-cookbook.md` (N1–N13, Ft1–Ft8), `anti-patterns.md`, `slop-test.md` (гейты 42, 43, 49, 56), `structure.md`, `floating-nav.md` — клон `../../kimi-research/99-raw/cache/repos/Nutlope__hallmark/skills/hallmark/`. [мнение вендора]
 - [S31] kimi: `../../kimi-research/07-brief-handoff/templates/build_package.py` (NAV_RULE, стр. 465); `06-cn-ecosystem/01-official-cn.md` §5.2. [практика]
-- [S32] База и сёстры: B `../02-site-types/01-site-and-page-taxonomy.md`, `vocabulary.yaml` r2; C `../03-page-structure/02-length-goal-message-match.md` §2.2–§2.3, `03-first-screen-and-mobile.md` §4; E `../04-blocks/blocks.yaml` v0.9 (`header`, `breadcrumbs`, `footer`, `anchor-nav`, `announcement-bar`, `related-links`, `not-found`), `page-plan.schema.json` (`navigation`); A `../01-foundations/site-brief.schema.json` (`languages`, `pages`); creative `../../creative/01-creative-direction/ambition-levels.yaml` (`section_caps.chrome_roles`, `defaults_by_page_type`); решение заказчика п. 20 — `../99-raw/notes/sync/C1-site-reply-2026-09-24/README.md`. [практика]
+- [S32] База и сёстры: B `../02-site-types/01-site-and-page-taxonomy.md`, `vocabulary.yaml` r2; C `../03-page-structure/02-length-goal-message-match.md` §2.2–§2.3, `03-first-screen-and-mobile.md` §4; E `../04-blocks/blocks.yaml` v0.9 (`header`, `breadcrumbs`, `footer`, `anchor-nav`, `announcement-bar`, `related-links`, `not-found`), `../10-playbooks-contracts/schemas/page-plan.schema.json` (`navigation`); A `../10-playbooks-contracts/schemas/site-brief.schema.json` (`languages`, `pages`); creative `../../creative/01-creative-direction/ambition-levels.yaml` (`section_caps.chrome_roles`, `defaults_by_page_type`); решение заказчика п. 20. [практика]
 - [S33] Опыты G/00 и G/01: `../99-raw/experiments/G/`, утилита `../../../scripts/site/ia_probe.py` v1.1. [проверено]
