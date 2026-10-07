@@ -2457,8 +2457,8 @@ def gate_severities(doc=None):
 
 
 def main_jurisdiction(page):
-    """Основная юрисдикция страницы — первый элемент page.jurisdiction плана (условие eu критериев приёмки; по ней же
-    page_gates.py ставит тяжесть SG-LEGAL-01)."""
+    """Основная юрисдикция страницы — первый элемент page.jurisdiction плана (условия eu и law критериев приёмки; по
+    ней же page_gates.py ставит тяжесть SG-LEGAL-01 и пропускает строки права вне ru и eu)."""
     return (str_list((page or {}).get("jurisdiction")) or [None])[0]
 
 

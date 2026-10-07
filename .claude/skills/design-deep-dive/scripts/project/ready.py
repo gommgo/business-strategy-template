@@ -48,9 +48,10 @@
                                       заметки пропусков поверхности (<state>/design/<surface>/_phase-jump.md)
     budget_profile, gate_exceptions   сайт — page.budget_profile и id x-gate-exception плана своей страницы (исключение
                                       ворот соседней страницы в единицу не идёт); кабинет — «—» и []
-    after_build                       пункты места «после сборки» kb/common/acceptance-criteria.yaml рода поверхности:
-                                      {id, severity, check} — тяжесть по условиям пункта (у сайта eu — основная
-                                      юрисдикция своей страницы), способ проверки — поле check (gates, tool, code,
+    after_build                       пункты места «после сборки» kb/common/acceptance-criteria.yaml рода поверхности
+                                      с выполненным условием when: {id, severity, check} — тяжесть по условиям пункта
+                                      (у сайта условия eu и law — по основной юрисдикции своей страницы: вне ru и eu
+                                      пунктов права J4b и L3 нет), способ проверки — поле check (gates, tool, code,
                                       manual); вход холста манифест не читает
     open                              заглушки [PLACEHOLDER] выбранных текстов (вариант chosen, у слота без chosen —
                                       единственный), демо-факты (example: true), которые страница называет,
