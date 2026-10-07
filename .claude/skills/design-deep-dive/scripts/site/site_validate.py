@@ -40,7 +40,9 @@
          SM-01 — и цель призыва шапки: страница карты, #якорь формы или messenger:<fact-id> — факт есть в facts.yaml.
   blocks (blocks.yaml)       BL-* — каталог блоков; BL-14 — информационные картинки без парного элемента image-alt
                              (warning одной строкой каталога).
-  forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля.
+  forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля; LF-07 — перечни формы без JS
+                             (antispam.without_js, hidden_fields_without_js, автоцели events.yaml#defaults.without_js)
+                             — подмножества полных перечней.
   project DIR                бриф + facts + site-map + plans/*.yaml одной папки со всеми связями (PJ-*); страница брифа
                              без плана и без строки карты — PJ-03: error, у служебной (thank-you-page, legal-page,
                              not-found-page) — warning. PJ-04 — адреса страниц (warning): хвостовой слеш адресов карты
@@ -189,6 +191,7 @@ class Ctx:
         self.forms = load_yaml(P['forms'])
         self.form_sets = {s['id']: s for s in self.forms.get('form_sets') or []}
         ev = load_yaml(P['events'])
+        self.events_doc = ev
         self.events = {e['id']: e for e in ev.get('events') or []}
         self.budgets = load_yaml(P['budgets']) if P['budgets'].exists() else {}
         # ворота страницы (site, SG-…) и ворота эффектов (creative, EG-…): исключение x-gate-exception называет id любого файла
@@ -629,6 +632,21 @@ def check_blocks(ctx, path=P['blocks']):
     return B
 
 
+def without_js_gaps(defaults, events_doc):
+    """Перечни формы без JS — подмножества полных (LF-07): слои антиспама, скрытые поля, автоцели счётчика среди событий
+    events.yaml → [(что, [лишнее])]."""
+    asp = defaults.get('antispam') or {}
+    hid = defaults.get('hidden_fields_without_js') or {}
+    out = [('antispam.without_js', [x for x in asp.get('without_js') or [] if x not in (asp.get('layers') or [])])]
+    full = defaults.get('hidden_fields') or []
+    out += [(f'hidden_fields_without_js.{k}', [x for x in hid.get(k) or [] if x not in full]) for k in ('build', 'server')]
+    ev = events_doc or {}
+    ids = {e.get('id') for e in ev.get('events') or [] if isinstance(e, dict)}
+    goals = ((ev.get('defaults') or {}).get('without_js') or {}).get('counter_goals') or []
+    out.append(('events.yaml defaults.without_js.counter_goals', [x for x in goals if x not in ids]))
+    return [(w, b) for w, b in out if b]
+
+
 def check_forms(ctx, path=P['forms']):
     w = rel(path)
     d = load_yaml(path)
@@ -654,6 +672,8 @@ def check_forms(ctx, path=P['forms']):
             continue
         if not str(e).startswith('event:') or str(e)[6:] not in ctx.events:
             R.add('error', 'LF-04', w, f'defaults.events.{k}: {e} — не id events.yaml (event:<id>)')
+    for what, bad in without_js_gaps(d.get('defaults') or {}, ctx.events_doc):
+        R.add('error', 'LF-07', w, f'{what}: {", ".join(bad)} — нет в полном перечне')
     for pt, pl in (d.get('placement_defaults') or {}).items():
         if not ctx.vok('page_type', pt):
             R.add('error', 'LF-06', w, f'placement_defaults: page_type {pt} нет в словаре')
@@ -1934,6 +1954,21 @@ def selftest(ctx):
     good = 'about-story.photo' in bl14(tmp) and 'about-story.photo' not in bl14(P['blocks'])
     shutil.rmtree(tmp.parent, ignore_errors=True)
     print(f"N75 каталог: информационная картинка без элемента alt — warning BL-14, с элементом — нет: {'OK' if good else 'FAIL'}")
+    ok &= good
+    # перечни формы без JS — подмножества полных: лишний слой, поле или автоцель — LF-07
+    forms = load_yaml(P['forms'])
+    clean = without_js_gaps(forms['defaults'], ctx.events_doc)
+    df = copy.deepcopy(forms['defaults'])
+    df['antispam']['without_js'] = df['antispam']['without_js'] + ['captcha-x']
+    df['hidden_fields_without_js']['server'] = df['hidden_fields_without_js']['server'] + ['landing_ref']
+    ev = copy.deepcopy(ctx.events_doc)
+    ev['defaults']['without_js']['counter_goals'] = ev['defaults']['without_js']['counter_goals'] + ['call-done']
+    got = dict(without_js_gaps(df, ev))
+    good = clean == [] and got == {'antispam.without_js': ['captcha-x'],
+                                   'hidden_fields_without_js.server': ['landing_ref'],
+                                   'events.yaml defaults.without_js.counter_goals': ['call-done']}
+    print("N85 перечни формы без JS: каталог базы — подмножества; лишний слой, поле, автоцель — LF-07: "
+          f"{'OK' if good else 'FAIL'}")
     ok &= good
     print('SELFTEST', 'OK' if ok else 'FAIL')
     return 0 if ok else 1

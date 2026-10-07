@@ -48,6 +48,10 @@ defaults:
     jurisdiction: ru                        # профиль eu — site 08
   antispam:                                 # 01 §8; W3C «Inaccessibility of CAPTCHA» (2021): honeypot, пока хватает
     layers: [honeypot, time-trap, rate-limit, server-validation, content-filter]
+    without_js: [honeypot, rate-limit, server-validation, content-filter]   # форма без JS на клиенте: слои, которые
+                                            # исполняет сервер (поле-ловушка скрыто CSS); time-trap — с JS или на
+                                            # странице, которую сервер отдаёт по запросу (время выдачи — подписанным
+                                            # скрытым полем): у страницы из сборки времени выдачи нет
     honeypot: {field: company-website, hidden: "css + aria-hidden + tabindex=-1 + autocomplete=off", reject_if_filled: true}
     time_trap_seconds: 3                    # отправка раньше 3 с после загрузки — подозрение; 7 с — перебор ([V:qktwIWZNFY4 1:09:01])
     rate_limit: {per_ip_per_hour: 5, per_phone_per_day: 3, on_exceed: soft-block-and-log}   # ориентир [практика], настраивать по логам
@@ -66,8 +70,17 @@ defaults:
     - page_url                              # страница с формой
     - form_id                               # id набора из этого файла + id секции page-plan
     - variant                               # вариант A/B или подстановки hero
+  hidden_fields_without_js:                 # форма без JS на клиенте: значения, которые ставят без кода в браузере;
+                                            # landing_url и ym_client_id — только с JS (первая страница визита,
+                                            # client id Метрики)
+    build: [form_id, page_url, variant]     # пишет сборка в HTML страницы: известны при сборке
+    server: [utm_source, utm_medium, utm_campaign, utm_content, utm_term, yclid, gclid]   # сервер при приёме — из
+                                            # query заголовка Referer (страница с формой, тот же сайт: Referrer-Policy
+                                            # сайта отдаёт своим запросам полный адрес)
   success:
     default: thank-you-page                 # отдельная страница; inline — на месте формы (по плану)
+    without_js: thank-you-page              # форма без JS — PRG: сервер отвечает 303 на «спасибо» только принятой
+                                            # заявке; inline без JS адреса успеха не даёт — только с JS
     must_show: [status-first, what-happens-next, who-and-when, response-time-fact, channels, one-next-action, save-record]
     why: "GOV.UK Confirmation pages; 01 §10"
   events:                                   # id словаря событий (07-seo-geo-performance-analytics/events.yaml); конверсия — только подтверждённый сервером успех
@@ -76,7 +89,7 @@ defaults:
     step: event:form-step                   # номер шага — параметр
     error: event:form-error                 # поле и тип ошибки — параметры, без значений ПД
     submit_attempt: null                    # кандидат form_submit_attempt в словарь событий не вошёл (site 05/03 §1.1) — не размечать
-    success: event:lead-submit              # конверсия; из ответа сервера или загрузки страницы «спасибо» (у наборов со своим действием — событие действия из events.yaml)
+    success: event:lead-submit              # конверсия; из ответа сервера или загрузки страницы «спасибо» (у наборов со своим действием — событие действия из events.yaml); у формы без JS — цель визита «спасибо» (events.yaml#defaults.without_js)
   channels_ru_default: [form, phone]        # мессенджеры — по fields.contact-channel и блоку contact-channels
   modal_max_fields: 4                       # форма в окне — меньше пяти полей, без прокрутки (ux 04-05 §7.5)
 

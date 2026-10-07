@@ -584,7 +584,8 @@ criteria:
   source: page.yaml forms[].set.success_must_show
 - id: K5
   for: [site]
-  question: Антиспам — honeypot и time-trap без видимой капчи
+  question: 'Антиспам без видимой капчи — слои lead-forms.yaml (antispam.layers; у формы без JS — antispam.without_js:
+    поле-ловушка, лимит частоты, проверка и фильтр на сервере)'
   severity: S
   method: скрипт
   where: после сборки
@@ -593,12 +594,13 @@ criteria:
   check: code
 - id: K6
   for: [site]
-  question: Скрытые поля источника (utm_*, yclid, ym_client_id, landing_url, page_url, form_id, variant)
+  question: 'Скрытые поля источника — lead-forms.yaml hidden_fields; у формы без JS — hidden_fields_without_js: form_id,
+    page_url, variant — сборкой в HTML, utm_*, yclid, gclid — сервером из Referer'
   severity: S
   method: скрипт
   where: после сборки
   stage: —
-  source: lead-forms.yaml#defaults.hidden_fields
+  source: lead-forms.yaml#defaults.hidden_fields, hidden_fields_without_js
   check: code
 - id: L1
   for: [site]
