@@ -3388,6 +3388,13 @@ def _values(x):
             yield from _values(v)
 
 
+def page_fact_ids(plan, deck_page=None):
+    """id фактов страницы — источников единицы: ссылки fact:<id> плана в любом его поле и fact_ids её текстов в copy
+    deck. По ним — записи фактов отпечатка одобрения и сверка machine манифеста готовности (ready.py)."""
+    ids = {m.group(1) for _k, v in _values(plan) if isinstance(v, str) for m in FACT_REF.finditer(v)}
+    return ids | {str(x) for k, v in _values(deck_page or {}) if k == "fact_ids" and isinstance(v, list) for x in v}
+
+
 def _row(ctx, sid, path, fp=None):
     return {"id": sid, "path": ctx.rel(path), "fingerprint": fp or sha_path(path)}
 
@@ -3454,8 +3461,7 @@ def _page_rows(ctx, unit):
                                  None if p is not None else "—"))
     if pg.spec_src is not None:
         rows.append(_row(ctx, "motion-spec", pg.spec_src.path))
-    ids = {m.group(1) for _k, v in _values(pg.plan) if isinstance(v, str) for m in FACT_REF.finditer(v)}
-    ids |= {str(x) for k, v in _values(pg.deck_page or {}) if k == "fact_ids" and isinstance(v, list) for x in v}
+    ids = page_fact_ids(pg.plan, pg.deck_page)
     fpath = docpaths.facts(ctx.slug, repo=ctx.repo)
     if ids and fpath.is_file():
         data, _err = load_doc(fpath)

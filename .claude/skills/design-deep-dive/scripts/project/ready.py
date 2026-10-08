@@ -76,9 +76,10 @@
   держат, публикацию сайта с демо-фактом держит copydeck.py validate --final; в blockers («факты: …») — факт, которого
   нет в facts.yaml, missing: без строки пробела, факт, который claims_check не допускает к публикации (разрешение,
   срок, проверка), и факт с machine не по форме или не из canonical (claims_check.machine_issues, error), значение
-  которого берёт страница: она называет факт, на него ведёт цель messenger:<fact-id> плана или призыва шапки карты
-  или его machine стоит литералом цели плана (tel:, mailto:, адрес ссылки). Исправление machine снимает блокер без
-  новой приёмки макета: в отпечаток одобрения machine не входит
+  которого берёт страница: она называет факт (ссылка fact:<id> плана в любом поле, fact_ids её текстов — те же записи
+  фактов, что в отпечатке одобрения: canvas_input.page_fact_ids), на него ведёт цель messenger:<fact-id> плана или
+  призыва шапки карты или его machine стоит литералом цели плана (tel:, mailto:, адрес ссылки). Исправление machine
+  снимает блокер без новой приёмки макета: в отпечаток одобрения machine не входит
   perf                                сайт — plans; кабинет — {field: p75, rum: true, lab: [AC-PRF-04, AC-PRF-05,
                                       AC-PRF-06]}
   frontend_design                     сайт — род, уровень и потолок движения брифа (потолок без поля брифа — уровень
@@ -439,11 +440,12 @@ class Build:
             self._facts = (facts, missing, bool((data or {}).get("example")), obj)
         return self._facts
 
-    def fact_problems(self, refs, targets=frozenset()):
-        """Ссылки fact:/missing: единицы и значения целей её действий → ([непубликуемые или нет], [демо]). К
-        непубликуемым идёт и факт с machine не по форме или не из canonical (`claims_check.machine_issues`, error),
-        значение которого берёт страница: она называет факт (refs), на него ведёт цель messenger:<fact-id> или его
-        machine стоит литералом цели — «tel:<номер>», «mailto:<почта>», адрес ссылки."""
+    def fact_problems(self, refs, named=frozenset(), targets=frozenset()):
+        """Ссылки fact:/missing: единицы → ([непубликуемые или нет], [демо]). К непубликуемым идёт и факт с machine не
+        по форме или не из canonical (`claims_check.machine_issues`, error), значение которого берёт страница: она
+        называет факт (refs и named — id фактов страницы, `canvas_input.page_fact_ids`), на него ведёт цель
+        messenger:<fact-id> или его machine стоит литералом цели (targets — значения целей) — «tel:<номер>»,
+        «mailto:<почта>», адрес ссылки. Факт узнаётся и по id из aliases."""
         facts, missing, demo_file, obj = self.facts()
         bad, demo = [], []
         for kind, fid in sorted(refs):
@@ -466,12 +468,14 @@ class Build:
                     bad.append(f"fact:{fid} ({'; '.join(m for lv, _r, m, _f in issues if lv == 'error')[:120]})")
         if obj is not None:
             cc, jur = mod("claims_check"), obj.data.get("jurisdiction") or "ru"
-            named = {fid for kind, fid in refs if kind == "fact"}
+            named = set(named) | {fid for kind, fid in refs if kind == "fact"}
+            named |= {t[len("messenger:"):] for t in targets if t.startswith("messenger:")}
             literals = {t.removeprefix("tel:").removeprefix("mailto:") for t in targets}
             for fid in sorted(k for k, f in facts.items() if isinstance(k, str) and "machine" in f):
                 m = facts[fid]["machine"]
                 value = m.get("value") if isinstance(m, dict) else None
-                if not (fid in named or f"messenger:{fid}" in targets or isinstance(value, str) and value in literals):
+                ids = {fid, *(str(a) for a in facts[fid].get("aliases") or [])}
+                if not (ids & named or isinstance(value, str) and value in literals):
                     continue
                 try:
                     issues = cc.machine_issues(facts[fid], jur)
@@ -599,7 +603,8 @@ class Build:
                 refs |= {("fact", f) for f in fids if isinstance(f, str)}
                 if "[PLACEHOLDER" in text:
                     opened.append(f"[PLACEHOLDER]: {where}")
-            bad, demo = self.fact_problems(refs, self.target_values(plan) | {self.header_cta})
+            bad, demo = self.fact_problems(refs, mod("canvas_input").page_fact_ids(plan, page),
+                                           self.target_values(plan) | {self.header_cta})
             if bad:
                 why.append("факты: " + ", ".join(bad[:4]) + (f" и ещё {len(bad) - 4}" if len(bad) > 4 else ""))
             opened += [f"демо-факт: {x}" for x in sorted(set(demo))]
@@ -1478,11 +1483,12 @@ def _selftest():
         bp.write_text(btext.replace("project:\n  slug: otves-remont-nn\n  status: proposed\n",
                                     "project:\n  slug: otves-remont-nn\n  status: approved\n", 1), encoding="utf-8")
         d_pub = build(slug, surf, root, today)
-        # machine не из canonical, значение которого берёт готовая единица: литералом цели и слотом данных
+        # machine не из canonical, значение которого берёт готовая единица: литералом цели и ссылкой fact:<id> плана
         fy.write_text(ft.replace(tel_ok, tel_bad), encoding="utf-8")
         plan.write_text(ptext.replace("value: tel:+79000000001", "value: tel:+79000000009"), encoding="utf-8")
         d_lit = build(slug, surf, root, today)
-        plan.write_text(ptext.replace("fact: missing:legal-details", "fact: fact:company-phone"), encoding="utf-8")
+        job = "job: логотип → главная, призыв, телефон"
+        plan.write_text(ptext.replace(job, job + " — fact:company-phone"), encoding="utf-8")
         d_named = build(slug, surf, root, today)
         fy.write_text(ft, encoding="utf-8")
         d_right = build(slug, surf, root, today)
@@ -1490,9 +1496,9 @@ def _selftest():
         s_lit, s_named, s_right = ({u["id"]: u for u in x["units"]}["spasibo"] for x in (d_lit, d_named, d_right))
         held = "spasibo: факты: fact:company-phone (fact:company-phone: machine — номера +79000000009 в canonical нет)"
         check("готовая единица с чужим номером в machine: литерал цели плана несёт этот номер — не готова, блокер "
-              "«факты: fact:… (machine — …)»; страница называет факт слотом данных — тот же блокер; machine из "
-              "формулировки — готова",
-              "value: tel:+79000000001" in ptext and "fact: missing:legal-details" in ptext
+              "«факты: fact:… (machine — …)»; план называет факт ссылкой fact:<id> вне слота данных — тот же блокер; "
+              "machine из формулировки — готова",
+              "value: tel:+79000000001" in ptext and ptext.count(job) == 1
               and not s_lit["ready"] and held in d_lit["blockers"]
               and not s_named["ready"] and held in d_named["blockers"]
               and s_right["ready"] and not any("machine" in b for b in d_right["blockers"]))
@@ -1590,14 +1596,16 @@ def _selftest():
         mt, ft = mp.read_text(encoding="utf-8"), fy.read_text(encoding="utf-8")
         cta = "      cta:\n        action: request-quote\n        target: "
         tel = "machine: {type: telephone, value: '+7900000000"
-        mp.write_text(mt.replace(cta + "request\n", cta + "messenger:company-phone\n"), encoding="utf-8")
-        fy.write_text(ft.replace(tel + "2'}", tel + "9'}"), encoding="utf-8")
+        mp.write_text(mt.replace(cta + "request\n", cta + "messenger:sales-phone\n"), encoding="utf-8")
+        fy.write_text(ft.replace(tel + "2'}", tel + "9'}").replace("- id: company-phone\n", "- id: company-phone\n"
+                                                                    "  aliases: [sales-phone]\n"), encoding="utf-8")
         held = [b for b in build(slug, surf, root, today)["blockers"] if "fact:company-phone" in b and "machine" in b]
         mp.write_text(mt, encoding="utf-8")
         free = [b for b in build(slug, surf, root, today)["blockers"] if "machine" in b]
-        check("многостраничник: цель призыва шапки карты messenger:<fact-id> ведёт на факт с machine не из canonical — "
-              "блокер «факты: …» у каждой единицы; цель шапки — страница — блокера нет",
-              cta + "request\n" in mt and tel + "2'}" in ft and len(held) == 15 and not free)
+        check("многостраничник: цель призыва шапки карты messenger:<fact-id> ведёт (по id из aliases) на факт с "
+              "machine не из canonical — блокер «факты: …» у каждой единицы; цель шапки — страница — блокера нет",
+              cta + "request\n" in mt and tel + "2'}" in ft and "- id: company-phone\n" in ft and len(held) == 15
+              and not free)
     with fixture_project.built("package-cabinet") as fx:
         root, slug = fx.root, fx.slug
         surf = docpaths.surface(slug, "office", root)
