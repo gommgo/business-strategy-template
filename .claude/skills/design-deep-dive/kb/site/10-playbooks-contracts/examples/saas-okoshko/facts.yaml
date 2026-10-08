@@ -892,6 +892,37 @@ facts:
     - body
   notes: ДЕМО-факт.
   lang: ru
+- id: support-telegram
+  kind: company
+  claim_class:
+  - company-details
+  verbatim:
+  - Написать поддержке в Telegram
+  canonical: 'Поддержке «Окошко» пишут в Telegram: t.me/okoshko_demo.'
+  machine: {type: messenger, network: telegram, value: 'https://t.me/okoshko_demo'}
+  entities:
+  - product-okoshko
+  source:
+    type: customer-message
+    who: демо-заказчик
+    where: анкета, контакты поддержки (демо)
+    date: '2026-09-24'
+    quote: 'Поддержка в Telegram: t.me/okoshko_demo'
+    derivation: direct
+  verification:
+    status: verified
+    by: агент (демо)
+    date: '2026-09-24'
+    method: демо
+  permission:
+    status: not-required
+  use:
+    section_roles:
+    - final-cta
+    - footer
+    slot_types: []
+  notes: ДЕМО-факт.
+  lang: ru
 missing:
 - id: legal-details
   what: 'реквизиты: полное название юрлица, ОГРН, ИНН, адрес (сведения о продавце — site 08; блок «продавец» — text 08)'

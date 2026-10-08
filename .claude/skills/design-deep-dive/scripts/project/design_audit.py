@@ -3704,22 +3704,31 @@ def _selftest():
         check("PL-U01: планы approved без записи approval — одна строка R-STRUCT-002 warning со списком планов",
               [x[:3] for x in u01] == [("R-STRUCT-002", "warning", "corp#PL-U01")] and " — 15: " in u01[0][3]
               and all(p in u01[0][3] for p in ("about", "home", "not-found", "thanks-request")))
-        # литерал цели телефона в двух планах; факты проекта — по ссылке брифа от его папки (у фикстуры ссылка примера)
-        tel = {plans_dir / p: (plans_dir / p).read_text(encoding="utf-8") for p in ("about.yaml", "contacts.yaml")}
+        # литерал цели телефона в двух планах не равен machine факта, в третьем цель записана словами; факты проекта —
+        # по ссылке брифа от его папки (у фикстуры ссылка примера)
+        tel = {plans_dir / p: (plans_dir / p).read_text(encoding="utf-8")
+               for p in ("about.yaml", "contacts.yaml", "news.yaml")}
         bpath = docpaths.site(slug, "corp", "brief", repo=root)
         btext = bpath.read_text(encoding="utf-8")
         bpath.write_text(btext.replace("facts_ref: facts.yaml", "facts_ref: ../../facts.yaml"), encoding="utf-8")
         for p, text in tel.items():
-            p.write_text(text.replace("value: 'tel: номер из facts.yaml'", "value: tel:+70000000001"), encoding="utf-8")
+            p.write_text(text.replace("value: tel:+79000000002", "value: 'tel: номер отдела продаж'"
+                                      if p.name == "news.yaml" else "value: tel:+70000000001"), encoding="utf-8")
         lit, a08 = site("site_validate")
         for p, text in list(tel.items()) + [(bpath, btext)]:
             p.write_text(text, encoding="utf-8")
         f08 = [x for x in lit if "PL-F08" in x[3]]
-        check("PL-F08: литерал цели телефона без machine у фактов в двух планах — одна строка R-COV-003 warning со "
-              "списком планов, совет — этап meaning; цель словами — без находки",
+        f09 = [f for f in a08.rep.items if "PL-F09" in f.message]
+        check("PL-F08: литерал цели телефона, которого нет у machine фактов, в двух планах — одна строка R-COV-003 "
+              "warning со списком планов, совет — этап meaning; литерал, равный machine факта, — без находки",
               [x[:3] for x in f08] == [("R-COV-003", "warning", "corp#PL-F08")]
               and f08[0][3].endswith(" — 2: about, contacts") and not any("PL-F08" in x[3] for x in got)
               and [f.fix for f in a08.rep.items if "PL-F08" in f.message] == [a08.dd("corp", Audit.SV_ONE["PL-F08"][3])])
+        check("PL-F09: цель телефона словами — R-COV-003 warning у своего плана, совет — этап плана страницы; у планов "
+              "с литералом — без находки",
+              [(f.rule, f.severity, f.ref, f.fix) for f in f09] == [("R-COV-003", "warning", "news",
+                                                                     a08.dd("corp", "page-plan:news"))]
+              and not any("PL-F09" in x[3] for x in got))
         check("сайт с планами до этапа дизайн-системы (арт-дирекция не утверждена, токенов ДС нет): «нет карты "
               "решений» — R-COV-005 hint",
               [x[1] for x in got if x[0] == "R-COV-005" and x[2] == "system"] == ["hint"])

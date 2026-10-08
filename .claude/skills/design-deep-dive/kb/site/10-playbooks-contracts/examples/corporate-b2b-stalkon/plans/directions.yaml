@@ -114,7 +114,7 @@ sections:
       style: channel
       target:
         kind: tel
-        value: 'tel: номер из facts.yaml'
+        value: tel:+79000000002
       event: event:phone-click
 - id: hero
   role: hero

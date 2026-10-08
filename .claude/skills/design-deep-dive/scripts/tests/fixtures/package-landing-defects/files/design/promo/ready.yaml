@@ -15,10 +15,10 @@ sources:
   - {path: design/promo/art-direction.json, status: proposed, sha256: 974ba01d631e84bb61e305705524a9466d7cc8435414f338751b9d497f9cefd8}
   - {path: design/promo/motion/home.motion-spec.yaml, status: proposed, sha256: 2d791b0eda243fef16492868e673e5faaca4977d7774a0bb7bd623855adcf876}
   - {path: design/system.yaml, status: approved, sha256: c414ca2e032febbd863cba39ec74aa6cbc4e6601e702fa8fca70037fca899091}
-  - {path: facts.yaml, status: draft, sha256: 5f1e166a55b557b3377ccc9828acf28c74985c4f6c7dfe5220ebb591fa775a66}
+  - {path: facts.yaml, status: draft, sha256: 7e0731035a9cb3767d41b8fb911a044ec46e6996dab191e785a3d403c11e0e75}
   - {path: site/promo/copy/spasibo.yaml, status: draft, sha256: 2581080140d75c4969637d8e93f5b0219bc1a3726a56d9b8c26e800aeec891e8}
-  - {path: site/promo/plans/home.yaml, status: proposed, sha256: 1bb60b6f62be0eaad7e743e713e1268c2f2140db1d948065aaf7168fe6ca0f10}
-  - {path: site/promo/plans/spasibo.yaml, status: approved, sha256: ea7346a1ef9c05d8aeab8e71789ac14e6974e8d5d31158cfce4449db9e90c74e}
+  - {path: site/promo/plans/home.yaml, status: proposed, sha256: e48a88aa71fd09280954e068b7bf3bf870b9c3ff55b358e2a1b7936106e087b5}
+  - {path: site/promo/plans/spasibo.yaml, status: approved, sha256: bf659955e251eabc0994d2e98b2e2af70cebdd993203a14cda2d30b20128614c}
   - {path: site/promo/site-brief.yaml, status: proposed, sha256: e96c451f482846cea92603ccd748af12c0ce63038663bc16a432cf4f66604aa9}
   - {path: voice.yaml, status: draft, sha256: 2da95520c1c7fdd48839600e677adef8a1b0fd0ea0c42103b388ef6596803c76}
 

@@ -344,6 +344,33 @@ facts:
   lang: ru
   valid:
     until: '2027-12-31'
+- id: company-phone
+  kind: company
+  claim_class:
+  - company-details
+  verbatim:
+  - '+7 900 000-00-02 (демо)'
+  canonical: 'Телефон отдела продаж «Сталькона»: +7 900 000-00-02 (демо).'
+  machine: {type: telephone, value: '+79000000002'}
+  entities:
+  - company-stalkon
+  source:
+    type: customer-message
+    who: заказчик (директор)
+    where: анкета proof-intake.md, контакты (демо)
+    date: '2026-09-18'
+    quote: 'Телефон отдела продаж: +7 900 000-00-02'
+    derivation: direct
+  verification:
+    status: verified
+    by: редактор
+    date: '2026-09-18'
+  permission:
+    status: not-required
+  use:
+    section_roles: []
+    slot_types: []
+  lang: ru
 missing:
 - id: client-logos
   what: логотипы клиентов с письменным разрешением

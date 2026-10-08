@@ -304,7 +304,7 @@ sections:
       action: call
       target:
         kind: tel
-        value: 'tel: номер компании из брифа'
+        value: tel:+79000000001
       style: channel
       event: event:phone-click
     - id: messenger
@@ -312,7 +312,7 @@ sections:
       action: message
       target:
         kind: messenger
-        value: канал — site 05 (доступность мессенджеров в РФ)
+        value: messenger:company-max
       style: channel
       event: event:messenger-click
   mobile:
@@ -744,7 +744,7 @@ sections:
       action: call
       target:
         kind: tel
-        value: 'tel: номер компании из брифа'
+        value: tel:+79000000001
       style: channel
       event: event:phone-click
     - id: messenger
@@ -752,7 +752,7 @@ sections:
       action: message
       target:
         kind: messenger
-        value: канал — site 05
+        value: messenger:company-max
       style: channel
       event: event:messenger-click
   notes:
@@ -1363,7 +1363,7 @@ sections:
       action: call
       target:
         kind: tel
-        value: 'tel: номер компании из брифа'
+        value: tel:+79000000001
       style: channel
       event: event:phone-click
   events:
@@ -1435,7 +1435,7 @@ sections:
       action: call
       target:
         kind: tel
-        value: 'tel: номер компании из брифа'
+        value: tel:+79000000001
       style: channel
       event: event:phone-click
   mobile:
@@ -1473,7 +1473,7 @@ overlays:
       action: call
       target:
         kind: tel
-        value: 'tel: номер компании из брифа'
+        value: tel:+79000000001
       style: channel
       event: event:phone-click
   notes: ≤ 72 px + safe area; вместе с шапкой ≤ 20 % высоты экрана (site 03/03 §4.2–4.3)

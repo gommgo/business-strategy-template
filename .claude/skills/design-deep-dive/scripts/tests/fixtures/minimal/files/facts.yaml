@@ -6,7 +6,8 @@
 # Что показывает пример: все виды доказательств лидогенерации услуг (число из CRM, рейтинг площадки со снимком,
 # отзыв с разрешением и журналом правок, кейс без имени клиента, гарантия по договору, цена «от» со сроком, акция с
 # датой окончания, человек команды с согласием, реквизиты в missing как ворота публикации), разрешение «pending»,
-# проектный never_claim с lift: with-fact и английскую адаптацию canonical.
+# проектный never_claim с lift: with-fact, английскую адаптацию canonical и контакты с машинным значением machine
+# (телефон и канал мессенджера, на которые ведут цели планов).
 
 facts_version: 1
 date: "2026-09-24"
@@ -238,6 +239,34 @@ facts:
     entities: [company-otves, city-nn]
     source: {type: registry, who: "ЕГРЮЛ", where: "выписка", date: "2026-09-10", document: "egrul-2026-09-10.pdf", quote: "Дата регистрации: 11.03.2014", derivation: direct}
     verification: {status: verified, by: "редактор", date: "2026-09-18"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: ru
+
+  - id: company-phone
+    kind: company
+    claim_class: [company-details]
+    verbatim:
+      - "+7 900 000-00-01"
+    canonical: "Телефон студии «Отвес»: +7 900 000-00-01."
+    machine: {type: telephone, value: "+79000000001"}
+    entities: [company-otves]
+    source: {type: customer-message, who: "заказчик (директор)", where: "анкета proof-intake.md, контакты", date: "2026-09-18", quote: "Телефон для заявок: +7 900 000-00-01", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18", method: "звонок на номер"}
+    permission: {status: not-required}
+    use: {any: true}
+    lang: ru
+
+  - id: company-max
+    kind: company
+    claim_class: [company-details]
+    verbatim:
+      - "Написать в MAX"
+    canonical: "Студия «Отвес» отвечает на сообщения в мессенджере MAX: max.ru/otves_demo."
+    machine: {type: messenger, network: max, value: "https://max.ru/otves_demo"}
+    entities: [company-otves]
+    source: {type: customer-message, who: "заказчик (директор)", where: "анкета proof-intake.md, контакты", date: "2026-09-18", quote: "Пишут нам в MAX: max.ru/otves_demo", derivation: direct}
+    verification: {status: verified, by: "редактор", date: "2026-09-18", method: "ссылка открывает чат студии"}
     permission: {status: not-required}
     use: {any: true}
     lang: ru

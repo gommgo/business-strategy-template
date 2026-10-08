@@ -22,7 +22,9 @@
          valid.until, «популярный», минимумы доказательств (секция с пробелом и on_missing: omit-block — info);
          PL-F08 цель-контакт (warning): литерал цели — «tel:+7…», «mailto:…», адрес ссылки у kind: messenger — равен
          machine факта: значение живёт в факте, литерал — его копия (находка на значение плана); у факта цели
-         messenger:<fact-id> — machine с адресом ссылки (вид messenger или url); цель словами не сверяется;
+         messenger:<fact-id> — machine с адресом ссылки (вид messenger или url);
+         PL-F09 цель-контакт не по форме (warning): у kind: tel — не литерал «tel:+<номер E.164>», у kind: messenger —
+         не адрес ссылки и не messenger:<fact-id> (цель словами): ссылку по такой цели код не соберёт;
          PL-H01 один H1; PL-R01 ссылки «секция.слот»; PL-L01 длина; PL-N01 id секций из роли или блока; PL-N02
          навигация = карта (шаблон, архетип шапки, крошки, local_nav); PL-O01…O02 overlays и политики брифа;
          PL-E01…E02 события events.yaml и цели; PL-P01…P03 профиль бюджета и уровень (умолчания по типу —
@@ -329,19 +331,27 @@ def load_facts(path):
 
 # Цель-контакт: значение телефона, почты и мессенджера живёт в факте — machine (facts.schema.yaml $defs/machine).
 # Литерал цели плана — его копия, цель messenger:<fact-id> — ссылка на факт с адресом; расхождение — PL-F08 (у карты —
-# SM-24).
+# SM-24). Цель телефона или мессенджера в другой форме (словами) — PL-F09: ссылку по ней код не соберёт.
 LINK_MACHINE = ('messenger', 'url')                      # виды machine с адресом ссылки: канал, профиль, мессенджер
 
 
 def contact_literal(tgt):
-    """Вид литерала цели-контакта: tel («tel:+7…»), email («mailto:…»), messenger (адрес ссылки у kind: messenger);
-    цель словами, якорь, маршрут и внешняя ссылка — None."""
+    """Вид литерала цели-контакта: tel («tel:+<номер E.164>»), email («mailto:…»), messenger (адрес ссылки у kind:
+    messenger); цель словами, якорь, маршрут и внешняя ссылка — None."""
     val = str(tgt.get('value') or '')
-    if re.match(r'^tel:\+?\d', val):
+    if re.match(r'^tel:\+[1-9]\d{6,14}$', val):
         return 'tel'
     if re.match(r'^mailto:\S+@', val):
         return 'email'
     return 'messenger' if tgt.get('kind') == 'messenger' and re.match(r'^https?://\S+$', val) else None
+
+
+def contact_gap(tgt):
+    """Цель телефона или мессенджера не в форме, по которой код соберёт ссылку: у kind: tel — не литерал номера, у
+    kind: messenger — не адрес ссылки и не messenger:<fact-id>."""
+    kind, val = tgt.get('kind'), str(tgt.get('value') or '')
+    return kind == 'tel' and contact_literal(tgt) != 'tel' or \
+        kind == 'messenger' and not (val.startswith('messenger:') or contact_literal(tgt))
 
 
 def contact_hrefs(facts):
@@ -783,17 +793,20 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
         if val is not None and not ctx.vok(ns, val):
             R.add('error', 'PL-V01', where, f'{ns} {val} нет в словаре')
 
-    hrefs, literals = contact_hrefs(facts), defaultdict(list)
+    hrefs, literals, worded = contact_hrefs(facts), defaultdict(list), defaultdict(list)
 
     def tcheck(where, tgt, texts, scope):
         """Цель-мессенджер: value messenger:<fact-id> — факт или названный пробел есть в facts.yaml (PL-F01), у факта —
         machine с адресом ссылки (PL-F08); литерал цели-контакта (contact_literal), которого нет среди machine фактов,
-        — в literals (PL-F08 одной находкой на значение); prefill — текстовый слот готового сообщения (PREFILL_SLOT)
-        среди texts {ссылка: слот} своей секции, overlay или страницы."""
+        — в literals (PL-F08 одной находкой на значение); цель телефона или мессенджера не по форме (contact_gap) — в
+        worded (PL-F09 так же); prefill — текстовый слот готового сообщения (PREFILL_SLOT) среди texts {ссылка: слот}
+        своей секции, overlay или страницы."""
         if not isinstance(tgt, dict):
             return
         val = str(tgt.get('value') or '')
-        if tgt.get('kind') == 'messenger' and val.startswith('messenger:') and facts is not None:
+        if contact_gap(tgt):
+            worded[val].append(where)
+        elif tgt.get('kind') == 'messenger' and val.startswith('messenger:') and facts is not None:
             if val[10:] not in facts and val[10:] not in (missing or {}):
                 R.add('error', 'PL-F01', where, f'target {val}: факта {val[10:]} нет в facts.yaml')
             elif link_fact_gap(val[10:], facts):
@@ -1106,12 +1119,18 @@ def check_plan(path, ctx, brief=None, facts_pack=None, sitemap=None):
                                                            'включить в брифе с policies.rationale и согласием заказчика или выключить в плане')
             if ov.get('block') == 'chat-widget' and pol.get('chat_widget', 'off') == 'off':
                 R.add('error', 'PL-O02', w0 + ':overlays', 'чат включён, а в брифе policies.chat_widget: off')
-    # литерал цели-контакта — копия machine факта: значения, которого у фактов нет, — одна находка на план
+    # литерал цели-контакта — копия machine факта: значения, которого у фактов нет, — одна находка на план; цель
+    # телефона или мессенджера не по форме — так же
+    def seen(places):
+        return ', '.join(x.removeprefix(w0).lstrip(':') for x in places[:2]) + (f' и ещё {len(places) - 2}' if len(places) > 2 else '')
     for val, places in sorted(literals.items()):
-        seen = ', '.join(x.removeprefix(w0).lstrip(':') for x in places[:2]) + (f' и ещё {len(places) - 2}' if len(places) > 2 else '')
-        R.add('warning', 'PL-F08', w0, f'цель {val} ({seen}): такого значения нет у machine фактов — телефон, почта и '
-                                       'мессенджер живут в факте (machine), литерал цели — его копия; значение — '
-                                       'подсказка claims_check.py lint-facts')
+        R.add('warning', 'PL-F08', w0, f'цель {val} ({seen(places)}): такого значения нет у machine фактов — телефон, '
+                                       'почта и мессенджер живут в факте (machine), литерал цели — его копия; '
+                                       'значение — подсказка claims_check.py lint-facts')
+    for val, places in sorted(worded.items()):
+        R.add('warning', 'PL-F09', w0, f'цель «{val}» ({seen(places)}) — не адрес ссылки: у телефона — литерал '
+                                       '«tel:+<номер E.164>», копия machine факта, у мессенджера — адрес ссылки или '
+                                       'messenger:<fact-id>; ссылку по такой цели код не соберёт')
     # события
     for e in used_events:
         if not str(e).startswith('event:') or str(e)[6:] not in ctx.events:
@@ -1741,9 +1760,9 @@ def selftest(ctx):
         s['variant'] = 'final-with-channels'
         s['slots'].setdefault('action', []).extend([
             {'id': 'phone', 'slot': 'phone-link', 'action': 'call', 'style': 'channel',
-             'target': {'kind': 'tel', 'value': 'tel: номер компании'}},
+             'target': {'kind': 'tel', 'value': 'tel:+70000000003'}},
             {'id': 'messenger', 'slot': 'messenger-link', 'action': 'message', 'style': 'channel',
-             'target': {'kind': 'messenger', 'value': 'канал компании'}}])
+             'target': {'kind': 'messenger', 'value': 'https://t.me/primer_demo'}}])
 
     def add_3d(p, sid, **slot):
         sec(p, sid).setdefault('slots', {})['3d'] = [dict({'id': 'model', 'slot': 'model-3d', 'poster': 'visual'}, **slot)]
@@ -2070,8 +2089,8 @@ def selftest(ctx):
           f"перечней, успех inline, цель формы не из событий, событие без автоцели — LF-07: {'OK' if good else 'FAIL ' + str(got)}")
     ok &= good
     # цель-контакт: литерал цели tel и мессенджера — копия machine факта, у факта цели messenger:<fact-id> — machine с
-    # адресом ссылки (PL-F08 у плана, SM-24 у призыва шапки карты); цель словами — не литерал, её не сверяют
-    def contact_case(tel, link, literal):
+    # адресом ссылки (PL-F08 у плана, SM-24 у призыва шапки карты); цель телефона или мессенджера не по форме — PL-F09
+    def contact_case(tel, link, literal, cta=None):
         dst = Path(tempfile.mkdtemp(dir=ex.parent, prefix='.selftest-'))
         shutil.copytree(ex.parent / site, dst, dirs_exist_ok=True)
 
@@ -2082,11 +2101,11 @@ def selftest(ctx):
                     f['machine'] = m
 
         def targets(p):
-            p['page']['cta_target'] = {'kind': 'messenger', 'value': f'messenger:{map_fact}'}
+            p['page']['cta_target'] = {'kind': 'messenger', 'value': cta or f'messenger:{map_fact}'}
             for s in p['sections']:
                 for a in (s.get('slots') or {}).get('action') or []:
                     if (a.get('target') or {}).get('kind') == 'tel':
-                        a['target']['value'] = literal
+                        a['target'].update(kind='url' if literal.startswith('mailto:') else 'tel', value=literal)
         edit(dst / 'facts.yaml', machines)
         edit(dst / 'site-map.yaml', lambda m: header_cta(m, f'messenger:{map_fact}'))
         edit(dst / 'plans/contacts.yaml', targets)
@@ -2094,18 +2113,24 @@ def selftest(ctx):
         check_project(dst, ctx)
         shutil.rmtree(dst, ignore_errors=True)
         errs = [i for i in R.items if i[0] == 'error']
-        return sorted(i[1] for i in R.items if i[1] in ('PL-F08', 'SM-24') and i[0] == 'warning') if not errs else errs[:3]
+        return sorted(i[1] for i in R.items if i[1] in ('PL-F08', 'PL-F09', 'SM-24') and i[0] == 'warning') if not errs else errs[:3]
     phone = {'type': 'telephone', 'value': '+70000000001'}
     chat = {'type': 'messenger', 'network': 'telegram', 'value': 'https://t.me/stalkon_demo'}
     mail = {'type': 'email', 'value': 'zakaz@stalkon.example'}
-    got = [contact_case(phone, chat, 'tel:+70000000001'), contact_case(phone, chat, 'tel: номер из facts.yaml'),
-           contact_case(mail, chat, 'mailto:zakaz@stalkon.example'), contact_case(None, None, 'tel:+70000000001'),
+    got = [contact_case(phone, chat, 'tel:+70000000001'), contact_case(mail, chat, 'mailto:zakaz@stalkon.example'),
+           contact_case(phone, chat, 'tel:+70000000001', cta=chat['value']), contact_case(None, None, 'tel:+70000000001'),
            contact_case(dict(phone, value='+70000000002'), chat, 'tel:+70000000001'),
            contact_case(phone, chat, 'mailto:zakaz@stalkon.example')]
     good = got == [[], [], [], ['PL-F08', 'PL-F08', 'SM-24'], ['PL-F08'], ['PL-F08']]
-    print("N86 цель-контакт: литерал телефона и почты равен machine факта, цель словами — без находки; фактов без "
-          "machine — PL-F08 у литерала и у цели messenger:<fact-id>, SM-24 у призыва шапки; другой номер и почта без "
-          f"факта — PL-F08: {'OK' if good else 'FAIL ' + str(got)}")
+    print("N86 цель-контакт: литерал телефона, почты и адреса мессенджера равен machine факта — без находки; без machine "
+          "— PL-F08 у литерала и у цели messenger:<fact-id>, SM-24 у призыва шапки; другой номер и почта без факта — "
+          f"PL-F08: {'OK' if good else 'FAIL ' + str(got)}")
+    ok &= good
+    got = [contact_case(phone, chat, 'tel: номер из facts.yaml'), contact_case(phone, chat, 'tel:8 900 000-00-01'),
+           contact_case(phone, chat, 'tel:+70000000001', cta='канал компании в мессенджере')]
+    good = got == [['PL-F09']] * 3
+    print("N90 цель-контакт не по форме: телефон словами и номером не в E.164, мессенджер словами — PL-F09 warning: "
+          f"{'OK' if good else 'FAIL ' + str(got)}")
     ok &= good
     # таблица head-kit «вид machine → свойство JSON-LD» стоит на схеме machine фактов: виды, поля, дни, схемы реквизита
     mdefs = {o['properties']['type']['const']: o['properties'] for o in load_any(P['facts_schema'])['$defs']['machine']['oneOf']}

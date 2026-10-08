@@ -1113,7 +1113,7 @@ sections:
       action: message
       target:
         kind: messenger
-        value: чат поддержки или Telegram — site 05
+        value: messenger:support-telegram
       style: secondary
       label: cta-secondary-label
       event: event:messenger-click

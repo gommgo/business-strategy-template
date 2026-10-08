@@ -101,7 +101,7 @@ sections:
       style: channel
       target:
         kind: tel
-        value: 'tel: номер из facts.yaml'
+        value: tel:+79000000001
       event: event:phone-click
 - id: article-body
   role: article-body
