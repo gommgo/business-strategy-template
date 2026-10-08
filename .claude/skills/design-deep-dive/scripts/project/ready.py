@@ -79,7 +79,10 @@
   которого берёт страница: она называет факт (ссылка fact:<id> плана в любом поле, fact_ids её текстов — те же записи
   фактов, что в отпечатке одобрения: canvas_input.page_fact_ids), на него ведёт цель messenger:<fact-id> плана или
   призыва шапки карты или его machine стоит литералом цели плана (tel:, mailto:, адрес ссылки). Исправление machine
-  снимает блокер без новой приёмки макета: в отпечаток одобрения machine не входит
+  снимает блокер без новой приёмки макета: в отпечаток одобрения machine не входит. Файл фактов есть, но не читается
+  (YAML не разбирается, не форма фактов — claims_check его не загружает) — сверить факты нечем: блокер «факты: файл
+  фактов не читается» у единицы, которая берёт факты (называет факт или пробел, ведёт цель messenger:, tel:, mailto:
+  или адресом ссылки); сверка упала на записи факта — «факты: fact:<id> (запись факта не читается)»
   perf                                сайт — plans; кабинет — {field: p75, rum: true, lab: [AC-PRF-04, AC-PRF-05,
                                       AC-PRF-06]}
   frontend_design                     сайт — род, уровень и потолок движения брифа (потолок без поля брифа — уровень
@@ -271,6 +274,7 @@ class Build:
         self.surf_open = []
         self.context = []
         self.header_cta = ""
+        self.facts_unreadable = False
         self._facts = None
         self._fonts = None
         self._theme = None
@@ -424,7 +428,8 @@ class Build:
 
     # факты
     def facts(self):
-        """(факты по id, id пробелов, демо у файла, claims_check.Facts или None)."""
+        """(факты по id, id пробелов, демо у файла, claims_check.Facts или None). Файл есть, а claims_check его не
+        загрузил (YAML не разбирается, не форма фактов) — facts_unreadable: сверить факты нечем."""
         if self._facts is None:
             p = docpaths.facts(self.slug, repo=self.repo)
             data = load(p) if p.is_file() else None
@@ -435,6 +440,7 @@ class Build:
                     obj = cc.load_facts(str(p), cc.load_schema(), True)
                 except (Exception, SystemExit):                 # noqa: BLE001 — форму фактов проверяет R-STRUCT-003
                     obj = None
+            self.facts_unreadable = p.is_file() and obj is None
             facts = {f.get("id"): f for f in (data or {}).get("facts") or [] if isinstance(f, dict)}
             missing = {m.get("id") for m in (data or {}).get("missing") or [] if isinstance(m, dict)}
             self._facts = (facts, missing, bool((data or {}).get("example")), obj)
@@ -445,8 +451,13 @@ class Build:
         по форме или не из canonical (`claims_check.machine_issues`, error), значение которого берёт страница: она
         называет факт (refs и named — id фактов страницы, `canvas_input.page_fact_ids`), на него ведёт цель
         messenger:<fact-id> или его machine стоит литералом цели (targets — значения целей) — «tel:<номер>»,
-        «mailto:<почта>», адрес ссылки. Факт узнаётся и по id из aliases."""
+        «mailto:<почта>», адрес ссылки. Факт узнаётся и по id из aliases. Проверка, которой нечем сверять, готовой
+        единицу не называет: файл фактов не читается (facts_unreadable) — «файл фактов не читается» у единицы, которая
+        берёт факты; сверка упала на записи факта — «запись факта не читается»."""
         facts, missing, demo_file, obj = self.facts()
+        if self.facts_unreadable:
+            takes = refs or named or any(re.match(r"(?:messenger|tel|mailto|https?):", t) for t in targets)
+            return (["файл фактов не читается"] if takes else []), []
         bad, demo = [], []
         for kind, fid in sorted(refs):
             if kind == "missing":
@@ -462,8 +473,8 @@ class Build:
             if obj is not None:
                 try:
                     issues = mod("claims_check").publishable_issues(f, obj, self.today)
-                except Exception:                           # noqa: BLE001
-                    issues = []
+                except Exception:                           # noqa: BLE001 — форму фактов проверяет R-STRUCT-003
+                    issues = [("error", "", "запись факта не читается", "")]
                 if any(lv == "error" for lv, *_ in issues):
                     bad.append(f"fact:{fid} ({'; '.join(m for lv, _r, m, _f in issues if lv == 'error')[:120]})")
         if obj is not None:
@@ -480,7 +491,7 @@ class Build:
                 try:
                     issues = cc.machine_issues(facts[fid], jur)
                 except Exception:                           # noqa: BLE001 — форму фактов проверяет R-STRUCT-003
-                    issues = []
+                    issues = [("error", "запись факта не читается", "")]
                 bad += [f"fact:{fid} ({msg[:120]})" for lv, msg, _fix in issues if lv == "error"]
         return bad, demo
 
@@ -1502,6 +1513,28 @@ def _selftest():
               and not s_lit["ready"] and held in d_lit["blockers"]
               and not s_named["ready"] and held in d_named["blockers"]
               and s_right["ready"] and not any("machine" in b for b in d_right["blockers"]))
+        # файл фактов не читается: сверить факты нечем — единица с фактами не готова, единица без них готова
+        broken = ft.replace(tel_ok, tel_bad).replace("\nentities:\n", '\nentities: ["не объект"]\nentities_was:\n')
+        fy.write_text(broken, encoding="utf-8")
+        plan.write_text(ptext.replace("value: tel:+79000000001", "value: tel:+79000000009"), encoding="utf-8")
+        d_broken = build(slug, surf, root, today)
+        fy.write_text("facts: [\n", encoding="utf-8")
+        d_garbage = build(slug, surf, root, today)
+        plan.write_text(ptext.replace("value: tel:+79000000001", "value: '#lead-form'")
+                        .replace("fact: missing:legal-details", "fact: null"), encoding="utf-8")
+        d_nofacts = build(slug, surf, root, today)
+        fy.write_text(ft, encoding="utf-8")
+        plan.write_text(ptext, encoding="utf-8")
+        s_broken, s_garbage, s_nofacts = ({u["id"]: u for u in x["units"]}["spasibo"]
+                                          for x in (d_broken, d_garbage, d_nofacts))
+        unread = "spasibo: факты: файл фактов не читается"
+        check("файл фактов не читается (entities не объектом при чужом номере в machine; YAML не разбирается) — "
+              "единица с фактами не готова, блокер «факты: файл фактов не читается»; единица без ссылок на факты и "
+              "без целей-контактов при том же файле готова",
+              broken.count("entities_was:") == 1 and tel_bad in broken
+              and not s_broken["ready"] and unread in d_broken["blockers"]
+              and not s_garbage["ready"] and unread in d_garbage["blockers"]
+              and s_nofacts["ready"] and not any(b.startswith("spasibo: факты") for b in d_nofacts["blockers"]))
         # тема брифа без темы токенов: бриф ждёт тёмную тему, значения токенов — светлая тема (modes.base не объявлена)
         tk = docpaths.design(slug, "tokens", repo=root)
         ink = {"color": {"$type": "color", "bg": {"$value": {"colorSpace": "srgb", "components": [0.1, 0.1, 0.1],
