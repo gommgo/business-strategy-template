@@ -3465,7 +3465,8 @@ def _page_rows(ctx, unit):
     fpath = docpaths.facts(ctx.slug, repo=ctx.repo)
     if ids and fpath.is_file():
         data, _err = load_doc(fpath)
-        recs = {str(f.get("id")): f for f in get(data, "facts", default=[]) or [] if isinstance(f, dict)}
+        facts = get(data, "facts", default=[])                # файл не по форме — записей нет, отпечаток другой
+        recs = {str(f.get("id")): f for f in (facts if isinstance(facts, list) else []) if isinstance(f, dict)}
         for fid in sorted(ids):
             rec = recs.get(fid)
             rows.append(_row(ctx, f"fact · {fid}", fpath, content_fp("fact", rec) if rec else "—"))
@@ -4327,10 +4328,12 @@ def selftest():
         with_machine = unit_fingerprint(fx.slug, "promo", "home", fx.root)
         rec["canonical"] = f"{rec.get('canonical') or ''} — правка"
         fpath.write_text(Y.safe_dump(doc, allow_unicode=True, sort_keys=False), encoding="utf-8")
+        edited = unit_fingerprint(fx.slug, "promo", "home", fx.root)
+        fpath.write_text("facts: 5\n", encoding="utf-8")
         check("записи фактов страницы: добавленный machine — тот же отпечаток (одобрение живо), правка canonical — "
-              "другой",
-              fp0.startswith("sha256:") and with_machine == fp0
-              and unit_fingerprint(fx.slug, "promo", "home", fx.root) not in (fp0, None))
+              "другой; файл фактов не по форме (facts не списком) — отпечаток считается, записей фактов в нём нет",
+              fp0.startswith("sha256:") and with_machine == fp0 and edited not in (fp0, None)
+              and unit_fingerprint(fx.slug, "promo", "home", fx.root) not in (fp0, edited, None))
     with FP.built("package-landing") as fx:
         # ассеты входа макета: ключ «страница и слот», принятое по варианту и формату, демо, общие ассеты продукта
         Y = yaml_mod()

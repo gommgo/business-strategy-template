@@ -429,7 +429,8 @@ class Build:
     # факты
     def facts(self):
         """(факты по id, id пробелов, демо у файла, claims_check.Facts или None). Файл есть, а claims_check его не
-        загрузил (YAML не разбирается, не форма фактов) — facts_unreadable: сверить факты нечем."""
+        загрузил (YAML не разбирается, верхний уровень — не объект, не форма фактов) — facts_unreadable: сверить факты
+        нечем."""
         if self._facts is None:
             p = docpaths.facts(self.slug, repo=self.repo)
             data = load(p) if p.is_file() else None
@@ -440,10 +441,15 @@ class Build:
                     obj = cc.load_facts(str(p), cc.load_schema(), True)
                 except (Exception, SystemExit):                 # noqa: BLE001 — форму фактов проверяет R-STRUCT-003
                     obj = None
+            else:
+                data = {}
             self.facts_unreadable = p.is_file() and obj is None
-            facts = {f.get("id"): f for f in (data or {}).get("facts") or [] if isinstance(f, dict)}
-            missing = {m.get("id") for m in (data or {}).get("missing") or [] if isinstance(m, dict)}
-            self._facts = (facts, missing, bool((data or {}).get("example")), obj)
+
+            def rows(key):
+                return [x for x in (data.get(key) if isinstance(data.get(key), list) else [])
+                        if isinstance(x, dict) and isinstance(x.get("id"), str)]
+            self._facts = ({f["id"]: f for f in rows("facts")}, {m["id"] for m in rows("missing")},
+                           bool(data.get("example")), obj)
         return self._facts
 
     def fact_problems(self, refs, named=frozenset(), targets=frozenset()):
@@ -1518,6 +1524,8 @@ def _selftest():
         fy.write_text(broken, encoding="utf-8")
         plan.write_text(ptext.replace("value: tel:+79000000001", "value: tel:+79000000009"), encoding="utf-8")
         d_broken = build(slug, surf, root, today)
+        fy.write_text("- не объект\n", encoding="utf-8")
+        d_list = build(slug, surf, root, today)
         fy.write_text("facts: [\n", encoding="utf-8")
         d_garbage = build(slug, surf, root, today)
         plan.write_text(ptext.replace("value: tel:+79000000001", "value: '#lead-form'")
@@ -1525,14 +1533,15 @@ def _selftest():
         d_nofacts = build(slug, surf, root, today)
         fy.write_text(ft, encoding="utf-8")
         plan.write_text(ptext, encoding="utf-8")
-        s_broken, s_garbage, s_nofacts = ({u["id"]: u for u in x["units"]}["spasibo"]
-                                          for x in (d_broken, d_garbage, d_nofacts))
+        s_broken, s_list, s_garbage, s_nofacts = ({u["id"]: u for u in x["units"]}["spasibo"]
+                                                  for x in (d_broken, d_list, d_garbage, d_nofacts))
         unread = "spasibo: факты: файл фактов не читается"
-        check("файл фактов не читается (entities не объектом при чужом номере в machine; YAML не разбирается) — "
-              "единица с фактами не готова, блокер «факты: файл фактов не читается»; единица без ссылок на факты и "
-              "без целей-контактов при том же файле готова",
+        check("файл фактов не читается (entities не объектом при чужом номере в machine; верхний уровень — список; "
+              "YAML не разбирается) — единица с фактами не готова, блокер «факты: файл фактов не читается»; единица "
+              "без ссылок на факты и без целей-контактов при том же файле готова",
               broken.count("entities_was:") == 1 and tel_bad in broken
               and not s_broken["ready"] and unread in d_broken["blockers"]
+              and not s_list["ready"] and unread in d_list["blockers"]
               and not s_garbage["ready"] and unread in d_garbage["blockers"]
               and s_nofacts["ready"] and not any(b.startswith("spasibo: факты") for b in d_nofacts["blockers"]))
         # тема брифа без темы токенов: бриф ждёт тёмную тему, значения токенов — светлая тема (modes.base не объявлена)
