@@ -388,8 +388,8 @@ text 10/01 §8).
   - антиспам — слои `lead-forms.yaml#defaults.antispam.without_js`;
   - скрытые поля — `hidden_fields_without_js`: поля `build` пишет сборка в HTML, поля `server` ставит сервер при
     приёме из `Referer`, полей `js_only` у формы без JS нет;
-  - успех — `success.without_js`: 303 на адрес `form.thank_you_page` плана, только принятой заявке; плана без адреса
-    код не собирает — `STRATEGY-ISSUE` (предупреждение PL-T02 `site_validate.py`);
+  - успех — `success.without_js`: 303 на адрес `form.thank_you_page` плана, только принятой заявке; форму без этого
+    адреса код не собирает — `STRATEGY-ISSUE` (предупреждение PL-T02 `site_validate.py`);
   - цель формы любого набора — событие `events.yaml#defaults.without_js.form_success`: визит «спасибо»; события
     `counter_goals` считает счётчик автоцелями. Прочие события плана шлёт только JS — остров: без острова события
     нет, и пункт приёмки L1 по нему не пройден (S — остров или запись заказчика).
