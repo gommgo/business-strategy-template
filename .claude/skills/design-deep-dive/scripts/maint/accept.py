@@ -9,7 +9,9 @@
     проверяются все изменённые файлы;
   • ссылки — `.md`: находки `refcheck.py --strict` (битые ссылки и следы forward-only) в новых и изменённых строках —
     по номерам строк диффа против базы; находки в нетронутых строках — счётом, приёмку они не роняют; md фикстур
-    и материала к разбору не сверяются (маски `links_skip` данных);
+    и материала к разбору не сверяются (маски `links_skip` данных). `.yaml`, `.yml`: путь файла в комментарии новой
+    или изменённой строки, по которому файла нет (от папки файла, `kb/`, корня скилла и репозитория — правила путей
+    `refcheck.py`), — находка, в нетронутых строках — счётом: шапка каталога не ссылается на снятый файл;
   • разбор — `.json`, `.yaml`, `.yml` читаются; `*.schema.json` и `*.schema.yaml` проходят метасхему Draft 2020-12;
   • код — `.py` компилируется;
   • следы — новые и изменённые строки `.py`: образцы `forward-only` из `scripts/maint/data/traces.tsv` (те же, что у
@@ -63,6 +65,8 @@ ENV_REEXEC = "DDD_ACCEPT_VENV"
 DATA_EXT = (".json", ".yaml", ".yml")
 SCHEMA_EXT = (".schema.json", ".schema.yaml")
 HUNK = re.compile(r"^@@ -\d+(?:,\d+)? \+(\d+)(?:,(\d+))? @@", re.M)
+YAML_COMMENT = re.compile(r"(?:^|\s)#(.*)$")                # комментарий строки YAML: «#» в начале или после пробела
+YAML_PATH = re.compile(r"(?<![\w./:<>…*-])((?:\.{1,2}/)*(?:[\w.-]+/)+[\w.-]+\.(?:json|ya?ml|md|py|tsv|csv))(?![\w/-])")
 SMOKE_COUNT = re.compile(r"\b(PASS|FAIL|XFAIL|XPASS) (\d+)")
 SMOKE_STATUSES = ("PASS", "FAIL", "XFAIL", "XPASS")
 # Переменные, которыми вызывающий процесс (хук, обёртка) направляет git в другой репозиторий: приёмка их не наследует.
@@ -203,6 +207,37 @@ def check_md(root: Path, files: list[str], lines_of) -> tuple[list[dict], int]:
                 n, _, message = item.partition(": ")
                 if lines is None or int(n) in lines:
                     hits.append(finding("ссылки", f, int(n), kind, message))
+                else:
+                    untouched += 1
+    return hits, untouched
+
+
+def check_yaml_paths(root: Path, files: list[str], lines_of) -> tuple[list[dict], int]:
+    """Пути файлов в комментариях YAML: файла по пути нет — находка в новой или изменённой строке, счёт — в нетронутой.
+    Путь — слово комментария с «/» и расширением файла; образец с `<…>`, `…` или `*` и адрес в сети путём не считаются.
+    Файл ищется как путь текста вне `kb/` у `refcheck.py`, у каталога базы — ещё от папки его базы (`kb/<база>/`);
+    путь вне репозитория, имя из списка не-ссылок `refcheck.py` и путь раскладки проекта в форме слоя (первый сегмент
+    — папка слоя в `docs/projects/_template/`) — не находка."""
+    hits, untouched = [], 0
+    for f in files:
+        path = (root / f).resolve()
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError) as e:
+            hits.append(finding("ссылки", f, 0, "чтение", str(e)))
+            continue
+        lines = lines_of(f)
+        base = refcheck.KB / path.relative_to(refcheck.KB).parts[0] if path.is_relative_to(refcheck.KB) else None
+        form = path.is_relative_to(refcheck.TEMPLATE)
+        for n, line in enumerate(text.split("\n"), 1):
+            m = YAML_COMMENT.search(line)
+            for tok in YAML_PATH.findall(m.group(1)) if m else []:
+                if refcheck.resolve_path(tok, path) or base is not None and (base / tok).exists() \
+                        or form and (refcheck.TEMPLATE / tok.split("/")[0]).is_dir() \
+                        or refcheck.not_a_file(tok) or refcheck.outside_repo(tok, path) or refcheck.elsewhere(tok):
+                    continue
+                if lines is None or n in lines:
+                    hits.append(finding("ссылки", f, n, "битая ссылка", f"путь {tok} в комментарии"))
                 else:
                     untouched += 1
     return hits, untouched
@@ -357,10 +392,13 @@ def accept(root: Path = ROOT, base: str = "HEAD", masks: list[str] | None = None
     skipped = [p for p in md if under(p, cfg["links_skip"])]
     md = [p for p in md if p not in skipped]
     hits, untouched = check_md(root, md, lines_of)
+    yml = [p for p in live if p.endswith((".yaml", ".yml")) and not under(p, cfg["links_skip"])]
+    more, quiet = check_yaml_paths(root, yml, lines_of)
+    hits, untouched = hits + more, untouched + quiet
     findings += hits
     note = "; ".join(x for x in (f"в нетронутых строках — {untouched}" if untouched else "",
                                  f"не сверялись (маски links_skip данных) — {len(skipped)}" if skipped else "") if x)
-    rows.append(row("ссылки", len(md), len(hits), note, untouched=untouched, skipped=len(skipped)))
+    rows.append(row("ссылки", len(md) + len(yml), len(hits), note, untouched=untouched, skipped=len(skipped)))
 
     data = [p for p in live if p.endswith(DATA_EXT)]
     hits, schemas = check_data(root, data)
@@ -593,6 +631,14 @@ def selftest() -> int:
                 rep = accept(repo, masks=masks + [skip_md])
                 ok_if("md под маской исключения из данных не сверяется",
                       under(skip_md, cfg["links_skip"]) and rep["clean"] and check_of(rep, "ссылки")["skipped"] == 1)
+            with seeded("zone/data.yaml", "# схема: ./t.schema.json; рядом: zone-docs/gone.schema.json\na: 2\n"
+                        "b: [1, 2]  # форма — sub/<имя>/form.yaml и https://example.org/x/form.yaml\n"):
+                rep = accept(repo, masks=masks)
+                hits = [(f["path"], f["line"], f["kind"]) for f in rep["findings"]]
+                ok_if("yaml: путь в комментарии новой строки, по которому файла нет, — находка; живой путь, образец с "
+                      "<…> и адрес в сети — нет",
+                      failed(rep) == ["ссылки"] and hits == [("zone/data.yaml", 1, "битая ссылка")]
+                      and "zone-docs/gone.schema.json" in rep["findings"][0]["message"])
             with seeded("zone/broken.py", "def f(:\n    pass\n"):
                 rep = accept(repo, masks=masks)
                 ok_if("py с синтаксической ошибкой — код, строка ошибки", failed(rep) == ["код"]

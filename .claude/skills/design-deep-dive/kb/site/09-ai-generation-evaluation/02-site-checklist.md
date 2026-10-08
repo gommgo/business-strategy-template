@@ -465,9 +465,9 @@ SG-WEIGHT — `page-gates.yaml`; автопроверка — `page_gates.py`. �
 Дефект — что сломано на странице или сайте; шаг — где процедура `../10-playbooks-contracts/01-procedure-brief-to-pages.md`
 (J) его предотвращает; «ловят» — пункты этого чек-листа и ворота. Шаги: `step:intake` (разбор и вопросы, бриф),
 `step:proof` (инвентарь фактов), `step:site-type`, `step:site-map`, `step:page-plan`, `step:sister-sync` (copy-deck,
-treatment, план ассетов, 3D), `step:plan-check` (блок PRE), `step:package` (пакет исполнителя), `step:build-loop` (сборка и
-цикл), `step:gates` (ворота и чек-лист), `step:fix`, `step:acceptance`, `step:measure` (события и A/B). Правило: дефект
-чинится на шаге, где рождается; ловить его воротами — последний рубеж, а не способ.
+treatment, план ассетов, 3D), `step:plan-check` (блок PRE), `step:package` (пакет для кода), `step:build-loop`
+(сборка), `step:gates` (ворота и чек-лист), `step:fix`, `step:acceptance`, `step:measure` (события и A/B). Правило:
+дефект чинится на шаге, где рождается; ловить его воротами — последний рубеж, а не способ.
 
 | ID | Дефект | Предотвращает шаг | Ловят | Маркер |
 |---|---|---|---|---|
