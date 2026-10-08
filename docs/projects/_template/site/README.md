@@ -380,8 +380,9 @@ text 10/01 §8).
     `machine.value` факта цели `messenger:<fact-id>` (§ Цель действия; литерал — копия `machine`, расхождение —
     PL-F08);
   - свойства JSON-LD организации — по таблице «вид `machine` → свойство» каталога `head`
-    (`head-kit.yaml#jsonld_policy.fields_from_facts`) из фактов, которые называет страница; вида в таблице нет —
-    в разметку он не идёт; `sameAs` — только `search.profiles[].url` брифа.
+    (`head-kit.yaml#jsonld_policy.fields_from_facts`) из фактов, которые называет страница: ссылка `fact:<id>` в
+    любом поле плана и `fact_ids` её текстов; вида в таблице нет — в разметку он не идёт; `sameAs` — только
+    `search.profiles[].url` брифа.
 
   Цель `messenger:<fact-id>`, у факта которой нет `machine` с адресом ссылки, и цель телефона или мессенджера в
   другой форме (PL-F09) код не собирает: пишет `STRATEGY-ISSUE`.

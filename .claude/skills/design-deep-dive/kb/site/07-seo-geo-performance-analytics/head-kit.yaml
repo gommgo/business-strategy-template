@@ -209,9 +209,10 @@ jsonld_policy:
   fields_from_facts:
     # Контакты и реквизиты организации (Organization, LocalBusiness): «вид machine факта → свойство». Значение — machine
     # факта (../../text/02-strategy-messaging/facts.schema.yaml, $defs/machine) среди фактов, которые называет страница
-    # (слоты данных плана, fact_ids текстов); строку canonical код не разбирает. Несколько разных значений одного вида
-    # — списком в порядке facts[]; вида у фактов страницы нет — свойства нет. Вида нет в таблице — в разметку он не
-    # идёт: url и messenger — адреса ссылок страницы, legal-id схем ogrn, ogrnip, kpp, other — текст страницы.
+    # (ссылка fact:<id> в любом поле плана, fact_ids её текстов); строку canonical код не разбирает. Несколько разных
+    # значений одного вида — списком в порядке facts[]; вида у фактов страницы нет — свойства нет. Вида нет в таблице —
+    # в разметку он не идёт: url и messenger — адреса ссылок страницы, legal-id схем ogrn, ogrnip, kpp, other — текст
+    # страницы.
     telephone: {property: telephone}                    # значение — value: E.164
     email: {property: email}                            # значение — value
     postal-address:
