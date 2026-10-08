@@ -11,6 +11,9 @@
   import-only        импорт модуля без запуска main (для утилит без --help)
   compile            только синтаксис: .py — compile(), .sh — bash -n, .mjs/.js — node --check (нет node — пропуск)
   data               файл есть и читается (.json, .yaml — разбор)
+Предел времени проверки — общий `--timeout` (180 с); проверке, которой его мало, предел пишет её строка:
+`run: ARGS timeout=N` — N секунд (общий предел больше — берётся он). Долгая самопроверка на занятой машине идёт
+дольше обычного: строка с запасом не делает смоук красным от загрузки.
 Колонка xfail — известная причина, по которой проверка без окружения падает (снимок каталога, бинарник, входы опытов):
 «run: причина» относится к проверкам run, «help: …» — к help, без префикса — ко всем проверкам строки. Упавшая такая
 проверка — XFAIL, прошедшая — XPASS (окружение уже есть). Код выхода 1 — если есть FAIL.
@@ -51,16 +54,19 @@ COMPILE_PY = "import sys; f = sys.argv[1]; compile(open(f, encoding='utf-8').rea
 
 
 def parse_checks(spec):
+    """Проверки колонки smoke → [(вид, аргументы, ожидаемый код, свой предел времени в секундах или None)]."""
     out = []
     for part in [p.strip() for p in (spec or "").split(";") if p.strip() and p.strip() != "-"]:
-        rc = 0
-        m = re.search(r"\s+rc=(\d+)\s*$", part)
-        if m:
-            rc, part = int(m.group(1)), part[:m.start()].rstrip()
+        own = {"rc": 0, "timeout": None}
+        while m := re.search(r"\s+(rc|timeout)=(\d+)\s*$", part):
+            own[m.group(1)], part = int(m.group(2)), part[:m.start()].rstrip()
+        if own["timeout"] == 0:
+            raise ValueError("timeout=0: предел времени проверки — число секунд больше нуля")
         if part.startswith("run:"):
-            out.append(("run", [a.replace("{skill}", str(kbpaths.skill())) for a in shlex.split(part[4:])], rc))
+            out.append(("run", [a.replace("{skill}", str(kbpaths.skill())) for a in shlex.split(part[4:])],
+                        own["rc"], own["timeout"]))
         elif part in ("help", "import-only", "compile", "data"):
-            out.append((part, [], rc))
+            out.append((part, [], own["rc"], own["timeout"]))
         else:
             raise ValueError(f"неизвестная проверка: {part!r}")
     return out
@@ -113,7 +119,7 @@ def list_problems(rows, paths=True):
             errs.append(f"{where}: пустой path")
             continue
         try:
-            kinds = {k for k, _, _ in parse_checks(row.get("smoke"))}
+            kinds = {k for k, *_ in parse_checks(row.get("smoke"))}
         except ValueError as e:
             errs.append(f"{where}: {e}")
             continue
@@ -199,7 +205,8 @@ def main():
     ap.add_argument("--list", action="append", default=[], metavar="PATH",
                     help="список .tsv или папка списков (ключ — повтором); по умолчанию — все списки папки smoke/")
     ap.add_argument("--only", default="", help="подстрока пути")
-    ap.add_argument("--timeout", type=float, default=180.0)
+    ap.add_argument("--timeout", type=float, default=180.0,
+                    help="общий предел времени проверки, с; свой предел проверки — timeout=N в её строке списка")
     ap.add_argument("--tsv", default="", help="записать результаты в TSV")
     ap.add_argument("--validate", action="store_true",
                     help="проверить списки (колонки, виды проверок, дубли, файлы строк) без запуска; код 1 — есть ошибки")
@@ -235,8 +242,8 @@ def main():
         if a.only and a.only not in row["path"]:
             continue
         path = kbpaths.skill(row["path"])
-        for kind, args, rc in parse_checks(row["smoke"]):
-            ok, got, dt, note = run_check(path, kind, args, rc, py, a.timeout, env)
+        for kind, args, rc, own in parse_checks(row["smoke"]):
+            ok, got, dt, note = run_check(path, kind, args, rc, py, max(a.timeout, own or 0), env)
             xf = xfail_for(row.get("xfail", ""), kind)
             if xf:
                 status = "XPASS" if ok else "XFAIL"
