@@ -444,6 +444,7 @@ title, description, canonical на себя, `lang`; H1, цены, призыв 
 | PL-S01, PL-V01 | план по схеме v1 (`page_plan_version: 1`), другая версия — ошибка; id словаря, macro-действие, семейство формы | error | 5 |
 | PL-B01…B03, PL-A01…A05 | блок, вариант, роль в `serves`; слоты, анатомия, группы, кратность, обязательные; `target.prefill` — текстовый слот `messenger-prefill` своей секции (PL-A03) | error / warning | 5 |
 | PL-F00…F07 | факты: файл, наличие, вид, допуск, `use.page_types`, срок, «популярный», минимумы; цель `messenger:<fact-id>` — факт есть (PL-F01) | error / warning | 5 |
+| PL-F08, SM-24 | цель-контакт: литерал цели плана (`tel:+7…`, `mailto:…`, адрес мессенджера) равен `machine` факта; у факта цели `messenger:<fact-id>` плана (PL-F08) и призыва шапки карты (SM-24) — `machine` с адресом ссылки | warning | 4–5 |
 | PL-H01, PL-R01, PL-L01 | один H1; «секция.слот»; длина | error / warning | 5 |
 | PL-N01, PL-N02 | id секции из роли или блока; навигация и уровень = карте и шаблону | error (v1) | 5 |
 | PL-O01…O02, PL-W01 | overlays и политики брифа; виджеты фасадом | error / warning | 5 |

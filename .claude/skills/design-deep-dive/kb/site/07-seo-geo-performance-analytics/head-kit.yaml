@@ -201,16 +201,39 @@ jsonld_policy:
     - 'Разметка описывает то, что видно на странице; невидимое не размечать (Google sd-policies 2026-07-10; Bing guidelines)'
     - 'Одна сущность — один @id: https://<домен>/#org, /#website, /<путь>#service, /<путь>#breadcrumb; ссылки {"@id": …}'
     - 'Организация — один раз (главная или «О компании»), на остальных страницах — ссылка по @id'
-    - 'Значения — из facts.yaml (name, legalName, адрес, телефон, цены, рейтинг); формулировка = канонической формулировке факта'
+    - 'Значения — из facts.yaml (name, legalName, адрес, телефон, цены, рейтинг); формулировка = канонической формулировке факта; контакты и реквизиты — machine факта по таблице fields_from_facts'
     - 'Не размечать отзывы о себе ради звёзд: LocalBusiness и Organization, контролирующие отзывы о себе, не получают звёзды (review snippet 2026-09-08)'
     - 'Не переносить в разметку оценки с других сайтов (Яндекс Карты, 2ГИС, G2, App Store): «Don''t aggregate reviews or ratings from other websites»'
     - 'Не добавлять устаревшее ради «полноты»: SearchAction (снят 11.2024), HowTo (2023), FAQPage ради сниппета (снят 2026-05-07), Course info (снят 11.2025)'
     - 'JSON-LD — для Google и Яндекса: Яндекс берёт из JSON-LD навигационную цепочку сниппета (BreadcrumbList) и вопросы-ответы мобильной выдачи (QAPage); данные об организации у Яндекса — Яндекс Бизнес и фиды (раздел yandex)'
+  fields_from_facts:
+    # Контакты и реквизиты организации (Organization, LocalBusiness): «вид machine факта → свойство». Значение — machine
+    # факта (../../text/02-strategy-messaging/facts.schema.yaml, $defs/machine) среди фактов, которые называет страница
+    # (слоты данных плана, fact_ids текстов); строку canonical код не разбирает. Несколько разных значений одного вида
+    # — списком в порядке facts[]; вида у фактов страницы нет — свойства нет. Вида нет в таблице — в разметку он не
+    # идёт: url и messenger — адреса ссылок страницы, legal-id схем ogrn, ogrnip, kpp, other — текст страницы.
+    telephone: {property: telephone}                    # значение — value: E.164
+    email: {property: email}                            # значение — value
+    postal-address:
+      property: address
+      type: PostalAddress
+      fields: {country: addressCountry, region: addressRegion, locality: addressLocality, street: streetAddress, postal_code: postalCode}
+    opening-hours:
+      property: openingHoursSpecification
+      type: OpeningHoursSpecification                   # узел на элемент hours; формат времени — recipes.local_business
+      fields: {days: dayOfWeek, opens: opens, closes: closes}
+      days: {mo: Monday, tu: Tuesday, we: Wednesday, th: Thursday, fr: Friday, sa: Saturday, su: Sunday}
+    geo:
+      property: geo
+      type: GeoCoordinates
+      fields: {lat: latitude, lon: longitude}
+    legal-id:
+      property_by_scheme: {inn: taxID, vat: vatID}      # значение — value
   recipes:
     organization:
       where: главная или about-page
       google: 'обязательных свойств нет; рекомендовано name, alternateName, legalName, url, logo, sameAs, description, address, contactPoint, telephone, email, foundingDate, taxID, vatID'
-      fields_from_brief: 'brand.name → name; business.legal_name → legalName (реквизиты подвала — site 08); ИНН → taxID; search.profiles[].url → sameAs'
+      fields_from_brief: 'brand.name → name; business.legal_name → legalName (реквизиты подвала — site 08); search.profiles[].url → sameAs — единственный источник sameAs; контакты и ИНН — fields_from_facts'
       same_as_rule: 'только профили, которыми владеет организация и которые открываются: Яндекс Бизнес, Google Business Profile, 2ГИС, VK, Telegram, YouTube, Wikidata (если есть элемент), Википедия (если статья о ней)'
       example: |
         {"@context":"https://schema.org","@graph":[

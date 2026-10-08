@@ -389,10 +389,11 @@ $defs:
 
   machine:
     description: >-
-      Машинное значение контакта или реквизита для кода (ссылки tel:, mailto: и мессенджера, подвал, JSON-LD): то же
-      значение, что в canonical, в форме, которую код берёт без разбора строк. Один факт — одно значение.
-      `claims_check.py lint-facts` сверяет его с canonical: расхождение — error COPY-F-MACHINE; у факта вида company с
-      контактом в canonical без machine — warning с готовым значением (03-proof-and-facts.md §4.2).
+      Машинное значение контакта или реквизита для кода (адреса ссылок tel:, mailto: и мессенджера, свойства JSON-LD
+      организации — таблица site head-kit.yaml#jsonld_policy.fields_from_facts): то же значение, что в canonical, в
+      форме, которую код берёт без разбора строк. Один факт — одно значение. `claims_check.py lint-facts` сверяет его
+      с canonical: расхождение — error COPY-F-MACHINE; у факта вида company с контактом в canonical без machine —
+      warning с готовым значением (03-proof-and-facts.md §4.2).
     oneOf:
       - type: object
         additionalProperties: false

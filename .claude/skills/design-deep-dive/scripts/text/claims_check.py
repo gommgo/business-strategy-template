@@ -2823,6 +2823,8 @@ _M_ADDRESS = re.compile(r'адрес|address', re.I)
 _M_HOURS = re.compile(r'час\w* работы|режим работы|ежедневно|без выходных|opening hours', re.I)
 _M_PHONE_CC = {'ru': '7'}                     # код страны десятизначного номера без «+» по праву фактов
 _M_LEGAL_SCHEME = {'ИНН': 'inn', 'ОГРН': 'ogrn', 'ОГРНИП': 'ogrnip', 'КПП': 'kpp'}
+# хост ссылки, по которой пишут, → сеть мессенджера (формы ссылок — site 05/01 §6.3): подсказка и сверка network
+_M_NETWORK_HOSTS = {'t.me': 'telegram', 'wa.me': 'whatsapp', 'max.ru': 'max', 'vk.me': 'vk'}
 
 
 def e164(raw, jurisdiction='ru'):
@@ -2850,9 +2852,10 @@ def _m_norm(s):
 
 
 def machine_contacts(text, jurisdiction='ru'):
-    """Контакты формулировки — кандидаты значений machine: {email, url (ключ без схемы), handle, legal [(схема,
-    значение)], phone (E.164), time (ЧЧ:ММ), num}. Виды ищутся по порядку, найденное одним видом следующие не видят:
-    домен почты — не ссылка, номер в ссылке и реквизит — не телефон."""
+    """Контакты формулировки — кандидаты значений machine: {email, url (ключ без схемы), scheme {ключ ссылки: схема,
+    названная в формулировке}, handle, legal [(схема, значение)], phone (E.164), time (ЧЧ:ММ), num} — списки в порядке
+    формулировки. Виды ищутся по порядку, найденное одним видом следующие не видят: домен почты — не ссылка, номер в
+    ссылке и реквизит — не телефон."""
     t, out = text or '', {k: [] for k in ('email', 'url', 'handle', 'legal', 'phone', 'time')}
     for key, rx, conv in (('email', _M_EMAIL, lambda m: m.group(0)),
                           ('url', _M_URL, lambda m: _url_key(m.group(0).rstrip('.!?:;'))),
@@ -2860,7 +2863,10 @@ def machine_contacts(text, jurisdiction='ru'):
                           ('legal', _M_LEGAL, lambda m: (_M_LEGAL_SCHEME[m.group(1).upper()], m.group(2))),
                           ('phone', _M_PHONE, lambda m: e164(m.group(1), jurisdiction)),
                           ('time', _M_TIME, lambda m: f'{int(m.group(1)):02d}:{m.group(2)}')):
-        out[key] = [v for v in (conv(m) for m in rx.finditer(t)) if v]
+        found = [(m.group(0), conv(m)) for m in rx.finditer(t)]
+        out[key] = [v for _raw, v in found if v]
+        if key == 'url':
+            out['scheme'] = {v: s.group(1).lower() for raw, v in found for s in [re.match(r'(https?)://', raw, re.I)] if s}
         t = rx.sub(lambda m: ' ' * len(m.group(0)), t)
     out['num'] = [float(x.replace(',', '.')) for x in _M_NUM.findall(text or '')]
     return out
@@ -2868,8 +2874,10 @@ def machine_contacts(text, jurisdiction='ru'):
 
 def machine_check(m, text, jurisdiction='ru'):
     """Сверка machine с формулировкой canonical: None — значение есть в формулировке, иначе — чего нет. Сверяются
-    значения: номер, почта, адрес ссылки (ник у мессенджера), части адреса словами, времена часов работы (дни — словами
-    формулировки, их сверяет человек), реквизит со своей меткой, координаты."""
+    значения: номер, почта, адрес ссылки (ник у мессенджера; схема — когда формулировка её называет; сеть мессенджера —
+    по хосту ссылки, _M_NETWORK_HOSTS), части адреса словами (страны в формулировке нет — её сверяет человек), времена
+    часов работы (интервал через полночь — в порядке формулировки; дни — словами, их сверяет человек), реквизит со
+    своей меткой, координаты в порядке формулировки: широта, затем долгота."""
     if not isinstance(m, dict) or m.get('type') not in MACHINE_TYPES:
         return f"не по форме (type — {', '.join(MACHINE_TYPES)})"
     c, t = machine_contacts(text, jurisdiction), m['type']
@@ -2879,30 +2887,43 @@ def machine_check(m, text, jurisdiction='ru'):
         return None if str(m.get('value') or '').lower() in {e.lower() for e in c['email']} else \
             f"почты {m.get('value')} в canonical нет"
     if t in ('url', 'messenger'):
-        key = _url_key(m.get('value'))
+        raw = str(m.get('value') or '')
+        key = _url_key(raw)
         handle = key.rsplit('/', 1)[-1].lower() if '/' in key else None
-        if key in c['url'] or t == 'messenger' and handle and (handle in {h.lower() for h in c['handle']}
-                                                              or '+' + handle in c['phone']):
-            return None
-        return f"адреса {m.get('value')} в canonical нет"
+        if not (key in c['url'] or t == 'messenger' and handle and (handle in {h.lower() for h in c['handle']}
+                                                                    or '+' + handle in c['phone'])):
+            return f"адреса {raw} в canonical нет"
+        scheme = c['scheme'].get(key)
+        if scheme and not raw.lower().startswith(scheme + '://'):
+            return f"схема адреса {raw} не та, что в canonical ({scheme}://)"
+        net = _M_NETWORK_HOSTS.get(key.partition('/')[0])
+        if t == 'messenger' and net and m.get('network') != net:
+            return f"сеть {m.get('network')} у ссылки {key.partition('/')[0]} — это {net}"
+        return None
     if t == 'postal-address':
         miss = [k for k in ('street', 'locality', 'region', 'postal_code')
                 if m.get(k) and _m_norm(m[k]) not in _m_norm(text)]
         return f"частей адреса {', '.join(miss)} нет в canonical (слова — как в формулировке)" if miss else None
     if t == 'opening-hours':
-        want = {x for h in m.get('hours') or [] if isinstance(h, dict) for x in (h.get('opens'), h.get('closes')) if x}
-        have = set(c['time'])
-        return None if want and want == have else \
-            f"времена часов работы {', '.join(sorted(want)) or '—'} не равны canonical ({', '.join(sorted(have)) or '—'})"
+        spans = [(h.get('opens'), h.get('closes')) for h in m.get('hours') or [] if isinstance(h, dict)]
+        want, have = {x for s in spans for x in s if x}, c['time']
+        if not want or want != set(have):
+            return (f"времена часов работы {', '.join(sorted(want)) or '—'} не равны canonical "
+                    f"({', '.join(sorted(set(have))) or '—'})")
+        # интервал через полночь законен, когда так в формулировке: время открытия стоит в ней раньше закрытия
+        swapped = [f'{o}–{cl}' for o, cl in spans if o and cl and o > cl and not any(
+            a == o and cl in have[i + 1:] for i, a in enumerate(have))]
+        return f"часы {', '.join(swapped)}: в canonical время закрытия стоит раньше открытия" if swapped else None
     if t == 'legal-id':
         pairs = {(s, v) for s, v in c['legal']}
         if (m.get('scheme'), m.get('value')) in pairs or m.get('scheme') in ('vat', 'other') and \
                 str(m.get('value') or '') in (text or ''):
             return None
         return f"реквизита {m.get('scheme')} {m.get('value')} с этой меткой в canonical нет"
-    near = [any(abs(x - float(m.get(k))) < 1e-6 for x in c['num']) for k in ('lat', 'lon')
-            if isinstance(m.get(k), (int, float))]
-    return None if len(near) == 2 and all(near) else 'координат lat и lon в canonical нет'
+    lat, lon = (m.get(k) if isinstance(m.get(k), (int, float)) else None for k in ('lat', 'lon'))
+    near = lat is not None and lon is not None and any(
+        abs(x - lat) < 1e-6 and any(abs(y - lon) < 1e-6 for y in c['num'][i + 1:]) for i, x in enumerate(c['num']))
+    return None if near else 'координат lat и lon в canonical нет (порядок формулировки: широта, затем долгота)'
 
 
 def _address_hint(text, jurisdiction):
@@ -2922,11 +2943,11 @@ def machine_hint(text, jurisdiction='ru'):
     out += [{'type': 'legal-id', 'scheme': s, 'value': v} for s, v in c['legal']]
     out += [{'type': 'email', 'value': e} for e in c['email']]
     for key in c['url']:
-        net = next((n for n, host in (('telegram', 't.me/'), ('whatsapp', 'wa.me/')) if key.startswith(host)), None)
-        if net and not re.search(r'канал|channel', low):
-            out.append({'type': 'messenger', 'network': net, 'value': f'https://{key}'})
+        net, value = _M_NETWORK_HOSTS.get(key.partition('/')[0]), f"{c['scheme'].get(key, 'https')}://{key}"
+        if net and '/' in key and not re.search(r'канал|channel', low):
+            out.append({'type': 'messenger', 'network': net, 'value': value})
         else:
-            out.append({'type': 'url', 'value': f'https://{key}'})
+            out.append({'type': 'url', 'value': value})
     if re.search(r'telegram|телеграм', low) and not any(x['type'] == 'messenger' for x in out):
         out += [{'type': 'messenger', 'network': 'telegram', 'value': f'https://t.me/{h}'} for h in c['handle']]
     out += [{'type': 'telephone', 'value': p} for p in c['phone']]
@@ -3795,10 +3816,17 @@ def _selftest_machine(check):
             fact('hours', 'Часы работы: ежедневно с 9:00 до 21:00.',
                  {'type': 'opening-hours', 'hours': [{'days': week, 'opens': '09:00', 'closes': '21:00'}]}),
             fact('ogrn', 'ООО «Пример», ОГРН 1000000000001.', {'type': 'legal-id', 'scheme': 'ogrn', 'value': '1000000000001'}),
-            fact('geo', 'Координаты студии: 55.7512, 37.6184.', {'type': 'geo', 'lat': 55.7512, 'lon': 37.6184})]
+            fact('geo', 'Координаты студии: 55.7512, 37.6184.', {'type': 'geo', 'lat': 55.7512, 'lon': 37.6184}),
+            fact('site-http', 'Сайт студии: http://primer.example.', {'type': 'url', 'value': 'http://primer.example'}),
+            fact('max', 'Написать студии в MAX: max.ru/primer_studio.',
+                 {'type': 'messenger', 'network': 'max', 'value': 'https://max.ru/primer_studio'}),
+            fact('night', 'Часы работы: по пятницам с 22:00 до 6:00, обед с 2:00 до 3:00.',
+                 {'type': 'opening-hours', 'hours': [{'days': ['fr'], 'opens': '22:00', 'closes': '02:00'},
+                                                     {'days': ['sa'], 'opens': '03:00', 'closes': '06:00'}]})]
     got = {f['id']: machine_issues(f) for f in same}
-    check('machine совпадает с canonical — находок нет: телефон с «+» и с 8 в скобках, почта, ссылка без схемы, '
-          'Telegram по нику, части адреса, часы 9:00, ОГРН с меткой, координаты', not any(got.values()), got)
+    check('machine совпадает с canonical — находок нет: телефон с «+» и с 8 в скобках, почта, ссылка без схемы и со '
+          'схемой формулировки, Telegram по нику, MAX по ссылке, части адреса, часы 9:00, часы через полночь в порядке '
+          'формулировки, ОГРН с меткой, координаты', not any(got.values()), got)
     differ = [fact('tel', 'Телефон: +7 900 000-00-01.', {'type': 'telephone', 'value': '+79000000009'}),
               fact('addr', 'Адрес: Казань, улица Примерная, 1.',
                    {'type': 'postal-address', 'country': 'RU', 'locality': 'Казань', 'street': 'ул. Примерная, 1'}),
@@ -3812,6 +3840,19 @@ def _selftest_machine(check):
     check('machine не из canonical (номер, сокращённая улица, время, метка реквизита) и не по форме — error у любого '
           'вида факта; совет называет значение из формулировки',
           all(v == ['error'] for v in got.values()) and '"+79000000001"' in tel[0][2], got)
+    turned = [fact('geo', 'Координаты студии: 55.7512, 37.6184.', {'type': 'geo', 'lat': 37.6184, 'lon': 55.7512}),
+              fact('hours', 'Часы работы: ежедневно с 9:00 до 21:00.',
+                   {'type': 'opening-hours', 'hours': [{'days': ['mo'], 'opens': '21:00', 'closes': '09:00'}]}),
+              fact('site', 'Сайт студии: https://primer.example/kontakty.',
+                   {'type': 'url', 'value': 'http://primer.example/kontakty'}),
+              fact('tg', 'Написать студии в Telegram: t.me/primer_studio.',
+                   {'type': 'messenger', 'network': 'whatsapp', 'value': 'https://t.me/primer_studio'})]
+    got = {f['id']: [(x[0], x[1]) for x in machine_issues(f)] for f in turned}
+    check('machine из слов canonical, но не то значение — error: широта и долгота переставлены, открытие и закрытие '
+          'переставлены, схема ссылки не та, что в формулировке, сеть мессенджера не по хосту ссылки',
+          all(len(v) == 1 and v[0][0] == 'error' for v in got.values()) and 'широта, затем долгота' in got['geo'][0][1]
+          and 'раньше открытия' in got['hours'][0][1] and 'https://' in got['site'][0][1]
+          and 'это telegram' in got['tg'][0][1], got)
     hint = {f['id']: machine_issues(f) for f in (
         fact('tel', 'Телефон студии: 8 900 000-00-01.'), fact('tg', 'Пишите в Telegram: @primer_studio.'),
         fact('chan', 'Telegram-канал студии: t.me/primer_news.'),

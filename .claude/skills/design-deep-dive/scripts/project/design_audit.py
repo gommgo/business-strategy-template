@@ -68,9 +68,10 @@ missing[] по id). R-COV-005 «нет карты решений» у сайта
 сверяется только записанная копия, расхождение — warning.
 Ошибки публикуемости фактов из claims_check.py lint-facts (разрешение, срок, проверка) в R-STRUCT-003 не идут: их сверяет
 R-COV-003 там, где факт стоит (план, copy deck). Предупреждение SM-22 site_validate (служебный шаблон без плана) в
-отчёт не идёт: страницу без плана называет R-COV-001 аудита; PL-U01 (план approved без записи approval) — одна находка
-со списком планов. Совет находки называет этап: у site_validate — по коду (SB-* — brief, SM-* — site-map, PL-* —
-page-plan), факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила (свежесть производных при
+отчёт не идёт: страницу без плана называет R-COV-001 аудита; PL-U01 (план approved без записи approval) и PL-F08
+(значения цели-контакта нет у machine фактов) — по одной находке со списком планов. Совет находки называет этап: у
+site_validate — по коду (SB-* — brief, SM-* — site-map, PL-* — page-plan; значение контакта PL-F08 и SM-24 — meaning),
+факты и голос — meaning, copy deck — copy. Правило, которое утилита не проверила (свежесть производных при
 битых токенах; артефакт ДС без токенов DTCG system.tokens.json и system.tokens.css — ds_build не зовётся), — заметка
 сводки, а не находка.
 Окружение не установлено (нет PyYAML или jsonschema в Python окружения) — валидаторы не запускаются, в сводке —
@@ -691,15 +692,20 @@ class Audit:
           (r"^SB-M03$", "R-REF-001"), (r"^SB-P0\d$", "R-COV-003"), (r"^PL-F0\d$", "R-COV-003"),
           (r"^SB-(R0\d|M05)$", "R-REF-005"), (r"^PL-(B0\d|A0\d|E0\d|T0\d|R01)$", "R-REF-005"),
           (r"^PL-(N01|K0\d)$", "R-REF-004"), (r"^PL-C0\d$", "R-STRUCT-004"), (r"^PL-D01$", "R-COV-004"),
-          (r"^PJ-01$", "R-STRUCT-001"), (r"^SM-2[23]$", "R-COV-001"))
+          (r"^PJ-01$", "R-STRUCT-001"), (r"^SM-2[23]$", "R-COV-001"), (r"^SM-24$", "R-COV-003"))
     # (код, уровень) site_validate, который повторяет находку самого аудита: служебный шаблон без плана — та же
     # страница без плана, что называет R-COV-001 аудита; error того же кода (план не связан с шаблоном) остаётся
     SV_TWIN = (("SM-22", "warning"),)
     # код site_validate, который сводится в одну находку со списком планов: (правило, сообщение, (слово сообщения
-    # валидатора, приписка о планах с этим словом))
+    # валидатора, приписка о планах с этим словом), шаг исправления)
     SV_ONE = {"PL-U01": ("R-STRUCT-002", "планы approved без записи утверждения approval {by, date} — кто и когда "
                                          "утвердил",
-                         ("x-approval", "запись лежит расширением x-approval, её место — approval"))}
+                         ("x-approval", "запись лежит расширением x-approval, её место — approval"),
+                         "page-plan — запись approval словом владельца"),
+              "PL-F08": ("R-COV-003", "значения цели-контакта нет у machine фактов: литерал цели телефона, почты и "
+                                      "мессенджера — копия machine факта",
+                         ("target messenger:", "у факта цели messenger:<fact-id> нет machine с адресом ссылки"),
+                         "meaning — machine фактов-контактов: подсказка claims_check.py lint-facts")}
 
     def sv_rule(self, code):
         for rx, rule in self.SV:
@@ -708,8 +714,10 @@ class Audit:
         return "R-STRUCT-002"
 
     # код site_validate → этап, где правится файл: бриф, карта сайта, план страницы; None — по файлу находки (форма
-    # адресов PJ-04 правится в карте или в плане, у лендинга — в планах)
-    SV_STAGE = (("SB-", "brief"), ("PJ-04", None), ("PJ-", "brief"), ("SM-", "site-map"), ("PL-", "page-plan"))
+    # адресов PJ-04 правится в карте или в плане, у лендинга — в планах); значение контакта цели призыва шапки (SM-24)
+    # — machine факта
+    SV_STAGE = (("SB-", "brief"), ("PJ-04", None), ("PJ-", "brief"), ("SM-24", "meaning"), ("SM-", "site-map"),
+                ("PL-", "page-plan"))
 
     def sv_stage(self, code, kind, page):
         stage = next((st for pre, st in self.SV_STAGE if str(code or "").startswith(pre)), None) or \
@@ -754,13 +762,13 @@ class Audit:
                      self.dd(s, self.sv_stage(x.get("code"), kind, p.stem)))
         by_file = {pp.resolve(): pid for pid, (pp, _plan) in self.plans(s).items()}
         for (code, lvl), hits in one.items():
-            rule, what, (word, also) = self.SV_ONE[code]
+            rule, what, (word, also), step = self.SV_ONE[code]
             pids = sorted({by_file.get(f, f.stem) for f, _msg in hits})
             marked = sorted({by_file.get(f, f.stem) for f, msg in hits if word in msg})
             self.add(rule, lvl, s, "page-plan", f"{s}#{code}", d / "plans",
                      f"{code}: {what} — {len(pids)}: {', '.join(pids)}"
                      + (f"; {also} — {', '.join(marked)}" if marked else ""),
-                     self.dd(s, "page-plan — запись approval словом владельца"))
+                     self.dd(s, step))
 
     def proof_refs_ok(self, s):
         """proof.facts_ref брифа и proof_ref смысла ведут в файлы (тогда их неравенство — отдельная находка SB-M03)."""
@@ -3675,6 +3683,22 @@ def _selftest():
         check("PL-U01: планы approved без записи approval — одна строка R-STRUCT-002 warning со списком планов",
               [x[:3] for x in u01] == [("R-STRUCT-002", "warning", "corp#PL-U01")] and " — 15: " in u01[0][3]
               and all(p in u01[0][3] for p in ("about", "home", "not-found", "thanks-request")))
+        # литерал цели телефона в двух планах; факты проекта — по ссылке брифа от его папки (у фикстуры ссылка примера)
+        tel = {plans_dir / p: (plans_dir / p).read_text(encoding="utf-8") for p in ("about.yaml", "contacts.yaml")}
+        bpath = docpaths.site(slug, "corp", "brief", repo=root)
+        btext = bpath.read_text(encoding="utf-8")
+        bpath.write_text(btext.replace("facts_ref: facts.yaml", "facts_ref: ../../facts.yaml"), encoding="utf-8")
+        for p, text in tel.items():
+            p.write_text(text.replace("value: 'tel: номер из facts.yaml'", "value: tel:+70000000001"), encoding="utf-8")
+        lit, a08 = site("site_validate")
+        for p, text in list(tel.items()) + [(bpath, btext)]:
+            p.write_text(text, encoding="utf-8")
+        f08 = [x for x in lit if "PL-F08" in x[3]]
+        check("PL-F08: литерал цели телефона без machine у фактов в двух планах — одна строка R-COV-003 warning со "
+              "списком планов, совет — этап meaning; цель словами — без находки",
+              [x[:3] for x in f08] == [("R-COV-003", "warning", "corp#PL-F08")]
+              and f08[0][3].endswith(" — 2: about, contacts") and not any("PL-F08" in x[3] for x in got)
+              and [f.fix for f in a08.rep.items if "PL-F08" in f.message] == [a08.dd("corp", Audit.SV_ONE["PL-F08"][3])])
         check("сайт с планами до этапа дизайн-системы (арт-дирекция не утверждена, токенов ДС нет): «нет карты "
               "решений» — R-COV-005 hint",
               [x[1] for x in got if x[0] == "R-COV-005" and x[2] == "system"] == ["hint"])
