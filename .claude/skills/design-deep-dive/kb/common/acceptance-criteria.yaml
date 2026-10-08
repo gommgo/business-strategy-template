@@ -584,8 +584,7 @@ criteria:
   source: page.yaml forms[].set.success_must_show
 - id: K5
   for: [site]
-  question: 'Антиспам без видимой капчи — слои lead-forms.yaml (antispam.layers; у формы без JS — antispam.without_js:
-    поле-ловушка, лимит частоты, проверка и фильтр на сервере)'
+  question: 'Антиспам без видимой капчи — слои lead-forms.yaml: antispam.layers, у формы без JS — antispam.without_js'
   severity: S
   method: скрипт
   where: после сборки
@@ -594,8 +593,8 @@ criteria:
   check: code
 - id: K6
   for: [site]
-  question: 'Скрытые поля источника — lead-forms.yaml hidden_fields; у формы без JS — hidden_fields_without_js: form_id,
-    page_url, variant — сборкой в HTML, utm_*, yclid, gclid — сервером из Referer'
+  question: 'Скрытые поля источника — lead-forms.yaml hidden_fields; у формы без JS — hidden_fields_without_js: поля
+    build — сборкой в HTML, поля server — сервером из Referer, полей js_only нет'
   severity: S
   method: скрипт
   where: после сборки
@@ -604,7 +603,8 @@ criteria:
   check: code
 - id: L1
   for: [site]
-  question: События плана — на своих триггерах с именами из events.yaml ({events})
+  question: 'События плана — на своих триггерах с именами из events.yaml ({events}); у страницы без JS — по
+    профилю events.yaml defaults.without_js'
   severity: S
   method: скрипт
   where: после сборки

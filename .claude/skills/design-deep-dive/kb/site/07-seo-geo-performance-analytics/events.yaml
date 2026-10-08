@@ -10,9 +10,9 @@ defaults:
   systems: [yandex-metrica]            # Метрика по умолчанию, GA4 — по запросу
   consent: "счётчики и пиксели — после согласия (SG-LEGAL-01; позиция I по умолчанию для РФ [спорно]); до согласия — только события без cookie и ПД в свой RUM или ничего"
   without_js:                          # сайт без своего JS на клиенте: форма — PRG (POST → 303 → «спасибо»), счётчик — скрипт после согласия
-    form_success: thank-you-visit      # успех формы (lead-forms.yaml#defaults.events.success) — цель «посещение» адреса «спасибо»: 303 туда сервер отдаёт только принятой заявке, визит = успех сервера
-    counter_goals: [phone-click, messenger-click, lead-magnet-download]   # автоцели счётчика (клик по телефону, мессенджеры, скачивание файлов) — без кода сайта
-    other: island-or-none              # прочие события шлёт только JS сайта: остров по решению плана или события нет
+    form_success: thank-you-view       # успех формы без JS — событие thank-you-view: цель «посещение» адреса «спасибо» (303 туда сервер отдаёт только принятой заявке, визит = успех сервера); так у формы любого набора — с успехом lead-forms.yaml#defaults.events.success и с событием своего действия (booking-complete, quote-submit)
+    counter_goals: [phone-click, messenger-click, lead-magnet-download]   # автоцели счётчика (клик по телефону, мессенджеры, скачивание файлов) — без кода сайта; у события автоцель названа в metrica.type
+    other: island-or-none              # прочие события плана шлёт только JS сайта — остров: событие на своём триггере; без острова события нет, и пункт приёмки L1 по нему не пройден (S: остров или запись заказчика)
 naming:
   id: "kebab-case латиницей, глагол в конце: lead-submit, form-start (ссылка в page-plan — event:<id>)"
   ga4: "snake_case ≤ 40 символов; рекомендованное имя Google, если есть (generate_lead, sign_up, purchase, qualify_lead …)"
@@ -78,7 +78,7 @@ events:
   - {id: contact-copy, kind: diagnostic, trigger: copy, when: "скопирован телефон или адрес", ga4: {event: contact_copy, params: [contact_type]}, metrica: {goal: contact_copy, type: js-event}}
   - {id: section-view, kind: diagnostic, trigger: view, when: "ключевая секция (доказательства, тарифы, форма) ≥ 50 % в экране ≥ 1 с; не больше 5 секций", ga4: {event: section_view, params: [section_role, block]}, metrica: {goal: section_view, type: js-event}}
   - {id: scroll-depth, kind: diagnostic, trigger: scroll-depth, when: "25/50/75/90 % высоты", ga4: {event: scroll_depth, params: [percent]}, metrica: {goal: scroll_depth, type: "карта скроллинга Метрики заменяет"}, note: "D: не главная метрика (Кохави: «время и глубина» — плохой OEC)"}
-  - {id: thank-you-view, kind: milestone, trigger: view, when: "показ страницы «спасибо» после действия", ga4: {event: page_view}, metrica: {goal: thank_you_view, type: "цель по URL — страховка"}}
+  - {id: thank-you-view, kind: milestone, trigger: view, when: "показ страницы «спасибо» после действия", ga4: {event: page_view}, metrica: {goal: thank_you_view, type: "цель по URL: у формы с JS — страховка, у формы без JS — основная цель (defaults.without_js.form_success)"}}
   # ------------------------------------------------------------ качество лида (CRM → аналитика; офлайн-конверсии)
   - {id: lead-working, kind: lifecycle, source: crm, when: "с лидом связались", ga4: {event: working_lead}, metrica: {goal: lead_working, type: "офлайн-конверсия (ClientID)"}}
   - {id: lead-qualified, kind: lifecycle, source: crm, when: "лид соответствует критериям (квалифицирован)", ga4: {event: qualify_lead, key_event: true}, metrica: {goal: lead_qualified, type: "офлайн-конверсия"}, note: "главная метрика качества для OEC лидогенерации"}

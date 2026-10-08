@@ -33,7 +33,8 @@
          виджеты фасадом; PL-X01 x-gate-exception: id ворот страницы (page-gates.yaml) или ворот эффектов
          (effect-gates.yaml); PL-U01 план approved без записи утверждения approval — warning;
          PL-D01 3D: постер, призыв до 3D; PL-D02 recipe: — рецепт blender 12-recipes есть; PL-D03 загрузка 3D по месту
-         секции (ниже первого экрана — on-interaction); PL-T01…T02 формы lead-forms.yaml; PL-SEO01 разметка по head-kit:
+         секции (ниже первого экрана — on-interaction); PL-T01…T02 формы lead-forms.yaml (PL-T02 — у формы без JS,
+         то есть без success: inline, есть адрес «спасибо» thank_you_page); PL-SEO01 разметка по head-kit:
          типы страницы и подтипы её structured_data_subtypes.
   map    (site-map)    SM-S01 схема; SM-01…SM-18 перекрёстные ссылки карты; SM-19 входящие ссылки (граф); SM-20 крошки по
          глубине; SM-21 уровень шаблона ≤ сайта; SM-22 планы шаблонов; SM-23 «спасибо» у страниц с формой.
@@ -44,9 +45,11 @@
          SM-24 — у факта этой цели есть machine с адресом ссылки (warning, как PL-F08).
   blocks (blocks.yaml)       BL-* — каталог блоков; BL-14 — информационные картинки без парного элемента image-alt
                              (warning одной строкой каталога).
-  forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля; LF-07 — перечни формы без JS
-                             (antispam.without_js, hidden_fields_without_js, автоцели events.yaml#defaults.without_js)
-                             — подмножества полных перечней.
+  forms  (lead-forms.yaml)   LF-01…LF-06 — наборы, действия, блоки, события, поля; LF-07 — профиль формы без JS
+                             держится на полных перечнях: слои antispam.without_js — из layers; каждое поле
+                             hidden_fields — ровно в одном перечне hidden_fields_without_js (build · server ·
+                             js_only); success.without_js — не inline; цель формы и автоцели
+                             events.yaml#defaults.without_js — id событий, у автоцели она названа в metrica.type.
   project DIR                бриф + facts + site-map + plans/*.yaml одной папки со всеми связями (PJ-*); страница брифа
                              без плана и без строки карты — PJ-03: error, у служебной (thank-you-page, legal-page,
                              not-found-page) — warning. PJ-04 — адреса страниц (warning): хвостовой слеш адресов карты
@@ -677,18 +680,36 @@ def check_blocks(ctx, path=P['blocks']):
     return B
 
 
+HIDDEN_BY = ('build', 'server', 'js_only')               # кто ставит скрытое поле формы без JS: hidden_fields_without_js
+
+
 def without_js_gaps(defaults, events_doc):
-    """Перечни формы без JS — подмножества полных (LF-07): слои антиспама, скрытые поля, автоцели счётчика среди событий
-    events.yaml → [(что, [лишнее])]."""
+    """Профиль формы без JS держится на полных перечнях (LF-07) → [(что, [не так])]: слои антиспама — из layers;
+    скрытые поля — каждое поле hidden_fields ровно в одном перечне build · server · js_only; успех without_js — не
+    inline (адреса успеха у него нет); цель формы form_success и автоцели counter_goals — id событий events.yaml, у
+    автоцели она названа в metrica.type события."""
     asp = defaults.get('antispam') or {}
     hid = defaults.get('hidden_fields_without_js') or {}
-    out = [('antispam.without_js', [x for x in asp.get('without_js') or [] if x not in (asp.get('layers') or [])])]
+    out = [('antispam.without_js — слоя нет в layers',
+            [x for x in asp.get('without_js') or [] if x not in (asp.get('layers') or [])])]
     full = defaults.get('hidden_fields') or []
-    out += [(f'hidden_fields_without_js.{k}', [x for x in hid.get(k) or [] if x not in full]) for k in ('build', 'server')]
+    out += [(f'hidden_fields_without_js.{k} — поля нет в hidden_fields', [x for x in hid.get(k) or [] if x not in full])
+            for k in HIDDEN_BY]
+    placed = Counter(x for k in HIDDEN_BY for x in hid.get(k) or [])
+    out.append(('hidden_fields_without_js — поле в двух перечнях', sorted(x for x, n in placed.items() if n > 1)))
+    out.append((f"hidden_fields_without_js — поля hidden_fields нет ни в одном перечне ({', '.join(HIDDEN_BY)})",
+                [x for x in full if x not in placed]))
+    out.append(('success.without_js — без JS адреса успеха нет',
+                [x for x in [(defaults.get('success') or {}).get('without_js')] if x == 'inline']))
     ev = events_doc or {}
-    ids = {e.get('id') for e in ev.get('events') or [] if isinstance(e, dict)}
-    goals = ((ev.get('defaults') or {}).get('without_js') or {}).get('counter_goals') or []
-    out.append(('events.yaml defaults.without_js.counter_goals', [x for x in goals if x not in ids]))
+    events = {e.get('id'): e for e in ev.get('events') or [] if isinstance(e, dict)}
+    wj = (ev.get('defaults') or {}).get('without_js') or {}
+    goals = wj.get('counter_goals') or []
+    out.append(('events.yaml defaults.without_js.form_success — не id события',
+                [str(x) for x in [wj.get('form_success')] if x not in events]))
+    out.append(('events.yaml defaults.without_js.counter_goals — не id события', [x for x in goals if x not in events]))
+    out.append(('events.yaml defaults.without_js.counter_goals — у события нет автоцели в metrica.type',
+                [x for x in goals if x in events and 'автоцел' not in str((events[x].get('metrica') or {}).get('type'))]))
     return [(w, b) for w, b in out if b]
 
 
@@ -718,7 +739,7 @@ def check_forms(ctx, path=P['forms']):
         if not str(e).startswith('event:') or str(e)[6:] not in ctx.events:
             R.add('error', 'LF-04', w, f'defaults.events.{k}: {e} — не id events.yaml (event:<id>)')
     for what, bad in without_js_gaps(d.get('defaults') or {}, ctx.events_doc):
-        R.add('error', 'LF-07', w, f'{what}: {", ".join(bad)} — нет в полном перечне')
+        R.add('error', 'LF-07', w, f'{what}: {", ".join(bad)}')
     for pt, pl in (d.get('placement_defaults') or {}).items():
         if not ctx.vok('page_type', pt):
             R.add('error', 'LF-06', w, f'placement_defaults: page_type {pt} нет в словаре')
@@ -1232,8 +1253,12 @@ def check_form_slot(ctx, where, sl, fm, pg):
     jur = pg.get('jurisdiction') or []
     if 'ru' in jur and fm.get('consent') in ('link-only', 'none') and form_collects_pd(ctx, fm):
         R.add('error', 'PL-G01', where, f"согласие {fm.get('consent')} при сборе ПД в ru — нужна отдельная неотмеченная галочка (req:LR-RU-01, 02)")
+    # профиль формы решает план: success: inline — остров формы; иначе форма без JS — 303 на адрес thank_you_page
     if fm.get('success') == 'thank-you-page' and not fm.get('thank_you_page'):
         R.add('warning', 'PL-T02', where, 'success: thank-you-page без thank_you_page')
+    elif not fm.get('success') and not fm.get('thank_you_page'):
+        R.add('warning', 'PL-T02', where, 'форма без success и без thank_you_page: без JS успех формы — 303 на адрес '
+                                          '«спасибо» плана (lead-forms.yaml#defaults.success); остров формы — success: inline')
 
 
 # ─────────────────────────────────────────── карта сайта ───────────────────────────────────────────
@@ -1788,6 +1813,8 @@ def selftest(ctx):
         ('N8 уровень страницы выше сайта', 'PL-P03', plan_name, lambda p: (p['page'].__setitem__('ambition_level', 'L2'), p['page'].__setitem__('budget_profile', p['page']['page_type'] + '@L2'))),
         ('N9 профиль бюджета не по формату', 'PL-P01', plan_name, lambda p: p['page'].__setitem__('budget_profile', 'lead-L1')),
         ('N10 набор формы не существует', 'PL-T01', plan_name, lambda p: [a['form'].__setitem__('ref', 'lead-forms.yaml#mega-quiz') for s in p['sections'] for a in s['slots'].get('action') or [] if a.get('form')]),
+        ('N88 форма без success и без адреса «спасибо»', ('warning', 'PL-T02'), plan_name, lambda p: [(a['form'].pop('success', None), a['form'].pop('thank_you_page', None)) for s in p['sections'] for a in s['slots'].get('action') or [] if (a.get('form') or {}).get('success') == 'thank-you-page']),
+        ('N89 форма-остров: success inline без адреса «спасибо»', ('none', 'PL-T02'), plan_name, lambda p: [(a['form'].__setitem__('success', 'inline'), a['form'].pop('thank_you_page', None)) for s in p['sections'] for a in s['slots'].get('action') or [] if (a.get('form') or {}).get('success') == 'thank-you-page']),
         ('N11 x-gate-exception без ворот', 'PL-X01', plan_name, lambda p: p['page'].__setitem__('x-gate-exception', [{'id': 'SG-PERF-99', 'why': 'проверка самопроверки', 'who': 'самопроверка'}])),
         ('N12 бриф: прелоадер вне L2', ('warning', 'SB-D02'), 'site-brief.yaml', lambda b: (b['policies'].__setitem__('preloader', 'on'), b['policies'].__setitem__('rationale', 'самопроверка'))),
         ('N13 бриф: заявки за рубежом при ru', 'SB-L01', 'site-brief.yaml', lambda b: b['constraints'].setdefault('legal_intake', {}).__setitem__('leads_storage', 'abroad')),
@@ -2016,20 +2043,31 @@ def selftest(ctx):
     shutil.rmtree(tmp.parent, ignore_errors=True)
     print(f"N75 каталог: информационная картинка без элемента alt — warning BL-14, с элементом — нет: {'OK' if good else 'FAIL'}")
     ok &= good
-    # перечни формы без JS — подмножества полных: лишний слой, поле или автоцель — LF-07
+    # профиль формы без JS держится на полных перечнях: лишний слой, поле или автоцель, поле в двух перечнях или вне
+    # их, успех inline, цель формы не из событий, автоцель без автоцели счётчика — LF-07
     forms = load_yaml(P['forms'])
     clean = without_js_gaps(forms['defaults'], ctx.events_doc)
     df = copy.deepcopy(forms['defaults'])
     df['antispam']['without_js'] = df['antispam']['without_js'] + ['captcha-x']
-    df['hidden_fields_without_js']['server'] = df['hidden_fields_without_js']['server'] + ['landing_ref']
+    hid = df['hidden_fields_without_js']
+    hid['server'] = hid['server'] + ['landing_ref', 'ym_client_id']       # ym_client_id — уже в js_only
+    hid['build'] = [x for x in hid['build'] if x != 'variant']
+    df['success']['without_js'] = 'inline'
     ev = copy.deepcopy(ctx.events_doc)
-    ev['defaults']['without_js']['counter_goals'] = ev['defaults']['without_js']['counter_goals'] + ['call-done']
-    got = dict(without_js_gaps(df, ev))
-    good = clean == [] and got == {'antispam.without_js': ['captcha-x'],
-                                   'hidden_fields_without_js.server': ['landing_ref'],
-                                   'events.yaml defaults.without_js.counter_goals': ['call-done']}
-    print("N85 перечни формы без JS: каталог базы — подмножества; лишний слой, поле, автоцель — LF-07: "
-          f"{'OK' if good else 'FAIL'}")
+    wj = ev['defaults']['without_js']
+    wj.update(counter_goals=wj['counter_goals'] + ['call-done', 'cta-click'], form_success='thank-you-vist')
+    got = {k.partition(' — ')[::2]: v for k, v in without_js_gaps(df, ev)}
+    good = clean == [] and got == {
+        ('antispam.without_js', 'слоя нет в layers'): ['captcha-x'],
+        ('hidden_fields_without_js.server', 'поля нет в hidden_fields'): ['landing_ref'],
+        ('hidden_fields_without_js', 'поле в двух перечнях'): ['ym_client_id'],
+        ('hidden_fields_without_js', 'поля hidden_fields нет ни в одном перечне (build, server, js_only)'): ['variant'],
+        ('success.without_js', 'без JS адреса успеха нет'): ['inline'],
+        ('events.yaml defaults.without_js.form_success', 'не id события'): ['thank-you-vist'],
+        ('events.yaml defaults.without_js.counter_goals', 'не id события'): ['call-done'],
+        ('events.yaml defaults.without_js.counter_goals', 'у события нет автоцели в metrica.type'): ['cta-click']}
+    print("N85 профиль формы без JS: каталог базы чист; лишний слой, поле и автоцель, поле в двух перечнях и вне "
+          f"перечней, успех inline, цель формы не из событий, событие без автоцели — LF-07: {'OK' if good else 'FAIL ' + str(got)}")
     ok &= good
     # цель-контакт: литерал цели tel и мессенджера — копия machine факта, у факта цели messenger:<fact-id> — machine с
     # адресом ссылки (PL-F08 у плана, SM-24 у призыва шапки карты); цель словами — не литерал, её не сверяют

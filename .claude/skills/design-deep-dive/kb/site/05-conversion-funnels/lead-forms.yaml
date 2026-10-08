@@ -51,7 +51,8 @@ defaults:
     without_js: [honeypot, rate-limit, server-validation, content-filter]   # форма без JS на клиенте: слои, которые
                                             # исполняет сервер (поле-ловушка скрыто CSS); time-trap — с JS или на
                                             # странице, которую сервер отдаёт по запросу (время выдачи — подписанным
-                                            # скрытым полем): у страницы из сборки времени выдачи нет
+                                            # скрытым полем): у страницы из сборки времени выдачи нет; правила
+                                            # content-filter — по объёму спама, настройка сайта (01 §8)
     honeypot: {field: company-website, hidden: "css + aria-hidden + tabindex=-1 + autocomplete=off", reject_if_filled: true}
     time_trap_seconds: 3                    # отправка раньше 3 с после загрузки — подозрение; 7 с — перебор ([V:qktwIWZNFY4 1:09:01])
     rate_limit: {per_ip_per_hour: 5, per_phone_per_day: 3, on_exceed: soft-block-and-log}   # ориентир [практика], настраивать по логам
@@ -70,17 +71,23 @@ defaults:
     - page_url                              # страница с формой
     - form_id                               # id набора из этого файла + id секции page-plan
     - variant                               # вариант A/B или подстановки hero
-  hidden_fields_without_js:                 # форма без JS на клиенте: значения, которые ставят без кода в браузере;
-                                            # landing_url и ym_client_id — только с JS (первая страница визита,
-                                            # client id Метрики)
-    build: [form_id, page_url, variant]     # пишет сборка в HTML страницы: известны при сборке
+  hidden_fields_without_js:                 # форма без JS на клиенте: кто ставит значение без кода в браузере; каждое
+                                            # поле hidden_fields — ровно в одном перечне
+    build: [form_id, page_url, variant]     # пишет сборка в HTML страницы: известны при сборке; variant — у страницы с
+                                            # вариантами первого экрана или экспериментом, без них поля нет
     server: [utm_source, utm_medium, utm_campaign, utm_content, utm_term, yclid, gclid]   # сервер при приёме — из
                                             # query заголовка Referer (страница с формой, тот же сайт: Referrer-Policy
                                             # сайта отдаёт своим запросам полный адрес)
+    js_only: [ym_client_id, landing_url]    # только с JS: client id Метрики и первая страница визита — у формы без JS
+                                            # этих полей нет
   success:
-    default: thank-you-page                 # отдельная страница; inline — на месте формы (по плану)
+    default: thank-you-page                 # отдельная страница; inline — на месте формы (по плану). Профиль формы
+                                            # решает план: form.success: inline — остров формы, успех на месте, только
+                                            # с JS; иначе форма без JS с успехом without_js. success.default набора —
+                                            # умолчание для плана, код читает form.success плана
     without_js: thank-you-page              # форма без JS — PRG: сервер отвечает 303 на «спасибо» только принятой
-                                            # заявке; inline без JS адреса успеха не даёт — только с JS
+                                            # заявке, адрес — form.thank_you_page плана; inline без JS адреса успеха
+                                            # не даёт — только с JS
     must_show: [status-first, what-happens-next, who-and-when, response-time-fact, channels, one-next-action, save-record]
     why: "GOV.UK Confirmation pages; 01 §10"
   events:                                   # id словаря событий (07-seo-geo-performance-analytics/events.yaml); конверсия — только подтверждённый сервером успех
