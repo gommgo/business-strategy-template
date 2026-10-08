@@ -423,7 +423,7 @@ $defs:
       - type: object
         additionalProperties: false
         required: [type, country, locality, street]
-        description: "Части адреса — слова canonical; разметка — PostalAddress."
+        description: "Части адреса: улица и индекс — как в canonical, город и регион — названием (в canonical — те же слова в любом падеже); разметка — PostalAddress."
         properties:
           type: {const: postal-address}
           country: {type: string, pattern: "^[A-Z]{2}$", description: "ISO 3166-1 alpha-2: RU, KZ, DE."}

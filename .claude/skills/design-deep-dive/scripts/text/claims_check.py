@@ -2812,15 +2812,24 @@ def cmd_inventory(a):
 # ================================================================ машинное значение факта (machine)
 # Форма — facts.schema.yaml $defs/machine; сверка с canonical и подсказка — lint-facts (03-proof-and-facts.md §4.2).
 MACHINE_TYPES = ('telephone', 'email', 'url', 'messenger', 'postal-address', 'opening-hours', 'legal-id', 'geo')
-_M_EMAIL = re.compile(r'[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)+')
-_M_URL = re.compile(r'(?<![@\w.])(?:https?://)?(?:www\.)?(?:[a-z0-9-]+\.)+[a-z]{2,}(?:/[^\s,;«»"()]*)?', re.I)
+# хост латиницей (зона — буквами или punycode) или в зоне .рф с кириллицей в метках: прочее слово с точкой
+# («ул.Примерная») — не адрес
+_M_HOST = r'(?:(?:[a-z0-9-]+\.)+(?:xn--[a-z0-9-]+|[a-z]{2,})|(?:[a-zа-яё0-9-]+\.)+рф(?![\w-]))'
+_M_EMAIL = re.compile(r'[a-z0-9._%+-]+@' + _M_HOST, re.I)
+_M_URL = re.compile(r'(?<![@\w.])(?:https?://)?(?:www\.)?' + _M_HOST + r'(?:/[^\s,;«»"()]*)?', re.I)
 _M_HANDLE = re.compile(r'(?<![\w@])@([A-Za-z0-9_]{3,32})\b')
 _M_LEGAL = re.compile(r'\b(ОГРНИП|ОГРН|ИНН|КПП)\s*:?\s*(\d{9,15})\b', re.I)
-_M_PHONE = re.compile(r'(?<![\w+])(\+?\d[\d\s()‐‑–-]{8,}\d)(?!\w)')
+# разделители номера: пробел, скобки, дефис и тире любой длины, минус; точка — только между цифрами («+7.900.000.00.01»,
+# а не конец фразы перед числом)
+_M_PHONE = re.compile(r'(?<![\w+])(\+?\d(?:[\d\s()‐‑‒–—―−-]|(?<=\d)\.(?=\d)){8,}\d)(?!\w)')
 _M_TIME = re.compile(r'(?<![\d:.])([01]?\d|2[0-4])[:.]([0-5]\d)(?!\d|[.,]\d)')
+# часы без минут — только в обороте «с 9 до 21»; с единицей счёта после него это срок, сумма или доля, а не время
+_M_HOUR = r'([01]?\d|2[0-4])(?:[:.]([0-5]\d))?'
+_M_SPAN = re.compile(r'(?<!\w)с\s+' + _M_HOUR + r'\s+до\s+' + _M_HOUR + r'(?!\d|[:.]\d|\s*(?:%|₽|руб|тыс|млн|процент|'
+                     r'дн|сут|недел|мес|лет|год|мин|сек|раз|шт|чел|мест|этаж|кг|км|м\b|м²|рабочих|календарных))', re.I)
 _M_NUM = re.compile(r'-?\d+(?:[.,]\d+)?')
 _M_ADDRESS = re.compile(r'адрес|address', re.I)
-_M_HOURS = re.compile(r'час\w* работы|режим работы|ежедневно|без выходных|opening hours', re.I)
+_M_HOURS = re.compile(r'час\w* работы|режим работы|работаем|открыт|ежедневно|без выходных|opening hours', re.I)
 _M_PHONE_CC = {'ru': '7'}                     # код страны десятизначного номера без «+» по праву фактов
 _M_LEGAL_SCHEME = {'ИНН': 'inn', 'ОГРН': 'ogrn', 'ОГРНИП': 'ogrnip', 'КПП': 'kpp'}
 # хост ссылки, по которой пишут, → сеть мессенджера (формы ссылок — site 05/01 §6.3): подсказка и сверка network
@@ -2829,45 +2838,92 @@ _M_NETWORK_HOSTS = {'t.me': 'telegram', 'wa.me': 'whatsapp', 'max.ru': 'max', 'v
 
 def e164(raw, jurisdiction='ru'):
     """Телефон формулировки → E.164 или None: «+» и 7–15 цифр; 8 или 7 и ещё 10 цифр — +7; десять цифр — с кодом
-    страны права фактов (ru — 7)."""
-    d = re.sub(r'\D', '', raw or '')
-    if (raw or '').strip().startswith('+'):
+    страны права фактов (ru — 7). Запись с точками без «+» — номер, только когда за 8 или 7 стоит код из трёх цифр
+    («8.800.555.35.35»): иначе это дата, время или пара чисел."""
+    s = (raw or '').strip()
+    d = re.sub(r'\D', '', s)
+    if s.startswith('+'):
         return '+' + d if 7 <= len(d) <= 15 and d[0] != '0' else None
+    if '.' in s and not re.match(r'[78]\D{0,2}\d{3}\D', s):
+        return None
     if len(d) == 11 and d[0] in '78':
         return '+7' + d[1:]
     cc = _M_PHONE_CC.get(jurisdiction)
     return f'+{cc}{d}' if cc and len(d) == 10 and d[0] != '0' else None
 
 
+def _host(h):
+    """Хост в одной форме: строчными, метки punycode — буквами («xn--e1afmkfd.xn--p1ai» — «пример.рф»)."""
+    h = (h or '').lower()
+    if 'xn--' in h:
+        try:
+            return h.encode('ascii').decode('idna')
+        except UnicodeError:
+            pass
+    return h
+
+
 def _url_key(u):
-    """Адрес без схемы, www и хвостового слеша; хост — строчными."""
+    """Адрес без схемы, www и хвостового слеша; хост — в одной форме (_host)."""
     u = re.sub(r'^(?:https?://)?(?:www\.)?', '', (u or '').strip(), flags=re.I)
     host, _, path = u.partition('/')
     path = path.rstrip('/')
-    return host.lower() + (f'/{path}' if path else '')
+    return _host(host) + (f'/{path}' if path else '')
+
+
+def _email_key(e):
+    """Почта для сравнения: имя строчными, хост — в одной форме (_host)."""
+    name, _, host = str(e or '').rpartition('@')
+    return f'{name.lower()}@{_host(host)}'
 
 
 def _m_norm(s):
     return re.sub(r'\s+', ' ', str(s or '').replace(' ', ' ').lower().replace('ё', 'е')).strip()
 
 
+def _m_inflected(value, text):
+    """Название value стоит в формулировке, может быть, в другом падеже: у каждого его слова есть слово text с тем же
+    началом — всё, кроме окончания до двух букв; слово короче трёх букв — буква в букву. Дефис делит слово."""
+    def words(s):
+        return re.findall(r'[^\W_]+', _m_norm(s))
+
+    def same(a, b):
+        short = min(len(a), len(b))
+        return a == b or short >= 3 and len(os.path.commonprefix([a, b])) >= max(2, short - 2)
+    have = words(text)
+    return all(any(same(w, x) for x in have) for w in words(value))
+
+
+def _m_times(text):
+    """Времена формулировки ЧЧ:ММ в её порядке: запись с минутами («9:00», «21.30») и часы без минут в обороте «с 9
+    до 21» (_M_SPAN)."""
+    hits = {m.start(): f'{int(m.group(1)):02d}:{m.group(2)}' for m in _M_TIME.finditer(text)}
+    for m in _M_SPAN.finditer(text):
+        hits.update({m.start(g): f'{int(m.group(g)):02d}:00' for g in (1, 3) if m.group(g + 1) is None})
+    return [v for _pos, v in sorted(hits.items())]
+
+
 def machine_contacts(text, jurisdiction='ru'):
     """Контакты формулировки — кандидаты значений machine: {email, url (ключ без схемы), scheme {ключ ссылки: схема,
-    названная в формулировке}, handle, legal [(схема, значение)], phone (E.164), time (ЧЧ:ММ), num} — списки в порядке
-    формулировки. Виды ищутся по порядку, найденное одним видом следующие не видят: домен почты — не ссылка, номер в
-    ссылке и реквизит — не телефон."""
+    названная в формулировке}, handle, legal [(схема, значение)], phone (E.164), time (ЧЧ:ММ, _m_times), num} — списки
+    в порядке формулировки. Виды ищутся по порядку, найденное одним видом следующие не видят: домен почты — не ссылка,
+    номер в ссылке и реквизит — не телефон; запись, которая видом не стала (цифры с точками и тире — не номер),
+    остаётся следующим: «09.00–21.00» — времена."""
     t, out = text or '', {k: [] for k in ('email', 'url', 'handle', 'legal', 'phone', 'time')}
     for key, rx, conv in (('email', _M_EMAIL, lambda m: m.group(0)),
                           ('url', _M_URL, lambda m: _url_key(m.group(0).rstrip('.!?:;'))),
                           ('handle', _M_HANDLE, lambda m: m.group(1)),
                           ('legal', _M_LEGAL, lambda m: (_M_LEGAL_SCHEME[m.group(1).upper()], m.group(2))),
-                          ('phone', _M_PHONE, lambda m: e164(m.group(1), jurisdiction)),
-                          ('time', _M_TIME, lambda m: f'{int(m.group(1)):02d}:{m.group(2)}')):
-        found = [(m.group(0), conv(m)) for m in rx.finditer(t)]
-        out[key] = [v for _raw, v in found if v]
+                          ('phone', _M_PHONE, lambda m: e164(m.group(1), jurisdiction))):
+        found = [(m, conv(m)) for m in rx.finditer(t)]
+        out[key] = [v for _m, v in found if v]
         if key == 'url':
-            out['scheme'] = {v: s.group(1).lower() for raw, v in found for s in [re.match(r'(https?)://', raw, re.I)] if s}
-        t = rx.sub(lambda m: ' ' * len(m.group(0)), t)
+            out['scheme'] = {v: s.group(1).lower() for m, v in found
+                             for s in [re.match(r'(https?)://', m.group(0), re.I)] if s}
+        for m, v in found:
+            if v:
+                t = t[:m.start()] + ' ' * (m.end() - m.start()) + t[m.end():]
+    out['time'] = _m_times(t)
     out['num'] = [float(x.replace(',', '.')) for x in _M_NUM.findall(text or '')]
     return out
 
@@ -2875,16 +2931,18 @@ def machine_contacts(text, jurisdiction='ru'):
 def machine_check(m, text, jurisdiction='ru'):
     """Сверка machine с формулировкой canonical: None — значение есть в формулировке, иначе — чего нет. Сверяются
     значения: номер, почта, адрес ссылки (ник у мессенджера; схема — когда формулировка её называет; сеть мессенджера —
-    по хосту ссылки, _M_NETWORK_HOSTS), части адреса словами (страны в формулировке нет — её сверяет человек), времена
-    часов работы (интервал через полночь — в порядке формулировки; дни — словами, их сверяет человек), реквизит со
-    своей меткой, координаты в порядке формулировки: широта, затем долгота."""
+    по хосту ссылки, _M_NETWORK_HOSTS; хост — в одной форме, буквами или punycode), части адреса (улица и индекс —
+    как в формулировке, город и регион — теми же словами в любом падеже, _m_inflected; страны в формулировке нет — её
+    сверяет человек), времена часов работы (интервал через полночь — в порядке формулировки; дни — словами, их сверяет
+    человек), реквизит со своей меткой, координаты в порядке формулировки: широта, затем долгота. Чего машина сверить
+    не может, то находки не даёт: у часов работы без времён цифрами в формулировке («круглосуточно») сверять нечем."""
     if not isinstance(m, dict) or m.get('type') not in MACHINE_TYPES:
         return f"не по форме (type — {', '.join(MACHINE_TYPES)})"
     c, t = machine_contacts(text, jurisdiction), m['type']
     if t == 'telephone':
         return None if m.get('value') in c['phone'] else f"номера {m.get('value')} в canonical нет"
     if t == 'email':
-        return None if str(m.get('value') or '').lower() in {e.lower() for e in c['email']} else \
+        return None if _email_key(m.get('value')) in {_email_key(e) for e in c['email']} else \
             f"почты {m.get('value')} в canonical нет"
     if t in ('url', 'messenger'):
         raw = str(m.get('value') or '')
@@ -2902,11 +2960,15 @@ def machine_check(m, text, jurisdiction='ru'):
         return None
     if t == 'postal-address':
         miss = [k for k in ('street', 'locality', 'region', 'postal_code')
-                if m.get(k) and _m_norm(m[k]) not in _m_norm(text)]
-        return f"частей адреса {', '.join(miss)} нет в canonical (слова — как в формулировке)" if miss else None
+                if m.get(k) and _m_norm(m[k]) not in _m_norm(text)
+                and (k in ('street', 'postal_code') or not _m_inflected(m[k], text))]
+        return (f"частей адреса {', '.join(miss)} нет в canonical (улица и индекс — как в формулировке, город и регион "
+                "— теми же словами в любом падеже)") if miss else None
     if t == 'opening-hours':
         spans = [(h.get('opens'), h.get('closes')) for h in m.get('hours') or [] if isinstance(h, dict)]
         want, have = {x for s in spans for x in s if x}, c['time']
+        if want and not have:
+            return None                                   # времени цифрами в формулировке нет — сверяет человек
         if not want or want != set(have):
             return (f"времена часов работы {', '.join(sorted(want)) or '—'} не равны canonical "
                     f"({', '.join(sorted(set(have))) or '—'})")
@@ -2927,18 +2989,23 @@ def machine_check(m, text, jurisdiction='ru'):
 
 
 def _address_hint(text, jurisdiction):
-    """Адрес по формулировке «…адрес…: город, улица, дом» → части; чего не вывести — «…»."""
+    """Адрес по формулировке «…адрес…: город, улица, дом» → части; чего не вывести — «…»: город с предлогом («в
+    Москве») стоит в падеже — его название пишет человек."""
     tail = re.search(r'(?:адрес|address)[^:]*:\s*(.+)', text or '', re.I)
     tail = tail.group(1).strip().rstrip('.') if tail else ''
     loc, _, street = tail.partition(', ')
     if not street or re.search(r'\d', loc):
         loc, street = '…', tail or '…'
+    elif re.match(r'(?:в|во|на)\s', loc, re.I):
+        loc = '…'
     return {'type': 'postal-address', 'country': {'ru': 'RU'}.get(jurisdiction, '…'), 'locality': loc, 'street': street}
 
 
 def machine_hint(text, jurisdiction='ru'):
     """Готовые значения machine по формулировке canonical (подсказка lint-facts): [значение]; части, которых из
-    формулировки не вывести (дни часов работы, части адреса не по образцу «город, улица»), — «…»."""
+    формулировки не вывести (дни часов работы, части адреса не по образцу «город, улица», город в падеже), — «…».
+    Часы работы — только когда в формулировке найдены оба времени: значение с «…» на месте времени сверку не прошло
+    бы; часы без минут («с 9 до 21») — когда формулировка говорит о работе (_M_HOURS), а не о числе от и до."""
     c, low, out = machine_contacts(text, jurisdiction), (text or '').lower(), []
     out += [{'type': 'legal-id', 'scheme': s, 'value': v} for s, v in c['legal']]
     out += [{'type': 'email', 'value': e} for e in c['email']]
@@ -2952,9 +3019,8 @@ def machine_hint(text, jurisdiction='ru'):
         out += [{'type': 'messenger', 'network': 'telegram', 'value': f'https://t.me/{h}'} for h in c['handle']]
     out += [{'type': 'telephone', 'value': p} for p in c['phone']]
     times = list(dict.fromkeys(c['time']))
-    if len(times) >= 2 or _M_HOURS.search(text or ''):
-        out.append({'type': 'opening-hours', 'hours': [{'days': ['…'], 'opens': times[0] if times else '…',
-                                                        'closes': times[1] if len(times) > 1 else '…'}]})
+    if len(times) >= 2 and (_M_TIME.search(text or '') or _M_HOURS.search(text or '')):
+        out.append({'type': 'opening-hours', 'hours': [{'days': ['…'], 'opens': times[0], 'closes': times[1]}]})
     if _M_ADDRESS.search(text or ''):
         out.append(_address_hint(text, jurisdiction))
     return out
@@ -3867,6 +3933,64 @@ def _selftest_machine(check):
           and '{type: url, value: "https://t.me/primer_news"}' in hint['chan'][0][1]
           and 'country: "RU", locality: "Казань", street: "улица Примерная, 1"' in hint['addr'][0][1]
           and 'email, telephone' in hint['two'][0][1] and not hint['since'] and not hint['metric'], hint)
+    # законные формы записи значения в формулировке — без error: сверка держит готовность единицы (ready.py)
+    msk = {'type': 'postal-address', 'country': 'RU', 'locality': 'Москва', 'street': 'ул. Примерная, 1'}
+    day = {'type': 'opening-hours', 'hours': [{'days': week, 'opens': '09:00', 'closes': '21:00'}]}
+    tel = {'type': 'telephone', 'value': '+79000000001'}
+    legit = [fact('dots', 'Телефон студии: +7.900.000.00.01.', tel),
+             fact('dots8', 'Телефон: 8.800.555.35.35.', {'type': 'telephone', 'value': '+78005553535'}),
+             fact('dash', 'Телефон студии: +7 900 000—00—01.', tel),
+             fact('minus', 'Телефон студии: +7 900 000−00‒01.', tel),
+             fact('stop', 'Телефон: +7 900 000-00-01. 24 часа на связи.', tel),
+             fact('rf', 'Сайт студии: пример.рф.', {'type': 'url', 'value': 'https://пример.рф'}),
+             fact('rf-puny', 'Сайт студии: Пример.РФ/контакты.',
+                  {'type': 'url', 'value': 'https://xn--e1afmkfd.xn--p1ai/контакты'}),
+             fact('puny-rf', 'Сайт студии: xn--e1afmkfd.xn--p1ai.', {'type': 'url', 'value': 'https://пример.рф'}),
+             fact('mail-rf', 'Почта студии: info@пример.рф.', {'type': 'email', 'value': 'info@пример.рф'}),
+             fact('mail-puny', 'Почта: info@пример.рф.', {'type': 'email', 'value': 'info@xn--e1afmkfd.xn--p1ai'}),
+             fact('hours', 'Работаем ежедневно с 9 до 21 часов.', day),
+             fact('mixed', 'Будни с 9:00 до 21, суббота с 10 до 16:30.',
+                  {'type': 'opening-hours', 'hours': [{'days': week[:5], 'opens': '09:00', 'closes': '21:00'},
+                                                      {'days': ['sa'], 'opens': '10:00', 'closes': '16:30'}]}),
+             fact('dotted', 'Часы работы: 09.00–21.00 ежедневно.', day),
+             fact('words', 'Работаем круглосуточно, без выходных.',
+                  {'type': 'opening-hours', 'hours': [{'days': week, 'opens': '00:00', 'closes': '24:00'}]}),
+             fact('city', 'Студия находится по адресу: в Москве, ул. Примерная, 1.', msk),
+             fact('city2', 'Адрес: в Нижнем Новгороде, ул. Примерная, 1.', dict(msk, locality='Нижний Новгород')),
+             fact('city-hyphen', 'Адрес: в Ростове-на-Дону, ул. Примерная, 1.', dict(msk, locality='Ростов-на-Дону')),
+             fact('city-short', 'Адрес: в Уфе, ул. Примерная, 1.', dict(msk, locality='Уфа')),
+             fact('region', 'Адрес: в Московской области, в Химках, ул. Примерная, 1.',
+                  dict(msk, locality='Химки', region='Московская область'))]
+    got = {f['id']: [x[1] for x in machine_issues(f) if x[0] == 'error'] for f in legit}
+    check('законная запись значения — без error: номер с точками, длинным тире и минусом, точка после номера; сайт и '
+          'почта на домене .рф буквами и в punycode; часы без минут, с минутами вперемешку, с точками и словами без '
+          'цифр; город и регион в падеже — из двух слов, через дефис, короткий', not any(got.values()), got)
+    foreign = [fact('dots', 'Телефон студии: +7.900.000.00.01.', dict(tel, value='+79000000009')),
+               fact('rf', 'Сайт студии: пример.рф.', {'type': 'url', 'value': 'https://другой.рф'}),
+               fact('mail-rf', 'Почта студии: info@пример.рф.', {'type': 'email', 'value': 'info@другой.рф'}),
+               fact('hours', 'Работаем ежедневно с 9 до 21.', dict(day, hours=[dict(day['hours'][0], opens='10:00')])),
+               fact('city', 'Студия находится по адресу: в Москве, ул. Примерная, 1.', dict(msk, locality='Казань')),
+               fact('street', 'Студия находится по адресу: в Москве, ул. Примерная, 1.',
+                    dict(msk, street='ул. Другая, 1')),
+               fact('pair', 'Координаты студии: 55.751 37.618.', {'type': 'telephone', 'value': '+75575137618'}),
+               fact('stamp', 'Запись открыта с 7.11.2026 10.00.', {'type': 'telephone', 'value': '+71120261000'})]
+    got = {f['id']: [x[0] for x in machine_issues(f)] for f in foreign}
+    check('чужое значение при тех же формах записи — error: номер, домен сайта и почты, время, город, улица; пара '
+          'чисел и дата со временем через точки — не номер', all(v == ['error'] for v in got.values()), got)
+    hint = {f['id']: machine_issues(f) for f in (
+        fact('hours', 'Работаем ежедневно с 9 до 21.'), fact('words', 'Работаем круглосуточно, без выходных.'),
+        fact('one', 'Режим работы: открываемся в 9:00.'), fact('city', 'Адрес студии: в Москве, ул. Примерная, 1.'),
+        fact('dots', 'Телефон студии: +7.900.000.00.01.'), fact('rf', 'Сайт студии: пример.рф.'),
+        fact('mail-rf', 'Почта студии: info@пример.рф.'), fact('range', 'В студии с 5 до 12 мастеров.'))}
+    check('подсказка: часы — только когда в формулировке найдены оба времени (без минут — «09:00» и «21:00»), слова '
+          'без цифр, одно время и число от и до не о работе подсказки не дают; город в падеже — «…», улица — из '
+          'формулировки; номер с точками, сайт и почта на .рф — готовым значением',
+          'opens: "09:00", closes: "21:00"' in hint['hours'][0][1] and not hint['words'] and not hint['one']
+          and not hint['range']
+          and 'locality: "…", street: "ул. Примерная, 1"' in hint['city'][0][1]
+          and '{type: telephone, value: "+79000000001"}' in hint['dots'][0][1]
+          and '{type: url, value: "https://пример.рф"}' in hint['rf'][0][1]
+          and '{type: email, value: "info@пример.рф"}' in hint['mail-rf'][0][1], hint)
     with tempfile.TemporaryDirectory() as td:
         fp, jp = os.path.join(td, 'facts.yaml'), os.path.join(td, 'lint.json')
         base = {'id': 'x', 'claim_class': ['company-details'], 'verbatim': ['x'], 'lang': 'ru',
