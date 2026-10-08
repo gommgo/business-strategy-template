@@ -2882,16 +2882,19 @@ def _m_norm(s):
 
 
 def _m_inflected(value, text):
-    """Название value стоит в формулировке, может быть, в другом падеже: у каждого его слова есть слово text с тем же
-    началом — всё, кроме окончания до двух букв; слово короче трёх букв — буква в букву. Дефис делит слово."""
+    """Название value стоит в формулировке словами, может быть, в другом падеже: у каждого его слова есть слово text
+    с тем же началом — всё, кроме окончания до двух букв — и длиной, отличной не больше чем на две буквы; слово короче
+    трёх букв — буква в букву. Дефис делит слово. Часть слова («Омск» в «Томск») и слово с суффиксом («Тверь» —
+    «Тверская», «Москва» — «Московская») — не название; значение без букв и цифр («…») — тоже."""
     def words(s):
         return re.findall(r'[^\W_]+', _m_norm(s))
 
     def same(a, b):
         short = min(len(a), len(b))
-        return a == b or short >= 3 and len(os.path.commonprefix([a, b])) >= max(2, short - 2)
-    have = words(text)
-    return all(any(same(w, x) for x in have) for w in words(value))
+        return a == b or short >= 3 and abs(len(a) - len(b)) <= 2 and \
+            len(os.path.commonprefix([a, b])) >= max(2, short - 2)
+    want, have = words(value), words(text)
+    return bool(want) and all(any(same(w, x) for x in have) for w in want)
 
 
 def _m_times(text):
@@ -2959,9 +2962,8 @@ def machine_check(m, text, jurisdiction='ru'):
             return f"сеть {m.get('network')} у ссылки {key.partition('/')[0]} — это {net}"
         return None
     if t == 'postal-address':
-        miss = [k for k in ('street', 'locality', 'region', 'postal_code')
-                if m.get(k) and _m_norm(m[k]) not in _m_norm(text)
-                and (k in ('street', 'postal_code') or not _m_inflected(m[k], text))]
+        miss = [k for k in ('street', 'locality', 'region', 'postal_code') if m.get(k) and not (
+            _m_norm(m[k]) in _m_norm(text) if k in ('street', 'postal_code') else _m_inflected(m[k], text))]
         return (f"частей адреса {', '.join(miss)} нет в canonical (улица и индекс — как в формулировке, город и регион "
                 "— теми же словами в любом падеже)") if miss else None
     if t == 'opening-hours':
@@ -3959,24 +3961,34 @@ def _selftest_machine(check):
              fact('city2', 'Адрес: в Нижнем Новгороде, ул. Примерная, 1.', dict(msk, locality='Нижний Новгород')),
              fact('city-hyphen', 'Адрес: в Ростове-на-Дону, ул. Примерная, 1.', dict(msk, locality='Ростов-на-Дону')),
              fact('city-short', 'Адрес: в Уфе, ул. Примерная, 1.', dict(msk, locality='Уфа')),
+             fact('city-vowel', 'Адрес: в Орле, ул. Примерная, 1.', dict(msk, locality='Орёл')),
+             fact('city-plural', 'Работаем рядом с Набережными Челнами: ул. Примерная, 1.',
+                  dict(msk, locality='Набережные Челны')),
              fact('region', 'Адрес: в Московской области, в Химках, ул. Примерная, 1.',
                   dict(msk, locality='Химки', region='Московская область'))]
     got = {f['id']: [x[1] for x in machine_issues(f) if x[0] == 'error'] for f in legit}
     check('законная запись значения — без error: номер с точками, длинным тире и минусом, точка после номера; сайт и '
           'почта на домене .рф буквами и в punycode; часы без минут, с минутами вперемешку, с точками и словами без '
-          'цифр; город и регион в падеже — из двух слов, через дефис, короткий', not any(got.values()), got)
+          'цифр; город и регион в падеже — из двух слов, через дефис, короткий, с беглой гласной, во множественном '
+          'числе', not any(got.values()), got)
     foreign = [fact('dots', 'Телефон студии: +7.900.000.00.01.', dict(tel, value='+79000000009')),
                fact('rf', 'Сайт студии: пример.рф.', {'type': 'url', 'value': 'https://другой.рф'}),
                fact('mail-rf', 'Почта студии: info@пример.рф.', {'type': 'email', 'value': 'info@другой.рф'}),
                fact('hours', 'Работаем ежедневно с 9 до 21.', dict(day, hours=[dict(day['hours'][0], opens='10:00')])),
                fact('city', 'Студия находится по адресу: в Москве, ул. Примерная, 1.', dict(msk, locality='Казань')),
+               fact('city-street', 'Адрес: Москва, ул. Тверская, 1.', dict(msk, locality='Тверь', street='ул. Тверская, 1')),
+               fact('city-part', 'Адрес: Томск, ул. Примерная, 1.', dict(msk, locality='Омск')),
+               fact('city-region', 'Адрес: Московская область, Химки, ул. Примерная, 1.', msk),
+               fact('city-gap', 'Адрес студии: в Москве, ул. Примерная, 1.', dict(msk, locality='…')),
                fact('street', 'Студия находится по адресу: в Москве, ул. Примерная, 1.',
                     dict(msk, street='ул. Другая, 1')),
                fact('pair', 'Координаты студии: 55.751 37.618.', {'type': 'telephone', 'value': '+75575137618'}),
                fact('stamp', 'Запись открыта с 7.11.2026 10.00.', {'type': 'telephone', 'value': '+71120261000'})]
     got = {f['id']: [x[0] for x in machine_issues(f)] for f in foreign}
-    check('чужое значение при тех же формах записи — error: номер, домен сайта и почты, время, город, улица; пара '
-          'чисел и дата со временем через точки — не номер', all(v == ['error'] for v in got.values()), got)
+    check('чужое значение при тех же формах записи — error: номер, домен сайта и почты, время, улица, город — и при '
+          'улице его имени, при названии, в которое он входит частью, при области его имени, с «…» подсказки на месте '
+          'названия; пара чисел и дата со временем через точки — не номер',
+          all(v == ['error'] for v in got.values()), got)
     hint = {f['id']: machine_issues(f) for f in (
         fact('hours', 'Работаем ежедневно с 9 до 21.'), fact('words', 'Работаем круглосуточно, без выходных.'),
         fact('one', 'Режим работы: открываемся в 9:00.'), fact('city', 'Адрес студии: в Москве, ул. Примерная, 1.'),
