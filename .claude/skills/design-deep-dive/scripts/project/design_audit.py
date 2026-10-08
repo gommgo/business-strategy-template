@@ -1781,8 +1781,10 @@ class Audit:
                 continue
             # отпечаток принятой строки сверил plan_to_assets (R-STRUCT-005 error): одна несостыковка — одна находка
             own_sha = not (r.get("status") == "accepted" and man_path in self.fingerprinted)
-            need = [k for k, alts in (("slot", ("slot",)), ("role", ("role",)), ("license", ("license",)),
-                                      ("origin", ("origin", "provenance")), ("ai", ("ai", "ai_mark", "ai_label")),
+            # роль ассета (несёт смысл или украшает) — о картинке слота: у строки файла шрифта (font) её нет
+            need = [k for k, alts in (("slot", ("slot",)), ("role", () if r.get("font") else ("role",)),
+                                      ("license", ("license",)), ("origin", ("origin", "provenance")),
+                                      ("ai", ("ai", "ai_mark", "ai_label")),
                                       ("sha256", ("sha256",) if own_sha else ()), ("status", ("status",)))
                     if alts and not any(r.get(a) not in (None, "") for a in alts)]
             sha = str(r.get("sha256") or "").replace("sha256:", "")
@@ -3376,6 +3378,25 @@ def _selftest():
         check("манифест, сверенный plan_to_assets: sha256 принятой строки R-COV-009 не называет, черновой — называет",
               sha_refs(False) == ["header-logo.svg", "hero-visual-desktop.webp"]
               and sha_refs(True) == ["hero-visual-desktop.webp"])
+        # строка файла шрифта манифеста продукта: роли ассета у неё нет, остальные поля строки — как у любого файла
+        pdir, woff = docpaths.design(slug, "assets", repo=root), b"wOF2\n"
+        (pdir / "fonts").mkdir(parents=True)
+        (pdir / "fonts" / "demo-400.woff2").write_bytes(woff)
+        frow = ("slot: font-demo, file: fonts/demo-400.woff2, status: accepted, license: OFL (демо), ai: false, "
+                f"sha256: {hashlib.sha256(woff).hexdigest()}, font: {{family: Demo Sans, weight: 400, style: normal}}")
+
+        def font_need(row):
+            (pdir / "manifest.yaml").write_text("example: true\nassets:\n  - {" + row + "}\n", encoding="utf-8")
+            aa = Audit(slug, root, today=today, run_tools=False)
+            aa.cov_assets(pdir, None)
+            return [f.message.rpartition(" — ")[2] for f in aa.rep.items if f.rule == "R-COV-009"]
+
+        fgot = [font_need(frow + ", origin: демо"), font_need(frow),
+                font_need(frow.partition(", font:")[0] + ", origin: демо")]
+        shutil.rmtree(pdir)                                 # у фикстуры папки ассетов продукта нет
+        check("строка файла шрифта (font) манифеста продукта: роль ассета не нужна — с лицензией, происхождением и "
+              "пометкой ИИ находок нет; без происхождения — R-COV-009 называет origin; строка без font — и role",
+              fgot == [[], ["origin"], ["role"]])
         manifest(rows)
         up = "design/promo/assets/"
 
