@@ -57,12 +57,14 @@
                                       единственный), демо-факты (example: true), которые страница называет,
                                       демо-кадры — «демо-кадр: <слот>» на слот плана ассетов страницы с расширением
                                       x-demo (кадр макета не для публикации), и у каждой единицы — «шрифт: <семейство>
-                                      …»: семейство токенов ДС, которому нужен файл (ds_build.web_families), без
-                                      принятой строки манифеста ассетов продукта с этим font.family и файлом; затем
-                                      строки «решение заказчика: …» — ДС
-                                      не утверждена, у кабинета ещё покрытие ДС типов своего экрана не полное
-                                      (ds_coverage) и FSD-карта не stable, и открытые источники группы «контекст»
-                                      («<путь> <статус>», context_open): готовность они не держат, решает заказчик
+                                      [<насыщенности>] …»: начертание токенов ДС, которому нужен файл
+                                      (ds_build.font_needs — семейство и насыщенности его типографики), без принятой
+                                      строки манифеста ассетов продукта с этим font, файлом и лицензией, и «тема: …»:
+                                      бриф поверхности ждёт темы, которой нет у токенов ДС (ds_build.theme_gaps,
+                                      правило R-COV-010); затем строки «решение заказчика: …» — ДС не утверждена, у
+                                      кабинета ещё покрытие ДС типов своего экрана не полное (ds_coverage) и FSD-карта
+                                      не stable, и открытые источники группы «контекст» («<путь> <статус>»,
+                                      context_open): готовность они не держат, решает заказчик
     ready                             композиция закрыта (план approved, экран stable), тексты approved, факты
                                       публикуемы или пробел назван, макет принят с совпавшим отпечатком (или пропущен
                                       решением заказчика); у сайта ещё закрыта поверхность — бриф и у рода site карта
@@ -210,6 +212,14 @@ def dash(v):
     return "—" if v in (None, "", [], {}) else v
 
 
+def font_span(weight):
+    """Насыщенность строки манифеста ассетов (`font.weight`): число 400 → (400, 400), диапазон вариативного шрифта
+    «100 900» → (100, 900); значение вне формы — None."""
+    ok = isinstance(weight, (int, str)) and not isinstance(weight, bool)
+    m = re.fullmatch(r"(\d+)(?: (\d+))?", str(weight)) if ok else None
+    return (int(m.group(1)), int(m.group(2) or m.group(1))) if m else None
+
+
 # ------------------------------------------------------------------ статусы источников
 
 def md_rows_status(path):
@@ -258,6 +268,7 @@ class Build:
         self.context = []
         self._facts = None
         self._fonts = None
+        self._theme = None
         self._src = {}
 
     # пути
@@ -277,22 +288,53 @@ class Build:
 
     @property
     def fonts_open(self):
-        """Строки open «шрифт: <семейство> …» — у каждой единицы: семейство токенов ДС, которому нужен файл
-        (`ds_build.web_families`), без принятой строки манифеста ассетов продукта с этим `font.family` и файлом на
-        диске. Код подключает шрифты по строкам манифеста; без файла страница — не та, что одобрена на макете."""
+        """Строки open «шрифт: <семейство> [<насыщенности>] …» — у каждой единицы: начертание токенов ДС, которому
+        нужен файл (`ds_build.font_needs`: семейство и насыщенности его типографики, начертание normal), без файла —
+        принятой строки манифеста ассетов продукта с этим `font` (семейство, насыщенность числом или диапазоном
+        вариативного шрифта, `style: normal`), файлом на диске и лицензией `license`. Семейству без типографического
+        токена хватает одного такого файла. Код подключает шрифты по строкам манифеста; без файла начертания
+        страница — не та, что одобрена на макете."""
         if self._fonts is None:
             data = load(self.dprod("tokens"))
             man = self.dprod("assets") / "manifest.yaml"
             rows = load(man)
             rows = rows.get("assets") if isinstance(rows, dict) else rows
-            have = {str(r["font"].get("family")).lower() for r in rows if isinstance(r, dict)
-                    and r.get("status") == "accepted" and isinstance(r.get("font"), dict)
-                    and isinstance(r.get("file"), str) and (man.parent / r["file"]).is_file()} \
-                if isinstance(rows, list) else set()
-            fams = mod("ds_build").web_families(data) if isinstance(data, dict) else []
-            self._fonts = [f"шрифт: {f} — нет принятого файла со строкой манифеста design/_assets/ (font.family)"
-                           for f in fams if f.lower() not in have]
+            have = {}
+            for r in rows if isinstance(rows, list) else []:
+                f = r.get("font") if isinstance(r, dict) else None
+                span = font_span(f.get("weight")) if isinstance(f, dict) and f.get("style") == "normal" else None
+                if span and r.get("status") == "accepted" and isinstance(r.get("file"), str) \
+                        and (man.parent / r["file"]).is_file() and str(r.get("license") or "").strip():
+                    have.setdefault(str(f.get("family")).lower(), []).append(span)
+            needs = mod("ds_build").font_needs(data) if isinstance(data, dict) else {}
+            self._fonts = []
+            for fam, weights in needs.items():
+                got = have.get(fam.lower(), [])
+                lack = [w for w in weights if not any(lo <= w <= hi for lo, hi in got)]
+                if lack or not got:
+                    what = " " + ", ".join(f"{w:g}" for w in lack) if lack else ""
+                    self._fonts.append(f"шрифт: {fam}{what} — нет принятого файла с лицензией (строка манифеста "
+                                       "design/_assets/ с font)")
         return self._fonts
+
+    @property
+    def theme_open(self):
+        """Строка open «тема: …» — у каждой единицы: бриф поверхности (у сайта — бриф сайта, у кабинета — бриф на вид)
+        ждёт темы, которой нет у токенов ДС ни темой значений `modes.base`, ни режимом (`ds_build.theme_gaps`, правило
+        R-COV-010). Код ставит тему брифа атрибутом `data-theme`; без неё у токенов страница получит не ту
+        `color-scheme`. Токены не читаются или не по форме — строки нет: их называет R-STRUCT-006."""
+        if self._theme is None:
+            self._theme = []
+            DB = mod("ds_build")
+            data = load(self.dprod("tokens"))
+            try:
+                gaps = DB.theme_gaps(DB.Project.of(self.slug, self.repo), DB.Tokens(data)) if isinstance(data, dict) else []
+            except Exception:                                   # noqa: BLE001 — формат токенов сверяет ds_build check
+                gaps = []
+            own = self.surface if self.surf.page else None
+            self._theme = [f"тема: бриф ждёт {', '.join(sorted(need))}, у токенов ДС — {', '.join(sorted(have))} "
+                           "(тема значений modes.base или режим)" for surf, _path, need, have in gaps if surf == own]
+        return self._theme
 
     def review(self):
         """Строки «Приёмка» REVIEW.md: {единица: {artboards, verdict, fingerprint, by, date, open}}."""
@@ -521,7 +563,7 @@ class Build:
             if bad:
                 why.append("факты: " + ", ".join(bad[:4]) + (f" и ещё {len(bad) - 4}" if len(bad) > 4 else ""))
             opened += [f"демо-факт: {x}" for x in sorted(set(demo))]
-            opened += [f"демо-кадр: {x}" for x in self.demo_slots(pid)] + self.fonts_open
+            opened += [f"демо-кадр: {x}" for x in self.demo_slots(pid)] + self.fonts_open + self.theme_open
             decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
             decide += [line for line, scope in self.context if scope in (None, ("page", pid))]
             exc = [str(e.get("id")) for e in get(plan, "page", "x-gate-exception", default=[]) or []
@@ -534,7 +576,7 @@ class Build:
     @staticmethod
     def unit(uid, ready, comp, texts, verdict, budget, exc, after, opened):
         """Единица формы; publishable — готова, а в open только «решение заказчика: …» (заглушек, демо-фактов,
-        демо-кадров и шрифтов без файла нет): такую единицу код публикует."""
+        демо-кадров, шрифтов без файла и темы брифа без темы токенов нет): такую единицу код публикует."""
         return {"id": uid, "ready": ready, "publishable": ready and all(o.startswith(DECIDE) for o in opened),
                 "composition": comp, "texts": texts, "mockup": verdict, "budget_profile": budget,
                 "gate_exceptions": exc, "after_build": after, "open": opened}
@@ -549,8 +591,8 @@ class Build:
 
     @staticmethod
     def open_list(opened, decide):
-        """Строки open единицы: заглушки, демо-кадры, демо-факты и шрифты без файла по алфавиту, затем по алфавиту
-        решения заказчика (ДС, покрытие, FSD-карта, открытые источники контекста)."""
+        """Строки open единицы: заглушки, демо-кадры, демо-факты, шрифты без файла и тема брифа без темы токенов по
+        алфавиту, затем по алфавиту решения заказчика (ДС, покрытие, FSD-карта, открытые источники контекста)."""
         return sorted(set(opened)) + sorted({DECIDE + d for d in decide})
 
     # кабинет
@@ -595,7 +637,7 @@ class Build:
             verdict, mwhy = self.mockup(slug, rev, ids)
             if mwhy:
                 why.append(mwhy)
-            opened += self.fonts_open
+            opened += self.fonts_open + self.theme_open
             decide = [] if ds == "approved" else [f"ДС не утверждена (system.yaml {ds or 'нет'})"]
             if cov_err:
                 decide.append(f"покрытие ДС не посчитано ({cov_err})")
@@ -1373,6 +1415,27 @@ def _selftest():
         bp.write_text(btext.replace("project:\n  slug: otves-remont-nn\n  status: proposed\n",
                                     "project:\n  slug: otves-remont-nn\n  status: approved\n", 1), encoding="utf-8")
         d_pub = build(slug, surf, root, today)
+        # тема брифа без темы токенов: бриф ждёт тёмную тему, значения токенов — светлая тема (modes.base не объявлена)
+        tk = docpaths.design(slug, "tokens", repo=root)
+        ink = {"color": {"$type": "color", "bg": {"$value": {"colorSpace": "srgb", "components": [0.1, 0.1, 0.1],
+                                                             "hex": "#1A1A1A"}}}}
+        tk.write_text(json.dumps(ink), encoding="utf-8")
+        bp.write_text(bp.read_text(encoding="utf-8").replace("themes:\n  default: light\n", "themes:\n  default: dark\n",
+                                                             1), encoding="utf-8")
+        d_dark = build(slug, surf, root, today)
+        tk.write_text(json.dumps(dict(ink, **{"$extensions": {"org.design-deep-dive.modes": {"base": "dark"}}})),
+                      encoding="utf-8")
+        d_based = build(slug, surf, root, today)
+        tk.unlink()
+        bp.write_text(bp.read_text(encoding="utf-8").replace("themes:\n  default: dark\n", "themes:\n  default: light\n",
+                                                             1), encoding="utf-8")
+        theme = "тема: бриф ждёт dark, у токенов ДС — light (тема значений modes.base или режим)"
+        s_dark, s_based = ({u["id"]: u for u in x["units"]}["spasibo"] for x in (d_dark, d_based))
+        check("тема брифа, которой нет у токенов ДС, — строка open «тема: …» у каждой единицы: готовность не держит, "
+              "публикацию держит; токены с modes.base: dark — строки нет",
+              all(theme in u["open"] for u in d_dark["units"]) and s_dark["ready"] and not s_dark["publishable"]
+              and not any(o.startswith("тема:") for u in d_based["units"] for o in u["open"])
+              and s_based["publishable"])
         dk.write_text(approved.replace("        - {id: a, text: 'Прораб позвонит и договорится о дне замера', status: "
                                        "assumed, source: ai-self}\n        chosen: a\n",
                                        "        - {id: a, text: '[PLACEHOLDER: срок звонка] Прораб позвонит', status: "
@@ -1489,25 +1552,34 @@ def _selftest():
         sysp.write_text(sysp.read_text(encoding="utf-8").replace("status: approved", "status: proposed", 1)
                         + "starter: [plan-dashboard]\n", encoding="utf-8")
         d = build(slug, surf, root, today)
-        font = "шрифт: Golos Text — нет принятого файла со строкой манифеста design/_assets/ (font.family)"
+        tail = " — нет принятого файла с лицензией (строка манифеста design/_assets/ с font)"
+        font = "шрифт: Golos Text 400, 500, 600" + tail
         pd0 = next(u for u in d["units"] if u["id"] == "plan-dashboard")
         fdir = docpaths.design(slug, "assets", repo=root) / "fonts"
         fdir.mkdir(parents=True, exist_ok=True)
-        (fdir / "golos-text-400.woff2").write_bytes(b"wOF2 demo")
-        row = {"slot": "font-golos-text", "file": "fonts/golos-text-400.woff2", "status": "accepted",
+        (fdir / "golos-text.woff2").write_bytes(b"wOF2 demo")
+        row = {"slot": "font-golos-text", "file": "fonts/golos-text.woff2", "status": "accepted",
                "font": {"family": "Golos Text", "weight": 400, "style": "normal"}, "license": "OFL (демо)",
-               "sha256": sha(fdir / "golos-text-400.woff2")}
-        (fdir.parent / "manifest.yaml").write_text(yaml_mod().safe_dump({"assets": [dict(row, status="draft")]},
-                                                                        allow_unicode=True), encoding="utf-8")
-        draft = build(slug, surf, root, today)
-        (fdir.parent / "manifest.yaml").write_text(yaml_mod().safe_dump({"assets": [row]}, allow_unicode=True),
-                                                   encoding="utf-8")
-        d = build(slug, surf, root, today)
-        check("шрифт токенов ДС без принятого файла — строка open «шрифт: …» у каждой единицы (черновая строка "
-              "манифеста её не снимает), публикацию держит; принятая строка манифеста продукта с font.family и файлом "
-              "её снимает",
-              pd0["ready"] and not pd0["publishable"] and all(font in u["open"] for u in draft["units"])
-              and not any(font in u["open"] for u in d["units"]))
+               "sha256": sha(fdir / "golos-text.woff2")}
+        wide = dict(row, font=dict(row["font"], weight="400 600"))     # вариативный файл на все насыщенности токенов
+
+        def fonts_of(*rows):
+            (fdir.parent / "manifest.yaml").write_text(yaml_mod().safe_dump({"assets": list(rows)}, allow_unicode=True),
+                                                       encoding="utf-8")
+            data = build(slug, surf, root, today)
+            return data, [sorted(o for o in u["open"] if o.startswith("шрифт:")) for u in data["units"]]
+        draft = fonts_of(dict(wide, status="draft"))[1]
+        part = fonts_of(row)[1]
+        bare = fonts_of({k: v for k, v in wide.items() if k != "license"})[1]
+        slant = fonts_of(dict(wide, font=dict(wide["font"], style="italic")))[1]
+        d, full = fonts_of(wide)
+        check("начертания шрифта токенов ДС без принятого файла с лицензией — строка open «шрифт: <семейство> "
+              "<насыщенности> …» у каждой единицы, публикацию держит: черновая строка манифеста, строка без license и "
+              "курсив её не снимают, файл одной насыщенности оставляет недостающие; вариативный файл на все "
+              "насыщенности с лицензией её снимает",
+              pd0["ready"] and not pd0["publishable"] and font in pd0["open"]
+              and draft == bare == slant == [[font]] * len(d["units"])
+              and part == [["шрифт: Golos Text 500, 600" + tail]] * len(d["units"]) and not any(full))
         units = {u["id"]: u for u in d["units"]}
         pd = units["plan-dashboard"]
         cov_lines = {u: [o for o in x["open"] if o.startswith(f"{DECIDE}покрытие ДС")] for u, x in units.items()}

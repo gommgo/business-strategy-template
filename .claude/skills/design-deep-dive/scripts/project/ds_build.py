@@ -30,12 +30,15 @@
 артефакта; режим токена с именем парной темы даёт вторую тему — её блок включается и по настройке системы
 (`prefers-color-scheme`), и атрибутом `[data-theme]`. Темы, которых ждут брифы — бриф сайта каждой поверхности слоя
 страницы и бриф на вид кабинета, блок `themes` (две темы — `dark.needed` или `default: system`, иначе одна —
-`default`), — есть у токенов темой значений или режимом; иначе R-COV-010: сайт в тёмной теме на токенах без
-`modes.base: dark` получил бы `color-scheme: light`, и системные элементы страницы были бы светлыми.
+`default`), — есть у токенов темой значений или режимом; иначе R-COV-010 (`theme_gaps()`): сайт в тёмной теме на
+токенах без `modes.base: dark` получил бы `color-scheme: light`, и системные элементы страницы были бы светлыми. Ту же
+нехватку манифест готовности несёт строкой open «тема: …» единиц поверхности (ready.py) — публикацию она держит.
 
 Шрифты: семейство, которому нужен файл, — первое имя стека токена fontFamily или fontFamily типографического токена,
-если оно не родовое (`GENERIC_FONTS`) и не системное (`SYSTEM_FONTS`) — `web_families()`; файлы — строки манифеста
-ассетов продукта с полем `font` (их сверяет ready.py: семейство без принятого файла — строка open «шрифт: …»).
+если оно не родовое (`GENERIC_FONTS`) и не системное (`SYSTEM_FONTS`); прочие имена стека — запасные, файлов им не
+нужно. Начертания семейства — насыщенности `fontWeight` его типографических токенов во всех режимах, начертание —
+normal: `font_needs()` (`web_families()` — только имена). Файлы — строки манифеста ассетов продукта с полем `font` (их
+сверяет ready.py: начертание без принятого файла с лицензией — строка open «шрифт: …»).
 
 Типографика в CSS считается от того, что покажет браузер. Интерлиньяж: число DTCG — отношение, округлённое до шести
 знаков; когда оно недотягивает до целого px (14 px × 1.428571 = 19,999994), браузер усекает высоту строки до шага
@@ -444,24 +447,45 @@ def token_themes(toks):
     return {first} | ({THEME_PAIR[first]} if THEME_PAIR[first] in toks.mode_names() else set())
 
 
-def web_families(data):
-    """Семейства токенов, которым нужен файл шрифта: первое имя стека каждого токена fontFamily и fontFamily
-    типографических токенов, если оно не родовое и не системное (GENERIC_FONTS, SYSTEM_FONTS), — по порядку документа,
-    без повторов. Токен, значение которого не разрешается, пропускается: его называет R-STRUCT-006."""
-    toks, out = Tokens(data), []
+def font_needs(data):
+    """Начертания, которым нужен файл шрифта: {семейство: [насыщенности по возрастанию]} по порядку документа.
+    Семейство — первое имя стека каждого токена fontFamily и fontFamily типографических токенов, если оно не родовое и
+    не системное (GENERIC_FONTS, SYSTEM_FONTS); насыщенности — fontWeight типографических токенов этого семейства во
+    всех режимах, числом; у семейства без типографического токена список пуст — ему нужен хотя бы один файл. Токен,
+    значение которого не разрешается, пропускается: его называет R-STRUCT-006."""
+    toks, out = Tokens(data), {}
     for t in toks.list:
         if t.type not in ("fontFamily", "typography"):
             continue
-        try:
-            v = toks.value(t)
-        except ValueError:
-            continue
-        stack = v.get("fontFamily") if t.type == "typography" and isinstance(v, dict) else v
-        first = stack[0] if isinstance(stack, list) and stack else stack
-        name = str(first or "").split(",")[0].strip().strip("'\"")
-        if name and name.lower() not in GENERIC_FONTS + SYSTEM_FONTS and name not in out:
-            out.append(name)
-    return out
+        for mode in [None] + toks.mode_names():
+            try:
+                v = toks.value(t, mode)
+            except ValueError:
+                continue
+            typo = t.type == "typography" and isinstance(v, dict)
+            stack = v.get("fontFamily") if typo else v
+            first = stack[0] if isinstance(stack, list) and stack else stack
+            name = str(first or "").split(",")[0].strip().strip("'\"")
+            if not name or name.lower() in GENERIC_FONTS + SYSTEM_FONTS:
+                continue
+            weights = out.setdefault(name, [])
+            w = weight_num(v.get("fontWeight")) if typo else None
+            if isinstance(w, (int, float)) and not isinstance(w, bool) and w not in weights:
+                weights.append(w)
+    return {name: sorted(ws) for name, ws in out.items()}
+
+
+def web_families(data):
+    """Семейства токенов, которым нужен файл шрифта (`font_needs`), — по порядку документа, без повторов."""
+    return list(font_needs(data))
+
+
+def theme_gaps(prj, toks):
+    """Темы брифов, которых нет у токенов (R-COV-010): [(поверхность или None, путь брифа, {темы брифа}, {темы
+    токенов})] — бриф сайта каждой поверхности слоя страницы и бриф на вид кабинета (`brief_themes`) против темы
+    значений и парной по режиму (`token_themes`)."""
+    have = token_themes(toks)
+    return [(surf, path, need, have) for surf, path, need in brief_themes(prj) if not need <= have]
 
 
 def base_theme(data):
@@ -1352,11 +1376,9 @@ def check(prj):
         rep.add("R-STRUCT-006", i.severity, surface=None, kind=KIND, ref="tokens#" + i.pointer, path=rel_tokens,
                 message=i.message, fix="одно значение в `$value` и в расширении кегля токена, затем "
                                        f"ds_build build {prj.slug}")
-    have, first = token_themes(toks), base_theme(toks.data)
+    first = base_theme(toks.data)
     declared = isinstance(_root_modes(data), dict) and "base" in _root_modes(data)
-    for surf, path, need in brief_themes(prj):
-        if need <= have:
-            continue
+    for surf, path, need, have in theme_gaps(prj, toks):
         rep.add("R-COV-010", "warning", surface=surf, kind=KIND, ref="tokens#" + pointer(("$extensions", EXT_MODES)),
                 path=rel_tokens,
                 message=f"бриф {prj.rel(path)} ждёт тем {', '.join(sorted(need))}, у токенов — "
@@ -1682,6 +1704,12 @@ def _selftest():
     fam["type"]["broken"] = {"$value": dict(doc["type"]["body"]["$value"], fontFamily="{font.nope}")}
     check_("web_families: первое имя стека fontFamily и типографики — не родовое и не системное, без повторов; "
            "алиас в пустоту пропускается", web_families(fam) == ["Golos Text", "Demo Display"])
+    fam["font"]["solo"] = {"$type": "fontFamily", "$value": ["Solo Sans", "sans-serif"]}
+    fam["type"]["strong"] = {"$value": dict(doc["type"]["body"]["$value"], fontWeight="semi-bold"),
+                             "$extensions": {EXT_MODES: {"compact": dict(doc["type"]["body"]["$value"], fontWeight=500)}}}
+    check_("font_needs: насыщенности типографики семейства числом по возрастанию — значение (словом тоже) и режимы; "
+           "семейство без типографического токена — без насыщенностей",
+           font_needs(fam) == {"Golos Text": [400, 500, 600], "Demo Display": [400], "Solo Sans": []})
     check_("темы токенов: тема значений и парная по режиму (light + dark); без режимов темы — одна",
            token_themes(toks) == {"light", "dark"} and token_themes(Tokens({"font": doc["font"]})) == {"light"})
     _selftest_themes(check_)
