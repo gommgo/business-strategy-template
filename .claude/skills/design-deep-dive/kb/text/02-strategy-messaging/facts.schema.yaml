@@ -412,7 +412,7 @@ $defs:
         required: [type, value]
         properties:
           type: {const: url}
-          value: {type: string, pattern: "^https?://[^\\s]+$", description: "Абсолютный адрес: сайт, страница, профиль (sameAs разметки)."}
+          value: {type: string, pattern: "^https?://[^\\s]+$", description: "Абсолютный адрес ссылки страницы: сайт, страница, профиль, канал."}
       - type: object
         additionalProperties: false
         required: [type, network, value]

@@ -246,7 +246,7 @@ jsonld_policy:
       where: главная или contacts-page сайта услуг с адресом или зоной обслуживания; landing-lead-services с адресом
       google: 'обязательно name, address; рекомендовано telephone (с кодом страны), url, geo (≥ 5 знаков), openingHoursSpecification (hh:mm:ss), priceRange (< 100 знаков); aggregateRating и review — не для отзывов о себе'
       subtype: самый конкретный подтип schema.org (HomeAndConstructionBusiness, MovingCompany, Dentist, LegalService, AccountingService, ProfessionalService…)
-      nap_rule: 'название, адрес, телефон — буква в букву как на странице, в Яндекс Бизнесе, Google Business Profile и Bing Places; телефон и адрес — в HTML сервера: коллтрекинг подменяет номер поверх серверного, а не вставляет его с нуля ([проверено] телефон stamus есть только в браузере)'
+      nap_rule: 'название, адрес, телефон — те же, что на странице, в Яндекс Бизнесе, Google Business Profile и Bing Places: название и адрес — буква в букву (части адреса machine — слова формулировки факта), телефон — тот же номер (в разметке — E.164 из machine, на странице — формулировка факта); телефон и адрес — в HTML сервера: коллтрекинг подменяет номер поверх серверного, а не вставляет его с нуля ([проверено] телефон stamus есть только в браузере)'
     website:
       where: главная
       google: 'name, url, alternateName — для названия сайта в выдаче; SearchAction не нужен'
