@@ -49,13 +49,17 @@ normal: `font_needs()` (`web_families()` — только имена). Файл�
 
 Гарнитура в CSS: стек такого семейства — у токена fontFamily и у части `-family` типографического токена — идёт
 ссылкой на переменную семейства со стеком в запасе, `var(--font-<ключ>, <стек>)`. Ключ — имя семейства строчными,
-каждый отрезок вне латинских букв и цифр — дефис (`family_key()`): `Golos Text` → `--font-golos-text`, значение —
+каждый отрезок знаков вне латинских букв и цифр — один дефис, дефисы по краям срезаются (`family_key()`): `Golos
+Text` → `--font-golos-text`, значение —
 `var(--font-golos-text, "Golos Text", Arial, sans-serif)`. Сам файл переменную семейства не объявляет: без загрузчика
 шрифтов действует стек, а загрузчик кода, который подключает файл под своим именем `@font-face`, объявляет её на
 `:root` — и токены гарнитуры и роли текста берут его семейство. Стек системного или родового семейства идёт литералом.
-Литералом остаётся и стек семейства, чьё имя переменной занято переменной токена (`font.inter` → `--font-inter` при
-гарнитуре Inter): ссылка на себя оставила бы её без значения — предупреждение R-STRUCT-006, токен гарнитуры называют
-ролью. В передней части DESIGN.md, в tokens.json артефакта и в `show` стек — литералом.
+Литералом остаётся и стек семейства без ключа (в имени нет латинских букв и цифр) и семейства, чьё имя переменной
+занято переменной токена (`font.inter` → `--font-inter` при гарнитуре Inter): ссылка на себя оставила бы её без
+значения. Оба случая и два семейства с одним ключом (`PT Sans` и `PT-Sans` ссылаются на одну `--font-pt-sans`) —
+предупреждения R-STRUCT-006: загрузчик такую гарнитуру не подменит или подменит не той. Токен гарнитуры называют
+ролью, имя семейства пишут латиницей и одним написанием; переименование токена, который читает код, — решение
+владельца продукта. В передней части DESIGN.md, в tokens.json артефакта и в `show` стек — литералом.
 
 Типографика в CSS считается от того, что покажет браузер. Интерлиньяж: число DTCG — отношение, округлённое до шести
 знаков; когда оно недотягивает до целого px (14 px × 1.428571 = 19,999994), браузер усекает высоту строки до шага
@@ -102,8 +106,9 @@ projects/<slug>/design/_design-system/project/`: ссылка `src`, `href`, `po
   R-STRUCT-006  формат DTCG схемой (группы, `$type`, форма `$value` по типу, алиасы `{…}` ведут в токен того же типа,
                 без циклов; значения режимов; тема значений `base`; одна шкала space.*)                    error;
                 warning — вторая шкала, лимит семейств, px типографики из CSS расходится с px значения DTCG,
-                ключ `$extensions` вне известных сборке, режим токена с именем темы значений, переменная
-                семейства `--font-<ключ>` занята переменной токена
+                ключ `$extensions` вне известных сборке, режим токена с именем темы значений, гарнитура, которую
+                загрузчик шрифтов не подменит: имя переменной семейства `--font-<ключ>` занято переменной токена, у
+                имени семейства нет ключа, у двух семейств один ключ
   R-COV-010     тема брифа сайта или кабинета есть у токенов (тема значений `modes.base` или режим)           warning
   R-FRESH-001   system.tokens.css, передняя часть DESIGN.md, tokens.json и README артефакта равны сборке байт в байт
                 (README сверяется по началу файла: хвост, который дописывает страница артефакта, — не расхождение)
@@ -466,13 +471,11 @@ def token_themes(toks):
     return {first} | ({THEME_PAIR[first]} if THEME_PAIR[first] in toks.mode_names() else set())
 
 
-def font_needs(data):
-    """Начертания, которым нужен файл шрифта: {семейство: [насыщенности по возрастанию]} по порядку документа.
-    Семейство — первое имя стека каждого токена fontFamily и fontFamily типографических токенов, если оно не родовое и
-    не системное (GENERIC_FONTS, SYSTEM_FONTS); насыщенности — fontWeight типографических токенов этого семейства во
-    всех режимах, числом; у семейства без типографического токена список пуст — ему нужен хотя бы один файл. Токен,
-    значение которого не разрешается, пропускается: его называет R-STRUCT-006."""
-    toks, out = Tokens(data), {}
+def _web_fonts(toks):
+    """(семейство, токен, насыщенность) значений токенов fontFamily и типографических токенов во всех режимах, у
+    которых первому имени стека нужен файл шрифта (`web_family`), — по порядку документа. Насыщенность — fontWeight
+    типографического значения, у токена fontFamily — None. Значение, которое не разрешается, пропускается: его
+    называет R-STRUCT-006."""
     for t in toks.list:
         if t.type not in ("fontFamily", "typography"):
             continue
@@ -483,12 +486,21 @@ def font_needs(data):
                 continue
             typo = t.type == "typography" and isinstance(v, dict)
             name = web_family(v.get("fontFamily") if typo else v)
-            if not name:
-                continue
-            weights = out.setdefault(name, [])
-            w = weight_num(v.get("fontWeight")) if typo else None
-            if isinstance(w, (int, float)) and not isinstance(w, bool) and w not in weights:
-                weights.append(w)
+            if name:
+                yield name, t, weight_num(v.get("fontWeight")) if typo else None
+
+
+def font_needs(data):
+    """Начертания, которым нужен файл шрифта: {семейство: [насыщенности по возрастанию]} по порядку документа.
+    Семейство — первое имя стека каждого токена fontFamily и fontFamily типографических токенов, если оно не родовое и
+    не системное (GENERIC_FONTS, SYSTEM_FONTS); насыщенности — fontWeight типографических токенов этого семейства во
+    всех режимах, числом; у семейства без типографического токена список пуст — ему нужен хотя бы один файл. Токен,
+    значение которого не разрешается, пропускается: его называет R-STRUCT-006."""
+    out = {}
+    for name, _t, w in _web_fonts(Tokens(data)):
+        weights = out.setdefault(name, [])
+        if isinstance(w, (int, float)) and not isinstance(w, bool) and w not in weights:
+            weights.append(w)
     return {name: sorted(ws) for name, ws in out.items()}
 
 
@@ -506,8 +518,9 @@ def web_family(stack):
 
 
 def family_key(name):
-    """Ключ семейства по имени: строчными, каждый отрезок вне латинских букв и цифр — дефис (`Golos Text` →
-    `golos-text`); переменная семейства — `--font-<ключ>`. Имя без латинских букв и цифр — пустой ключ."""
+    """Ключ семейства по имени: строчными, каждый отрезок знаков вне латинских букв и цифр — один дефис, дефисы по
+    краям срезаются (`Golos Text` → `golos-text`, `M+ 1p` → `m-1p`); переменная семейства — `--font-<ключ>`. Имя без
+    латинских букв и цифр — пустой ключ: ключа у семейства нет."""
     return re.sub(r"[^a-z0-9]+", "-", str(name).lower()).strip("-")
 
 
@@ -567,7 +580,7 @@ def validate(data):
         if second in tops and "space" in tops:
             issues.append(Issue(pointer((second,)), f"вторая шкала отступов `{second}.*` рядом с `space.*`: шкала одна",
                                 "warning"))
-    issues += _extension_issues(data) + _base_mode_issues(toks) + _family_var_issues(data, toks)
+    issues += _extension_issues(data) + _base_mode_issues(toks) + _family_var_issues(toks)
     return issues
 
 
@@ -611,19 +624,39 @@ def _base_mode_issues(toks):
                   f"`{THEME_PAIR[first]}` или сменой `base` в корне")]
 
 
-def _family_var_issues(data, toks):
-    """Переменная семейства `--font-<ключ>` занята переменной токена: стек этой гарнитуры в производном CSS остаётся
-    литералом (`family_css`), и загрузчик шрифтов кода семейство не подменит — предупреждение на гарнитуру."""
+def _family_var_issues(toks):
+    """Гарнитура, которую загрузчик шрифтов кода не подменит или подменит не той, — по предупреждению на случай:
+    у имени семейства нет ключа или имя переменной семейства `--font-<ключ>` занято переменной токена (стек в
+    производном CSS остаётся литералом — `family_css`); у двух семейств один ключ (их стеки ссылаются на одну
+    переменную). Форму файла предупреждение не меняет."""
     taken = {n: t for t in toks.list for n in var_names(t)}
-    out = []
-    for name in font_needs(data):
+    first = {}
+    for name, t, _w in _web_fonts(toks):
+        first.setdefault(name, t)
+    out, same = [], {}
+    for name, t in first.items():
         key = family_key(name)
-        t = taken.get(f"font-{key}") if key else None
-        if t is not None:
-            out.append(Issue(t.pointer, f"переменная семейства `--font-{key}` гарнитуры «{name}» занята токеном "
-                                        f"`{'.'.join(t.path)}`: в производном CSS стек гарнитуры остаётся литералом, "
-                                        "загрузчик шрифтов кода её не подменит", "warning",
-                             "токен гарнитуры называют ролью (`font.text`, `font.display`), а не семейством"))
+        if not key:
+            out.append(Issue(t.pointer, f"у гарнитуры «{name}» нет ключа семейства — в имени нет латинских букв и "
+                                        "цифр: в производном CSS её стек остаётся литералом, загрузчик шрифтов кода "
+                                        "её не подменит", "warning",
+                             "имя семейства в стеке — латиницей, как в файле шрифта и в `font.family` строки "
+                             "манифеста"))
+            continue
+        same.setdefault(key, []).append(name)
+        held = taken.get(f"font-{key}")
+        if held is not None:
+            out.append(Issue(held.pointer, f"переменная семейства `--font-{key}` гарнитуры «{name}» занята токеном "
+                                           f"`{'.'.join(held.path)}`: в производном CSS стек гарнитуры остаётся "
+                                           "литералом, загрузчик шрифтов кода её не подменит", "warning",
+                             "токен гарнитуры называют ролью (`font.text`, `font.display`), а не семейством; "
+                             "переименование токена меняет имя переменной в коде — решает владелец продукта"))
+    for key, names in same.items():
+        if len(names) > 1:
+            out.append(Issue(first[names[1]].pointer,
+                             f"у гарнитур {', '.join(f'«{n}»' for n in names)} один ключ семейства: их стеки "
+                             f"ссылаются на одну переменную `--font-{key}`, загрузчик шрифтов кода объявит её одной "
+                             "гарнитурой", "warning", "одно семейство — одно написание имени во всех токенах"))
     return out
 
 
@@ -1798,7 +1831,8 @@ def _selftest():
            and "--font-ui: system-ui, -apple-system, sans-serif;" in wcss and "--font-serif: Georgia;" in wcss
            and "var(--font-" not in front_matter(Tokens(wf), "Проба", "описание")
            and "var(--font-" not in dump_artifact(artifact_tokens(Tokens(wf), "Проба")) and validate(wf) == []
-           and (family_key("IBM Plex Sans"), family_key("Шрифт")) == ("ibm-plex-sans", "")
+           and [family_key(n) for n in ("IBM Plex Sans", "M+ 1p", " Font (Beta) ", "Élan", "Шрифт")]
+           == ["ibm-plex-sans", "m-1p", "font-beta", "lan", ""]
            and family_css(["Шрифт Проекта", "serif"], set()) == '"Шрифт Проекта", serif')
     held = copy.deepcopy(wf)
     held["font"]["demo-display"] = {"$type": "fontFamily", "$value": ["Demo Display", "serif"]}
@@ -1808,7 +1842,22 @@ def _selftest():
            '--font-demo-display: "Demo Display", serif;' in hcss
            and '--type-title-family: "Demo Display", serif;' in hcss and "--font-sans: var(--font-golos-text, " in hcss
            and [(i.severity, i.pointer) for i in got] == [("warning", "/font/demo-display")]
-           and "`--font-demo-display`" in got[0].message and "`font.demo-display`" in got[0].message and got[0].fix)
+           and "`--font-demo-display`" in got[0].message and "`font.demo-display`" in got[0].message
+           and "владелец продукта" in got[0].fix)
+    mute = copy.deepcopy(wf)
+    mute["font"]["alt"] = {"$type": "fontFamily", "$value": ["Golos-Text", "sans-serif"]}
+    mute["type"]["local"] = {"$value": dict(doc["type"]["body"]["$value"], fontFamily=["Шрифт Проекта", "serif"])}
+    mcss, got = build_css(Tokens(mute)), validate(mute)
+    check_("гарнитура без ключа (в имени нет латинских букв и цифр) и два семейства с одним ключом — по "
+           "предупреждению с подсказкой; форма CSS та же: стек без ключа — литералом, оба семейства — ссылкой на одну "
+           "переменную",
+           '--type-local-family: "Шрифт Проекта", serif;' in mcss
+           and "--font-alt: var(--font-golos-text, Golos-Text, sans-serif);" in mcss
+           and '--font-sans: var(--font-golos-text, "Golos Text", Arial, sans-serif);' in mcss
+           and [(i.severity, i.pointer) for i in got] == [("warning", "/type/local"), ("warning", "/font/alt")]
+           and "«Шрифт Проекта»" in got[0].message and "нет ключа" in got[0].message and got[0].fix
+           and "«Golos Text», «Golos-Text»" in got[1].message and "`--font-golos-text`" in got[1].message
+           and got[1].fix)
     check_("темы токенов: тема значений и парная по режиму (light + dark); без режимов темы — одна",
            token_themes(toks) == {"light", "dark"} and token_themes(Tokens({"font": doc["font"]})) == {"light"})
     _selftest_themes(check_)
