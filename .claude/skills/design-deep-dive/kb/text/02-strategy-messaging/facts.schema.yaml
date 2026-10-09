@@ -434,7 +434,7 @@ $defs:
       - type: object
         additionalProperties: false
         required: [type, hours]
-        description: "Часы работы; разметка — OpeningHoursSpecification."
+        description: "Часы работы; круглосуточно — opens 00:00, closes 24:00; разметка — OpeningHoursSpecification."
         properties:
           type: {const: opening-hours}
           hours:
