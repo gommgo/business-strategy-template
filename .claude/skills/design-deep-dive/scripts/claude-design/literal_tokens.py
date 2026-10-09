@@ -1083,9 +1083,10 @@ def selftest():
     load_css_tokens(':root { --font-text: var(--font-golos-text, "Golos Text", Arial, sans-serif);\n'
                     '  --type-body-family: var(--font-golos-text, "Golos Text", Arial, sans-serif);\n'
                     '  --type-code-family: var(--font-mono); --font-mono: "Demo Mono", monospace;\n'
+                    '  --type-note-family: var(--font-mono, "Reserve Mono", monospace);\n'
                     '  --type-lost-family: var(--font-nope); }\n', tf, "selftest.css")
-    check("гарнитура ссылкой на переменную семейства: файл её не объявляет — стек в запасе; объявленная — её значение",
-          sorted(tf.families), ["demo mono", "golos text", "var(--font-nope)"])
+    check("гарнитура ссылкой на переменную семейства: файл её не объявляет — стек в запасе; объявленная — её значение, "
+          "и при запасе у ссылки", sorted(tf.families), ["demo mono", "golos text", "var(--font-nope)"])
 
     def outside(decls):
         return sorted((x.family, x.raw) for x in block_literals(decls, 1) if in_tokens(x, tk) == (False, True))
