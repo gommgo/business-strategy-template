@@ -28,11 +28,17 @@
 Тема значений `$value` — `light`, пока корень токенов не объявил другую: `$extensions["org.design-deep-dive.modes"].base` —
 `light` или `dark`. От неё — `color-scheme` в `:root` (у продукта с одной тёмной темой — `dark`) и первая тема
 артефакта; режим токена с именем парной темы даёт вторую тему — её блок включается и по настройке системы
-(`prefers-color-scheme`), и атрибутом `[data-theme]`. Темы, которых ждут брифы — бриф сайта каждой поверхности слоя
-страницы и бриф на вид кабинета, блок `themes` (две темы — `dark.needed` или `default: system`, иначе одна —
-`default`), — есть у токенов темой значений или режимом; иначе R-COV-010 (`theme_gaps()`): сайт в тёмной теме на
-токенах без `modes.base: dark` получил бы `color-scheme: light`, и системные элементы страницы были бы светлыми. Ту же
-нехватку манифест готовности несёт строкой open «тема: …» единиц поверхности (ready.py) — публикацию она держит.
+(`prefers-color-scheme`), и атрибутом `[data-theme]`. Каждый блок темы объявляет её `color-scheme`: у продукта с двумя
+темами `:root` несёт обе (решает система), блок парной темы — её схему и по системе, и под атрибутом, а тема значений
+под атрибутом — блок `:root[data-theme="<тема значений>"]` с одной её схемой: без него выбор темы значений при другой
+теме системы оставил бы системные элементы страницы (чекбокс, полосы прокрутки) в теме системы. Режим с другим
+именем — правка поверх действующей темы: своей схемы у его блока нет, и второй темой он продукт не делает.
+
+Темы, которых ждут брифы — бриф сайта каждой поверхности слоя страницы и бриф на вид кабинета, блок `themes` (две темы
+— `dark.needed` или `default: system`, иначе одна — `default`), — есть у токенов темой значений или режимом; иначе
+R-COV-010 (`theme_gaps()`): сайт в тёмной теме на токенах без `modes.base: dark` получил бы `color-scheme: light`, и
+системные элементы страницы были бы светлыми. Ту же нехватку манифест готовности несёт строкой open «тема: …» единиц
+поверхности (ready.py) — публикацию она держит.
 
 Шрифты: семейство, которому нужен файл, — первое имя стека токена fontFamily или fontFamily типографического токена,
 если оно не родовое (`GENERIC_FONTS`) и не системное (`SYSTEM_FONTS`); прочие имена стека — запасные, файлов им не
@@ -909,7 +915,8 @@ def build_css(toks):
     themes = [m for m in modes if m not in DENSITY and m != REDUCED]
     first = base_theme(toks.data)
     pair = THEME_PAIR[first]
-    lines = [CSS_HEAD, ":root {", f"  color-scheme: {f'{first} {pair}' if themes else first};"]
+    two = pair in themes
+    lines = [CSS_HEAD, ":root {", f"  color-scheme: {f'{first} {pair}' if two else first};"]
     lines += [f"  {_var(n)}: {v};" for n, v in base]
     lines.append("}")
 
@@ -927,6 +934,10 @@ def build_css(toks):
                       "(ux 09/03 §7.1). */",
                   f"@media (width < {nar['below']}) {{", "  :root {", f"    --type-body-size: {nar['size']};", "  }",
                   "}"]
+    if two and not (first in themes and block(first)):
+        lines += ["", f"/* Тема «{THEMES[first]}» ({first}) — тема значений: под атрибутом — её color-scheme, иначе "
+                      "системные элементы остаются в теме системы. */",
+                  f':root[data-theme="{first}"] {{', f"  color-scheme: {first};", "}"]
     for mode in themes:
         rows = block(mode)
         if not rows:
@@ -937,7 +948,7 @@ def build_css(toks):
         if mode == pair:
             lines += [f"@media (prefers-color-scheme: {mode}) {{", f'  :root:not([data-theme="{first}"]) {{',
                       f"    color-scheme: {mode};"] + [f"    {_var(n)}: {v};" for n, v in rows] + ["  }", "}", ""]
-        lines += [f':root[data-theme="{mode}"] {{'] + ([f"  color-scheme: {mode};"] if mode == pair else []) + \
+        lines += [f':root[data-theme="{mode}"] {{'] + ([f"  color-scheme: {mode};"] if mode in THEMES else []) + \
                  [f"  {_var(n)}: {v};" for n, v in rows] + ["}"]
     if REDUCED in modes:
         rows = block(REDUCED)
@@ -1731,6 +1742,22 @@ def _selftest():
     check_("тема значений не объявлена: с тёмным режимом — color-scheme: light dark, без режимов темы — light",
            "  color-scheme: light dark;\n" in css and "  color-scheme: light;\n" in build_css(Tokens(lite))
            and [x["id"] for x in artifact_tokens(Tokens(lite), "Проба")["color"]["themes"]] == ["light"])
+    check_("две темы: каждый блок темы объявляет её color-scheme — тема значений под атрибутом одну свою, парная — по "
+           "системе и под атрибутом; у одной темы блоков темы нет",
+           ':root[data-theme="light"] {\n  color-scheme: light;\n}\n' in css
+           and ':root:not([data-theme="light"]) {\n    color-scheme: dark;\n' in css
+           and ':root[data-theme="dark"] {\n  color-scheme: dark;\n' in css and css.count(" color-scheme: ") == 4
+           and "data-theme" not in build_css(Tokens(lite)))
+    own = copy.deepcopy(lite)
+    own["color"]["bg"]["$extensions"] = {EXT_MODES: {"contrast": "{primitive.color.ink}"}}
+    ocss = build_css(Tokens(own))
+    mix = copy.deepcopy(doc)
+    mix["color"]["scrim"]["$extensions"] = {EXT_MODES: {"contrast": "{primitive.color.ink}"}}
+    check_("режим с другим именем — правка поверх действующей темы: своей схемы у блока нет, второй темой продукт он "
+           "не делает (color-scheme: light, блока темы значений нет); при двух темах — блок без схемы",
+           "  color-scheme: light;\n" in ocss and ocss.count(" color-scheme: ") == 1
+           and ':root[data-theme="contrast"] {\n  --color-bg: #000000;' in ocss and 'data-theme="light"' not in ocss
+           and ':root[data-theme="contrast"] {\n  --color-scrim: #000000;' in build_css(Tokens(mix)))
     dark = copy.deepcopy(lite)
     dark["$extensions"] = {EXT_MODES: {"base": "dark"}}
     dark["color"]["bg"]["$value"], dark["color"]["text"]["$value"] = "{primitive.color.ink}", "{primitive.color.paper}"
@@ -1743,8 +1770,9 @@ def _selftest():
     both["color"]["bg"]["$extensions"] = {EXT_MODES: {"light": "{primitive.color.paper}"}}
     both["color"]["text"]["$extensions"] = {EXT_MODES: {"light": "{primitive.color.ink}"}}
     bcss, bart = build_css(Tokens(both)), artifact_tokens(Tokens(both), "Проба")
-    check_("тёмная тема значений со светлым режимом: color-scheme: dark light, блок светлой — по системе и атрибутом",
-           "  color-scheme: dark light;\n" in bcss
+    check_("тёмная тема значений со светлым режимом: color-scheme: dark light, блок светлой — по системе и атрибутом, "
+           "тёмная под атрибутом — блок с её схемой",
+           "  color-scheme: dark light;\n" in bcss and ':root[data-theme="dark"] {\n  color-scheme: dark;\n}\n' in bcss
            and '@media (prefers-color-scheme: light) {\n  :root:not([data-theme="dark"]) {\n    color-scheme: light;\n'
            in bcss
            and re.search(r':root\[data-theme="light"\] \{\n  color-scheme: light;\n  --color-bg: #FFFFFF;', bcss)
@@ -1860,11 +1888,13 @@ def _selftest():
     bad["color"]["bg"]["$extensions"][EXT_MODES]["light"] = "{primitive.color.ink}"
     bad["color"]["text"]["$extensions"][EXT_MODES]["light"] = "{primitive.color.paper}"
     got = validate(bad)
+    scss = build_css(Tokens(bad))
     check_("режим токена с именем темы значений — одно предупреждение с числом токенов; у темы значений dark режим "
-           "light — чисто",
+           "light — чисто; в CSS блок этой темы под атрибутом один — со схемой и значениями режима",
            len(got) == 1 and got[0].severity == "warning" and "токенов — 2" in got[0].message
            and got[0].pointer == f"/color/bg/$extensions/{EXT_MODES}/light" and "`dark`" in got[0].fix
-           and validate(both) == [])
+           and validate(both) == [] and scss.count(':root[data-theme="light"] {') == 1
+           and ':root[data-theme="light"] {\n  color-scheme: light;\n  --color-bg: #000000;' in scss)
     # 3. эталоны баз проходят формат
     ref = reference_tokens()
     check_("эталон ui 09/04 §4 проходит формат DTCG (0 ошибок)",

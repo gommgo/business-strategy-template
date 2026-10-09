@@ -122,6 +122,11 @@
   }
 }
 
+/* Тема «Светлая» (light) — тема значений: под атрибутом — её color-scheme, иначе системные элементы остаются в теме системы. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
 /* Тема «Тёмная» (dark): на :root, где объявлены переменные, иначе алиасы не пересчитаются. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
