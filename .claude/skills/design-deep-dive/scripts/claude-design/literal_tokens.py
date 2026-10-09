@@ -371,18 +371,21 @@ def add_value(ts, name, value, cat=None):
 
 
 def load_css_tokens(text, ts, source):
-    """CSS-переменные всех блоков (темы, плотность, узкая ширина): значения, имена, темы, брейкпоинты."""
+    """CSS-переменные всех блоков (темы, плотность, узкая ширина): значения, имена, темы, брейкпоинты. Ссылка
+    `var(--x, запас)` — значение `--x` этого файла, а переменной, которую файл не объявляет (переменная семейства
+    шрифта производного CSS), — значение в запасе."""
     decl = re.findall(r"(--[A-Za-z0-9_-]+)\s*:\s*([^;{}]+);", text)
     raw = {}
     for name, val in decl:
         raw.setdefault(name, val.strip())
     for name, val in decl:
         v = val.strip()
-        for _ in range(8):                               # var(--x) → значение x
-            m = re.search(r"var\(\s*(--[A-Za-z0-9_-]+)\s*(?:,[^()]*)?\)", v)
-            if not m or m.group(1) not in raw:
+        for _ in range(8):                               # var(--x) → значение x, иначе запасное
+            m = re.search(r"var\(\s*(--[A-Za-z0-9_-]+)\s*(?:,([^()]*))?\)", v)
+            sub = raw.get(m.group(1), m.group(2)) if m else None
+            if sub is None:
                 break
-            v = v[:m.start()] + raw[m.group(1)] + v[m.end():]
+            v = v[:m.start()] + sub.strip() + v[m.end():]
         ts.names.add(name)
         add_value(ts, name[2:], v)
     first = css_first_theme(text)
@@ -1030,6 +1033,8 @@ def selftest():
     tc = load_tokens([fx_css])
     check("CSS фикстуры cabinet-ds: брейкпоинты", tc.breakpoints, [640.0, 1024.0, 1440.0])
     check("CSS: темы light и dark", tc.themes, ["light", "dark"])
+    check("CSS: гарнитура — семейство стека в запасе ссылки на переменную семейства", sorted(tc.families),
+          ["golos text"])
     check("CSS: длительности", sorted(tc.durations), [100.0, 150.0, 200.0])
     check("CSS: тень elevation-raised", len(tc.shadows) >= 1, True)
     fx_dtcg = kbpaths.scripts("tests", "fixtures", "cabinet-ds", "files", "design", "system.tokens.json")
@@ -1074,6 +1079,13 @@ def selftest():
     check("CSS: первая тема тёмная, блок светлой — темы [dark, light]", td2.themes, ["dark", "light"])
     check("резиновый токен: границы clamp() в px", (tk.ranges.get("font-size"), tk.ranges.get("spacing")),
           ([(36.0, 56.0, "type-display-size")], [(48.0, 96.0, "space-section")]))
+    tf = TokenSet()
+    load_css_tokens(':root { --font-text: var(--font-golos-text, "Golos Text", Arial, sans-serif);\n'
+                    '  --type-body-family: var(--font-golos-text, "Golos Text", Arial, sans-serif);\n'
+                    '  --type-code-family: var(--font-mono); --font-mono: "Demo Mono", monospace;\n'
+                    '  --type-lost-family: var(--font-nope); }\n', tf, "selftest.css")
+    check("гарнитура ссылкой на переменную семейства: файл её не объявляет — стек в запасе; объявленная — её значение",
+          sorted(tf.families), ["demo mono", "golos text", "var(--font-nope)"])
 
     def outside(decls):
         return sorted((x.family, x.raw) for x in block_literals(decls, 1) if in_tokens(x, tk) == (False, True))
