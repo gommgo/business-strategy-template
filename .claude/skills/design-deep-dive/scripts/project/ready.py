@@ -61,7 +61,11 @@
                                       (ds_build.font_needs — семейство и насыщенности его типографики), без принятой
                                       строки манифеста ассетов продукта с этим font, файлом и лицензией, и «тема: …»:
                                       бриф поверхности ждёт темы, которой нет у токенов ДС (ds_build.theme_gaps,
-                                      правило R-COV-010); затем строки «решение заказчика: …» — ДС не утверждена, у
+                                      правило R-COV-010); вход сверки, который есть, но не читается, — та же строка с
+                                      причиной «… сверить нечем»: токены ДС (не разбираются, не объект или не по
+                                      форме — ошибки R-STRUCT-006) — «шрифт: …» и «тема: …», бриф — «тема: …», план
+                                      ассетов страницы — «демо-кадр: …»; токенов или брифа нет — строки нет; затем
+                                      строки «решение заказчика: …» — ДС не утверждена, у
                                       кабинета ещё покрытие ДС типов своего экрана не полное (ds_coverage) и FSD-карта
                                       не stable, и открытые источники группы «контекст» («<путь> <статус>»,
                                       context_open): готовность они не держат, решает заказчик
@@ -151,9 +155,10 @@ HEADER = ("# ready.yaml — готовность поверхности {surface
 # ------------------------------------------------------------------ окружение и модули соседей
 
 def _reexec_venv():
-    """Без PyYAML в текущем Python — один перезапуск в Python окружения скилла."""
+    """Без PyYAML или jsonschema (формат токенов ДС сверяет `ds_build.validate`) в текущем Python — один перезапуск
+    в Python окружения скилла."""
     import importlib.util
-    if importlib.util.find_spec("yaml") is not None:
+    if all(importlib.util.find_spec(m) is not None for m in ("yaml", "jsonschema")):
         return
     py = kbpaths.python()
     if os.environ.get("DDD_READY_VENV") or not Path(py).exists():
@@ -276,6 +281,7 @@ class Build:
         self.header_cta = ""
         self.facts_unreadable = False
         self._facts = None
+        self._tokens = None
         self._fonts = None
         self._theme = None
         self._src = {}
@@ -295,6 +301,21 @@ class Build:
     def ds_status(self):
         return docpaths.status(self.dprod("system")) if self.dprod("system").is_file() else None
 
+    def tokens(self):
+        """Токены ДС для сверок шрифта и темы: (словарь, None). Файла нет — (None, None): ДС без токенов — решение
+        заказчика (строка «ДС не утверждена»), сверять нечего. Файл есть, а не разбирается, не объект или не по форме
+        DTCG (ошибки `ds_build.validate`, правило R-STRUCT-006: по токену с ошибкой начертание или тему не вывести)
+        — (None, причина): сверить нечем, и строки open «шрифт: …» и «тема: …» называют причину вместо находок."""
+        if self._tokens is None:
+            p = self.dprod("tokens")
+            data, why = load(p), None
+            if p.is_file() and not isinstance(data, dict):
+                why = f"токены ДС не читаются ({self.prel(p)})"
+            elif isinstance(data, dict) and any(i.severity == "error" for i in mod("ds_build").validate(data)):
+                why = f"токены ДС не по форме ({self.prel(p)}: ошибки R-STRUCT-006)"
+            self._tokens = (data if isinstance(data, dict) and not why else None, why)
+        return self._tokens
+
     @property
     def fonts_open(self):
         """Строки open «шрифт: <семейство> [<насыщенности>] …» — у каждой единицы: начертание токенов ДС, которому
@@ -302,9 +323,10 @@ class Build:
         принятой строки манифеста ассетов продукта с этим `font` (семейство, насыщенность числом или диапазоном
         вариативного шрифта, `style: normal`), файлом на диске и лицензией `license`. Семейству без типографического
         токена хватает одного такого файла. Код подключает шрифты по строкам манифеста; без файла начертания
-        страница — не та, что одобрена на макете."""
+        страница — не та, что одобрена на макете. Токены не читаются или не по форме (`tokens`) — строка «шрифт: … —
+        начертания сверить нечем»; манифест, который не читается, строк не снимает: принятого файла по нему нет."""
         if self._fonts is None:
-            data = load(self.dprod("tokens"))
+            data, unread = self.tokens()
             man = self.dprod("assets") / "manifest.yaml"
             rows = load(man)
             rows = rows.get("assets") if isinstance(rows, dict) else rows
@@ -315,9 +337,8 @@ class Build:
                 if span and r.get("status") == "accepted" and isinstance(r.get("file"), str) \
                         and (man.parent / r["file"]).is_file() and str(r.get("license") or "").strip():
                     have.setdefault(str(f.get("family")).lower(), []).append(span)
-            needs = mod("ds_build").font_needs(data) if isinstance(data, dict) else {}
-            self._fonts = []
-            for fam, weights in needs.items():
+            self._fonts = [f"шрифт: {unread} — начертания сверить нечем"] if unread else []
+            for fam, weights in (mod("ds_build").font_needs(data) if data else {}).items():
                 got = have.get(fam.lower(), [])
                 lack = [w for w in weights if not any(lo <= w <= hi for lo, hi in got)]
                 if lack or not got:
@@ -331,18 +352,27 @@ class Build:
         """Строка open «тема: …» — у каждой единицы: бриф поверхности (у сайта — бриф сайта, у кабинета — бриф на вид)
         ждёт темы, которой нет у токенов ДС ни темой значений `modes.base`, ни режимом (`ds_build.theme_gaps`, правило
         R-COV-010). Код ставит тему брифа атрибутом `data-theme`; без неё у токенов страница получит не ту
-        `color-scheme`. Токены не читаются или не по форме — строки нет: их называет R-STRUCT-006."""
+        `color-scheme`. Бриф есть, а сверить нечем — он сам не читается или токены не читаются или не по форме
+        (`tokens`) — строка «тема: … сверить нечем». Брифа или токенов нет — строки нет: сверять нечего."""
         if self._theme is None:
-            self._theme = []
             DB = mod("ds_build")
-            data = load(self.dprod("tokens"))
-            try:
-                gaps = DB.theme_gaps(DB.Project.of(self.slug, self.repo), DB.Tokens(data)) if isinstance(data, dict) else []
-            except Exception:                                   # noqa: BLE001 — формат токенов сверяет ds_build check
-                gaps = []
+            data, unread = self.tokens()
             own = self.surface if self.surf.page else None
-            self._theme = [f"тема: бриф ждёт {', '.join(sorted(need))}, у токенов ДС — {', '.join(sorted(have))} "
-                           "(тема значений modes.base или режим)" for surf, _path, need, have in gaps if surf == own]
+            brief = docpaths.site(self.slug, own, "brief", repo=self.repo) if own else self.dprod("app-brief")
+            self._theme, has = [], brief.is_file()
+            if has and not isinstance(load(brief), dict):
+                self._theme = [f"тема: бриф не читается ({self.prel(brief)}) — тему сверить нечем"]
+            elif has and unread:
+                self._theme = [f"тема: {unread} — тему брифа сверить нечем"]
+            elif has and data is not None:
+                try:
+                    gaps = DB.theme_gaps(DB.Project.of(self.slug, self.repo), DB.Tokens(data))
+                except Exception:                           # noqa: BLE001 — темы брифов продукта не вывести
+                    gaps = None
+                self._theme = ["тема: темы брифов не вывести (ds_build.theme_gaps) — тему сверить нечем"] \
+                    if gaps is None else [
+                        f"тема: бриф ждёт {', '.join(sorted(need))}, у токенов ДС — {', '.join(sorted(have))} "
+                        "(тема значений modes.base или режим)" for surf, _path, need, have in gaps if surf == own]
         return self._theme
 
     def review(self):
@@ -645,11 +675,15 @@ class Build:
 
     def demo_slots(self, pid):
         """id слотов плана ассетов страницы с демо-кадром (расширение x-demo слота): кадр стоит на макете, в
-        публикацию идёт файл слота."""
-        d = load(self.dsurf("asset-plans") / f"{pid}.yaml")
+        публикацию идёт файл слота. План есть, а не читается (не разбирается, не объект, `slots` не списком) — одна
+        строка с причиной: демо-кадры сверить нечем."""
+        p = self.dsurf("asset-plans") / f"{pid}.yaml"
+        d = load(p)
+        slots = get(d, "slots", default=[]) or []
+        if p.is_file() and not (isinstance(d, dict) and isinstance(slots, list)):
+            return [f"план ассетов не читается ({self.prel(p)}) — демо-кадры сверить нечем"]
         demo = mod("canvas_input").demo_files
-        return [str(sl["id"]) for sl in get(d, "slots", default=[]) or [] if isinstance(sl, dict) and sl.get("id")
-                and demo(sl)]
+        return [str(sl["id"]) for sl in slots if isinstance(sl, dict) and sl.get("id") and demo(sl)]
 
     @staticmethod
     def open_list(opened, decide):
@@ -1555,9 +1589,16 @@ def _selftest():
         tk.write_text(json.dumps(dict(ink, **{"$extensions": {"org.design-deep-dive.modes": {"base": "dark"}}})),
                       encoding="utf-8")
         d_based = build(slug, surf, root, today)
+        tk.write_text("{", encoding="utf-8")
+        d_unread = build(slug, surf, root, today)
         tk.unlink()
         bp.write_text(bp.read_text(encoding="utf-8").replace("themes:\n  default: dark\n", "themes:\n  default: light\n",
                                                              1), encoding="utf-8")
+        ap = docpaths.design(slug, "asset-plans", surface="promo", repo=root) / "spasibo.yaml"
+        aptext = ap.read_text(encoding="utf-8")
+        ap.write_text("slots: [\n", encoding="utf-8")
+        d_noplan = build(slug, surf, root, today)
+        ap.write_text(aptext, encoding="utf-8")
         theme = "тема: бриф ждёт dark, у токенов ДС — light (тема значений modes.base или режим)"
         s_dark, s_based = ({u["id"]: u for u in x["units"]}["spasibo"] for x in (d_dark, d_based))
         check("тема брифа, которой нет у токенов ДС, — строка open «тема: …» у каждой единицы: готовность не держит, "
@@ -1565,6 +1606,17 @@ def _selftest():
               all(theme in u["open"] for u in d_dark["units"]) and s_dark["ready"] and not s_dark["publishable"]
               and not any(o.startswith("тема:") for u in d_based["units"] for o in u["open"])
               and s_based["publishable"])
+        s_unread, s_noplan = ({u["id"]: u for u in x["units"]}["spasibo"] for x in (d_unread, d_noplan))
+        gone = "токены ДС не читаются (design/system.tokens.json)"
+        check("вход сверки публикации есть, но не читается — сверить нечем: единица готова, публикацию держит строка "
+              "open с причиной — токены ДС: «шрифт: … начертания сверить нечем» и «тема: … тему брифа сверить нечем»; "
+              "план ассетов страницы: «демо-кадр: … демо-кадры сверить нечем»",
+              s_unread["ready"] and not s_unread["publishable"]
+              and f"шрифт: {gone} — начертания сверить нечем" in s_unread["open"]
+              and f"тема: {gone} — тему брифа сверить нечем" in s_unread["open"]
+              and s_noplan["ready"] and not s_noplan["publishable"]
+              and "демо-кадр: план ассетов не читается (design/promo/assets/plans/spasibo.yaml) — демо-кадры сверить "
+                  "нечем" in s_noplan["open"])
         dk.write_text(approved.replace("        - {id: a, text: 'Прораб позвонит и договорится о дне замера', status: "
                                        "assumed, source: ai-self}\n        chosen: a\n",
                                        "        - {id: a, text: '[PLACEHOLDER: срок звонка] Прораб позвонит', status: "
@@ -1739,6 +1791,28 @@ def _selftest():
               and len(cov_lines["plan-dashboard"]) == 1 and "KpiTile" in cov_lines["plan-dashboard"][0]
               and not any(v for u, v in cov_lines.items() if u != "plan-dashboard")
               and not any(w in x for x in d["blockers"] for w in ("ДС", "FSD", "покрытие")))
+        tk = docpaths.design(slug, "tokens", repo=root)
+        tk0, lost = tk.read_text(encoding="utf-8"), {}
+        for form, text in (("не разбираются", "{"), ("список", "[]")):
+            tk.write_text(text, encoding="utf-8")
+            lost[form] = next(u for u in build(slug, surf, root, today)["units"] if u["id"] == "plan-dashboard")
+        void = json.loads(tk0)
+        void["font"]["sans"]["$value"] = "{font.nowhere}"
+        tk.write_text(json.dumps(void, ensure_ascii=False), encoding="utf-8")
+        odd = next(u for u in build(slug, surf, root, today)["units"] if u["id"] == "plan-dashboard")
+        tk.write_text(tk0, encoding="utf-8")
+        back = next(u for u in build(slug, surf, root, today)["units"] if u["id"] == "plan-dashboard")
+        gone = "токены ДС не читаются (design/system.tokens.json)"
+        form = "токены ДС не по форме (design/system.tokens.json: ошибки R-STRUCT-006)"
+        check("кабинет: токены ДС есть, но не читаются (не разбираются, не объект) или не по форме (семейство шрифта — "
+              "алиас в пустоту) — экран с принятым макетом готов (отпечаток одобрения стоит на производном CSS), "
+              "публикацию держат строки open «шрифт: … сверить нечем» и «тема: … сверить нечем»; токены возвращены — "
+              "экран публикуем",
+              all(u["ready"] and not u["publishable"] and f"шрифт: {gone} — начертания сверить нечем" in u["open"]
+                  and f"тема: {gone} — тему брифа сверить нечем" in u["open"] for u in lost.values())
+              and odd["ready"] and not odd["publishable"] and f"шрифт: {form} — начертания сверить нечем" in odd["open"]
+              and f"тема: {form} — тему брифа сверить нечем" in odd["open"]
+              and back["ready"] and back["publishable"])
         r = subprocess.run([sys.executable, me, "build", slug, "office", "--repo", str(root), "--today", today.isoformat()],
                            capture_output=True, text=True)
         check("build: решения заказчика — строками «решение заказчика: …» с единицами",
