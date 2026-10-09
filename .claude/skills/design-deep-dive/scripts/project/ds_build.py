@@ -107,7 +107,8 @@ projects/<slug>/design/_design-system/project/`: ссылка `src`, `href`, `po
   R-COV-010     тема брифа сайта или кабинета есть у токенов (тема значений `modes.base` или режим)           warning
   R-FRESH-001   system.tokens.css, передняя часть DESIGN.md, tokens.json и README артефакта равны сборке байт в байт
                 (README сверяется по началу файла: хвост, который дописывает страница артефакта, — не расхождение)
-                error; нет прозы — warning
+                error; нет прозы — warning. Пересборка, которая меняет system.tokens.css, снимает одобрения принятых
+                макетов: файл — источник отпечатка одобрения единицы (ready.py); подсказка находки это называет
   R-REF-008     команда artifact: у файла ассета, на который ссылается исходник артефакта, или у записи индекса нет
                 id в ответе загрузки                                                                          warning
 Код выхода: 0 — нет error, 1 — есть error, 2 — ошибка вызова или окружения.
@@ -1477,8 +1478,13 @@ def check(prj):
         fresh = readme_fresh(disk, built[path]) if path == prj.art_readme else disk == built[path]
         if not fresh:
             rep.add("R-FRESH-001", "error", surface=None, kind=KIND, ref=ref, path=prj.rel(path),
-                    message=f"{_what(path, prj)} от сборки: {_first_diff(disk, built[path])}", fix=fix)
+                    message=f"{_what(path, prj)} от сборки: {_first_diff(disk, built[path])}",
+                    fix=fix + (CSS_APPROVALS if path == prj.css_path else ""))
     return rep.items
+
+
+CSS_APPROVALS = ("; пересборка изменит system.tokens.css — источник отпечатка одобрения: одобрения принятых макетов "
+                 "сняты до новой приёмки, решает владелец продукта")
 
 
 def _what(path, prj):
@@ -2023,10 +2029,13 @@ def _selftest():
         # правка значения без сборки
         raw = prj.tokens_path.read_text(encoding="utf-8")
         prj.tokens_path.write_text(raw.replace('"hex": "#1d4ed8"', '"hex": "#1e40af"', 1), encoding="utf-8")
-        got = {(f.rule, f.ref) for f in check(prj) if f.severity == "error"}
-        check_("правка значения токена без build → R-FRESH-001 (CSS, передняя часть, tokens.json)",
+        stale = [f for f in check(prj) if f.severity == "error"]
+        got = {(f.rule, f.ref) for f in stale}
+        check_("правка значения токена без build → R-FRESH-001 (CSS, передняя часть, tokens.json); у CSS подсказка "
+               "называет цену пересборки — одобрения принятых макетов",
                {("R-FRESH-001", "tokens-css"), ("R-FRESH-001", "design-md#front-matter"),
-                ("R-FRESH-001", "artifact#tokens.json")} <= got)
+                ("R-FRESH-001", "artifact#tokens.json")} <= got
+               and [f.ref for f in stale if "одобрения" in f.fix] == ["tokens-css"])
         with tempfile.TemporaryDirectory(prefix="ddd-ds-out-") as od:
             build(prj, out=od)
             outp = Path(od) / prj.rel(prj.css_path)
