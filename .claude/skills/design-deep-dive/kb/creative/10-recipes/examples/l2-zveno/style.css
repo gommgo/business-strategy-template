@@ -179,7 +179,7 @@ html.gl-pending .steps--right .step, html.gl-on .steps--right .step { left: auto
 
 .foot { position: relative; z-index: 1; background: var(--c-bg); border-top: 1px solid var(--c-line); padding: 32px var(--space-page-x) 40px; color: var(--c-muted); font-size: .95rem; }
 .foot p { margin: 0 0 8px; }
-.foot__demo { font-size: .85rem; }
+.foot__demo { font-size: .85rem; max-width: 60ch; }
 
 @media (max-width: 60rem) {
   .top__nav { display: none; }
