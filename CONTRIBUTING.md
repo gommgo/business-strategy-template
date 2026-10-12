@@ -125,6 +125,8 @@ FSD-слои, DDD-термины) и структурных идентифика
 - `scripts/maint/accept.py --base <коммит> --mask <glob> [--smoke <папка>]` — изменённые файлы под масками, разбор
   YAML и JSON, ссылки и следы в изменённых строках, смоук своей папки;
 - `scripts/tests/smoke.py` — полный смоук, 0 FAIL; самопроверки тронутых утилит;
+- правка кода страницы `scripts/ui/ui_audit.py` (`COLLECT_JS`) — ещё `ui_audit.py --selftest --browser`: смоук идёт
+  без браузера, а строки абзацев (H8) держит браузерная часть самопроверки;
 - `scripts/maint/fixture_gen.py build --all --check` и `scripts/maint/sync_check.py` — фикстуры, производные файлы,
   управляемые копии и описания скиллов совпадают со сборкой;
 - `scripts/maint/canon_check.py` и `scripts/maint/mapcheck.py kb/INDEX.md` — таблица «норма → место» и адреса карты;

@@ -55,13 +55,14 @@ J раскладка, K движение, L приметы вида, M сокр�
 ряда выровнены (J9). Находка несёт id приметы реестра `kb/common/tells.yaml` (раздел `checks`, ключ
 `ui_audit:<id проверки>`), отчёт сводит приметы без повторов.
 
-Длина строки абзаца (H8) — знаков в самой длинной строке, как строки разложил браузер: у `p`, `li`, `dd` и
-`blockquote` длиннее 120 знаков страница читает прямоугольник каждого знака: знак — то, что нарисовано с ненулевой
-шириной (схлопнутый пробел — нет), строка — знаки на одной высоте (центр по вертикали ближе половины высоты знака),
-пробелы по краям строки (висящий у переноса) не считаются; текст вложенного абзаца, пункта или цитаты — их строки,
-визуально скрытый текст не считается. Порог — `measure_chars` пресета, в окне уже
-первого брейкпоинта — `measure_chars_narrow`. Данные без строк (синтетика вызывающей утилиты) — ширина абзаца
-против `para_max_width`.
+Длина строки абзаца (H8) — знаков в самой длинной строке, как строки разложил браузер. У каждого `p`, `li`, `dd` и
+`blockquote` страница читает прямоугольник каждого знака: знак — графема (эмодзи, флаг, буква с комбинирующим знаком —
+один знак), нарисованная с ненулевой шириной (схлопнутый пробел — нет); знак продолжает строку, когда по вертикали
+перекрывает предыдущий знак не меньше чем на половину высоты меньшего из двух (инлайн-код, сдвинутые слова и буквица
+строку не рвут); висящий пробел у переноса не считается; текст вложенного абзаца, пункта или цитаты — их строки,
+визуально скрытый текст не считается. H8 судит абзацы длиннее 120 знаков; порог — `measure_chars`
+пресета, в окне уже первого брейкпоинта — `measure_chars_narrow`. Данные без строк (синтетика вызывающей утилиты) —
+ширина абзаца против `para_max_width`.
 
 Профиль страницы сайта — `marketing` (`scripts/ui/data/marketing-profile.yaml`): пресет страницы (шкалы отступов,
 радиусов, высот, кеглей, слоёв и длительностей `preset.*` — их читают проверки, когда токены ДС не переданы) и таблица
@@ -560,13 +561,17 @@ COLLECT_JS = r"""
     return { w: Math.round(w * 100) / 100, h: Math.round(h * 100) / 100 };
   };
 
-  // строки абзаца, как их разложил браузер (H8): знаков в каждой строке. Знак — то, что нарисовано с ненулевой
-  // шириной (схлопнутый пробел — нет); строка — знаки на одной высоте (центр по вертикали ближе половины высоты знака),
-  // пробелы по краям строки (висящий у переноса) не считаются. Текст вложенного абзаца, пункта или цитаты — их строки;
+  // строки абзаца, как их разложил браузер (H8): знаков в каждой строке. Знак — графема (эмодзи, флаг, буква с
+  // комбинирующим знаком — один знак), нарисованная с ненулевой шириной (схлопнутый пробел — нет). Знак продолжает
+  // строку, когда его прямоугольник по вертикали перекрывает прямоугольник предыдущего знака не меньше чем на половину
+  // высоты меньшего из двух: строку не рвут инлайн-код, сдвинутые слова и буквица, а следующая строка с предыдущей не
+  // перекрывается. Висящий пробел у переноса не считается. Текст вложенного абзаца, пункта или цитаты — их строки;
   // визуально скрытый (clip, 1×1) не считается
   const LINE_TAGS = ['p', 'li', 'dd', 'blockquote'];
+  const graphemes = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
   const lineChars = (el) => {
     const lines = [], range = document.createRange(), hidden = new Map();
+    let prev = null;
     const hiddenHost = (host) => {
       if (!hidden.has(host)) {
         let h = false;
@@ -580,19 +585,26 @@ COLLECT_JS = r"""
     };
     const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
-      const node = walker.currentNode, host = node.parentElement, s = node.textContent;
+      const node = walker.currentNode, host = node.parentElement;
       if (!host || host.closest(LINE_TAGS.join(',')) !== el || hiddenHost(host)) continue;
-      for (let k = 0; k < s.length; k++) {
-        range.setStart(node, k);
-        range.setEnd(node, k + 1);
-        const b = range.getBoundingClientRect();
-        if (!b.width) continue;
-        const cy = b.top + b.height / 2, last = lines[lines.length - 1];
-        if (last && Math.abs(cy - last.cy) < last.h / 2) last.t += s[k];
-        else lines.push({ cy, h: b.height, t: s[k] });
+      for (const { segment, index } of graphemes.segment(node.textContent)) {
+        range.setStart(node, index);
+        range.setEnd(node, index + segment.length);
+        // знак сразу за переносом по дефису несёт и прямоугольник дефиса на конце прошлой строки: свой — последний
+        const b = Array.from(range.getClientRects()).filter(r => r.width > 0).pop();
+        if (!b) continue;
+        const same = prev && Math.min(b.bottom, prev.bottom) - Math.max(b.top, prev.top)
+          >= Math.min(b.height, prev.height) / 2;
+        if (same) lines[lines.length - 1].push(segment);
+        else lines.push([segment]);
+        prev = b;
       }
     }
-    return lines.map(l => l.t.trim().length).filter(n => n > 0);
+    return lines.map(l => {
+      let n = l.length;
+      while (n > 0 && !l[n - 1].trim()) n--;
+      return n;
+    }).filter(n => n > 0);
   };
 
   const all = Array.from(document.querySelectorAll('body *')).slice(0, MAXN);
@@ -2300,9 +2312,10 @@ def selftest(browser=False):
 
 def selftest_browser(check):
     """Код страницы COLLECT_JS в Chromium на синтетической странице (текст вымышлен): строки абзацев H8. Моноширинный
-    шрифт и колонка в `ch` задают раскладку заранее — жадное заполнение строки словами; ссылка, сдвинутые на 4 px слова
-    и визуально скрытая подпись строк не меняют, висящий пробел `pre-wrap` у переноса не считается, у цитаты с абзацем
-    внутри своих строк нет."""
+    шрифт и колонка в `ch` задают раскладку заранее — жадное заполнение строки словами; перевод строки с отступом в
+    разметке, ссылка, сдвинутые на 4 px слова и визуально скрытая подпись строк не меняют, висящий пробел `pre-wrap` у
+    переноса не считается, у цитаты с абзацем внутри своих строк нет; эмодзи, флаг, семья через ZWJ и буква с
+    комбинирующим знаком — по знаку; буквица, интерлиньяж 1 и перенос по мягкому дефису строки не склеивают."""
     from playwright.sync_api import sync_playwright
 
     words = ("lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et "
@@ -2322,16 +2335,25 @@ def selftest_browser(check):
     text = " ".join(words)
     head, link, up, tail = (" ".join(words[:7]), " ".join(words[7:12]), " ".join(words[12:15]),
                             " ".join(words[15:]))
+    marks = ["flag", "\U0001F1F7\U0001F1FA", "family", "\U0001F468\u200D\U0001F469\u200D\U0001F467", "smile",
+             "\U0001F600", "\u0438\u0306"]
+    indented = text.replace(" dolor ", " dolor\n        ", 1)
     html = ("<!doctype html><html lang='en'><head><style>body { margin: 0; font: 16px/24px monospace; } "
             ".n { width: 40.5ch; } .w { width: 110.5ch; } .pw { white-space: pre-wrap; } "
             ".up { position: relative; top: -4px; } .sr { position: absolute; width: 1px; height: 1px; "
-            "overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }</style></head><body>"
-            f"<p id='a' class='n'>{text}</p>"
+            "overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; } "
+            ".dc::first-letter { float: left; font-size: 3.4em; line-height: 1; }</style></head><body>"
+            f"<p id='a' class='n'>{indented}</p>"
             f"<p id='b' class='n'>{head} <a href='#b'>{link}</a><span class='sr'>hidden link caption</span> "
             f"<span class='up'>{up}</span> {tail}</p>"
             f"<p id='pw' class='n pw'>{text}</p>"
             f"<blockquote id='q' class='n'><p id='qp'>{text}</p></blockquote>"
-            f"<p id='w' class='w'>{text}</p></body></html>")
+            f"<p id='w' class='w'>{text}</p>"
+            f"<p id='g' class='w'>{' '.join(marks)}</p>"
+            f"<p id='dc' class='n dc'>{text}</p>"
+            f"<p id='t' class='n' style='line-height: 1'>{text}</p>"
+            f"<p id='sh' class='n'>{'x' * 30} {'\u00ad'.join(['ex', 'er', 'ci', 'ta', 'tion', 'al', 'ly'])} {text}</p>"
+            "</body></html>")
     with kbpaths.lock("browser"), sync_playwright() as pw:
         chromium = pw.chromium.launch()
         page = chromium.new_page(viewport={"width": 1440, "height": 900})
@@ -2346,6 +2368,14 @@ def selftest_browser(check):
     check("браузер: у цитаты своих строк нет, строки — у вложенного абзаца", (tl.get("blockquote#q"), tl.get("p#qp")),
           ([], lay(40)))
     check("браузер: колонка 110ch — строки до 110 знаков", tl.get("p#w"), lay(110))
+    check("браузер: эмодзи, флаг, семья через ZWJ и буква с комбинирующим знаком — по знаку", tl.get("p#g"),
+          [sum(len(m) if m.isascii() else 1 for m in marks) + len(marks) - 1])
+    check("браузер: интерлиньяж 1 — соседние строки перекрываются краем и не склеиваются", tl.get("p#t"), lay(40))
+    sh = tl.get("p#sh") or [0]
+    check("браузер: перенос по мягкому дефису строки не склеивает", (len(sh) > 2, max(sh) <= 40), (True, True))
+    dc = tl.get("p#dc") or [0]
+    check("браузер: буквица строки не склеивает — строка не длиннее колонки, каждый знак посчитан один раз",
+          (max(dc) <= 40, sum(dc)), (True, len(text) - (len(dc) - 1)))
     f = _run(data["rows"], PRESET_ADMIN)
     check("браузер: H8 — находка только у колонки 110ch", (f["H8"]["found"], f["H8"]["examples"][0].split(" ")[0]),
           (1, "p#w.w"))
