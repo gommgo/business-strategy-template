@@ -16,6 +16,7 @@
     python3 ui_audit.py страница.html --surface page        # страница сайта: пороги профиля marketing
     python3 ui_audit.py --slop-params [--tokens ФАЙЛ]       # параметры скрипта маркеров ui 11/04 §3 (JSON)
     python3 ui_audit.py --selftest                          # парсеры, пороги и проверки на синтетике, без браузера
+    python3 ui_audit.py --selftest --browser                # и код страницы в Chromium: строки абзацев (H8)
 
 Ключи:
     --preset admin|consumer|marketing
@@ -50,9 +51,17 @@
 
 Проверки — 14 групп: A отступы, B размеры, C форма, D глубина, E слои, F цели, G фокус, H типографика, I цвет,
 J раскладка, K движение, L приметы вида, M сокращённое движение, S состояния. Визуально скрытое (clip, 1×1, вне предка с
-`overflow: hidden`) в проверки текста и целей не входит. Длина строки абзаца (H8) — в знаках; потолок длительностей (K2)
-— из пресета; соседние карточки ряда выровнены (J9). Находка несёт id приметы реестра `kb/common/tells.yaml`
-(раздел `checks`, ключ `ui_audit:<id проверки>`), отчёт сводит приметы без повторов.
+`overflow: hidden`) в проверки текста и целей не входит. Потолок длительностей (K2) — из пресета; соседние карточки
+ряда выровнены (J9). Находка несёт id приметы реестра `kb/common/tells.yaml` (раздел `checks`, ключ
+`ui_audit:<id проверки>`), отчёт сводит приметы без повторов.
+
+Длина строки абзаца (H8) — знаков в самой длинной строке, как строки разложил браузер: у `p`, `li`, `dd` и
+`blockquote` длиннее 120 знаков страница читает прямоугольник каждого знака: знак — то, что нарисовано с ненулевой
+шириной (схлопнутый пробел — нет), строка — знаки на одной высоте (центр по вертикали ближе половины высоты знака),
+пробелы по краям строки (висящий у переноса) не считаются; текст вложенного абзаца, пункта или цитаты — их строки,
+визуально скрытый текст не считается. Порог — `measure_chars` пресета, в окне уже
+первого брейкпоинта — `measure_chars_narrow`. Данные без строк (синтетика вызывающей утилиты) — ширина абзаца
+против `para_max_width`.
 
 Профиль страницы сайта — `marketing` (`scripts/ui/data/marketing-profile.yaml`): пресет страницы (шкалы отступов,
 радиусов, высот, кеглей, слоёв и длительностей `preset.*` — их читают проверки, когда токены ДС не переданы) и таблица
@@ -551,6 +560,41 @@ COLLECT_JS = r"""
     return { w: Math.round(w * 100) / 100, h: Math.round(h * 100) / 100 };
   };
 
+  // строки абзаца, как их разложил браузер (H8): знаков в каждой строке. Знак — то, что нарисовано с ненулевой
+  // шириной (схлопнутый пробел — нет); строка — знаки на одной высоте (центр по вертикали ближе половины высоты знака),
+  // пробелы по краям строки (висящий у переноса) не считаются. Текст вложенного абзаца, пункта или цитаты — их строки;
+  // визуально скрытый (clip, 1×1) не считается
+  const LINE_TAGS = ['p', 'li', 'dd', 'blockquote'];
+  const lineChars = (el) => {
+    const lines = [], range = document.createRange(), hidden = new Map();
+    const hiddenHost = (host) => {
+      if (!hidden.has(host)) {
+        let h = false;
+        for (let e = host; e && e !== el && !h; e = e.parentElement) {
+          const s = getComputedStyle(e), b = e.getBoundingClientRect();
+          h = s.visibility !== 'visible' || clipHidden(s) || (b.width <= 1.5 && b.height <= 1.5);
+        }
+        hidden.set(host, h);
+      }
+      return hidden.get(host);
+    };
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const node = walker.currentNode, host = node.parentElement, s = node.textContent;
+      if (!host || host.closest(LINE_TAGS.join(',')) !== el || hiddenHost(host)) continue;
+      for (let k = 0; k < s.length; k++) {
+        range.setStart(node, k);
+        range.setEnd(node, k + 1);
+        const b = range.getBoundingClientRect();
+        if (!b.width) continue;
+        const cy = b.top + b.height / 2, last = lines[lines.length - 1];
+        if (last && Math.abs(cy - last.cy) < last.h / 2) last.t += s[k];
+        else lines.push({ cy, h: b.height, t: s[k] });
+      }
+    }
+    return lines.map(l => l.t.trim().length).filter(n => n > 0);
+  };
+
   const all = Array.from(document.querySelectorAll('body *')).slice(0, MAXN);
   const rows = [];
   const media = [], texts = [], glass = [];
@@ -614,7 +658,8 @@ COLLECT_JS = r"""
       svg: tag === 'svg' ? { w: Math.round(r.width), h: Math.round(r.height), sw: cs.strokeWidth, vb: el.getAttribute('viewBox') || '' } : null,
       inline: el.getAttribute('style') || '',
       hid, hw: hit ? hit.w : null, hh: hit ? hit.h : null,
-      tlen: ['p', 'li', 'dd', 'blockquote'].includes(tag) ? (el.textContent || '').replace(/\s+/g, ' ').trim().length : null,
+      tlen: LINE_TAGS.includes(tag) ? (el.textContent || '').replace(/\s+/g, ' ').trim().length : null,
+      tl: LINE_TAGS.includes(tag) && !hid ? lineChars(el) : null,
       ai: cs.alignItems, as: cs.alignSelf, fd: cs.flexDirection,
       bgi: /gradient/.test(bgImg) ? bgImg.slice(0, 300) : null,
       bgclip: cs.backgroundClip === 'text' || cs.webkitBackgroundClip === 'text',
@@ -1240,28 +1285,24 @@ def run_checks(data, preset, opts, ctx):
     rep.add("H7", "Типографика", f"Интерлиньяж тела в коридоре {lo}–{hi}", len(bad_lead), "0",
             not bad_lead, SEV_POLISH, bad_lead)
 
-    # длина строки абзаца в знаках: знаков в полной строке ≈ длина текста / (строк − 0,5) — последняя строка неполная
+    # длина строки абзаца в знаках — самая длинная строка, как её разложил браузер (`tl`: знаков в каждой строке)
     narrow = meta["innerW"] < (ctx.get("first_bp") or first_breakpoint(None))
     lo_c, hi_c = preset["measure_chars_narrow"] if narrow else preset["measure_chars"]
     long_lines = []
     for r in rows:
         if r["tag"] not in ("p", "li", "dd", "blockquote") or r.get("hid"):
             continue
-        n = r.get("tlen")
-        if n is None:
-            # данные без длины текста (синтетика вызывающей утилиты): ширина абзаца против пресета
+        lines = r.get("tl")
+        if lines is None:
+            # данные без строк (синтетика вызывающей утилиты): ширина абзаца против пресета
             if r["txt"] and len(r["txt"]) >= 120 and r["w"] > preset["para_max_width"]:
                 long_lines.append(f"{r['sel']} {r['w']}px > {preset['para_max_width']}px")
             continue
-        if n <= 120 or not r["fs"]:
+        if (r.get("tlen") or 0) <= 120 or not lines:
             continue
-        lh = r["lh"] if isinstance(r["lh"], (int, float)) else 1.2 * r["fs"]
-        lines = round(r["h"] / lh) if lh else 1
-        if lines < 2:
-            continue
-        cpl = n / (lines - 0.5)
-        if cpl > hi_c + 0.5:
-            long_lines.append(f"{r['sel']} ≈ {cpl:.0f} знаков в строке ({lines} строк)")
+        if max(lines) > hi_c:
+            shown = ", ".join(str(n) for n in lines[:8]) + (", …" if len(lines) > 8 else "")
+            long_lines.append(f"{r['sel']} — {max(lines)} знаков в самой длинной строке (строки: {shown})")
     rep.add("H8", "Типографика", f"Длина строки абзаца ≤ {hi_c} знаков" + (" (окно уже первого брейкпоинта)" if narrow else ""),
             len(long_lines), "0", not long_lines, SEV_SERIOUS, long_lines,
             note=f"норма {lo_c}–{hi_c} знаков, не больше {preset['measure_chars_max']}; ширину задают в ch "
@@ -1982,7 +2023,7 @@ def _row(i, **kw):
                 fvn="normal", tt="none", ta="start", col="#0f172b", cola=1, bg="#ffffff", bggrad=False, bgguess=False,
                 bcol=None, bcola=0, ow=0, ost="none", oc=None, pos="static", ov="visible visible", mw=None, gtc=None,
                 tp="all", td="0s", an="none", txt="", inter=False, disp="block", dis=False, inflow=False, par=None,
-                svg=None, inline="", hid=False, hw=None, hh=None, tlen=None, ai="normal", as_="auto", fd="row",
+                svg=None, inline="", hid=False, hw=None, hh=None, tlen=None, tl=None, ai="normal", as_="auto", fd="row",
                 bgi=None, bgclip=False, onmedia=None, bdmedia=None)
     base["as"] = base.pop("as_")
     base.update(kw)
@@ -1999,7 +2040,7 @@ def _run(rows, preset, touch=False, text="", ts=None, w=1440, h=900):
     return {f["id"]: f for f in run_checks(data, preset, opts, ctx).findings}
 
 
-def selftest():
+def selftest(browser=False):
     global TELL_OF
     ok = True
 
@@ -2086,14 +2127,27 @@ def selftest():
     check("F3 на таче: 32 без зоны — находка, 32 с ::before 44 — нет", (f["F3"]["verdict"], f["F3"]["found"]), ("FAIL", 1))
     check("F3 только на тач-прогоне", "F3" in _run(rows, A), False)
 
-    # длина строки в знаках
-    long_p = _row(0, tag="p", txt="x" * 120, tlen=400, fs=16, lh=24, h=72, w=900)
-    short_p = _row(1, tag="p", txt="x" * 120, tlen=180, fs=16, lh=24, h=72, w=400)
-    f = _run([long_p, short_p], A)
-    check("H8: 400 знаков в 3 строках — ≈160 в строке, 180 в 3 строках — ≈72",
-          (f["H8"]["verdict"], f["H8"]["found"]), ("FAIL", 1))
-    f = _run([dict(short_p, i=0)], A, w=390, h=844)
-    check("H8 в узком окне — порог 60", f["H8"]["verdict"], "FAIL")
+    # длина строки в знаках — самая длинная строка абзаца по раскладке браузера (`tl`); высота — как у этих строк:
+    # оценка по высоте (знаков / (строк − 0,5)) дала бы первым двум ≈86 и ≈83, узкому — ≈81
+    def para(i, tl, w=592, **kw):
+        return _row(i, tag="p", txt="x" * 120, tlen=sum(tl) + len(tl) - 1, tl=tl, fs=16, lh=24, h=24 * len(tl), w=w,
+                    **kw)
+    f = _run([para(0, [58, 70]), para(1, [66, 69, 70])], A)
+    check("H8: 2 и 3 строки по 58–70 знаков с полной последней — в норме 75", f["H8"]["verdict"], "OK")
+    f = _run([para(0, [58, 70]), para(1, [110, 108, 31], w=1060), para(2, [75, 60]), para(3, [60, 76]),
+              para(4, [130], w=1300)], A)
+    check("H8: строки ≈110 знаков, строка 76 и абзац в одну строку 130 — находки с длиной самой длинной строки; "
+          "75 — норма", (f["H8"]["verdict"], f["H8"]["found"],
+                         [e.split(" — ")[1].split(" ")[0] for e in f["H8"]["examples"]]),
+          ("FAIL", 3, ["110", "76", "130"]))
+    f = _run([para(0, [58, 62], w=360)], A, w=390, h=844)
+    check("H8 в узком окне — порог 60: самая длинная строка 62 (последняя) — находка", f["H8"]["verdict"], "FAIL")
+    f = _run([para(0, [58, 60, 9], w=360)], A, w=390, h=844)
+    check("H8 в узком окне: строки до 60 знаков — в норме", f["H8"]["verdict"], "OK")
+    short = _row(0, tag="p", txt="x" * 100, tlen=100, tl=[100], fs=16, lh=24, h=24, w=900)
+    quote = _row(1, tag="blockquote", txt="", tlen=300, tl=[], fs=16, lh=24, h=120, w=900)
+    check("H8: абзац до 120 знаков и цитата без своих строк (строки — у вложенного абзаца) не судятся",
+          _run([short, quote], A)["H8"]["verdict"], "OK")
 
     # шкала отступов и значения — из токенов; потолок длительностей пресета
     f = _run([_row(0, pt=13, pb=13, pl=16, pr=16), _row(1, pt=10, pb=6)], A, ts=ref)
@@ -2226,7 +2280,7 @@ def selftest():
 
     # синтетика без новых полей (строки вызывающей утилиты) не ломает проверки
     bare = [{k: v for k, v in _row(0, tag="p", txt="x" * 120, w=900).items()
-             if k not in ("hid", "hw", "hh", "tlen", "ai", "as", "fd", "bgi", "bgclip", "onmedia", "bdmedia")}]
+             if k not in ("hid", "hw", "hh", "tlen", "tl", "ai", "as", "fd", "bgi", "bgclip", "onmedia", "bdmedia")}]
     check("строки без новых полей: H8 — по ширине в px", _run(bare, PRESET_CONSUMER)["H8"]["verdict"], "FAIL")
 
     sp = slop_params(ref, "admin")
@@ -2237,9 +2291,64 @@ def selftest():
     check("JSON отчёта (файл и stdout с --json): tool, skill_version — версия скилла, находки",
           (rep["tool"], rep["skill_version"], [f["id"] for f in rep["findings"]], "tells" in rep),
           ("ui_audit.py", kbpaths.skill_version(), ["J5"], True))
+    if browser:
+        selftest_browser(check)
     print("\nпресеты:", ", ".join(PRESETS), "; профиль данными:", ", ".join(PROFILES))
     print("групп проверок:", len(GROUP_ORDER))
     return 0 if ok else 1
+
+
+def selftest_browser(check):
+    """Код страницы COLLECT_JS в Chromium на синтетической странице (текст вымышлен): строки абзацев H8. Моноширинный
+    шрифт и колонка в `ch` задают раскладку заранее — жадное заполнение строки словами; ссылка, сдвинутые на 4 px слова
+    и визуально скрытая подпись строк не меняют, висящий пробел `pre-wrap` у переноса не считается, у цитаты с абзацем
+    внутри своих строк нет."""
+    from playwright.sync_api import sync_playwright
+
+    words = ("lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et "
+             "dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex "
+             "ea commodo consequat duis aute irure dolor in reprehenderit in voluptate velit esse cillum").split()
+
+    def lay(width):
+        out, cur = [], ""
+        for w in words:
+            if cur and len(cur) + 1 + len(w) > width:
+                out.append(len(cur))
+                cur = w
+            else:
+                cur = f"{cur} {w}" if cur else w
+        return out + [len(cur)]
+
+    text = " ".join(words)
+    head, link, up, tail = (" ".join(words[:7]), " ".join(words[7:12]), " ".join(words[12:15]),
+                            " ".join(words[15:]))
+    html = ("<!doctype html><html lang='en'><head><style>body { margin: 0; font: 16px/24px monospace; } "
+            ".n { width: 40.5ch; } .w { width: 110.5ch; } .pw { white-space: pre-wrap; } "
+            ".up { position: relative; top: -4px; } .sr { position: absolute; width: 1px; height: 1px; "
+            "overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }</style></head><body>"
+            f"<p id='a' class='n'>{text}</p>"
+            f"<p id='b' class='n'>{head} <a href='#b'>{link}</a><span class='sr'>hidden link caption</span> "
+            f"<span class='up'>{up}</span> {tail}</p>"
+            f"<p id='pw' class='n pw'>{text}</p>"
+            f"<blockquote id='q' class='n'><p id='qp'>{text}</p></blockquote>"
+            f"<p id='w' class='w'>{text}</p></body></html>")
+    with kbpaths.lock("browser"), sync_playwright() as pw:
+        chromium = pw.chromium.launch()
+        page = chromium.new_page(viewport={"width": 1440, "height": 900})
+        page.set_content(html)
+        data = page.evaluate(COLLECT_JS, {"maxElements": 4000})
+        chromium.close()
+    tl = {r["sel"].split(".")[0]: r["tl"] for r in data["rows"] if r["tag"] in ("p", "blockquote")}
+    check("браузер: строки абзаца в колонке 40ch — жадная раскладка слов", tl.get("p#a"), lay(40))
+    check("браузер: ссылка, сдвинутые на 4 px слова и визуально скрытая подпись строк не меняют", tl.get("p#b"),
+          lay(40))
+    check("браузер: pre-wrap — висящий пробел у переноса не считается", tl.get("p#pw"), lay(40))
+    check("браузер: у цитаты своих строк нет, строки — у вложенного абзаца", (tl.get("blockquote#q"), tl.get("p#qp")),
+          ([], lay(40)))
+    check("браузер: колонка 110ch — строки до 110 знаков", tl.get("p#w"), lay(110))
+    f = _run(data["rows"], PRESET_ADMIN)
+    check("браузер: H8 — находка только у колонки 110ch", (f["H8"]["found"], f["H8"]["examples"][0].split(" ")[0]),
+          (1, "p#w.w"))
 
 
 # =====================================================================================
@@ -2271,6 +2380,7 @@ def main():
     p.add_argument("--quiet", action="store_true")
     p.add_argument("--json", action="store_true")
     p.add_argument("--selftest", action="store_true")
+    p.add_argument("--browser", action="store_true")
     p.add_argument("--slop-params", action="store_true")
     p.add_argument("-h", "--help", action="store_true")
     a = p.parse_args()
@@ -2279,7 +2389,7 @@ def main():
         print(__doc__)
         return 0
     if a.selftest:
-        return selftest()
+        return selftest(browser=a.browser)
     if a.json and a.batch:
         print("--json — JSON одной цели в stdout, без --batch", file=sys.stderr)
         return 2
