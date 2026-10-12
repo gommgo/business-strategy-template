@@ -35,6 +35,12 @@
 теме системы оставил бы системные элементы страницы (чекбокс, полосы прокрутки) в теме системы. Режим с другим
 именем — правка поверх действующей темы: своей схемы у его блока нет, и второй темой он продукт не делает.
 
+Сокращённое движение — режим `reduced` токенов (или расширение `reduce`): выбор посетителя сильнее системы в обе
+стороны, как у тем (норма переключателя — `creative/06-effects-catalog/effects.yaml#motion-toggle`, ui 08/03 §3.6).
+Блок по системе — `@media (prefers-reduced-motion: reduce)` на `:root:not([data-motion="full"])`: выбор «полное
+движение» оставляет значения `$value` и при системном «уменьшить движение»; блок `:root[data-motion="reduced"]` —
+сокращённое движение при любой системе; без атрибута решает система. У ДС без режима `reduced` блока нет.
+
 Темы, которых ждут брифы — бриф сайта каждой поверхности слоя страницы и бриф на вид кабинета, блок `themes` (две темы
 — `dark.needed` или `default: system`, иначе одна — `default`), — есть у токенов темой значений или режимом; иначе
 R-COV-010 (`theme_gaps()`): сайт в тёмной теме на токенах без `modes.base: dark` получил бы `color-scheme: light`, и
@@ -1047,10 +1053,11 @@ def build_css(toks):
     if REDUCED in modes:
         rows = block(REDUCED)
         if rows:
-            lines += ["", "/* Сокращённое движение: только токены движения. */",
+            lines += ["", "/* Сокращённое движение: только токены движения; выбор посетителя data-motion сильнее "
+                          "системы в обе стороны. */",
                       "@media (prefers-reduced-motion: reduce) {",
-                      "  :root {"] + [f"    {_var(n)}: {v};" for n, v in rows] + ["  }", "}", "",
-                                                                             ':root[data-motion="reduced"] {'] + \
+                      '  :root:not([data-motion="full"]) {'] + [f"    {_var(n)}: {v};" for n, v in rows] + \
+                     ["  }", "}", "", ':root[data-motion="reduced"] {'] + \
                      [f"  {_var(n)}: {v};" for n, v in rows] + ["}"]
     for mode in DENSITY:
         if mode in modes:
@@ -1806,6 +1813,19 @@ def _selftest():
            re.search(r':root\[data-theme="dark"\] \{[^}]*--color-on-bg: #FFFFFF;', css) is not None)
     check_("CSS: сокращённое движение и узкая ширина (type.body 14 → 16 ниже первой границы 640px)",
            "--motion-fast: 0ms;" in css and "@media (width < 640px)" in css and "--type-body-size: 16px;" in css)
+    check_("CSS: сокращённое движение — по системе, кроме выбора data-motion=\"full\", и под атрибутом reduced при "
+           "любой системе; значение $value — в :root",
+           '@media (prefers-reduced-motion: reduce) {\n  :root:not([data-motion="full"]) {\n    --motion-fast: 0ms;\n'
+           '  }\n}\n\n:root[data-motion="reduced"] {\n  --motion-fast: 0ms;\n}\n' in css
+           and ":root {\n" in css and "  --motion-fast: 100ms;\n" in css.split("\n}\n")[0]
+           and css.count("[data-motion=") == 2)
+    still = copy.deepcopy(doc)
+    del still["motion"]
+    still_css = build_css(Tokens(still))
+    check_("CSS: ДС без токенов движения — без блока сокращённого движения",
+           "prefers-reduced-motion" not in still_css and "data-motion" not in still_css
+           and still_css == css.split("\n\n/* Сокращённое движение")[0].replace("  --motion-fast: 100ms;\n", "")
+           + "\n")
     fam = copy.deepcopy(doc)
     fam["font"].update({"ui": {"$type": "fontFamily", "$value": ["system-ui", "-apple-system", "sans-serif"]},
                         "serif": {"$type": "fontFamily", "$value": "Georgia"}})

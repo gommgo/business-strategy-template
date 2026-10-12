@@ -3132,7 +3132,8 @@ effects:
   cliche: {risk: low, status: 'н/д (переключателя нет ни у одной из 49)', registry_id: null}
   rules: ['три состояния на <html data-motion>: нет атрибута — как в системе, reduced — меньше, full — полное вопреки ОС; выбор — localStorage, ставится
       строкой в <head> до стилей (повторный визит не «взрывается»)', 'CSS-движение объявлять только когда оно разрешено: @media (prefers-reduced-motion:
-      no-preference) { :root:not([data-motion=reduced]) … } и :root[data-motion=full] …; токены --mm-* сами дают 0 мс и 0 px', 'JS-движение подписывать
+      no-preference) { :root:not([data-motion=reduced]) … } и :root[data-motion=full] …; токены --mm-* сами дают 0 мс и 0 px, роли движения ДС — так
+      же: system.tokens.css (ds_build) — @media (prefers-reduced-motion: reduce) { :root:not([data-motion=full]) … } и :root[data-motion=reduced] …', 'JS-движение подписывать
       на Motion.on(): WebGL — один статичный кадр и cancelAnimationFrame (0 вызовов), видео — pause() + hidden (постер, 0 новых байт), GSAP — gsap.context().revert(),
       Lenis — destroy() и new Lenis({respectReducedMotion: false})', 'Lenis 1.3.26 (respectReducedMotion: true по умолчанию) и gsap.matchMedia видят только
       системную настройку: без ручного управления «Полное» при системном reduce не работает, а «Меньше» не снимает скраб и Lenis', видна при любой прокрутке
